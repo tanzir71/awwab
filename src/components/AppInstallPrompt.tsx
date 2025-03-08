@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, Info, X, Minus } from 'lucide-react';
@@ -58,7 +59,6 @@ const AppInstallPrompt = () => {
 
     if (/Edg/.test(userAgent) && !isAppInstalled) {
       setIsVisible(true);
-      setShowIOSInstructions(true);
       console.log('Edge browser detected, showing install instructions');
     }
 
@@ -70,6 +70,12 @@ const AppInstallPrompt = () => {
 
   const handleInstallClick = async () => {
     if (isIOS) {
+      setShowIOSInstructions(true);
+      return;
+    }
+    
+    // For Microsoft Edge, immediately show instructions when clicking Install Now
+    if (browserType === 'edge') {
       setShowIOSInstructions(true);
       return;
     }
@@ -186,7 +192,7 @@ const AppInstallPrompt = () => {
             ) : (
               <Button onClick={handleInstallClick} size="sm">
                 <Download className="mr-2 h-4 w-4" />
-                {isIOS ? 'Show Instructions' : 'Install Now'}
+                {browserType === 'edge' ? 'Show Instructions' : isIOS ? 'Show Instructions' : 'Install Now'}
               </Button>
             )}
           </div>
