@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -80,7 +81,7 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-b from-background to-muted">
       <div className="container mx-auto px-4 py-8">
         <header className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2">Prayer Tracker</h1>
+          <h1 className="text-3xl font-bold mb-2">PrayerTracker</h1>
           <p className="text-muted-foreground">
             Build your spiritual journey, one prayer at a time
           </p>

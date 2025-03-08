@@ -1,7 +1,7 @@
 
 {
-  "name": "Prayer Tracker",
-  "short_name": "Prayer Tracker",
+  "name": "PrayerTracker",
+  "short_name": "PrayerTracker",
   "description": "Build your spiritual journey, one prayer at a time",
   "start_url": "/",
   "display": "standalone",
