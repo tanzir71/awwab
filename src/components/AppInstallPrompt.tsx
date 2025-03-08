@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Download, Info, X } from 'lucide-react';
+import { Download, Info, X, Minus } from 'lucide-react';
 
 const AppInstallPrompt = () => {
   const [installPromptEvent, setInstallPromptEvent] = useState<any>(null);
@@ -10,6 +10,7 @@ const AppInstallPrompt = () => {
   const [isStandalone, setIsStandalone] = useState(false);
   const [showIOSInstructions, setShowIOSInstructions] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [isEdge, setIsEdge] = useState(false);
 
   useEffect(() => {
     // Check if running in standalone mode already
@@ -20,6 +21,10 @@ const AppInstallPrompt = () => {
     // Detect iOS device
     const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
     setIsIOS(isIOSDevice);
+
+    // Detect Edge browser
+    const isEdgeBrowser = /Edg/.test(navigator.userAgent);
+    setIsEdge(isEdgeBrowser);
 
     // Force show install prompt for mobile devices
     const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -84,8 +89,13 @@ const AppInstallPrompt = () => {
       // Clear the saved prompt since it can't be used twice
       setInstallPromptEvent(null);
     } else {
+      // Edge-specific instructions
+      if (isEdge) {
+        console.log('Edge browser detected, showing manual instructions');
+        setShowIOSInstructions(true);  // Reuse the instructions UI for Edge
+      } 
       // If event is not available but we're on Android/Chrome, try adding to home screen manually
-      if (!isIOS && 'serviceWorker' in navigator) {
+      else if (!isIOS && 'serviceWorker' in navigator) {
         console.log('No install prompt available, showing manual instructions');
         setShowIOSInstructions(true);  // Reuse the iOS instructions UI for manual Android instructions
       } else {
@@ -121,7 +131,7 @@ const AppInstallPrompt = () => {
         <div className="relative">
           <div className="absolute top-0 right-0 flex space-x-1">
             <Button variant="ghost" size="sm" onClick={handleMinimizeClick} className="h-8 w-8 p-0">
-              <span className="h-1 w-5 bg-foreground rounded-full block"></span>
+              <Minus className="h-4 w-4" />
             </Button>
             <Button variant="ghost" size="sm" onClick={handleCloseClick} className="h-8 w-8 p-0">
               <X className="h-4 w-4" />
@@ -134,7 +144,9 @@ const AppInstallPrompt = () => {
               <p className="text-sm text-muted-foreground">
                 {isIOS 
                   ? 'Add to your home screen for a better experience'
-                  : 'Install this app on your device for offline access'}
+                  : isEdge
+                    ? 'Install this app on Microsoft Edge for offline access'
+                    : 'Install this app on your device for offline access'}
               </p>
             </div>
             
@@ -145,6 +157,16 @@ const AppInstallPrompt = () => {
                   <li>Tap the share icon <span className="inline-block px-2">⎙</span> at the bottom of your browser</li>
                   <li>Scroll down and tap "Add to Home Screen"</li>
                   <li>Tap "Add" in the top right</li>
+                </ol>
+              </div>
+            ) : showIOSInstructions && isEdge ? (
+              <div className="mt-2 text-sm p-3 bg-muted rounded-md">
+                <p className="font-semibold mb-1">How to install in Microsoft Edge:</p>
+                <ol className="list-decimal pl-5 space-y-1">
+                  <li>Click the menu button (three dots) in the top right</li>
+                  <li>Select "Apps" from the dropdown menu</li>
+                  <li>Click "Install this site as an app"</li>
+                  <li>Click "Install" in the dialog that appears</li>
                 </ol>
               </div>
             ) : showIOSInstructions && !isIOS ? (
