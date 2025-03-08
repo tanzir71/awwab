@@ -2,93 +2,6 @@
 import { Prayer } from "@/types/Prayer";
 import { isPrayerCompletedToday } from "./storageService";
 
-let notificationPermission: NotificationPermission = "default";
-
-// This function is kept for compatibility, but we're using direct browser API in NotificationToggle
-export const requestNotificationPermission = async (): Promise<boolean> => {
-  if (!("Notification" in window)) {
-    console.warn("Notifications not supported in this browser");
-    return false;
-  }
-
-  try {
-    // Request permission directly
-    notificationPermission = await Notification.requestPermission();
-    localStorage.setItem("notificationPermission", notificationPermission);
-    
-    // If granted, send a test notification
-    if (notificationPermission === "granted") {
-      new Notification("Prayer Notifications Enabled", {
-        body: "You will now receive alerts for upcoming prayer times.",
-        icon: "/favicon.ico",
-      });
-    }
-    
-    return notificationPermission === "granted";
-  } catch (error) {
-    console.error("Error requesting notification permission:", error);
-    return false;
-  }
-};
-
-export const checkNotificationPermission = (): NotificationPermission => {
-  if (!("Notification" in window)) {
-    return "denied";
-  }
-  
-  // Get current browser permission
-  const browserPermission = Notification.permission;
-  
-  // Use browser's current value
-  if (browserPermission) {
-    notificationPermission = browserPermission;
-    localStorage.setItem("notificationPermission", notificationPermission);
-  } else {
-    const savedPermission = localStorage.getItem("notificationPermission");
-    if (savedPermission) {
-      notificationPermission = savedPermission as NotificationPermission;
-    }
-  }
-  
-  return notificationPermission;
-};
-
-export const scheduleNotification = (prayer: Prayer): void => {
-  if (!("Notification" in window) || notificationPermission !== "granted") {
-    return;
-  }
-
-  try {
-    // Get the prayer time
-    const prayerTime = convertTo24Hour(prayer.time);
-    const [hours, minutes] = prayerTime.split(":").map(Number);
-    
-    // Create a Date object for this prayer time today
-    const prayerDate = new Date();
-    prayerDate.setHours(hours, minutes, 0, 0);
-    
-    // Get current time
-    const now = new Date();
-    
-    // Only schedule if the prayer time is in the future
-    if (prayerDate > now) {
-      const timeUntilPrayer = prayerDate.getTime() - now.getTime();
-      
-      // Schedule the notification
-      setTimeout(() => {
-        new Notification(`Time for ${prayer.name} Prayer`, {
-          body: `It's time for ${prayer.name} prayer (${prayer.rakats.total} Rakats: ${prayer.prayerOrder})`,
-          icon: '/favicon.ico',
-        });
-      }, timeUntilPrayer);
-      
-      console.log(`Notification scheduled for ${prayer.name} in ${Math.round(timeUntilPrayer / 60000)} minutes`);
-    }
-  } catch (error) {
-    console.error(`Error scheduling notification for ${prayer.name}:`, error);
-  }
-};
-
 export const fetchPrayerTimes = async (latitude: number, longitude: number): Promise<Prayer[]> => {
   try {
     // Get the current date
@@ -170,7 +83,7 @@ export const fetchPrayerTimes = async (latitude: number, longitude: number): Pro
     const currentTime = new Date();
     let hasSetNextPrayer = false;
     
-    const processedPrayers = prayers.map(prayer => {
+    return prayers.map(prayer => {
       const prayerTime = convertTo24Hour(prayer.time);
       const prayerDateTime = new Date();
       const [hours, minutes] = prayerTime.split(":").map(Number);
@@ -195,13 +108,6 @@ export const fetchPrayerTimes = async (latitude: number, longitude: number): Pro
         isNext
       };
     });
-    
-    // Schedule notifications for upcoming prayers if permission is granted
-    if (checkNotificationPermission() === "granted") {
-      processedPrayers.filter(prayer => !prayer.isCompleted).forEach(scheduleNotification);
-    }
-    
-    return processedPrayers;
   } catch (error) {
     console.error("Error in fetchPrayerTimes:", error);
     throw error;
