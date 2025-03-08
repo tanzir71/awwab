@@ -22,10 +22,11 @@ const AppInstallPrompt = () => {
     const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
     setIsIOS(isIOSDevice);
 
-    // Detect browser type
+    // Detect browser type - more reliable detection for Edge
     const userAgent = navigator.userAgent;
     if (/Edg/.test(userAgent)) {
       setBrowserType('edge');
+      console.log('Edge browser detected');
     } else if (/OPR|Opera/.test(userAgent)) {
       setBrowserType('opera');
     } else if (/Chrome/.test(userAgent)) {
@@ -35,8 +36,6 @@ const AppInstallPrompt = () => {
     } else if (/Safari/.test(userAgent)) {
       setBrowserType('safari');
     }
-
-    console.log('Browser detected:', browserType);
 
     // Force show install prompt for mobile devices
     const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -164,9 +163,8 @@ const AppInstallPrompt = () => {
                 <p className="font-semibold mb-1">How to install in Microsoft Edge:</p>
                 <ol className="list-decimal pl-5 space-y-1">
                   <li>Click the menu button (three dots) in the top right</li>
-                  <li>Select "Apps" from the dropdown menu</li>
-                  <li>Click "Install this site as an app"</li>
-                  <li>Click "Install" in the dialog that appears</li>
+                  <li>Select "Apps"</li>
+                  <li>Click "Install this site as an app" or "Install PrayerTracker"</li>
                 </ol>
               </div>
             ) : showIOSInstructions && browserType === 'opera' ? (
