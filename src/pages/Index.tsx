@@ -1,9 +1,9 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import PrayerTimeline from "@/components/PrayerTimeline";
+import AppInstallPrompt from "@/components/AppInstallPrompt";
 import { Prayer } from "@/types/Prayer";
 import { fetchPrayerTimes } from "@/lib/prayerServices";
 import { calculatePrayerStatistics } from "@/lib/storageService";
@@ -24,7 +24,6 @@ const Index = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Get user's location
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -40,7 +39,6 @@ const Index = () => {
             description: "Could not get your location. Using default location.",
             variant: "destructive",
           });
-          // Set default location (Mecca)
           setLocation({ latitude: 21.4225, longitude: 39.8262 });
         }
       );
@@ -70,14 +68,11 @@ const Index = () => {
     loadPrayerTimes();
   }, [location, toast]);
 
-  // Load statistics
   useEffect(() => {
     setStatistics(calculatePrayerStatistics());
   }, [prayers, activeTab]);
   
-  // Refresh data when prayer is completed
   const handlePrayerCompleted = () => {
-    // Refresh statistics
     setStatistics(calculatePrayerStatistics());
   };
 
@@ -150,6 +145,8 @@ const Index = () => {
           </TabsContent>
         </Tabs>
       </div>
+      
+      <AppInstallPrompt />
     </div>
   );
 };
