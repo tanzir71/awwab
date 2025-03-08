@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Download } from 'lucide-react';
+import { Download, Info } from 'lucide-react';
 
 const AppInstallPrompt = () => {
   const [installPromptEvent, setInstallPromptEvent] = useState<any>(null);
@@ -20,6 +20,14 @@ const AppInstallPrompt = () => {
     const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
     setIsIOS(isIOSDevice);
 
+    // Force show install prompt for mobile devices
+    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isMobileDevice && !isAppInstalled) {
+      console.log('Mobile device detected, showing install prompt');
+      setIsVisible(true);
+    }
+
     // Listen for beforeinstallprompt event (Android/Chrome)
     const handleBeforeInstallPrompt = (e: Event) => {
       // Prevent Chrome 67 and earlier from automatically showing the prompt
@@ -31,15 +39,6 @@ const AppInstallPrompt = () => {
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    // Check if PWA criteria is met for iOS (after page load)
-    if (isIOSDevice && !isAppInstalled) {
-      // Set timeout to ensure we check after page is fully loaded
-      setTimeout(() => {
-        console.log('iOS device detected, setting prompt visibility');
-        setIsVisible(true);
-      }, 1000);
-    }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -71,6 +70,9 @@ const AppInstallPrompt = () => {
       }
       
       setInstallPromptEvent(null);
+    } else {
+      // If event is not available, just show instructions
+      setShowIOSInstructions(true);
     }
   };
 

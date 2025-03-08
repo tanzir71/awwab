@@ -14,6 +14,13 @@ if ('serviceWorker' in navigator) {
         console.error('Service Worker registration failed:', error);
       });
   });
+  
+  // Check for service worker updates
+  setInterval(() => {
+    navigator.serviceWorker.getRegistration().then(registration => {
+      if (registration) registration.update();
+    });
+  }, 60 * 60 * 1000); // Check for updates every hour
 }
 
 createRoot(document.getElementById("root")!).render(<App />);

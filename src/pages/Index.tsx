@@ -11,7 +11,7 @@ import { calculatePrayerStatistics } from "@/lib/storageService";
 import { Award, Calendar, Flame, CalendarCheck } from "lucide-react";
 
 const Index = () => {
-  const [location, setLocation] = useState({ latitude: 0, longitude: 0 });
+  const [location, setLocation] = useState({ latitude: 21.4225, longitude: 39.8262 }); // Default to Mecca
   const [prayers, setPrayers] = useState<Prayer[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("today");
@@ -32,37 +32,51 @@ const Index = () => {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
           });
+          console.log("Location obtained successfully:", position.coords.latitude, position.coords.longitude);
         },
         (error) => {
-          console.error("Error getting location:", error);
+          console.log("Geolocation error:", error.code, error.message);
+          // Using default location (Mecca) that was set in initial state
           toast({
-            title: "Location Error",
-            description: "Could not get your location. Using default location.",
-            variant: "destructive",
+            title: "Using Default Location",
+            description: "We're using Mecca for prayer times. Allow location access for local times.",
+            duration: 5000,
           });
-          setLocation({ latitude: 21.4225, longitude: 39.8262 });
+          // Continue with default location, no need to set it again
+        },
+        { 
+          enableHighAccuracy: true, 
+          timeout: 5000, 
+          maximumAge: 0 
         }
       );
+    } else {
+      console.log("Geolocation not supported by this browser");
+      toast({
+        title: "Location Not Supported",
+        description: "Your browser doesn't support location. Using Mecca for prayer times.",
+        duration: 5000,
+      });
+      // Continue with default location
     }
   }, [toast]);
 
   useEffect(() => {
     const loadPrayerTimes = async () => {
-      if (location.latitude && location.longitude) {
-        try {
-          setLoading(true);
-          const prayerData = await fetchPrayerTimes(location.latitude, location.longitude);
-          setPrayers(prayerData);
-        } catch (error) {
-          console.error("Error fetching prayer times:", error);
-          toast({
-            title: "Error",
-            description: "Could not fetch prayer times. Please try again later.",
-            variant: "destructive",
-          });
-        } finally {
-          setLoading(false);
-        }
+      try {
+        setLoading(true);
+        console.log("Fetching prayer times for location:", location.latitude, location.longitude);
+        const prayerData = await fetchPrayerTimes(location.latitude, location.longitude);
+        setPrayers(prayerData);
+      } catch (error) {
+        console.error("Error fetching prayer times:", error);
+        toast({
+          title: "Error",
+          description: "Could not fetch prayer times. Please try again later.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
       }
     };
 
