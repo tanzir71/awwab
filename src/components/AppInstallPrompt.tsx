@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, Info, X, Minus } from 'lucide-react';
@@ -13,16 +12,13 @@ const AppInstallPrompt = () => {
   const [browserType, setBrowserType] = useState('');
 
   useEffect(() => {
-    // Check if running in standalone mode already
     const isAppInstalled = window.matchMedia('(display-mode: standalone)').matches ||
                           (window.navigator as any).standalone === true;
     setIsStandalone(isAppInstalled);
 
-    // Detect iOS device
     const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
     setIsIOS(isIOSDevice);
 
-    // Detect browser type with more reliable detection
     const userAgent = navigator.userAgent;
     if (/Edg/.test(userAgent)) {
       setBrowserType('edge');
@@ -37,7 +33,6 @@ const AppInstallPrompt = () => {
       setBrowserType('safari');
     }
 
-    // Force show install prompt for mobile devices
     const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
     if (isMobileDevice && !isAppInstalled) {
@@ -45,11 +40,8 @@ const AppInstallPrompt = () => {
       setIsVisible(true);
     }
 
-    // Listen for beforeinstallprompt event (Android/Chrome/Edge)
     const handleBeforeInstallPrompt = (e: Event) => {
-      // Prevent Chrome 67 and earlier from automatically showing the prompt
       e.preventDefault();
-      // Stash the event so it can be triggered later
       setInstallPromptEvent(e);
       setIsVisible(true);
       console.log('Before install prompt event captured');
@@ -57,7 +49,6 @@ const AppInstallPrompt = () => {
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-    // Listen for appinstalled event to hide the prompt after installation
     const handleAppInstalled = () => {
       console.log('App was installed');
       setIsVisible(false);
@@ -65,10 +56,9 @@ const AppInstallPrompt = () => {
     
     window.addEventListener('appinstalled', handleAppInstalled);
 
-    // For Microsoft Edge, manually show the install prompt
     if (/Edg/.test(userAgent) && !isAppInstalled) {
       setIsVisible(true);
-      setShowIOSInstructions(true); // Use instructions panel for Edge too
+      setShowIOSInstructions(true);
       console.log('Edge browser detected, showing install instructions');
     }
 
@@ -86,16 +76,10 @@ const AppInstallPrompt = () => {
     
     if (installPromptEvent) {
       try {
-        // Show the install prompt
-        console.log('Showing install prompt');
-        // This is the key fix - we need to explicitly call prompt()
         await installPromptEvent.prompt();
-        
-        // Wait for the user to respond to the prompt
         const choiceResult = await installPromptEvent.userChoice;
         
         if (choiceResult.outcome === 'accepted') {
-          console.log('User accepted the install prompt');
           setIsVisible(false);
         } else {
           console.log('User dismissed the install prompt');
@@ -104,10 +88,8 @@ const AppInstallPrompt = () => {
         console.error('Error with install prompt:', error);
       }
       
-      // Clear the saved prompt since it can't be used twice
       setInstallPromptEvent(null);
     } else {
-      // Show browser-specific instructions
       console.log(`Showing instructions for ${browserType}`);
       setShowIOSInstructions(true);
     }
@@ -169,10 +151,9 @@ const AppInstallPrompt = () => {
               <div className="mt-2 text-sm p-3 bg-muted rounded-md">
                 <p className="font-semibold mb-1">How to install in Microsoft Edge:</p>
                 <ol className="list-decimal pl-5 space-y-1">
-                  <li>Click the menu (three dots) in the top-right corner</li>
-                  <li>Look for the "Apps" option in the menu</li>
-                  <li>Select "Install this site as an app" or "Install PrayerTracker"</li>
-                  <li>Click "Install" in the confirmation dialog</li>
+                  <li>Tap the menu button (three dots) in the bottom-right corner</li>
+                  <li>Select "Add to phone" or "Add to home screen"</li>
+                  <li>Tap "Add" in the confirmation dialog</li>
                 </ol>
               </div>
             ) : showIOSInstructions && browserType === 'opera' ? (

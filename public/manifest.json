@@ -35,5 +35,9 @@
       "description": "Track your prayer",
       "url": "/"
     }
-  ]
+  ],
+  "related_applications": [],
+  "edge_side_panel": {
+    "preferred_width": 400
+  }
 }
