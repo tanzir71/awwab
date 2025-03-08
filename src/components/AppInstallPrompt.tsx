@@ -10,7 +10,7 @@ const AppInstallPrompt = () => {
   const [isStandalone, setIsStandalone] = useState(false);
   const [showIOSInstructions, setShowIOSInstructions] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [isEdge, setIsEdge] = useState(false);
+  const [browserType, setBrowserType] = useState('');
 
   useEffect(() => {
     // Check if running in standalone mode already
@@ -22,9 +22,21 @@ const AppInstallPrompt = () => {
     const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
     setIsIOS(isIOSDevice);
 
-    // Detect Edge browser
-    const isEdgeBrowser = /Edg/.test(navigator.userAgent);
-    setIsEdge(isEdgeBrowser);
+    // Detect browser type
+    const userAgent = navigator.userAgent;
+    if (/Edg/.test(userAgent)) {
+      setBrowserType('edge');
+    } else if (/OPR|Opera/.test(userAgent)) {
+      setBrowserType('opera');
+    } else if (/Chrome/.test(userAgent)) {
+      setBrowserType('chrome');
+    } else if (/Firefox/.test(userAgent)) {
+      setBrowserType('firefox');
+    } else if (/Safari/.test(userAgent)) {
+      setBrowserType('safari');
+    }
+
+    console.log('Browser detected:', browserType);
 
     // Force show install prompt for mobile devices
     const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -89,19 +101,9 @@ const AppInstallPrompt = () => {
       // Clear the saved prompt since it can't be used twice
       setInstallPromptEvent(null);
     } else {
-      // Edge-specific instructions
-      if (isEdge) {
-        console.log('Edge browser detected, showing manual instructions');
-        setShowIOSInstructions(true);  // Reuse the instructions UI for Edge
-      } 
-      // If event is not available but we're on Android/Chrome, try adding to home screen manually
-      else if (!isIOS && 'serviceWorker' in navigator) {
-        console.log('No install prompt available, showing manual instructions');
-        setShowIOSInstructions(true);  // Reuse the iOS instructions UI for manual Android instructions
-      } else {
-        // If event is not available, just show instructions
-        setShowIOSInstructions(true);
-      }
+      // Show browser-specific instructions
+      console.log(`Showing instructions for ${browserType}`);
+      setShowIOSInstructions(true);
     }
   };
 
@@ -144,9 +146,7 @@ const AppInstallPrompt = () => {
               <p className="text-sm text-muted-foreground">
                 {isIOS 
                   ? 'Add to your home screen for a better experience'
-                  : isEdge
-                    ? 'Install this app on Microsoft Edge for offline access'
-                    : 'Install this app on your device for offline access'}
+                  : `Install this app for offline access`}
               </p>
             </div>
             
@@ -159,7 +159,7 @@ const AppInstallPrompt = () => {
                   <li>Tap "Add" in the top right</li>
                 </ol>
               </div>
-            ) : showIOSInstructions && isEdge ? (
+            ) : showIOSInstructions && browserType === 'edge' ? (
               <div className="mt-2 text-sm p-3 bg-muted rounded-md">
                 <p className="font-semibold mb-1">How to install in Microsoft Edge:</p>
                 <ol className="list-decimal pl-5 space-y-1">
@@ -169,7 +169,25 @@ const AppInstallPrompt = () => {
                   <li>Click "Install" in the dialog that appears</li>
                 </ol>
               </div>
-            ) : showIOSInstructions && !isIOS ? (
+            ) : showIOSInstructions && browserType === 'opera' ? (
+              <div className="mt-2 text-sm p-3 bg-muted rounded-md">
+                <p className="font-semibold mb-1">How to install in Opera:</p>
+                <ol className="list-decimal pl-5 space-y-1">
+                  <li>Click the "Easy setup" button (three lines) in the top right</li>
+                  <li>Scroll down to find "Add to home screen" or "Install App"</li>
+                  <li>Click "Install" in the dialog that appears</li>
+                </ol>
+              </div>
+            ) : showIOSInstructions && browserType === 'firefox' ? (
+              <div className="mt-2 text-sm p-3 bg-muted rounded-md">
+                <p className="font-semibold mb-1">How to install in Firefox:</p>
+                <ol className="list-decimal pl-5 space-y-1">
+                  <li>Click the menu button (three lines) in the top right</li>
+                  <li>Look for "Install" or "Add to Home screen" option</li>
+                  <li>Follow the on-screen instructions</li>
+                </ol>
+              </div>
+            ) : showIOSInstructions ? (
               <div className="mt-2 text-sm p-3 bg-muted rounded-md">
                 <p className="font-semibold mb-1">How to install:</p>
                 <ol className="list-decimal pl-5 space-y-1">
