@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, Info, X, Minus } from 'lucide-react';
@@ -99,7 +100,7 @@ const AppInstallPrompt = () => {
   if (!isVisible || isStandalone) return null;
 
   return (
-    <div className={`fixed bottom-0 left-0 right-0 p-2 bg-background border-t border-border z-50 transition-all duration-300 ${isMinimized ? 'max-h-12' : ''}`}>
+    <div className={`fixed bottom-0 left-0 right-0 p-2 bg-background border-t border-border z-50 transition-all duration-300 mb-8 md:mb-0 ${isMinimized ? 'max-h-12' : ''}`}>
       {isMinimized ? (
         <div className="flex items-center justify-between">
           <Button variant="ghost" size="sm" onClick={handleMinimizeClick} className="p-1">
