@@ -5,8 +5,8 @@ const Footer = () => {
   return (
     <footer className="py-4 mt-auto w-full bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row md:justify-end items-center text-xs text-gray-600 dark:text-gray-400">
-          <div className="mb-2 md:mb-0 md:mr-4">
+        <div className="flex flex-col md:flex-row md:justify-between items-center text-xs text-gray-600 dark:text-gray-400">
+          <div className="mb-2 md:mb-0">
             Made with <Heart className="h-3 w-3 mx-1 text-red-500 fill-red-500 inline" /> by <a href="https://tanziro.com" className="ml-1 hover:text-primary transition-colors" target="_blank" rel="noopener noreferrer">tanziro.com</a>
           </div>
           <div>
