@@ -91,7 +91,7 @@ const NotificationToggle = () => {
       <Switch 
         checked={enabled} 
         onCheckedChange={handleToggle}
-        disabled={notificationStatus === "denied"}
+        disabled={false} // Allow toggling regardless of notification status
       />
     </div>
   );
