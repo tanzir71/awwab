@@ -22,7 +22,7 @@ const AppInstallPrompt = () => {
     const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
     setIsIOS(isIOSDevice);
 
-    // Detect browser type - more reliable detection for Edge
+    // Detect browser type with more reliable detection
     const userAgent = navigator.userAgent;
     if (/Edg/.test(userAgent)) {
       setBrowserType('edge');
@@ -45,7 +45,7 @@ const AppInstallPrompt = () => {
       setIsVisible(true);
     }
 
-    // Listen for beforeinstallprompt event (Android/Chrome)
+    // Listen for beforeinstallprompt event (Android/Chrome/Edge)
     const handleBeforeInstallPrompt = (e: Event) => {
       // Prevent Chrome 67 and earlier from automatically showing the prompt
       e.preventDefault();
@@ -64,6 +64,13 @@ const AppInstallPrompt = () => {
     };
     
     window.addEventListener('appinstalled', handleAppInstalled);
+
+    // For Microsoft Edge, manually show the install prompt
+    if (/Edg/.test(userAgent) && !isAppInstalled) {
+      setIsVisible(true);
+      setShowIOSInstructions(true); // Use instructions panel for Edge too
+      console.log('Edge browser detected, showing install instructions');
+    }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -162,9 +169,10 @@ const AppInstallPrompt = () => {
               <div className="mt-2 text-sm p-3 bg-muted rounded-md">
                 <p className="font-semibold mb-1">How to install in Microsoft Edge:</p>
                 <ol className="list-decimal pl-5 space-y-1">
-                  <li>Click the menu button (three dots) in the top right</li>
-                  <li>Select "Apps"</li>
-                  <li>Click "Install this site as an app" or "Install PrayerTracker"</li>
+                  <li>Click the menu (three dots) in the top-right corner</li>
+                  <li>Look for the "Apps" option in the menu</li>
+                  <li>Select "Install this site as an app" or "Install PrayerTracker"</li>
+                  <li>Click "Install" in the confirmation dialog</li>
                 </ol>
               </div>
             ) : showIOSInstructions && browserType === 'opera' ? (
