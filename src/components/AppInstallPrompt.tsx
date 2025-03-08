@@ -40,8 +40,17 @@ const AppInstallPrompt = () => {
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
+    // Listen for appinstalled event to hide the prompt after installation
+    const handleAppInstalled = () => {
+      console.log('App was installed');
+      setIsVisible(false);
+    };
+    
+    window.addEventListener('appinstalled', handleAppInstalled);
+
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
 
@@ -52,11 +61,13 @@ const AppInstallPrompt = () => {
     }
     
     if (installPromptEvent) {
-      // For Android/Chrome
-      console.log('Showing install prompt');
-      installPromptEvent.prompt();
-      
       try {
+        // Show the install prompt
+        console.log('Showing install prompt');
+        // This is the key fix - we need to explicitly call prompt()
+        await installPromptEvent.prompt();
+        
+        // Wait for the user to respond to the prompt
         const choiceResult = await installPromptEvent.userChoice;
         
         if (choiceResult.outcome === 'accepted') {
@@ -69,10 +80,17 @@ const AppInstallPrompt = () => {
         console.error('Error with install prompt:', error);
       }
       
+      // Clear the saved prompt since it can't be used twice
       setInstallPromptEvent(null);
     } else {
-      // If event is not available, just show instructions
-      setShowIOSInstructions(true);
+      // If event is not available but we're on Android/Chrome, try adding to home screen manually
+      if (!isIOS && 'serviceWorker' in navigator) {
+        console.log('No install prompt available, showing manual instructions');
+        setShowIOSInstructions(true);  // Reuse the iOS instructions UI for manual Android instructions
+      } else {
+        // If event is not available, just show instructions
+        setShowIOSInstructions(true);
+      }
     }
   };
 
@@ -97,6 +115,15 @@ const AppInstallPrompt = () => {
               <li>Tap the share icon <span className="inline-block px-2">⎙</span> at the bottom of your browser</li>
               <li>Scroll down and tap "Add to Home Screen"</li>
               <li>Tap "Add" in the top right</li>
+            </ol>
+          </div>
+        ) : showIOSInstructions && !isIOS ? (
+          <div className="mt-2 text-sm p-3 bg-muted rounded-md">
+            <p className="font-semibold mb-1">How to install:</p>
+            <ol className="list-decimal pl-5 space-y-1">
+              <li>Tap the menu icon (three dots) in the top right</li>
+              <li>Select "Install app" or "Add to Home screen"</li>
+              <li>Follow the on-screen instructions</li>
             </ol>
           </div>
         ) : (

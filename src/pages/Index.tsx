@@ -24,41 +24,102 @@ const Index = () => {
   });
   const { toast } = useToast();
 
+  // Function to get location from IP address
+  const getLocationFromIP = async () => {
+    try {
+      console.log("Attempting to get location from IP address");
+      const response = await fetch("https://ipapi.co/json/");
+      if (!response.ok) {
+        throw new Error("Failed to get location from IP");
+      }
+      
+      const data = await response.json();
+      if (data.latitude && data.longitude) {
+        console.log("Location obtained from IP:", data.latitude, data.longitude);
+        setLocation({
+          latitude: data.latitude,
+          longitude: data.longitude,
+        });
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error getting location from IP:", error);
+      return false;
+    }
+  };
+
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocation({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
+    const getLocation = async () => {
+      if (navigator.geolocation) {
+        try {
+          // Try browser geolocation first with a timeout
+          const locationPromise = new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(
+              (position) => {
+                setLocation({
+                  latitude: position.coords.latitude,
+                  longitude: position.coords.longitude,
+                });
+                console.log("Location obtained successfully:", position.coords.latitude, position.coords.longitude);
+                resolve(true);
+              },
+              (error) => {
+                console.log("Geolocation error:", error.code, error.message);
+                reject(error);
+              },
+              { 
+                enableHighAccuracy: true, 
+                timeout: 5000, 
+                maximumAge: 0 
+              }
+            );
           });
-          console.log("Location obtained successfully:", position.coords.latitude, position.coords.longitude);
-        },
-        (error) => {
-          console.log("Geolocation error:", error.code, error.message);
-          // Using default location (Mecca) that was set in initial state
+          
+          // Wait for geolocation or timeout after 5 seconds
+          await Promise.race([
+            locationPromise,
+            new Promise((_, reject) => 
+              setTimeout(() => reject(new Error("Geolocation timeout")), 5000)
+            )
+          ]);
+          
+        } catch (error) {
+          console.log("Browser geolocation failed, trying IP geolocation");
+          
+          // Try IP-based geolocation as fallback
+          const ipLocationSuccess = await getLocationFromIP();
+          
+          if (!ipLocationSuccess) {
+            // If IP geolocation also fails, use default location
+            console.log("Using default location (Mecca)");
+            toast({
+              title: "Using Default Location",
+              description: "We're using Mecca for prayer times. Allow location access for local times.",
+              duration: 5000,
+            });
+            // Continue with default location, which is already set in initial state
+          }
+        }
+      } else {
+        console.log("Geolocation not supported by this browser, trying IP geolocation");
+        
+        // Try IP-based geolocation
+        const ipLocationSuccess = await getLocationFromIP();
+        
+        if (!ipLocationSuccess) {
+          console.log("IP geolocation failed. Using default location (Mecca)");
           toast({
-            title: "Using Default Location",
-            description: "We're using Mecca for prayer times. Allow location access for local times.",
+            title: "Location Not Supported",
+            description: "Your browser doesn't support location. Using Mecca for prayer times.",
             duration: 5000,
           });
-          // Continue with default location, no need to set it again
-        },
-        { 
-          enableHighAccuracy: true, 
-          timeout: 5000, 
-          maximumAge: 0 
+          // Continue with default location
         }
-      );
-    } else {
-      console.log("Geolocation not supported by this browser");
-      toast({
-        title: "Location Not Supported",
-        description: "Your browser doesn't support location. Using Mecca for prayer times.",
-        duration: 5000,
-      });
-      // Continue with default location
-    }
+      }
+    };
+    
+    getLocation();
   }, [toast]);
 
   useEffect(() => {
