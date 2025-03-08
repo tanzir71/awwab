@@ -1,4 +1,3 @@
-
 import { Prayer } from "@/types/Prayer";
 import { isPrayerCompletedToday } from "./storageService";
 
@@ -11,19 +10,7 @@ export const requestNotificationPermission = async (): Promise<boolean> => {
   }
 
   try {
-    // First check if permission was previously denied
-    const currentPermission = Notification.permission;
-    
-    if (currentPermission === "denied") {
-      // If denied, we can't request directly again through the API
-      // We need to direct users to browser settings
-      console.warn("Notification permission was previously denied");
-      // Open a new tab with instruction on how to enable notifications
-      // This is a fallback but browsers may block this if not triggered by user action
-      return false;
-    }
-    
-    // Request permission if not previously denied
+    // Request permission directly
     notificationPermission = await Notification.requestPermission();
     localStorage.setItem("notificationPermission", notificationPermission);
     
@@ -47,10 +34,10 @@ export const checkNotificationPermission = (): NotificationPermission => {
     return "denied";
   }
   
-  // Get current browser permission first
+  // Get current browser permission
   const browserPermission = Notification.permission;
   
-  // Use browser's current value, but allow our saved value as a fallback
+  // Use browser's current value
   if (browserPermission) {
     notificationPermission = browserPermission;
     localStorage.setItem("notificationPermission", notificationPermission);

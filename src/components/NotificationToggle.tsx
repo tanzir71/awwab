@@ -29,15 +29,21 @@ const NotificationToggle = () => {
   const handleToggle = async (checked: boolean) => {
     if (checked) {
       try {
-        const granted = await requestNotificationPermission();
+        // Request permission directly from browser
+        if (!("Notification" in window)) {
+          throw new Error("Notifications not supported in this browser");
+        }
+        
+        // Force a new permission request
+        const permission = await Notification.requestPermission();
         
         // Update status and toggle state based on result
-        setNotificationStatus(granted ? "granted" : "denied");
-        setEnabled(granted);
+        setNotificationStatus(permission);
+        setEnabled(permission === "granted");
         
         toast({
-          title: granted ? "Notifications Enabled" : "Notifications Disabled",
-          description: granted 
+          title: permission === "granted" ? "Notifications Enabled" : "Notifications Disabled",
+          description: permission === "granted" 
             ? "You will receive alerts for upcoming prayers." 
             : "You won't receive prayer time alerts. Please try again or check browser settings.",
           duration: 3000,
