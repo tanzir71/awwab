@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { Bell, BellOff } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-import { requestNotificationPermission, checkNotificationPermission } from "@/lib/prayerServices";
 import { useToast } from "@/hooks/use-toast";
 
 const NotificationToggle = () => {
@@ -13,7 +12,8 @@ const NotificationToggle = () => {
   // Update notification status when component mounts and when toggled
   useEffect(() => {
     const updateStatus = () => {
-      const currentPermission = checkNotificationPermission();
+      // Check current browser notification permission state
+      const currentPermission = Notification.permission;
       setNotificationStatus(currentPermission);
       // Only set enabled if permission is granted
       setEnabled(currentPermission === "granted");
@@ -29,7 +29,7 @@ const NotificationToggle = () => {
   const handleToggle = async (checked: boolean) => {
     if (checked) {
       try {
-        // Request permission directly from browser
+        // Directly request browser notification permission
         if (!("Notification" in window)) {
           throw new Error("Notifications not supported in this browser");
         }

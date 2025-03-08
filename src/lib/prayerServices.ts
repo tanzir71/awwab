@@ -1,8 +1,10 @@
+
 import { Prayer } from "@/types/Prayer";
 import { isPrayerCompletedToday } from "./storageService";
 
 let notificationPermission: NotificationPermission = "default";
 
+// This function is kept for compatibility, but we're using direct browser API in NotificationToggle
 export const requestNotificationPermission = async (): Promise<boolean> => {
   if (!("Notification" in window)) {
     console.warn("Notifications not supported in this browser");
