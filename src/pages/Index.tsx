@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import PrayerTimeline from "@/components/PrayerTimeline";
 import AppInstallPrompt from "@/components/AppInstallPrompt";
+import Footer from "@/components/Footer";
 import { Prayer } from "@/types/Prayer";
 import { fetchPrayerTimes } from "@/lib/prayerServices";
 import { calculatePrayerStatistics } from "@/lib/storageService";
@@ -143,8 +144,8 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted pb-12">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted pb-12 flex flex-col">
+      <div className="container mx-auto px-4 py-8 flex-grow">
         <header className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2">PrayerTracker</h1>
           <p className="text-muted-foreground">
@@ -212,6 +213,7 @@ const Index = () => {
         </Tabs>
       </div>
       
+      <Footer />
       <AppInstallPrompt />
     </div>
   );
