@@ -214,7 +214,7 @@ const Index = () => {
         </Tabs>
       </div>
       
-      <div className="relative pb-12">
+      <div className="relative pb-12 md:pb-0">
         <Footer />
         <AppInstallPrompt />
       </div>
