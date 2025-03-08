@@ -48,6 +48,23 @@ export const markPrayerAsCompleted = (prayer: Prayer): void => {
   }
 };
 
+// Unmark a prayer (remove it from completed prayers)
+export const unmarkPrayerAsCompleted = (prayerName: string): void => {
+  try {
+    const completedPrayers = getCompletedPrayers();
+    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+    
+    // Filter out the prayer for today
+    const updatedPrayers = completedPrayers.filter(
+      (p) => !(p.date === today && p.prayerName === prayerName)
+    );
+    
+    localStorage.setItem(COMPLETED_PRAYERS_KEY, JSON.stringify(updatedPrayers));
+  } catch (error) {
+    console.error("Error unmarking prayer:", error);
+  }
+};
+
 // Calculate statistics based on completed prayers
 export const calculatePrayerStatistics = () => {
   const completedPrayers = getCompletedPrayers();
@@ -143,4 +160,3 @@ export const isPrayerCompletedToday = (prayerName: string): boolean => {
     (p) => p.date === today && p.prayerName === prayerName
   );
 };
-

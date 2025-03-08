@@ -2,7 +2,7 @@
 import { Check, Clock } from "lucide-react";
 import { Prayer } from "@/types/Prayer";
 import { cn } from "@/lib/utils";
-import { markPrayerAsCompleted, isPrayerCompletedToday } from "@/lib/storageService";
+import { markPrayerAsCompleted, isPrayerCompletedToday, unmarkPrayerAsCompleted } from "@/lib/storageService";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 
@@ -39,6 +39,26 @@ const PrayerTimeline = ({ prayers, onPrayerCompleted }: PrayerTimelineProps) => 
     toast({
       title: "Prayer Completed",
       description: `${prayer.name} prayer has been recorded. Keep it up!`,
+      duration: 3000,
+    });
+    
+    // Notify parent component if callback provided
+    if (onPrayerCompleted) {
+      onPrayerCompleted();
+    }
+  };
+
+  const handleUnmarkPrayer = (prayer: Prayer) => {
+    // Unmark prayer in storage
+    unmarkPrayerAsCompleted(prayer.name);
+    
+    // Update local state
+    setCompletedPrayers(prev => prev.filter(name => name !== prayer.name));
+    
+    // Show toast notification
+    toast({
+      title: "Prayer Unmarked",
+      description: `${prayer.name} prayer has been unmarked.`,
       duration: 3000,
     });
     
@@ -101,16 +121,23 @@ const PrayerTimeline = ({ prayers, onPrayerCompleted }: PrayerTimelineProps) => 
                 </div>
               </div>
               
-              {!isCompletedToday && (
-                <div className="mt-3 flex justify-end">
+              <div className="mt-3 flex justify-end">
+                {isCompletedToday ? (
+                  <button 
+                    className="bg-red-500 text-white text-sm px-3 py-1 rounded-md hover:bg-red-600 transition-colors"
+                    onClick={() => handleUnmarkPrayer(prayer)}
+                  >
+                    Unmark Prayer
+                  </button>
+                ) : (
                   <button 
                     className="bg-primary text-primary-foreground text-sm px-3 py-1 rounded-md hover:bg-primary/90 transition-colors"
                     onClick={() => handleMarkAsCompleted(prayer)}
                   >
                     Mark as Prayed
                   </button>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         );
