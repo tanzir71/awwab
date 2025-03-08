@@ -6,12 +6,35 @@ let notificationPermission: NotificationPermission = "default";
 
 export const requestNotificationPermission = async (): Promise<boolean> => {
   if (!("Notification" in window)) {
+    console.warn("Notifications not supported in this browser");
     return false;
   }
 
   try {
+    // First check if permission was previously denied
+    const currentPermission = Notification.permission;
+    
+    if (currentPermission === "denied") {
+      // If denied, we can't request directly again through the API
+      // We need to direct users to browser settings
+      console.warn("Notification permission was previously denied");
+      // Open a new tab with instruction on how to enable notifications
+      // This is a fallback but browsers may block this if not triggered by user action
+      return false;
+    }
+    
+    // Request permission if not previously denied
     notificationPermission = await Notification.requestPermission();
     localStorage.setItem("notificationPermission", notificationPermission);
+    
+    // If granted, send a test notification
+    if (notificationPermission === "granted") {
+      new Notification("Prayer Notifications Enabled", {
+        body: "You will now receive alerts for upcoming prayer times.",
+        icon: "/favicon.ico",
+      });
+    }
+    
     return notificationPermission === "granted";
   } catch (error) {
     console.error("Error requesting notification permission:", error);
@@ -24,9 +47,18 @@ export const checkNotificationPermission = (): NotificationPermission => {
     return "denied";
   }
   
-  const savedPermission = localStorage.getItem("notificationPermission");
-  if (savedPermission) {
-    notificationPermission = savedPermission as NotificationPermission;
+  // Get current browser permission first
+  const browserPermission = Notification.permission;
+  
+  // Use browser's current value, but allow our saved value as a fallback
+  if (browserPermission) {
+    notificationPermission = browserPermission;
+    localStorage.setItem("notificationPermission", notificationPermission);
+  } else {
+    const savedPermission = localStorage.getItem("notificationPermission");
+    if (savedPermission) {
+      notificationPermission = savedPermission as NotificationPermission;
+    }
   }
   
   return notificationPermission;

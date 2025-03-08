@@ -20,15 +20,22 @@ const AppInstallPrompt = () => {
   const [showNotificationCard, setShowNotificationCard] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    // Check if notifications are already enabled
+  // Function to check and update notification status
+  const updateNotificationStatus = () => {
     const currentPermission = checkNotificationPermission();
     setNotificationStatus(currentPermission);
     
-    // Only show notification permission request if not already granted or denied
-    if (currentPermission === "default" && "Notification" in window) {
+    // Only show notification permission request if not already granted
+    if (currentPermission !== "granted" && "Notification" in window) {
       setShowNotificationCard(true);
+    } else {
+      setShowNotificationCard(false);
     }
+  };
+
+  useEffect(() => {
+    // Initialize notification status
+    updateNotificationStatus();
     
     // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
@@ -42,8 +49,13 @@ const AppInstallPrompt = () => {
     
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     
+    // Set up an interval to periodically check notification permission
+    // This helps detect when users change permissions in browser settings
+    const permissionCheckInterval = setInterval(updateNotificationStatus, 5000);
+    
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      clearInterval(permissionCheckInterval);
     };
   }, []);
 
@@ -73,17 +85,28 @@ const AppInstallPrompt = () => {
   };
   
   const handleNotificationPermissionClick = async () => {
-    const granted = await requestNotificationPermission();
-    setNotificationStatus(granted ? "granted" : "denied");
-    setShowNotificationCard(false);
-    
-    toast({
-      title: granted ? "Notifications Enabled" : "Notifications Disabled",
-      description: granted 
-        ? "You will receive alerts for upcoming prayers." 
-        : "You won't receive prayer time alerts. You can enable them in your browser settings.",
-      duration: 3000,
-    });
+    try {
+      const granted = await requestNotificationPermission();
+      
+      // Update status immediately after permission request
+      updateNotificationStatus();
+      
+      toast({
+        title: granted ? "Notifications Enabled" : "Notifications Disabled",
+        description: granted 
+          ? "You will receive alerts for upcoming prayers." 
+          : "You won't receive prayer time alerts. Please try again or check browser settings.",
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error("Error requesting notification permission:", error);
+      toast({
+        title: "Permission Error",
+        description: "There was a problem requesting notification permissions.",
+        variant: "destructive",
+        duration: 3000,
+      });
+    }
   };
   
   if (!showNotificationCard && !showInstallCard) {
@@ -96,15 +119,20 @@ const AppInstallPrompt = () => {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Enable Prayer Notifications</CardTitle>
-            <CardDescription>Receive alerts when it's time for prayer</CardDescription>
+            <CardDescription>
+              {notificationStatus === "denied" 
+                ? "Notifications are blocked. Please update your browser settings." 
+                : "Receive alerts when it's time for prayer"}
+            </CardDescription>
           </CardHeader>
           <CardFooter>
             <Button 
               onClick={handleNotificationPermissionClick}
               className="w-full"
+              variant={notificationStatus === "denied" ? "outline" : "default"}
             >
               <Bell className="h-4 w-4 mr-2" />
-              Enable Notifications
+              {notificationStatus === "denied" ? "Update Browser Settings" : "Enable Notifications"}
             </Button>
           </CardFooter>
         </Card>
