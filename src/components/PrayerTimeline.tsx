@@ -88,12 +88,7 @@ const PrayerTimeline = ({ prayers, onPrayerCompleted }: PrayerTimelineProps) => 
                       <span className="ml-2 text-xs font-normal bg-primary/20 text-primary px-2 py-0.5 rounded-full">Next</span>
                     }
                   </h3>
-                  <div className="mt-1">
-                    <p className="text-sm text-muted-foreground mb-1">{prayer.rakats.total} Rakats Total</p>
-                    <p className="text-xs text-muted-foreground bg-muted inline-block px-2 py-1 rounded">
-                      {prayer.prayerOrder}
-                    </p>
-                  </div>
+                  <p className="text-sm text-muted-foreground">{prayer.rakats} Rakats</p>
                 </div>
                 <div className="flex items-center space-x-1">
                   <Clock className="h-4 w-4 text-muted-foreground" />
