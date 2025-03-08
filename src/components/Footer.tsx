@@ -6,7 +6,7 @@ const Footer = () => {
     <footer className="py-4 mt-auto w-full">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-center text-center md:text-left text-xs text-foreground">
-          <div className="mx-auto md:mx-0 md:pl-2">
+          <div className="mx-auto md:mx-0 md:pl-6">
             Disclaimer: All data is stored in your browser's local cache.
           </div>
           <div className="mb-2 md:mb-0 mx-auto md:mx-0">
