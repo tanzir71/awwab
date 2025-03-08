@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -24,7 +23,6 @@ const Index = () => {
   });
   const { toast } = useToast();
 
-  // Function to get location from IP address
   const getLocationFromIP = async () => {
     try {
       console.log("Attempting to get location from IP address");
@@ -53,7 +51,6 @@ const Index = () => {
     const getLocation = async () => {
       if (navigator.geolocation) {
         try {
-          // Try browser geolocation first with a timeout
           const locationPromise = new Promise((resolve, reject) => {
             navigator.geolocation.getCurrentPosition(
               (position) => {
@@ -76,35 +73,29 @@ const Index = () => {
             );
           });
           
-          // Wait for geolocation or timeout after 5 seconds
           await Promise.race([
             locationPromise,
             new Promise((_, reject) => 
               setTimeout(() => reject(new Error("Geolocation timeout")), 5000)
             )
           ]);
-          
         } catch (error) {
           console.log("Browser geolocation failed, trying IP geolocation");
           
-          // Try IP-based geolocation as fallback
           const ipLocationSuccess = await getLocationFromIP();
           
           if (!ipLocationSuccess) {
-            // If IP geolocation also fails, use default location
             console.log("Using default location (Mecca)");
             toast({
               title: "Using Default Location",
               description: "We're using Mecca for prayer times. Allow location access for local times.",
               duration: 5000,
             });
-            // Continue with default location, which is already set in initial state
           }
         }
       } else {
         console.log("Geolocation not supported by this browser, trying IP geolocation");
         
-        // Try IP-based geolocation
         const ipLocationSuccess = await getLocationFromIP();
         
         if (!ipLocationSuccess) {
@@ -114,7 +105,6 @@ const Index = () => {
             description: "Your browser doesn't support location. Using Mecca for prayer times.",
             duration: 5000,
           });
-          // Continue with default location
         }
       }
     };
@@ -153,7 +143,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted pb-12">
       <div className="container mx-auto px-4 py-8">
         <header className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2">PrayerTracker</h1>
