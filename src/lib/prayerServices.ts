@@ -1,4 +1,6 @@
+
 import { Prayer } from "@/types/Prayer";
+import { isPrayerCompletedToday } from "./storageService";
 
 export const fetchPrayerTimes = async (latitude: number, longitude: number): Promise<Prayer[]> => {
   try {
@@ -37,7 +39,11 @@ export const fetchPrayerTimes = async (latitude: number, longitude: number): Pro
       const [hours, minutes] = prayerTime.split(":").map(Number);
       prayerDateTime.setHours(hours, minutes, 0);
       
-      const isCompleted = currentTime > prayerDateTime;
+      // Check if completed from local storage
+      const isCompletedToday = isPrayerCompletedToday(prayer.name);
+      
+      // Only mark as completed based on time if not manually completed
+      const isCompleted = isCompletedToday || currentTime > prayerDateTime;
       
       // Mark the next upcoming prayer
       let isNext = false;

@@ -4,15 +4,23 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import PrayerTimeline from "@/components/PrayerTimeline";
-import MosqueProgress from "@/components/MosqueProgress";
 import { Prayer } from "@/types/Prayer";
 import { fetchPrayerTimes } from "@/lib/prayerServices";
+import { calculatePrayerStatistics } from "@/lib/storageService";
+import { Award, Calendar, Flame, CalendarCheck } from "lucide-react";
 
 const Index = () => {
   const [location, setLocation] = useState({ latitude: 0, longitude: 0 });
   const [prayers, setPrayers] = useState<Prayer[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("today");
+  const [statistics, setStatistics] = useState({
+    currentStreak: 0,
+    bestStreak: 0,
+    completionRate: 0,
+    totalPrayersCompleted: 0,
+    uniqueDays: 0
+  });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -62,7 +70,16 @@ const Index = () => {
     loadPrayerTimes();
   }, [location, toast]);
 
-  const streakCount = 15; // This would come from a real tracking system
+  // Load statistics
+  useEffect(() => {
+    setStatistics(calculatePrayerStatistics());
+  }, [prayers, activeTab]);
+  
+  // Refresh data when prayer is completed
+  const handlePrayerCompleted = () => {
+    // Refresh statistics
+    setStatistics(calculatePrayerStatistics());
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted">
@@ -73,12 +90,6 @@ const Index = () => {
             Build your spiritual journey, one prayer at a time
           </p>
         </header>
-
-        <Card className="mb-8 overflow-hidden">
-          <CardContent className="p-0">
-            <MosqueProgress streak={streakCount} />
-          </CardContent>
-        </Card>
 
         <Tabs defaultValue="today" value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid grid-cols-2 mb-4">
@@ -94,7 +105,7 @@ const Index = () => {
                 </div>
               </div>
             ) : (
-              <PrayerTimeline prayers={prayers} />
+              <PrayerTimeline prayers={prayers} onPrayerCompleted={handlePrayerCompleted} />
             )}
           </TabsContent>
           
@@ -104,18 +115,33 @@ const Index = () => {
                 <div className="text-center space-y-4">
                   <div>
                     <h3 className="text-xl font-medium">Your Prayer Journey</h3>
-                    <p className="text-4xl font-bold">{streakCount} days</p>
+                    <p className="text-4xl font-bold">{statistics.currentStreak} days</p>
                     <p className="text-muted-foreground">Current streak</p>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4 mt-4">
-                    <div className="bg-muted p-4 rounded-lg">
-                      <p className="text-2xl font-bold">73%</p>
+                    <div className="bg-muted p-4 rounded-lg flex flex-col items-center">
+                      <Calendar className="h-5 w-5 mb-1 text-primary" />
+                      <p className="text-2xl font-bold">{statistics.uniqueDays}</p>
+                      <p className="text-sm text-muted-foreground">Total active days</p>
+                    </div>
+                    <div className="bg-muted p-4 rounded-lg flex flex-col items-center">
+                      <CalendarCheck className="h-5 w-5 mb-1 text-primary" />
+                      <p className="text-2xl font-bold">{statistics.totalPrayersCompleted}</p>
+                      <p className="text-sm text-muted-foreground">Total prayers</p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div className="bg-muted p-4 rounded-lg flex flex-col items-center">
+                      <Flame className="h-5 w-5 mb-1 text-primary" />
+                      <p className="text-2xl font-bold">{statistics.completionRate}%</p>
                       <p className="text-sm text-muted-foreground">Completion rate</p>
                     </div>
-                    <div className="bg-muted p-4 rounded-lg">
-                      <p className="text-2xl font-bold">30</p>
-                      <p className="text-sm text-muted-foreground">Days best streak</p>
+                    <div className="bg-muted p-4 rounded-lg flex flex-col items-center">
+                      <Award className="h-5 w-5 mb-1 text-primary" />
+                      <p className="text-2xl font-bold">{statistics.bestStreak}</p>
+                      <p className="text-sm text-muted-foreground">Best streak</p>
                     </div>
                   </div>
                 </div>
