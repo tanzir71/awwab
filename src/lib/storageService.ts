@@ -3,6 +3,7 @@ import { Prayer } from "@/types/Prayer";
 
 // Key for storing completed prayers in localStorage
 const COMPLETED_PRAYERS_KEY = "completedPrayers";
+const LAST_ACTIVE_DAY_KEY = "lastActiveDay";
 
 // Interface for storing prayer completion data
 export interface PrayerCompletion {
@@ -10,6 +11,32 @@ export interface PrayerCompletion {
   prayerName: string;
   completedAt: string; // ISO string
 }
+
+// Get the current date in local timezone (YYYY-MM-DD)
+export const getCurrentLocalDate = (): string => {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+};
+
+// Check if a new day has started since last app activity
+export const hasNewDayStarted = (): boolean => {
+  const currentDate = getCurrentLocalDate();
+  const lastActiveDay = localStorage.getItem(LAST_ACTIVE_DAY_KEY);
+  
+  if (!lastActiveDay) {
+    // First time using the app
+    localStorage.setItem(LAST_ACTIVE_DAY_KEY, currentDate);
+    return false;
+  }
+  
+  if (currentDate !== lastActiveDay) {
+    // Update the last active day
+    localStorage.setItem(LAST_ACTIVE_DAY_KEY, currentDate);
+    return true;
+  }
+  
+  return false;
+};
 
 // Get all completed prayers from localStorage
 export const getCompletedPrayers = (): PrayerCompletion[] => {
@@ -27,7 +54,7 @@ export const getCompletedPrayers = (): PrayerCompletion[] => {
 export const markPrayerAsCompleted = (prayer: Prayer): void => {
   try {
     const completedPrayers = getCompletedPrayers();
-    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+    const today = getCurrentLocalDate();
     
     // Check if prayer is already completed today
     const alreadyCompleted = completedPrayers.some(
@@ -42,6 +69,9 @@ export const markPrayerAsCompleted = (prayer: Prayer): void => {
       });
       
       localStorage.setItem(COMPLETED_PRAYERS_KEY, JSON.stringify(completedPrayers));
+      
+      // Update last active day
+      localStorage.setItem(LAST_ACTIVE_DAY_KEY, today);
     }
   } catch (error) {
     console.error("Error marking prayer as completed:", error);
@@ -52,7 +82,7 @@ export const markPrayerAsCompleted = (prayer: Prayer): void => {
 export const unmarkPrayerAsCompleted = (prayerName: string): void => {
   try {
     const completedPrayers = getCompletedPrayers();
-    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+    const today = getCurrentLocalDate();
     
     // Filter out the prayer for today
     const updatedPrayers = completedPrayers.filter(
@@ -68,7 +98,7 @@ export const unmarkPrayerAsCompleted = (prayerName: string): void => {
 // Calculate statistics based on completed prayers
 export const calculatePrayerStatistics = () => {
   const completedPrayers = getCompletedPrayers();
-  const today = new Date().toISOString().split("T")[0];
+  const today = getCurrentLocalDate();
   
   // Get unique dates where at least one prayer was completed
   const uniqueDates = [...new Set(completedPrayers.map(p => p.date))];
@@ -87,7 +117,7 @@ export const calculatePrayerStatistics = () => {
     // Check consecutive days backwards
     for (let i = 1; i < sortedDates.length; i++) {
       checkDate.setDate(checkDate.getDate() - 1);
-      const prevDate = checkDate.toISOString().split("T")[0];
+      const prevDate = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
       
       if (sortedDates.includes(prevDate)) {
         currentStreak++;
@@ -154,7 +184,7 @@ export const calculatePrayerStatistics = () => {
 // Check if a prayer is completed for today
 export const isPrayerCompletedToday = (prayerName: string): boolean => {
   const completedPrayers = getCompletedPrayers();
-  const today = new Date().toISOString().split("T")[0];
+  const today = getCurrentLocalDate();
   
   return completedPrayers.some(
     (p) => p.date === today && p.prayerName === prayerName

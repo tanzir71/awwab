@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,7 +7,7 @@ import AppInstallPrompt from "@/components/AppInstallPrompt";
 import Footer from "@/components/Footer";
 import { Prayer } from "@/types/Prayer";
 import { fetchPrayerTimes } from "@/lib/prayerServices";
-import { calculatePrayerStatistics } from "@/lib/storageService";
+import { calculatePrayerStatistics, hasNewDayStarted, getCurrentLocalDate } from "@/lib/storageService";
 import { Award, Calendar, Flame, CalendarCheck } from "lucide-react";
 
 const Index = () => {
@@ -139,6 +138,44 @@ const Index = () => {
   useEffect(() => {
     setStatistics(calculatePrayerStatistics());
   }, [prayers, activeTab]);
+  
+  useEffect(() => {
+    // Check if day has changed
+    if (hasNewDayStarted()) {
+      console.log("New day detected, refreshing data");
+      toast({
+        title: "New Day",
+        description: `Today is ${getCurrentLocalDate()}. Start a new prayer journey!`,
+        duration: 5000,
+      });
+      
+      // Reload prayer times for the new day
+      loadPrayerTimes();
+      
+      // Update statistics for the new day
+      setStatistics(calculatePrayerStatistics());
+    }
+    
+    // Check for day change every minute
+    const intervalId = setInterval(() => {
+      if (hasNewDayStarted()) {
+        console.log("Day changed while app is active");
+        toast({
+          title: "New Day Has Begun",
+          description: "Your prayer tracking has been reset for the new day.",
+          duration: 5000,
+        });
+        
+        // Reload prayer times for the new day
+        loadPrayerTimes();
+        
+        // Update statistics for the new day
+        setStatistics(calculatePrayerStatistics());
+      }
+    }, 60000); // Check every minute
+    
+    return () => clearInterval(intervalId);
+  }, [toast]);
   
   const handlePrayerCompleted = () => {
     setStatistics(calculatePrayerStatistics());
