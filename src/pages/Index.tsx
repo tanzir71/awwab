@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,6 +16,7 @@ const Index = () => {
   const [prayers, setPrayers] = useState<Prayer[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("today");
+  const [currentDate, setCurrentDate] = useState(getCurrentLocalDate());
   const [statistics, setStatistics] = useState({
     currentStreak: 0,
     bestStreak: 0,
@@ -139,23 +141,33 @@ const Index = () => {
     setStatistics(calculatePrayerStatistics());
   }, [prayers, activeTab]);
   
+  // Enhanced day change detection
   useEffect(() => {
+    // First check on mount
     if (hasNewDayStarted()) {
       console.log("New day detected, refreshing data");
+      const newDate = getCurrentLocalDate();
+      setCurrentDate(newDate);
+      
       toast({
         title: "New Day",
-        description: `Today is ${getCurrentLocalDate()}. Start a new prayer journey!`,
+        description: `Today is ${newDate}. Start a new prayer journey!`,
         duration: 5000,
       });
       
       loadPrayerTimes();
-      
       setStatistics(calculatePrayerStatistics());
     }
     
+    // Then check periodically
     const intervalId = setInterval(() => {
-      if (hasNewDayStarted()) {
-        console.log("Day changed while app is active");
+      const newDate = getCurrentLocalDate();
+      
+      // Check if date has changed since last render
+      if (newDate !== currentDate) {
+        console.log("Day changed from", currentDate, "to", newDate);
+        setCurrentDate(newDate);
+        
         toast({
           title: "New Day Has Begun",
           description: "Your prayer tracking has been reset for the new day.",
@@ -163,13 +175,12 @@ const Index = () => {
         });
         
         loadPrayerTimes();
-        
         setStatistics(calculatePrayerStatistics());
       }
-    }, 60000);
+    }, 60000); // Check every minute
     
     return () => clearInterval(intervalId);
-  }, [toast]);
+  }, [toast, currentDate]);
   
   const handlePrayerCompleted = () => {
     setStatistics(calculatePrayerStatistics());
@@ -199,7 +210,11 @@ const Index = () => {
                 </div>
               </div>
             ) : (
-              <PrayerTimeline prayers={prayers} onPrayerCompleted={handlePrayerCompleted} />
+              <PrayerTimeline 
+                prayers={prayers} 
+                onPrayerCompleted={handlePrayerCompleted} 
+                currentDate={currentDate}
+              />
             )}
           </TabsContent>
           

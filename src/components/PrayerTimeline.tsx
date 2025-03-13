@@ -1,21 +1,21 @@
-
 import { Check, Clock } from "lucide-react";
 import { Prayer } from "@/types/Prayer";
 import { cn } from "@/lib/utils";
-import { markPrayerAsCompleted, isPrayerCompletedToday, unmarkPrayerAsCompleted } from "@/lib/storageService";
+import { markPrayerAsCompleted, isPrayerCompletedToday, unmarkPrayerAsCompleted, getCurrentLocalDate } from "@/lib/storageService";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 
 interface PrayerTimelineProps {
   prayers: Prayer[];
   onPrayerCompleted?: () => void;
+  currentDate?: string;
 }
 
-const PrayerTimeline = ({ prayers, onPrayerCompleted }: PrayerTimelineProps) => {
+const PrayerTimeline = ({ prayers, onPrayerCompleted, currentDate }: PrayerTimelineProps) => {
   const { toast } = useToast();
   const [completedPrayers, setCompletedPrayers] = useState<string[]>([]);
+  const today = currentDate || getCurrentLocalDate();
   
-  // Initialize completed prayers from local storage
   useEffect(() => {
     const updatedPrayers = prayers.map(prayer => {
       const isCompleted = isPrayerCompletedToday(prayer.name);
@@ -26,43 +26,29 @@ const PrayerTimeline = ({ prayers, onPrayerCompleted }: PrayerTimelineProps) => 
     });
     
     setCompletedPrayers(updatedPrayers.filter(p => p.isCompleted).map(p => p.name));
-  }, [prayers]);
+  }, [prayers, currentDate]);
   
   const handleMarkAsCompleted = (prayer: Prayer) => {
-    // Mark prayer as completed in storage
     markPrayerAsCompleted(prayer);
-    
-    // Update local state
     setCompletedPrayers(prev => [...prev, prayer.name]);
-    
-    // Show toast notification
     toast({
       title: "Prayer Completed",
       description: `${prayer.name} prayer has been recorded. Keep it up!`,
       duration: 3000,
     });
-    
-    // Notify parent component if callback provided
     if (onPrayerCompleted) {
       onPrayerCompleted();
     }
   };
 
   const handleUnmarkPrayer = (prayer: Prayer) => {
-    // Unmark prayer in storage
     unmarkPrayerAsCompleted(prayer.name);
-    
-    // Update local state
     setCompletedPrayers(prev => prev.filter(name => name !== prayer.name));
-    
-    // Show toast notification
     toast({
       title: "Prayer Unmarked",
       description: `${prayer.name} prayer has been unmarked.`,
       duration: 3000,
     });
-    
-    // Notify parent component if callback provided
     if (onPrayerCompleted) {
       onPrayerCompleted();
     }
@@ -70,7 +56,6 @@ const PrayerTimeline = ({ prayers, onPrayerCompleted }: PrayerTimelineProps) => 
   
   return (
     <div className="relative">
-      {/* Vertical line */}
       <div className="absolute left-4 top-4 bottom-4 w-0.5 bg-muted"></div>
       
       {prayers.map((prayer, index) => {
@@ -84,7 +69,6 @@ const PrayerTimeline = ({ prayers, onPrayerCompleted }: PrayerTimelineProps) => 
               prayer.isNext && !isCompletedToday && "animate-pulse"
             )}
           >
-            {/* Timeline dot */}
             <div className={cn(
               "absolute left-2 top-1.5 w-5 h-5 rounded-full flex items-center justify-center",
               isCompletedToday ? "bg-primary" : 
