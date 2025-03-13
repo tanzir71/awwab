@@ -48,6 +48,24 @@ const Index = () => {
     }
   };
 
+  const loadPrayerTimes = async () => {
+    try {
+      setLoading(true);
+      console.log("Fetching prayer times for location:", location.latitude, location.longitude);
+      const prayerData = await fetchPrayerTimes(location.latitude, location.longitude);
+      setPrayers(prayerData);
+    } catch (error) {
+      console.error("Error fetching prayer times:", error);
+      toast({
+        title: "Error",
+        description: "Could not fetch prayer times. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     const getLocation = async () => {
       if (navigator.geolocation) {
@@ -114,24 +132,6 @@ const Index = () => {
   }, [toast]);
 
   useEffect(() => {
-    const loadPrayerTimes = async () => {
-      try {
-        setLoading(true);
-        console.log("Fetching prayer times for location:", location.latitude, location.longitude);
-        const prayerData = await fetchPrayerTimes(location.latitude, location.longitude);
-        setPrayers(prayerData);
-      } catch (error) {
-        console.error("Error fetching prayer times:", error);
-        toast({
-          title: "Error",
-          description: "Could not fetch prayer times. Please try again later.",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadPrayerTimes();
   }, [location, toast]);
 
@@ -140,7 +140,6 @@ const Index = () => {
   }, [prayers, activeTab]);
   
   useEffect(() => {
-    // Check if day has changed
     if (hasNewDayStarted()) {
       console.log("New day detected, refreshing data");
       toast({
@@ -149,14 +148,11 @@ const Index = () => {
         duration: 5000,
       });
       
-      // Reload prayer times for the new day
       loadPrayerTimes();
       
-      // Update statistics for the new day
       setStatistics(calculatePrayerStatistics());
     }
     
-    // Check for day change every minute
     const intervalId = setInterval(() => {
       if (hasNewDayStarted()) {
         console.log("Day changed while app is active");
@@ -166,13 +162,11 @@ const Index = () => {
           duration: 5000,
         });
         
-        // Reload prayer times for the new day
         loadPrayerTimes();
         
-        // Update statistics for the new day
         setStatistics(calculatePrayerStatistics());
       }
-    }, 60000); // Check every minute
+    }, 60000);
     
     return () => clearInterval(intervalId);
   }, [toast]);
