@@ -1,69 +1,46 @@
-# Welcome to your Lovable project
+# Prayer Quest
 
-## Project info
+A small installable web app for tracking the five daily prayers. It shows today's prayer times for your location, lets you tick off each prayer as you complete it, and turns your streak into a mosque that is gradually built.
 
-**URL**: https://lovable.dev/projects/de76f21c-1c95-4998-838b-0577d09e92c9
+## Features
 
-## How can I edit this code?
+- Today's times for Fajr, Dhuhr, Asr, Maghrib and Isha, fetched from the Aladhan API (`api.aladhan.com`, calculation method 2) for your coordinates.
+- Location from the browser's geolocation, falling back to an IP lookup (`ipapi.co`), then to Mecca if both fail.
+- Each prayer lists its rakat breakdown (Sunnah, Fard, Nafl, Witr) and order.
+- Mark prayers complete or undo; completions are stored in the browser's `localStorage` and nothing is sent to a server.
+- Statistics tab: current streak, best streak, completion rate, total prayers completed and active days.
+- A mosque illustration that advances through stages (foundation, walls, dome, minarets, complete) as your streak grows.
+- PWA pieces: web manifest, service worker for the app shell, and an install prompt for mobile browsers.
 
-There are several ways of editing your application.
+## Tech stack
 
-**Use Lovable**
+Vite, React 18 and TypeScript, Tailwind CSS, shadcn/ui (Radix UI), Lucide icons. The project was scaffolded with Lovable.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/de76f21c-1c95-4998-838b-0577d09e92c9) and start prompting.
+## Getting started
 
-Changes made via Lovable will be committed automatically to this repo.
+Prerequisites: Node.js and npm.
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Open the URL Vite prints. Allow location access for times at your position; prayer times require network access.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Scripts
 
-**Use GitHub Codespaces**
+| Script | What it does |
+|---|---|
+| `npm run dev` | Start the Vite dev server |
+| `npm run build` | Production build |
+| `npm run build:dev` | Build in development mode |
+| `npm run preview` | Preview the production build |
+| `npm run lint` | Run ESLint |
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Project structure
 
-## What technologies are used for this project?
-
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/de76f21c-1c95-4998-838b-0577d09e92c9) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+- `src/pages/Index.tsx` - main screen with the Today and Statistics tabs.
+- `src/lib/prayerServices.ts` - prayer-time fetching and rakat data.
+- `src/lib/storageService.ts` - completion tracking and streak statistics in `localStorage`.
+- `src/components/` - prayer timeline, mosque progress, install prompt, footer.
+- `public/` - manifest, service worker and icons.
