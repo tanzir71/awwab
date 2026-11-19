@@ -3,15 +3,71 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { addDays } from "./dates";
 import { baselineMonthStart, calendarEvents, hijriOn, monthStart } from "./hijri";
 import { cities, currentPrayerSchedule, prayerDay, schedule } from "./prayerServices";
-import { db, backup, logPrayer, migrateLegacy, prayerStatistics, restoreBackup, updateSettings } from "./storageService";
+import { db, backup, getRecord, logPrayer, migrateLegacy, prayerStatistics, restoreBackup, updateSettings } from "./storageService";
 import { calendarFile } from "./calendarFile";
 import { estimateQada, finishQada } from "./qada";
 import { guideReference, prayerGuide } from "./prayerGuide";
-import { reviewCard } from "./reviews";
+import { reviewCard, type Reviews } from "./reviews";
+import { countKnownQuranWords } from "./quran";
+import { finishQaidaLesson, saveSurahReview, saveWordReview, setAyahFamiliar, wordMilestones } from "./studyMilestones";
+import coreWords from "../../docs/content/core-quran-words.json";
+import qaida from "../../docs/content/qaida-lessons.json";
 
 const dhaka = cities[0];
 const day = "2026-11-19";
 const times = schedule(day, dhaka, "Karachi", "hanafi");
+
+describe("saved study milestones", () => {
+  beforeEach(async () => {
+    await db.records.clear();
+  });
+
+  it.each(wordMilestones)("celebrates %i core words once and preserves the record in a backup", async count => {
+    const key = coreWords.words[count - 1];
+    await db.records.put({ key: "word-bank-known", value: coreWords.words.slice(0, count - 1) });
+    const results = await Promise.all([
+      saveWordReview(key, "got-it", times.asr, dhaka.timeZone),
+      saveWordReview(key, "got-it", times.asr, dhaka.timeZone),
+    ]);
+    expect(results).toEqual([count, undefined]);
+    expect(await getRecord("study-days", [])).toEqual([day]);
+    const file = await backup();
+    await db.records.clear();
+    await restoreBackup(file);
+    expect(await getRecord("word-milestones", [])).toEqual(wordMilestones.filter(threshold => threshold <= count));
+  });
+
+  it("shares the count with ayah study and retains an achievement when a verse is unmarked", async () => {
+    const verse = "1:2";
+    const words = coreWords.words.filter(key => countKnownQuranWords([verse], [key]) > countKnownQuranWords([verse], [])).slice(0, 24);
+    expect(words).toHaveLength(24);
+    await db.records.put({ key: "word-bank-known", value: words });
+    expect(await setAyahFamiliar(verse, true)).toBe(25);
+    expect(await setAyahFamiliar(verse, false)).toBeUndefined();
+    expect(await setAyahFamiliar(verse, true)).toBeUndefined();
+    expect(await getRecord("word-milestones", [])).toEqual([25]);
+  });
+
+  it("reports when a surah moves to Manzil and schedules its next review", async () => {
+    const first = reviewCard(undefined, "got-it", times.asr);
+    const second = reviewCard(first, "got-it", first.card.due);
+    expect(second.bucket).toBe("sabqi");
+    await db.records.put({ key: "reviews", value: { 103: second } });
+    expect(await saveSurahReview(103, "got-it", second.card.due, dhaka.timeZone)).toBe(true);
+    const reviews = await getRecord<Reviews>("reviews", {});
+    expect(reviews[103].bucket).toBe("manzil");
+    expect(await saveSurahReview(103, "got-it", reviews[103].card.due, dhaka.timeZone)).toBe(false);
+  });
+
+  it("completes the Qaida book only after every lesson is saved", async () => {
+    expect(await finishQaidaLesson(17, times.asr, dhaka.timeZone)).toEqual({ bookComplete: false });
+    expect(await finishQaidaLesson(17, times.asr, dhaka.timeZone)).toBeUndefined();
+    const otherLessons = qaida.lessons.map(item => item.n).filter(number => number !== 1);
+    await db.records.put({ key: "qaida-complete", value: otherLessons });
+    expect(await finishQaidaLesson(1, times.asr, dhaka.timeZone)).toEqual({ bookComplete: true });
+    expect(await finishQaidaLesson(1, times.asr, dhaka.timeZone)).toBeUndefined();
+  });
+});
 
 describe("daily prayer times", () => {
   it("distinguishes passed prayers, current prayer and future prayers", () => {

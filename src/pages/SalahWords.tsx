@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { ArabicText } from "@/components/ArabicText";
 import { DesignIcon } from "@/components/DesignIcon";
@@ -9,7 +9,7 @@ import { useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { prayerGuidePath } from "@/lib/prayerGuide";
 import { coreWordCoverage, coreWordSource, coreWordTotal, countKnownQuranWords, fatihaMorphology, quranText } from "@/lib/quran";
-import { updateRecord } from "@/lib/storageService";
+import { momentPath, setAyahFamiliar } from "@/lib/studyMilestones";
 import { studyNames } from "@/lib/study-copy";
 import { splitArabicWords } from "@/lib/wordAnatomy";
 import content from "../../docs/content/salah-words.json";
@@ -23,6 +23,7 @@ const verseNotes: Record<string, { glosses: string[]; transliteration?: string }
 
 export function SalahWords() {
   const { language, t } = useCopy();
+  const navigate = useNavigate();
   const [params] = useSearchParams();
   const [ayah, selectAyah] = useState(2);
   const [position, selectPosition] = useState(1);
@@ -42,8 +43,9 @@ export function SalahWords() {
 
   async function toggleFamiliar() {
     try {
-      await updateRecord<string[]>("words-known", [], previous => known ? previous.filter(ref => ref !== verse.ref) : [...new Set([...previous, verse.ref])]);
-      toast(t(known ? "salahVerseUnmarked" : "salahVerseSaved"));
+      const earned = await setAyahFamiliar(verse.ref, !known);
+      if (earned) navigate(momentPath("words", earned, true));
+      else toast(t(known ? "salahVerseUnmarked" : "salahVerseSaved"));
     } catch {
       toast.error(t("saveError"));
     }

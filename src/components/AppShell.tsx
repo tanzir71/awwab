@@ -95,7 +95,9 @@ export function AppShell({ children, settings, now, desktop }: { children: React
   const date = formatDay(day, { weekday: "short", day: "numeric", month: "short", year: "numeric" }, settings.language);
   const nextPrayer = Number.isFinite(next.starts.valueOf())
     ? t("nextPrayerIn", { name: t(next.id), time: duration(next.starts.valueOf() - now.valueOf(), settings.language) }) : t("prayerTimes");
-  const fullscreen = location.pathname.startsWith("/umrah") || location.pathname.startsWith("/print/");
+  const shareSheet = location.pathname === "/share";
+  const shareMoment = location.pathname.startsWith("/share/milestone/");
+  const fullscreen = shareSheet || shareMoment || location.pathname.startsWith("/umrah") || location.pathname.startsWith("/print/");
   const today = location.pathname === "/today";
   const prayerGuide = location.pathname.startsWith("/today/guide/");
   const salahStudy = location.pathname === "/learn/salah";
@@ -144,14 +146,14 @@ export function AppShell({ children, settings, now, desktop }: { children: React
         </div>
       </>}
     </nav>}
-    <main className="app-main" id="app-main" tabIndex={-1} data-page={prayerGuide ? "prayer-guide" : salahStudy ? "salah-study" : today ? "today" : undefined}>
+    <main className="app-main" id="app-main" tabIndex={-1} data-page={shareSheet ? "share-sheet" : shareMoment ? "share-moment" : prayerGuide ? "prayer-guide" : salahStudy ? "salah-study" : today ? "today" : undefined}>
       {!fullscreen && !(today && settings.mode === "maktab") && <header className="topbar">
         <div>{today ? <h1>{title}</h1> : <h2>{title}</h2>}<p className="small muted">{date} · {hijriLabel(day, settings.hijriAdjust, calendar.anchors)}{today && ` · ${settings.city.name}`}</p></div>
         <Link className="chip night" to="/today">{nextPrayer}</Link>
         {settings.mode === "adult" && <>
           <Link className="action" to={nextReview ? `/learn/surahs/${nextReview}` : "/learn/surahs"}><DesignIcon name="desk-play" size={14} />{t("startReview")}{due.length ? ` · ${due.length}` : ""}</Link>
           <Link className="action soft" to="/today?log=1"><DesignIcon name="desk-plus" size={14} />{t("logPrayer")}</Link>
-          <Link className="action light" to="/share"><DesignIcon name="desk-share" size={14} />{t("share")}</Link>
+          <Link className="action light" to={today ? "/share?from=today" : "/share?from=learn"}><DesignIcon name="desk-share" size={14} />{t("share")}</Link>
         </>}
         <Link className="icon-button" to="/you/reminders" aria-label={t("reminders")}><DesignIcon name="desk-bell" size={18} /></Link>
       </header>}

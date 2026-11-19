@@ -1,18 +1,18 @@
 import { useDeferredValue, useEffect, useState } from "react";
 import { BookOpen, ChevronRight, Headphones, Search } from "lucide-react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { ArabicText } from "@/components/ArabicText";
 import { VerseAudio } from "@/components/VerseAudio";
 import { SectionNav } from "@/components/Surface";
 import { useDesktop, useRecord } from "@/hooks/use-awwab";
-import { dateKey } from "@/lib/dates";
 import { asset } from "@/lib/config";
 import { prayerGuidePath } from "@/lib/prayerGuide";
-import { grades, isDue, reviewCard, type ReviewGrade, type Reviews } from "@/lib/reviews";
+import { grades, isDue, type ReviewGrade, type Reviews } from "@/lib/reviews";
 import { useCopy } from "@/lib/copy";
 import { studyNames, studySearchTerm } from "@/lib/study-copy";
 import { updateRecord, type Settings } from "@/lib/storageService";
+import { finishQaidaLesson, momentPath, saveSurahReview } from "@/lib/studyMilestones";
 import { splitArabicWords, wordAnatomy } from "@/lib/wordAnatomy";
 import alphabet from "../../docs/content/arabic-letters.json";
 import qaida from "../../docs/content/qaida-lessons.json";
@@ -80,7 +80,7 @@ function SurahStudy({ surah, settings }: { surah: typeof fullChapters[number]; s
   const [mode, setMode] = useState<typeof studyModes[number]>(() => studyModes.find(mode => mode === params.get("mode")) ?? "read");
   const [hints, setHints] = useState<Record<string, boolean>>({});
   const [saved, setSaved] = useState(false);
-  const [milestone, setMilestone] = useState(false);
+  const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const reviews = useRecord<Reviews>("reviews", {});
   const bucket = reviews[surah.number]?.bucket ?? "sabaq";
@@ -96,15 +96,9 @@ function SurahStudy({ surah, settings }: { surah: typeof fullChapters[number]; s
     if (saving || saved) return;
     setSaving(true);
     try {
-      let moved = false;
-      await updateRecord<Reviews>("reviews", {}, old => {
-        const next = reviewCard(old[surah.number], value, new Date());
-        moved = old[surah.number]?.bucket !== "manzil" && next.bucket === "manzil";
-        return { ...old, [surah.number]: next };
-      });
-      await updateRecord<string[]>("study-days", [], old => [...new Set([...old, dateKey(new Date(), settings.city.timeZone)])]);
-      setMilestone(moved);
+      const moved = await saveSurahReview(surah.number, value, new Date(), settings.city.timeZone);
       setSaved(true);
+      if (moved) navigate(momentPath("surah", surah.number));
     } catch { toast.error(t("reviewSaveError")); }
     finally { setSaving(false); }
   }
@@ -143,8 +137,6 @@ function SurahStudy({ surah, settings }: { surah: typeof fullChapters[number]; s
         {saved && <p className="muted" role="status">{t("reviewSaved")}</p>}
       </section>
       {surah.number !== 1 && <p className="card soft">{t("tryInMaghrib", { name })}</p>}
-      {milestone && <section className="card tint compact-stack"><h2>{t("surahMilestone", { name })}</h2><p>{t("progressMoment")}</p>
-        <Link className="action soft" to={`/share?template=surah&milestone=${encodeURIComponent(t("learnedSurah", { name }))}`}>{t("shareMoment")}</Link></section>}
       <p className="muted small"><a href={settings.script === "indopak" ? "https://digitalkhatt.org" : "https://tanzil.net/docs/text_license"}>{t(settings.script === "indopak" ? "indopakCredit" : "tanzilCredit")}</a> · {t("englishTranslationCredit")}</p>
     </div>
   </div>;
@@ -175,7 +167,10 @@ function QaidaLesson({ lesson, settings }: {
   const storedRow = useRecord(`qaida-row-${lesson.n}`, 0);
   const [activeRow, setActiveRow] = useState<number>();
   const [answer, setAnswer] = useState<number>();
-  const [finished, setFinished] = useState(false);
+  const navigate = useNavigate();
+  const completed = useRecord<number[]>("qaida-complete", []);
+  const [saving, setSaving] = useState(false);
+  const finished = completed.includes(lesson.n);
   const drill = lesson.n === 1 || lesson.n === 4 || lesson.n === 5;
   const marks = lesson.n === 4 ? drillMarks : lesson.n === 5 ? ["ً", "ٍ", "ٌ"] : [""];
   const ampara = settings.spellStyle === "ampara-bn";
@@ -197,12 +192,13 @@ function QaidaLesson({ lesson, settings }: {
     void updateRecord(`qaida-row-${lesson.n}`, 0, () => next);
   }
   async function finish() {
+    if (saving || finished) return;
+    setSaving(true);
     try {
-      await updateRecord<number[]>("qaida-complete", [], old => Array.from(new Set([...old, lesson.n])));
-      await updateRecord("qaida-current", 1, () => Math.min(lesson.n + 1, 17));
-      await updateRecord<string[]>("study-days", [], old => [...new Set([...old, dateKey(new Date(), settings.city.timeZone)])]);
-      setFinished(true);
+      const result = await finishQaidaLesson(lesson.n, new Date(), settings.city.timeZone);
+      if (result) navigate(isMaktab && result.bookComplete ? momentPath("maktab", qaida.lessons.length) : momentPath("qaida", lesson.n));
     } catch { toast.error(t("lessonSaveError")); }
+    finally { setSaving(false); }
   }
 
   return <div className="qaida-workspace">
@@ -244,7 +240,7 @@ function QaidaLesson({ lesson, settings }: {
       <p className="muted small">{lesson.n === 3 ? "Al-Baqara 2:1" : "Al-Ikhlāṣ 112:1"}</p>
     </section>
     {finished ? <div className="equal-row"><Link className="action" to={lesson.n < 17 ? `/learn/qaida/${lesson.n + 1}` : "/learn"}>{t("continueLearning")}</Link>
-      <Link className="action soft" to={`/share?template=${isMaktab && lesson.n === 17 ? "maktab" : "qaida"}&milestone=${encodeURIComponent(t("practisedLesson", { number: lesson.n }))}`}>{t("shareMoment")}</Link></div> : <button className="action" onClick={() => void finish()}>{t("saveLesson")}</button>}
+      <Link className="action soft" to={momentPath("qaida", lesson.n)}>{t("shareMoment")}</Link></div> : <button className="action" disabled={saving} onClick={() => void finish()}>{t("saveLesson")}</button>}
     </div>
     <aside className="qaida-trace card stack" aria-label={t("takhtiWorkspace")}>
       <h2>{t("takhti")} · {language === "bn" ? traceLetter.nameBn : traceLetter.name}</h2>

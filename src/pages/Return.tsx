@@ -67,7 +67,7 @@ export function ReturnPage({ settings, now }: { settings: Settings; now: Date })
       <a className="caption" href={content.hope.url}>{content.hope.source}</a>
     </section>
     <ListLink to="/return/qada" icon={<CalendarClock size={22} />} title="Make-up prayers and fasts" detail="Keep track at a pace that works for you" />
-    <Link to="/share?template=return" className="action soft">Share progress</Link>
+    <Link to="/share?template=return&from=return" className="action soft">Share progress</Link>
   </div>;
 }
 

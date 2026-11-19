@@ -20,6 +20,7 @@ import { Zakat } from "@/pages/Zakat";
 import { PrintHub, PrintSheet } from "@/pages/Print";
 import { Takhti } from "@/pages/Takhti";
 import { Share } from "@/pages/Share";
+import { Milestone } from "@/pages/Milestone";
 import { HaramFocus, UmrahDuas, UmrahMapPage, UmrahNow, UmrahPlan, UmrahRituals, UmrahShell, WalkWithMe } from "@/pages/Umrah";
 import { Sources } from "@/pages/Sources";
 import { WordBank } from "@/pages/WordBank";
@@ -62,7 +63,7 @@ function Main() {
       <Route path="/learn/surahs/:id?" element={<SurahReader settings={settings} />} />
       <Route path="/learn/salah" element={<SalahWords />} />
       <Route path="/learn/fluency" element={<Fluency />} />
-      <Route path="/learn/words" element={<WordBank />} />
+      <Route path="/learn/words" element={<WordBank settings={settings} />} />
       <Route path="/learn/takhti/:family?" element={<Takhti />} />
       <Route path="/learn/hadith" element={<Hadith />} />
       <Route path="/return" element={<ReturnPage settings={settings} now={now} />} />
@@ -72,6 +73,7 @@ function Main() {
       <Route path="/plan/mosques" element={<Mosques settings={settings} now={now} />} />
       <Route path="/plan/zakat" element={<Zakat settings={settings} />} />
       <Route path="/share" element={<Share key={search} settings={settings} now={now} />} />
+      <Route path="/share/milestone/:kind/:number" element={<Milestone settings={settings} now={now} />} />
       <Route path="/install" element={<div className="stack"><AppInstallPrompt /><Link className="action soft" to="/">Continue to awwab</Link></div>} />
       <Route path="/sources" element={<Sources />} />
       <Route path="/umrah" element={<UmrahShell now={now} />}>

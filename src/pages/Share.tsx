@@ -1,87 +1,132 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { Copy, Download, Share2 } from "lucide-react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import { SectionNav } from "@/components/Surface";
-import { usePrayerLogs } from "@/hooks/use-awwab";
-import { addDays, dateKey } from "@/lib/dates";
+import { DesignIcon } from "@/components/DesignIcon";
+import { ShareArtwork, type ShareArtifact } from "@/components/ShareArtwork";
+import { useShareCards } from "@/hooks/use-share-cards";
+import { useCopy } from "@/lib/copy";
 import { downloadFile } from "@/lib/download";
-import { drawShare, imageFile, shareFormats, shareTemplates, shareUrl, type ShareFormat, type TemplateId } from "@/lib/share";
+import { shareFormats, shareTemplates, shareUrl, type ShareFormat, type ShareModel, type TemplateId } from "@/lib/share";
 import type { Settings } from "@/lib/storageService";
+import { momentPath, type MomentTemplate } from "@/lib/studyMilestones";
+
+const carousel: TemplateId[] = ["surah", "return", "qaida", "umrah", "maktab", "words"];
+const shareOrigins = { return: "/return", umrah: "/umrah", today: "/today", learn: "/learn" };
+
+function ShareSwitch({ label, hint, on, change }: { label: string; hint?: string; on: boolean; change: (value: boolean) => void }) {
+  return <button className="share-switch" type="button" role="switch" aria-label={label} aria-checked={on} onClick={() => change(!on)}>
+    <span className="compact-stack"><strong>{label}</strong>{hint && <small>{hint}</small>}</span>
+    {on ? <span className="share-switch-on" aria-hidden="true" /> : <DesignIcon name="share-toggle-off" size={44} height={26} className="share-switch-off" />}
+  </button>;
+}
 
 export function Share({ settings, now }: { settings: Settings; now: Date }) {
+  const { t } = useCopy();
   const [params] = useSearchParams();
-  const [id, select] = useState<TemplateId>(() => shareTemplates.find(item => item.id === params.get("template"))?.id ?? "return");
+  const original = shareTemplates.find(item => item.id === params.get("template")) ?? shareTemplates[0];
+  const [id, select] = useState<TemplateId>(original.id);
   const [format, setFormat] = useState<ShareFormat>("story");
-  const [light, setLight] = useState(() => shareTemplates.find(item => item.id === id).theme === "light");
+  const [light, setLight] = useState(original.theme === "light");
   const [counts, showCounts] = useState(false);
+  const [artifact, setArtifact] = useState<ShareArtifact>();
   const [status, setStatus] = useState("");
-  const [file, setFile] = useState<File>();
-  const canvas = useRef<HTMLCanvasElement>(null);
-  const logs = usePrayerLogs();
-  const template = shareTemplates.find(item => item.id === id);
-  const date = dateKey(now, settings.city.timeZone);
-  const activity = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const log of logs) counts.set(log.date, (counts.get(log.date) ?? 0) + 1);
-    return Array.from({ length: 371 }, (_, i) => counts.get(addDays(date, i - 370)) ?? 0);
-  }, [logs, date]);
-  const milestone = params.get("milestone")?.slice(0, 80);
-  const title = id === params.get("template") && milestone ? milestone : template.label;
-  const text = id === params.get("template") && milestone ? `${milestone} with awwab.` : `${template.detail} · awwab`;
-  const prayerCount = logs.length;
-  useEffect(() => {
-    const surface = canvas.current;
-    setFile(undefined);
-    setStatus("");
-    let current = true;
-    async function render() {
-      const rendered = document.createElement("canvas");
-      await drawShare(rendered, { template: id, format, light, title, showPrayerNumbers: counts, prayerCount, activity });
-      if (!current || !surface) return;
-      surface.width = rendered.width;
-      surface.height = rendered.height;
-      surface.getContext("2d").drawImage(rendered, 0, 0);
-      const blob = await imageFile(rendered, id);
-      if (current) setFile(blob);
-    }
-    void render().catch(() => { if (current) setStatus("The card could not be drawn. Try changing the format."); });
-    return () => { current = false; };
-  }, [activity, counts, format, id, light, prayerCount, settings.mode, title]);
+  const touch = useRef<number>();
+  const templates = useRef<HTMLDivElement>(null);
+  const value = Number(params.get("value")) || undefined;
+  const cards = useShareCards(settings, now, original.id, value);
+  const model = useMemo<ShareModel>(() => ({ template: id, format, light, showPrayerNumbers: counts, card: cards[id] }),
+    [id, format, light, counts, cards]);
+  const ready = artifact?.model === model ? artifact.file : undefined;
+  const failed = artifact?.model === model && artifact.failed;
+  const index = carousel.indexOf(id);
+  const prev = carousel[(index + carousel.length - 1) % carousel.length];
+  const next = carousel[(index + 1) % carousel.length];
+  const neighbors = useMemo(() => [prev, next].map(template => ({
+    template, format, showPrayerNumbers: counts, light: shareTemplates.find(item => item.id === template).theme === "light", card: cards[template],
+  })), [prev, next, format, counts, cards]);
+  const moment = params.get("from") === "moment" && value && original.id !== "return" && original.id !== "umrah";
+  const back = moment ? momentPath(original.id as MomentTemplate, value, params.get("study") === "salah") :
+    shareOrigins[params.get("from")] ?? "/you";
+  const url = shareUrl(id);
+  const title = counts && id === "return" ? model.card.numbers.title : model.card.title;
+  const description = [title, model.card.detail, counts && id === "return" ? model.card.numbers.label : "", model.card.citation].filter(Boolean).join(" · ");
+  const text = title + " · " + model.card.detail + " · awwab";
 
-  async function copy(linkOnly = false) {
+  useLayoutEffect(() => {
+    const row = templates.current;
+    const selected = row?.querySelector('button[aria-pressed="true"]');
+    if (!selected) return;
+    const viewport = row.getBoundingClientRect();
+    const pill = selected.getBoundingClientRect();
+    if (pill.left < viewport.left + 4) row.scrollLeft += pill.left - viewport.left - 4;
+    else if (pill.right > viewport.right - 4) row.scrollLeft += pill.right - viewport.right + 4;
+  }, [id]);
+
+  function choose(template: TemplateId) {
+    select(template);
+    setLight(shareTemplates.find(item => item.id === template).theme === "light");
+    setStatus("");
+  }
+  async function copy(value: string, notice: string) {
     try {
-      await navigator.clipboard.writeText(linkOnly ? shareUrl(id) : `${text} ${shareUrl(id)}`);
-      toast(linkOnly ? "Link copied." : "Share text copied.");
+      await navigator.clipboard.writeText(value);
+      toast(t(notice));
     } catch {
-      setStatus(shareUrl(id));
+      setStatus(value);
     }
   }
   async function share() {
-    if (!file) return;
-    if (navigator.canShare?.({ files: [file] })) {
-      try { await navigator.share({ files: [file], text, url: shareUrl(id) }); return; }
-      catch (error) { if (error instanceof DOMException && error.name === "AbortError") return; }
+    if (!ready) return;
+    const files = [ready];
+    try {
+      if (navigator.canShare?.({ files })) {
+        await navigator.share({ files, text, url });
+        return;
+      }
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
     }
-    downloadFile(file, file.name);
-    await copy();
+    downloadFile(ready, ready.name);
+    await copy(text + " " + url, "shareCopiedText");
   }
-  return <div className="stack">
-    <SectionNav title={milestone ? "A moment worth keeping" : "Share progress"} back="/you" />
-    <div className="share-layout">
-      <div className="stack">
-        <div className="chips" aria-label="Card templates">{shareTemplates.map(item => <button type="button" aria-pressed={item.id === id} key={item.id}
-          className={`action ${item.id === id ? "soft" : "light"}`} onClick={() => { select(item.id); setLight(item.theme === "light"); }}>{item.label}</button>)}</div>
-        <div className="equal-row" aria-label="Format">{(Object.keys(shareFormats) as ShareFormat[]).map(value => <button key={value} className={`action ${format === value ? "" : "light"}`} aria-pressed={format === value} onClick={() => setFormat(value)}>{shareFormats[value].label}</button>)}</div>
-        <div className="equal-row" aria-label="Background"><button className={`action ${light ? "" : "light"}`} aria-pressed={light} onClick={() => setLight(true)}>Light</button><button className={`action ${light ? "light" : ""}`} aria-pressed={!light} onClick={() => setLight(false)}>Dark</button></div>
-        {id === "return" && <label className="with-icon"><input type="checkbox" checked={counts} onChange={event => showCounts(event.target.checked)} /> Show prayer numbers</label>}
-        <p className="muted small">Share to encourage. The image is prepared on this device.</p>
-        <div className="equal-row"><button className="action" disabled={!file} onClick={() => void share()}><Share2 size={18} /> Share…</button>
-          <button className="action soft" disabled={!file} onClick={() => file && downloadFile(file, file.name)}><Download size={18} /> Save image</button></div>
-        <button className="action light" onClick={() => void copy(true)}><Copy size={17} /> Copy link</button>
-        {status && <p role="status">{status}</p>}
+
+  return <section className="share-sheet" aria-labelledby="share-sheet-title">
+    <header className="row-between">
+      <h1 id="share-sheet-title">{t("shareYourProgress")}</h1>
+      <Link className="icon-button share-close" aria-label={t("shareClose")} to={back}><DesignIcon name="share-close" size={22} /></Link>
+    </header>
+    <div className="share-stage" data-format={format}
+      onTouchStart={event => { touch.current = event.touches[0].clientX; }}
+      onTouchEnd={event => {
+        if (touch.current === undefined) return;
+        const change = event.changedTouches[0].clientX - touch.current;
+        touch.current = undefined;
+        if (Math.abs(change) > 36) choose(change < 0 ? next : prev);
+      }}>
+      <button type="button" className="share-neighbor" aria-label={t("sharePrevious")} onClick={() => choose(prev)}>
+        <ShareArtwork model={neighbors[0]} />
+      </button>
+      <div className="share-current">
+        <ShareArtwork model={model} label={t("shareCardLabel", { title: description })} onArtifact={setArtifact} />
       </div>
-      <canvas className="share-preview" ref={canvas} role="img" aria-label={`Awwab share card: ${title}`} />
+      <button type="button" className="share-neighbor" aria-label={t("shareNext")} onClick={() => choose(next)}>
+        <ShareArtwork model={neighbors[1]} />
+      </button>
     </div>
-  </div>;
+    <div className="share-dots" aria-hidden="true">{carousel.map(item => <span key={item} data-selected={id === item} />)}</div>
+    <div ref={templates} className="share-template-row" role="group" aria-label={t("shareTemplates")}>{shareTemplates.map(item => <button type="button"
+      className="chip" aria-pressed={id === item.id} key={item.id} onClick={() => choose(item.id)}>{t(item.label)}</button>)}</div>
+    <div className="equal-row share-format-row" role="group" aria-label={t("shareFormat")}>{(Object.keys(shareFormats) as ShareFormat[]).map(value =>
+      <button key={value} type="button" className="action plain" aria-pressed={format === value} onClick={() => setFormat(value)}>{t(shareFormats[value].label)}</button>)}</div>
+    <div className="card share-options">
+      <ShareSwitch label={t("shareNumbers")} hint={t("shareNumbersHint")} on={counts} change={showCounts} />
+      <ShareSwitch label={t("shareLight")} on={light} change={setLight} />
+    </div>
+    <div className="equal-row share-actions"><button type="button" className="action" disabled={!ready} onClick={() => void share()}>{t("shareNow")}</button>
+      <button type="button" className="action light" disabled={!ready} onClick={() => ready && downloadFile(ready, ready.name)}>{t("shareSave")}</button></div>
+    <p className="share-privacy small muted">{t("sharePrivacy")}</p>
+    <button className="text-button share-copy-button" type="button" onClick={() => void copy(url, "shareCopiedLink")}>{t("shareCopyLink")}</button>
+    {failed && <p role="status">{t("shareDrawError")}</p>}
+    {status && <p className="small muted share-copy-status" role="status">{status}</p>}
+  </section>;
 }

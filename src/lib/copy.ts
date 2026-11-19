@@ -4,6 +4,7 @@ import { prayerNames, prayerStatusNames } from "../types/Prayer";
 import { rakatNames } from "./prayerServices";
 import type { Settings } from "./storageService";
 import { studyMessages } from "./study-copy";
+import { shareMessages } from "./share-copy";
 
 type CopySettings = Pick<Settings, "mode" | "language">;
 export type MessageCatalog = Record<string, Record<Settings["language"], string | [string, string]>>;
@@ -11,6 +12,7 @@ export const CopyContext = createContext<CopySettings>({ mode: "adult", language
 
 const messages: MessageCatalog = {
   ...studyMessages,
+  ...shareMessages,
   today: { en: "Today", bn: "আজ" },
   learn: { en: "Learn", bn: "শিখি" },
   return: { en: "Return", bn: "ফিরে আসি" },

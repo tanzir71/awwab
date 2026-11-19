@@ -398,8 +398,81 @@ progress::-moz-progress-bar { background: var(--control-primary); }
 .month-day[data-kind="current"] { background: var(--control-primary); color: var(--c-on-primary); }
 .month-day[data-kind="white-days"] { background: var(--c-tint); }
 .month-day[data-kind="expected"] { background: var(--c-primary-soft); }
-.share-layout { display: grid; gap: 16px; align-items: start; }
-.share-preview { width: min(100%, 380px); height: auto; justify-self: center; border-radius: var(--r-card); box-shadow: var(--shadow-raised); }
+[data-page="share-sheet"] { background: var(--c-ink); }
+[data-page="share-sheet"] .app-content, [data-page="share-moment"] .app-content { padding: 0; max-width: 520px; }
+.share-sheet {
+  position: relative; display: grid; gap: 12px; align-content: start;
+  margin-top: max(14px, env(safe-area-inset-top));
+  min-height: calc(100svh - max(14px, env(safe-area-inset-top)));
+  padding: 16px 20px max(18px, env(safe-area-inset-bottom));
+  background: var(--c-bg); border-radius: var(--r-sheet) var(--r-sheet) 0 0;
+}
+.share-sheet::before {
+  content: ""; position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+  width: 36px; height: 4px; border-radius: var(--r-pill); background: var(--c-line);
+}
+.share-sheet h1 { font-size: 24px; line-height: 30px; }
+.share-close { background: transparent; box-shadow: none; }
+.share-sheet .share-close { margin-inline-end: -10px; }
+.share-stage {
+  --share-card-width: 163px; --share-neighbor-width: 132px;
+  position: relative; height: 318px; display: grid; place-items: center;
+  overflow: hidden; touch-action: pan-y; background: var(--c-surface-alt); border-radius: var(--r-card);
+}
+.share-stage[data-format="post"] { --share-card-width: 214px; --share-neighbor-width: 162px; }
+.share-stage[data-format="wide"] { --share-card-width: 280px; --share-neighbor-width: 220px; }
+.share-current { width: min(var(--share-card-width), 76%); z-index: 1; }
+.share-artwork { display: block; width: 100%; height: auto; }
+.share-stage .share-artwork, .moment-copy .share-artwork { border-radius: var(--r-control); box-shadow: var(--shadow-card); }
+.share-neighbor {
+  position: absolute; top: 50%; right: 50%; transform: translate(calc(-1 * (var(--share-card-width) / 2 + 12px)), -50%);
+  width: var(--share-neighbor-width); opacity: .55; border: 0; padding: 0; border-radius: var(--r-control);
+}
+.share-neighbor:last-child {
+  left: 50%; right: auto; transform: translate(calc(var(--share-card-width) / 2 + 12px), -50%);
+}
+.share-neighbor:focus-visible { outline-offset: -4px; opacity: 1; }
+.share-dots { display: flex; justify-content: center; gap: 6px; }
+.share-dots span { width: 6px; height: 6px; border-radius: var(--r-pill); background: var(--c-line); }
+.share-dots span[data-selected="true"] { width: 18px; background: var(--c-primary); }
+.share-template-row {
+  display: flex; gap: 8px; min-width: 0; overflow-x: auto; scrollbar-width: none;
+  margin-inline: -4px; padding-inline: 4px; padding-block: 4px;
+}
+.share-template-row .chip {
+  display: inline-grid; place-items: center; color: var(--c-ink); background: var(--c-surface);
+  white-space: nowrap; flex: none; padding-inline: 12px; min-height: 32px; font-weight: 600;
+}
+.share-template-row .chip[aria-pressed="true"] { background: var(--control-primary); color: var(--c-on-primary); }
+.share-format-row { gap: 0; padding: 3px; background: var(--c-surface-alt); border-radius: var(--r-control); }
+.share-format-row .action { min-height: 39px; padding-inline: 3px; font: var(--type-small); font-weight: 700; }
+.share-format-row .action[aria-pressed="true"] { background: var(--c-surface); box-shadow: var(--shadow-card); }
+.share-options { padding: 6px 14px; }
+.share-switch {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px;
+  text-align: start; width: 100%; padding-block: 4px;
+}
+.share-switch .compact-stack { gap: 2px; }
+.share-switch small { color: var(--c-ink-muted); }
+.share-switch-off, .share-switch-on { flex: 0 0 44px; height: 26px; }
+.share-switch-on { display: flex; align-items: center; justify-content: flex-end; padding: 3px; border-radius: var(--r-pill); background: var(--control-primary); }
+.share-switch-on::before { content: ""; width: 20px; height: 20px; border-radius: var(--r-pill); background: var(--c-on-primary); }
+.share-actions .action, .moment-actions .action { min-height: 50px; padding-block: 12px; font: var(--type-body-strong); }
+.share-actions { margin-top: 12px; }
+.share-privacy, .share-copy-status { text-align: center; }
+.share-copy-status { overflow-wrap: anywhere; }
+.share-copy-button { display: none; }
+.share-moment {
+  position: relative; display: grid; grid-template-rows: 1fr auto; gap: 20px;
+  min-height: 100svh; padding: max(34px, env(safe-area-inset-top)) 20px max(28px, env(safe-area-inset-bottom));
+}
+.share-moment .share-close { position: absolute; inset: max(10px, env(safe-area-inset-top)) 10px auto auto; }
+.moment-copy { display: grid; justify-items: center; align-content: start; gap: 10px; text-align: center; padding-top: 10px; }
+.moment-copy h1 { max-width: 340px; font-size: 28px; line-height: 34px; }
+.moment-copy p { max-width: 320px; }
+.moment-check { width: 56px; height: 56px; display: grid; place-items: center; margin-bottom: 6px; border-radius: var(--r-pill); background: var(--c-primary-soft); }
+.moment-copy .share-artwork { width: min(100%, 256px); aspect-ratio: 4 / 5; margin-top: 8px; }
+.moment-actions { display: grid; gap: 10px; }
 .umrah-shell { max-width: 680px; margin-inline: auto; }
 .umrah-tabs { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); position: fixed; z-index: 20; inset: auto 0 0; padding: 8px 12px max(15px, env(safe-area-inset-bottom)); gap: 5px; background: var(--c-surface); box-shadow: var(--shadow-bar); }
 .umrah-tabs a[aria-current] { background: var(--c-primary-soft); color: var(--interactive-ink); }
@@ -474,7 +547,9 @@ table tbody tr:nth-child(even) { background: var(--c-surface-alt); }
   .anatomy-open .qaida-workspace > aside { display: none; }
   .anatomy-open .study-workspace { grid-template-columns: minmax(0, 1fr); }
   .anatomy-open .desktop-queue { display: none; }
-  .share-layout { grid-template-columns: 1fr 1fr; }
+  [data-page="share-sheet"] .workspace { min-height: 100svh; align-items: end; }
+  .share-sheet { margin-top: 30px; min-height: auto; }
+  .share-copy-button { display: inline-flex; margin: -8px auto; }
   .umrah-tabs { position: static; border-radius: var(--r-card); }
 }
 @media (max-width: 1023px) {

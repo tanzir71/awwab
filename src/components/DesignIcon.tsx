@@ -1,7 +1,7 @@
 import { asset } from "@/lib/config";
 
-export function DesignIcon({ name, size = 20, className }: { name: string; size?: number; className?: string }) {
-  return <img className={className} width={size} height={size} src={asset(`design/${name}.svg`)} alt="" aria-hidden="true" />;
+export function DesignIcon({ name, size = 20, height = size, className }: { name: string; size?: number; height?: number; className?: string }) {
+  return <img className={className} width={size} height={height} src={asset(`design/${name}.svg`)} alt="" aria-hidden="true" />;
 }
 
 export function Wordmark() {

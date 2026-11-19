@@ -1,5 +1,5 @@
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 import { toast } from "sonner";
 import { ArabicText } from "@/components/ArabicText";
@@ -8,10 +8,11 @@ import { useRecord } from "@/hooks/use-awwab";
 import { dateKey, formatDay } from "@/lib/dates";
 import { coreVocabulary, loadMorphology } from "@/lib/morphology";
 import { coreWordTotal, knownCoreQuranWords } from "@/lib/quran";
-import { grades, isDue, reviewCard, type ReviewGrade, type Reviews } from "@/lib/reviews";
+import { grades, isDue, type ReviewGrade, type Reviews } from "@/lib/reviews";
 import { useCopy } from "@/lib/copy";
 import { studyNames, studySearchTerm } from "@/lib/study-copy";
-import { updateRecord } from "@/lib/storageService";
+import type { Settings } from "@/lib/storageService";
+import { momentPath, saveWordReview } from "@/lib/studyMilestones";
 import { normalizeWord, wordAnatomy } from "@/lib/wordAnatomy";
 
 const meanings: Record<string, string> = {
@@ -32,8 +33,9 @@ function pronunciation(word: string) {
   return wordAnatomy(word).syllables.map(item => item.tr).join("");
 }
 
-export function WordBank() {
+export function WordBank({ settings }: { settings: Settings }) {
   const { language, t } = useCopy();
+  const navigate = useNavigate();
   const numbers = new Intl.NumberFormat(language);
   const [corpus, setCorpus] = useState<Corpus>();
   const [error, setError] = useState(false);
@@ -43,6 +45,7 @@ export function WordBank() {
   const [root, setRoot] = useState<string>();
   const [session, review] = useState<string>();
   const [reveal, setReveal] = useState(false);
+  const [saving, setSaving] = useState(false);
   const reviews = useRecord<Reviews>("reviews", {});
   const knownVocabulary = useRecord<string[]>("word-bank-known", []);
   const knownVerses = useRecord<string[]>("words-known", []);
@@ -104,14 +107,17 @@ export function WordBank() {
       {active ? <>
         <ArabicText text={active.text} citation={active.verse} />
         {reveal ? <p lang={active.en ? "en" : undefined}>{active.en || t("spellWordAloud")}</p> : <button className="action light" onClick={() => setReveal(true)}>{t("showCue")}</button>}
-        <div className="equal-row">{(Object.keys(grades) as ReviewGrade[]).map(grade => <button className={`action ${grade === "got-it" ? "" : "light"}`} key={grade}
+        <div className="equal-row">{(Object.keys(grades) as ReviewGrade[]).map(grade => <button className={`action ${grade === "got-it" ? "" : "light"}`} key={grade} disabled={saving}
           onClick={async () => {
+            if (saving) return;
+            setSaving(true);
             try {
-              await updateRecord<Reviews>("reviews", {}, old => ({ ...old, [active.key]: reviewCard(old[active.key], grade, new Date()) }));
-              if (grade === "got-it") await updateRecord<string[]>("word-bank-known", [], old => [...new Set([...old, active.key])]);
+              const earned = await saveWordReview(active.key, grade, new Date(), settings.city.timeZone);
               review(undefined);
-              toast(t("wordReviewSaved"));
+              if (earned) navigate(momentPath("words", earned));
+              else toast(t("wordReviewSaved"));
             } catch { toast.error(t("reviewSaveError")); }
+            finally { setSaving(false); }
           }}>{t(grade)}</button>)}</div>
       </> : <button className="action soft" disabled={due.length === 0} onClick={() => { review(due[0].key); setReveal(false); }}>{t("startDueReview")}</button>}
     </section>

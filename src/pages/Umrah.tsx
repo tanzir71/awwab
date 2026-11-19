@@ -140,7 +140,7 @@ export function UmrahNow() {
       </div>
       <Link className="action soft" to="/umrah/focus">Open Haram focus</Link>
     </section>
-    <Link className="action soft" to="/share?template=umrah">Share an Umrah card</Link>
+    <Link className="action soft" to="/share?template=umrah&from=umrah">Share an Umrah card</Link>
   </>;
 }
 
