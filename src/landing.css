@@ -72,10 +72,10 @@ main:focus { outline: 0; }
 .pill { display: inline-block; padding: 6px 12px; border-radius: var(--r-pill); color: var(--c-on-night); background: var(--c-overlay-on-night); font: var(--type-small); }
 .checks { list-style: none; padding: 0; display: grid; gap: 10px; }
 .checks li { display: flex; align-items: start; gap: 8px; }
-.checks li::before { content: "✓"; color: var(--c-primary); font-weight: 700; }
-.night .checks li::before { color: var(--c-accent); }
+.checks li::before { content: ""; flex: 0 0 16px; height: 16px; margin-block: 1px; background: center / auto no-repeat; }
 .trust { display: flex; flex-wrap: wrap; gap: 10px 20px; color: var(--c-night-muted); font: var(--type-small); }
-.trust li::before { content: ""; flex: 0 0 16px; height: 16px; margin-block: 1px; background: url('/landing/figma-35-29-iconcheck.svg') center / contain no-repeat; }
+.trust li { gap: 6px; }
+.trust li::before { background-image: url('/landing/figma-35-29-iconcheck.svg'); }
 .trust li:last-child { width: 100%; }
 .preview-art { display: block; position: relative; min-width: 0; }
 .preview-art img, .paper-shots img { display: block; width: 100%; height: auto; }
@@ -114,6 +114,15 @@ main:focus { outline: 0; }
 .copy h2 { font: 600 clamp(36px, 3.06vw, 44px)/1.182 var(--font-display); letter-spacing: -.023em; }
 .copy .lead { font-size: 18px; line-height: 28px; }
 .copy .checks { gap: 12px; font-size: 17px; line-height: 26px; }
+.copy .checks li { gap: 10px; }
+.copy .checks li::before {
+  flex-basis: 22px;
+  height: 22px;
+  margin: 0;
+  border-radius: var(--r-pill);
+  background-color: var(--c-primary-soft);
+  background-image: url('/design/check-primary-14.svg');
+}
 .feature-preview { display: block; width: 100%; position: relative; }
 .feature-preview .preview-art { aspect-ratio: 560 / var(--preview-height, 618); }
 .feature-preview img {
@@ -163,7 +172,7 @@ main:focus { outline: 0; }
 .dark-tiles article p { margin-top: 4px; color: var(--c-night-muted); font-size: 16px; line-height: 24px; }
 .dark-tiles .glyph { flex: 0 0 42px; height: 42px; background: var(--c-primary); }
 .umrah-benefits { display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; margin-top: 64px; color: var(--c-on-night); font: var(--type-small); }
-.umrah-benefits li::before { color: currentColor; }
+.umrah-benefits li::before { background-image: url('/landing/umrah-check.svg'); }
 
 .modes article { position: relative; min-height: 680px; }
 .modes article h3 { font: 600 26px/32px var(--font-display); }
@@ -179,6 +188,7 @@ main:focus { outline: 0; }
 #share .intro { max-width: 760px; margin-bottom: 56px; gap: 16px; }
 .share-stories { aspect-ratio: 1200 / 520; }
 .share-points { display: flex; justify-content: center; flex-wrap: wrap; gap: 16px 28px; margin-top: 56px; font: var(--type-small); }
+.share-points li::before { background-image: url('/landing/share-check.svg'); }
 
 .print-preview { display: grid; grid-template-columns: minmax(0, 968fr) minmax(0,179fr); gap: 40px; align-items: center; width: min(100%, 1187px); margin-inline: auto; }
 .laptop { aspect-ratio: 968 / 555; }
@@ -248,7 +258,7 @@ main:focus { outline: 0; }
   .hero-lead-mobile, .trust-mobile { display: inline; }
   .trust { gap: 8px 14px; }
   .trust li { gap: 6px; }
-  .trust li::before { flex-basis: 14px; height: 14px; margin-block: 2px; }
+  .trust li::before { flex-basis: 14px; height: 14px; margin-block: 2px; background-image: url('/landing/trust-check-mobile.svg'); }
   .hero-devices { width: min(100%, 350px); margin: 0 auto; aspect-ratio: 350 / 517; }
   .hero-devices img { width: 100%; inset: 0; }
   .verse { padding-block: 40px; }
@@ -288,7 +298,7 @@ main:focus { outline: 0; }
   .dark-tiles article p { margin-top: 2px; font: var(--type-small); }
   .umrah-benefits { grid-area: 5 / 1 / 6 / -1; gap: 8px; margin: 0; }
   .umrah-benefits li { padding: 6px 10px; gap: 6px; border-radius: var(--r-pill); background: var(--c-overlay-on-night); }
-  .umrah-benefits li::before { flex: 0 0 14px; text-align: center; }
+  .umrah-benefits li::before { flex-basis: 14px; height: 14px; margin: 0; background-image: url('/landing/umrah-check-mobile.svg'); }
 
   #share { padding-block: 56px; }
   #share .intro, #modes .intro, #privacy .intro { text-align: start; margin-bottom: 12px; gap: 12px; }
