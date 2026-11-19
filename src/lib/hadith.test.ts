@@ -1,0 +1,56 @@
+import { readFileSync } from "node:fs";
+import { gunzipSync } from "node:zlib";
+import { describe, expect, it } from "vitest";
+import { curatedHadith, hadithId, hadithSource, parseHadithId, riyadSelections, searchHadith } from "./hadith";
+import { canonicalHadithNumber, collectionIds, narrationGrade, type HadithNarration } from "./hadith-catalogue";
+
+const archive = collectionIds.flatMap(collection => {
+  const file = new URL(`../../public/data/hadith-${collection}-v2.json.gz`, import.meta.url);
+  const source = JSON.parse(gunzipSync(readFileSync(file)).toString()) as { items: HadithNarration[] };
+  return source.items;
+});
+const byId = new Map(archive.map(item => [hadithId(item.collection, item.number), item]));
+
+describe("hadith editions", () => {
+  it("preserves edition numbering and turns Muslim variants into their canonical suffixes", () => {
+    expect(canonicalHadithNumber("muslim", "2702.01")).toBe("2702a");
+    expect(canonicalHadithNumber("muslim", "52.10")).toBe("52j");
+    expect(canonicalHadithNumber("muslim", undefined)).toBeUndefined();
+    expect(canonicalHadithNumber("bukhari", 402.2)).toBe("402.2");
+    expect(parseHadithId("muslim:571a")).toEqual({ collection: "muslim", number: "571a" });
+    expect(parseHadithId("muslim:571a:again")).toBeUndefined();
+    expect(hadithSource(byId.get("muslim:2702a")!)).toBe("https://sunnah.com/muslim:2702a");
+  });
+
+  it("keeps only documented grades and excludes the ungraded introduction to Muslim", () => {
+    expect(narrationGrade("muslim", 0, [])).toBeUndefined();
+    expect(narrationGrade("bukhari", 1, [])).toEqual({ tier: "sahih", label: "Sahih" });
+    expect(narrationGrade("tirmidhi", 48, [])).toBeUndefined();
+    expect(narrationGrade("tirmidhi", 48, [
+      { name: "first grader", grade: "Sahih" }, { name: "second grader", grade: "Daif" },
+    ])).toBeUndefined();
+    expect(byId.get("tirmidhi:3540")?.grade).toMatchObject({ tier: "hasan", label: "Hasan", grader: "Bashar Awad Maarouf" });
+    expect(archive.filter(item => item.collection === "muslim").every(item => item.book > 0)).toBe(true);
+  });
+
+  it("bundles the verified original references for every curated card and Riyad selection", () => {
+    expect(byId.size).toBe(archive.length);
+    expect(new Set(archive.map(item => item.collection))).toEqual(new Set(collectionIds));
+    for (const reference of curatedHadith) {
+      expect(byId.get(hadithId(reference.collection, reference.number))?.text, reference.url).toBeTruthy();
+      if (reference.alsoIn) expect(byId.has(reference.alsoIn)).toBe(true);
+    }
+    for (const reference of riyadSelections) expect(byId.has(reference.original)).toBe(true);
+  });
+
+  it("finds references by canonical suffix, Bangla number, text, and selected Riyad collection", () => {
+    const exact = searchHadith("সহিহ মুসলিম ২৭০২a", archive, "all");
+    expect(exact.matches.map(item => item.number)).toEqual(["2702a"]);
+    expect(exact.matches[0].text).toMatch(/seek forgiveness/i);
+    expect(searchHadith("Muslim 2702", archive, "all").matches.map(item => item.number)).toContain("2702b");
+    expect(searchHadith("Muslim 2702", archive, "bukhari").matches).toEqual([]);
+    expect(searchHadith("প্রতিবেশীর ক্ষতি", archive, "all").matches.some(item => item.number === "6018")).toBe(true);
+    expect(searchHadith("Riyad 14", archive, "riyadussalihin").riyad.map(item => item.original)).toEqual(["muslim:2702b"]);
+    expect(searchHadith("999999999", archive, "all")).toEqual({ matches: [], riyad: [] });
+  });
+});

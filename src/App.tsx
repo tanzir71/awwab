@@ -13,7 +13,7 @@ import { Plan } from "@/pages/Plan";
 import { Qada, ReturnPage, Sayyid } from "@/pages/Return";
 import { SettingsPage, You } from "@/pages/You";
 import { Onboarding } from "@/pages/Onboarding";
-import { Hadith } from "@/pages/Study";
+import { Hadith } from "@/pages/Hadith";
 import { Fluency } from "@/pages/Fluency";
 import { Qaida } from "@/pages/Qaida";
 import { SurahReader } from "@/pages/Surahs";

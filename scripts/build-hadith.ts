@@ -1,40 +1,49 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { gzipSync } from "node:zlib";
+import { canonicalHadithNumber, collectionIds, editionUrl, narrationGrade, type HadithCollection, type HadithNarration } from "../src/lib/hadith-catalogue.ts";
+import curated from "../docs/content/hadith-curated.json" with { type: "json" };
 
 const dir = new URL("../public/data/", import.meta.url);
 const local = process.env.AWWAB_CONTENT_DIR;
-const base = "https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions";
-const collections = ["abudawud", "ibnmajah", "nasai", "tirmidhi"] as const;
-const accepted = /^(?:sahih(?: hadith| - agreed upon| - bukhari and muslim| lighairihi)?|hasan(?: sahih| lighairihi)?)$/i;
-const weak = /daif|munkar|mawdu|shadh|mursal|batil|maqtu|muquf/i;
 
 interface RawHadith {
-  hadithnumber: number;
+  arabicnumber?: number | string;
   text: string;
   grades: { name: string; grade: string }[];
   reference: { book: number; hadith: number };
 }
 
-async function load(collection: string): Promise<{ hadiths: RawHadith[] }> {
+async function load(collection: HadithCollection): Promise<{ hadiths: RawHadith[] }> {
   if (local) return JSON.parse(await readFile(join(local, `eng-${collection}.json`), "utf8"));
-  const response = await fetch(`${base}/eng-${collection}.min.json`, { signal: AbortSignal.timeout(60000) });
+  const response = await fetch(editionUrl(collection), { signal: AbortSignal.timeout(60000) });
   if (!response.ok) throw new Error(`Hadith source ${collection} returned HTTP ${response.status}`);
   return response.json();
 }
 
-await mkdir(dir, { recursive: true });
-await Promise.all(collections.map(async collection => {
+const archives = await Promise.all(collectionIds.map(async collection => {
   const source = await load(collection);
-  const items = source.hadiths.flatMap(item => {
-    if (!item.text.trim() || item.grades.some(grade => weak.test(grade.grade))) return [];
-    const grade = item.grades.find(grade => accepted.test(grade.grade));
-    return grade ? [{
-      collection, number: item.hadithnumber, text: item.text, grade: grade.grade, grader: grade.name,
-      book: item.reference.book, inBook: item.reference.hadith,
-    }] : [];
+  const items = source.hadiths.flatMap((item): HadithNarration[] => {
+    const number = canonicalHadithNumber(collection, item.arabicnumber);
+    const grade = narrationGrade(collection, item.reference.book, item.grades);
+    if (!number || !grade || !item.text.trim()) return [];
+    return [{ collection, number, text: item.text.trim(), grade, book: item.reference.book, inBook: item.reference.hadith }];
   });
-  if (items.length < 100) throw new Error(`Only ${items.length} usable entries for ${collection}`);
-  await writeFile(new URL(`hadith-${collection}-v1.json`, dir), JSON.stringify({
-    version: 1, source: `${base}/eng-${collection}.min.json`, license: "Unlicense", items,
-  }));
+  if (items.length < 100 || new Set(items.map(item => item.number)).size !== items.length) {
+    throw new Error(`Invalid ${collection} edition with ${items.length} usable entries.`);
+  }
+  return { collection, items };
 }));
+
+const references = new Set(archives.flatMap(({ items }) => items.map(item => `${item.collection}:${item.number}`)));
+const curatedReferences = [...curated.items, ...curated.character].map(item => `${item.collection}:${item.number}`);
+const required = [...curatedReferences, ...curated.items.flatMap(item => item.alsoIn ? [item.alsoIn] : []), ...curated.riyad.map(item => item.original)];
+for (const reference of required) {
+  if (!references.has(reference)) throw new Error(`A curated narration is missing its offline edition: ${reference}`);
+}
+
+await mkdir(dir, { recursive: true });
+await Promise.all(archives.map(({ collection, items }) => writeFile(
+  new URL(`hadith-${collection}-v2.json.gz`, dir),
+  gzipSync(JSON.stringify({ version: 2, source: editionUrl(collection), license: "Unlicense", items }), { level: 9 }),
+)));

@@ -1,0 +1,90 @@
+.app-content:has(.hadith-page) { padding-top: calc(env(safe-area-inset-top) + 8px); }
+.hadith-page, .hadith-intro, .hadith-gallery, .hadith-list, .hadith-search {
+  display: grid;
+  align-content: start;
+  min-width: 0;
+}
+.hadith-page { max-width: 610px; margin-inline: auto; gap: 16px; }
+.hadith-intro { gap: 4px; }
+.hadith-intro h1 { font: var(--type-display-l); letter-spacing: var(--tracking-display-l); }
+.hadith-intro > .muted { margin-top: 12px; }
+.hadith-topics { gap: 6px; }
+.hadith-topics .chip { min-height: 30px; padding: 4px 12px; color: var(--c-ink); background: var(--c-surface); box-shadow: var(--shadow-card); }
+.hadith-topics .chip[aria-pressed="true"] { color: var(--c-on-primary); background: var(--control-primary); box-shadow: none; }
+.hadith-page .hadith-feature {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  color: var(--c-on-night);
+  background: var(--c-night);
+  box-shadow: none;
+}
+.hadith-feature-label { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.hadith-feature-label .caption { color: var(--c-on-night); }
+.hadith-feature-label small, .hadith-feature > .small { color: var(--c-night-muted); }
+.hadith-feature > .arabic-text { max-width: 100%; font: var(--type-arabic-l); }
+.hadith-feature .arabic-line { padding: 0 0 8px; gap: 10px; justify-content: start; }
+.hadith-feature .word-chip { min-width: 0; padding-inline: 2px; }
+.hadith-feature .word-chip:hover { background: var(--c-overlay-on-night); color: var(--c-on-night); }
+.hadith-feature .word-chip > span:first-child { text-decoration: none; }
+.hadith-feature .word-chip::after {
+  content: "";
+  width: 28px;
+  height: 2px;
+  margin-top: -5px;
+  border-radius: var(--r-pill);
+  background: var(--c-night-muted);
+}
+.hadith-feature h2 { margin: 0; font: var(--type-display-m); max-width: 13em; }
+.hadith-feature .action { min-height: 50px; font: var(--type-body-strong); }
+.hadith-feature .action.hadith-gold {
+  color: var(--c-on-primary);
+  background: color-mix(in srgb, var(--c-accent) var(--hadith-accent-strength, 82%), var(--c-night));
+}
+:root[data-mode="maktab"] .hadith-feature { --hadith-accent-strength: 56%; }
+.hadith-feature :focus-visible { outline-color: var(--c-on-night); }
+.hadith-gallery { gap: 12px; }
+.hadith-gallery-title h2 { font: var(--type-display-m); }
+.hadith-gallery-title span { color: var(--interactive-ink); font: var(--type-small); }
+.hadith-list { gap: 8px; }
+.hadith-list-item {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  color: var(--c-ink);
+  text-align: left;
+  background: var(--c-surface);
+}
+.hadith-list-item:hover { background: var(--c-primary-soft); }
+.hadith-item-source, .hadith-detail-meta { display: flex; align-items: center; justify-content: space-between; gap: 5px 8px; flex-wrap: wrap; }
+.hadith-item-source small { color: var(--c-ink-muted); }
+.hadith-grade {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  background: var(--c-primary-soft);
+  color: var(--interactive-ink);
+  font: var(--type-caption);
+  letter-spacing: var(--tracking-caption);
+  text-transform: uppercase;
+}
+.hadith-grade[data-grade="hasan"] { background: var(--c-tint); color: var(--c-ink); }
+.hadith-page .hadith-search-panel { display: grid; gap: 8px; background: var(--c-tint); }
+.hadith-search-panel h2 { margin: 0; font: var(--type-body-strong); }
+.hadith-search-panel > .action { min-height: 50px; }
+.hadith-search { gap: 12px; }
+.hadith-search-snippet { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+.hadith-detail.awwab-dialog { max-width: min(565px, calc(100% - 32px)); }
+.hadith-detail > .equal-row { align-items: stretch; }
+.hadith-detail-meta { justify-content: start; }
+.hadith-translation { display: grid; gap: 8px; overflow-wrap: anywhere; }
+.hadith-translation .arabic-text { display: inline-flex; max-width: 100%; vertical-align: baseline; margin-inline: 2px; }
+.hadith-translation .arabic-line { gap: 1px; padding: 0; }
+.hadith-translation .word-chip { min-height: 28px; min-width: 0; padding-inline: 2px; }
+@media (max-width: 359px) {
+  .hadith-topics .chip { padding-inline: 8px; }
+  .hadith-feature > .arabic-text { font-size: 27px; }
+}

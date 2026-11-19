@@ -1,5 +1,16 @@
 {
- "_note": "Seed of verified references (checked on sunnah.com, Nov 2026). Full text/grades: build-time import from fawazahmed0/hadith-api (Unlicense) — keep only ṣaḥīḥ/ḥasan. Display paraphrase only in UI summaries; show full translation on detail with collection + number + grade.",
+ "_note": "Curated paraphrases and cross-references checked against Sunnah.com in November 2026. Full translations and named gradings are imported at build time from the public Hadith API editions. The selected Riyad references point readers to the matching reports in the original collections.",
+ "featuredArabic": "إِنَّمَا الْأَعْمَالُ بِالنِّيَّاتِ",
+ "riyad": [
+  { "number": "1", "original": "muslim:1907a", "url": "https://sunnah.com/riyadussalihin:1", "summary": "The value of deeds depends on the intentions behind them.", "summaryBn": "কাজের মূল্য নির্ভর করে তার নিয়তের ওপর।" },
+  { "number": "14", "original": "muslim:2702b", "url": "https://sunnah.com/riyadussalihin:14", "summary": "The Prophet called people to repent and said that he repented a hundred times a day.", "summaryBn": "নবী মানুষকে তওবা করতে বলতেন এবং জানাতেন, তিনি দিনে একশ বার তওবা করেন।" },
+  { "number": "304", "original": "muslim:2625b", "url": "https://sunnah.com/riyadussalihin:304", "summary": "When making broth, add water and give some to your neighbours.", "summaryBn": "ঝোল রান্না করলে একটু বেশি পানি দিন এবং প্রতিবেশীদেরও কিছু দিন।" }
+ ],
+ "character": [
+  { "collection": "bukhari", "number": 3559, "grade": "Sahih", "theme": "character", "summary": "The best among you have the best manners and character.", "summaryBn": "তোমাদের মধ্যে উত্তম তারা, যাদের আচার-আচরণ ও চরিত্র সবচেয়ে সুন্দর।", "alsoIn": null, "url": "https://sunnah.com/bukhari:3559" },
+  { "collection": "bukhari", "number": 6018, "grade": "Sahih", "theme": "character", "summary": "Treat neighbours with care, honour guests, and speak good words or stay silent.", "summaryBn": "প্রতিবেশীর ক্ষতি করবেন না, অতিথিকে সম্মান করুন এবং ভালো কথা বলুন অথবা চুপ থাকুন।", "alsoIn": null, "url": "https://sunnah.com/bukhari:6018" },
+  { "collection": "bukhari", "number": 13, "grade": "Sahih", "theme": "character", "summary": "Wish for your fellow believer what you wish for yourself.", "summaryBn": "নিজের জন্য যা কামনা করেন, অন্য মুমিনের জন্যও তা-ই কামনা করুন।", "alsoIn": null, "url": "https://sunnah.com/bukhari:13" }
+ ],
  "items": [
   {
    "collection": "bukhari",
@@ -7,6 +18,7 @@
    "grade": "Sahih",
    "theme": "intentions",
    "summary": "Actions are by intentions.",
+   "summaryBn": "কাজের মূল্য নিয়তের ওপর নির্ভর করে।",
    "alsoIn": "muslim:1907a",
    "url": "https://sunnah.com/bukhari:1"
   },
@@ -16,6 +28,7 @@
    "grade": "Sahih",
    "theme": "consistency",
    "summary": "The most beloved deeds to Allah are the most consistent, even if small.",
+   "summaryBn": "অল্প হলেও নিয়মিত করা কাজ আল্লাহর কাছে প্রিয়।",
    "alsoIn": null,
    "url": "https://sunnah.com/bukhari:6464"
   },
@@ -24,7 +37,8 @@
    "number": 528,
    "grade": "Sahih",
    "theme": "prayer",
-   "summary": "The five prayers are like bathing in a river at your door five times a day.",
+   "summary": "The five prayers are like a river at your door that you bathe in five times a day. No dirt remains.",
+   "summaryBn": "পাঁচ ওয়াক্ত সালাতের উদাহরণ হলো দরজার সামনে নদীতে দিনে পাঁচবার গোসল করা। কোনো ময়লা থাকে না।",
    "alsoIn": null,
    "url": "https://sunnah.com/bukhari:528"
   },
@@ -34,17 +48,20 @@
    "grade": "Hasan",
    "theme": "mercy",
    "summary": "Ḥadīth qudsī: even if your sins reached the clouds, then you sought forgiveness, I would forgive you.",
+   "summaryBn": "পাপ মেঘ পর্যন্ত পৌঁছালেও তুমি ক্ষমা চাইলে আমি তোমাকে ক্ষমা করব।",
+   "qudsi": true,
    "alsoIn": null,
    "url": "https://sunnah.com/tirmidhi:3540"
   },
   {
    "collection": "muslim",
-   "number": "2702b",
+   "number": "2702a",
    "grade": "Sahih",
    "theme": "return",
    "summary": "He ﷺ sought Allah’s forgiveness a hundred times a day.",
+   "summaryBn": "নবী প্রতিদিন একশ বার আল্লাহর কাছে ক্ষমা চাইতেন।",
    "alsoIn": null,
-   "url": "https://sunnah.com/muslim:2702b"
+   "url": "https://sunnah.com/muslim:2702a"
   },
   {
    "collection": "bukhari",
@@ -52,6 +69,7 @@
    "grade": "Sahih",
    "theme": "return",
    "summary": "Sayyid al-Istighfār — the best way to ask forgiveness.",
+   "summaryBn": "সাইয়্যিদুল ইস্তিগফার · ক্ষমা চাওয়ার শ্রেষ্ঠ দোয়া।",
    "alsoIn": null,
    "url": "https://sunnah.com/bukhari:6306"
   },
@@ -61,6 +79,7 @@
    "grade": "Sahih",
    "theme": "prayer",
    "summary": "Unsure of 3 or 4 rakʿahs? Build on certainty and make two prostrations before salām.",
+   "summaryBn": "তিন না চার রাকাত নিয়ে সন্দেহ হলে নিশ্চিত সংখ্যাটি ধরে সালামের আগে দুটি সিজদা করুন।",
    "alsoIn": null,
    "url": "https://sunnah.com/muslim:571a"
   }

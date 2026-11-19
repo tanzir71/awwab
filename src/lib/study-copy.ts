@@ -145,7 +145,7 @@ export const studyMessages: MessageCatalog = {
   markFamiliar: { en: "Mark words familiar", bn: "শব্দগুলো চেনা হিসেবে রাখুন" },
   eachPrayerPosition: { en: "What you say in each position", bn: "সালাতের প্রতিটি অবস্থায় যা পড়েন" },
   prayerPositionNote: { en: "These are narrated forms. Scholars differ on when to say some phrases in congregational prayer.", bn: "এই পাঠগুলো বর্ণনায় এসেছে। জামাতে সালাতের সময় কিছু বাক্য কখন পড়তে হয়, তা নিয়ে আলেমদের মতভেদ আছে।" },
-  authenticHadith: { en: "Popular and authentic", bn: "বহুল পরিচিত প্রামাণ্য হাদিস" },
+  authenticHadith: { en: "Popular, and authentic", bn: "বহুল পরিচিত প্রামাণ্য হাদিস" },
   searchOffline: { en: "Search offline", bn: "অফলাইনে খুঁজুন" },
   hadithSearchHint: { en: "Collection, number or topic", bn: "সংকলন, নম্বর বা বিষয়" },
   englishHadithSearch: { en: "Search by reference number or English text.", bn: "হাদিস নম্বর বা ইংরেজি লেখা দিয়ে খুঁজুন।" },

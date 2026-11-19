@@ -5,6 +5,7 @@
 @import "./qaida-takhti.css";
 @import "./fluency.css";
 @import "./onboarding.css";
+@import "./hadith.css";
 
 @tailwind base;
 @tailwind components;
