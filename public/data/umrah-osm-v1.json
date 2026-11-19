@@ -1,0 +1,230 @@
+{
+  "version": 1,
+  "source": "https://api.openstreetmap.org/api/0.6/map.json?bbox=39.823,21.417,39.832,21.426",
+  "attribution": "© OpenStreetMap contributors",
+  "license": "https://www.openstreetmap.org/copyright",
+  "pins": [
+    {
+      "osm": "way/103914569",
+      "id": "kaaba",
+      "title": "Kaʿbah",
+      "zone": "mataf",
+      "point": {
+        "lat": 21.42251716,
+        "lon": 39.82619418
+      }
+    },
+    {
+      "osm": "node/4589923995",
+      "id": "safa",
+      "title": "Ṣafā",
+      "zone": "safa",
+      "point": {
+        "lat": 21.4217996,
+        "lon": 39.8274307
+      }
+    },
+    {
+      "osm": "node/4589923996",
+      "id": "marwah",
+      "title": "Marwah",
+      "zone": "marwah",
+      "point": {
+        "lat": 21.4251754,
+        "lon": 39.8271276
+      }
+    },
+    {
+      "osm": "node/4582731080",
+      "id": "haram",
+      "title": "Al Haram",
+      "zone": "haram",
+      "point": {
+        "lat": 21.4240767,
+        "lon": 39.8258948
+      }
+    },
+    {
+      "osm": "node/7727447429",
+      "id": "zamzam",
+      "title": "Zamzam filling point",
+      "point": {
+        "lat": 21.4246975,
+        "lon": 39.8300062
+      }
+    },
+    {
+      "osm": "node/6289846144",
+      "id": "wudu-women",
+      "title": "Women’s wudu · ground floor",
+      "point": {
+        "lat": 21.4233097,
+        "lon": 39.8264562
+      }
+    },
+    {
+      "osm": "node/6289850856",
+      "id": "wudu-men",
+      "title": "Men’s wudu · ground floor",
+      "point": {
+        "lat": 21.4232489,
+        "lon": 39.8264454
+      }
+    },
+    {
+      "osm": "node/5868939385",
+      "id": "tawaf-line",
+      "title": "Ṭawāf start line",
+      "point": {
+        "lat": 21.4222904,
+        "lon": 39.8268401
+      }
+    },
+    {
+      "osm": "node/1199442714",
+      "id": "gate-1199442714",
+      "title": "Quraish Gate",
+      "point": {
+        "lat": 21.4254428,
+        "lon": 39.8269231
+      }
+    },
+    {
+      "osm": "node/3210622327",
+      "id": "gate-3210622327",
+      "title": "King Fahd Gate - 79",
+      "point": {
+        "lat": 21.421232,
+        "lon": 39.8240461
+      }
+    },
+    {
+      "osm": "node/4318154227",
+      "id": "gate-4318154227",
+      "title": "Fateh Gate",
+      "point": {
+        "lat": 21.4240151,
+        "lon": 39.8265147
+      }
+    },
+    {
+      "osm": "node/4318154228",
+      "id": "gate-4318154228",
+      "title": "Umra Gate 40",
+      "point": {
+        "lat": 21.4228378,
+        "lon": 39.8245696
+      }
+    },
+    {
+      "osm": "node/4562391840",
+      "id": "gate-4562391840",
+      "title": "Bab Al Marwah 25",
+      "point": {
+        "lat": 21.4253183,
+        "lon": 39.8273872
+      }
+    },
+    {
+      "osm": "node/4755914231",
+      "id": "gate-4755914231",
+      "title": "King Abdul Aziz Gate 1",
+      "point": {
+        "lat": 21.4210447,
+        "lon": 39.8258406
+      }
+    },
+    {
+      "osm": "node/5858896077",
+      "id": "gate-5858896077",
+      "title": "Gate 17",
+      "arabic": "باب علي",
+      "point": {
+        "lat": 21.4229524,
+        "lon": 39.8275792
+      }
+    },
+    {
+      "osm": "node/5858929758",
+      "id": "gate-5858929758",
+      "title": "Bab al-Hudaybiyah",
+      "point": {
+        "lat": 21.4233538,
+        "lon": 39.824743
+      }
+    },
+    {
+      "osm": "node/5858933516",
+      "id": "gate-5858933516",
+      "title": "Bab Ajyad - Gate 3",
+      "point": {
+        "lat": 21.4210652,
+        "lon": 39.8264059
+      }
+    },
+    {
+      "osm": "node/6284017920",
+      "id": "gate-6284017920",
+      "title": "Gate 21",
+      "point": {
+        "lat": 21.4244632,
+        "lon": 39.827387
+      }
+    },
+    {
+      "osm": "node/6284838118",
+      "id": "gate-6284838118",
+      "title": "22 Bani Shaibah Gate",
+      "point": {
+        "lat": 21.4246888,
+        "lon": 39.8273569
+      }
+    },
+    {
+      "osm": "node/6297046470",
+      "id": "gate-6297046470",
+      "title": "Al Quds Gate 35",
+      "point": {
+        "lat": 21.4238175,
+        "lon": 39.8252692
+      }
+    },
+    {
+      "osm": "node/7728594724",
+      "id": "gate-7728594724",
+      "title": "Gate 16",
+      "arabic": "باب سلم الأرقم الكهربائي",
+      "point": {
+        "lat": 21.4224983,
+        "lon": 39.8277405
+      }
+    },
+    {
+      "osm": "node/8715775972",
+      "id": "gate-8715775972",
+      "title": "Bab Al Marwah 25",
+      "point": {
+        "lat": 21.4253089,
+        "lon": 39.8273881
+      }
+    },
+    {
+      "osm": "node/8756153753",
+      "id": "gate-8756153753",
+      "title": "Al Nabi Gate 14",
+      "point": {
+        "lat": 21.4222008,
+        "lon": 39.8276781
+      }
+    },
+    {
+      "osm": "way/958867174",
+      "id": "clock-tower",
+      "title": "Clock Tower",
+      "point": {
+        "lat": 21.418144380952384,
+        "lon": 39.82554935238096
+      }
+    }
+  ]
+}

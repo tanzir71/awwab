@@ -1,46 +1,39 @@
-# Prayer Quest
+# Awwab
 
-A small installable web app for tracking the five daily prayers. It shows today's prayer times for your location, lets you tick off each prayer as you complete it, and turns your streak into a mosque that is gradually built.
+Awwab is an offline-first app for returning to regular prayer and relearning Quranic Arabic. It stores prayer logs, learning progress, and trip details in IndexedDB on the device. There are no accounts or analytics.
 
-## Features
+## Run locally
 
-- Today's times for Fajr, Dhuhr, Asr, Maghrib and Isha, fetched from the Aladhan API (`api.aladhan.com`, calculation method 2) for your coordinates.
-- Location from the browser's geolocation, falling back to an IP lookup (`ipapi.co`), then to Mecca if both fail.
-- Each prayer lists its rakat breakdown (Sunnah, Fard, Nafl, Witr) and order.
-- Mark prayers complete or undo; completions are stored in the browser's `localStorage` and nothing is sent to a server.
-- Statistics tab: current streak, best streak, completion rate, total prayers completed and active days.
-- A mosque illustration that advances through stages (foundation, walls, dome, minarets, complete) as your streak grows.
-- PWA pieces: web manifest, service worker for the app shell, and an install prompt for mobile browsers.
+Use Node.js 22 or later and npm.
 
-## Tech stack
-
-Vite, React 18 and TypeScript, Tailwind CSS, shadcn/ui (Radix UI), Lucide icons. The project was scaffolded with Lovable.
-
-## Getting started
-
-Prerequisites: Node.js and npm.
-
-```bash
-npm install
+```sh
+npm ci
 npm run dev
+npm run lint
+npm run typecheck
+npm test
+npm run build
+npm run preview
 ```
 
-Open the URL Vite prints. Allow location access for times at your position; prayer times require network access.
+The landing page is at `/awwab/`. The installable app is at `/awwab/app/`. Use the production preview to test offline behavior. Open the app once online and wait for its service worker to activate, then reload with the network disabled.
 
-## Scripts
+## GitHub Pages
 
-| Script | What it does |
-|---|---|
-| `npm run dev` | Start the Vite dev server |
-| `npm run build` | Production build |
-| `npm run build:dev` | Build in development mode |
-| `npm run preview` | Preview the production build |
-| `npm run lint` | Run ESLint |
+The Pages workflow checks each pull request. A build from `main` publishes the `dist` artifact when the repository uses GitHub Actions as its Pages source. The app uses hash routes inside `/awwab/app/`, and its service worker is scoped to that directory.
 
-## Project structure
+## Content and map packs
 
-- `src/pages/Index.tsx` - main screen with the Today and Statistics tabs.
-- `src/lib/prayerServices.ts` - prayer-time fetching and rakat data.
-- `src/lib/storageService.ts` - completion tracking and streak statistics in `localStorage`.
-- `src/components/` - prayer timeline, mosque progress, install prompt, footer.
-- `public/` - manifest, service worker and icons.
+The repository includes versioned Quran, hadith, morphology, and map assets. Normal installs and builds use the checked-in assets.
+
+- `npm run content` refreshes the supported surahs from Tanzil, Pickthall, and DigitalKhatt.
+- `npm run hadith` refreshes Hadith API editions and retains explicitly graded entries without conflicting weak grades.
+- `npm run morphology` prepares the verbatim Quranic Arabic Corpus 0.4 file for offline use.
+- `npm run recitation` refreshes opt-in murattal audio packs from Aaqib Azeez’s CC0 recordings.
+- `node scripts/build-umrah-pins.mjs` refreshes selected Haram features from OpenStreetMap.
+- `pwsh -File scripts/build-umrah-maps.ps1` uses the Protomaps CLI to prepare and verify the Makkah and Madinah packs.
+- `AWWAB_CONTENT_DIR` can point the content refresh scripts to a directory of existing source files.
+
+The app shows attributions in **You → Sources and licences**. Asset terms are in [public/data/licences](public/data/licences). The product and architecture are in [docs/SPEC.md](docs/SPEC.md).
+
+Before public launch, complete the religious content review in SPEC §12. Awwab includes downloadable whole-surah recordings. You can also import recordings for individual āyāt, Qaida drills, or Umrah guidance on your device.

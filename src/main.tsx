@@ -1,26 +1,14 @@
+import { createRoot } from "react-dom/client";
+import App from "./App";
+import { listenForInstallPrompt } from "./lib/installPrompt";
+import "./fonts-app.css";
+import "./index.css";
 
-import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
-import './index.css'
-
-// Register service worker for PWA
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js')
-      .then(registration => {
-        console.log('Service Worker registered with scope:', registration.scope);
-      })
-      .catch(error => {
-        console.error('Service Worker registration failed:', error);
-      });
+listenForInstallPrompt();
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  navigator.serviceWorker.register(`${import.meta.env.BASE_URL}app/sw.js`).catch(error => {
+    console.error("Awwab could not prepare offline access.", error);
   });
-  
-  // Check for service worker updates
-  setInterval(() => {
-    navigator.serviceWorker.getRegistration().then(registration => {
-      if (registration) registration.update();
-    });
-  }, 60 * 60 * 1000); // Check for updates every hour
 }
 
 createRoot(document.getElementById("root")!).render(<App />);

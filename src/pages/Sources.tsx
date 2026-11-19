@@ -1,0 +1,22 @@
+import { SectionNav } from "@/components/Surface";
+
+const sources = [
+  ["Tanzil Quran Text", "Uthmani Quran text, © Tanzil Project, CC BY 3.0. The distributed verses are preserved verbatim.", "https://tanzil.net/docs/text_license"],
+  ["M. M. Pickthall", "The Meaning of the Glorious Koran. English renderings from Tanzil’s translation archive.", "https://tanzil.net/trans/"],
+  ["DigitalKhatt", "IndoPak 15-line Quran text (MIT), IndoPak and Madina fonts (SIL Open Font License). © Amine Anane and Tarteel Inc.", "https://digitalkhatt.org/"],
+  ["Quranic Arabic Corpus", "Version 0.4 morphology, © 2011 Kais Dukes, GNU GPL. The original source file is compressed without changes and read locally.", "https://corpus.quran.com/download/"],
+  ["Hadith API", "Distributed as public-domain data under the Unlicense. Individual narrations show their specific collection, reference and grade.", "https://github.com/fawazahmed0/hadith-api"],
+  ["Adhan JS", "Prayer times are computed on this device with Adhan, MIT.", "https://github.com/batoulapps/adhan-js"],
+  ["OpenStreetMap and Protomaps", "Haram points come from OpenStreetMap. The Makkah and Madinah map packs are Protomaps extracts. © OpenStreetMap contributors, Open Database License.", "https://www.openstreetmap.org/copyright"],
+  ["Fontsource", "Noto Sans, Noto Serif, Noto Sans Arabic, Noto Sans Bengali, Baloo 2 and Nunito are licensed under the SIL Open Font License.", "https://fontsource.org/"],
+];
+
+export function Sources() {
+  return <div className="stack">
+    <SectionNav title="Sources and licences" back="/you" />
+    {sources.map(([name, description, url]) => <section className="card compact-stack" key={name}>
+      <h2>{name}</h2><p>{description}</p><a className="text-button" href={url}>Visit {name}</a>
+    </section>)}
+    <p className="card tint">Awwab is a learning and tracking aid. Ask a qualified scholar about religious rulings for your situation.</p>
+  </div>;
+}

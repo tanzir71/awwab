@@ -1,0 +1,121 @@
+{
+ "_note": "Hanafi structure (default for Bangladesh). Make madhab configurable; other schools differ (e.g. Witr). REVIEW WITH A SCHOLAR. Fixes vs current code: Dhuhr order is 4S → 4F → 2S → 2N (code had 2N before 2S); Isha includes 2 Sunnah muʾakkadah after Fard (code omitted them).",
+ "madhab": "hanafi",
+ "prayers": {
+  "fajr": [
+   {
+    "type": "sunnah",
+    "emphasis": "muakkadah",
+    "count": 2
+   },
+   {
+    "type": "fard",
+    "count": 2,
+    "recitation": "aloud"
+   }
+  ],
+  "dhuhr": [
+   {
+    "type": "sunnah",
+    "emphasis": "muakkadah",
+    "count": 4
+   },
+   {
+    "type": "fard",
+    "count": 4,
+    "recitation": "silent"
+   },
+   {
+    "type": "sunnah",
+    "emphasis": "muakkadah",
+    "count": 2
+   },
+   {
+    "type": "nafl",
+    "count": 2
+   }
+  ],
+  "asr": [
+   {
+    "type": "sunnah",
+    "emphasis": "ghayr-muakkadah",
+    "count": 4
+   },
+   {
+    "type": "fard",
+    "count": 4,
+    "recitation": "silent"
+   }
+  ],
+  "maghrib": [
+   {
+    "type": "fard",
+    "count": 3,
+    "recitation": "aloud first two"
+   },
+   {
+    "type": "sunnah",
+    "emphasis": "muakkadah",
+    "count": 2
+   },
+   {
+    "type": "nafl",
+    "count": 2
+   }
+  ],
+  "isha": [
+   {
+    "type": "sunnah",
+    "emphasis": "ghayr-muakkadah",
+    "count": 4
+   },
+   {
+    "type": "fard",
+    "count": 4,
+    "recitation": "aloud first two"
+   },
+   {
+    "type": "sunnah",
+    "emphasis": "muakkadah",
+    "count": 2
+   },
+   {
+    "type": "nafl",
+    "count": 2
+   },
+   {
+    "type": "witr",
+    "count": 3,
+    "note": "wājib in Hanafi"
+   },
+   {
+    "type": "nafl",
+    "count": 2
+   }
+  ],
+  "jumuah": [
+   {
+    "type": "sunnah",
+    "count": 4
+   },
+   {
+    "type": "fard",
+    "count": 2,
+    "recitation": "aloud"
+   },
+   {
+    "type": "sunnah",
+    "count": 4
+   },
+   {
+    "type": "sunnah",
+    "count": 2
+   },
+   {
+    "type": "nafl",
+    "count": 2
+   }
+  ]
+ },
+ "fardRakahGuide": "Rakʿah 1–2: Al-Fātiḥa + a short surah; first sitting after rakʿah 2 (Tashahhud) in 3/4-rakʿah prayers; rakʿah 3–4: Al-Fātiḥa only; final sitting: Tashahhud → Ṣalawāt → duʿāʾ → Salām."
+}

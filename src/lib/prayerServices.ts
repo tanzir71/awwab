@@ -1,122 +1,89 @@
+import { CalculationMethod, Coordinates, Madhab, PrayerTimes } from "adhan";
+import { addDays, dateKey } from "./dates";
+import { type Prayer, type PrayerLog, prayerIds, prayerNames } from "../types/Prayer";
+import structure from "../../docs/content/rakat-structure.json";
 
-import { Prayer } from "@/types/Prayer";
-import { isPrayerCompletedToday } from "./storageService";
+export type PrayerMethod = keyof typeof CalculationMethod;
+export type AsrSchool = "hanafi" | "shafi";
 
-export const fetchPrayerTimes = async (latitude: number, longitude: number): Promise<Prayer[]> => {
-  try {
-    // Get the current date
-    const date = new Date();
-    const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
-    
-    // Fetch prayer times from the API
-    const response = await fetch(
-      `https://api.aladhan.com/v1/timings/${formattedDate}?latitude=${latitude}&longitude=${longitude}&method=2`
-    );
-    
-    if (!response.ok) {
-      throw new Error("Failed to fetch prayer times");
-    }
-    
-    const data = await response.json();
-    const timings = data.data.timings;
-    
-    // Create prayer objects with accurate rakats info including Sunnah and Fard
-    const prayers: Prayer[] = [
-      { 
-        name: "Fajr", 
-        time: timings.Fajr, 
-        rakats: {
-          sunnah: 2,
-          fard: 2,
-          total: 4
-        },
-        prayerOrder: "2 Sunnah → 2 Fard"
-      },
-      { 
-        name: "Dhuhr", 
-        time: timings.Dhuhr, 
-        rakats: {
-          sunnah: 4,
-          fard: 4,
-          nafl: 2,
-          sunnah2: 2,
-          total: 12
-        },
-        prayerOrder: "4 Sunnah → 4 Fard → 2 Nafl → 2 Sunnah"
-      },
-      { 
-        name: "Asr", 
-        time: timings.Asr, 
-        rakats: {
-          sunnah: 4,
-          fard: 4,
-          total: 8
-        },
-        prayerOrder: "4 Sunnah → 4 Fard"
-      },
-      { 
-        name: "Maghrib", 
-        time: timings.Maghrib, 
-        rakats: {
-          fard: 3,
-          sunnah: 2,
-          nafl: 2,
-          total: 7
-        },
-        prayerOrder: "3 Fard → 2 Sunnah → 2 Nafl"
-      },
-      { 
-        name: "Isha", 
-        time: timings.Isha, 
-        rakats: {
-          sunnah: 4,
-          fard: 4,
-          nafl: 2,
-          witr: 3,
-          total: 13
-        },
-        prayerOrder: "4 Sunnah → 4 Fard → 2 Nafl → 3 Witr"
-      }
-    ];
-    
-    // Determine which prayers are completed and which is next
-    const currentTime = new Date();
-    let hasSetNextPrayer = false;
-    
-    return prayers.map(prayer => {
-      const prayerTime = convertTo24Hour(prayer.time);
-      const prayerDateTime = new Date();
-      const [hours, minutes] = prayerTime.split(":").map(Number);
-      prayerDateTime.setHours(hours, minutes, 0);
-      
-      // Check if completed from local storage
-      const isCompletedToday = isPrayerCompletedToday(prayer.name);
-      
-      // Only mark as completed based on time if not manually completed
-      const isCompleted = isCompletedToday || currentTime > prayerDateTime;
-      
-      // Mark the next upcoming prayer
-      let isNext = false;
-      if (!isCompleted && !hasSetNextPrayer) {
-        isNext = true;
-        hasSetNextPrayer = true;
-      }
-      
-      return {
-        ...prayer,
-        isCompleted,
-        isNext
-      };
-    });
-  } catch (error) {
-    console.error("Error in fetchPrayerTimes:", error);
-    throw error;
+export interface City {
+  name: string;
+  latitude: number;
+  longitude: number;
+  timeZone: string;
+}
+
+export const cities: City[] = [
+  { name: "Dhaka", latitude: 23.8103, longitude: 90.4125, timeZone: "Asia/Dhaka" },
+  { name: "Chattogram", latitude: 22.3569, longitude: 91.7832, timeZone: "Asia/Dhaka" },
+  { name: "Sylhet", latitude: 24.8949, longitude: 91.8687, timeZone: "Asia/Dhaka" },
+  { name: "Rajshahi", latitude: 24.3745, longitude: 88.6042, timeZone: "Asia/Dhaka" },
+  { name: "Khulna", latitude: 22.8456, longitude: 89.5403, timeZone: "Asia/Dhaka" },
+  { name: "Makkah", latitude: 21.3891, longitude: 39.8579, timeZone: "Asia/Riyadh" },
+  { name: "Madinah", latitude: 24.4672, longitude: 39.6111, timeZone: "Asia/Riyadh" },
+  { name: "Karachi", latitude: 24.8607, longitude: 67.0011, timeZone: "Asia/Karachi" },
+  { name: "Kolkata", latitude: 22.5726, longitude: 88.3639, timeZone: "Asia/Kolkata" },
+  { name: "London", latitude: 51.5072, longitude: -0.1276, timeZone: "Europe/London" },
+  { name: "New York", latitude: 40.7128, longitude: -74.006, timeZone: "America/New_York" },
+  { name: "Sydney", latitude: -33.8688, longitude: 151.2093, timeZone: "Australia/Sydney" },
+];
+
+export const methodNames: Record<PrayerMethod, string> = {
+  MuslimWorldLeague: "Muslim World League",
+  Egyptian: "Egyptian General Authority",
+  Karachi: "Karachi",
+  UmmAlQura: "Umm al-Qura",
+  Dubai: "Dubai",
+  MoonsightingCommittee: "Moonsighting Committee",
+  NorthAmerica: "ISNA",
+  Kuwait: "Kuwait",
+  Qatar: "Qatar",
+  Singapore: "Singapore",
+  Tehran: "Tehran",
+  Turkey: "Türkiye",
+  Other: "Other (18° Fajr, 18° Isha)",
+};
+
+export const rakatNames: Record<string, string> = {
+  sunnah: "Sunnah", fard: "Fard", nafl: "Nafl", witr: "Witr",
+};
+
+export function schedule(day: string, city: City, method: PrayerMethod, school: AsrSchool) {
+  const [year, month, date] = day.split("-").map(Number);
+  const params = CalculationMethod[method]();
+  params.madhab = school === "hanafi" ? Madhab.Hanafi : Madhab.Shafi;
+  if (method === "Other") {
+    params.fajrAngle = 18;
+    params.ishaAngle = 18;
   }
-};
+  return new PrayerTimes(new Coordinates(city.latitude, city.longitude), new Date(year, month - 1, date, 12), params);
+}
 
-// Helper function to convert prayer times to 24-hour format
-const convertTo24Hour = (timeStr: string): string => {
-  // The API returns times in 24-hour format (HH:MM), but we'll keep this helper
-  // in case we need to handle different formats in the future
-  return timeStr;
-};
+export function prayerDay(day: string, city: City, method: PrayerMethod, school: AsrSchool, now: Date, logs: PrayerLog[] = []): Prayer[] {
+  const times = schedule(day, city, method, school);
+  const nextFajr = schedule(addDays(day, 1), city, method, school).fajr;
+  const ends = [times.sunrise, times.asr, times.maghrib, times.isha, nextFajr];
+  return prayerIds.map((id, index) => {
+    const starts = times[id];
+    const end = ends[index];
+    const log = logs.find(item => item.date === day && item.prayer === id);
+    return {
+      id, name: prayerNames[id], date: day, starts, ends: end,
+      status: log?.status ?? (!Number.isFinite(starts.valueOf()) || !Number.isFinite(end.valueOf()) || now < starts
+        ? "upcoming" : now >= end ? "missed" : "now"),
+      rakats: structure.prayers[id],
+    };
+  });
+}
+
+export function currentPrayerSchedule(city: City, method: PrayerMethod, school: AsrSchool, now: Date, logs: PrayerLog[] = []) {
+  const day = dateKey(now, city.timeZone);
+  const prayers = prayerDay(day, city, method, school, now, logs);
+  const yesterdayIsha = now < prayers[0].starts
+    ? prayerDay(addDays(day, -1), city, method, school, now, logs)[4]
+    : undefined;
+  const current = [yesterdayIsha, ...prayers].find(prayer => prayer && now >= prayer.starts && now < prayer.ends);
+  const next = prayers.find(prayer => now < prayer.starts)
+    ?? prayerDay(addDays(day, 1), city, method, school, now, logs)[0];
+  return { day, prayers, current, next };
+}

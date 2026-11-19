@@ -1,0 +1,347 @@
+{
+ "_note": "Order for Learn → Surahs for salah. Al-Fātiḥa first (recited every rakʿah), then Juz ʿAmma by word count ascending. Word count = whitespace-separated tokens of the Uthmani text (quran-json 3.1.2 / QuranEnc). Text & translations are NOT included here: fetch at build time from a licensed source (see SPEC §7).",
+ "surahs": [
+  {
+   "number": 1,
+   "nameArabic": "الفاتحة",
+   "transliteration": "Al-Fatihah",
+   "english": "The Opener",
+   "ayahs": 7,
+   "words": 29,
+   "order": 1
+  },
+  {
+   "number": 108,
+   "nameArabic": "الكوثر",
+   "transliteration": "Al-Kawthar",
+   "english": "The Abundance",
+   "ayahs": 3,
+   "words": 10,
+   "order": 2
+  },
+  {
+   "number": 103,
+   "nameArabic": "العصر",
+   "transliteration": "Al-'Asr",
+   "english": "The Declining Day",
+   "ayahs": 3,
+   "words": 14,
+   "order": 3
+  },
+  {
+   "number": 112,
+   "nameArabic": "الإخلاص",
+   "transliteration": "Al-Ikhlas",
+   "english": "The Sincerity",
+   "ayahs": 4,
+   "words": 15,
+   "order": 4
+  },
+  {
+   "number": 106,
+   "nameArabic": "قريش",
+   "transliteration": "Quraysh",
+   "english": "Quraysh",
+   "ayahs": 4,
+   "words": 17,
+   "order": 5
+  },
+  {
+   "number": 110,
+   "nameArabic": "النصر",
+   "transliteration": "An-Nasr",
+   "english": "The Divine Support",
+   "ayahs": 3,
+   "words": 19,
+   "order": 6
+  },
+  {
+   "number": 114,
+   "nameArabic": "الناس",
+   "transliteration": "An-Nas",
+   "english": "Mankind",
+   "ayahs": 6,
+   "words": 20,
+   "order": 7
+  },
+  {
+   "number": 105,
+   "nameArabic": "الفيل",
+   "transliteration": "Al-Fil",
+   "english": "The Elephant",
+   "ayahs": 5,
+   "words": 23,
+   "order": 8
+  },
+  {
+   "number": 111,
+   "nameArabic": "المسد",
+   "transliteration": "Al-Masad",
+   "english": "The Palm Fiber",
+   "ayahs": 5,
+   "words": 23,
+   "order": 9
+  },
+  {
+   "number": 113,
+   "nameArabic": "الفلق",
+   "transliteration": "Al-Falaq",
+   "english": "The Daybreak",
+   "ayahs": 5,
+   "words": 23,
+   "order": 10
+  },
+  {
+   "number": 107,
+   "nameArabic": "الماعون",
+   "transliteration": "Al-Ma'un",
+   "english": "The Small kindnesses",
+   "ayahs": 7,
+   "words": 25,
+   "order": 11
+  },
+  {
+   "number": 109,
+   "nameArabic": "الكافرون",
+   "transliteration": "Al-Kafirun",
+   "english": "The Disbelievers",
+   "ayahs": 6,
+   "words": 26,
+   "order": 12
+  },
+  {
+   "number": 94,
+   "nameArabic": "الشرح",
+   "transliteration": "Ash-Sharh",
+   "english": "The Relief",
+   "ayahs": 8,
+   "words": 27,
+   "order": 13
+  },
+  {
+   "number": 102,
+   "nameArabic": "التكاثر",
+   "transliteration": "At-Takathur",
+   "english": "The Rivalry in world increase",
+   "ayahs": 8,
+   "words": 28,
+   "order": 14
+  },
+  {
+   "number": 97,
+   "nameArabic": "القدر",
+   "transliteration": "Al-Qadr",
+   "english": "The Power",
+   "ayahs": 5,
+   "words": 30,
+   "order": 15
+  },
+  {
+   "number": 104,
+   "nameArabic": "الهمزة",
+   "transliteration": "Al-Humazah",
+   "english": "The Traducer",
+   "ayahs": 9,
+   "words": 33,
+   "order": 16
+  },
+  {
+   "number": 95,
+   "nameArabic": "التين",
+   "transliteration": "At-Tin",
+   "english": "The Fig",
+   "ayahs": 8,
+   "words": 34,
+   "order": 17
+  },
+  {
+   "number": 99,
+   "nameArabic": "الزلزلة",
+   "transliteration": "Az-Zalzalah",
+   "english": "The Earthquake",
+   "ayahs": 8,
+   "words": 36,
+   "order": 18
+  },
+  {
+   "number": 101,
+   "nameArabic": "القارعة",
+   "transliteration": "Al-Qari'ah",
+   "english": "The Calamity",
+   "ayahs": 11,
+   "words": 36,
+   "order": 19
+  },
+  {
+   "number": 93,
+   "nameArabic": "الضحى",
+   "transliteration": "Ad-Duhaa",
+   "english": "The Morning Hours",
+   "ayahs": 11,
+   "words": 40,
+   "order": 20
+  },
+  {
+   "number": 100,
+   "nameArabic": "العاديات",
+   "transliteration": "Al-'Adiyat",
+   "english": "The Courser",
+   "ayahs": 11,
+   "words": 40,
+   "order": 21
+  },
+  {
+   "number": 91,
+   "nameArabic": "الشمس",
+   "transliteration": "Ash-Shams",
+   "english": "The Sun",
+   "ayahs": 15,
+   "words": 54,
+   "order": 22
+  },
+  {
+   "number": 86,
+   "nameArabic": "الطارق",
+   "transliteration": "At-Tariq",
+   "english": "The Nightcommer",
+   "ayahs": 17,
+   "words": 61,
+   "order": 23
+  },
+  {
+   "number": 92,
+   "nameArabic": "الليل",
+   "transliteration": "Al-Layl",
+   "english": "The Night",
+   "ayahs": 21,
+   "words": 71,
+   "order": 24
+  },
+  {
+   "number": 87,
+   "nameArabic": "الأعلى",
+   "transliteration": "Al-A'la",
+   "english": "The Most High",
+   "ayahs": 19,
+   "words": 72,
+   "order": 25
+  },
+  {
+   "number": 96,
+   "nameArabic": "العلق",
+   "transliteration": "Al-'Alaq",
+   "english": "The Clot",
+   "ayahs": 19,
+   "words": 72,
+   "order": 26
+  },
+  {
+   "number": 82,
+   "nameArabic": "الإنفطار",
+   "transliteration": "Al-Infitar",
+   "english": "The Cleaving",
+   "ayahs": 19,
+   "words": 80,
+   "order": 27
+  },
+  {
+   "number": 90,
+   "nameArabic": "البلد",
+   "transliteration": "Al-Balad",
+   "english": "The City",
+   "ayahs": 20,
+   "words": 82,
+   "order": 28
+  },
+  {
+   "number": 88,
+   "nameArabic": "الغاشية",
+   "transliteration": "Al-Ghashiyah",
+   "english": "The Overwhelming",
+   "ayahs": 26,
+   "words": 92,
+   "order": 29
+  },
+  {
+   "number": 98,
+   "nameArabic": "البينة",
+   "transliteration": "Al-Bayyinah",
+   "english": "The Clear Proof",
+   "ayahs": 8,
+   "words": 94,
+   "order": 30
+  },
+  {
+   "number": 81,
+   "nameArabic": "التكوير",
+   "transliteration": "At-Takwir",
+   "english": "The Overthrowing",
+   "ayahs": 29,
+   "words": 104,
+   "order": 31
+  },
+  {
+   "number": 84,
+   "nameArabic": "الإنشقاق",
+   "transliteration": "Al-Inshiqaq",
+   "english": "The Sundering",
+   "ayahs": 25,
+   "words": 107,
+   "order": 32
+  },
+  {
+   "number": 85,
+   "nameArabic": "البروج",
+   "transliteration": "Al-Buruj",
+   "english": "The Mansions of the Stars",
+   "ayahs": 22,
+   "words": 109,
+   "order": 33
+  },
+  {
+   "number": 80,
+   "nameArabic": "عبس",
+   "transliteration": "'Abasa",
+   "english": "He Frowned",
+   "ayahs": 42,
+   "words": 133,
+   "order": 34
+  },
+  {
+   "number": 89,
+   "nameArabic": "الفجر",
+   "transliteration": "Al-Fajr",
+   "english": "The Dawn",
+   "ayahs": 30,
+   "words": 137,
+   "order": 35
+  },
+  {
+   "number": 83,
+   "nameArabic": "المطففين",
+   "transliteration": "Al-Mutaffifin",
+   "english": "The Defrauding",
+   "ayahs": 36,
+   "words": 169,
+   "order": 36
+  },
+  {
+   "number": 78,
+   "nameArabic": "النبإ",
+   "transliteration": "An-Naba",
+   "english": "The Tidings",
+   "ayahs": 40,
+   "words": 173,
+   "order": 37
+  },
+  {
+   "number": 79,
+   "nameArabic": "النازعات",
+   "transliteration": "An-Nazi'at",
+   "english": "Those who drag forth",
+   "ayahs": 46,
+   "words": 179,
+   "order": 38
+  }
+ ]
+}

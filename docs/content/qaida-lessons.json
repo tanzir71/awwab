@@ -1,0 +1,107 @@
+{
+ "_note": "17-lesson sequence following the common Noorani Qaida order. Exact lesson boundaries differ between editions — VERIFY against the Bangla Noorani Qaida the user learned from (and Nadia Ampara) before finalising. Each lesson = 3–5 min micro-sessions; recall check (A03) can skip lessons.",
+ "lessons": [
+  {
+   "n": 1,
+   "title": "Single letters",
+   "traditional": "Ḥurūf mufradāt",
+   "focus": "28 letters, makhārij, letter names; Bangla names optional"
+  },
+  {
+   "n": 2,
+   "title": "Joined letters",
+   "traditional": "Ḥurūf murakkabāt",
+   "focus": "start/middle/end forms; non-joining letters"
+  },
+  {
+   "n": 3,
+   "title": "Disjoined letters",
+   "traditional": "Ḥurūf muqaṭṭaʿāt",
+   "focus": "الم ، يس … read letter by letter"
+  },
+  {
+   "n": 4,
+   "title": "Harakat",
+   "traditional": "Ḥarakāt",
+   "focus": "fatha/zabar, kasra/zer, ḍamma/pesh"
+  },
+  {
+   "n": 5,
+   "title": "Tanwīn",
+   "traditional": "Tanwīn",
+   "focus": "do zabar, do zer, do pesh"
+  },
+  {
+   "n": 6,
+   "title": "Practice: harakat + tanwīn",
+   "traditional": "Mashq",
+   "focus": "short words"
+  },
+  {
+   "n": 7,
+   "title": "Standing harakat",
+   "traditional": "Khaṛī ḥarakāt",
+   "focus": "khaṛā zabar, khaṛā zer, ulṭā pesh"
+  },
+  {
+   "n": 8,
+   "title": "Madd & līn letters",
+   "traditional": "Ḥurūf madd o līn",
+   "focus": "ا و ي stretching; līn softening"
+  },
+  {
+   "n": 9,
+   "title": "Practice: madd, līn, tanwīn",
+   "traditional": "Mashq",
+   "focus": "words from Juz ʿAmma"
+  },
+  {
+   "n": 10,
+   "title": "Sukūn / jazm",
+   "traditional": "Sukūn",
+   "focus": "closed syllables"
+  },
+  {
+   "n": 11,
+   "title": "Practice: sukūn",
+   "traditional": "Mashq",
+   "focus": "words from Al-Fātiḥa"
+  },
+  {
+   "n": 12,
+   "title": "Shadda",
+   "traditional": "Tashdīd",
+   "focus": "doubled letters"
+  },
+  {
+   "n": 13,
+   "title": "Practice: shadda",
+   "traditional": "Mashq",
+   "focus": "words with shadda"
+  },
+  {
+   "n": 14,
+   "title": "Shadda with madd / consecutive shaddas",
+   "traditional": "Tashdīd",
+   "focus": "combined"
+  },
+  {
+   "n": 15,
+   "title": "Madd signs",
+   "traditional": "Madd",
+   "focus": "lengthening marks (intro)"
+  },
+  {
+   "n": 16,
+   "title": "Nūn sākin & tanwīn rules",
+   "traditional": "Iẓhār, idghām, iqlāb, ikhfāʾ",
+   "focus": "intro"
+  },
+  {
+   "n": 17,
+   "title": "Mīm sākin, qalqalah & stops",
+   "traditional": "Waqf",
+   "focus": "stopping signs (intro)"
+  }
+ ]
+}

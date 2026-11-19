@@ -1,0 +1,96 @@
+{
+ "_note": "Event states: expected → confirmed(source) ; 'moon' events show two possible dates (29/30-day previous month) until confirmed; 'follows-month' events shift automatically when their month start is confirmed. Default authority configurable (e.g. Bangladesh National Moon Sighting Committee, Saudi Umm al-Qura, my mosque). Example Umm al-Qura estimates (Nov 2026): Rajab 1448 = Thu 10 Dec 2026; Ramadan 1448 ≈ Mon 8 Feb 2027; Eid al-Fitr ≈ Tue 9 Mar 2027; Eid al-Adha ≈ Sun 16 May 2027.",
+ "events": [
+  {
+   "label": "1 Muharram",
+   "title": "Islamic New Year",
+   "hijriMonth": 1,
+   "hijriDay": 1,
+   "kind": "moon"
+  },
+  {
+   "label": "10 Muharram",
+   "title": "ʿĀshūrāʾ (fast 9 & 10)",
+   "hijriMonth": 1,
+   "hijriDay": 10,
+   "kind": "follows-month"
+  },
+  {
+   "label": "1 Rajab",
+   "title": "Rajab begins",
+   "hijriMonth": 7,
+   "hijriDay": 1,
+   "kind": "moon"
+  },
+  {
+   "label": "15 Shaʿbān",
+   "title": "Mid-Shaʿbān (observed by many; scholars differ on practices)",
+   "hijriMonth": 8,
+   "hijriDay": 15,
+   "kind": "follows-month"
+  },
+  {
+   "label": "1 Ramaḍān",
+   "title": "Ramadan begins",
+   "hijriMonth": 9,
+   "hijriDay": 1,
+   "kind": "moon"
+  },
+  {
+   "label": "21–29 Ramaḍān (odd nights)",
+   "title": "Last ten nights / Laylat al-Qadr",
+   "hijriMonth": 9,
+   "hijriDay": 21,
+   "kind": "follows-month"
+  },
+  {
+   "label": "1 Shawwāl",
+   "title": "Eid al-Fitr",
+   "hijriMonth": 10,
+   "hijriDay": 1,
+   "kind": "moon"
+  },
+  {
+   "label": "2–7 Shawwāl",
+   "title": "Six fasts of Shawwāl window",
+   "hijriMonth": 10,
+   "hijriDay": 2,
+   "kind": "follows-month"
+  },
+  {
+   "label": "1 Dhū al-Ḥijjah",
+   "title": "First ten days",
+   "hijriMonth": 12,
+   "hijriDay": 1,
+   "kind": "moon"
+  },
+  {
+   "label": "9 Dhū al-Ḥijjah",
+   "title": "Day of ʿArafah (fast if not on Hajj)",
+   "hijriMonth": 12,
+   "hijriDay": 9,
+   "kind": "follows-month"
+  },
+  {
+   "label": "10 Dhū al-Ḥijjah",
+   "title": "Eid al-Adha",
+   "hijriMonth": 12,
+   "hijriDay": 10,
+   "kind": "follows-month"
+  },
+  {
+   "label": "13–15 every month",
+   "title": "White days (Ayyām al-Bīḍ)",
+   "hijriMonth": 0,
+   "hijriDay": 13,
+   "kind": "follows-month"
+  },
+  {
+   "label": "Mon & Thu",
+   "title": "Sunnah fasts",
+   "hijriMonth": 0,
+   "hijriDay": 0,
+   "kind": "weekly"
+  }
+ ]
+}

@@ -1,0 +1,14 @@
+@font-face {
+  font-family: "Noto Sans Variable";
+  src: url("@fontsource-variable/noto-sans/files/noto-sans-latin-wght-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: optional;
+}
+@font-face {
+  font-family: "Noto Serif Variable";
+  src: url("@fontsource-variable/noto-serif/files/noto-serif-latin-wght-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: optional;
+}

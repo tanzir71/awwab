@@ -1,192 +1,256 @@
+import Dexie, { type EntityTable, type Table } from "dexie";
+import { z } from "zod";
+import { prayerIds, type PrayerLog, type Prayer, type PrayerId } from "../types/Prayer";
+import { addDays, dateKey } from "./dates";
+import { cities, methodNames, type AsrSchool, type City, type PrayerMethod } from "./prayerServices";
 
-import { Prayer } from "@/types/Prayer";
-
-// Key for storing completed prayers in localStorage
-const COMPLETED_PRAYERS_KEY = "completedPrayers";
-const LAST_ACTIVE_DAY_KEY = "lastActiveDay";
-
-// Interface for storing prayer completion data
-export interface PrayerCompletion {
-  date: string; // Format: YYYY-MM-DD
-  prayerName: string;
-  completedAt: string; // ISO string
+export interface Settings {
+  mode: "adult" | "maktab";
+  script: "indopak" | "uthmani";
+  school: AsrSchool;
+  method: PrayerMethod;
+  city: City;
+  hijriAdjust: number;
+  spellStyle: "en" | "ampara-bn";
+  language: "en" | "bn";
+  onboarded: boolean;
 }
 
-// Get the current date in local timezone (YYYY-MM-DD)
-export const getCurrentLocalDate = (): string => {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+export const defaults: Settings = {
+  mode: "adult", script: "indopak", school: "hanafi", method: "Karachi", city: cities[0],
+  hijriAdjust: 0, spellStyle: "en", language: "en", onboarded: false,
 };
 
-// Check if a new day has started since last app activity
-export const hasNewDayStarted = (): boolean => {
-  const currentDate = getCurrentLocalDate();
-  const lastActiveDay = localStorage.getItem(LAST_ACTIVE_DAY_KEY);
-  
-  if (!lastActiveDay) {
-    // First time using the app
-    localStorage.setItem(LAST_ACTIVE_DAY_KEY, currentDate);
-    return false;
-  }
-  
-  if (currentDate !== lastActiveDay) {
-    // Update the last active day
-    localStorage.setItem(LAST_ACTIVE_DAY_KEY, currentDate);
-    return true;
-  }
-  
-  return false;
-};
+export interface LocalRecord {
+  key: string;
+  value: unknown;
+}
 
-// Get all completed prayers from localStorage
-export const getCompletedPrayers = (): PrayerCompletion[] => {
-  try {
-    const storedData = localStorage.getItem(COMPLETED_PRAYERS_KEY);
-    if (!storedData) return [];
-    return JSON.parse(storedData);
-  } catch (error) {
-    console.error("Error retrieving completed prayers:", error);
-    return [];
-  }
-};
+export interface LocalAudio {
+  ref: string;
+  blob: Blob;
+  title: string;
+  attribution?: string;
+}
 
-// Mark a prayer as completed
-export const markPrayerAsCompleted = (prayer: Prayer): void => {
-  try {
-    const completedPrayers = getCompletedPrayers();
-    const today = getCurrentLocalDate();
-    
-    // Check if prayer is already completed today
-    const alreadyCompleted = completedPrayers.some(
-      (p) => p.date === today && p.prayerName === prayer.name
-    );
-    
-    if (!alreadyCompleted) {
-      completedPrayers.push({
-        date: today,
-        prayerName: prayer.name,
-        completedAt: new Date().toISOString(),
-      });
-      
-      localStorage.setItem(COMPLETED_PRAYERS_KEY, JSON.stringify(completedPrayers));
-      
-      // Update last active day
-      localStorage.setItem(LAST_ACTIVE_DAY_KEY, today);
-    }
-  } catch (error) {
-    console.error("Error marking prayer as completed:", error);
-  }
-};
-
-// Unmark a prayer (remove it from completed prayers)
-export const unmarkPrayerAsCompleted = (prayerName: string): void => {
-  try {
-    const completedPrayers = getCompletedPrayers();
-    const today = getCurrentLocalDate();
-    
-    // Filter out the prayer for today
-    const updatedPrayers = completedPrayers.filter(
-      (p) => !(p.date === today && p.prayerName === prayerName)
-    );
-    
-    localStorage.setItem(COMPLETED_PRAYERS_KEY, JSON.stringify(updatedPrayers));
-  } catch (error) {
-    console.error("Error unmarking prayer:", error);
-  }
-};
-
-// Calculate statistics based on completed prayers
-export const calculatePrayerStatistics = () => {
-  const completedPrayers = getCompletedPrayers();
-  const today = getCurrentLocalDate();
-  
-  // Get unique dates where at least one prayer was completed
-  const uniqueDates = [...new Set(completedPrayers.map(p => p.date))];
-  
-  // Calculate current streak
-  let currentStreak = 0;
-  const sortedDates = [...uniqueDates].sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
-  
-  // Check if any prayer was completed today
-  const prayedToday = sortedDates[0] === today;
-  
-  if (prayedToday) {
-    currentStreak = 1; // Start with today
-    let checkDate = new Date(today);
-    
-    // Check consecutive days backwards
-    for (let i = 1; i < sortedDates.length; i++) {
-      checkDate.setDate(checkDate.getDate() - 1);
-      const prevDate = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
-      
-      if (sortedDates.includes(prevDate)) {
-        currentStreak++;
-      } else {
-        break;
-      }
-    }
-  }
-  
-  // Calculate best streak
-  let bestStreak = 0;
-  let tempStreak = 0;
-  
-  if (sortedDates.length > 0) {
-    // Sort dates in ascending order for streak calculation
-    const chronologicalDates = sortedDates.sort((a, b) => 
-      new Date(a).getTime() - new Date(b).getTime()
-    );
-    
-    tempStreak = 1;
-    for (let i = 1; i < chronologicalDates.length; i++) {
-      const currentDate = new Date(chronologicalDates[i]);
-      const prevDate = new Date(chronologicalDates[i-1]);
-      
-      // Set hours to 0 to compare just the dates
-      currentDate.setHours(0, 0, 0, 0);
-      prevDate.setHours(0, 0, 0, 0);
-      
-      const diffTime = Math.abs(currentDate.getTime() - prevDate.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      
-      if (diffDays === 1) {
-        tempStreak++;
-      } else {
-        if (tempStreak > bestStreak) {
-          bestStreak = tempStreak;
-        }
-        tempStreak = 1;
-      }
-    }
-    
-    if (tempStreak > bestStreak) {
-      bestStreak = tempStreak;
-    }
-  }
-  
-  // Calculate completion rate (prayers completed / total possible prayers)
-  const totalDays = uniqueDates.length;
-  const totalPrayersCompleted = completedPrayers.length;
-  const totalPossiblePrayers = totalDays * 5; // 5 prayers per day
-  const completionRate = totalPossiblePrayers > 0 
-    ? Math.round((totalPrayersCompleted / totalPossiblePrayers) * 100) 
-    : 0;
-  
-  return {
-    currentStreak,
-    bestStreak,
-    completionRate,
-    totalPrayersCompleted,
-    uniqueDays: uniqueDates.length
+export function openDatabase(name = "awwab") {
+  const database = new Dexie(name) as Dexie & {
+    records: EntityTable<LocalRecord, "key">;
+    prayers: Table<PrayerLog, [string, PrayerId]>;
+    audio: EntityTable<LocalAudio, "ref">;
   };
+  database.version(1).stores({ records: "&key", prayers: "[date+prayer], date" });
+  database.version(2).stores({ audio: "&ref" });
+  return database;
+}
+
+export const db = openDatabase();
+
+export async function getRecord<T>(key: string, fallback: T): Promise<T> {
+  const record = await db.records.get(key);
+  return (record?.value as T) ?? fallback;
+}
+
+export function updateRecord<T>(key: string, fallback: T, update: (current: T) => T) {
+  return db.transaction("rw", db.records, async () => {
+    const value = update(await getRecord(key, fallback));
+    await db.records.put({ key, value });
+  });
+}
+
+export function updateSettings(patch: Partial<Settings>) {
+  return updateRecord("settings", defaults, saved => ({ ...defaults, ...saved, ...patch }));
+}
+
+const daySchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(day => {
+  const date = new Date(`${day}T12:00:00Z`);
+  return Number.isFinite(date.valueOf()) && date.toISOString().slice(0, 10) === day;
+});
+const instantSchema = z.string().datetime();
+const prayerSchema = z.object({
+  date: daySchema,
+  prayer: z.enum(prayerIds),
+  status: z.enum(["done", "late", "qada"]),
+  at: instantSchema,
+  mosqueId: z.string().optional(),
+});
+const citySchema = z.object({
+  name: z.string().trim().min(1).max(100),
+  latitude: z.number().min(-90).max(90),
+  longitude: z.number().min(-180).max(180),
+  timeZone: z.string().refine(zone => {
+    try { dateKey(new Date(), zone); return true; } catch { return false; }
+  }),
+});
+const settingsSchema = z.object({
+  mode: z.enum(["adult", "maktab"]),
+  script: z.enum(["indopak", "uthmani"]),
+  school: z.enum(["hanafi", "shafi"]),
+  method: z.custom<PrayerMethod>(value => typeof value === "string" && Object.prototype.hasOwnProperty.call(methodNames, value)),
+  city: citySchema,
+  hijriAdjust: z.number().int().min(-2).max(2),
+  spellStyle: z.enum(["en", "ampara-bn"]),
+  language: z.enum(["en", "bn"]),
+  onboarded: z.boolean(),
+});
+const legacySchema = z.array(z.object({ date: daySchema, prayerName: z.string(), completedAt: instantSchema }));
+const count = z.number().int().nonnegative();
+const time = z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/);
+const point = z.object({ lat: z.number().min(-90).max(90), lon: z.number().min(-180).max(180) });
+const labels = z.array(z.string().max(500));
+const dateCounts = z.record(daySchema, count);
+const dateLists = z.record(daySchema, labels);
+const balances = z.object({ fajr: count, dhuhr: count, asr: count, maghrib: count, isha: count });
+const savedRecords: Record<string, z.ZodTypeAny> = {
+  settings: settingsSchema,
+  "qaida-current": count.min(1).max(17),
+  "qaida-complete": z.array(count.min(1).max(17)),
+  "study-days": z.array(daySchema),
+  "sayyid-line": count.max(6),
+  "words-known": labels,
+  "word-bank-known": labels,
+  istighfar: dateCounts,
+  qada: z.object({ estimated: balances, madeUp: balances, dailyGoal: count.min(1).max(100), fasts: count, fastsMadeUp: count }),
+  calendar: z.object({
+    anchors: z.array(z.object({ year: count.min(1), month: count.min(1).max(12), date: daySchema, source: z.string().max(100) })),
+    overrides: z.record(z.string(), z.object({ date: daySchema.optional(), source: z.string().max(100).optional(), adjust: z.union([z.literal(-1), z.literal(0), z.literal(1)]) })),
+  }),
+  mosques: z.object({
+    mosques: z.array(z.object({
+      id: z.string().max(128),
+      name: z.string().min(1).max(100),
+      role: z.enum(["home", "office", "jumuah", "eid", "hometown", "other"]),
+      source: z.enum(["board photo", "imam", "friend", "visited"]),
+      updatedAt: instantSchema,
+      jamaat: z.partialRecord(z.enum(prayerIds), z.union([time, z.literal("adhan+5")])),
+      jumuah: z.object({ khutbah: z.union([time, z.literal("")]), prayer: z.union([time, z.literal("")]) }).optional(),
+      occasional: z.array(z.object({ type: z.enum(["eid_fitr", "eid_adha", "tarawih"]), year: count.min(1900).max(2200), times: z.array(time) })),
+      photo: z.string().max(2_700_000).regex(/^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/]*={0,2}$/).optional(),
+      contact: z.string().regex(/^\d*$/).max(30).optional(),
+      location: point.optional(),
+    })),
+    mapping: z.record(z.string(), z.string().max(128)),
+  }),
+  zakat: z.object({
+    basis: z.enum(["silver", "gold"]), unit: z.enum(["g", "bhori"]),
+    price: z.number().finite().nonnegative(), cash: z.number().finite().nonnegative(), metals: z.number().finite().nonnegative(),
+    trade: z.number().finite().nonnegative(), debt: z.number().finite().nonnegative(), currency: z.string().regex(/^[A-Z]{3}$/),
+    hawlMonth: count.min(1).max(12), hawlDay: count.min(1).max(30),
+    payments: z.array(z.object({ day: daySchema, amount: z.number().finite().nonnegative(), currency: z.string().regex(/^[A-Z]{3}$/) })),
+  }),
+  umrah: z.object({
+    start: z.union([daySchema, z.literal("")]), end: z.union([daySchema, z.literal("")]),
+    hotel: z.object({ name: z.string().max(120), room: z.string().max(25), point: point.optional() }),
+    group: z.string().max(120), meeting: point.optional(), gate: z.string().max(120),
+    state: z.enum(["At the hotel", "Walking", "In the Haram", "Doing Umrah", "Resting", "Eating out"]),
+    walk: count.max(120), crowd: count.max(90), iqamah: count.max(90), gps: z.boolean(), auto: z.boolean(),
+    tawaf: count.max(7), step: count.max(6),
+    sai: z.object({ count: count.max(7), last: z.enum(["safa", "marwah"]).optional(), lastAt: count.optional(), exited: z.boolean() }),
+    dhikr: dateCounts, juz: dateCounts, haramPrayers: dateLists,
+    requests: z.array(z.object({ id: z.string(), name: z.string().max(100), for: z.string().max(500), done: z.array(daySchema) })),
+  }),
+  reviews: z.record(z.string(), z.object({
+    bucket: z.enum(["sabaq", "sabqi", "manzil"]),
+    attempts: count.optional(), correct: count.optional(),
+    card: z.object({ due: instantSchema, last_review: instantSchema.optional() }).passthrough(),
+  })),
 };
 
-// Check if a prayer is completed for today
-export const isPrayerCompletedToday = (prayerName: string): boolean => {
-  const completedPrayers = getCompletedPrayers();
-  const today = getCurrentLocalDate();
-  
-  return completedPrayers.some(
-    (p) => p.date === today && p.prayerName === prayerName
-  );
-};
+export async function migrateLegacy(storage: Pick<Storage, "getItem" | "removeItem">) {
+  const raw = storage.getItem("completedPrayers");
+  if (raw === null) return;
+  let value: unknown;
+  try { value = JSON.parse(raw); } catch { return; }
+  const parsed = legacySchema.safeParse(value);
+  if (!parsed.success) return;
+  await db.transaction("rw", db.prayers, async () => {
+    for (const log of parsed.data) {
+      const prayer = prayerIds.find(id => id === log.prayerName.toLowerCase());
+      if (prayer && !await db.prayers.get([log.date, prayer])) {
+        await db.prayers.put({ date: log.date, prayer, status: "done", at: log.completedAt });
+      }
+    }
+  });
+  storage.removeItem("completedPrayers");
+  storage.removeItem("lastActiveDay");
+}
+
+export async function logPrayer(prayer: Prayer, now = new Date(), mosqueId?: string) {
+  if (now < prayer.starts || !Number.isFinite(prayer.starts.valueOf())) return;
+  const status = now < prayer.ends ? "done" : "qada";
+  await db.transaction("rw", db.prayers, async () => {
+    if (!await db.prayers.get([prayer.date, prayer.id])) {
+      await db.prayers.put({ date: prayer.date, prayer: prayer.id, status, at: now.toISOString(), mosqueId });
+    }
+  });
+}
+
+const backupSchema = z.object({
+  app: z.literal("awwab"), version: z.literal(1),
+  records: z.array(z.object({ key: z.string().min(1).max(256), value: z.unknown() })),
+  prayers: z.array(prayerSchema),
+  audio: z.array(z.object({
+    ref: z.string().min(1).max(80),
+    title: z.string().max(256),
+    attribution: z.string().max(1000).optional(),
+    type: z.string().regex(/^audio\/[\w.+-]+$/i),
+    bytes: z.string().max(16_000_000).regex(/^[A-Za-z0-9+/]*={0,2}$/),
+  })).optional(),
+});
+
+export async function backup() {
+  const [records, prayers, clips] = await db.transaction("r", db.records, db.prayers, db.audio, () =>
+    Promise.all([db.records.toArray(), db.prayers.toArray(), db.audio.toArray()]));
+  const audio = await Promise.all(clips.map(async ({ blob, ...clip }) => {
+    const bytes = new Uint8Array(await blob.arrayBuffer());
+    let binary = "";
+    for (let start = 0; start < bytes.length; start += 8192) {
+      binary += String.fromCharCode(...bytes.subarray(start, start + 8192));
+    }
+    return { ...clip, type: blob.type, bytes: btoa(binary) };
+  }));
+  return JSON.stringify({ app: "awwab", version: 1, records, prayers, audio }, null, 2);
+}
+
+export async function restoreBackup(file: string) {
+  const data = backupSchema.parse(JSON.parse(file));
+  const records = data.records.map(({ key, value }) => {
+    if (key === "umrah") {
+      const trip = savedRecords.umrah.parse(value) as Record<string, unknown>;
+      return { key, value: { ...trip, gps: false, auto: false } };
+    }
+    return {
+      key,
+      value: /^qaida-row-\d{1,2}$/.test(key) ? count.max(100).parse(value) : savedRecords[key]?.parse(value) ?? value,
+    };
+  });
+  const audio = (data.audio ?? []).map(({ bytes, type, ...clip }) => ({
+    ref: clip.ref,
+    title: clip.title,
+    attribution: clip.attribution,
+    blob: new Blob([Uint8Array.from(atob(bytes), char => char.charCodeAt(0))], { type }),
+  }));
+  await db.transaction("rw", db.records, db.prayers, db.audio, async () => {
+    await db.records.clear();
+    await db.prayers.clear();
+    await db.audio.clear();
+    await db.records.bulkPut(records);
+    await db.prayers.bulkPut(data.prayers as PrayerLog[]);
+    await db.audio.bulkPut(audio);
+  });
+}
+
+export function prayerStatistics(logs: PrayerLog[], today: string) {
+  const counts = new Map<string, number>();
+  for (const log of logs) {
+    if (log.date <= today) counts.set(log.date, (counts.get(log.date) ?? 0) + 1);
+  }
+  const activeDays = [...counts.keys()].sort();
+  const returns = activeDays.filter((day, i) => i > 0 && addDays(activeDays[i - 1], 1) < day).length;
+  const recent = Array.from({ length: 30 }, (_, i) => {
+    const day = addDays(today, i - 29);
+    return { day, count: counts.get(day) ?? 0 };
+  });
+  const consistency = Math.round(recent.reduce((sum, day) => sum + day.count, 0) * 100 / 150);
+  return { consistency, recent, returns, activeDays: activeDays.length };
+}

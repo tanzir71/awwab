@@ -1,26 +1,182 @@
-
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-mode="adult">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PrayerTracker</title>
-    <meta name="description" content="Build your spiritual journey, one prayer at a time" />
-    <meta name="author" content="Lovable" />
-    <meta property="og:image" content="/og-image.png" />
-    
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#ffffff" />
-    <link rel="manifest" href="/manifest.json" />
-    <link rel="apple-touch-icon" href="/icon-192x192.png" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#15302b">
+    <meta name="description" content="A gentle companion for Muslims returning to prayer and relearning Quranic Arabic. Private, installable, and built to work offline.">
+    <title>awwab · For those who keep coming back</title>
+    <link rel="icon" href="%BASE_URL%app/icon-192.png">
+    <link rel="canonical" href="https://tanzir71.github.io/awwab/">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="awwab · For those who keep coming back">
+    <meta property="og:description" content="Return to prayer and relearn Quranic Arabic at your own pace.">
+    <meta property="og:url" content="https://tanzir71.github.io/awwab/">
+    <meta property="og:image" content="https://tanzir71.github.io/awwab/landing/cover.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="awwab · For those who keep coming back">
+    <meta name="twitter:description" content="Return to prayer and relearn Quranic Arabic at your own pace.">
+    <meta name="twitter:image" content="https://tanzir71.github.io/awwab/landing/cover.png">
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/node_modules/@fontsource-variable/noto-sans/files/noto-sans-latin-wght-normal.woff2">
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/node_modules/@fontsource-variable/noto-serif/files/noto-serif-latin-wght-normal.woff2">
+    <link rel="stylesheet" href="./src/landing.css">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"awwab","url":"https://tanzir71.github.io/awwab/","applicationCategory":"EducationalApplication","operatingSystem":"Any","isAccessibleForFree":true,"offers":{"@type":"Offer","price":0,"priceCurrency":"USD"},"description":"A private offline companion for Muslim prayer and Quranic Arabic study."}</script>
   </head>
-
   <body>
-    <div id="root"></div>
-    <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
-    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
-    <script type="module" src="/src/main.tsx"></script>
+    <a class="skip" href="#main">Skip to content</a>
+    <header id="top" class="night">
+      <nav class="wrap site-nav" aria-label="Main navigation">
+        <a class="wordmark" href="#top" aria-label="Awwab home">awwab</a>
+        <div class="desktop-links"><a href="#features">Features</a><a href="#learn">Learn Arabic</a><a href="#plan">Plan your year</a><a href="#umrah">Umrah mode</a><a href="#privacy">Offline &amp; private</a><a href="#faq">FAQ</a></div>
+        <details class="mobile-menu"><summary aria-label="Menu"><span aria-hidden="true">☰</span></summary><div class="menu-panel"><a href="#features">Features</a><a href="#learn">Learn Arabic</a><a href="#plan">Plan your year</a><a href="#umrah">Umrah mode</a><a href="#privacy">Offline &amp; private</a><a href="#faq">FAQ</a></div></details>
+        <a class="btn gold nav-open" href="%BASE_URL%app/">Open awwab</a>
+      </nav>
+    </header>
+    <main id="main">
+      <section class="night hero">
+        <div class="wrap hero-grid">
+          <div class="hero-copy">
+            <p class="pill">Awwāb · the one who keeps returning</p>
+            <h1>For those who keep coming back.</h1>
+            <p class="lead">A gentle companion for Muslims finding their way back to prayer. Know your rakʿāt, make up what you missed, and read the Quran again, letter by letter.</p>
+            <div class="ctas"><a class="btn gold" href="%BASE_URL%app/">Open awwab</a><a class="btn light install-hero" href="#install">Install the app</a></div>
+            <ul class="trust checks"><li>No account</li><li>Works offline after setup</li><li>Private on your device</li><li>Install on phone or computer</li></ul>
+          </div>
+          <div class="hero-devices">
+            <figure class="device phone primary-phone"><img src="%BASE_URL%landing/hero-today.webp" srcset="%BASE_URL%landing/hero-today.webp 290w, %BASE_URL%landing/hero-today@2x.webp 580w" sizes="(max-width: 1023px) 238px, 278px" width="290" height="628" alt="Today in Awwab with a prayer countdown and prayer log" fetchpriority="high" loading="eager"></figure>
+            <figure class="device phone secondary-phone"><img src="%BASE_URL%landing/word.webp" srcset="%BASE_URL%landing/word.webp 1x, %BASE_URL%landing/word@2x.webp 2x" width="390" height="844" alt="Word anatomy showing how a Quranic word is spelled" loading="lazy" decoding="async"></figure>
+          </div>
+        </div>
+      </section>
+      <section class="verse paper" aria-label="The verse our name comes from">
+        <div class="wrap">
+          <p lang="ar" dir="rtl" class="quran-verse">فَإِنَّهُۥ كَانَ لِلْأَوَّٰبِينَ غَفُورًۭا</p>
+          <blockquote>“He is ever forgiving to those who keep returning.”</blockquote>
+          <a class="kicker" href="https://quran.com/17/25">Al-Isrāʾ 17:25</a>
+        </div>
+      </section>
+      <section class="band ground" id="features">
+        <div class="wrap">
+          <h2 class="center">Built for the way you actually pray</h2>
+          <div class="three tiles">
+            <article><span class="glyph"><img src="%BASE_URL%landing/figma-35-265-iconclock.svg" alt="" width="22" height="22"></span><h3>Forgot how many rakʿāt?</h3><p>See what to recite, when to sit, and what to do if you lose count.</p><a class="text-link" href="#today">How to pray →</a></article>
+            <article><span class="glyph"><img src="%BASE_URL%landing/figma-35-265-iconret.svg" alt="" width="22" height="22"></span><h3>Missed a few. Or a few years.</h3><p>Make up missed prayers at your own pace, with istighfar and a plan that fits.</p><a class="text-link" href="#return">Return →</a></article>
+            <article><span class="glyph"><img src="%BASE_URL%landing/figma-35-265-iconbook.svg" alt="" width="22" height="22"></span><h3>Can’t read like you used to?</h3><p>Tap an Arabic word to learn how it’s written and how its letters join.</p><a class="text-link" href="#word">Word anatomy →</a></article>
+          </div>
+        </div>
+      </section>
+      <section id="today" class="band paper">
+      <div class="wrap feature ">
+        <div class="copy"><p class="kicker">Today</p><h2>Know what to pray, and when.</h2><p class="lead">See which prayer is now, how many rakʿāt it has, and when your mosque prays in congregation.</p>
+          <ul class="checks"><li>Times computed on your device</li><li>Jamaat times from your mosques</li><li>Step-by-step prayer guide</li></ul>
+
+          <a class="text-link" href="%BASE_URL%app/#/today">Open Today <span aria-hidden="true">→</span></a>
+        </div>
+        <figure class="device phone "><img src="%BASE_URL%landing/today.webp" srcset="%BASE_URL%landing/today.webp 1x, %BASE_URL%landing/today@2x.webp 2x" width="390" height="844" alt="Today screen with prayer times and rakʿāt" loading="lazy" decoding="async"></figure>
+      </div>
+    </section>
+<section id="return" class="band ground">
+      <div class="wrap feature reverse">
+        <div class="copy"><p class="kicker">Return · At-tawbah</p><h2>Come back, gently.</h2><p class="lead">Tap to count istighfar, learn Sayyid al-Istighfār a line at a time, and make up prayers at a pace you can keep.</p>
+          <ul class="checks"><li>Daily istighfar counter</li><li>Seven lines of Sayyid al-Istighfār</li><li>A make-up prayer and fasting plan</li></ul>
+
+          <a class="text-link" href="%BASE_URL%app/#/return">Open Return <span aria-hidden="true">→</span></a>
+        </div>
+        <figure class="device phone "><img src="%BASE_URL%landing/return.webp" srcset="%BASE_URL%landing/return.webp 1x, %BASE_URL%landing/return@2x.webp 2x" width="390" height="844" alt="Return screen with the daily istighfar counter" loading="lazy" decoding="async"></figure>
+      </div>
+    </section>
+<section id="word" class="band paper">
+      <div class="wrap feature ">
+        <div class="copy"><p class="kicker">Word anatomy</p><h2>Every Arabic word spells itself out.</h2><p class="lead">Tap a word to see its letters and marks, hear it in syllables as you read, and notice how the letters join.</p>
+          <ul class="checks"><li>Letter names and harakat</li><li>Sounds and joining forms</li><li>Quran and modern Arabic examples</li></ul>
+          <div class="letter-preview" dir="rtl" lang="ar" aria-label="Al-Asr, letter by letter"><span>وَ<small lang="en">Wāw</small></span><span>ٱ<small lang="en">Waṣl</small></span><span>لْ<small lang="en">Lām</small></span><span>عَ<small lang="en">ʿAyn</small></span><span>صْ<small lang="en">Ṣād</small></span><span>رِ<small lang="en">Rāʾ</small></span></div>
+          <a class="text-link" href="%BASE_URL%app/#/learn/surahs/103">Open Word anatomy <span aria-hidden="true">→</span></a>
+        </div>
+        <figure class="device phone "><img src="%BASE_URL%landing/word.webp" srcset="%BASE_URL%landing/word.webp 1x, %BASE_URL%landing/word@2x.webp 2x" width="390" height="844" alt="Word anatomy sheet for Al-Asr" loading="lazy" decoding="async"></figure>
+      </div>
+    </section>
+<section id="learn" class="band ground">
+      <div class="wrap feature reverse">
+        <div class="copy"><p class="kicker">Learn Arabic</p><h2>Pick up where you left off.</h2><p class="lead">Revisit short surahs and familiar Qaida sounds. The app brings back what you’re learning at intervals you can manage.</p>
+          <ul class="checks"><li>Seventeen Qaida lessons</li><li>Listen, read and recall</li><li>Takhti letter tracing</li></ul>
+
+          <a class="text-link" href="%BASE_URL%app/#/learn">Open Learn Arabic <span aria-hidden="true">→</span></a>
+        </div>
+        <figure class="device phone "><img src="%BASE_URL%landing/qaida-adult.webp" srcset="%BASE_URL%landing/qaida-adult.webp 1x, %BASE_URL%landing/qaida-adult@2x.webp 2x" width="390" height="844" alt="Adult Qaida Harakat lesson" loading="lazy" decoding="async"></figure>
+      </div>
+    </section>
+<section id="plan" class="band paper">
+      <div class="wrap feature ">
+        <div class="copy"><p class="kicker">Plan your year</p><h2>Make room for the Islamic year.</h2><p class="lead">Keep an eye on Islamic dates, confirm local moon sightings, and keep your mosques’ jamaat times in one place.</p>
+          <ul class="checks"><li>Expected dates until you confirm them</li><li>My mosques and weekly mapping</li><li>Zakat calculator and calendar export</li></ul>
+
+          <a class="text-link" href="%BASE_URL%app/#/plan">Open Plan your year <span aria-hidden="true">→</span></a>
+        </div>
+        <figure class="device phone "><img src="%BASE_URL%landing/plan.webp" srcset="%BASE_URL%landing/plan.webp 1x, %BASE_URL%landing/plan@2x.webp 2x" width="390" height="844" alt="Islamic calendar with expected Hijri events" loading="lazy" decoding="async"></figure>
+      </div>
+    </section>
+      <section class="night band" id="umrah"><div class="wrap">
+        <div class="center intro"><p class="kicker">Umrah mode</p><h2>From the hotel to the Haram</h2><p class="lead">A trip plan, an offline map and a step-by-step guide you can keep with you.</p></div>
+        <div class="three map-phones">
+          <figure class="device phone "><img src="%BASE_URL%landing/umrah-map.webp" srcset="%BASE_URL%landing/umrah-map.webp 1x, %BASE_URL%landing/umrah-map@2x.webp 2x" width="390" height="844" alt="Offline map of Makkah with Haram pins" loading="lazy" decoding="async"></figure>
+          <figure class="device phone "><img src="%BASE_URL%landing/umrah-now.webp" srcset="%BASE_URL%landing/umrah-now.webp 1x, %BASE_URL%landing/umrah-now@2x.webp 2x" width="390" height="844" alt="Umrah Now card and Makkah prayer timeline" loading="lazy" decoding="async"></figure>
+          <figure class="device phone "><img src="%BASE_URL%landing/umrah-sai.webp" srcset="%BASE_URL%landing/umrah-sai.webp 1x, %BASE_URL%landing/umrah-sai@2x.webp 2x" width="390" height="844" alt="Sa'y guide with lap counter" loading="lazy" decoding="async"></figure>
+        </div>
+        <div class="three tiles dark-tiles">
+          <article><h3>Makkah time</h3><p>See the next prayer and when to leave for the Haram.</p></article>
+          <article><h3>Offline maps</h3><p>Download a map of Makkah or Madinah before you go.</p></article>
+          <article><h3>Live saʿy guide</h3><p>Count laps by hand or turn on beta location assistance.</p></article>
+          <article><h3>Hotel and gate memory</h3><p>Save your hotel and remember the gate you used to enter.</p></article>
+          <article><h3>Duʿā requests</h3><p>Keep a private list of people who asked you to pray for them.</p></article>
+          <article><h3>Trip timeline</h3><p>Follow prayer times and keep track of your Quran reading.</p></article>
+        </div>
+        <p class="checklist">Before leaving · Save your hotel pin · Download maps · Add your group’s meeting point</p>
+        <a class="btn gold" href="%BASE_URL%app/#/umrah">Open Umrah mode</a>
+      </div></section>
+      <section class="band ground" id="modes"><div class="wrap">
+        <div class="center intro"><p class="kicker">Two ways to learn</p><h2>Same lessons, two moods</h2><p class="lead">Choose when you start. Switch any time.</p></div>
+        <div class="two tiles modes">
+          <article><h3>Adult · calm and meaning-first</h3><p>Short lessons, word meanings and sources you can check.</p><figure class="device phone "><img src="%BASE_URL%landing/qaida-adult.webp" srcset="%BASE_URL%landing/qaida-adult.webp 1x, %BASE_URL%landing/qaida-adult@2x.webp 2x" width="390" height="844" alt="Adult mode in a Qaida lesson" loading="lazy" decoding="async"></figure></article>
+          <article class="maktab" data-theme-preview="maktab"><h3>Maktab · learn like you’re 12</h3><p>Bigger letters, colour-coded harakat, stickers and a takhti to write on.</p><figure class="device phone"><img src="%BASE_URL%landing/qaida-maktab.webp" srcset="%BASE_URL%landing/qaida-maktab.webp 1x, %BASE_URL%landing/qaida-maktab@2x.webp 2x" width="390" height="844" alt="Maktab mode in the same Qaida lesson" loading="lazy" decoding="async"></figure></article>
+        </div>
+      </div></section>
+      <section class="band paper" id="share"><div class="wrap">
+        <div class="center intro"><p class="kicker">Share your progress</p><h2>Mark a moment worth keeping</h2><p class="lead">Save a card when you learn a surah, revisit a letter, or find your way back.</p></div>
+        <div class="three share-stories"><img src="%BASE_URL%landing/share-surah.webp" srcset="%BASE_URL%landing/share-surah.webp 1x, %BASE_URL%landing/share-surah@2x.webp 2x" width="360" height="640" alt="Surah learned share card" loading="lazy" decoding="async"><img src="%BASE_URL%landing/share-return.webp" srcset="%BASE_URL%landing/share-return.webp 1x, %BASE_URL%landing/share-return@2x.webp 2x" width="360" height="640" alt="Coming back share card" loading="lazy" decoding="async"><img src="%BASE_URL%landing/share-qaida.webp" srcset="%BASE_URL%landing/share-qaida.webp 1x, %BASE_URL%landing/share-qaida@2x.webp 2x" width="360" height="640" alt="Qaida share card" loading="lazy" decoding="async"></div>
+        <ul class="checks four share-points"><li>Story, post and wide sizes</li><li>Created on your device</li><li>Awwab link on every card</li><li>Prayer counts hidden by default</li></ul>
+      </div></section>
+      <section class="band ground" id="print"><div class="wrap">
+        <div class="center intro"><p class="kicker">Phone · laptop · paper</p><h2>A study desk you can take with you</h2><p class="lead">Start on the Study plan at your laptop, or print a timetable, tracing sheet, or surah card.</p></div>
+        <figure class="device laptop"><img src="%BASE_URL%landing/desktop.webp" srcset="%BASE_URL%landing/desktop.webp 1x, %BASE_URL%landing/desktop@2x.webp 2x" width="1440" height="900" alt="Desktop study plan with review and Qaida learning panels" loading="lazy" decoding="async"></figure>
+        <div class="three paper-shots"><img src="%BASE_URL%landing/print-timetable.webp" srcset="%BASE_URL%landing/print-timetable.webp 1x, %BASE_URL%landing/print-timetable@2x.webp 2x" width="620" height="800" alt="A4 prayer timetable" loading="lazy" decoding="async"><img src="%BASE_URL%landing/print-takhti.webp" srcset="%BASE_URL%landing/print-takhti.webp 1x, %BASE_URL%landing/print-takhti@2x.webp 2x" width="620" height="800" alt="A4 Takhti worksheet" loading="lazy" decoding="async"><img src="%BASE_URL%landing/print-suras.webp" srcset="%BASE_URL%landing/print-suras.webp 1x, %BASE_URL%landing/print-suras@2x.webp 2x" width="620" height="800" alt="A4 surah pocket cards" loading="lazy" decoding="async"></div>
+      </div></section>
+      <section class="band ground" id="privacy"><div class="wrap">
+        <div class="center intro"><p class="kicker">Offline &amp; private</p><h2>Your progress stays with you</h2></div>
+        <div class="four tiles">
+          <article><h3>Works offline</h3><p>After setup, open your app even without a connection.</p></article>
+          <article><h3>Private by design</h3><p>Prayer and study records are stored on your device.</p></article>
+          <article><h3>Install from your browser</h3><p>Add Awwab to your home screen or desktop.</p></article>
+          <article><h3>Keep your backup</h3><p>Export a file to save and restore your progress.</p></article>
+        </div>
+        <article class="sources" id="sources"><h3>Sources you can check</h3><p>Quran passages show the surah and āyah. Hadith show the collection, number and grade.</p>
+          <a class="text-link" href="%BASE_URL%app/#/sources">Sources &amp; licences →</a>
+        </article>
+      </div></section>
+      <section class="band paper" id="faq"><div class="wrap">
+        <div class="center intro"><p class="kicker">FAQ</p><h2>Questions people ask</h2></div>
+        <div class="two faq-cards"><details><summary>Do I need internet?</summary><p>Open the app online first so it can prepare offline access. Map packs are optional downloads.</p></details><details><summary>Where does my data go?</summary><p>Your prayer logs, trip details and learning progress stay on your device. You can export a backup file at any time.</p></details><details><summary>Which madhhab does it follow?</summary><p>Prayer examples start with the Hanafi structure. Choose your Asr calculation in Settings. The guides note where scholars differ.</p></details><details><summary>Who is Maktab mode for?</summary><p>Anyone who wants to re-learn with short lessons, larger letters and a takhti. Children are welcome to learn with a parent.</p></details><details><summary>Can I use it alongside a teacher?</summary><p>Yes. Use Awwab to practise and remember. Check your recitation with a teacher and ask a scholar you trust for rulings.</p></details><details><summary>How do I install it?</summary><p>Open Awwab in your browser. Look for Install app or Add to Home Screen in the browser menu.</p></details></div>
+        <div class="two faq-static"><article><h3>Do I need internet?</h3><p>Open the app online first so it can prepare offline access. Map packs are optional downloads.</p></article><article><h3>Where does my data go?</h3><p>Your prayer logs, trip details and learning progress stay on your device. You can export a backup file at any time.</p></article><article><h3>Which madhhab does it follow?</h3><p>Prayer examples start with the Hanafi structure. Choose your Asr calculation in Settings. The guides note where scholars differ.</p></article><article><h3>Who is Maktab mode for?</h3><p>Anyone who wants to re-learn with short lessons, larger letters and a takhti. Children are welcome to learn with a parent.</p></article><article><h3>Can I use it alongside a teacher?</h3><p>Yes. Use Awwab to practise and remember. Check your recitation with a teacher and ask a scholar you trust for rulings.</p></article><article><h3>How do I install it?</h3><p>Open Awwab in your browser. Look for Install app or Add to Home Screen in the browser menu.</p></article></div>
+      </div></section>
+      <section class="band night final" id="install"><div class="wrap center">
+        <h2>Come back today. Start with one prayer.</h2><p class="lead">Open Awwab in your browser and add it to your home screen.</p>
+        <div class="ctas"><a class="btn gold" href="%BASE_URL%app/">Open awwab</a><a class="btn light" href="%BASE_URL%app/#/install">Install the app</a></div>
+      </div></section>
+    </main>
+    <footer class="night"><div class="wrap foot">
+      <div class="foot-row"><a class="wordmark" href="#top" aria-label="Awwab home">awwab</a>
+        <nav aria-label="Footer"><a href="#features">Features</a><a href="#privacy">Privacy</a><a href="#sources">Sources &amp; licences</a><a href="https://github.com/tanzir71/awwab">GitHub</a></nav>
+      </div>
+      <div class="foot-row"><p>Awwab is a learning and tracking aid, not a source of religious rulings.</p><p>Designed and built by <a href="https://tanziro.com">tanziro.com</a></p></div>
+    </div></footer>
   </body>
 </html>

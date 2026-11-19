@@ -1,0 +1,53 @@
+{
+  "istighfar": {
+    "arabic": "أَسْتَغْفِرُ ٱللَّهَ",
+    "source": "Muslim 2702b · Sahih",
+    "url": "https://sunnah.com/muslim:2702b"
+  },
+  "sayyid": {
+    "source": "Bukhari 6306 · Sahih",
+    "url": "https://sunnah.com/bukhari:6306",
+    "lines": [
+      [
+        "اللَّهُمَّ أَنْتَ رَبِّي",
+        "O Allah, You are my Lord."
+      ],
+      [
+        "لَا إِلَهَ إِلَّا أَنْتَ",
+        "You alone are worthy of worship."
+      ],
+      [
+        "خَلَقْتَنِي وَأَنَا عَبْدُكَ",
+        "You made me, and I am Your servant."
+      ],
+      [
+        "وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ",
+        "I keep to Your covenant and promise as best I can."
+      ],
+      [
+        "أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ",
+        "I seek Your protection from the harm of what I’ve done."
+      ],
+      [
+        "أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ وَأَبُوءُ لَكَ بِذَنْبِي",
+        "I acknowledge Your blessings on me, and I acknowledge my sin."
+      ],
+      [
+        "فَاغْفِرْ لِي فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ",
+        "Forgive me. You alone forgive sins."
+      ]
+    ]
+  },
+  "hope": {
+    "arabic": "لَا تَقْنَطُوا۟ مِن رَّحْمَةِ ٱللَّهِ",
+    "source": "Az-Zumar 39:53",
+    "url": "https://quran.com/39/53",
+    "meaning": "Do not lose hope in Allah’s mercy."
+  },
+  "welcome": {
+    "arabic": "فَإِنَّهُۥ كَانَ لِلْأَوَّٰبِينَ غَفُورًۭا",
+    "source": "Al-Isra 17:25",
+    "url": "https://quran.com/17/25",
+    "meaning": "He is ever forgiving to those who keep returning."
+  }
+}
