@@ -1,22 +1,28 @@
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react-swc";
-import path from "path";
-import { componentTagger } from "lovable-tagger";
+import { resolve } from "node:path";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { ArabicText } from "./src/components/ArabicText";
+import returnCopy from "./docs/content/return.json";
 
-// https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
-  server: {
-    host: "::",
-    port: 8080,
-  },
-  plugins: [
-    react(),
-    mode === 'development' &&
-    componentTagger(),
-  ].filter(Boolean),
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
+const base = "/awwab/";
+
+export default defineConfig({
+  base,
+  build: {
+    rollupOptions: {
+      input: { landing: resolve(__dirname, "index.html"), app: resolve(__dirname, "app/index.html") },
     },
   },
-}));
+  plugins: [{
+    name: "awwab-landing-verse",
+    transformIndexHtml(html) {
+      if (!html.includes("<!-- awwab-welcome-verse -->")) return html;
+      const verse = renderToStaticMarkup(createElement(ArabicText, {
+        text: returnCopy.welcome.arabic,
+        wordLink: position => `${base}app/#/sources?word=${position}`,
+      }));
+      return html.replace("<!-- awwab-welcome-verse -->", verse);
+    },
+  }],
+});

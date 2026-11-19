@@ -1,0 +1,313 @@
+{
+ "_note": "28 letters in Qaida order. joinsNext=false: letter never connects to the following letter (ا د ذ ر ز و). family = shared skeleton taught together in Takhti. Bangla names follow common Bangladeshi Qaida usage — VERIFY against the Bangla Noorani Qaida edition before shipping.",
+ "letters": [
+  {
+   "letter": "ا",
+   "name": "Alif",
+   "sound": "a/ā carrier",
+   "nameBn": "আলিফ",
+   "joinsNext": false,
+   "family": "alif"
+  },
+  {
+   "letter": "ب",
+   "name": "Bāʾ",
+   "sound": "b",
+   "nameBn": "বা",
+   "joinsNext": true,
+   "family": "boat"
+  },
+  {
+   "letter": "ت",
+   "name": "Tāʾ",
+   "sound": "t",
+   "nameBn": "তা",
+   "joinsNext": true,
+   "family": "boat"
+  },
+  {
+   "letter": "ث",
+   "name": "Thāʾ",
+   "sound": "th",
+   "nameBn": "ছা",
+   "joinsNext": true,
+   "family": "boat"
+  },
+  {
+   "letter": "ج",
+   "name": "Jīm",
+   "sound": "j",
+   "nameBn": "জীম",
+   "joinsNext": true,
+   "family": "jim"
+  },
+  {
+   "letter": "ح",
+   "name": "Ḥāʾ",
+   "sound": "ḥ",
+   "nameBn": "হা",
+   "joinsNext": true,
+   "family": "jim"
+  },
+  {
+   "letter": "خ",
+   "name": "Khāʾ",
+   "sound": "kh",
+   "nameBn": "খা",
+   "joinsNext": true,
+   "family": "jim"
+  },
+  {
+   "letter": "د",
+   "name": "Dāl",
+   "sound": "d",
+   "nameBn": "দাল",
+   "joinsNext": false,
+   "family": "dal"
+  },
+  {
+   "letter": "ذ",
+   "name": "Dhāl",
+   "sound": "dh",
+   "nameBn": "যাল",
+   "joinsNext": false,
+   "family": "dal"
+  },
+  {
+   "letter": "ر",
+   "name": "Rāʾ",
+   "sound": "r",
+   "nameBn": "রা",
+   "joinsNext": false,
+   "family": "ra"
+  },
+  {
+   "letter": "ز",
+   "name": "Zāy",
+   "sound": "z",
+   "nameBn": "ঝা",
+   "joinsNext": false,
+   "family": "ra"
+  },
+  {
+   "letter": "س",
+   "name": "Sīn",
+   "sound": "s",
+   "nameBn": "সীন",
+   "joinsNext": true,
+   "family": "sin"
+  },
+  {
+   "letter": "ش",
+   "name": "Shīn",
+   "sound": "sh",
+   "nameBn": "শীন",
+   "joinsNext": true,
+   "family": "sin"
+  },
+  {
+   "letter": "ص",
+   "name": "Ṣād",
+   "sound": "ṣ",
+   "nameBn": "সোয়াদ",
+   "joinsNext": true,
+   "family": "sad"
+  },
+  {
+   "letter": "ض",
+   "name": "Ḍād",
+   "sound": "ḍ",
+   "nameBn": "দোয়াদ",
+   "joinsNext": true,
+   "family": "sad"
+  },
+  {
+   "letter": "ط",
+   "name": "Ṭāʾ",
+   "sound": "ṭ",
+   "nameBn": "ত্বোয়া",
+   "joinsNext": true,
+   "family": "ta"
+  },
+  {
+   "letter": "ظ",
+   "name": "Ẓāʾ",
+   "sound": "ẓ",
+   "nameBn": "যোয়া",
+   "joinsNext": true,
+   "family": "ta"
+  },
+  {
+   "letter": "ع",
+   "name": "ʿAyn",
+   "sound": "ʿ",
+   "nameBn": "আইন",
+   "joinsNext": true,
+   "family": "ayn"
+  },
+  {
+   "letter": "غ",
+   "name": "Ghayn",
+   "sound": "gh",
+   "nameBn": "গাইন",
+   "joinsNext": true,
+   "family": "ayn"
+  },
+  {
+   "letter": "ف",
+   "name": "Fāʾ",
+   "sound": "f",
+   "nameBn": "ফা",
+   "joinsNext": true,
+   "family": "fa"
+  },
+  {
+   "letter": "ق",
+   "name": "Qāf",
+   "sound": "q",
+   "nameBn": "ক্বাফ",
+   "joinsNext": true,
+   "family": "fa"
+  },
+  {
+   "letter": "ك",
+   "name": "Kāf",
+   "sound": "k",
+   "nameBn": "কাফ",
+   "joinsNext": true,
+   "family": "kaf"
+  },
+  {
+   "letter": "ل",
+   "name": "Lām",
+   "sound": "l",
+   "nameBn": "লাম",
+   "joinsNext": true,
+   "family": "lam"
+  },
+  {
+   "letter": "م",
+   "name": "Mīm",
+   "sound": "m",
+   "nameBn": "মীম",
+   "joinsNext": true,
+   "family": "mim"
+  },
+  {
+   "letter": "ن",
+   "name": "Nūn",
+   "sound": "n",
+   "nameBn": "নূন",
+   "joinsNext": true,
+   "family": "boat"
+  },
+  {
+   "letter": "ه",
+   "name": "Hāʾ",
+   "sound": "h",
+   "nameBn": "হা",
+   "joinsNext": true,
+   "family": "ha"
+  },
+  {
+   "letter": "و",
+   "name": "Wāw",
+   "sound": "w / ū",
+   "nameBn": "ওয়াও",
+   "joinsNext": false,
+   "family": "waw"
+  },
+  {
+   "letter": "ي",
+   "name": "Yāʾ",
+   "sound": "y / ī",
+   "nameBn": "ইয়া",
+   "joinsNext": true,
+   "family": "boat"
+  }
+ ],
+ "marks": [
+  {
+   "mark": "َ",
+   "name": "fatha",
+   "alt": "zabar",
+   "nameBn": "যবর",
+   "sound": "a",
+   "color": "harakat-fatha"
+  },
+  {
+   "mark": "ِ",
+   "name": "kasra",
+   "alt": "zer",
+   "nameBn": "যের",
+   "sound": "i",
+   "color": "harakat-kasra"
+  },
+  {
+   "mark": "ُ",
+   "name": "ḍamma",
+   "alt": "pesh",
+   "nameBn": "পেশ",
+   "sound": "u",
+   "color": "harakat-damma"
+  },
+  {
+   "mark": "ْ",
+   "name": "sukūn",
+   "alt": "jazm",
+   "nameBn": "জযম",
+   "sound": "(no vowel)",
+   "color": "harakat-sukoon",
+   "alsoMatches": [
+    "ۡ"
+   ]
+  },
+  {
+   "mark": "ّ",
+   "name": "shadda",
+   "alt": "tashdīd",
+   "nameBn": "তাশদীদ",
+   "sound": "doubles the letter",
+   "color": "accent"
+  },
+  {
+   "mark": "ً",
+   "name": "tanwīn fatḥ",
+   "alt": "do zabar",
+   "nameBn": "দুই যবর",
+   "sound": "an",
+   "color": "harakat-tanween"
+  },
+  {
+   "mark": "ٍ",
+   "name": "tanwīn kasr",
+   "alt": "do zer",
+   "nameBn": "দুই যের",
+   "sound": "in",
+   "color": "harakat-tanween"
+  },
+  {
+   "mark": "ٌ",
+   "name": "tanwīn ḍamm",
+   "alt": "do pesh",
+   "nameBn": "দুই পেশ",
+   "sound": "un",
+   "color": "harakat-tanween"
+  },
+  {
+   "mark": "ٰ",
+   "name": "standing fatha",
+   "alt": "khaṛā zabar",
+   "nameBn": "খাড়া যবর",
+   "sound": "ā",
+   "color": "harakat-fatha"
+  }
+ ],
+ "special": [
+  {
+   "char": "ٱ",
+   "name": "alif waṣl",
+   "rule": "silent when joined to the previous word; shown as a grey 'silent' tile"
+  }
+ ]
+}

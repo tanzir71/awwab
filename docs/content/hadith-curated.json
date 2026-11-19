@@ -1,0 +1,68 @@
+{
+ "_note": "Seed of verified references (checked on sunnah.com, Nov 2026). Full text/grades: build-time import from fawazahmed0/hadith-api (Unlicense) — keep only ṣaḥīḥ/ḥasan. Display paraphrase only in UI summaries; show full translation on detail with collection + number + grade.",
+ "items": [
+  {
+   "collection": "bukhari",
+   "number": 1,
+   "grade": "Sahih",
+   "theme": "intentions",
+   "summary": "Actions are by intentions.",
+   "alsoIn": "muslim:1907a",
+   "url": "https://sunnah.com/bukhari:1"
+  },
+  {
+   "collection": "bukhari",
+   "number": 6464,
+   "grade": "Sahih",
+   "theme": "consistency",
+   "summary": "The most beloved deeds to Allah are the most consistent, even if small.",
+   "alsoIn": null,
+   "url": "https://sunnah.com/bukhari:6464"
+  },
+  {
+   "collection": "bukhari",
+   "number": 528,
+   "grade": "Sahih",
+   "theme": "prayer",
+   "summary": "The five prayers are like bathing in a river at your door five times a day.",
+   "alsoIn": null,
+   "url": "https://sunnah.com/bukhari:528"
+  },
+  {
+   "collection": "tirmidhi",
+   "number": 3540,
+   "grade": "Hasan",
+   "theme": "mercy",
+   "summary": "Ḥadīth qudsī: even if your sins reached the clouds, then you sought forgiveness, I would forgive you.",
+   "alsoIn": null,
+   "url": "https://sunnah.com/tirmidhi:3540"
+  },
+  {
+   "collection": "muslim",
+   "number": "2702b",
+   "grade": "Sahih",
+   "theme": "return",
+   "summary": "He ﷺ sought Allah’s forgiveness a hundred times a day.",
+   "alsoIn": null,
+   "url": "https://sunnah.com/muslim:2702b"
+  },
+  {
+   "collection": "bukhari",
+   "number": 6306,
+   "grade": "Sahih",
+   "theme": "return",
+   "summary": "Sayyid al-Istighfār — the best way to ask forgiveness.",
+   "alsoIn": null,
+   "url": "https://sunnah.com/bukhari:6306"
+  },
+  {
+   "collection": "muslim",
+   "number": "571a",
+   "grade": "Sahih",
+   "theme": "prayer",
+   "summary": "Unsure of 3 or 4 rakʿahs? Build on certainty and make two prostrations before salām.",
+   "alsoIn": null,
+   "url": "https://sunnah.com/muslim:571a"
+  }
+ ]
+}

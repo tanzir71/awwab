@@ -1,0 +1,151 @@
+{
+ "_note": "Example output of the Word Anatomy engine for 103:1 (Uthmani). Engine steps: (1) split into grapheme clusters (base letter + combining marks); (2) map base letters & marks via arabic-letters.json; (3) mark ٱ as silent when word-medial or preceded by a particle; (4) build syllables CV/CVC from vowel marks; (5) joining forms by joinsNext; (6) root/lemma from Quranic Arabic Corpus morphology (GPL — check licence) ; (7) modern spelling = Quran.com text_imlaei (or strip Quranic annotation marks + ٱ→ا); (8) modern usage examples = curated content.",
+ "verseKey": "103:1",
+ "word": "وَٱلۡعَصۡرِ",
+ "translit": "wal-ʿaṣri",
+ "meaning": "By time",
+ "letters": [
+  {
+   "glyph": "وَ",
+   "letter": "و",
+   "name": "Wāw",
+   "mark": "fatha",
+   "sound": "wa"
+  },
+  {
+   "glyph": "ٱ",
+   "letter": "ٱ",
+   "name": "Alif waṣl",
+   "mark": "silent",
+   "sound": ""
+  },
+  {
+   "glyph": "لْ",
+   "letter": "ل",
+   "name": "Lām",
+   "mark": "sukūn",
+   "sound": "l"
+  },
+  {
+   "glyph": "عَ",
+   "letter": "ع",
+   "name": "ʿAyn",
+   "mark": "fatha",
+   "sound": "ʿa"
+  },
+  {
+   "glyph": "صْ",
+   "letter": "ص",
+   "name": "Ṣād",
+   "mark": "sukūn",
+   "sound": "ṣ"
+  },
+  {
+   "glyph": "رِ",
+   "letter": "ر",
+   "name": "Rāʾ",
+   "mark": "kasra",
+   "sound": "ri"
+  }
+ ],
+ "syllables": [
+  {
+   "ar": "وَٱلْ",
+   "tr": "wal"
+  },
+  {
+   "ar": "عَصْ",
+   "tr": "ʿaṣ"
+  },
+  {
+   "ar": "رِ",
+   "tr": "ri"
+  }
+ ],
+ "joining": [
+  {
+   "form": "و",
+   "position": "isolated"
+  },
+  {
+   "form": "ا",
+   "position": "isolated"
+  },
+  {
+   "form": "لـ",
+   "position": "initial"
+  },
+  {
+   "form": "ـعـ",
+   "position": "medial"
+  },
+  {
+   "form": "ـصـ",
+   "position": "medial"
+  },
+  {
+   "form": "ـر",
+   "position": "final"
+  }
+ ],
+ "prefixes": [
+  {
+   "ar": "وَ",
+   "meaning": "by / and (oath)"
+  },
+  {
+   "ar": "ٱلْ",
+   "meaning": "the"
+  }
+ ],
+ "root": {
+  "letters": [
+   "ع",
+   "ص",
+   "ر"
+  ],
+  "meaning": "to press, squeeze",
+  "family": [
+   {
+    "ar": "عَصْر",
+    "tr": "ʿaṣr",
+    "en": "afternoon; era"
+   },
+   {
+    "ar": "عَصِير",
+    "tr": "ʿaṣīr",
+    "en": "juice"
+   },
+   {
+    "ar": "مُعَاصِر",
+    "tr": "muʿāṣir",
+    "en": "contemporary"
+   },
+   {
+    "ar": "عَصْرِيّ",
+    "tr": "ʿaṣriyy",
+    "en": "modern"
+   }
+  ]
+ },
+ "modern": {
+  "spelling": "والعصر",
+  "examples": [
+   {
+    "ar": "صَلَاةُ ٱلْعَصْرِ",
+    "tr": "ṣalāt al-ʿaṣr",
+    "en": "the Asr prayer"
+   },
+   {
+    "ar": "نَلْتَقِي بَعْدَ ٱلْعَصْرِ",
+    "tr": "naltaqī baʿda l-ʿaṣr",
+    "en": "We’ll meet after Asr."
+   },
+   {
+    "ar": "هٰذَا عَصْرُ ٱلسُّرْعَةِ",
+    "tr": "hādhā ʿaṣru s-surʿa",
+    "en": "This is the age of speed."
+   }
+  ]
+ }
+}

@@ -1,0 +1,220 @@
+{
+ "_source": "Figma file cZzhFbOND8BtWNmryfFnIf · collection 'Theme' · modes Adult / Maktab",
+ "modes": [
+  "adult",
+  "maktab"
+ ],
+ "color": {
+  "bg": [
+   "#F3F4F0",
+   "#F1F7F3"
+  ],
+  "surface": [
+   "#FFFFFF",
+   "#FFFFFF"
+  ],
+  "surface-alt": [
+   "#E9ECE6",
+   "#E2EFE7"
+  ],
+  "tint": [
+   "#E4ECEF",
+   "#E1EEFB"
+  ],
+  "ink": [
+   "#18211E",
+   "#1D2742"
+  ],
+  "ink-muted": [
+   "#5C6661",
+   "#5A6680"
+  ],
+  "line": [
+   "#DCE1DA",
+   "#D2E3D9"
+  ],
+  "primary": [
+   "#1E4D44",
+   "#0E9F6E"
+  ],
+  "primary-soft": [
+   "#DCE8E2",
+   "#D2F3E4"
+  ],
+  "on-primary": [
+   "#FFFFFF",
+   "#FFFFFF"
+  ],
+  "accent": [
+   "#B07D2E",
+   "#F2994A"
+  ],
+  "danger": [
+   "#A9533D",
+   "#E8573F"
+  ],
+  "danger-soft": [
+   "#F3E1DA",
+   "#FDE3DE"
+  ],
+  "night": [
+   "#15302B",
+   "#25306B"
+  ],
+  "on-night": [
+   "#F3F4F0",
+   "#FFFFFF"
+  ],
+  "night-muted": [
+   "#9DB5AD",
+   "#AEB8E6"
+  ],
+  "overlay-on-night": [
+   "rgba(255,255,255,0.10)",
+   "rgba(255,255,255,0.14)"
+  ],
+  "harakat-fatha": [
+   "#D9443F",
+   "#E5383B"
+  ],
+  "harakat-kasra": [
+   "#2F62D6",
+   "#2F6FED"
+  ],
+  "harakat-damma": [
+   "#1E8A5A",
+   "#0E9F6E"
+  ],
+  "harakat-sukoon": [
+   "#8A4FC2",
+   "#9B51E0"
+  ],
+  "harakat-tanween": [
+   "#D9822B",
+   "#F08C00"
+  ],
+  "harakat-shadda": "use accent",
+  "harakat-silent": "use ink-muted"
+ },
+ "radius": {
+  "card": [
+   16,
+   24
+  ],
+  "control": [
+   12,
+   18
+  ],
+  "pill": [
+   999,
+   999
+  ],
+  "sheet": [
+   24,
+   32
+  ]
+ },
+ "font": {
+  "display": [
+   "Noto Serif",
+   "Baloo 2"
+  ],
+  "body": [
+   "Noto Sans",
+   "Nunito"
+  ],
+  "arabic": [
+   "Noto Sans Arabic",
+   "Noto Sans Arabic"
+  ],
+  "quranMushaf": "per script setting: IndoPak → an IndoPak Nastaleeq web font; Uthmani → KFGQPC Uthmanic Hafs (check licences). All learning/UI Arabic uses Noto Sans Arabic."
+ },
+ "type": {
+  "display-xl": {
+   "family": "display",
+   "weight": 600,
+   "size": 34,
+   "line": 40,
+   "tracking": "-3%"
+  },
+  "display-l": {
+   "family": "display",
+   "weight": 600,
+   "size": 26,
+   "line": 32,
+   "tracking": "-2%"
+  },
+  "display-m": {
+   "family": "display",
+   "weight": 600,
+   "size": 20,
+   "line": 26
+  },
+  "numeral-l": {
+   "family": "display",
+   "weight": 600,
+   "size": 40,
+   "line": 44
+  },
+  "title": {
+   "family": "body",
+   "weight": 700,
+   "size": 17,
+   "line": 22
+  },
+  "body": {
+   "family": "body",
+   "weight": 400,
+   "size": 15,
+   "line": 22
+  },
+  "body-strong": {
+   "family": "body",
+   "weight": 600,
+   "size": 15,
+   "line": 22
+  },
+  "small": {
+   "family": "body",
+   "weight": 500,
+   "size": 13,
+   "line": 18
+  },
+  "caption": {
+   "family": "body",
+   "weight": 700,
+   "size": 11,
+   "line": 14,
+   "tracking": "6%",
+   "transform": "uppercase"
+  },
+  "arabic-xl": {
+   "family": "arabic",
+   "weight": 700,
+   "size": 56,
+   "line": 84
+  },
+  "arabic-l": {
+   "family": "arabic",
+   "weight": 400,
+   "size": 30,
+   "line": 54
+  },
+  "arabic-m": {
+   "family": "arabic",
+   "weight": 400,
+   "size": 22,
+   "line": 40
+  }
+ },
+ "shadow": {
+  "card": "0 1px 2px rgba(27,36,32,.05), 0 6px 18px -4px rgba(27,36,32,.06)",
+  "raised": "0 2px 4px rgba(27,36,32,.06), 0 12px 28px -6px rgba(27,36,32,.10)",
+  "bar": "0 -4px 20px rgba(27,36,32,.07)"
+ },
+ "rules": [
+  "No outlined containers: use tonal fill + shadow.",
+  "Sibling actions/cards in a row share equal widths (flex:1).",
+  "Colour is never the only signal: harakat tiles always show the mark name."
+ ]
+}

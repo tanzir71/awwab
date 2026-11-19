@@ -1,0 +1,68 @@
+{
+ "_note": "Ritual steps for Umrah mode live guide. Geofence polygons/points MUST be traced from OpenStreetMap (ODbL) — do not guess coordinates. Ṭawāf lap counting stays manual (GPS unreliable near the Kaʿbah). Saʿy auto-lap = alternating geofence entry Ṣafā ↔ Marwah with hysteresis (≥ 60 s and ≥ 300 m path between counts) and one-tap correction.",
+ "steps": [
+  {
+   "id": "ihram",
+   "title": "Iḥrām & intention",
+   "trigger": "manual or flight reminder before mīqāt (airline announces)",
+   "duas": [
+    "talbiyah"
+   ]
+  },
+  {
+   "id": "talbiyah",
+   "title": "Talbiyah",
+   "trigger": "after niyyah until reaching the Kaʿbah"
+  },
+  {
+   "id": "tawaf",
+   "title": "Ṭawāf · 7 rounds",
+   "trigger": "geofence: haram_mataf (enter) → show counter",
+   "counter": "manual",
+   "notes": [
+    "start at Black Stone line",
+    "Kaʿbah on your left",
+    "between Yemeni corner and Black Stone: Quran 2:201"
+   ]
+  },
+  {
+   "id": "two_rakahs",
+   "title": "Two rakʿahs",
+   "trigger": "after 7 rounds",
+   "notes": [
+    "behind Maqām Ibrāhīm if possible; anywhere in the masjid if crowded"
+   ]
+  },
+  {
+   "id": "zamzam",
+   "title": "Zamzam",
+   "trigger": "manual"
+  },
+  {
+   "id": "sai",
+   "title": "Saʿy · 7 laps",
+   "trigger": "geofence: masa_safa (enter)",
+   "counter": "auto (beta) + manual",
+   "notes": [
+    "Ṣafā → Marwah = 1 lap; finish at Marwah",
+    "men jog lightly between the green lights"
+   ]
+  },
+  {
+   "id": "halq",
+   "title": "Shave or trim",
+   "trigger": "after lap 7 at Marwah",
+   "notes": [
+    "men shave or trim; women trim a fingertip’s length"
+   ]
+  }
+ ],
+ "geofences": {
+  "haram_boundary": null,
+  "haram_mataf": null,
+  "masa_safa": null,
+  "masa_marwah": null,
+  "gates": "array of {number,name,point} from OSM (e.g. Gate 1 King Abdulaziz, Gate 79 King Fahd)",
+  "miqat": "by flight route; reminder only"
+ }
+}
