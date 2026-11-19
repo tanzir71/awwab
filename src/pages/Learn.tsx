@@ -4,7 +4,7 @@ import { ArabicText } from "@/components/ArabicText";
 import { ListLink, SectionHeading } from "@/components/Surface";
 import { useRecord } from "@/hooks/use-awwab";
 import { addDays, dateKey, formatDay } from "@/lib/dates";
-import { bucketNames, isDue, type Reviews } from "@/lib/reviews";
+import { isDue, type Reviews } from "@/lib/reviews";
 import type { Settings } from "@/lib/storageService";
 import { families, lettersForFamily } from "@/lib/takhti";
 import { normalizeWord, splitArabicWords } from "@/lib/wordAnatomy";
@@ -12,6 +12,7 @@ import qaida from "../../docs/content/qaida-lessons.json";
 import surahs from "../../docs/content/surahs-for-salah.json";
 import { quranText } from "@/lib/quran";
 import { message } from "@/lib/copy";
+import { studyNames } from "@/lib/study-copy";
 
 const practice = surahs.surahs.slice(0, 12);
 const labelFor = (id: string) => practice.find(item => item.number === Number(id))?.transliteration;
@@ -46,13 +47,13 @@ export function Learn({ settings, desktop }: { settings: Settings; desktop: bool
   const attempted = Object.values(reviews).reduce((sum, review) => sum + (review.attempts ?? 0), 0);
   const correct = Object.values(reviews).reduce((sum, review) => sum + (review.correct ?? 0), 0);
   const duration = maktab ? 3 : 5;
-  const title = t("lessonTitle", { number: lesson.n, title: lesson.title });
+  const title = t("lessonTitle", { number: lesson.n, title: studyNames.lesson(settings.language, lesson.n, lesson.title) });
   const rowLabel = t("lessonRow", { name: lesson.traditional, row: row + 1 });
-  const reviewSurah = labelFor(reviewRef) ?? "Al-Asr";
+  const reviewSurah = studyNames.surah(settings.language, Number(reviewRef), labelFor(reviewRef) ?? "Al-Asr");
 
   const cards = [
-    { id: "recall", kind: "Sabqi", title: reviewSurah, detail: t("readThenRecall"), minutes: 2, path: `/learn/surahs/${reviewRef}` },
-    { id: "qaida", kind: "Sabaq", title, detail: t("spellThenRead"), minutes: duration, path: `/learn/qaida/${lesson.n}` },
+    { id: "recall", kind: t("sabqi").split(" · ")[0], title: reviewSurah, detail: t("readThenRecall"), minutes: 2, path: `/learn/surahs/${reviewRef}` },
+    { id: "qaida", kind: t("sabaq").split(" · ")[0], title, detail: t("spellThenRead"), minutes: duration, path: `/learn/qaida/${lesson.n}` },
     { id: "salah", kind: t("words"), title: t("understandSalah"), detail: t("wordAnatomy"), minutes: 2, path: "/learn/salah" },
     { id: "takhti", kind: t("takhti"), title: t("practiseShapes"), detail: t("traceThenWrite"), minutes: 3, path: "/learn/takhti" },
     { id: "fluency", kind: t("fluency"), title: t("readModernArabic"), detail: t("readThenCheck"), minutes: 2, path: "/learn/fluency" },
@@ -80,7 +81,7 @@ export function Learn({ settings, desktop }: { settings: Settings; desktop: bool
     <SectionHeading title={t("qaidaPath")} to="/learn/qaida" label={t("allLessons")} />
     <div className="qaida-path">
       {qaida.lessons.map(item => <Link key={item.n} className={`path-number ${item.n === lesson.n ? "current" : completed.includes(item.n) ? "done" : ""}`}
-        to={`/learn/qaida/${item.n}`} aria-label={t("lessonTitle", { number: item.n, title: item.title })}>{number.format(item.n)}</Link>)}
+        to={`/learn/qaida/${item.n}`} aria-label={t("lessonTitle", { number: item.n, title: studyNames.lesson(settings.language, item.n, item.title) })}>{number.format(item.n)}</Link>)}
     </div>
   </section>;
   const resume = <section className={`card night compact-stack learn-continue ${maktab ? "desk-span-2" : ""}`}>
@@ -111,7 +112,7 @@ export function Learn({ settings, desktop }: { settings: Settings; desktop: bool
       <div className="equal-row week-strip">{Array.from({ length: 7 }, (_, i) => addDays(date, i - 6)).map(day => <span key={day} data-done={activeDays.includes(day)} title={day}>{formatDay(day, { weekday: "narrow" }, settings.language)}</span>)}</div>
     </section>
     <section className="card compact-stack"><p className="caption">{t("dueForReview")}</p><h2>{t("studyItems", { count: due.length })}</h2>
-      <div className="equal-row">{(["sabaq", "sabqi", "manzil"] as const).map(bucket => <span className="counter-tile" key={bucket}><strong>{number.format(due.filter(([, review]) => review.bucket === bucket).length)}</strong><small>{bucketNames[bucket].split(" ")[0]}</small></span>)}</div>
+      <div className="equal-row">{(["sabaq", "sabqi", "manzil"] as const).map(bucket => <span className="counter-tile" key={bucket}><strong>{number.format(due.filter(([, review]) => review.bucket === bucket).length)}</strong><small>{t(bucket).split(" · ")[0]}</small></span>)}</div>
       <Link className="text-button" to={`/learn/surahs/${reviewRef}`}>{t("startReview")}</Link>
     </section>
     <section className="card compact-stack desk-span-2">
@@ -135,11 +136,11 @@ export function Learn({ settings, desktop }: { settings: Settings; desktop: bool
     {path}
     <section className="card compact-stack">
       <SectionHeading title={t("surahsForSalah")} to="/learn/surahs" label={`${t("all")} →`} />
-      {practice.slice(0, 5).map(item => <Link className="study-item" key={item.number} to={`/learn/surahs/${item.number}`}><span>{item.transliteration}</span><small>{t("wordCount", { count: item.words })}</small></Link>)}
+      {practice.slice(0, 5).map(item => <Link className="study-item" key={item.number} to={`/learn/surahs/${item.number}`}><span>{studyNames.surah(settings.language, item.number, item.transliteration)}</span><small>{t("wordCount", { count: item.words })}</small></Link>)}
     </section>
     <section className="card compact-stack">
       <SectionHeading title={t("takhtiWriting")} to="/learn/takhti" label={`${t("practise")} →`} />
-      <div className="takhti-shortcuts">{families.map(item => <Link className="chip" key={item.id} to={`/learn/takhti/${item.id}`}>{item.title}</Link>)}</div>
+      <div className="takhti-shortcuts">{families.map(item => <Link className="chip" key={item.id} to={`/learn/takhti/${item.id}`}>{studyNames.family(settings.language, item.id, item.title)}</Link>)}</div>
     </section>
   </div>;
 }

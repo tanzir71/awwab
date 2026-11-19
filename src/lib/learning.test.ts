@@ -5,6 +5,7 @@ import { quranText } from "./quran";
 import { splitArabicWords } from "./wordAnatomy";
 import { parseCorpus } from "./morphology";
 import { message } from "./copy";
+import { studyNames, studySearchTerm } from "./study-copy";
 
 describe("Word anatomy", () => {
   it("keeps Quranic marks on their base letter", () => {
@@ -50,6 +51,13 @@ describe("Learning copy", () => {
     expect(message({ language: "en", mode: "adult" }, "studyDays", { count: 1 })).toBe("1 day");
     expect(message({ language: "bn", mode: "adult" }, "studyDays", { count: 2 })).toBe("২ দিন");
     expect(message({ language: "bn", mode: "maktab" }, "studyResume", { duration: 3 })).toBe("পাঠ শুরু করি · ৩ মিনিট");
+  });
+
+  it("keeps reference numbers searchable and presents native labels and decimal sizes", () => {
+    expect(studySearchTerm("  তিরমিযী ২৬৭৬ ")).toBe("তিরমিযী 2676");
+    expect(studyNames.surah("bn", 103, "Al-ʿAsr")).toBe("আল-আসর");
+    expect(studyNames.surah("en", 103, "Al-ʿAsr")).toBe("Al-ʿAsr");
+    expect(message({ language: "bn", mode: "adult" }, "fileSizeMB", { size: 1.25 })).toBe("১.৩ মেগাবাইট");
   });
 });
 

@@ -43,6 +43,11 @@ function wrap(ctx: CanvasRenderingContext2D, value: string, width: number) {
 
 export async function drawShare(canvas: HTMLCanvasElement, model: ShareModel) {
   const card = shareTemplates.find(item => item.id === model.template);
+  const title = model.title || card.label;
+  const detail = model.detail || card.detail;
+  const bangla = /\p{Script=Bengali}/u;
+  const titleFont = bangla.test(title) ? '"Noto Sans Bengali Variable"' : '"Noto Serif Variable"';
+  const detailFont = bangla.test(detail) ? '"Noto Sans Bengali Variable"' : '"Noto Sans Variable"';
   const { width, height } = shareFormats[model.format];
   const root = getComputedStyle(document.documentElement);
   const token = (key: string) => root.getPropertyValue(`--c-${key}`).trim();
@@ -51,7 +56,8 @@ export async function drawShare(canvas: HTMLCanvasElement, model: ShareModel) {
   const ground = token(model.light ? "bg" : "night");
   await Promise.all([
     document.fonts.load('650 50px "Noto Sans Variable"'),
-    document.fonts.load('600 80px "Noto Serif Variable"'),
+    document.fonts.load(`600 80px ${titleFont}`, title),
+    document.fonts.load(`500 42px ${detailFont}`, detail),
     document.fonts.load('600 120px "Noto Sans Arabic Variable"', card.arabic),
   ]);
   await document.fonts.ready;
@@ -76,8 +82,8 @@ export async function drawShare(canvas: HTMLCanvasElement, model: ShareModel) {
   ctx.fillText("AWWAB", margin, margin + 26);
   let y = model.format === "wide" ? 221 : height * .27;
   ctx.fillStyle = text;
-  ctx.font = `600 ${model.format === "wide" ? 64 : 92}px "Noto Serif Variable"`;
-  for (const line of wrap(ctx, model.title || card.label, width - 2 * margin)) {
+  ctx.font = `600 ${model.format === "wide" ? 64 : 92}px ${titleFont}`;
+  for (const line of wrap(ctx, title, width - 2 * margin)) {
     ctx.fillText(line, margin, y);
     y += model.format === "wide" ? 72 : 104;
   }
@@ -91,8 +97,8 @@ export async function drawShare(canvas: HTMLCanvasElement, model: ShareModel) {
     y += 170;
   }
   ctx.fillStyle = muted;
-  ctx.font = `500 ${model.format === "wide" ? 35 : 42}px "Noto Sans Variable"`;
-  for (const line of wrap(ctx, model.detail || card.detail, width - 2 * margin)) { ctx.fillText(line, margin, y); y += 54; }
+  ctx.font = `500 ${model.format === "wide" ? 35 : 42}px ${detailFont}`;
+  for (const line of wrap(ctx, detail, width - 2 * margin)) { ctx.fillText(line, margin, y); y += 54; }
   if (model.template === "return" && model.activity.length && model.format !== "wide") {
     const step = Math.floor((width - 2 * margin) / 53);
     model.activity.slice(-371).forEach((count, index) => {

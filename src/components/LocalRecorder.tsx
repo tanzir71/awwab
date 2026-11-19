@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { Mic, Square } from "lucide-react";
+import { useCopy } from "@/lib/copy";
 
 export function LocalRecorder({ label }: { label?: string } = {}) {
+  const { t } = useCopy();
   const active = useRef<{ input: MediaStream; recorder: MediaRecorder }>();
   const mounted = useRef(true);
   const requesting = useRef(false);
   const [recording, setRecording] = useState(false);
   const [audio, setAudio] = useState("");
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState<"recordingUnavailable" | "microphonePermission">();
 
   useEffect(() => {
     mounted.current = true;
@@ -23,7 +25,7 @@ export function LocalRecorder({ label }: { label?: string } = {}) {
   async function start() {
     if (requesting.current) return;
     if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
-      setMessage("Recording is unavailable in this browser."); return;
+      setMessage("recordingUnavailable"); return;
     }
     requesting.current = true;
     let input: MediaStream | undefined;
@@ -45,22 +47,22 @@ export function LocalRecorder({ label }: { label?: string } = {}) {
       recorder.start();
       active.current = { input, recorder };
       setRecording(true);
-      setMessage("");
+      setMessage(undefined);
     } catch {
       input?.getTracks().forEach(track => track.stop());
-      setMessage("Allow microphone access to record your reading.");
+      if (mounted.current) setMessage("microphonePermission");
     } finally {
       requesting.current = false;
     }
   }
 
   return <div className="compact-stack">
-    <button type="button" className="action soft" aria-label={label ? `${recording ? "Stop recording" : "Record & compare"} ${label}` : undefined} onClick={() => {
+    <button type="button" className="action soft" aria-label={label ? t(recording ? "stopRecordingNamed" : "recordCompareNamed", { name: label }) : undefined} onClick={() => {
       const recorder = active.current?.recorder;
       if (recorder?.state === "recording") recorder.stop();
       else void start();
-    }}>{recording ? <><Square size={16} /> Stop recording</> : <><Mic size={17} /> Record &amp; compare</>}</button>
-    {message && <p role="status" className="small muted">{message}</p>}
-    {audio && <div className="compact-stack"><audio controls src={audio} aria-label={label ? `Your recording for ${label}` : "Your recording"} /><button className="text-button" onClick={() => setAudio("")}>Clear recording</button></div>}
+    }}>{recording ? <Square size={16} /> : <Mic size={17} />} {t(recording ? "stopRecording" : "recordCompare")}</button>
+    {message && <p role="status" className="small muted">{t(message)}</p>}
+    {audio && <div className="compact-stack"><audio controls src={audio} aria-label={label ? t("yourRecordingFor", { name: label }) : t("yourRecording")} /><button className="text-button" onClick={() => setAudio("")}>{t("clearRecording")}</button></div>}
   </div>;
 }

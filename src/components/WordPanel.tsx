@@ -10,6 +10,7 @@ import { lookupMorphology } from "@/lib/morphology";
 import { reviewCard, type Reviews } from "@/lib/reviews";
 import { updateRecord, type Settings } from "@/lib/storageService";
 import { message } from "@/lib/copy";
+import { studyNames } from "@/lib/study-copy";
 
 function Anatomy({ selection, settings }: { selection: WordSelection; settings: Settings }) {
   const t = message.bind(null, settings);
@@ -40,7 +41,9 @@ function Anatomy({ selection, settings }: { selection: WordSelection; settings: 
       {letters.map((tile, i) => <div key={i} className="letter-tile">
         <span lang="ar" className="tile-glyph" style={{ color: `var(--c-${tile.color})` }}>{tile.glyph}</span>
         <strong dir="auto" lang={ampara && tile.nameBn ? "bn" : "en"}>{ampara ? tile.nameBn ?? tile.name : tile.name}</strong>
-        <small dir="auto" lang={ampara && tile.details.length ? "bn" : "en"}>{ampara && tile.details.length ? tile.details.map(mark => mark.nameBn).join(" · ") : tile.mark}</small>
+        <small dir="auto" lang={ampara && tile.details.length && !tile.silent ? "bn" : tile.details.length && !tile.silent ? "en" : settings.language}>
+          {tile.silent ? t("silent") : !tile.details.length ? t("noMark") : ampara ? tile.details.map(mark => mark.nameBn).join(" · ") : tile.mark}
+        </small>
         <strong dir="ltr">{tile.sound || "—"}</strong>
       </div>)}
     </div>
@@ -50,7 +53,7 @@ function Anatomy({ selection, settings }: { selection: WordSelection; settings: 
     </div>
     <h3>{t("joining")}</h3>
     <div dir="rtl" className="letter-tiles" role="group" aria-label={t("joiningForms")} tabIndex={0}>
-      {joining.map((item, i) => <div className="letter-tile" key={i}><span className="tile-glyph" lang="ar">{item.form}</span><small>{item.position}</small></div>)}
+      {joining.map((item, i) => <div className="letter-tile" key={i}><span className="tile-glyph" lang="ar">{item.form}</span><small>{t(item.position)}</small></div>)}
     </div>
     {root && <section className="compact-stack">
       <h3>{t("rootFamily")}</h3>
@@ -58,7 +61,7 @@ function Anatomy({ selection, settings }: { selection: WordSelection; settings: 
       {curated && <><p>{curated.root.meaning}</p>
         {curated.root.family.map(item => <div className="list-row" key={item.ar}><span>{item.tr}<small>{item.en}</small></span><ArabicText text={item.ar} /></div>)}</>}
       {!curated && morphology?.family.slice(0, 4).map(item => <div className="list-row" key={`${item.verse}:${item.position}`}>
-        <span>{item.type}<small>{item.verse}</small></span><ArabicText text={item.lemma ?? item.word} />
+        <span>{studyNames.wordKind(settings.language, item.type)}<small>{item.verse}</small></span><ArabicText text={item.lemma ?? item.word} />
       </div>)}
       {morphology && <a className="small muted" href="https://corpus.quran.com/download/">Quranic Arabic Corpus 0.4</a>}
     </section>}

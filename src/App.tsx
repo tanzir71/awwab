@@ -5,6 +5,7 @@ import { AppShell } from "@/components/AppShell";
 import { WordPanel } from "@/components/WordPanel";
 import { useClock, useDesktop, useSettings } from "@/hooks/use-awwab";
 import { migrateLegacy } from "@/lib/storageService";
+import { CopyContext } from "@/lib/copy";
 import Today, { PrayerGuide, PrayerWeek } from "@/pages/Index";
 import { Learn } from "@/pages/Learn";
 import { Plan } from "@/pages/Plan";
@@ -47,8 +48,8 @@ function Main() {
 
   if (storage === "error") return <main className="app-content stack"><h1>Device storage is unavailable</h1><p>Allow this site to use browser storage, then reload to open Awwab.</p></main>;
   if (!settings || storage === "loading") return <main className="app-content"><p role="status">Opening awwab…</p></main>;
-  if (!settings.onboarded && pathname !== "/install" && pathname !== "/sources") return <><Onboarding settings={settings} /><WordPanel desktop={false} settings={settings} /></>;
-  return <AppShell settings={settings} now={now} desktop={desktop}>
+  if (!settings.onboarded && pathname !== "/install" && pathname !== "/sources") return <CopyContext.Provider value={settings}><Onboarding settings={settings} /><WordPanel desktop={false} settings={settings} /></CopyContext.Provider>;
+  return <CopyContext.Provider value={settings}><AppShell settings={settings} now={now} desktop={desktop}>
     <Routes>
       <Route path="/" element={<Navigate replace to={desktop ? "/learn" : "/today"} />} />
       <Route path="/today" element={<Today settings={settings} now={now} />} />
@@ -87,7 +88,7 @@ function Main() {
       {["learning", "prayer", "hijri", "reminders", "data"].map(page => <Route key={page} path={`/you/${page}`} element={<SettingsPage key={page} settings={settings} now={now} panel={page} />} />)}
       <Route path="*" element={<section className="card stack"><h1>Find your way back</h1><p>Choose a page to continue.</p><Link className="action" to="/">Go to your home screen</Link></section>} />
     </Routes>
-  </AppShell>;
+  </AppShell></CopyContext.Provider>;
 }
 
 export default function App() {

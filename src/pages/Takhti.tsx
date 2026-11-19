@@ -4,10 +4,14 @@ import { Download, Eraser, Eye, PenLine } from "lucide-react";
 import { ArabicText } from "@/components/ArabicText";
 import { SectionNav } from "@/components/Surface";
 import { families, lettersForFamily, strokesForLetter } from "@/lib/takhti";
+import { useCopy } from "@/lib/copy";
+import { studyNames } from "@/lib/study-copy";
 
 type Letter = ReturnType<typeof lettersForFamily>[number];
 
 export function TraceBoard({ letter, printable = false }: { letter: Letter; printable?: boolean }) {
+  const { language, t } = useCopy();
+  const name = language === "bn" ? letter.nameBn : letter.name;
   const canvas = useRef<HTMLCanvasElement>(null);
   const guide = useRef<HTMLCanvasElement>(null);
   const pointer = useRef<number>();
@@ -82,8 +86,8 @@ export function TraceBoard({ letter, printable = false }: { letter: Letter; prin
 
   return <div className="compact-stack">
     <div className="trace-board">
-      <canvas ref={guide} width={640} height={400} aria-label={`Tracing guide for ${letter.name}`} />
-      {!printable && <canvas ref={canvas} width={640} height={400} aria-label={`Drawing board for ${letter.name}`}
+      <canvas ref={guide} width={640} height={400} aria-label={t("tracingGuide", { name })} />
+      {!printable && <canvas ref={canvas} width={640} height={400} aria-label={t("drawingBoard", { name })}
         onPointerDown={event => {
           if (pointer.current !== undefined || event.button !== 0) return;
           event.currentTarget.setPointerCapture(event.pointerId);
@@ -94,28 +98,29 @@ export function TraceBoard({ letter, printable = false }: { letter: Letter; prin
         onLostPointerCapture={() => { pointer.current = undefined; previous.current = undefined; }} />}
     </div>
     {!printable && <div className="equal-row">
-      <button className="action light" onClick={clear}><Eraser size={18} /> Wash the takhti</button>
-      <button className="action soft" aria-pressed={show} onClick={() => setShow(value => !value)}><Eye size={18} /> {show ? "Hide guide" : "Show me"}</button>
+      <button className="action light" onClick={clear}><Eraser size={18} /> {t("washTakhti")}</button>
+      <button className="action soft" aria-pressed={show} onClick={() => setShow(value => !value)}><Eye size={18} /> {t(show ? "hideGuide" : "showGuide")}</button>
     </div>}
   </div>;
 }
 
 export function Takhti() {
+  const { language, t } = useCopy();
   const { family } = useParams();
   const selected = families.find(item => item.id === family) ?? families[0];
   const letters = lettersForFamily(selected.id);
   const [pick, setPick] = useState("");
   const letter = letters.find(item => item.letter === pick) ?? letters[0];
   return <div className="stack">
-    <SectionNav title="Takhti · writing" back="/learn" />
-    <p className="muted">Follow the start dot and trace the letter with your finger, mouse or stylus.</p>
-    <div className="chips" aria-label="Letter families">{families.map(item => <Link key={item.id} className={`chip ${item.id === selected.id ? "soft" : ""}`} to={`/learn/takhti/${item.id}`}>{item.title}</Link>)}</div>
+    <SectionNav title={t("takhtiWriting")} back="/learn" />
+    <p className="muted">{t("traceInstruction")}</p>
+    <div className="chips" role="group" aria-label={t("letterFamilies")}>{families.map(item => <Link key={item.id} className={`chip ${item.id === selected.id ? "soft" : ""}`} to={`/learn/takhti/${item.id}`}>{studyNames.family(language, item.id, item.title)}</Link>)}</div>
     <section className="card stack">
-      <h2 className="with-icon"><PenLine size={19} /> {selected.title}</h2>
-      <div className="equal-row" aria-label="Choose a letter">{letters.map(item => <button key={item.letter} className={`action ${item === letter ? "" : "light"}`} type="button" aria-pressed={item === letter} onClick={() => setPick(item.letter)}>{item.name}</button>)}</div>
+      <h2 className="with-icon"><PenLine size={19} /> {studyNames.family(language, selected.id, selected.title)}</h2>
+      <div className="equal-row takhti-letters" role="group" aria-label={t("chooseLetter")}>{letters.map(item => <button key={item.letter} className={`action ${item === letter ? "" : "light"}`} type="button" aria-pressed={item === letter} onClick={() => setPick(item.letter)}>{language === "bn" ? item.nameBn : item.name}</button>)}</div>
       <ArabicText text={letter.letter} />
       <TraceBoard letter={letter} />
     </section>
-    <Link to={`/print/takhti/${selected.id}`} className="action soft"><Download size={18} /> Print a practice sheet</Link>
+    <Link to={`/print/takhti/${selected.id}`} className="action soft"><Download size={18} /> {t("printPracticeSheet")}</Link>
   </div>;
 }

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useCopy } from "@/lib/copy";
 
 export function ListLink({ to, icon, title, detail }: {
   to: string; icon: ReactNode; title: string; detail?: string;
@@ -13,8 +14,9 @@ export function ListLink({ to, icon, title, detail }: {
 }
 
 export function SectionNav({ title, back }: { title: string; back: string }) {
+  const { t } = useCopy();
   return <header className="section-nav">
-    <Link to={back} className="icon-button" aria-label="Back"><ChevronLeft size={22} /></Link>
+    <Link to={back} className="icon-button" aria-label={t("back")}><ChevronLeft size={22} /></Link>
     <h1>{title}</h1>
     <span className="w-11" />
   </header>;

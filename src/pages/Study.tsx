@@ -3,13 +3,14 @@ import { BookOpen, ChevronRight, Headphones, Search } from "lucide-react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { ArabicText } from "@/components/ArabicText";
-import { LocalRecorder } from "@/components/LocalRecorder";
 import { VerseAudio } from "@/components/VerseAudio";
 import { SectionNav } from "@/components/Surface";
 import { useDesktop, useRecord } from "@/hooks/use-awwab";
 import { dateKey } from "@/lib/dates";
 import { asset } from "@/lib/config";
-import { bucketNames, isDue, reviewCard, type ReviewGrade, type Reviews } from "@/lib/reviews";
+import { grades, isDue, reviewCard, type ReviewGrade, type Reviews } from "@/lib/reviews";
+import { useCopy } from "@/lib/copy";
+import { studyNames, studySearchTerm } from "@/lib/study-copy";
 import { updateRecord, type Settings } from "@/lib/storageService";
 import { splitArabicWords, wordAnatomy } from "@/lib/wordAnatomy";
 import alphabet from "../../docs/content/arabic-letters.json";
@@ -36,7 +37,7 @@ const exercises: Record<number, string[]> = {
   16: ["مِنْ", "أَنْعَمْتَ", "مِنْ رَبِّهِمْ", "مِنْ خَيْرٍ", "مِنْ بَعْدِ"], 17: ["قُلْ هُوَ ٱللَّهُ أَحَدٌ", "ٱللَّهُ ٱلصَّمَدُ", "لَمْ يَلِدْ"],
 };
 const supportedSurah = (number: number) => quranText[number];
-const labels: Record<ReviewGrade, string> = { forgot: "Forgot", shaky: "Shaky", "got-it": "Got it" };
+const studyModes = ["listen", "read", "recall"] as const;
 
 function wrapAyah(text: string) {
   const words = text.split(/\s+/);
@@ -53,28 +54,32 @@ function wrapAyah(text: string) {
 }
 
 function SurahList({ selected }: { selected?: number }) {
+  const { language, t } = useCopy();
   const reviews = useRecord<Reviews>("reviews", {});
   const now = new Date();
   return <section className="compact-stack">
     {fullChapters.map(chapter => <Link className={`list-row ${chapter.number === selected ? "soft" : ""}`} key={chapter.number} to={`/learn/surahs/${chapter.number}`}>
-      <span className="icon-box"><BookOpen size={19} /></span><span><strong>{chapter.transliteration}</strong><small>{chapter.words} words · {bucketNames[reviews[chapter.number]?.bucket ?? "sabaq"]}</small></span>
-      {reviews[chapter.number] && isDue(reviews[chapter.number], now) ? <span className="chip soft">Due</span> : <ChevronRight size={18} />}
+      <span className="icon-box"><BookOpen size={19} /></span><span><strong>{studyNames.surah(language, chapter.number, chapter.transliteration)}</strong><small>{t("wordCount", { count: chapter.words })} · {t(reviews[chapter.number]?.bucket ?? "sabaq")}</small></span>
+      {reviews[chapter.number] && isDue(reviews[chapter.number], now) ? <span className="chip soft">{t("due")}</span> : <ChevronRight size={18} />}
     </Link>)}
   </section>;
 }
 
 export function SurahReader({ settings }: { settings: Settings }) {
+  const { t } = useCopy();
   const { id } = useParams();
   const surah = fullChapters.find(chapter => chapter.number === Number(id));
-  if (!surah) return <div className="stack"><SectionNav title="Surahs for salah" back="/learn" /><SurahList /></div>;
+  if (!surah) return <div className="stack"><SectionNav title={t("surahsForSalah")} back="/learn" /><SurahList /></div>;
   return <SurahStudy key={id} surah={surah} settings={settings} />;
 }
 
 function SurahStudy({ surah, settings }: { surah: typeof fullChapters[number]; settings: Settings }) {
   const [params] = useSearchParams();
-  const [mode, setMode] = useState<"Listen" | "Read" | "Recall">(params.get("mode") === "listen" ? "Listen" : params.get("mode") === "recall" ? "Recall" : "Read");
+  const { language, t } = useCopy();
+  const name = studyNames.surah(language, surah.number, surah.transliteration);
+  const [mode, setMode] = useState<typeof studyModes[number]>(() => studyModes.find(mode => mode === params.get("mode")) ?? "read");
   const [hints, setHints] = useState<Record<string, boolean>>({});
-  const [saved, setSaved] = useState("");
+  const [saved, setSaved] = useState(false);
   const [milestone, setMilestone] = useState(false);
   const [saving, setSaving] = useState(false);
   const reviews = useRecord<Reviews>("reviews", {});
@@ -97,64 +102,66 @@ function SurahStudy({ surah, settings }: { surah: typeof fullChapters[number]; s
         moved = old[surah.number]?.bucket !== "manzil" && next.bucket === "manzil";
         return { ...old, [surah.number]: next };
       });
-      await updateRecord<string[]>("study-days", [], old => [...new Set([...old, dateKey()])]);
+      await updateRecord<string[]>("study-days", [], old => [...new Set([...old, dateKey(new Date(), settings.city.timeZone)])]);
       setMilestone(moved);
-      setSaved("Review saved.");
-    } catch { toast.error("This review could not be saved."); }
+      setSaved(true);
+    } catch { toast.error(t("reviewSaveError")); }
     finally { setSaving(false); }
   }
   return <div className="study-workspace">
-    <aside className="desktop-queue stack" aria-label="Surah list"><h2>Surahs for salah</h2><SurahList selected={surah.number} /></aside>
+    <aside className="desktop-queue stack" aria-label={t("surahList")}><h2>{t("surahsForSalah")}</h2><SurahList selected={surah.number} /></aside>
     <div className="stack">
-      <SectionNav title={`${surah.transliteration} · ${surah.number}`} back="/learn/surahs" />
-      <div className="equal-row study-tabs" aria-label="Study mode">
-        {(["Listen", "Read", "Recall"] as const).map(item => <button className={`action ${mode === item ? "light" : "plain"}`} aria-pressed={mode === item} key={item} onClick={() => { setMode(item); setSaved(""); }}>{item}</button>)}
+      <SectionNav title={t("chapterHeading", { name, number: surah.number })} back="/learn/surahs" />
+      <div className="equal-row study-tabs" role="group" aria-label={t("studyMode")}>
+        {studyModes.map(item => <button className={`action ${mode === item ? "light" : "plain"}`} aria-pressed={mode === item} key={item} onClick={() => { setMode(item); setSaved(false); }}>{t(item)}</button>)}
       </div>
-      <p className="muted small"><span className="chip soft">{bucketNames[bucket]}</span> {surah.ayahs} āyāt · {surah.words} words</p>
-      <p className="small muted">Tap any word to spell it out letter by letter.</p>
-      {mode === "Listen" && <section className="card stack">
-        <h2 className="with-icon"><Headphones size={20} /> Practise aloud</h2>
-        <VerseAudio audioRef={`surah:${surah.number}`} label={surah.transliteration} compare />
-        <Link to={`/you/audio?surah=${surah.number}`} className="text-button">Download recitation for offline listening</Link>
+      <p className="muted small"><span className="chip soft">{t(bucket)}</span> {t("chapterCounts", { verses: surah.ayahs, words: surah.words })}</p>
+      <p className="small muted">{t("spellOutHint")}</p>
+      {mode === "listen" && <section className="card stack">
+        <h2 className="with-icon"><Headphones size={20} /> {t("practiseAloud")}</h2>
+        <VerseAudio audioRef={`surah:${surah.number}`} label={name} compare />
+        <Link to={`/you/audio?surah=${surah.number}`} className="text-button">{t("downloadRecitation")}</Link>
       </section>}
       {verses.map((verse, i) => {
-        const reading = mode !== "Recall" || i === 0;
+        const reading = mode !== "recall" || i === 0;
         const recall = reading ? "read" : hints[verse.ref] ? "hint" : "hidden";
         return <section className={`card stack ${!reading && i > 1 ? "tint" : ""}`} key={verse.ref}>
           <header className="row-between"><a href={`https://quran.com/${verse.ref.replace(":", "/")}`} className="chip">{verse.ref}</a>
-            {!reading && <button className="text-button" onClick={() => setHints(value => ({ ...value, [verse.ref]: !value[verse.ref] }))}>{hints[verse.ref] ? "Hide first letters" : "Show first letters"}</button>}
+            {!reading && <button className="text-button" onClick={() => setHints(value => ({ ...value, [verse.ref]: !value[verse.ref] }))}>{t(hints[verse.ref] ? "hideInitials" : "showInitials")}</button>}
           </header>
           <div className="text-right"><ArabicText text={wrapAyah(verse[settings.script])} citation={verse.ref} verse={verse.ref} recall={recall} mushaf={settings.script}
             words={splitArabicWords(verse.uthmani).map(anatomyWord => ({ anatomyWord }))} /></div>
-          <p className={reading ? "" : "muted"}>{!reading && "Cue · "}{verse.english}</p>
-          {mode === "Listen" && <VerseAudio audioRef={verse.ref} label={`āyah ${i + 1}`} compare />}
+          <p className={reading ? "" : "muted"}>{!reading && `${t("cue")} · `}<span lang="en">{verse.english}</span></p>
+          {mode === "listen" && <VerseAudio audioRef={verse.ref} label={t("verseLabel", { number: i + 1 })} compare />}
         </section>;
       })}
       <section className="compact-stack">
-        <h2>How did that go?</h2>
+        <h2>{t("howDidItGo")}</h2>
         <div className="equal-row">
-          {(Object.keys(labels) as ReviewGrade[]).map(value => <button className={`action ${value === "got-it" ? "" : "light"}`} key={value} disabled={saving || Boolean(saved)} onClick={() => void grade(value)}>{labels[value]}</button>)}
+          {(Object.keys(grades) as ReviewGrade[]).map(value => <button className={`action ${value === "got-it" ? "" : "light"}`} key={value} disabled={saving || saved} onClick={() => void grade(value)}>{t(value)}</button>)}
         </div>
-        {saved && <p className="muted" role="status">{saved}</p>}
+        {saved && <p className="muted" role="status">{t("reviewSaved")}</p>}
       </section>
-      {surah.number !== 1 && <p className="card soft">Try reciting {surah.transliteration} in tonight’s Maghrib, in the second rakʿah.</p>}
-      {milestone && <section className="card tint compact-stack"><h2>{surah.transliteration} has moved to Manzil</h2><p>Take a moment to see how far you’ve come.</p>
-        <Link className="action soft" to={`/share?template=surah&milestone=${encodeURIComponent(`I learned ${surah.transliteration}`)}`}>Share this moment</Link></section>}
-      <p className="muted small"><a href={settings.script === "indopak" ? "https://digitalkhatt.org" : "https://tanzil.net/docs/text_license"}>{settings.script === "indopak" ? "IndoPak by DigitalKhatt" : "Quran text by Tanzil"}</a> · English by M. M. Pickthall</p>
+      {surah.number !== 1 && <p className="card soft">{t("tryInMaghrib", { name })}</p>}
+      {milestone && <section className="card tint compact-stack"><h2>{t("surahMilestone", { name })}</h2><p>{t("progressMoment")}</p>
+        <Link className="action soft" to={`/share?template=surah&milestone=${encodeURIComponent(t("learnedSurah", { name }))}`}>{t("shareMoment")}</Link></section>}
+      <p className="muted small"><a href={settings.script === "indopak" ? "https://digitalkhatt.org" : "https://tanzil.net/docs/text_license"}>{t(settings.script === "indopak" ? "indopakCredit" : "tanzilCredit")}</a> · {t("englishTranslationCredit")}</p>
     </div>
   </div>;
 }
 
 export function Qaida({ settings }: { settings: Settings }) {
+  const { language, t } = useCopy();
+  const formatNumber = new Intl.NumberFormat(language);
   const { id } = useParams();
   const current = useRecord("qaida-current", 1);
   const completed = useRecord<number[]>("qaida-complete", []);
   const lesson = qaida.lessons.find(item => item.n === Number(id));
   if (!lesson) return <div className="stack">
-    <SectionNav title="Noorani Qaida" back="/learn" />
+    <SectionNav title={t("nooraniQaida")} back="/learn" />
     {qaida.lessons.map(item => <Link key={item.n} className="list-row" to={`/learn/qaida/${item.n}`}>
-      <span className="icon-box">{item.n}</span><span><strong>{item.title}</strong><small>{item.traditional}</small></span>
-      {completed.includes(item.n) ? <span className="chip soft">Practised</span> : current === item.n ? <span className="chip soft">Continue</span> : <ChevronRight size={18} />}
+      <span className="icon-box">{formatNumber.format(item.n)}</span><span><strong>{studyNames.lesson(language, item.n, item.title)}</strong><small lang="en">{item.traditional}</small></span>
+      {completed.includes(item.n) ? <span className="chip soft">{t("practised")}</span> : current === item.n ? <span className="chip soft">{t("continueAction")}</span> : <ChevronRight size={18} />}
     </Link>)}
   </div>;
   return <QaidaLesson key={id} lesson={lesson} settings={settings} />;
@@ -163,13 +170,18 @@ export function Qaida({ settings }: { settings: Settings }) {
 function QaidaLesson({ lesson, settings }: {
   lesson: typeof qaida.lessons[number]; settings: Settings;
 }) {
+  const { language, t } = useCopy();
+  const title = studyNames.lesson(language, lesson.n, lesson.title);
   const storedRow = useRecord(`qaida-row-${lesson.n}`, 0);
   const [activeRow, setActiveRow] = useState<number>();
   const [answer, setAnswer] = useState<number>();
   const [finished, setFinished] = useState(false);
   const drill = lesson.n === 1 || lesson.n === 4 || lesson.n === 5;
   const marks = lesson.n === 4 ? drillMarks : lesson.n === 5 ? ["ً", "ٍ", "ٌ"] : [""];
-  const options = lesson.n === 1 ? ["Bāʾ", "Tāʾ", "Thāʾ"] : lesson.n === 4 ? ["Fatha", "Kasra", "Ḍamma"] : lesson.n === 5 ? ["an", "in", "un"] : ["1 letter", "2 letters", "3 letters"];
+  const ampara = settings.spellStyle === "ampara-bn";
+  const options = lesson.n === 1 ? ampara ? ["বা", "তা", "ছা"] : ["Bāʾ", "Tāʾ", "Thāʾ"]
+    : lesson.n === 4 ? ampara ? ["যবর", "যের", "পেশ"] : ["Fatha", "Kasra", "Ḍamma"]
+    : lesson.n === 5 ? ["an", "in", "un"] : [1, 2, 3].map(count => t("letterCount", { count }));
   const prompt = lesson.n === 1 ? "ب" : lesson.n === 4 ? "بِ" : lesson.n === 5 ? "بٌ" : "قُلْ";
   const correct = lesson.n === 1 ? 0 : lesson.n === 5 ? 2 : 1;
   const rows = drill
@@ -188,57 +200,57 @@ function QaidaLesson({ lesson, settings }: {
     try {
       await updateRecord<number[]>("qaida-complete", [], old => Array.from(new Set([...old, lesson.n])));
       await updateRecord("qaida-current", 1, () => Math.min(lesson.n + 1, 17));
-      await updateRecord<string[]>("study-days", [], old => [...new Set([...old, dateKey()])]);
+      await updateRecord<string[]>("study-days", [], old => [...new Set([...old, dateKey(new Date(), settings.city.timeZone)])]);
       setFinished(true);
-    } catch { toast.error("Your lesson progress could not be saved."); }
+    } catch { toast.error(t("lessonSaveError")); }
   }
 
   return <div className="qaida-workspace">
-    <aside className="qaida-queue card compact-stack" aria-label="Qaida lessons">
-      <h2>Noorani Qaida</h2>
+    <aside className="qaida-queue card compact-stack" aria-label={t("qaidaLessons")}>
+      <h2>{t("nooraniQaida")}</h2>
       {qaida.lessons.map(item => <Link key={item.n} className={`study-item ${item.n === lesson.n ? "soft" : ""}`}
-        to={`/learn/qaida/${item.n}`} aria-current={item.n === lesson.n ? "step" : undefined}>{item.n}. {item.title}</Link>)}
+        to={`/learn/qaida/${item.n}`} aria-current={item.n === lesson.n ? "step" : undefined}>{t("qaidaLessonNumber", { number: item.n, title: studyNames.lesson(language, item.n, item.title) })}</Link>)}
     </aside>
     <div className="stack">
-    <SectionNav title={`Qaida ${lesson.n} · ${lesson.title}`} back="/learn/qaida" />
-    <div className="row-between"><p className="muted">{lesson.traditional} · about {isMaktab ? 3 : 5} minutes</p><span className="chip soft">Row {row + 1} of {rows.length}</span></div>
+    <SectionNav title={t("lessonTitle", { number: lesson.n, title })} back="/learn/qaida" />
+    <div className="row-between"><p className="muted">{t("lessonAbout", { name: lesson.traditional, minutes: isMaktab ? 3 : 5 })}</p><span className="chip soft">{t("rowOf", { row: row + 1, total: rows.length })}</span></div>
     <section className="card stack">
-      <h2>{isMaktab ? "Read this row out loud" : "Read along"}</h2>
-      <progress value={row + 1} max={rows.length} aria-label="Lesson rows" />
+      <h2>{t("readAlong")}</h2>
+      <progress value={row + 1} max={rows.length} aria-label={t("lessonRows")} />
       <div className="drill-grid" dir="rtl">{rowLetters.flat().map((text, i) => {
         const tile = wordAnatomy(text).letters[0];
         return <div className="card soft compact-stack text-center" key={i}>
           <ArabicText text={text} />
-          {drill && <small>{settings.spellStyle === "ampara-bn"
+          {drill && <small lang={ampara ? "bn" : "en"}>{ampara
             ? `${tile.nameBn ?? tile.name} ${tile.details.map(mark => mark.nameBn).join(" ")}`
             : [tile.name, ...tile.details.map(mark => mark.name)].join(" + ")}</small>}
           {drill && <strong>{tile.sound}</strong>}
         </div>;
       })}</div>
       <div className="equal-row">
-        <button className="action light" disabled={row === 0} onClick={() => move(row - 1)}>Previous row</button>
-        <button className="action soft" disabled={row === rows.length - 1} onClick={() => move(row + 1)}>Next row</button>
+        <button className="action light" disabled={row === 0} onClick={() => move(row - 1)}>{t("previousRow")}</button>
+        <button className="action soft" disabled={row === rows.length - 1} onClick={() => move(row + 1)}>{t("nextRow")}</button>
       </div>
-      <VerseAudio key={row} audioRef={`qaida:${lesson.n}:${row + 1}`} label={`row ${row + 1}`} compare />
+      <VerseAudio key={row} audioRef={`qaida:${lesson.n}:${row + 1}`} label={t("rowLabel", { row: row + 1 })} compare />
     </section>
     <section className="card stack">
-      <h2>{lesson.n === 1 ? "Which letter is this?" : lesson.n === 4 ? "Which haraka do you see?" : lesson.n === 5 ? "Which sound do you hear as you read?" : "How many letters do you see?"}</h2>
+      <h2>{t(lesson.n === 1 ? "whichLetter" : lesson.n === 4 ? "whichMark" : lesson.n === 5 ? "whichSound" : "howManyLetters")}</h2>
       <ArabicText text={prompt} />
       <div className="equal-row">{options.map((label, i) => <button type="button" key={label} className={`action ${answer === i ? "" : "light"}`} aria-pressed={answer === i} onClick={() => setAnswer(i)}>{label}</button>)}</div>
-      {answer !== undefined && <p role="status">{answer === correct ? "You’ve got it." : "Take another look. Tap the word to see its letters."}</p>}
+      {answer !== undefined && <p role="status">{t(answer === correct ? "quizCorrect" : "quizTryAgain")}</p>}
     </section>
-    <section className="card tint compact-stack"><h2>Spot it in the Quran</h2>
+    <section className="card tint compact-stack"><h2>{t("spotInQuran")}</h2>
       <ArabicText text={lesson.n === 3 ? exercises[3][0] : quranText[112][0].uthmani} citation={lesson.n === 3 ? "2:1" : "112:1"} />
       <p className="muted small">{lesson.n === 3 ? "Al-Baqara 2:1" : "Al-Ikhlāṣ 112:1"}</p>
     </section>
-    {finished ? <div className="equal-row"><Link className="action" to={lesson.n < 17 ? `/learn/qaida/${lesson.n + 1}` : "/learn"}>Continue learning</Link>
-      <Link className="action soft" to={`/share?template=${isMaktab && lesson.n === 17 ? "maktab" : "qaida"}&milestone=${encodeURIComponent(`Practised Qaida lesson ${lesson.n}`)}`}>Share this moment</Link></div> : <button className="action" onClick={() => void finish()}>Mark lesson practised</button>}
+    {finished ? <div className="equal-row"><Link className="action" to={lesson.n < 17 ? `/learn/qaida/${lesson.n + 1}` : "/learn"}>{t("continueLearning")}</Link>
+      <Link className="action soft" to={`/share?template=${isMaktab && lesson.n === 17 ? "maktab" : "qaida"}&milestone=${encodeURIComponent(t("practisedLesson", { number: lesson.n }))}`}>{t("shareMoment")}</Link></div> : <button className="action" onClick={() => void finish()}>{t("saveLesson")}</button>}
     </div>
-    <aside className="qaida-trace card stack" aria-label="Takhti workspace">
-      <h2>Takhti · {traceLetter.name}</h2>
+    <aside className="qaida-trace card stack" aria-label={t("takhtiWorkspace")}>
+      <h2>{t("takhti")} · {language === "bn" ? traceLetter.nameBn : traceLetter.name}</h2>
       <ArabicText text={traceLetter.letter} />
       <TraceBoard letter={traceLetter} />
-      <Link className="action soft" to="/print/takhti/boat">Print a practice sheet</Link>
+      <Link className="action soft" to="/print/takhti/boat">{t("printPracticeSheet")}</Link>
     </aside>
   </div>;
 }
@@ -254,10 +266,11 @@ const salahGlosses: Record<string, string[]> = {
 };
 
 export function SalahWords({ settings }: { settings: Settings }) {
+  const { language, t } = useCopy();
   const known = useRecord<string[]>("words-known", []);
   return <div className="stack">
-    <SectionNav title="Understand your salah" back="/learn" />
-    <section className="card night compact-stack"><h2>Al-Fātiḥa, word by word</h2><p className="muted">Tap any word to spell it out. Mark a line familiar once you can recall its meaning.</p></section>
+    <SectionNav title={t("understandSalah")} back="/learn" />
+    <section className="card night compact-stack"><h2>{t("fatihaWordByWord")}</h2><p className="muted">{t("markFamiliarHint")}</p></section>
     {quranText[1].map(verse => {
       const glosses = salahGlosses[verse.ref];
       const words = splitArabicWords(verse.uthmani);
@@ -265,16 +278,16 @@ export function SalahWords({ settings }: { settings: Settings }) {
         <a className="chip justify-self-start" href={`https://quran.com/${verse.ref.replace(":", "/")}`}>{verse.ref}</a>
         <ArabicText text={words.reduce((lines, word, i) => lines + (i === 0 ? "" : i % 2 === 0 ? "\n" : " ") + word, "")}
           citation={verse.ref} verse={verse.ref} words={words.map((_, i) => ({ gloss: glosses[i] }))} />
-        <p>{verse.english}</p>
+        <p lang="en">{verse.english}</p>
         <button className="action soft" aria-pressed={known.includes(verse.ref)} onClick={() => void updateRecord<string[]>("words-known", [], old =>
-          old.includes(verse.ref) ? old.filter(item => item !== verse.ref) : [...old, verse.ref])}>{known.includes(verse.ref) ? "Familiar ✓" : "Mark words familiar"}</button>
+          old.includes(verse.ref) ? old.filter(item => item !== verse.ref) : [...old, verse.ref])}>{t(known.includes(verse.ref) ? "familiar" : "markFamiliar")}</button>
       </section>;
     })}
     <section className="compact-stack">
-      <h2>What you say in each position</h2>
-      <p className="muted">These are narrated forms. Scholars differ on when to say some phrases in congregational prayer.</p>
+      <h2>{t("eachPrayerPosition")}</h2>
+      <p className="muted">{t("prayerPositionNote")}</p>
       {salah.sections.map(section => <details className="card" key={section.title}>
-        <summary><strong>{section.title}</strong></summary>
+        <summary><strong>{studyNames.prayerSection(language, section.title)}</strong></summary>
         <div className="stack">
           <a href={section.url} className="caption">{section.source}</a>
           {section.lines.map(([arabic, gloss], i) => <ArabicText key={i} text={String(arabic)} citation={section.source}
@@ -282,17 +295,18 @@ export function SalahWords({ settings }: { settings: Settings }) {
         </div>
       </details>)}
     </section>
-    <p className="small muted"><a href="https://tanzil.net/docs/text_license">Tanzil Quran text</a> · Pickthall translation</p>
+    <p className="small muted"><a href="https://tanzil.net/docs/text_license">{t("tanzilCredit")}</a> · {t("englishTranslationCredit")}</p>
   </div>;
 }
 
 export function Hadith() {
+  const { language, t } = useCopy();
   const [query, setQuery] = useState("");
   const [collection, setCollection] = useState("curated");
   const [limit, setLimit] = useState(12);
   const [corpus, setCorpus] = useState<{ collection: string; items: Narration[] }>();
   const [error, setError] = useState("");
-  const normalized = useDeferredValue(query.trim().toLowerCase());
+  const normalized = useDeferredValue(studySearchTerm(query));
   useEffect(() => {
     if (collection === "curated") return;
     const controller = new AbortController();
@@ -309,30 +323,31 @@ export function Hadith() {
   const matches = hadith.items.filter(item => [item.summary, item.theme, item.collection, item.grade, String(item.number)].some(value => value.toLowerCase().includes(normalized)));
   const results = corpus?.collection === collection ? corpus.items.filter(item => [item.text, item.grade, String(item.number)].some(value => value.toLowerCase().includes(normalized))) : [];
   return <div className="stack">
-    <SectionNav title="Popular and authentic" back="/learn" />
+    <SectionNav title={t("authenticHadith")} back="/learn" />
     <div className="card stack">
-      <label className="field"><span className="with-icon"><Search size={18} /> Search offline</span><input value={query} onChange={event => { setQuery(event.target.value); setLimit(12); }} type="search" placeholder="Collection, number or topic" /></label>
-      <label className="field">Collection<select value={collection} onChange={event => { setCollection(event.target.value); setLimit(12); setError(""); }}>
-        <option value="curated">Curated references</option>
+      <label className="field"><span className="with-icon"><Search size={18} /> {t("searchOffline")}</span><input value={query} onChange={event => { setQuery(event.target.value); setLimit(12); }} type="search" placeholder={t("hadithSearchHint")} aria-describedby={language === "bn" ? "hadith-search-help" : undefined} /></label>
+      {language === "bn" && <p className="small muted" id="hadith-search-help">{t("englishHadithSearch")}</p>}
+      <label className="field">{t("collection")}<select value={collection} onChange={event => { setCollection(event.target.value); setLimit(12); setError(""); }}>
+        <option value="curated">{t("curatedReferences")}</option>
         {Object.entries(narrationCollections).map(([id, label]) => <option key={id} value={id}>{label}</option>)}
       </select></label>
     </div>
-    {collection === "curated" && !matches.length && <p className="card tint" role="status">Awwab couldn’t verify that narration in its offline collection.</p>}
+    {collection === "curated" && !matches.length && <p className="card tint" role="status">{t("hadithNotFound")}</p>}
     {collection === "curated" && matches.map(item => <article className="card stack" key={`${item.collection}:${item.number}`}>
       <a className="caption" href={item.url}>{item.collection} {item.number} · {item.grade}</a>
-      <h2>{item.summary.replace("He ﷺ", "The Prophet")}</h2>
+      <h2 lang="en">{item.summary.replace("He ﷺ", "The Prophet")}</h2>
     </article>)}
     {collection !== "curated" && (error === collection
-      ? <p className="card tint" role="status">This collection is unavailable. Open Awwab once online to prepare offline access.</p>
-      : corpus?.collection !== collection ? <p role="status">Opening collection…</p>
-      : !results.length ? <p className="card tint" role="status">Awwab couldn’t verify that narration in this offline collection.</p>
+      ? <p className="card tint" role="status">{t("collectionUnavailable")}</p>
+      : corpus?.collection !== collection ? <p role="status">{t("openingCollection")}</p>
+      : !results.length ? <p className="card tint" role="status">{t("hadithNotFound")}</p>
       : results.slice(0, limit).map(item => <article className="card stack" key={item.number}>
         <h2>{narrationCollections[item.collection]} {item.number}</h2>
         <p className="caption">{item.grade} · {item.grader}</p>
-        <p>{item.text.split("ﷺ").map((part, i) => i ? <span key={i}><ArabicText text="صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ" compact />{part}</span> : part)}</p>
-        <p className="muted small">Book {item.book}, narration {item.inBook} · Hadith API</p>
+        <p lang="en">{item.text.split("ﷺ").map((part, i) => i ? <span key={i}><ArabicText text="صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ" compact />{part}</span> : part)}</p>
+        <p className="muted small">{t("narrationReference", { book: item.book, number: item.inBook })}</p>
       </article>))}
-    {results.length > limit && <button className="action soft" onClick={() => setLimit(value => value + 12)}>Show more narrations</button>}
+    {results.length > limit && <button className="action soft" onClick={() => setLimit(value => value + 12)}>{t("moreNarrations")}</button>}
   </div>;
 }
 
@@ -340,19 +355,20 @@ const narrationCollections = { abudawud: "Sunan Abi Dawud", ibnmajah: "Sunan Ibn
 interface Narration { collection: keyof typeof narrationCollections; number: number; grade: string; grader: string; book: number; inBook: number; text: string }
 
 export function Fluency() {
+  const { t } = useCopy();
   return <div className="stack">
-    <SectionNav title="Quran and modern Arabic" back="/learn" />
+    <SectionNav title={t("quranAndModern")} back="/learn" />
     <section className="card soft stack">
-      <p className="caption">Root of the day · Al-ʿAsr 103:1</p>
+      <p className="caption">{t("fluencyRoot")}</p>
       <ArabicText text={sample.root.letters.join(" ")} />
-      <h2>{sample.root.meaning}</h2>
+      <h2 lang="en">{sample.root.meaning}</h2>
       <ArabicText text={sample.word} citation={sample.verseKey} />
     </section>
     <section className="compact-stack">
-      <h2>Read without harakat</h2>
+      <h2>{t("withoutHarakat")}</h2>
       {sample.modern.examples.map(example => <div className="card stack" key={example.ar}>
         <ArabicText text={example.ar.replace(/\p{M}/gu, "").replace(/ٱ/g, "ا")} />
-        <details><summary>Show vowels and meaning</summary><ArabicText text={example.ar} /><p>{example.en}</p></details>
+        <details><summary>{t("showVowels")}</summary><ArabicText text={example.ar} /><p lang="en">{example.en}</p></details>
       </div>)}
     </section>
   </div>;

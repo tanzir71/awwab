@@ -1,6 +1,7 @@
 import React, { type ReactNode } from "react";
 import { splitArabicWords, splitGraphemes, wordAnatomy } from "../lib/wordAnatomy";
 import { useUi } from "../lib/uiState";
+import { useCopy } from "../lib/copy";
 
 function WordChip({ children, recall, href, onSelect }: {
   children: ReactNode;
@@ -31,6 +32,7 @@ export function ArabicText({ text, citation, words, recall = "read", mushaf, com
   wordLink?: (position: number) => string;
 }) {
   const selectWord = useUi(state => state.selectWord);
+  const { language, t } = useCopy();
   let wordIndex = 0;
   return (
     <span className={`arabic-text ${compact ? "arabic-compact" : ""}`} data-script={mushaf} dir="rtl" lang="ar">
@@ -42,13 +44,13 @@ export function ArabicText({ text, citation, words, recall = "read", mushaf, com
             const anatomyWord = detail?.anatomyWord || word;
             const transliteration = recall === "read" ? detail?.transliteration ?? wordAnatomy(anatomyWord, index > 0).syllables.map(syllable => syllable.tr).join("") : "";
             const shown = recall === "hidden" ? "···" : recall === "hint" ? `${splitGraphemes(word)[0]}···` : word;
-            const screenReaderText = recall === "read" ? transliteration : `Reveal word ${index + 1}`;
+            const screenReaderText = recall === "read" ? transliteration : t("revealWord", { number: index + 1 });
             return (
               <WordChip key={index} recall={recall} href={wordLink?.(index + 1)}
                 onSelect={() => selectWord({ word: anatomyWord, citation, connected: index > 0, verse, position: positionOffset + index + 1, ...detail })}>
                 <span>{shown}</span>
                 {recall === "read" && detail?.gloss && <small lang="en" dir="ltr">{detail.gloss}</small>}
-                {screenReaderText && <span className="sr-only" lang="en" dir="ltr">{screenReaderText}</span>}
+                {screenReaderText && <span className="sr-only" lang={recall === "read" ? "en" : language} dir="ltr">{screenReaderText}</span>}
               </WordChip>
             );
           })}
