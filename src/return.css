@@ -56,11 +56,7 @@
   min-height: 50px;
   font: var(--type-body-strong);
   color: var(--c-on-primary);
-  background: color-mix(in srgb, var(--c-accent) 82%, var(--c-night));
-}
-:root[data-mode="maktab"] .action.return-count {
-  background: color-mix(in srgb, var(--c-accent) 56%, var(--c-night));
-  background: hsl(from var(--c-accent) h s calc(l * .615));
+  background: var(--control-accent);
 }
 .return-counter-source { font: var(--type-caption); color: var(--c-night-muted); letter-spacing: var(--tracking-caption); }
 

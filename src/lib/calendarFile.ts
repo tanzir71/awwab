@@ -2,7 +2,7 @@ import { addDays } from "./dates";
 import { schedule } from "./prayerServices";
 import { prayerIds, prayerNames } from "@/types/Prayer";
 import type { Settings } from "./storageService";
-import { calendarEvents, type CalendarSettings } from "./hijri";
+import { calendarEvents, eventMoonReminder, hijriMonths, moonWatchDay, type CalendarSettings } from "./hijri";
 import { downloadFile } from "./download";
 
 interface CalendarItem { id: string; title: string; start: Date | string; alarm?: number; description?: string }
@@ -51,12 +51,25 @@ export function prayerReminders(day: string, settings: Settings, days: number, a
 }
 
 export function eventReminders(day: string, settings: Settings, calendar: CalendarSettings) {
-  return calendarEvents(day, addDays(day, 365), settings.hijriAdjust, calendar)
-    .filter(event => event.kind !== "weekly")
-    .flatMap(event => event.dates.map((date, i) => ({
+  const events = calendarEvents(day, addDays(day, 365), settings.hijriAdjust, calendar).filter(event => event.kind !== "weekly");
+  return events.flatMap(event => {
+    const entries: CalendarItem[] = event.dates.map((date, i) => ({
       id: `event-${event.id}-${i}`,
       title: event.confirmed ? event.title : `Expected: ${event.title}`,
       start: date,
       description: event.confirmed ? event.source : "Estimated Hijri date. Check your local moon-sighting announcement.",
-    })));
+    }));
+    if (eventMoonReminder(event, calendar)) {
+      const watch = moonWatchDay(event.year, event.month, settings.hijriAdjust, calendar.anchors);
+      const reminder = crescentReminder(watch, settings, event.year, event.month);
+      if (watch >= day && reminder) entries.push(reminder);
+    }
+    return entries;
+  });
+}
+
+export function crescentReminder(day: string, settings: Settings, year: number, month: number): CalendarItem | undefined {
+  const start = schedule(day, settings.city, settings.method, settings.school).maghrib;
+  if (!Number.isFinite(start.valueOf())) return undefined;
+  return { id: `moon-watch-${year}-${month}`, title: `Check the moon for ${hijriMonths[month - 1]}`, start, alarm: 0 };
 }

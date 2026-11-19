@@ -1,10 +1,10 @@
 import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, it } from "vitest";
 import { addDays } from "./dates";
-import { baselineMonthStart, calendarEvents, hijriOn, monthStart } from "./hijri";
+import { baselineMonthStart, calendarEventById, calendarEvents, hijriOn, monthStart, possibleMonthStarts } from "./hijri";
 import { cities, currentPrayerSchedule, prayerDay, schedule } from "./prayerServices";
 import { db, backup, defaults, getRecord, logPrayer, migrateLegacy, prayerStatistics, restoreBackup, updateSettings } from "./storageService";
-import { calendarFile } from "./calendarFile";
+import { calendarFile, eventReminders } from "./calendarFile";
 import { estimateQada, finishQada, qadaDefaults } from "./qada";
 import { guideReference, prayerGuide } from "./prayerGuide";
 import { reviewCard, type Reviews } from "./reviews";
@@ -322,6 +322,33 @@ describe("Hijri confirmation", () => {
     expect(file).toContain("DTSTART;VALUE=DATE:20261119\r\n");
     expect(file).toContain("SUMMARY:A\\, B\r\n");
     expect(file).toContain("TRIGGER:-PT5M\r\n");
+  });
+
+  it("shows both local sighting dates even after a baseline 30-day month", () => {
+    const year = 1448;
+    const month = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].find(month => {
+      return addDays(baselineMonthStart(year, month - 1), 30) === baselineMonthStart(year, month);
+    })!;
+    const previous = baselineMonthStart(year, month - 1);
+    expect(possibleMonthStarts(year, month, 0, [])).toEqual([addDays(previous, 29), addDays(previous, 30)]);
+  });
+
+  it("keeps a confirmed event and source when moving it one day, and exports the chosen date", () => {
+    const id = "1448-10-6";
+    const calendar = { anchors: [], overrides: { [id]: { date: "2027-03-10", source: "Family", adjust: 1 as const } } };
+    expect(calendarEventById(id, 0, calendar)).toMatchObject({ confirmed: true, dates: ["2027-03-11"], source: "Family" });
+    expect(calendarEventById("1448-9-6", 0, calendar)).toBeUndefined();
+    expect(calendarEventById("9999-10-6", 0, calendar)).toBeUndefined();
+    expect(eventReminders(day, defaults, calendar).filter(item => item.id.startsWith("event-" + id)))
+      .toEqual([{ id: "event-" + id + "-0", start: "2027-03-11", title: "Eid al-Fitr", description: "Family" }]);
+  });
+
+  it("includes an optional moon-watch reminder at local Maghrib in the exported file", () => {
+    const id = "1448-10-6";
+    const calendar = { anchors: [], overrides: {} };
+    const watch = eventReminders(day, defaults, calendar).find(item => item.id === "moon-watch-1448-10");
+    expect(watch).toMatchObject({ start: schedule("2027-03-08", defaults.city, defaults.method, defaults.school).maghrib, alarm: 0 });
+    expect(eventReminders(day, defaults, { ...calendar, moonReminders: { [id]: false } }).some(item => item.id === "moon-watch-1448-10")).toBe(false);
   });
 });
 

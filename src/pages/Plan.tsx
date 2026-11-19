@@ -1,157 +1,251 @@
-import { useState } from "react";
+import { useMemo, useRef, useState, type MouseEvent } from "react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
-import { CalendarDays, Download, MapPin, Coins, BookOpen, ChevronLeft, ChevronRight, Moon } from "lucide-react";
 import { toast } from "sonner";
-import { ListLink, SectionHeading } from "@/components/Surface";
+import { DesignIcon } from "@/components/DesignIcon";
+import { EventSheet, SightingOptions } from "@/components/PlanEventSheet";
+import { Dialog, DialogClose, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useRecord } from "@/hooks/use-awwab";
+import { crescentReminder, eventReminders, prayerReminders, saveCalendar } from "@/lib/calendarFile";
+import { useCopy } from "@/lib/copy";
 import { addDays, dateKey, formatDay } from "@/lib/dates";
-import { calendarDefaults, calendarEvents, hijriLabel, hijriMonths, hijriOn, monthStart, type CalendarSettings, type MonthAnchor } from "@/lib/hijri";
-import { prayerReminders, saveCalendar, eventReminders } from "@/lib/calendarFile";
-import { schedule } from "@/lib/prayerServices";
-import { getRecord, updateRecord, type Settings } from "@/lib/storageService";
+import { calendarDefaults, calendarEventById, calendarEvents, dayDifference, hijriOn, monthStart,
+  moonWatchDay, possibleMonthStarts, type CalendarEvent, type CalendarSettings, type MonthAnchor } from "@/lib/hijri";
 import { mosqueDefaults } from "@/lib/mosques";
+import { planAuthorities, planEventCopy, planMonth } from "@/lib/plan-copy";
+import { getRecord, updateRecord, type Settings } from "@/lib/storageService";
+import { initialZakat } from "@/lib/zakat";
 
-const authorities = ["National moon-sighting committee", "Saudi announcement", "My mosque", "Family"];
-const labelDate = (day: string) => formatDay(day, { weekday: "short", day: "numeric", month: "short" });
+const beforeMoon = ["First ten days", "Last ten nights / Laylat al-Qadr", "Six fasts of Shawwāl window"];
+
+function startMonth(config: CalendarSettings, anchor: MonthAnchor) {
+  return { ...config, sightingSource: anchor.source, anchors: [...config.anchors.filter(item => item.year !== anchor.year || item.month !== anchor.month), anchor] };
+}
+
+function compactDates(dates: string[], language: Settings["language"], separator: string) {
+  const short = { weekday: "short", day: "numeric" } as const;
+  const last = dates[dates.length - 1];
+  return dates.map(date => formatDay(date, { ...short, month: date !== last && date.slice(0, 7) === last.slice(0, 7) ? undefined : "short" }, language)).join(separator);
+}
 
 export function Plan({ settings, now }: { settings: Settings; now: Date }) {
+  const { t, language } = useCopy();
+  const number = new Intl.NumberFormat(language, { useGrouping: false });
   const [query, setQuery] = useSearchParams();
-  const [span, setSpan] = useState(90);
+  const [expanded, setExpanded] = useState(false);
   const [monthOffset, setMonthOffset] = useState(0);
+  const [panel, setPanel] = useState<"authority" | "month">();
+  const [chosenMonthDate, chooseMonthDate] = useState("");
+  const [chosenSource, chooseSource] = useState("");
+  const [newCalendar, setNewCalendar] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const focus = useRef<HTMLElement>();
   const config = useRecord("calendar", calendarDefaults);
   const mosques = useRecord("mosques", mosqueDefaults);
+  const zakat = useRecord<typeof initialZakat | null>("zakat", null);
+  const { hijriAdjust: adjustment } = settings;
   const day = dateKey(now, settings.city.timeZone);
-  const events = calendarEvents(day, addDays(day, span), settings.hijriAdjust, config)
-    .filter(item => item.kind !== "weekly");
-  const selected = events.find(item => item.id === query.get("event"));
-  const hijri = hijriOn(day, settings.hijriAdjust, config.anchors);
-  const previewMonth = hijri.year * 12 + hijri.month - 1 + monthOffset;
-  const displayYear = Math.floor(previewMonth / 12);
-  const displayMonth = previewMonth % 12 + 1;
-  const displayStart = monthStart(displayYear, displayMonth, settings.hijriAdjust, config.anchors);
-  const followingStart = monthStart(Math.floor((previewMonth + 1) / 12), (previewMonth + 1) % 12 + 1, settings.hijriAdjust, config.anchors);
-  const displayLength = Math.round((Date.parse(followingStart.date) - Date.parse(displayStart.date)) / 86400000);
-  const before = new Date(`${displayStart.date}T12:00:00Z`).getUTCDay();
-  const nextMonth = hijri.month === 12 ? 1 : hijri.month + 1;
+  const hijri = hijriOn(day, adjustment, config.anchors);
+  const displayedOrdinal = hijri.year * 12 + hijri.month - 1 + monthOffset;
+  const displayYear = Math.floor(displayedOrdinal / 12);
+  const displayMonth = displayedOrdinal % 12 + 1;
+  const displayStart = monthStart(displayYear, displayMonth, adjustment, config.anchors);
+  const displayNext = monthStart(Math.floor((displayedOrdinal + 1) / 12), (displayedOrdinal + 1) % 12 + 1, adjustment, config.anchors);
+  const displayLength = displayNext.confirmed ? dayDifference(displayNext.date, displayStart.date) : 30;
+  const before = new Date(displayStart.date + "T12:00:00Z").getUTCDay();
+  const monthTitle = `${planMonth(displayMonth, language)} ${number.format(displayYear)}`;
+  const displayEnd = addDays(displayStart.date, displayLength - 1);
+  const monthLabel = displayStart.date.slice(0, 7) === displayEnd.slice(0, 7)
+    ? formatDay(displayEnd, { month: "short", year: "numeric" }, language)
+    : `${formatDay(displayStart.date, { month: "short", year: displayStart.date.slice(0, 4) === displayEnd.slice(0, 4) ? undefined : "numeric" }, language)} – ${formatDay(displayEnd, { month: "short", year: "numeric" }, language)}`;
+  const nextMonth = hijri.month % 12 + 1;
   const nextYear = hijri.year + Number(nextMonth === 1);
-  const next = monthStart(nextYear, nextMonth, settings.hijriAdjust, config.anchors);
-  const watchDate = addDays(monthStart(hijri.year, hijri.month, settings.hijriAdjust, config.anchors).date, 28);
-  const maghrib = schedule(day, settings.city, settings.method, settings.school).maghrib;
-  const moonWatch = hijri.day === 29 && now >= maghrib && !monthStart(nextYear, nextMonth, settings.hijriAdjust, config.anchors).confirmed;
-  const [authority, setAuthority] = useState(authorities[0]);
-  const [newCalendar, setNewCalendar] = useState(false);
-  const [eidLocation, setEidLocation] = useState<"home" | "hometown">("home");
+  const nextName = planMonth(nextMonth, language);
+  const monthDates = possibleMonthStarts(nextYear, nextMonth, adjustment, config.anchors);
+  const watchDate = moonWatchDay(nextYear, nextMonth, adjustment, config.anchors);
+  const watch = crescentReminder(watchDate, settings, nextYear, nextMonth);
+  const watchNow = day === watchDate && watch?.start instanceof Date && now >= watch.start;
+  const source = config.sightingSource ?? planAuthorities[0].value;
+  const district = settings.city.timeZone === "Asia/Dhaka";
+  const sourceLabel = planAuthorities.find(item => item.value === source)?.label;
+
+  const events = useMemo(() => calendarEvents(day, addDays(day, expanded ? 365 : 185), adjustment, config)
+    .filter(event => event.kind !== "weekly" && event.hijriMonth !== 0 && (expanded || !beforeMoon.includes(event.title))),
+  [day, expanded, adjustment, config]);
+  const gridEvents = useMemo(() => calendarEvents(displayStart.date, displayEnd, adjustment, config)
+    .filter(event => event.kind !== "weekly"),
+  [displayStart.date, displayEnd, adjustment, config]);
+  const eventId = query.get("event");
+  const selected = eventId ? calendarEventById(eventId, adjustment, config) : undefined;
+  const dateLabel = (date: string) => formatDay(date, { weekday: "short", day: "numeric", month: "short" }, language);
+
+  function exportCalendar(calendar: CalendarSettings) {
+    saveCalendar([...prayerReminders(day, settings, 30, 5), ...eventReminders(day, settings, calendar)]);
+  }
 
   async function save(change: (old: CalendarSettings) => CalendarSettings) {
     try {
       await updateRecord("calendar", calendarDefaults, change);
-      const updated = await getRecord("calendar", calendarDefaults);
-      saveCalendar([...prayerReminders(day, settings, 30, 5), ...eventReminders(day, settings, updated)]);
+      exportCalendar(await getRecord("calendar", calendarDefaults));
       setNewCalendar(true);
+      return true;
     } catch {
-      toast.error("The calendar change could not be saved. Try again.");
+      toast.error(t("planSaveError"));
+      return false;
     }
   }
 
-  function confirmMonth(anchor: MonthAnchor) {
-    return save(old => ({ ...old, anchors: [...old.anchors.filter(item => item.year !== anchor.year || item.month !== anchor.month), anchor] }));
+  async function submitPanel() {
+    setSaving(true);
+    const saved = await save(old => panel === "authority" ? { ...old, sightingSource: chosenSource }
+      : startMonth(old, { year: nextYear, month: nextMonth, date: chosenMonthDate, source: chosenSource }));
+    setSaving(false);
+    if (saved) setPanel(undefined);
   }
 
-  return <div className="stack">
-    <header><p className="caption">Plan</p><h1>Islamic calendar</h1><p className="muted">{hijriLabel(day, settings.hijriAdjust, config.anchors)}</p></header>
-    {moonWatch && <section className="card night stack">
-      <h2>Was the moon seen?</h2><p>Record the local decision for {hijriMonths[nextMonth - 1]}.</p>
-      <label className="field text-[var(--c-ink)]"><span className="text-[var(--c-on-night)]">Confirmation source</span><select value={authority} onChange={event => setAuthority(event.target.value)}>{authorities.map(item => <option key={item}>{item}</option>)}</select></label>
+  function openPanel(event: MouseEvent<HTMLElement>, next: "authority" | "month", date = monthDates[0]) {
+    focus.current = event.currentTarget;
+    chooseMonthDate(date);
+    chooseSource(source);
+    setPanel(next);
+  }
+
+  function openEvent(event: MouseEvent<HTMLElement>, id: string) {
+    focus.current = event.currentTarget;
+    setQuery({ event: id });
+  }
+
+  function confirmEvent(event: CalendarEvent, date: string, authority: string, moveAfter: boolean) {
+    return save(old => {
+      if (event.hijriDay === 1 && moveAfter) {
+        const overrides = { ...old.overrides };
+        delete overrides[event.id];
+        return { ...startMonth(old, { year: event.year, month: event.month, date, source: authority }), overrides };
+      }
+      return { ...old, sightingSource: authority, overrides: { ...old.overrides, [event.id]: { date, source: authority, adjust: 0 } } };
+    });
+  }
+
+  return <div className="plan-page">
+    <header className="plan-heading row-between">
+      <div>
+        <p className="caption">{monthLabel}</p>
+        <h1 aria-label={t("planTitle") + " · " + monthTitle}>{monthTitle}</h1>
+      </div>
+      <button type="button" className="plan-sighting" aria-haspopup="dialog"
+        onClick={event => openPanel(event, "authority")}>
+        {district && source === planAuthorities[0].value ? t("planSightingBd") : sourceLabel ? t(sourceLabel) : source}
+        <span className="sr-only"> · {t("planSighting")}</span>
+      </button>
+    </header>
+
+    {monthDates.length > 1 && <section className="night plan-moon-card" aria-label={t("planMoonWatch")}>
+      <p className="caption with-icon"><DesignIcon name="plan-moon" size={18} />{t("planMoonWatch")}</p>
+      <h2>{watchNow ? t("planSeen") : t("planStarts", { month: nextName, dates: compactDates(monthDates, language, t("planOr")) })}</h2>
+      <p className="muted small">{watchNow ? t("planSeenDetail", { month: nextName }) : t("planWatchDetail", { date: dateLabel(watchDate) })}</p>
       <div className="equal-row">
-        <button className="action gold" onClick={() => void confirmMonth({ year: nextYear, month: nextMonth, date: addDays(day, 1), source: authority })}>Starts tomorrow</button>
-        <button className="action light" onClick={() => void confirmMonth({ year: nextYear, month: nextMonth, date: addDays(day, 2), source: authority })}>Complete 30 days</button>
+        {watchNow ? <button className="action plan-moon-primary" onClick={event => openPanel(event, "month", monthDates[0])}>{t("planTomorrow")}</button>
+          : <button className="action plan-moon-primary" onClick={() => {
+            if (watch) saveCalendar([watch], "awwab-moon-watch.ics");
+            else toast.error(t("planWatchUnavailable"));
+          }}>{t("planWatchReminder", { day: formatDay(watchDate, { weekday: "short" }, language) })}</button>}
+        <button className="action light" onClick={event => openPanel(event, "month", watchNow ? monthDates[1] : monthDates[0])}>
+          {t(watchNow ? "planCompleteThirty" : "planItConfirmed")}
+        </button>
       </div>
     </section>}
-    {!moonWatch && !next.confirmed && <section className="card night stack">
-      <p className="caption with-icon"><Moon size={16} /> Moon watch</p>
-      <h2>{hijriMonths[nextMonth - 1]} starts {labelDate(next.date)} or {labelDate(addDays(next.date, 1))}</h2>
-      <p className="muted">The date depends on the local crescent sighting. Moon watch is on {labelDate(watchDate)} after Maghrib.</p>
-      <button className="action gold" onClick={() => {
-        const time = schedule(watchDate, settings.city, settings.method, settings.school).maghrib;
-        if (Number.isFinite(time.valueOf())) saveCalendar([{ id: `moon-watch-${nextYear}-${nextMonth}`, title: `Check the moon for ${hijriMonths[nextMonth - 1]}`, start: time, alarm: 0 }], "awwab-moon-watch.ics");
-      }}>Add moon watch reminder</button>
-    </section>}
-    <section className="card stack">
-      <div className="row-between">
-        <h2>{hijriMonths[displayMonth - 1]} {displayYear}</h2>
-        <div className="with-icon">
-          <button type="button" className="icon-button" onClick={() => setMonthOffset(value => value - 1)} aria-label="Previous Hijri month"><ChevronLeft size={20} /></button>
-          <button type="button" className="icon-button" onClick={() => setMonthOffset(value => value + 1)} aria-label="Next Hijri month"><ChevronRight size={20} /></button>
-        </div>
-      </div>
-      <div className="month-grid" aria-label={`Hijri month of ${hijriMonths[displayMonth - 1]}`}>
-        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(name => <small className="muted" key={name}>{name}</small>)}
-        {Array.from({ length: before }, (_, index) => <span key={`blank-${index}`} />)}
+
+    <section className="card plan-month" aria-label={monthTitle}>
+      <div className="month-grid">
+        {Array.from({ length: 7 }, (_, i) => {
+          const weekday = addDays("2026-11-15", i);
+          return <small key={weekday} className="plan-weekday muted" aria-label={formatDay(weekday, { weekday: "long" }, language)}>
+            {formatDay(weekday, { weekday: "narrow" }, language)}
+          </small>;
+        })}
+        {Array.from({ length: before }, (_, i) => <span key={i} />)}
         {Array.from({ length: displayLength }, (_, i) => {
           const date = addDays(displayStart.date, i);
-          const dayEvents = calendarEvents(date, date, settings.hijriAdjust, config).filter(
-            event => event.kind !== "weekly" && event.hijriMonth !== 0);
-          const event = dayEvents[0];
-          const status = date === day ? "current" : i >= 12 && i <= 14 ? "white-days" : i >= 28 && !followingStart.confirmed ? "expected" : "";
-          const label = `${i + 1} ${hijriMonths[displayMonth - 1]} · ${labelDate(date)}${event ? ` · ${event.title}` : ""}`;
-          return <span className="month-day" key={date} data-kind={status} title={label}>
-            {event && events.some(item => item.id === event.id)
-              ? <button type="button" aria-label={label} onClick={() => setQuery({ event: event.id })}><strong>{i + 1}</strong><small>{Number(date.slice(-2))} ·</small></button>
-              : <span aria-label={label}><strong>{i + 1}</strong><small>{Number(date.slice(-2))}</small></span>}
-          </span>;
+          const event = gridEvents.find(event => (event.hijriMonth || i === 12) && event.dates.includes(date)
+            && (event.hijriMonth || event.month === displayMonth));
+          const kind = date === day ? "current" : i >= 12 && i <= 14 ? "white-days" : i === 29 && !displayNext.confirmed ? "expected" : "";
+          const label = `${number.format(i + 1)} ${planMonth(displayMonth, language)} · ${dateLabel(date)}`;
+          const content = <><strong>{number.format(i + 1)}{kind === "expected" && "?"}</strong><small>{number.format(Number(date.slice(-2)))}</small></>;
+          return <div className="month-day" key={date} data-kind={kind} data-event={!!event} title={label}>
+            {event ? <button aria-haspopup="dialog" onClick={click => openEvent(click, event.id)}>{content}<span className="sr-only"> · {label} · {planEventCopy[event.title][language][0]}</span></button>
+              : <span aria-current={date === day ? "date" : undefined}><span className="sr-only">{label}</span><span aria-hidden="true">{content}</span></span>}
+          </div>;
         })}
       </div>
-      <div className="chips"><span className="chip night">Today</span><span className="chip">White days</span><span className="chip soft">Depends on moon</span></div>
+      <div className="plan-month-footer">
+        <ul className="plan-legend">
+          <li data-kind="current">{t("today")}</li><li data-kind="white-days">{t("planWhiteDays")}</li><li data-kind="expected">{t("planDependsOnMoon")}</li>
+        </ul>
+        <div className="plan-month-navigation">
+          <button className="icon-button" aria-label={t("planPrevMonth")} onClick={() => setMonthOffset(value => Math.max(-48, value - 1))} disabled={monthOffset === -48}><ChevronLeft size={17} /></button>
+          {monthOffset !== 0 && <button className="text-button" onClick={() => setMonthOffset(0)}>{t("planCurrentMonth")}</button>}
+          <button className="icon-button" aria-label={t("planNextMonth")} onClick={() => setMonthOffset(value => Math.min(48, value + 1))} disabled={monthOffset === 48}><ChevronRight size={17} /></button>
+        </div>
+      </div>
     </section>
-    {selected && <section className="card stack" aria-label="Selected event">
-      <div className="row-between"><h2>{selected.title}</h2><button className="text-button" onClick={() => setQuery({})}>Close</button></div>
-      <p>{selected.dates.map(labelDate).join(" or ")} · {selected.confirmed ? "Confirmed" : "Expected"}</p>
-      {selected.source && <p className="muted">Confirmed by {selected.source}</p>}
-      <label className="field">Confirmation source<select value={authority} onChange={event => setAuthority(event.target.value)}>{authorities.map(item => <option key={item}>{item}</option>)}</select></label>
-      {!selected.confirmed && <div className="equal-row">
-        {selected.dates.map(date => <button className="action soft" key={date} onClick={() => {
-          if (selected.hijriDay === 1) void confirmMonth({ year: selected.year, month: selected.month, date, source: authority });
-          else void save(old => ({ ...old, overrides: { ...old.overrides, [selected.id]: { date, source: authority, adjust: 0 } } }));
-        }}>Confirm {labelDate(date)}</button>)}
-      </div>}
-      <label className="field">Adjust this event
-        <select value={config.overrides[selected.id]?.adjust ?? 0} onChange={event => {
-          const adjust = Number(event.target.value) as -1 | 0 | 1;
-          void save(old => ({ ...old, overrides: { ...old.overrides, [selected.id]: { adjust } } }));
-        }}>
-          <option value={-1}>One day earlier</option><option value={0}>Follow the month</option><option value={1}>One day later</option>
-        </select>
-      </label>
-      {selected.title.startsWith("Eid") && <>
-        <h3>Where will you pray?</h3>
-        <div className="equal-row">{(["home", "hometown"] as const).map(location => <button key={location} aria-pressed={eidLocation === location} className={`action ${eidLocation === location ? "" : "light"}`} onClick={() => setEidLocation(location)}>{location === "home" ? "Home city" : "Hometown"}</button>)}</div>
-        {mosques.mosques.filter(mosque => mosque.role === eidLocation || (eidLocation === "home" && mosque.role === "eid")).map(mosque => {
-          const year = Number(selected.dates[0].slice(0, 4));
-          const records = mosque.occasional.filter(item => item.type === (selected.title.includes("Fitr") ? "eid_fitr" : "eid_adha") && item.year >= year - 1 && item.year <= year);
-          return <div key={mosque.id} className="card soft compact-stack"><strong>{mosque.name}</strong>
-            {records.length ? records.map(item => <p key={item.year}>{item.year === year ? "This year" : "Last year"} · {item.times.join(", ")}</p>) : <p>No jamaat time recorded yet.</p>}</div>;
+
+    {newCalendar && <p className="card soft small" role="status">{t("planSaved")}</p>}
+    <section className="plan-upcoming">
+      <div className="row-between"><h2>{t("planUpcoming")}</h2>
+        <button className="text-button" onClick={() => { exportCalendar(config); setNewCalendar(false); }}>{t("planAddCalendar")}</button>
+      </div>
+      <div className="compact-stack">
+        {(expanded ? events : events.slice(0, 5)).map(event => {
+          const [title, detail] = planEventCopy[event.title][language];
+          const status = event.confirmed ? "confirmedDate" : event.kind === "follows-month" ? "planFollowsMonth" : "expectedDate";
+          const dates = compactDates(event.dates, language, t("planOr"));
+          const offset = config.overrides[event.id]?.adjust ?? 0;
+          return <article className="card plan-event-card" key={event.id}>
+            <button className="plan-open-event" aria-haspopup="dialog" onClick={click => openEvent(click, event.id)}>
+              <span>{title}</span><strong>{dates}</strong><small className="muted">{detail}</small>
+            </button>
+            <div className="plan-event-side">
+              <span className="plan-event-badge caption" data-kind={status}>{t(status)}</span>
+              <small>{t("planDaysAway", { count: Math.max(0, dayDifference(event.dates[0], day)) })}</small>
+              <div className="plan-adjust">
+                {([-1, 1] as const).map(step => <button key={step} aria-pressed={offset === step}
+                  onClick={() => void save(old => {
+                    const previous = old.overrides[event.id];
+                    return { ...old, overrides: { ...old.overrides, [event.id]: { ...previous, adjust: previous?.adjust === step ? 0 : step } } };
+                  })}><span>{step < 0 ? "−" : "+"}{number.format(1)}</span><span className="sr-only"> {t(step < 0 ? "planAdjustEarlier" : "planAdjustLater", { event: title })}</span></button>)}
+              </div>
+            </div>
+          </article>;
         })}
-        <Link className="action soft" to="/plan/mosques">Manage mosque times</Link>
-      </>}
-    </section>}
-    {newCalendar && <p className="card soft" role="status">Dates updated. Open the new calendar file to update your reminders.</p>}
-    <section className="compact-stack">
-      <SectionHeading title="Coming up" to="/you/hijri" label="Adjust Hijri date" />
-      <p className="muted small">Moon-dependent dates are expected until confirmed locally.</p>
-      {events.map(event => <button key={event.id} className="list-row" onClick={() => setQuery({ event: event.id })}>
-        <span className="icon-box"><CalendarDays size={20} /></span><span><strong>{event.title}</strong><small>{event.dates.map(labelDate).join(" or ")} · {event.label}</small></span>
-        <span className={`chip ${event.confirmed ? "soft" : ""}`}>{event.confirmed ? "Confirmed" : "Expected"}</span>
-      </button>)}
-      {span < 365 && <button className="action light" onClick={() => setSpan(365)}>See the year ahead</button>}
+      </div>
     </section>
-    <button className="action" onClick={() => {
-      saveCalendar([...prayerReminders(day, settings, 30, 5), ...eventReminders(day, settings, config)]);
-      setNewCalendar(false);
-    }}><Download size={19} /> Export calendar file</button>
-    <section className="compact-stack">
-      <ListLink to="/plan/mosques" icon={<MapPin size={20} />} title="My mosques" detail="Keep your local jamaat times close" />
-      <ListLink to="/plan/zakat" icon={<Coins size={20} />} title="Zakat" detail="Estimate and record your zakat" />
-      <ListLink to="/umrah" icon={<BookOpen size={20} />} title="Umrah" detail="Prepare for your trip" />
-    </section>
+
+    <nav className="plan-tools equal-row" aria-label={t("tools")}>
+      <Link className="card" to="/plan/mosques"><span className="icon-box"><DesignIcon name="plan-pin" /></span><strong>{t("mosques")}</strong><small className="muted">{t("planMosquesSaved", { count: mosques.mosques.length })}</small></Link>
+      <Link className="card" to="/plan/zakat"><span className="icon-box"><DesignIcon name="plan-coins" /></span><strong>{t("zakat")}</strong><small className="muted">{zakat ? `${number.format(zakat.hawlDay)} ${planMonth(zakat.hawlMonth, language)}` : t("planZakatDetail")}</small></Link>
+      <Link className="card" to="/umrah"><span className="icon-box"><DesignIcon name="plan-cube" /></span><strong>{t("planUmrah")}</strong><small className="muted">{t("planUmrahDetail")}</small></Link>
+    </nav>
+    <div className="row-between plan-more">
+      <Link className="text-button" to="/you/hijri">{t("planTitle")} · {t("settings")}</Link>
+      <button className="text-button" onClick={() => setExpanded(value => !value)}>{t(expanded ? "planSeeFewer" : "planSeeYear")}</button>
+    </div>
+
+    <Dialog open={!!panel} onOpenChange={open => { if (!open && !saving) setPanel(undefined); }}>
+      {panel && <DialogContent className="awwab-dialog plan-confirm-dialog" showCloseButton={false} aria-describedby={undefined}
+        onCloseAutoFocus={event => { event.preventDefault(); focus.current?.focus(); }}>
+        <div className="row-between"><DialogTitle>{panel === "month" ? t("planSeenDetail", { month: nextName }) : t("planSighting")}</DialogTitle>
+          <DialogClose asChild><button className="icon-button" aria-label={t("planClose")}><X size={20} /></button></DialogClose>
+        </div>
+        {panel === "month" && <div className="equal-row plan-date-choices" role="group" aria-label={t("planWhichDay")}>
+          {monthDates.map(date => <button className="plan-date-choice" aria-pressed={date === chosenMonthDate} key={date} onClick={() => chooseMonthDate(date)}>{dateLabel(date)}</button>)}
+        </div>}
+        <SightingOptions source={chosenSource} setSource={chooseSource} district={district} />
+        <button className="action" disabled={saving} onClick={() => void submitPanel()}>{t(panel === "month" ? "planConfirm" : "planUseSource")}</button>
+      </DialogContent>}
+    </Dialog>
+    {selected && <EventSheet key={selected.id} event={selected} settings={settings} config={config} mosques={mosques}
+      onClose={() => setQuery({}, { replace: true })} onRestoreFocus={() => focus.current?.focus()}
+      onConfirm={(date, authority, moveAfter) => confirmEvent(selected, date, authority, moveAfter)}
+      onMoonReminder={enabled => save(old => ({ ...old, moonReminders: { ...old.moonReminders, [selected.id]: enabled } }))} />}
   </div>;
 }

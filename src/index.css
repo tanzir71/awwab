@@ -7,6 +7,7 @@
 @import "./onboarding.css";
 @import "./hadith.css";
 @import "./return.css";
+@import "./plan.css";
 
 @tailwind base;
 @tailwind components;
@@ -14,12 +15,17 @@
 
 :root {
   --control-primary: var(--c-primary);
+  --control-accent: color-mix(in srgb, var(--c-accent) 82%, var(--c-night));
   --interactive-ink: var(--c-primary);
   color-scheme: light;
 }
 :root[data-mode="maktab"] {
   --control-primary: color-mix(in srgb, var(--c-primary) 55%, var(--c-night));
+  --control-accent: color-mix(in srgb, var(--c-accent) 56%, var(--c-night));
   --interactive-ink: var(--control-primary);
+}
+@supports (color: hsl(from white h s calc(l * .615))) {
+  :root[data-mode="maktab"] { --control-accent: hsl(from var(--c-accent) h s calc(l * .615)); }
 }
 *, *::before, *::after { box-sizing: border-box; }
 body { margin: 0; background: var(--c-bg); color: var(--c-ink); font: var(--type-body); }

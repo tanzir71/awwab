@@ -122,6 +122,8 @@ const savedRecords: Record<string, z.ZodTypeAny> = {
   calendar: z.object({
     anchors: z.array(z.object({ year: count.min(1), month: count.min(1).max(12), date: daySchema, source: z.string().max(100) })),
     overrides: z.record(z.string(), z.object({ date: daySchema.optional(), source: z.string().max(100).optional(), adjust: z.union([z.literal(-1), z.literal(0), z.literal(1)]) })),
+    sightingSource: z.string().max(100).optional(),
+    moonReminders: z.record(z.string(), z.boolean()).optional(),
   }),
   mosques: z.object({
     mosques: z.array(z.object({

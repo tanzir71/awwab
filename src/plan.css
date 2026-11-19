@@ -1,0 +1,187 @@
+.app-content:has(.plan-page) { padding-top: calc(8px + env(safe-area-inset-top)); }
+.plan-page { display: grid; gap: 16px; min-width: 0; }
+.plan-heading h1 { font: var(--type-display-m); }
+.plan-heading .caption { margin-bottom: 2px; }
+.plan-sighting {
+  position: relative;
+  isolation: isolate;
+  min-height: 44px;
+  padding: 6px 14px;
+  color: var(--interactive-ink);
+  font: var(--type-small);
+}
+.plan-sighting::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 7px 0;
+  border-radius: var(--r-pill);
+  background: var(--c-primary-soft);
+}
+.plan-moon-card {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border-radius: var(--r-card);
+}
+.plan-moon-card > h2 { font: var(--type-title); margin: 0; }
+.plan-moon-card .equal-row { margin-top: 2px; }
+.plan-moon-card .action { min-height: 50px; padding-inline: 8px; font: var(--type-body-strong); }
+.plan-moon-card .action.plan-moon-primary { color: var(--c-on-primary); background: var(--control-accent); }
+.plan-month .month-grid { gap: 4px; }
+.plan-month .plan-weekday { font: var(--type-caption); padding: 2px 0 4px; }
+.plan-month .month-day { position: relative; }
+.plan-month .month-day > :is(button, span), .plan-month .month-day > span > [aria-hidden] {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  line-height: 1.2;
+}
+.plan-month .month-day button { width: 100%; min-height: 44px; border-radius: inherit; }
+.plan-month .month-day[data-event="true"]::after {
+  content: "";
+  width: 4px;
+  height: 4px;
+  position: absolute;
+  left: calc(50% - 2px);
+  bottom: 2px;
+  border-radius: var(--r-pill);
+  background: var(--interactive-ink);
+  pointer-events: none;
+}
+.plan-month .month-day[data-event="true"][data-kind="current"]::after { background: var(--c-on-primary); }
+.plan-month .month-day[data-kind="expected"] { background: var(--c-surface-alt); }
+.plan-month .month-day small { color: var(--c-ink-muted); }
+.plan-month .month-day[data-kind="current"] small { color: var(--c-on-primary); }
+.plan-month-footer { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; justify-content: space-between; margin-top: 8px; }
+.plan-legend { display: flex; flex-wrap: wrap; gap: 4px 10px; color: var(--c-ink-muted); font: var(--type-small); }
+.plan-legend li { display: flex; align-items: center; gap: 4px; }
+.plan-legend li::before { content: ""; flex: 0 0 12px; height: 12px; border-radius: 3px; background: var(--c-surface-alt); }
+.plan-legend [data-kind="current"]::before { background: var(--control-primary); }
+.plan-legend [data-kind="white-days"]::before { background: var(--c-tint); }
+.plan-month-navigation { display: flex; justify-content: flex-end; align-items: center; margin-inline-start: auto; }
+.plan-month-navigation .icon-button { box-shadow: none; }
+.plan-month-navigation .icon-button:disabled { opacity: .45; }
+
+.plan-upcoming h2 { margin: 0; }
+.plan-upcoming .plan-event-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  gap: 0 10px;
+  padding: 10px 16px;
+}
+.plan-open-event { display: grid; gap: 4px; justify-items: start; align-content: center; text-align: start; }
+.plan-open-event > span { font: var(--type-body-strong); }
+.plan-open-event > strong { font: var(--type-title); }
+.plan-event-side { display: grid; gap: 3px; justify-items: end; align-content: space-between; text-align: end; }
+.plan-event-side > small { color: var(--interactive-ink); }
+.plan-event-badge { display: inline-flex; padding: 3px 8px; border-radius: var(--r-pill); color: var(--c-ink); background: var(--c-tint); }
+.plan-event-badge[data-kind="planFollowsMonth"] { background: var(--c-surface-alt); color: var(--c-ink-muted); }
+.plan-event-badge[data-kind="confirmedDate"] { background: var(--c-primary-soft); color: var(--interactive-ink); }
+.plan-adjust { display: flex; }
+.plan-adjust button { position: relative; isolation: isolate; width: 44px; min-height: 44px; font: var(--type-small); }
+.plan-adjust button::before { content: ""; position: absolute; inset: 8px 0; z-index: -1; background: var(--c-surface-alt); }
+.plan-adjust button:first-child::before { border-radius: var(--r-pill) 0 0 var(--r-pill); }
+.plan-adjust button:last-child::before { border-radius: 0 var(--r-pill) var(--r-pill) 0; }
+.plan-adjust button[aria-pressed="true"] { color: var(--c-on-primary); }
+.plan-adjust button[aria-pressed="true"]::before { background: var(--control-primary); }
+.plan-tools .card { display: grid; gap: 6px; justify-items: start; align-content: start; padding: 14px 12px; color: var(--c-ink); }
+.plan-tools strong { font: var(--type-body-strong); }
+.plan-tools .icon-box { width: 36px; height: 36px; }
+.plan-more { flex-wrap: wrap; }
+
+.plan-segmented {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 4px;
+  padding: 4px 2px;
+  border-radius: var(--r-control);
+  background: var(--c-surface-alt);
+}
+.plan-segmented button {
+  display: grid;
+  align-content: center;
+  min-height: 44px;
+  padding: 4px;
+  border-radius: var(--r-control);
+  color: var(--c-ink-muted);
+  font: var(--type-small);
+  overflow-wrap: anywhere;
+}
+.plan-segmented button[aria-pressed="true"] { background: var(--c-surface); color: var(--c-ink); box-shadow: var(--shadow-card); }
+.plan-segmented button small { color: var(--c-ink-muted); }
+.plan-sheet-heading { display: flex; justify-content: space-between; align-items: start; gap: 8px; }
+.plan-sheet-heading h2 { font: var(--type-display-l); }
+.plan-sheet-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 6px; }
+.plan-sheet-actions .icon-button { box-shadow: none; background: var(--c-surface-alt); }
+.plan-date-choices .plan-date-choice {
+  display: grid;
+  gap: 4px;
+  text-align: start;
+  align-content: start;
+  min-height: 44px;
+  padding: 14px 16px;
+  border-radius: var(--r-card);
+  background: var(--c-surface-alt);
+  color: var(--c-ink);
+}
+.plan-date-choices .plan-date-choice[aria-pressed="true"] { background: var(--c-surface); box-shadow: var(--shadow-card); }
+.plan-date-choice strong { font: var(--type-display-m); }
+.plan-date-estimate {
+  justify-self: start;
+  color: var(--interactive-ink);
+  background: var(--c-primary-soft);
+  border-radius: var(--r-pill);
+  padding: 3px 8px;
+}
+.plan-announcement, .plan-eid-jamaat, .plan-eid-note { display: grid; gap: 12px; }
+.plan-announcement h3, .plan-eid-jamaat h3, .plan-eid-note h3 { margin: 0; }
+.plan-announcement .action { min-height: 50px; padding-inline: 8px; font: var(--type-body-strong); }
+.plan-switch { display: grid; grid-template-columns: minmax(0, 1fr) 44px; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; }
+.plan-switch strong, .plan-switch small { display: block; }
+.plan-switch strong { font: var(--type-body-strong); }
+.plan-switch input { width: 44px; height: 44px; grid-area: 1 / 2; opacity: 0; margin: 0; cursor: pointer; }
+.plan-switch-track {
+  display: flex;
+  grid-area: 1 / 2;
+  align-items: center;
+  width: 44px;
+  height: 26px;
+  border-radius: var(--r-pill);
+  padding: 3px;
+  background: var(--c-ink-muted);
+  pointer-events: none;
+}
+.plan-switch-track::after { content: ""; width: 20px; height: 20px; border-radius: 50%; background: var(--c-on-primary); }
+.plan-switch input:checked + .plan-switch-track { justify-content: flex-end; background: var(--control-primary); }
+.plan-switch input:focus-visible + .plan-switch-track { outline: 2px solid var(--interactive-ink); outline-offset: 3px; }
+.plan-eid-mosque .text-button { text-align: end; }
+.plan-event-sheet .plan-eid-note { gap: 6px; background: var(--c-tint); box-shadow: none; }
+.plan-eid-note a { display: inline-flex; align-items: center; min-height: 44px; }
+body .plan-event-overlay { background: color-mix(in srgb, var(--c-night) 83%, transparent); }
+
+@media (max-width: 639px) {
+  body .plan-event-overlay { background: var(--c-night); }
+  .awwab-dialog.plan-event-sheet {
+    top: auto;
+    bottom: 0;
+    width: 100%;
+    max-height: calc(100svh - 44px);
+    transform: translateX(-50%);
+    border-radius: var(--r-sheet) var(--r-sheet) 0 0;
+    padding: 10px 20px max(24px, env(safe-area-inset-bottom));
+    animation: none;
+  }
+  .plan-event-sheet::before { content: ""; width: 40px; height: 5px; border-radius: var(--r-pill); background: var(--c-line); }
+}
+@media (max-width: 359px) {
+  .plan-tools .card, .plan-upcoming .plan-event-card { padding-inline: 10px; }
+  .plan-event-badge { padding-inline: 5px; }
+  .awwab-dialog.plan-event-sheet { padding-inline: 14px; }
+  .plan-date-choices .plan-date-choice { padding: 12px; }
+}
+@media (min-width: 1024px) {
+  .plan-page { width: min(100%, 590px); margin: 16px auto 0; }
+}

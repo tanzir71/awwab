@@ -12,6 +12,7 @@ export function rawHijri(day: string) {
   return { year: get("year"), month: get("month"), day: get("day") };
 }
 
+const lastSupportedYear = rawHijri("9998-01-01").year;
 const baselineStarts = new Map<number, string>();
 export function baselineMonthStart(year: number, month: number) {
   const key = ordinal(year, month);
@@ -33,7 +34,7 @@ export function baselineMonthStart(year: number, month: number) {
   return result;
 }
 
-function dayDifference(a: string, b: string) {
+export function dayDifference(a: string, b: string) {
   return Math.round((Date.parse(a) - Date.parse(b)) / 86400000);
 }
 
@@ -66,25 +67,57 @@ export function hijriLabel(day: string, adjust = 0, anchors: MonthAnchor[] = [])
 }
 
 export interface EventOverride { date?: string; source?: string; adjust: -1 | 0 | 1 }
-export interface CalendarSettings { anchors: MonthAnchor[]; overrides: Record<string, EventOverride> }
+export interface CalendarSettings {
+  anchors: MonthAnchor[];
+  overrides: Record<string, EventOverride>;
+  sightingSource?: string;
+  moonReminders?: Record<string, boolean>;
+}
 export const calendarDefaults: CalendarSettings = { anchors: [], overrides: {} };
 
+export function moonWatchDay(year: number, month: number, adjust: number, anchors: MonthAnchor[]) {
+  const previous = monthStart(month === 1 ? year - 1 : year, month === 1 ? 12 : month - 1, adjust, anchors);
+  return addDays(previous.date, 28);
+}
+
+export function possibleMonthStarts(year: number, month: number, adjust: number, anchors: MonthAnchor[]) {
+  const start = monthStart(year, month, adjust, anchors);
+  if (start.confirmed) return [start.date];
+  const watch = moonWatchDay(year, month, adjust, anchors);
+  return [addDays(watch, 1), addDays(watch, 2)];
+}
+
+function eventForMonth(year: number, month: number, index: number, adjust: number, config: CalendarSettings) {
+  const item = source.events[index];
+  const start = monthStart(year, month, adjust, config.anchors);
+  const id = `${year}-${month}-${index}`;
+  const override = config.overrides[id];
+  const offset = override?.adjust ?? 0;
+  const dates = override?.date ? [addDays(override.date, offset)]
+    : possibleMonthStarts(year, month, adjust, config.anchors).map(date => addDays(date, item.hijriDay - 1 + offset));
+  return { ...item, id, year, month, dates, confirmed: dates.length === 1, source: override?.source ?? start.source };
+}
+
+export function calendarEventById(id: string, adjust: number, config: CalendarSettings) {
+  if (!/^\d{3,4}-\d{1,2}-\d{1,2}$/.test(id)) return undefined;
+  const [year, month, index] = id.split("-").map(Number);
+  const item = source.events[index];
+  if (!item || item.kind === "weekly" || year < 1 || year > lastSupportedYear
+    || month < 1 || month > 12 || (item.hijriMonth && month !== item.hijriMonth)) return undefined;
+  return eventForMonth(year, month, index, adjust, config);
+}
+
 export function calendarEvents(start: string, end: string, adjust: number, config = calendarDefaults) {
-  const year = hijriOn(addDays(start, -1), adjust, config.anchors).year;
-  const endYear = hijriOn(end, adjust, config.anchors).year;
+  const year = hijriOn(addDays(start, -2), adjust, config.anchors).year;
+  const endYear = hijriOn(addDays(end, 2), adjust, config.anchors).year;
   const events = [];
   for (let y = year; y <= endYear; y++) {
     for (const [index, item] of source.events.entries()) {
       if (item.kind === "weekly") continue;
       const months = item.hijriMonth ? [item.hijriMonth] : hijriMonths.map((_, i) => i + 1);
       for (const month of months) {
-        const id = `${y}-${month}-${index}`;
-        const anchor = monthStart(y, month, adjust, config.anchors);
-        const override = config.overrides[id];
-        const first = override?.date ?? addDays(anchor.date, item.hijriDay - 1 + (override?.adjust ?? 0));
-        const confirmed = anchor.confirmed || !!override?.date;
-        const dates = confirmed ? [first] : [first, addDays(first, 1)];
-        if (dates.some(day => day >= start && day <= end)) events.push({ ...item, id, year: y, month, dates, confirmed, source: override?.source ?? anchor.source });
+        const event = eventForMonth(y, month, index, adjust, config);
+        if (event.dates.some(day => day >= start && day <= end)) events.push(event);
       }
     }
   }
@@ -99,6 +132,10 @@ export function calendarEvents(start: string, end: string, adjust: number, confi
 }
 
 export type CalendarEvent = ReturnType<typeof calendarEvents>[number];
+
+export function eventMoonReminder(event: CalendarEvent, config: CalendarSettings) {
+  return !event.confirmed && event.hijriDay === 1 && (config.moonReminders?.[event.id] ?? event.title === "Eid al-Fitr");
+}
 
 export function eventDisplayDates(event: CalendarEvent, language: string, separator: string) {
   const shortDate = { day: "numeric", month: "short" } as const;
