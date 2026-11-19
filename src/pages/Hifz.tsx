@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArabicText } from "@/components/ArabicText";
 import { DesignIcon } from "@/components/DesignIcon";
+import { QuranStudySources } from "@/components/QuranStudySources";
 import { StudyText } from "@/components/StudyText";
 import { useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
@@ -45,14 +46,6 @@ function VerseRead({ verse, settings }: { verse: QuranVerse; settings: Settings 
   </article>;
 }
 
-function StudySources({ settings }: { settings: Settings }) {
-  const { t } = useCopy();
-  return <footer className="hifz-sources small muted">
-    {settings.script === "uthmani" ? <a href="https://tanzil.net/" rel="noreferrer">{t("hifzTanzil")}</a>
-      : <a href="https://github.com/DigitalKhatt/digitalkhatt-js" rel="noreferrer">{t("hifzIndopak")}</a>}
-    {showEnglishQuranMeaning(settings) && <a href="https://tanzil.net/trans/en.pickthall" rel="noreferrer">{t("hifzPickthall")}</a>}
-  </footer>;
-}
 
 function StudyPortion({ item, position, title, passage, settings, now, minutes }: { item: HifzPortion; position: number; title: string;
   passage: HifzPassage; settings: Settings; now: Date; minutes: number }) {
@@ -88,7 +81,7 @@ function StudyPortion({ item, position, title, passage, settings, now, minutes }
         className={`action${grade === "got-it" ? "" : " light"}`} onClick={() => void rate(grade)}>{t(grade)}</button>)}
     </div>
     {status && <p className="small muted" role="status">{status}</p>}
-    <StudySources settings={settings} />
+    <QuranStudySources script={settings.script} english={showEnglishQuranMeaning(settings)} />
   </div>;
 }
 
@@ -163,7 +156,7 @@ function PassagePlan({ passage, portions, settings, now }: { passage: HifzPassag
       onClick={() => { if (!stored[passage.id]) selectMinutes(minutes); }}>
       {t((reviews[due.id]?.learnedOn ? "hifzReview" : "hifzStart"), { number: dueIndex + 1, ref: due.ref })}
     </Link> : <p className="small muted" role="status">{t("hifzAllDone")}</p>}
-    <StudySources settings={settings} />
+    <QuranStudySources script={settings.script} english={showEnglishQuranMeaning(settings)} />
   </div>;
 }
 

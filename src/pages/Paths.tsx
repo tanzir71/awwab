@@ -12,6 +12,7 @@ import { countKnownQuranWords, quranText } from "@/lib/quran";
 import { studyNames } from "@/lib/study-copy";
 import type { Reviews } from "@/lib/reviews";
 import { tajweedIndex, tajweedLessons, tajweedProgress } from "@/lib/tajweed";
+import { completedReadingChapters, emptyReadingPractice, practiceChapters, teacherChecklistComplete } from "@/lib/readingPractice";
 import spoken from "../../docs/content/spoken-arabic.json";
 import grammar from "../../docs/content/grammar-foundations.json";
 
@@ -34,6 +35,7 @@ function usePathState() {
   const quranWords = useRecord<string[]>("words-known", emptyStrings);
   const vocabulary = useRecord<string[]>("word-bank-known", emptyStrings);
   const spokenLessons = useRecord("speak-complete", emptyStrings);
+  const reading = useRecord("reading-practice", emptyReadingPractice);
   const known = useMemo(() => countKnownQuranWords(quranWords, vocabulary), [quranWords, vocabulary]);
   const learned = useMemo(() => learnedSurahs(hifz, earlier), [hifz, earlier]);
   const short = salahChapters.filter(number => learned.has(number)).length;
@@ -41,18 +43,26 @@ function usePathState() {
   const spokenCount = spoken.units.filter(unit => spokenLessons.includes(unit.id)).length;
   const grammarCount = grammar.lessons.filter(lesson => earlier[grammarReviewPrefix + lesson.id]?.correct > 0).length;
   const tajweed = tajweedProgress(earlier);
+  const fluent = completedReadingChapters("flow", reading);
+  const understood = completedReadingChapters("meaning", reading);
+  const prepared = Object.values(reading.teacher).filter(teacherChecklistComplete).length;
   const complete = {
-    read: completedQaida.length === 17 ? 1 : 0, memorise: short >= salahChapters.length ? (amma >= juzAmma.length ? 2 : 1) : 0,
+    read: completedQaida.length === 17 ? (fluent === juzAmma.length ? (tajweed.completed === tajweedLessons.length ? 3 : 2) : 1) : 0,
+    memorise: short >= salahChapters.length ? (amma >= juzAmma.length ? 2 : 1) : 0,
     understand: known >= 125 ? (grammarCount === grammar.lessons.length ? 2 : 1) : 0,
     speak: spokenCount === spoken.units.length ? 1 : 0,
   };
   const active = Object.fromEntries(tracks.map(track => [track, Math.min(5, Math.max(complete[track] + 1, placement[track]?.level ?? 1))])) as Record<Track, number>;
-  return { active, complete, completedQaida, learned, short, amma, known, current, placement, spokenCount, grammarCount, tajweed };
+  return { active, complete, completedQaida, learned, short, amma, known, current, placement, spokenCount, grammarCount, tajweed, fluent, understood, prepared };
 }
 
 function headingLevel(track: Track, active: number) { return levels[track][active - 1]; }
 function levelDone(track: Track, level: number, state: ReturnType<typeof usePathState>) {
-  return level <= state.complete[track] || (track === "read" && level === 3 && state.tajweed.completed === tajweedLessons.length);
+  return level <= state.complete[track] ||
+    (track === "read" && level === 2 && state.fluent === juzAmma.length) ||
+    (track === "read" && level === 3 && state.tajweed.completed === tajweedLessons.length) ||
+    (track === "read" && level === 5 && state.prepared === practiceChapters.teacher.length) ||
+    (track === "understand" && level === 4 && state.understood === juzAmma.length);
 }
 
 function PathsBack({ to }: { to: string }) {
@@ -66,11 +76,14 @@ function PathIcon({ track, desktop }: { track: Track; desktop: boolean }) {
 
 function contextLabel(track: Track, level: number, state: ReturnType<typeof usePathState>, t: ReturnType<typeof useCopy>["t"]) {
   if (track === "read" && level === 1) return t("pathsQaidaCount", { count: state.completedQaida.length });
+  if (track === "read" && level === 2) return t("readingSurahsProgress", { count: state.fluent, total: juzAmma.length });
   if (track === "read" && level === 3) return t("pathsLessonProgress", { count: state.tajweed.completed, total: tajweedLessons.length });
+  if (track === "read" && level === 5) return t("readingPreparedCount", { count: state.prepared });
   if (track === "memorise" && level === 1) return `${trackStatus.memorise[0]} · ${t("pathsSalahCount", { count: state.short, total: salahChapters.length })}`;
   if (track === "memorise" && level === 2) return `${trackStatus.memorise[1]} · ${t("pathsAmmaCount", { count: state.amma })}`;
   if (track === "understand" && level === 1) return t("pathsCoreCount", { count: state.known });
   if (track === "understand" && level === 2) return t("pathsLessonProgress", { count: state.grammarCount, total: grammar.lessons.length });
+  if (track === "understand" && level === 4) return t("readingSurahsProgress", { count: state.understood, total: juzAmma.length });
   if (track === "speak" && level === 1) return t("pathsLessonProgress", { count: state.spokenCount, total: spoken.units.length });
   return trackStatus[track][level - 1];
 }
@@ -241,9 +254,7 @@ function Outline({ track, item, number }: { track: Track; item: PathLevel; numbe
   const { t } = useCopy();
   const links: Record<string, { to: string; label: string }[]> = {
     read1: [{ to: "/learn/qaida", label: "nooraniQaida" }, { to: "/learn/takhti", label: "takhti" }],
-    read2: [{ to: "/learn/fluency", label: "fluency" }, { to: pathUrl("memorise", 2), label: "pathsIslandJuz" }],
     understand1: [{ to: "/learn/words", label: "wordBankName" }, { to: "/learn/salah", label: "understandSalah" }],
-    understand4: [{ to: pathUrl("memorise", 2), label: "pathsIslandJuz" }],
     speak4: [{ to: "/umrah/ask", label: "askHome" }],
   };
   const available = links[track + number];

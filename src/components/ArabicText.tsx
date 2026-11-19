@@ -23,6 +23,7 @@ function WordChip({ children, recall, href, selected, indicator, annotation, onS
 export interface WordDetail {
   transliteration?: string;
   gloss?: string;
+  glossLanguage?: string;
   displayText?: string;
   root?: string;
   anatomyWord?: string;
@@ -72,7 +73,7 @@ export function ArabicText({ text, citation, words, recall = "read", mushaf, com
                   selectWord({ word: anatomyWord, citation, connected: index > 0, verse, position, ...detail });
                 }}>
                 <span>{shown}</span>
-                {chipRecall === "read" && showGlosses && detail?.gloss && <small lang="en" dir="ltr">{detail.gloss}</small>}
+                {chipRecall === "read" && showGlosses && detail?.gloss && <small lang={detail.glossLanguage ?? "en"} dir="auto">{detail.gloss}</small>}
                 {indicator && <small className="word-indicator" lang={language} dir="auto">{indicator.label}</small>}
                 {screenReaderText && <span className="sr-only" lang={chipRecall === "read" ? "en" : language} dir="ltr">{screenReaderText}</span>}
               </WordChip>

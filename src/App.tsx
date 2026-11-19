@@ -18,6 +18,7 @@ import { Hifz } from "@/pages/Hifz";
 import { PathCheck } from "@/pages/PathCheck";
 import { RootsPatterns } from "@/pages/RootsPatterns";
 import { Tajweed } from "@/pages/Tajweed";
+import { ReadingPractice } from "@/pages/ReadingPractice";
 import { Speak } from "@/pages/Speak";
 import { Grammar } from "@/pages/Grammar";
 import { Plan } from "@/pages/Plan";
@@ -94,6 +95,9 @@ function Main() {
         <Route path="/learn/paths/understand/3" element={<RootsPatterns settings={settings} now={now} />} />
         <Route path="/learn/paths/understand/2/:unit?" element={<Grammar settings={settings} now={now} />} />
         <Route path="/learn/paths/read/3/:unit?" element={<Tajweed key={pathname + search} settings={settings} now={now} />} />
+        <Route path="/learn/paths/read/2/:chapter?" element={<ReadingPractice mode="flow" settings={settings} now={now} />} />
+        <Route path="/learn/paths/read/5/:chapter?" element={<ReadingPractice mode="teacher" settings={settings} now={now} />} />
+        <Route path="/learn/paths/understand/4/:chapter?" element={<ReadingPractice mode="meaning" settings={settings} now={now} />} />
         <Route path="/learn/paths/:track?/:level?" element={<Paths desktop={desktop} />} />
         <Route path="/learn/map" element={<MaktabMap />} />
         <Route path="/learn/hifz/:id/:portion?" element={<Hifz settings={settings} now={now} />} />

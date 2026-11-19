@@ -14,7 +14,8 @@ import { updateWordChoice } from "./storageService";
 import { reviewCard, type Reviews } from "./reviews";
 import { countKnownQuranWords } from "./quran";
 import { completeOnboarding, desktopPlacementPassed, placementLesson } from "./onboarding";
-import { finishQaidaLesson, rememberQaidaPlace, saveFluencyPractice, saveQaidaRowReview, saveSurahReview, saveTakhtiPractice, saveWordReview, setAyahFamiliar, wordMilestones } from "./studyMilestones";
+import { finishQaidaLesson, markReadingPortion, rememberQaidaPlace, saveFluencyPractice, saveQaidaRowReview, saveSurahReview, saveTakhtiPractice, saveWordReview, setAyahFamiliar, setTeacherCheck, wordMilestones } from "./studyMilestones";
+import { completedReadingChapters, emptyReadingPractice, firstUnreadAyah, recitationChecks, teacherChecklistComplete } from "./readingPractice";
 import { reviewDestination, reviewQueue, studyPlanMinutes } from "./studyDesk";
 import coreWords from "../../docs/content/core-quran-words.json";
 import qaida from "../../docs/content/qaida-lessons.json";
@@ -63,6 +64,28 @@ describe("onboarding", () => {
 describe("saved study milestones", () => {
   beforeEach(async () => {
     await db.records.clear();
+  });
+
+  it("merges reading progress and keeps the two paths and teacher checklist separate in a backup", async () => {
+    await Promise.all([
+      markReadingPortion("flow", 108, [2, 3], times.asr, dhaka.timeZone),
+      markReadingPortion("flow", 108, [1, 2], times.asr, dhaka.timeZone),
+      markReadingPortion("meaning", 108, [2], times.asr, dhaka.timeZone),
+      ...recitationChecks.map(check => setTeacherCheck(1, check, true, times.asr, dhaka.timeZone)),
+    ]);
+    const file = await backup();
+    await db.records.clear();
+    await restoreBackup(file);
+    const reading = await getRecord("reading-practice", emptyReadingPractice);
+    expect(reading.flow[108]).toEqual([1, 2, 3]);
+    expect(reading.meaning[108]).toEqual([2]);
+    expect(completedReadingChapters("flow", reading)).toBe(1);
+    expect(completedReadingChapters("meaning", reading)).toBe(0);
+    expect(firstUnreadAyah(3, reading.meaning[108])).toBe(1);
+    expect(teacherChecklistComplete(reading.teacher[1])).toBe(true);
+    expect(await getRecord("word-bank-known", [])).toEqual([]);
+    expect(await getRecord("study-days", [])).toEqual([day]);
+    expect(() => markReadingPortion("flow", 108, [4], times.asr, dhaka.timeZone)).toThrow(RangeError);
   });
 
   it("schedules Qaida grades and preserves each due route and practice day", async () => {

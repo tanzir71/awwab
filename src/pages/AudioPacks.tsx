@@ -7,6 +7,7 @@ import { downloadAudioPack, listAudioPacks, type AudioPack } from "@/lib/audio";
 import { db } from "@/lib/storageService";
 import { useCopy } from "@/lib/copy";
 import { prayerGuidePath } from "@/lib/prayerGuide";
+import { practiceChapters, practicePage } from "@/lib/readingPractice";
 import { studyNames } from "@/lib/study-copy";
 
 export function AudioPacks() {
@@ -17,6 +18,7 @@ export function AudioPacks() {
   const [status, setStatus] = useState<{ id: string; name?: string }>();
   const refs = useLiveQuery(() => db.audio.toCollection().primaryKeys(), [], []);
   const selected = params.get("surah");
+  const teacherSurah = params.get("from") === "teacher" && practiceChapters.teacher.find(chapter => String(chapter.number) === selected);
   useEffect(() => {
     const controller = new AbortController();
     void listAudioPacks(controller.signal).then(setPacks, () => {
@@ -36,7 +38,8 @@ export function AudioPacks() {
   }
   const visible = packs?.slice().sort((a, b) => Number(b.id.endsWith("-" + selected)) - Number(a.id.endsWith("-" + selected)));
   return <div className="stack">
-    <SectionNav title={t("offlineAudio")} back={prayerGuidePath(params.get("fromPrayer"), params.get("fromRakah")) ?? (selected ? `/learn/surahs/${selected}?mode=listen` : "/you")} />
+    <SectionNav title={t("offlineAudio")} back={prayerGuidePath(params.get("fromPrayer"), params.get("fromRakah")) ??
+      (teacherSurah ? practicePage("teacher", teacherSurah.number) : selected ? `/learn/surahs/${selected}?mode=listen` : "/you")} />
     <p className="muted">{t("offlineAudioHint")}</p>
     {!packs && !status && <p role="status">{t("openingAudio")}</p>}
     {packs?.length === 0 && <p className="card soft">{t("audioEmpty")}</p>}

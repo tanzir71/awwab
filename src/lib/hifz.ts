@@ -92,7 +92,7 @@ export function passageLabel(passage: HifzPassage) {
     : ranges.map(range => rangeLabel(range.chapter, range.from, range.to)).join(" · ");
 }
 
-export function groupPortions(passage: HifzPassage, quran: StudyQuran) {
+export function groupPortions(passage: HifzPassage, quran: StudyQuran, limits = { ayahs: maxPortionAyahs, words: maxPortionWords }) {
   return passage.ranges.flatMap(({ chapter, from, to }) => {
     const groups: HifzPortion[] = [];
     let pending: QuranVerse[] = [];
@@ -106,21 +106,21 @@ export function groupPortions(passage: HifzPassage, quran: StudyQuran) {
     }
     for (const verse of quran.surahs[chapter].slice(from - 1, to)) {
       const count = splitArabicWords(verseText(verse, "uthmani").text).length;
-      if (pending.length === maxPortionAyahs || words + count > maxPortionWords) push();
+      if (pending.length === limits.ayahs || words + count > limits.words) push();
       pending.push(verse);
       words += count;
-      if (words >= maxPortionWords) push();
+      if (words >= limits.words) push();
     }
     push();
     return groups;
   });
 }
 
-export function studyPhrases(verse: QuranVerse, script: Script) {
+export function studyPhrases(verse: QuranVerse, script: Script, includeShortVerses = false) {
   const rendered = verseText(verse, script).text;
-  if (splitArabicWords(verseText(verse, "uthmani").text).length <= maxPortionWords) return rendered;
+  if (!includeShortVerses && splitArabicWords(verseText(verse, "uthmani").text).length <= maxPortionWords) return rendered;
   // Keep the waqf signs and split the reading display, not the review item.
-  return rendered.replace(/([ۖۗۘۚؕؗ])\s+/g, "$1\n");
+  return rendered.replace(/([ۖۗۘۚۛؕؗ])\s+/g, "$1\n");
 }
 
 export function portionPlan(portions: HifzPortion[], minutes: number, start: string) {

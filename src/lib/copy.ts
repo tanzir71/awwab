@@ -23,6 +23,7 @@ import { askMessages } from "./umrah-ask-copy";
 import { pathsMessages } from "./paths-copy";
 import { tajweedMessages } from "./tajweed-copy";
 import { speakMessages } from "./speak-copy";
+import { readingMessages } from "./reading-copy";
 import { pseudoLiteral, type PseudoLocale } from "./pseudoLocale";
 
 type CopySettings = Pick<Settings, "mode" | "language" | "wordChoices" | "nativeDigits"> & { pseudoLocale?: PseudoLocale };
@@ -30,6 +31,7 @@ export type MessageCatalog = Record<string, Record<Settings["language"], string 
 export const CopyContext = createContext<CopySettings>({ mode: "adult", language: "en" });
 
 const messages: MessageCatalog = {
+  ...readingMessages,
   ...speakMessages,
   ...tajweedMessages,
   ...pathsMessages,

@@ -5,6 +5,7 @@ export interface WordSelection {
   citation?: string;
   transliteration?: string;
   gloss?: string;
+  glossLanguage?: string;
   root?: string;
   position?: number;
   verse?: string;

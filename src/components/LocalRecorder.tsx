@@ -4,8 +4,8 @@ import { useCopy } from "@/lib/copy";
 
 let currentRecorder: MediaRecorder | undefined;
 
-export function LocalRecorder({ label, compact = false, actionClass, actionLabel, icon }: {
-  label?: string; compact?: boolean; actionClass?: string; actionLabel?: string; icon?: React.ReactNode;
+export function LocalRecorder({ label, compact = false, actionClass, actionLabel, icon, maxSeconds = 120 }: {
+  label?: string; compact?: boolean; actionClass?: string; actionLabel?: string; icon?: React.ReactNode; maxSeconds?: number;
 } = {}) {
   const { t } = useCopy();
   const active = useRef<{ input: MediaStream; recorder: MediaRecorder }>();
@@ -38,7 +38,7 @@ export function LocalRecorder({ label, compact = false, actionClass, actionLabel
       if (!mounted.current) { input.getTracks().forEach(track => track.stop()); return; }
       const recorder = new MediaRecorder(input);
       const chunks: BlobPart[] = [];
-      const timer = window.setTimeout(() => { if (recorder.state === "recording") recorder.stop(); }, 120_000);
+      const timer = window.setTimeout(() => { if (recorder.state === "recording") recorder.stop(); }, maxSeconds * 1000);
       recorder.ondataavailable = event => { if (event.data.size) chunks.push(event.data); };
       recorder.onstop = () => {
         window.clearTimeout(timer);

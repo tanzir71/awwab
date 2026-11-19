@@ -5,15 +5,17 @@ import { toast } from "sonner";
 import { db } from "@/lib/storageService";
 import { useCopy } from "@/lib/copy";
 import { LocalRecorder } from "./LocalRecorder";
+import audioCatalogue from "../../public/packs/audio/index.json";
 
-export function VerseAudio({ audioRef, label, compare = false, startExpanded = false }: {
-  audioRef: string; label: string; compare?: boolean; startExpanded?: boolean;
+export function VerseAudio({ audioRef, label, compare = false, startExpanded = false, showAttribution = false }: {
+  audioRef: string; label: string; compare?: boolean; startExpanded?: boolean; showAttribution?: boolean;
 }) {
   const { t } = useCopy();
   const clip = useLiveQuery(() => db.audio.get(audioRef), [audioRef]);
   const [url, setUrl] = useState("");
   const [loop, setLoop] = useState(false);
   const [expanded, setExpanded] = useState(startExpanded);
+  const original = showAttribution && clip?.attribution && audioCatalogue.packs.find(pack => pack.attribution === clip.attribution && pack.items.some(item => item.ref === audioRef));
   useEffect(() => {
     if (!clip?.blob) { setUrl(""); return; }
     const url = URL.createObjectURL(clip.blob);
@@ -27,6 +29,7 @@ export function VerseAudio({ audioRef, label, compare = false, startExpanded = f
         <button type="button" className="action light" aria-label={t("loopAudio", { name: label })} aria-pressed={loop} onClick={() => setLoop(value => !value)}><Repeat size={17} /></button>
       </div>
       <audio className="w-full" controls loop={loop} preload="none" src={url} aria-label={t("referenceAudioFor", { name: label })} />
+      {original && <p className="small muted"><a href={original.source} rel="noreferrer">{original.speaker}</a> · <a href={original.licenseUrl} rel="noreferrer">{original.attribution.split(" · ")[1]}</a></p>}
       <button type="button" className="text-button justify-self-start" aria-expanded={expanded} onClick={() => setExpanded(value => !value)}>{t("replaceAudio")}</button>
     </div> : !startExpanded && <button type="button" className="action soft" aria-expanded={expanded} onClick={() => setExpanded(value => !value)}><Headphones size={17} /> {t("addAudio")}</button>}
     {expanded && <label className="field small">{t("chooseAudioFor", { name: label })}

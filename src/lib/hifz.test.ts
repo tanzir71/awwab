@@ -11,6 +11,7 @@ import content from "../../docs/content/roots-and-patterns.json";
 import grammar from "../../docs/content/grammar-foundations.json";
 import { correctTajweedSamples, tajweedExcerpt, tajweedLessons, tajweedPracticeSamples, tajweedProgress, tajweedReviewId } from "./tajweed";
 import { newReview } from "./reviews";
+import { practiceChapters, readingPortions } from "./readingPractice";
 
 const quran = JSON.parse(gunzipSync(readFileSync(new URL("../../public/data/quran-study-v1.json.gz", import.meta.url))).toString()) as StudyQuran;
 
@@ -71,6 +72,20 @@ describe("Offline Quran study edition", () => {
 });
 
 describe("Learning path progress", () => {
+  it("preserves every āyah in short, shortest-first reading portions and keeps pause marks", () => {
+    expect(practiceChapters.flow).toEqual(juzAmma);
+    expect(practiceChapters.meaning).toHaveLength(37);
+    expect(practiceChapters.teacher.map(chapter => chapter.number)).toEqual([1, ...juzAmma.map(chapter => chapter.number)]);
+    for (const chapter of practiceChapters.flow) {
+      const portions = readingPortions(chapter.number, quran, true);
+      expect(portions.flatMap(part => part.verses.map(verse => verse.ref))).toEqual(quran.surahs[chapter.number].map(verse => verse.ref));
+      expect(portions.every(part => part.verses.length <= 3 && (part.words <= 22 || part.verses.length === 1))).toBe(true);
+    }
+    const verse = quran.surahs[2][1];
+    const phrases = studyPhrases(verse, "uthmani", true).split("\n");
+    expect(phrases).toHaveLength(3);
+    expect(phrases.join(" ")).toBe(verseText(verse, "uthmani").text);
+  });
   it("keeps Tajweed and grammar excerpts inside the cited ayah in each script", () => {
     const excerpt = (chapter: number, ayah: number, first: number, last: number, script: "indopak" | "uthmani") =>
       splitArabicWords(verseText(quran.surahs[chapter][ayah - 1], script).text).slice(first - 1, last);

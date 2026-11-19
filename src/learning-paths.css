@@ -174,6 +174,46 @@
 .tajweed-letters .arabic-line { gap: 0; padding: 0; }
 .tajweed-letters .word-chip { min-width: 18px; padding-inline: 2px; }
 .tajweed-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+
+.reading-active-grid, .reading-directory { display: grid; gap: 12px; min-width: 0; align-items: start; }
+.reading-active-grid > .reading-directory { display: none; }
+.reading-directory header { gap: 8px; flex-wrap: wrap; }
+.reading-directory h2, .reading-checklist h2 { font: var(--type-body-strong); }
+.reading-directory-list { display: grid; gap: 5px; margin: 0; padding: 0; list-style: none; }
+.reading-directory-list a {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 6px 9px;
+  color: var(--c-ink);
+  text-decoration: none;
+  background: var(--c-surface-alt);
+  border-radius: var(--r-control);
+}
+.reading-directory-list a:is(:hover, [aria-current="page"]) { background: var(--c-primary-soft); }
+.reading-directory-list a small { text-align: end; }
+.reading-controls { min-width: 0; }
+.reading-toolbar { justify-content: flex-start; flex-wrap: wrap; gap: 8px 12px; }
+.reading-toolbar .study-tabs { min-width: min(180px, 100%); }
+.reading-controls .study-tabs .chip { min-width: 0; min-height: 44px; justify-content: center; }
+.reading-controls .study-tabs [aria-pressed="true"] { background: var(--c-surface); box-shadow: var(--shadow-card); }
+.reading-verse .word-chip[data-annotation] { background: var(--c-primary-soft); }
+.reading-verse .word-chip small { max-width: 12ch; overflow-wrap: anywhere; }
+.reading-checklist { display: grid; min-width: 0; gap: 8px; }
+.reading-checkbox { display: flex; min-height: 44px; align-items: center; gap: 10px; }
+.reading-checkbox input { width: 18px; height: 18px; flex: none; accent-color: var(--control-primary); }
+@media (min-width: 1024px) {
+  .reading-workspace > .reading-directory .reading-directory-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .reading-active-grid { grid-template-columns: minmax(180px, 245px) minmax(0, 1fr); }
+  .reading-active-grid > .reading-directory { display: grid; position: sticky; inset-block-start: 16px; }
+  .reading-active-grid > .reading-directory ul { max-height: 68vh; overflow: auto; scrollbar-width: thin; }
+  .reading-active-grid .reading-directory-list a { grid-template-columns: auto minmax(0, 1fr); }
+  .reading-active-grid .reading-directory-list a small { grid-column: 2; text-align: start; }
+  .anatomy-open .reading-active-grid { grid-template-columns: minmax(0, 1fr); }
+  .anatomy-open .reading-active-grid > .reading-directory { display: none; }
+}
 @media (min-width: 1024px) {
   .tajweed-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

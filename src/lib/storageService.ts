@@ -9,6 +9,7 @@ import type { MosquePlan } from "./mosques";
 import { zakatBalances } from "./zakat";
 import { emptyPreparation, tripChecklist, type UmrahTrip } from "./umrah";
 import { askVarieties, askVoices } from "./umrahAsk";
+import { practiceChapters, recitationChecks } from "./readingPractice";
 import { builtInLanguages, glossaryOptions, glossaryTerms, textSizes, type AppLanguage, type GlossaryTerm, type WordChoices } from "./languagePreferences";
 
 export interface Settings {
@@ -158,7 +159,12 @@ export function readUmrahTripFile(text: string) {
     preparation: trip.preparation ? { ...emptyPreparation, ...trip.preparation } : undefined };
 }
 
+const juzAmmaKey = z.string().refine(key => practiceChapters.flow.some(chapter => String(chapter.number) === key));
+const readingAyahProgress = z.record(juzAmmaKey, z.array(count.min(1).max(286)).max(286));
+
 const savedRecords: Record<string, z.ZodTypeAny> = {
+  "reading-practice": z.object({ flow: readingAyahProgress, meaning: readingAyahProgress,
+    teacher: z.record(z.union([z.literal("1"), juzAmmaKey]), z.array(z.enum(recitationChecks)).max(recitationChecks.length)) }),
   "hifz-plans": z.record(passageKey, z.object({ minutes: count.min(1).max(90), start: daySchema })),
   "hifz-current": passageKey,
   "path-placement": z.partialRecord(z.enum(["read", "memorise", "understand", "speak"]), z.object({ level: count.min(1).max(5), score: count, total: count, day: daySchema })),
