@@ -1,0 +1,109 @@
+{
+  "source": "https://corpus.quran.com/documentation/verbforms.jsp",
+  "lessons": [
+    {
+      "id": "past",
+      "title": ["Past tense", "অতীত কাল"],
+      "rule": ["The perfect verb generally presents an action as complete. Its endings can show who did it. In the k-t-b family, kataba means ‘he wrote’ and katabnā means ‘we wrote’.", "মাদি ক্রিয়া সাধারণত কাজটি সম্পূর্ণ হয়েছে বোঝায়। ক্রিয়ার শেষ অংশে বোঝা যায় কাজটি কে করেছে। ক-ত-ব পরিবারে কাতাবা মানে ‘সে লিখল’ আর কাতাবনা মানে ‘আমরা লিখলাম’।"],
+      "words": [["كَتَبَ", "kataba", "He wrote", "সে লিখল"], ["كَتَبْنَا", "katabnā", "We wrote", "আমরা লিখলাম"], ["كَتَبْتَ", "katabta", "You wrote, masculine singular", "তুমি লিখলে, পুংলিঙ্গ একবচন"]],
+      "examples": [
+        { "ayah": [105, 1, 4, 4], "features": ["PERF"], "label": ["He did", "তিনি করলেন"], "note": ["Faʿala has the same vowel shape as kataba.", "ফা‘আলা ও কাতাবার হরকতের ছাঁচ একই।"] },
+        { "ayah": [108, 1, 2, 2], "features": ["PERF", "(IV)", "1P"], "label": ["We granted you", "আমরা আপনাকে দিলাম"], "note": ["The nā in aʿṭaynāka is the subject, ‘we’. The ka is the person addressed.", "আ‘তাইনাকার ‘না’ কর্তা ‘আমরা’। ‘কা’ দিয়ে যাঁকে বলা হচ্ছে তাঁকে বোঝায়।"] }
+      ],
+      "prompt": ["Which verb means ‘we wrote’?", "কোন ক্রিয়াটির অর্থ ‘আমরা লিখলাম’?"], "answer": 1
+    },
+    {
+      "id": "present",
+      "title": ["Present tense", "বর্তমান কাল"],
+      "rule": ["The imperfect verb takes a prefix that helps identify who acts. It can describe what someone does, is doing, or will do, depending on context.", "মুদারি ক্রিয়ার শুরুতে একটি উপসর্গ থাকে যা কর্তা চিনতে সাহায্য করে। বাক্যের প্রসঙ্গে এই ক্রিয়া কোনো কাজ করে, করছে বা করবে বোঝাতে পারে।"],
+      "words": [["يَكْتُبُ", "yaktubu", "He writes", "সে লেখে"], ["نَكْتُبُ", "naktubu", "We write", "আমরা লিখি"], ["أَكْتُبُ", "aktubu", "I write", "আমি লিখি"]],
+      "examples": [
+        { "ayah": [1, 5, 2, 2], "features": ["IMPF", "1P"], "label": ["We worship", "আমরা ইবাদত করি"], "note": ["Naʿbudu begins with na-, the prefix for ‘we’.", "না‘বুদু ‘না’ দিয়ে শুরু। এই উপসর্গ ‘আমরা’ বোঝায়।"] },
+        { "ayah": [1, 5, 4, 4], "features": ["IMPF", "1P"], "label": ["We seek help", "আমরা সাহায্য চাই"], "note": ["Nastaʿīnu also begins with na-. The rest of the verb uses a different pattern.", "নাসতা‘ঈনুও ‘না’ দিয়ে শুরু। ক্রিয়ার বাকি অংশ অন্য ছাঁচে গড়া।"] }
+      ],
+      "prompt": ["Which verb begins with the same ‘we’ prefix as naʿbudu?", "না‘বুদুর মতো ‘আমরা’ বোঝানোর উপসর্গ কোন ক্রিয়ায় আছে?"], "answer": 1
+    },
+    {
+      "id": "command",
+      "title": ["Commands and requests", "আদেশ ও অনুরোধ"],
+      "rule": ["The imperative directly addresses someone. Its use can be a command or a request. Compare uktub, ‘write’, with yaktubu, ‘he writes’.", "আমর ক্রিয়া দিয়ে কাউকে সরাসরি সম্বোধন করা হয়। এটি আদেশ বা অনুরোধ বোঝাতে পারে। ‘লেখো’ অর্থের উকতুবের সঙ্গে ‘সে লেখে’ অর্থের ইয়াকতুবু মিলিয়ে দেখুন।"],
+      "words": [["يَكْتُبُ", "yaktubu", "He writes", "সে লেখে"], ["كَتَبَ", "kataba", "He wrote", "সে লিখল"], ["اُكْتُبْ", "uktub", "Write", "লেখো"]],
+      "examples": [
+        { "ayah": [1, 6, 1, 1], "features": ["IMPV"], "label": ["A request", "একটি অনুরোধ"], "note": ["Ihdinā asks for guidance. The nā means ‘us’.", "ইহদিনা দিয়ে পথনির্দেশ চাওয়া হয়েছে। ‘না’ মানে ‘আমাদের’।"] },
+        { "ayah": [110, 3, 1, 1], "features": ["IMPV", "(II)"], "label": ["A command", "একটি আদেশ"], "note": ["After fa-, sabbiḥ is the imperative ‘glorify’.", "‘ফা’-এর পরে সাব্বিহ হলো ‘মহিমা ঘোষণা করুন’ অর্থের আমর ক্রিয়া।"] }
+      ],
+      "prompt": ["Which form directly tells someone to write?", "কোন রূপে সরাসরি কাউকে লিখতে বলা হয়েছে?"], "answer": 2
+    },
+    {
+      "id": "forms-1-5",
+      "title": ["Verb forms I–V", "ক্রিয়ার ছাঁচ ১–৫"],
+      "rule": ["Form I is the basic pattern, with its own vowel variations. Forms II–V add sounds, such as a doubled middle consonant, a long vowel, or a prefix. These changes suggest a sense to look for. Check the word in its āyah.", "প্রথম ছাঁচ মূল ছাঁচ। এর হরকত বদলাতে পারে। ২–৫ নম্বর ছাঁচে মাঝে তাশদিদ, দীর্ঘ স্বর বা উপসর্গের মতো ধ্বনি যুক্ত হয়। এগুলো অর্থের আভাস দেয়। আয়াতের প্রসঙ্গে শব্দটি মিলিয়ে দেখুন।"],
+      "words": [
+        ["فَعَلَ", "Form I", "Base form", "মূল ছাঁচ", "ছাঁচ ১"], ["فَعَّلَ", "Form II", "Often makes an action intensive or causes it", "প্রায়ই কাজের জোর বাড়ায় বা অন্যকে কাজটি করায়", "ছাঁচ ২"],
+        ["فَاعَلَ", "Form III", "Often directs the action toward another party", "প্রায়ই অন্য পক্ষের দিকে কাজটি নির্দেশ করে", "ছাঁচ ৩"], ["أَفْعَلَ", "Form IV", "Often causes a change or reaches an object", "প্রায়ই পরিবর্তন ঘটায় বা কোনো কর্ম গ্রহণ করে", "ছাঁচ ৪"],
+        ["تَفَعَّلَ", "Form V", "Often shows the subject taking on or undergoing the action", "প্রায়ই কর্তা নিজে কাজটি করে বা তার প্রভাব গ্রহণ করে", "ছাঁচ ৫"]
+      ],
+      "examples": [
+        { "ayah": [105, 1, 4, 4], "features": ["PERF"], "label": ["Form I", "ছাঁচ ১"], "note": ["Faʿala means ‘he did’. The three root letters supply the base pattern.", "ফা‘আলা অর্থ ‘তিনি করলেন’। মূল ছাঁচে তিনটি মূল হরফ রয়েছে।"] },
+        { "ayah": [96, 5, 1, 1], "features": ["(II)"], "label": ["Form II", "ছাঁচ ২"], "note": ["ʿAllama means ‘he taught’, sharing the root of ʿalima, ‘he knew’. Notice the doubled lām.", "‘আল্লামা মানে ‘তিনি শেখালেন’। ‘আলিমা মানে ‘তিনি জানলেন’। দুটির মূল এক। লামের তাশদিদ লক্ষ করুন।"] },
+        { "ayah": [2, 244, 1, 1], "features": ["(III)"], "label": ["Form III", "ছাঁচ ৩"], "note": ["Qātilū is a plural command to fight. The long ā follows the first root letter.", "কাতিলু বহুবচনে লড়াইয়ের আদেশ। প্রথম মূল হরফের পরে দীর্ঘ আ লক্ষ করুন।"] },
+        { "ayah": [108, 1, 2, 2], "features": ["(IV)"], "label": ["Form IV", "ছাঁচ ৪"], "note": ["Aʿṭaynāka means ‘we granted you’. The initial hamzah is part of Form IV.", "আ‘তাইনাকা মানে ‘আমরা আপনাকে দিয়েছি’। প্রথম হামযা চতুর্থ ছাঁচের অংশ।"] },
+        { "ayah": [2, 269, 13, 13], "features": ["(V)"], "label": ["Form V", "ছাঁচ ৫"], "note": ["Yadhdhakkaru refers to someone taking a reminder to heart. The prefix of Form V is assimilated here.", "ইয়ায্‌যাক্কারু বোঝায় কেউ উপদেশ গ্রহণ করছে। এখানে পঞ্চম ছাঁচের উপসর্গ পরের ধ্বনির সঙ্গে মিশেছে।"] }
+      ],
+      "prompt": ["Which form does ʿallama use in 96:5?", "৯৬:৫ আয়াতে ‘আল্লামা কোন ছাঁচে রয়েছে?"], "answer": 1
+    },
+    {
+      "id": "forms-6-10",
+      "title": ["Verb forms VI–X", "ক্রিয়ার ছাঁচ ৬–১০"],
+      "rule": ["Look for added sounds and positions. Form VI often shows mutual action, VII a change the subject undergoes, VIII an action involving the subject, IX a colour or state, and X can express seeking.", "কোন ধ্বনি কোথায় যুক্ত হয়েছে, তা লক্ষ করুন। ৬ নম্বর ছাঁচ প্রায়ই পারস্পরিক কাজ, ৭ কর্তার কোনো পরিবর্তন, ৮ কর্তার সঙ্গে সম্পর্কিত কাজ, ৯ রং বা অবস্থা, আর ১০ চাওয়া বোঝাতে পারে।"],
+      "words": [
+        ["تَفَاعَلَ", "Form VI", "Often mutual action", "প্রায়ই পারস্পরিক কাজ", "ছাঁচ ৬"], ["اِنْفَعَلَ", "Form VII", "Often undergoing a change", "প্রায়ই পরিবর্তনের মধ্য দিয়ে যাওয়া", "ছাঁচ ৭"],
+        ["اِفْتَعَلَ", "Form VIII", "Can be reflexive or reciprocal", "নিজের দিকে ফেরা বা পারস্পরিক হতে পারে", "ছাঁচ ৮"], ["اِفْعَلَّ", "Form IX", "Often a colour or bodily state", "প্রায়ই রং বা দেহের অবস্থা", "ছাঁচ ৯"],
+        ["اِسْتَفْعَلَ", "Form X", "Often seeking or asking", "প্রায়ই চাওয়া বা অনুরোধ", "ছাঁচ ১০"]
+      ],
+      "examples": [
+        { "ayah": [2, 85, 11, 11], "features": ["(VI)"], "label": ["Form VI", "ছাঁচ ৬"], "note": ["Taẓāharūna describes people supporting one another.", "তাযাহারূনা বোঝায় মানুষ একে অন্যকে সমর্থন করছে।"] },
+        { "ayah": [3, 144, 18, 18], "features": ["(VII)"], "label": ["Form VII", "ছাঁচ ৭"], "note": ["Yanqalib describes someone turning back. Notice the n before the first root letter.", "ইয়ানকালিব বোঝায় কেউ ফিরে যাচ্ছে। প্রথম মূল হরফের আগে নুন লক্ষ করুন।"] },
+        { "ayah": [9, 94, 8, 8], "features": ["(VIII)"], "label": ["Form VIII", "ছাঁচ ৮"], "note": ["Taʿtadhirū concerns making excuses. Look for the t after the first root letter.", "তা‘তাযিরু অজুহাত দেওয়া বোঝায়। প্রথম মূল হরফের পর তা লক্ষ করুন।"] },
+        { "ayah": [3, 106, 4, 4], "features": ["(IX)"], "label": ["Form IX", "ছাঁচ ৯"], "note": ["Taswaddu describes darkening. Notice the doubled final consonant.", "তাসওয়াদ্দু কালো হয়ে যাওয়া বোঝায়। শেষ হরফের তাশদিদ লক্ষ করুন।"] },
+        { "ayah": [110, 3, 4, 4], "features": ["(X)"], "label": ["Form X", "ছাঁচ ১০"], "note": ["Wa-staghfirhu asks the listener to seek His forgiveness. The s and t precede the root.", "ওয়াসতাগফিরহু দিয়ে তাঁর ক্ষমা চাইতে বলা হয়েছে। মূল হরফের আগে সীন ও তা আছে।"] }
+      ],
+      "prompt": ["Which form gives the sense ‘seek’ in wa-staghfirhu?", "ওয়াসতাগফিরহুতে ‘চাওয়া’ অর্থটি কোন ছাঁচে এসেছে?"], "answer": 4
+    },
+    {
+      "id": "participles",
+      "title": ["Active and passive participles", "কর্তা ও কর্মবাচক রূপ"],
+      "rule": ["An active participle can describe someone who does an action. A passive participle can describe what the action affects. In basic three-letter verbs, fāʿil and mafʿūl are common shapes.", "ইসমে ফায়েল কাজটি যে করে তাকে বোঝাতে পারে। ইসমে মাফউল যার ওপর কাজটি ঘটে তাকে বোঝাতে পারে। তিন মূল হরফের ক্রিয়ায় ফায়েল ও মাফউল পরিচিত ছাঁচ।"],
+      "words": [["كَاتِب", "kātib", "One who writes", "যে লেখে"], ["مَكْتُوب", "maktūb", "Something written", "যা লেখা হয়েছে"], ["مَكْتَب", "maktab", "Desk or office", "লেখার টেবিল বা অফিস"]],
+      "examples": [
+        { "ayah": [108, 3, 2, 2], "features": ["ACT", "PCPL"], "label": ["Active participle", "ইসমে ফায়েল"], "note": ["Shāniʾaka describes the person who hates you.", "শানি’আকা দিয়ে যে আপনাকে ঘৃণা করে তাকে বোঝানো হয়েছে।"] },
+        { "ayah": [105, 5, 3, 3], "features": ["PASS", "PCPL"], "label": ["Passive participle", "ইসমে মাফউল"], "note": ["Maʾkūl describes something that has been eaten.", "মা’কূল দিয়ে খাওয়া হয়েছে এমন কিছু বোঝানো হয়।"] }
+      ],
+      "prompt": ["Which word describes something that has been written?", "লেখা হয়েছে এমন কিছু কোন শব্দ দিয়ে বোঝায়?"], "answer": 1
+    },
+    {
+      "id": "masdar",
+      "title": ["Verbal nouns · maṣdar", "ক্রিয়াবাচক বিশেষ্য · মাসদার"],
+      "rule": ["A maṣdar names the action itself. It behaves like a noun. Form II often uses the tafʿīl pattern for its verbal noun.", "মাসদার কাজটির নাম বলে। এটি বিশেষ্যের মতো ব্যবহৃত হয়। দ্বিতীয় ছাঁচের মাসদারে প্রায়ই তাফঈল ছাঁচ দেখা যায়।"],
+      "words": [["تَكْبِير", "takbīr", "Magnification", "মহিমা ঘোষণা"], ["كَبِّرْ", "kabbir", "Magnify", "মহিমা ঘোষণা করুন"], ["كَبِير", "kabīr", "Great", "মহান"]],
+      "examples": [
+        { "ayah": [17, 111, 20, 21], "focus": 21, "features": ["VN", "(II)"], "label": ["Takbīr", "তাকবীর"], "note": ["Takbīran names the action urged by the command wa-kabbirhu.", "ওয়াকাব্বিরহু আদেশে যে কাজ বলা হয়েছে তাকবীরান সেই কাজটির নাম।"] },
+        { "ayah": [4, 164, 11, 14], "focus": 14, "features": ["VN", "(II)"], "label": ["Taklīm", "তাকলীম"], "note": ["Taklīman is a verbal noun from the same root as kallama, ‘spoke’.", "তাকলীমন হলো ক্রিয়াবাচক বিশেষ্য। ‘কথা বললেন’ অর্থের কাল্লামার সঙ্গে এর মূল এক।"] }
+      ],
+      "prompt": ["Which word names the action of magnifying?", "মহিমা ঘোষণা করার কাজটির নাম কোন শব্দ?"], "answer": 0
+    },
+    {
+      "id": "negation",
+      "title": ["Negation · lā, mā, lam, lan", "না-বোধক অব্যয় · লা, মা, লাম, লান"],
+      "rule": ["Look at the verb after a negative particle. Here lā negates a present action and mā negates a past action. Lam uses an imperfect verb to deny a past action. Lan puts an imperfect verb into the subjunctive to deny a future outcome.", "না-বোধক অব্যয়ের পরে ক্রিয়া লক্ষ করুন। এখানে ‘লা’ বর্তমান কাজ ও ‘মা’ অতীত কাজ নাকচ করে। ‘লাম’-এর পরে মুদারি ক্রিয়া থাকলেও অর্থ অতীত। ‘লান’-এর পরে মুদারি ক্রিয়া মানসূব হয় এবং ভবিষ্যতের ফল নাকচ করে।"],
+      "words": [["لَا", "lā", "Does not in this example", "এ উদাহরণে করে না"], ["مَا", "mā", "Did not in this example", "এ উদাহরণে করেনি"], ["لَمْ", "lam", "Did not, with jussive imperfect", "করেনি, সঙ্গে মাজযূম মুদারি"], ["لَنْ", "lan", "Will not, with subjunctive imperfect", "করবে না, সঙ্গে মানসূব মুদারি"]],
+      "examples": [
+        { "ayah": [109, 2, 1, 2], "features": ["POS:NEG"], "label": ["Lā", "লা"], "note": ["Lā negates the worship in aʿbudu.", "আ‘বুদুতে বোঝানো ইবাদতকে ‘লা’ নাকচ করে।"] },
+        { "ayah": [111, 2, 1, 2], "features": ["POS:NEG"], "label": ["Mā", "মা"], "note": ["Mā goes with the perfect aghnā, ‘availed’.", "‘কাজে এলো’ অর্থের মাদি আগনা-এর সঙ্গে ‘মা’ আছে।"] },
+        { "ayah": [112, 3, 1, 2], "features": ["POS:NEG"], "label": ["Lam", "লাম"], "note": ["Lam negates yalid. The imperfect ends in sukūn here.", "‘লাম’ ইয়ালিদকে নাকচ করে। মুদারি ক্রিয়াটির শেষে এখানে সুকুন আছে।"] },
+        { "ayah": [3, 92, 1, 3], "features": ["POS:NEG"], "label": ["Lan", "লান"], "note": ["Lan denies attaining righteousness. The plural verb tanālū shows the subjunctive by dropping the final n of tanālūna.", "‘লান’ নেকি লাভকে নাকচ করে। বহুবচন ক্রিয়া তানালুনার শেষের নুন বাদ গিয়ে মানসূব তানালু হয়েছে।"] }
+      ],
+      "prompt": ["Which particle introduces the future negation in 3:92?", "৩:৯২ আয়াতে ভবিষ্যৎ নাকচ করতে কোন অব্যয়টি এসেছে?"], "answer": 3
+    }
+  ]
+}

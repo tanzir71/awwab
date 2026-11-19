@@ -10,6 +10,7 @@ import { normalizeWord, splitArabicWords } from "./wordAnatomy";
 import content from "../../docs/content/roots-and-patterns.json";
 import grammar from "../../docs/content/grammar-foundations.json";
 import sentence from "../../docs/content/sentence-structure.json";
+import roots from "../../docs/content/roots-curriculum.json";
 import { correctTajweedSamples, tajweedClip, tajweedDepthLessons, tajweedExcerpt, tajweedLessons, tajweedPracticeSamples, tajweedPrecache,
   tajweedProgress, tajweedReviewId, tajweedSampleKey } from "./tajweed";
 import { newReview } from "./reviews";
@@ -177,6 +178,28 @@ describe("Learning path progress", () => {
     expect(normalizeWord(splitArabicWords(verse.uthmani)[last - 1])).toBe(normalizeWord(analysis.word));
     expect(content.patterns).toHaveLength(6);
     expect(reviewDestination(patternReviewPrefix + content.patterns[0].id)).toBe(patternPracticePath);
+  });
+
+  it("matches the roots lessons to the Quranic Arabic Corpus tags and the two bundled scripts", () => {
+    const morphology = gunzipSync(readFileSync(new URL("../../public/data/qac-morphology-0.4.txt.gz", import.meta.url))).toString();
+    const stems = new Map([...morphology.matchAll(/^\((\d+:\d+:\d+):\d+\)\t[^\t]+\t[^\t]+\t(STEM[^\r\n]*)$/gm)]
+      .map(([, ref, tags]) => [ref, tags.split("|")]));
+    for (const lesson of roots.lessons) {
+      expect(lesson.words[lesson.answer]).toBeDefined();
+      expect(reviewDestination(`roots:${lesson.id}`)).toBe(`/learn/paths/understand/3/${lesson.id}`);
+      for (const example of lesson.examples) {
+        const [chapter, ayah, first, last] = example.ayah;
+        const ref = `${chapter}:${ayah}:${"focus" in example ? example.focus : first}`;
+        expect(stems.get(ref), ref).toEqual(expect.arrayContaining(example.features));
+        for (const script of ["indopak", "uthmani"] as const) {
+          const verse = quran.surahs[chapter][ayah - 1];
+          const excerpt = splitArabicWords(verseText(verse, script).text).slice(first - 1, last);
+          expect(excerpt).toHaveLength(last - first + 1);
+        }
+      }
+    }
+    expect(roots.lessons.filter(lesson => lesson.id.startsWith("forms-")).flatMap(lesson => lesson.words.map(word => word[1])))
+      .toEqual(["Form I", "Form II", "Form III", "Form IV", "Form V", "Form VI", "Form VII", "Form VIII", "Form IX", "Form X"]);
   });
 
   it("leaves all five levels per path accessible and orders all 37 Juz ʿAmma surahs by length", () => {

@@ -6,15 +6,15 @@ import { DesignIcon } from "@/components/DesignIcon";
 import { StudyText } from "@/components/StudyText";
 import { useCopy } from "@/lib/copy";
 import { studyQuran, verseText } from "@/lib/hifz";
-import { pathUrl, patternPracticePath, patternReviewPrefix } from "@/lib/learningPaths";
+import { pathUrl, patternPracticePath, patternReviewPrefix, rootsPath, rootsReviewPrefix } from "@/lib/learningPaths";
 import type { QuranVerse } from "@/lib/quran";
 import { isDue, type ReviewGrade, type Reviews } from "@/lib/reviews";
 import { saveLearningReview } from "@/lib/studyMilestones";
 import { getRecord, type Settings } from "@/lib/storageService";
 import { splitArabicWords } from "@/lib/wordAnatomy";
 import content from "../../docs/content/roots-and-patterns.json";
+import curriculum from "../../docs/content/roots-curriculum.json";
 
-const route = pathUrl("understand", 3);
 const reviewKey = (id: string) => patternReviewPrefix + id;
 const emptyReviews: Reviews = {};
 const { spot, patterns } = content;
@@ -24,7 +24,7 @@ type Pattern = typeof patterns[number];
 function RootsHeading({ drill }: { drill: boolean }) {
   const { t } = useCopy();
   return <header className="hifz-heading">
-    <Link className="hifz-back" to={drill ? route : pathUrl("understand")} aria-label={t("back")}><DesignIcon name="ask-icon-chev-l" size={24} /></Link>
+    <Link className="hifz-back" to={drill ? rootsPath : pathUrl("understand")} aria-label={t("back")}><DesignIcon name="ask-icon-chev-l" size={24} /></Link>
     <div><h1>{t(drill ? "rootsPractice" : "rootsTitle")}</h1><p className="small muted">{t("rootsSubtitle")}</p></div>
   </header>;
 }
@@ -78,7 +78,7 @@ function PatternDrill({ items, settings, now, reviewMode }: { items: Pattern[]; 
   return <div className="paths-page roots-page">
     <RootsHeading drill />
     {!current ? <section className="card compact-stack"><h2>{t(reviewMode ? "rootsSaved" : "rootsUpToDate")}</h2>
-      <Link className="action" to={route}>{t("rootsTitle")}</Link></section> :
+      <Link className="action" to={rootsPath}>{t("rootsTitle")}</Link></section> :
       <section className="card compact-stack paths-question">
         <p className="caption">{t("pathsCheckQuestion", { number: index + 1, total: items.length })}</p>
         <h2>{t("rootsWhich")}</h2>
@@ -109,7 +109,7 @@ function StartPatternDrill({ settings, now, reviews }: { settings: Settings; now
 }
 
 export function RootsPatterns({ settings, now }: { settings: Settings; now: Date }) {
-  const { t } = useCopy();
+  const { t, language } = useCopy();
   const [query] = useSearchParams();
   const reviews = useLiveQuery(() => getRecord("reviews", emptyReviews));
   const due = reviews && patterns.filter(pattern => isDue(reviews[reviewKey(pattern.id)], now)).length;
@@ -131,6 +131,13 @@ export function RootsPatterns({ settings, now }: { settings: Settings; now: Date
     <QuranSpot settings={settings} />
     {reviews && (due ? <Link className="action" to={patternPracticePath}>{t("rootsStart", { count: settings.mode === "maktab" ? Math.min(3, due) : due })}</Link> :
       <p className="small muted">{t("rootsUpToDate")}</p>)}
+    <section className="card compact-stack roots-course">
+      <h2>{t("rootsMoreLessons")}</h2>
+      <ol className="compact-stack grammar-index">{curriculum.lessons.map(lesson => <li key={lesson.id}>
+        <Link className="row-between" to={`${rootsPath}/${lesson.id}`}><strong>{lesson.title[language === "bn" ? 1 : 0]}</strong>
+          {reviews?.[rootsReviewPrefix + lesson.id]?.correct > 0 && <span aria-label={t("pathsDone")}>✓</span>}</Link>
+      </li>)}</ol>
+    </section>
     <footer className="hifz-sources small muted">
       <a href={content.source} rel="noreferrer">{t("rootsDictionary")}</a>
       <a href={content.patternSource} rel="noreferrer">{t("rootsPatternSource")}</a>

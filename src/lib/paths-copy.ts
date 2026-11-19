@@ -148,4 +148,5 @@ export const pathsMessages: MessageCatalog = {
   rootsLoading: { en: "Opening your pattern reviews…", bn: "ছাঁচের ঝালাই খোলা হচ্ছে…" },
   rootsDictionary: { en: "Quranic Arabic Corpus · word family", bn: "কুরআনিক আরবি করপাস · শব্দপরিবার" },
   rootsPatternSource: { en: "Quranic Arabic Corpus · verb forms", bn: "কুরআনিক আরবি করপাস · ক্রিয়ার রূপ" },
+  rootsMoreLessons: { en: "Verbs and their families", bn: "ক্রিয়া ও তাদের শব্দপরিবার" },
 };

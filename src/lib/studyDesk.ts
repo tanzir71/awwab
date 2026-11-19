@@ -1,5 +1,6 @@
 import { addDays, dateKey } from "./dates";
-import { grammarPath, grammarReviewPrefix, patternPracticePath, patternReviewPrefix, phraseReviewPrefix, sentenceReviewPrefix, sentenceStructurePath } from "./learningPaths";
+import { grammarPath, grammarReviewPrefix, patternPracticePath, patternReviewPrefix, phraseReviewPrefix,
+  rootsPath, rootsReviewPrefix, sentenceReviewPrefix, sentenceStructurePath } from "./learningPaths";
 import { tajweedReviewDestination, tajweedReviewPrefix } from "./tajweed";
 import { isDue, type Reviews } from "./reviews";
 import { parseQaidaReview } from "./qaidaPractice";
@@ -13,7 +14,7 @@ export function studyPlanMinutes(hidden: DeskActivity[]) {
 }
 
 export function isPathReview(id: string) {
-  return [patternReviewPrefix, tajweedReviewPrefix, grammarReviewPrefix, sentenceReviewPrefix, phraseReviewPrefix].some(prefix => id.startsWith(prefix));
+  return [patternReviewPrefix, tajweedReviewPrefix, grammarReviewPrefix, rootsReviewPrefix, sentenceReviewPrefix, phraseReviewPrefix].some(prefix => id.startsWith(prefix));
 }
 
 export function reviewQueue(reviews: Reviews, now: Date, zone: string) {
@@ -47,6 +48,7 @@ export function reviewDestination(id?: string) {
   if (id.startsWith(patternReviewPrefix)) return patternPracticePath;
   if (id.startsWith(tajweedReviewPrefix)) return tajweedReviewDestination(id);
   if (id.startsWith(grammarReviewPrefix)) return `${grammarPath}/${encodeURIComponent(id.slice(grammarReviewPrefix.length))}`;
+  if (id.startsWith(rootsReviewPrefix)) return `${rootsPath}/${encodeURIComponent(id.slice(rootsReviewPrefix.length))}`;
   if (id.startsWith(sentenceReviewPrefix)) return `${sentenceStructurePath}/${encodeURIComponent(id.slice(sentenceReviewPrefix.length))}`;
   if (id.startsWith(phraseReviewPrefix)) {
     const [unit, word] = id.slice(phraseReviewPrefix.length).split(":");

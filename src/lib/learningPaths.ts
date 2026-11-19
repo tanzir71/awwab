@@ -46,7 +46,9 @@ export function learnedSurahs(hifz: HifzReviews, earlier: Reviews) {
 export const juzAmma = chapters.slice(77).sort((a, b) => a.words - b.words || b.number - a.number);
 export const pathUrl = (track: Track, level?: number) => `/learn/paths/${track}${level ? `/${level}` : ""}`;
 export const patternReviewPrefix = "pattern:ktb:";
-export const patternPracticePath = pathUrl("understand", 3) + "?practice";
+export const rootsPath = pathUrl("understand", 3);
+export const patternPracticePath = rootsPath + "?practice";
+export const rootsReviewPrefix = "roots:";
 export const grammarReviewPrefix = "grammar:";
 export const grammarPath = pathUrl("understand", 2);
 export const sentenceStructurePath = pathUrl("understand", 5);

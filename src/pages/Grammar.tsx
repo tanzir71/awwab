@@ -7,12 +7,13 @@ import { StudyText } from "@/components/StudyText";
 import { useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { studyQuran, verseText, type StudyQuran } from "@/lib/hifz";
-import { grammarPath, grammarReviewPrefix, pathUrl, sentenceReviewPrefix, sentenceStructurePath } from "@/lib/learningPaths";
+import { grammarPath, grammarReviewPrefix, pathUrl, rootsPath, rootsReviewPrefix, sentenceReviewPrefix, sentenceStructurePath } from "@/lib/learningPaths";
 import type { Reviews } from "@/lib/reviews";
 import { saveLearningReview } from "@/lib/studyMilestones";
 import type { Settings } from "@/lib/storageService";
 import { splitArabicWords } from "@/lib/wordAnatomy";
 import foundations from "../../docs/content/grammar-foundations.json";
+import roots from "../../docs/content/roots-curriculum.json";
 import sentence from "../../docs/content/sentence-structure.json";
 
 type Example = { ayah: number[]; label?: string[]; note?: string[] };
@@ -21,6 +22,7 @@ type Unit = { id: string; title: string[]; rule: string[]; words: string[][]; pr
 type Course = { title: string; subtitle: string; path: string; prefix: string; source: string; lessons: Unit[] };
 const courses = {
   foundations: { ...foundations, title: "grammarTitle", subtitle: "grammarSubtitle", path: grammarPath, prefix: grammarReviewPrefix },
+  roots: { ...roots, title: "rootsTitle", subtitle: "rootsSubtitle", path: rootsPath, prefix: rootsReviewPrefix },
   sentence: { ...sentence, title: "sentenceTitle", subtitle: "sentenceSubtitle", path: sentenceStructurePath, prefix: sentenceReviewPrefix },
 } satisfies Record<string, Course>;
 
@@ -51,6 +53,10 @@ function GrammarLesson({ unit, course, settings, now }: { unit: Unit; course: Co
   const [saveError, setSaveError] = useState(false);
   const next = course.lessons[course.lessons.indexOf(unit) + 1];
   const examples = unit.examples ?? [{ ayah: unit.ayah }];
+  const words = unit.words.map(([ar, latin, en, bn, banglaLabel]) => ({
+    ar, label: languageIndex && banglaLabel ? banglaLabel : latin,
+    labelLanguage: languageIndex && banglaLabel ? "bn" : "en", meaning: languageIndex ? bn : en,
+  }));
 
   useEffect(() => {
     let active = true;
@@ -71,8 +77,8 @@ function GrammarLesson({ unit, course, settings, now }: { unit: Unit; course: Co
 
   return <>
     <section className="card night compact-stack"><h2>{unit.title[languageIndex]}</h2><p><StudyText text={unit.rule[languageIndex]} /></p></section>
-    <ol className="card roots-patterns" aria-label={t("words")}>{unit.words.map(([ar, tr, en, bn]) => <li className="grammar-word" key={ar}>
-      <div><strong lang="en">{tr}</strong><p className="muted small">{languageIndex ? bn : en}</p></div>
+    <ol className="card roots-patterns" aria-label={t("words")}>{words.map(({ ar, label, labelLanguage, meaning }) => <li className="grammar-word" key={ar}>
+      <div><strong lang={labelLanguage}>{label}</strong><p className="muted small">{meaning}</p></div>
       <ArabicText text={ar} />
     </li>)}</ol>
     <div className="grammar-examples">{examples.map(example => <GrammarExample key={example.ayah.join(":")}
@@ -82,12 +88,12 @@ function GrammarLesson({ unit, course, settings, now }: { unit: Unit; course: Co
       <a className="text-button justify-self-start" href={unit.commentary.url} rel="noreferrer">{t("sentenceTafsirSource", { ref: unit.commentary.ref })}</a>
     </section>}
     <section className="card compact-stack"><h2>{unit.prompt[languageIndex]}</h2>
-      <div className="compact-stack">{unit.words.map(([ar, tr], i) => <div className="roots-option" key={ar}>
+      <div className="compact-stack">{words.map(({ ar, label, labelLanguage }, i) => <div className="roots-option" key={ar}>
         <ArabicText text={ar} compact />
-        <button type="button" className="action light" aria-pressed={choice === i} disabled={saving || choice !== undefined} onClick={() => void submit(i)}>{tr}</button>
+        <button type="button" className="action light" lang={labelLanguage} aria-pressed={choice === i} disabled={saving || choice !== undefined} onClick={() => void submit(i)}>{label}</button>
       </div>)}</div>
       {saveError && <p role="alert">{t("saveError")}</p>}
-      {choice !== undefined && <p role="status">{t(choice === unit.answer ? "lessonCorrect" : "grammarCompare", { word: unit.words[unit.answer][1] })}</p>}
+      {choice !== undefined && <p role="status">{t(choice === unit.answer ? "lessonCorrect" : "grammarCompare", { word: words[unit.answer].label })}</p>}
     </section>
     <Link className="action" to={next ? `${course.path}/${next.id}` : course.path}>{t(next ? "hifzNext" : "pathsDone")}</Link>
   </>;
@@ -107,7 +113,7 @@ export function Grammar({ settings, now, course = "foundations" }: { settings: S
         <strong>{item.title[language === "bn" ? 1 : 0]}</strong>{reviews[content.prefix + item.id]?.correct > 0 && <span aria-label={t("pathsDone")}>✓</span>}
       </Link></li>)}
     </ol>}
-    <footer className="hifz-sources small muted"><a href={content.source} rel="noreferrer">Quranic Arabic Corpus · Grammar</a></footer>
-    {active && course === "sentence" && <QuranStudySources script={settings.script} />}
+    <footer className="hifz-sources small muted"><a href={content.source} rel="noreferrer">{course === "roots" ? t("rootsPatternSource") : "Quranic Arabic Corpus · Grammar"}</a></footer>
+    {active && course !== "foundations" && <QuranStudySources script={settings.script} />}
   </div>;
 }

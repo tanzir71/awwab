@@ -93,6 +93,7 @@ function Main() {
         <Route path="/learn/tools" element={<Learn settings={settings} desktop={desktop} now={now} tools />} />
         <Route path="/learn/paths/check/:track?" element={<PathCheck settings={settings} now={now} />} />
         <Route path="/learn/paths/understand/3" element={<RootsPatterns settings={settings} now={now} />} />
+        <Route path="/learn/paths/understand/3/:unit" element={<Grammar course="roots" settings={settings} now={now} />} />
         <Route path="/learn/paths/understand/2/:unit?" element={<Grammar settings={settings} now={now} />} />
         <Route path="/learn/paths/understand/5/:unit?" element={<Grammar course="sentence" settings={settings} now={now} />} />
         <Route path="/learn/paths/read/3/:unit?" element={<Tajweed key={pathname + search} settings={settings} now={now} />} />
