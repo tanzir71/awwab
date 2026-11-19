@@ -6,7 +6,7 @@ import { ArabicText } from "@/components/ArabicText";
 import { ListLink, SectionNav } from "@/components/Surface";
 import { usePrayerLogs, useRecord } from "@/hooks/use-awwab";
 import { dateKey, formatDay } from "@/lib/dates";
-import { estimateQada, finishQada, qadaDefaults } from "@/lib/qada";
+import { estimateQada, finishQada, qadaBalances, qadaDefaults } from "@/lib/qada";
 import { type Settings, updateRecord } from "@/lib/storageService";
 import { prayerIds, prayerNames } from "@/types/Prayer";
 import { message } from "@/lib/copy";
@@ -100,10 +100,8 @@ export function Qada({ settings, now }: { settings: Settings; now: Date }) {
   const logs = usePrayerLogs();
   const [edit, setEdit] = useState(false);
   const today = dateKey(now, settings.city.timeZone);
-  const madeUp = Object.fromEntries(prayerIds.map(id => [id, plan.madeUp[id] + logs.filter(log => log.prayer === id && log.status === "qada").length]));
-  const remaining = Object.fromEntries(prayerIds.map(id => [id, Math.max(0, plan.estimated[id] - madeUp[id])]));
+  const { madeUp, remaining, totalLeft } = qadaBalances(plan, logs);
   const totalMade = Object.values(madeUp).reduce((total, count) => total + count, 0);
-  const totalLeft = Object.values(remaining).reduce((total, count) => total + count, 0);
   const end = finishQada(today, totalLeft, plan.dailyGoal);
   async function save(update: (previous: typeof qadaDefaults) => typeof qadaDefaults) {
     try { await updateRecord("qada", qadaDefaults, update); }

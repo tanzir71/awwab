@@ -58,7 +58,7 @@ function Tabs({ settings }: { settings: Settings }) {
     {mobile.map(item => <NavLink to={item.to} key={item.to}>{({ isActive }) => <>
       <span className="tab-icon"><DesignIcon size={22} name={mode === "adult"
         ? `tab-${item.tab}${isActive ? "" : "1"}`
-        : isActive ? `maktab-today-${item.tab === "book" || item.tab === "ret" ? `${item.tab}${item.tab === "book" ? "1" : "2"}` : item.tab}` : `tab-${item.tab}1`} /></span>
+        : isActive || item.tab !== "home" ? `maktab-today-${item.tab === "book" || item.tab === "ret" ? `${item.tab}${item.tab === "book" ? "1" : "2"}` : item.tab}` : "tab-home1"} /></span>
       {navigationLabel(settings, item.title)}
     </>}</NavLink>)}
   </nav>;
@@ -96,6 +96,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
   const nextPrayer = Number.isFinite(next.starts.valueOf())
     ? t("nextPrayerIn", { name: t(next.id), time: duration(next.starts.valueOf() - now.valueOf(), settings.language) }) : t("prayerTimes");
   const fullscreen = location.pathname.startsWith("/umrah") || location.pathname.startsWith("/print/");
+  const today = location.pathname === "/today";
   useLayoutEffect(() => {
     selectWord();
     setSearchOpen(false);
@@ -135,17 +136,19 @@ export function AppShell({ children, settings, now, desktop }: { children: React
         {simple.map(item => <NavLink key={item.to} to={item.to}><DesignIcon name={`maktab-desk-${item.simple}`} />{navigationLabel(settings, item.title === "Today" ? "Prayers" : item.title)}</NavLink>)}
         <div className="sidebar-bottom">
           <NavLink to="/print"><DesignIcon name="maktab-desk-download" /> {t("print")}</NavLink>
-          <button className="action soft w-full" onClick={() => void updateSettings({ mode: "adult", spellStyle: "en" })}>{t("switchToAdult")}</button>
+          <button className="sidebar-mode" type="button" role="switch" aria-checked="true" aria-label={t("maktabModeLabel")} onClick={() => void updateSettings({ mode: "adult", spellStyle: "en" })}>
+            <span>{t("maktabModeLabel")}<small className="muted">{t("maktabModeNote")}</small></span><span className="mode-switch-track" aria-hidden="true" />
+          </button>
         </div>
       </>}
     </nav>}
-    <main className="app-main" id="app-main" tabIndex={-1}>
-      {!fullscreen && <header className="topbar">
-        <div><h2>{title}</h2><p className="small muted">{date} · {hijriLabel(day, settings.hijriAdjust, calendar.anchors)}</p></div>
+    <main className="app-main" id="app-main" tabIndex={-1} data-page={today ? "today" : undefined}>
+      {!fullscreen && !(today && settings.mode === "maktab") && <header className="topbar">
+        <div>{today ? <h1>{title}</h1> : <h2>{title}</h2>}<p className="small muted">{date} · {hijriLabel(day, settings.hijriAdjust, calendar.anchors)}{today && ` · ${settings.city.name}`}</p></div>
         <Link className="chip night" to="/today">{nextPrayer}</Link>
         {settings.mode === "adult" && <>
           <Link className="action" to={nextReview ? `/learn/surahs/${nextReview}` : "/learn/surahs"}><DesignIcon name="desk-play" size={14} />{t("startReview")}{due.length ? ` · ${due.length}` : ""}</Link>
-          <Link className="action soft" to="/today"><DesignIcon name="desk-plus" size={14} />{t("logPrayer")}</Link>
+          <Link className="action soft" to="/today?log=1"><DesignIcon name="desk-plus" size={14} />{t("logPrayer")}</Link>
           <Link className="action light" to="/share"><DesignIcon name="desk-share" size={14} />{t("share")}</Link>
         </>}
         <Link className="icon-button" to="/you/reminders" aria-label={t("reminders")}><DesignIcon name="desk-bell" size={18} /></Link>

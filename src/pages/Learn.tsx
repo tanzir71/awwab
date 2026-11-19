@@ -7,10 +7,9 @@ import { addDays, dateKey, formatDay } from "@/lib/dates";
 import { isDue, type Reviews } from "@/lib/reviews";
 import type { Settings } from "@/lib/storageService";
 import { families, lettersForFamily } from "@/lib/takhti";
-import { normalizeWord, splitArabicWords } from "@/lib/wordAnatomy";
 import qaida from "../../docs/content/qaida-lessons.json";
 import surahs from "../../docs/content/surahs-for-salah.json";
-import { quranText } from "@/lib/quran";
+import { countKnownQuranWords } from "@/lib/quran";
 import { message } from "@/lib/copy";
 import { studyNames } from "@/lib/study-copy";
 
@@ -36,10 +35,7 @@ export function Learn({ settings, desktop }: { settings: Settings; desktop: bool
     return { day, count: Object.values(reviews).filter(review => dateKey(new Date(review.card.due), settings.city.timeZone) === day).length };
   });
   const knownVocabulary = useRecord<string[]>("word-bank-known", []);
-  const words = new Set([
-    ...quranText[1].filter(verse => known.includes(verse.ref)).flatMap(verse => splitArabicWords(verse.uthmani).map(normalizeWord)),
-    ...knownVocabulary.map(item => item.replace(/^word:/, "")),
-  ]).size;
+  const words = countKnownQuranWords(known, knownVocabulary);
   const reviewRef = due.find(([id]) => labelFor(id))?.[0] ?? "103";
   const letter = nextLetter(Number(date.slice(-2)));
   const maktab = settings.mode === "maktab";

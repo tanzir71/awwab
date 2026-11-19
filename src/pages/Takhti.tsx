@@ -1,21 +1,26 @@
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Download, Eraser, Eye, PenLine } from "lucide-react";
+import { toast } from "sonner";
 import { ArabicText } from "@/components/ArabicText";
 import { SectionNav } from "@/components/Surface";
 import { families, lettersForFamily, strokesForLetter } from "@/lib/takhti";
 import { useCopy } from "@/lib/copy";
 import { studyNames } from "@/lib/study-copy";
+import { useRecord } from "@/hooks/use-awwab";
+import { updateRecord } from "@/lib/storageService";
 
 type Letter = ReturnType<typeof lettersForFamily>[number];
 
-export function TraceBoard({ letter, printable = false }: { letter: Letter; printable?: boolean }) {
+export function TraceBoard({ letter, printable = false, onStroke }: { letter: Letter; printable?: boolean; onStroke?: () => void }) {
   const { language, t } = useCopy();
   const name = language === "bn" ? letter.nameBn : letter.name;
   const canvas = useRef<HTMLCanvasElement>(null);
   const guide = useRef<HTMLCanvasElement>(null);
   const pointer = useRef<number>();
   const previous = useRef<{ x: number; y: number }>();
+  const strokeStart = useRef<{ x: number; y: number }>();
+  const drewStroke = useRef(false);
   const [show, setShow] = useState(true);
 
   function clear() {
@@ -76,6 +81,7 @@ export function TraceBoard({ letter, printable = false }: { letter: Letter; prin
     const context = canvas.current?.getContext("2d");
     if (!context) return;
     const current = point(event);
+    if (strokeStart.current && Math.hypot(current.x - strokeStart.current.x, current.y - strokeStart.current.y) >= 4) drewStroke.current = true;
     const last = previous.current ?? current;
     const styles = getComputedStyle(document.documentElement);
     context.lineCap = "round"; context.lineJoin = "round"; context.lineWidth = 8;
@@ -92,9 +98,12 @@ export function TraceBoard({ letter, printable = false }: { letter: Letter; prin
           if (pointer.current !== undefined || event.button !== 0) return;
           event.currentTarget.setPointerCapture(event.pointerId);
           pointer.current = event.pointerId;
+          strokeStart.current = point(event);
+          drewStroke.current = false;
           draw(event);
         }}
         onPointerMove={draw}
+        onPointerUp={event => { if (pointer.current === event.pointerId && drewStroke.current) onStroke?.(); }}
         onLostPointerCapture={() => { pointer.current = undefined; previous.current = undefined; }} />}
     </div>
     {!printable && <div className="equal-row">
@@ -107,6 +116,7 @@ export function TraceBoard({ letter, printable = false }: { letter: Letter; prin
 export function Takhti() {
   const { language, t } = useCopy();
   const { family } = useParams();
+  const practised = useRecord<string[]>("takhti-practised", []);
   const selected = families.find(item => item.id === family) ?? families[0];
   const letters = lettersForFamily(selected.id);
   const [pick, setPick] = useState("");
@@ -119,7 +129,10 @@ export function Takhti() {
       <h2 className="with-icon"><PenLine size={19} /> {studyNames.family(language, selected.id, selected.title)}</h2>
       <div className="equal-row takhti-letters" role="group" aria-label={t("chooseLetter")}>{letters.map(item => <button key={item.letter} className={`action ${item === letter ? "" : "light"}`} type="button" aria-pressed={item === letter} onClick={() => setPick(item.letter)}>{language === "bn" ? item.nameBn : item.name}</button>)}</div>
       <ArabicText text={letter.letter} />
-      <TraceBoard letter={letter} />
+      <TraceBoard key={letter.letter} letter={letter} onStroke={practised.includes(selected.id) ? undefined : () => {
+        void updateRecord<string[]>("takhti-practised", [], previous => previous.includes(selected.id) ? previous : [...previous, selected.id])
+          .catch(() => toast.error(t("saveError")));
+      }} />
     </section>
     <Link to={`/print/takhti/${selected.id}`} className="action soft"><Download size={18} /> {t("printPracticeSheet")}</Link>
   </div>;

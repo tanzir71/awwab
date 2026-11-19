@@ -1,21 +1,22 @@
 import { useState } from "react";
-import { CalendarDays, ChevronRight } from "lucide-react";
-import { Link, useParams } from "react-router-dom";
+import { CalendarDays } from "lucide-react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { ArabicText } from "@/components/ArabicText";
 import { DesignIcon } from "@/components/DesignIcon";
 import PrayerTimeline from "@/components/PrayerTimeline";
 import { SectionHeading, SectionNav } from "@/components/Surface";
+import { TodayDashboard, type TodayPracticeItem } from "@/components/TodayDashboard";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { useDesktop, usePrayerLogs, useRecord } from "@/hooks/use-awwab";
+import { usePrayerLogs, useRecord } from "@/hooks/use-awwab";
 import { addDays, dateKey, duration, formatDay, formatTime } from "@/lib/dates";
-import { calendarDefaults, calendarEvents, hijriLabel } from "@/lib/hijri";
-import { currentPrayerSchedule, methodNames, prayerDay, rakatNames } from "@/lib/prayerServices";
+import { calendarDefaults, calendarEvents, eventDisplayDates, hijriLabel } from "@/lib/hijri";
+import { currentPrayerSchedule, methodNames, prayerDay } from "@/lib/prayerServices";
 import { jamaatForPrayer, mosqueDefaults } from "@/lib/mosques";
-import { db, logPrayer, prayerStatistics, type Settings } from "@/lib/storageService";
-import { qadaDefaults } from "@/lib/qada";
+import { db, logPrayer, type Settings } from "@/lib/storageService";
 import { isDue, type Reviews } from "@/lib/reviews";
-import { message } from "@/lib/copy";
+import { message, rakatLabel } from "@/lib/copy";
+import { studyNames } from "@/lib/study-copy";
 import { prayerIds, prayerNames, prayerStatusNames, type Prayer, type RakatGroup } from "@/types/Prayer";
 import hadith from "../../docs/content/hadith-curated.json";
 import rakat from "../../docs/content/rakat-structure.json";
@@ -27,125 +28,164 @@ const statusSaved = ["done", "late", "qada"];
 export const istighfar = "أَسْتَغْفِرُ ٱللَّهَ";
 const collectionNames = { bukhari: "Bukhari", muslim: "Muslim", tirmidhi: "Tirmidhi" };
 
-export function RakatCards({ groups }: { groups: RakatGroup[] }) {
+export function RakatCards({ groups, settings }: { groups: RakatGroup[]; settings: Settings }) {
+  const t = message.bind(null, settings);
+  const number = new Intl.NumberFormat(settings.language);
   return <div className="rakat-grid" data-count={groups.length}>
     {groups.map((group, i) => <div data-fard={group.type === "fard"} key={i}>
-      <strong>{group.count} {rakatNames[group.type]}</strong>
-      <small>{group.type === "fard" ? "Obligatory" : group.type === "witr" ? "Wājib in Hanafi" : "Optional"}</small>
+      <strong><span className="rakat-number">{number.format(group.count)}</span> {rakatLabel(settings, group.type)}</strong>
+      <small>{t(group.type === "fard" ? "rakatsObligatory" : group.type === "witr" ? "rakatsWajib" : "rakatsOptional")}</small>
     </div>)}
   </div>;
 }
 
-export default function Today({ settings, now }: { settings: Settings; now: Date }) {
+export default function Today({ settings, now, desktop }: { settings: Settings; now: Date; desktop: boolean }) {
   const logs = usePrayerLogs();
-  const desktop = useDesktop();
   const calendar = useRecord("calendar", calendarDefaults);
   const progress = useRecord<Record<string, number>>("istighfar", {});
   const mosques = useRecord("mosques", mosqueDefaults);
-  const qada = useRecord("qada", qadaDefaults);
   const reviews = useRecord<Reviews>("reviews", {});
   const lesson = useRecord("qaida-current", 1);
   const { day, current, next, prayers } = currentPrayerSchedule(settings.city, settings.method, settings.school, now, logs);
+  const [search, setSearch] = useSearchParams();
   const [selected, select] = useState<Prayer>();
-  const selectedCurrent = selected && (prayers.find(prayer => prayer.id === selected.id && prayer.date === selected.date) ?? selected);
-  const eventRange = calendarEvents(day, addDays(day, 180), settings.hijriAdjust, calendar)
-    .filter(item => item.kind !== "weekly").slice(0, 3);
+  const quickLog = search.get("log") === "1";
+  const suggested = current?.status === "now" ? current : prayers.find(prayer => prayer.status === "missed") ?? current ?? next;
+  const selection = selected ?? (quickLog ? suggested : undefined);
+  const selectedCurrent = selection && (prayers.find(prayer => prayer.id === selection.id && prayer.date === selection.date) ?? selection);
+  const events = calendarEvents(day, addDays(day, 180), settings.hijriAdjust, calendar).filter(item => item.kind !== "weekly");
+  const eventRange = events.filter((item, index) => events.findIndex(event => event.title === item.title) === index).slice(0, 3);
   const daily = hadith.items[Math.floor(Date.parse(day) / 86400000) % hadith.items.length];
   const zone = settings.city.timeZone;
   const language = settings.language;
   const t = message.bind(null, settings);
   const mode = settings.mode;
+  const maktabDesktop = mode === "maktab" && desktop;
   const group = mode === "maktab" ? "maktab-today" : "today";
   const headline = current ?? next;
   const due = Object.entries(reviews).find(([id, review]) => /^\d+$/.test(id) && isDue(review, now));
-  const dueSurah = surahs.surahs.find(item => item.number === Number(due?.[0] ?? 103));
-  const qadaLeft = prayerIds.reduce((sum, id) => sum + Math.max(0, qada.estimated[id] - qada.madeUp[id] - logs.filter(log => log.prayer === id && log.status === "qada").length), 0);
-  const lastWeek = prayerStatistics(logs, day).recent.slice(-7);
+  const dueSurah = surahs.surahs.find(item => item.number === Number(due?.[0])) ?? surahs.surahs.find(item => item.number === 103);
+  const currentLesson = qaida.lessons.find(item => item.n === lesson) ?? qaida.lessons[0];
   const jamaat = jamaatForPrayer(headline, zone, mosques);
   const countdown = duration((current ? current.ends : next.starts).valueOf() - now.valueOf(), language);
   const hasTimes = Number.isFinite(headline.starts.valueOf());
+  const fard = headline.rakats.find(rakat => rakat.type === "fard");
   const dateStyle = { weekday: "short", day: "numeric", month: "short" } as const;
+  const practiceItems: TodayPracticeItem[] = [
+    {
+      to: `/learn/surahs/${dueSurah.number}?mode=recall`, icon: mode === "maktab" ? "book" : "book1", minutes: 2,
+      title: t("recallSurah", { name: studyNames.surah(language, dueSurah.number, dueSurah.transliteration) }),
+      detail: t("todayRecallDetail", { count: dueSurah.words }) + (due ? ` · ${t("dueNow")}` : ""),
+    },
+    {
+      to: `/learn/qaida/${currentLesson.n}`, icon: "pen", minutes: 3,
+      title: t("lessonTitle", { number: currentLesson.n, title: studyNames.lesson(language, currentLesson.n, currentLesson.title) }),
+      detail: t("todayQaidaDetail", { minutes: 3 }),
+    },
+  ];
+  function closeLog() {
+    select(undefined);
+    if (quickLog) setSearch(previous => {
+      const updated = new URLSearchParams(previous);
+      updated.delete("log");
+      return updated;
+    }, { replace: true });
+  }
   async function record(prayer: Prayer, action: "log" | "late" | "undo") {
     try {
       if (action === "undo") await db.prayers.delete([prayer.date, prayer.id]);
       else if (action === "late") {
         await db.prayers.put({ date: prayer.date, prayer: prayer.id, status: "late", at: new Date().toISOString() });
       } else await logPrayer(prayer, new Date(), jamaatForPrayer(prayer, zone, mosques)?.id);
-      select(undefined);
+      closeLog();
       toast(t(action === "undo" ? "prayerRemoved" : prayer.status === "missed" ? "qadaRecorded" : "prayerRecorded"));
     } catch {
       toast.error(t("prayerSaveError"));
     }
   }
 
-  return <div className="prayer-layout stack">
-    <header className="prayer-intro row-between">
-      <div>
-        <p className="caption">{formatDay(day, dateStyle, language)} · {hijriLabel(day, settings.hijriAdjust, calendar.anchors)}</p>
+  const intro = <header className="prayer-intro row-between">
+      <div className="today-greeting">
+        <p className="caption">{formatDay(day, dateStyle, language)} · {hijriLabel(day, settings.hijriAdjust, calendar.anchors)}{maktabDesktop && ` · ${settings.city.name}`}</p>
         <h1>{t("greeting")}</h1>
-        <Link className="small with-icon muted" to="/you/prayer">
+        {!maktabDesktop && <Link className="small with-icon muted today-location" to="/you/prayer">
           <DesignIcon size={14} name={`${group}-pin`} />{settings.city.name} · {methodNames[settings.method]} method · {settings.school === "hanafi" ? "Hanafi Asr" : "Standard Asr"}
-        </Link>
+        </Link>}
       </div>
-      <Link className="icon-button" to="/you/reminders" aria-label={t("reminders")}><DesignIcon name={`${group}-bell`} /></Link>
-    </header>
-    <section className="card night prayer-hero stack">
-      <DesignIcon name={`${group}-motifstar8`} size={220} className="hero-motif" />
+      {maktabDesktop ? <div className="equal-row today-print-actions">
+        <Link className="action light" to="/print/timetable">{t("printThisMonth")}</Link>
+        <Link className="action soft" to="/plan/mosques">{t("mosques")}</Link>
+      </div> : <Link className="icon-button" to="/you/reminders" aria-label={t("reminders")}><DesignIcon name={`${group}-bell`} /></Link>}
+    </header>;
+  const hero = <section className="card night prayer-hero stack">
+      {!maktabDesktop && <DesignIcon name={`${group}-motifstar8`} size={220} className="hero-motif" />}
       <p className="caption">{hasTimes ? t(current ? "currentPrayer" : "nextPrayer", { time: formatTime(current ? current.ends : next.starts, zone, language) }) : t("prayerTimes")}</p>
-      <div className="with-icon"><h2>{t(headline.id)}</h2><ArabicText text={prayerArabic[headline.id]} compact /></div>
-      <p className="muted">{hasTimes ? t(current ? "prayerRemaining" : "prayerStarts", { time: countdown }) : t("prayerUnavailable")}</p>
-      {jamaat && <Link to="/plan/mosques" className="chip jamaat"><DesignIcon size={16} name={`${group}-pin1`} /> {t("jamaat", jamaat)}</Link>}
-      <RakatCards groups={headline.rakats} />
+      <div className="with-icon prayer-hero-title"><h2>{t(headline.id)}</h2><ArabicText text={prayerArabic[headline.id]} /></div>
+      {(!maktabDesktop || !hasTimes) && <p className="prayer-remaining">{hasTimes ? t(current ? "prayerRemaining" : "prayerStarts", { time: countdown, count: fard?.count ?? 0 }) : t("prayerUnavailable")}</p>}
+      {jamaat && <Link to="/plan/mosques" className="chip jamaat"><DesignIcon size={16} name={`${group}-pin1`} /> <span>{t("jamaat", jamaat)}</span></Link>}
+      <RakatCards groups={headline.rakats} settings={settings} />
       <div className="equal-row">
         {current && !statusSaved.includes(current.status)
           ? <button className="action gold" onClick={() => void record(current, "log")}>{t("iPrayed", { name: t(current.id) })}</button>
           : <Link className="action gold" to="/today/week">{t("weekView")}</Link>}
         <Link className="action light" to={`/today/guide/${headline.id}`}>{t("howToPray")}</Link>
       </div>
-    </section>
-    <section className="compact-stack">
+    </section>;
+  const prayerList = <section className="today-prayers compact-stack">
       <SectionHeading title={t("todayPrayers")} to="/today/week" label={t("weekView")} />
-      <PrayerTimeline prayers={prayers} settings={settings} onAction={select} />
-    </section>
-    <section className="compact-stack">
-      <SectionHeading title={t("todayPractice")} to="/learn" label={t("learn")} />
-      {[{ to: `/learn/surahs/${dueSurah.number}`, title: t("recallSurah", { name: dueSurah.transliteration }), detail: `Surah · ${dueSurah.words} words${due ? " · due now" : ""}`, icon: mode === "maktab" ? "book" : "book1" },
-        { to: `/learn/qaida/${lesson}`, title: `Qaida · Lesson ${lesson}`, detail: qaida.lessons[lesson - 1]?.title, icon: "pen" }].map(item =>
+      <PrayerTimeline prayers={prayers} settings={settings} now={now} mosques={maktabDesktop ? mosques : undefined} onAction={select} />
+    </section>;
+  const practice = <section className="today-practice compact-stack">
+      <SectionHeading title={t(maktabDesktop ? "todayFiveMinutes" : "todayPractice")} to="/learn" label={t("adjustPractice")} />
+      {practiceItems.map(item =>
         <Link key={item.to} className="list-row" to={item.to}>
-          <span className="icon-box"><DesignIcon name={`${group}-${item.icon}`} /></span>
+          <span className="icon-box"><DesignIcon name={`${group}-${item.icon}`} size={24} /></span>
           <span><strong>{item.title}</strong><small>{item.detail}</small></span>
-          <ChevronRight size={18} />
+          <DesignIcon name={`${group}-chevr`} size={24} />
         </Link>)}
-      <div className="card compact-stack">
-        <div className="row-between"><Link className="text-button" to="/return">Astaghfirullah · {progress[day] ?? 0} of 100</Link><ArabicText text={istighfar} compact /></div>
-        <progress value={Math.min(100, progress[day] ?? 0)} max={100} aria-label="Istighfar progress" />
+      <div className="card compact-stack today-istighfar">
+        <div className="row-between"><Link className="with-icon" to="/return">
+          {!maktabDesktop && <span className="icon-box"><DesignIcon name={`${group}-${mode === "maktab" ? "ret1" : "ret2"}`} size={20} /></span>}
+          <span><strong>Astaghfirullah</strong><small>{t("todayIstighfarProgress", { count: progress[day] ?? 0 })}</small></span>
+        </Link><ArabicText text={istighfar} /></div>
+        <progress value={Math.min(100, progress[day] ?? 0)} max={100} aria-label={t("istighfarProgress")} />
       </div>
-    </section>
-    {desktop && <section className="card compact-stack prayer-intro">
-      <SectionHeading title={t("todayWeek")} to="/today/week" label={t("openWeek")} />
-      <div className="equal-row">
-        {lastWeek.map(item => <div className="counter-tile" key={item.day}><strong>{item.count}/5</strong><small>{formatDay(item.day, { weekday: "short" }, language)}</small></div>)}
-      </div>
-      <Link className="text-button" to="/return/qada">{t("qadaBalance", { count: qadaLeft })}</Link>
-    </section>}
-    <section className="card soft hadith-quote">
+    </section>;
+  const hadithCard = <section className="card soft hadith-quote">
       <a className="caption" href={daily.url}>{daily.grade} · {collectionNames[daily.collection]} {daily.number}</a>
       <blockquote>{daily.summary.replace("He ﷺ", "The Prophet")}</blockquote>
-    </section>
-    <section className="compact-stack prayer-intro">
+      {!maktabDesktop && <p className="small muted">{t("hadithEncouragement")}</p>}
+    </section>;
+  const upcoming = <section className="today-events compact-stack">
       <SectionHeading title={t("comingUp")} to="/plan" label={t("calendar")} />
       <div className="chips">
         {eventRange.map(event => <Link className="chip soft" key={event.id} to={`/plan?event=${event.id}`}>
-          {event.title} · {event.dates.map(date => formatDay(date, dateStyle, language)).join(t("dateOr"))}
+          {event.title} · {eventDisplayDates(event, language, t("dateOr"))}
         </Link>)}
       </div>
-    </section>
-    <Dialog open={Boolean(selectedCurrent)} onOpenChange={open => { if (!open) select(undefined); }}>
+    </section>;
+  const printCard = <section className="card tint today-print compact-stack">
+      <h2>{t("printableThisMonth")}</h2>
+      <p className="small muted">{t("printablePrayerDescription")}</p>
+      <Link className="action light" to="/print/timetable">{t("previewA4")}</Link>
+    </section>;
+  return <>
+    {desktop && mode === "adult" ? <TodayDashboard settings={settings} now={now} day={day} prayers={prayers} current={current} next={next}
+      logs={logs} mosques={mosques} reviews={reviews} calendar={calendar} events={eventRange} practice={practiceItems}
+      istighfar={progress[day] ?? 0} onAction={select} /> : <div className="prayer-layout stack" data-desktop-maktab={maktabDesktop}>
+      {intro}
+      {maktabDesktop ? <div className="maktab-prayer-columns">
+        <div className="stack">{hero}{hadithCard}</div>
+        <div className="stack">{prayerList}{upcoming}</div>
+        <div className="stack">{practice}{printCard}</div>
+      </div> : <>{hero}{prayerList}{practice}{hadithCard}{upcoming}</>}
+    </div>}
+    <Dialog open={Boolean(selectedCurrent)} onOpenChange={open => { if (!open) closeLog(); }}>
       {selectedCurrent && <DialogContent className="awwab-dialog">
         <DialogTitle>{t(selectedCurrent.id)}</DialogTitle>
         <DialogDescription className="muted">{t(selectedCurrent.status)}</DialogDescription>
         {Number.isFinite(selectedCurrent.starts.valueOf()) && <p className="muted">{formatTime(selectedCurrent.starts, zone, language)} – {formatTime(selectedCurrent.ends, zone, language)} · {settings.city.name}</p>}
-        <Link className="action soft" to={`/today/guide/${selectedCurrent.id}`} onClick={() => select(undefined)}>{t("howToPray")}</Link>
+        <Link className="action soft" to={`/today/guide/${selectedCurrent.id}`}>{t("howToPray")}</Link>
         {selectedCurrent.status === "now" && <div className="equal-row">
           <button className="action" onClick={() => void record(selectedCurrent, "log")}>{t("iPrayedShort")}</button>
           <button className="action light" onClick={() => void record(selectedCurrent, "late")}>{t("logLate")}</button>
@@ -154,10 +194,10 @@ export default function Today({ settings, now }: { settings: Settings; now: Date
         {statusSaved.includes(selectedCurrent.status) && <button className="action light" onClick={() => void record(selectedCurrent, "undo")}>{t("undoPrayer")}</button>}
       </DialogContent>}
     </Dialog>
-  </div>;
+  </>;
 }
 
-export function PrayerGuide() {
+export function PrayerGuide({ settings }: { settings: Settings }) {
   const { id } = useParams();
   const reviews = useRecord<Reviews>("reviews", {});
   const prayer = prayerIds.find(item => item === id);
@@ -169,7 +209,7 @@ export function PrayerGuide() {
     <SectionNav title={`How to pray ${prayerNames[prayer]}`} back="/today" />
     <section className="card night compact-stack">
       <p className="caption">{groups.reduce((total, group) => total + group.count, 0)} rakʿāt in total</p>
-      <RakatCards groups={groups} />
+      <RakatCards groups={groups} settings={settings} />
       <p>Short on time? Start with the {count} Fard.</p>
     </section>
     <p className="muted"><span className="chip soft">Hanafi reference</span> Scholars differ on details, including Witr.</p>

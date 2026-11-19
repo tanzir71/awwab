@@ -1,6 +1,7 @@
 import { IntlMessageFormat } from "intl-messageformat";
 import { createContext, useContext, useMemo } from "react";
 import { prayerNames, prayerStatusNames } from "../types/Prayer";
+import { rakatNames } from "./prayerServices";
 import type { Settings } from "./storageService";
 import { studyMessages } from "./study-copy";
 
@@ -44,7 +45,8 @@ const messages: MessageCatalog = {
   skipToContent: { en: "Skip to content", bn: "মূল অংশে যান" },
   mainNavigation: { en: "Main navigation", bn: "প্রধান মেনু" },
   adultOffline: { en: "Adult mode · works offline", bn: "প্রাপ্তবয়স্ক মোড · অফলাইনে চলে" },
-  switchToAdult: { en: "Switch to Adult", bn: "প্রাপ্তবয়স্ক মোডে যান" },
+  maktabModeLabel: { en: "Maktab mode", bn: "মক্তব মোড" },
+  maktabModeNote: { en: "Learn like you’re 12", bn: "ছোটবেলার মতো শিখি" },
   startReview: { en: "Start review", bn: "ঝালাই শুরু করুন" },
   logPrayer: { en: "Log prayer", bn: "সালাত লিখে রাখুন" },
   share: { en: "Share", bn: "শেয়ার করুন" },
@@ -56,8 +58,8 @@ const messages: MessageCatalog = {
   currentPrayer: { en: "Now · until {time}", bn: "এখন · {time} পর্যন্ত" },
   nextPrayer: { en: "Next · {time}", bn: "পরবর্তী · {time}" },
   prayerRemaining: {
-    en: ["{time} left to pray on time. Short on time? Start with the Fard.", "{time} left to pray on time. You still have time."],
-    bn: ["ওয়াক্ত শেষ হতে {time} বাকি। সময় কম থাকলে ফরজ দিয়ে শুরু করুন।", "ওয়াক্ত শেষ হতে {time} বাকি। এখনও সময় আছে।"],
+    en: ["{time} left to pray on time. Short on time? Pray the {count, number} Fard first.", "You still have time! If you’re in a hurry, start with the {count, number} Fard."],
+    bn: ["ওয়াক্ত শেষ হতে {time} বাকি। সময় কম থাকলে আগে {count, number} রাকাত ফরজ পড়ুন।", "এখনও সময় আছে! সময় কম থাকলে আগে {count, number} রাকাত ফরজ পড়ো।"],
   },
   prayerStarts: {
     en: "Starts in {time}. You can read through the steps while you wait.",
@@ -69,7 +71,58 @@ const messages: MessageCatalog = {
   prayerRemoved: { en: "Prayer log removed.", bn: "সালাতের রেকর্ড মুছে ফেলা হয়েছে।" },
   prayerSaveError: { en: "The prayer log could not be saved. Try again.", bn: "সালাতের হিসাব রাখা যায়নি। আবার চেষ্টা করুন।" },
   jamaat: { en: "Jamaat {time} · {mosque}", bn: "জামাত {time} · {mosque}" },
-  missedEncouragement: { en: "You can still come back to it.", bn: "এখনও এই সালাত আদায় করতে পারেন।" },
+  missedEncouragement: { en: "It happens. Make it up when you can (qaḍāʾ).", bn: "এমন হয়। সুযোগ হলে কাযা আদায় করুন।" },
+  prayerRowNow: { en: "Now · {time} left", bn: "এখন · {time} বাকি" },
+  rakatsSunnah: { en: "Sunnah", bn: "সুন্নত" },
+  rakatsFard: { en: "Fard", bn: "ফরজ" },
+  rakatsNafl: { en: "Nafl", bn: "নফল" },
+  rakatsWitr: { en: "Witr", bn: "বিতর" },
+  rakatsObligatory: { en: "Obligatory", bn: "আবশ্যক" },
+  rakatsOptional: { en: "Optional", bn: "ঐচ্ছিক" },
+  rakatsWajib: { en: "Wājib in Hanafi", bn: "হানাফি মতে ওয়াজিব" },
+  adjustPractice: { en: "Adjust", bn: "বদলাই" },
+  todayFiveMinutes: { en: "Your 5 minutes", bn: "আপনার পাঁচ মিনিট" },
+  todayRecallDetail: { en: "Surah · {count, number} words", bn: "সূরা · {count, number}টি শব্দ" },
+  todayQaidaDetail: { en: "Reading · {minutes, number} min · picks up where you left", bn: "পাঠ · {minutes, number} মিনিট · যেখান থেকে থেমেছিলেন" },
+  todayIstighfarProgress: { en: "{count, number} of 100 today", bn: "আজ ১০০-এর মধ্যে {count, number} বার" },
+  istighfarProgress: { en: "Istighfar progress", bn: "ইস্তিগফারের অগ্রগতি" },
+  hadithEncouragement: { en: ["Missed a few? Consistency beats intensity. One prayer at a time.", "A little every day adds up. You’ve got this!"], bn: ["কিছু বাদ পড়েছে? অল্প অল্প করে নিয়মিত পড়ুন। একবারে এক ওয়াক্ত।", "প্রতিদিন একটু একটু করে এগিয়ে যাও। তুমি পারবে!"] },
+  printThisMonth: { en: "Print this month", bn: "এই মাস প্রিন্ট করি" },
+  printableThisMonth: { en: "Printable this month", bn: "এই মাসের প্রিন্ট" },
+  printablePrayerDescription: { en: "Timetable with your mosques’ jamaat times, ready for the fridge.", bn: "আপনার মসজিদের জামাতের সময়সহ সালাতের সময়সূচি।" },
+  previewA4: { en: "Preview A4", bn: "A4 প্রিভিউ" },
+  prayerCount: { en: "{count, number} of 5", bn: "৫ ওয়াক্তের মধ্যে {count, number}" },
+  consistencyThirty: { en: "30-day consistency", bn: "৩০ দিনের নিয়মিত সালাত" },
+  consistencyExplanation: { en: "Logged over 30 days", bn: "গত ৩০ দিনে লেখা সালাত" },
+  returnsStat: { en: "Returns", bn: "ফিরে আসা" },
+  returnsExplanation: { en: "Times you came back after a gap", bn: "বিরতির পর যতবার ফিরে এসেছেন" },
+  dueToReview: { en: "Due to review", bn: "ঝালাই বাকি" },
+  noReviewsDue: { en: "You’re up to date", bn: "সব ঝালাই হয়েছে" },
+  lastSevenDays: { en: "Last 7 days", bn: "গত ৭ দিন" },
+  fullPrayerHistory: { en: "Full history →", bn: "পুরো হিসাব →" },
+  atAdhan: { en: "Adhan", bn: "আযান" },
+  atJamaat: { en: "Jamaat", bn: "জামাত" },
+  where: { en: "Where", bn: "কোথায়" },
+  rakats: { en: "Rakʿāt", bn: "রাকাত" },
+  prayer: { en: "Prayer", bn: "সালাত" },
+  prayerLogActions: { en: "Prayer log actions", bn: "সালাতের হিসাবের কাজ" },
+  makeUp: { en: "Make up", bn: "কাযা" },
+  logNow: { en: "Log", bn: "লিখুন" },
+  onTime: { en: "On time", bn: "ওয়াক্তে" },
+  prayerNotLogged: { en: "Missed", bn: "বাদ পড়েছে" },
+  makeUpPrayers: { en: "Make-up prayers (qaḍāʾ)", bn: "কাযা সালাত" },
+  prayersLeft: { en: "{count, number} left", bn: "{count, number} ওয়াক্ত বাকি" },
+  qadaTargetDate: { en: "By {date} at {count, number}/day", bn: "দিনে {count, number} ওয়াক্তে {date} পর্যন্ত" },
+  learning: { en: "Learning", bn: "পড়ার অগ্রগতি" },
+  qaidaLessons: { en: "Qaida lessons", bn: "কায়দার পাঠ" },
+  surahsSolid: { en: "Surahs for salah (solid)", bn: "সালাতের সূরা (ভালোভাবে শেখা)" },
+  coreQuranWords: { en: "Core Quran words", bn: "কুরআনের মূল শব্দ" },
+  takhtiFamilies: { en: "Takhti letter families", bn: "তখতির হরফের পরিবার" },
+  expectedDate: { en: "Expected", bn: "সম্ভাব্য" },
+  confirmedDate: { en: "Confirmed", bn: "নিশ্চিত" },
+  zakatDate: { en: "Zakat date", bn: "যাকাতের তারিখ" },
+  yours: { en: "Yours", bn: "আপনার" },
+  tapAction: { en: "Tap", bn: "চাপ দিন" },
   unavailable: { en: "Unavailable", bn: "পাওয়া যায়নি" },
   fajr: { en: prayerNames.fajr, bn: "ফজর" },
   dhuhr: { en: prayerNames.dhuhr, bn: "যোহর" },
@@ -84,9 +137,6 @@ const messages: MessageCatalog = {
   qada: { en: prayerStatusNames.qada, bn: "কাযা আদায় হয়েছে" },
   iPrayedShort: { en: "I’ve prayed", bn: "সালাত পড়েছি" },
   calendar: { en: "Calendar", bn: "ক্যালেন্ডার" },
-  todayWeek: { en: "This week", bn: "এই সপ্তাহ" },
-  openWeek: { en: "Open week view", bn: "সাপ্তাহিক হিসাব দেখুন" },
-  qadaBalance: { en: "Make-up balance · {count} prayers", bn: "{count, number} ওয়াক্ত কাযা বাকি" },
   dateOr: { en: " or ", bn: " অথবা " },
   logLate: { en: "Log as late", bn: "দেরিতে পড়া হিসেবে রাখুন" },
   logQada: { en: "Record make-up prayer", bn: "কাযা সালাত লিখে রাখুন" },
@@ -209,4 +259,8 @@ export function useCopy() {
 
 export function navigationLabel(settings: Settings, title: string) {
   return message(settings, navMessages[title] ?? title);
+}
+
+export function rakatLabel(settings: CopySettings, type: string) {
+  return rakatNames[type] ? message(settings, `rakats${rakatNames[type]}`) : type;
 }

@@ -1,4 +1,4 @@
-import { addDays } from "./dates";
+import { addDays, formatDay } from "./dates";
 import source from "../../docs/content/islamic-events.json";
 
 export interface MonthAnchor { year: number; month: number; date: string; source: string }
@@ -96,4 +96,16 @@ export function calendarEvents(start: string, end: string, adjust: number, confi
     }
   }
   return events.sort((a, b) => a.dates[0].localeCompare(b.dates[0]));
+}
+
+export type CalendarEvent = ReturnType<typeof calendarEvents>[number];
+
+export function eventDisplayDates(event: CalendarEvent, language: string, separator: string) {
+  const shortDate = { day: "numeric", month: "short" } as const;
+  return event.dates.map(day => {
+    if (!event.title.startsWith("White days")) return formatDay(day, { ...shortDate, weekday: "short" }, language);
+    const end = addDays(day, 2);
+    const startStyle = day.slice(0, 7) === end.slice(0, 7) ? { day: "numeric" } as const : shortDate;
+    return `${formatDay(day, startStyle, language)}–${formatDay(end, shortDate, language)}`;
+  }).join(separator);
 }

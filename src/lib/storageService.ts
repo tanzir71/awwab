@@ -108,6 +108,7 @@ const savedRecords: Record<string, z.ZodTypeAny> = {
   "study-days": z.array(daySchema),
   "sayyid-line": count.max(6),
   "words-known": labels,
+  "takhti-practised": labels,
   "word-bank-known": labels,
   istighfar: dateCounts,
   qada: z.object({ estimated: balances, madeUp: balances, dailyGoal: count.min(1).max(100), fasts: count, fastsMadeUp: count }),

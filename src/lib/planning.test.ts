@@ -1,6 +1,30 @@
 import { describe, expect, it } from "vitest";
 import { calculateZakat, gramsPerBhori, nisabWeight } from "./zakat";
 import { advanceSai, bearing, correctSai, distance, initialSai } from "./umrah";
+import { eventDisplayDates } from "./hijri";
+import { qadaBalances, qadaDefaults } from "./qada";
+
+describe("Today summaries", () => {
+  it("shows both possible three-day White Days windows across a Gregorian month boundary", () => {
+    expect(eventDisplayDates({
+      id: "1448-6-11", title: "White days (Ayyām al-Bīḍ)", label: "13–15 every month", kind: "follows-month",
+      year: 1448, month: 6, hijriMonth: 0, hijriDay: 13, dates: ["2026-11-28", "2026-11-29"], confirmed: false, source: undefined,
+    }, "en", " or ")).toBe("28–30 Nov or 29 Nov–1 Dec");
+  });
+
+  it("combines recorded make-ups and manual counts without reducing other prayer balances", () => {
+    const plan = { ...qadaDefaults, estimated: { ...qadaDefaults.estimated, fajr: 2, asr: 3 }, madeUp: { ...qadaDefaults.madeUp, fajr: 2 } };
+    const at = "2026-11-19T10:00:00.000Z";
+    const result = qadaBalances(plan, [
+      { date: "2026-11-19", prayer: "fajr", status: "qada", at },
+      { date: "2026-11-19", prayer: "asr", status: "done", at },
+    ]);
+    expect(result.madeUp.fajr).toBe(3);
+    expect(result.remaining.fajr).toBe(0);
+    expect(result.remaining.asr).toBe(3);
+    expect(result.totalLeft).toBe(3);
+  });
+});
 
 describe("zakat", () => {
   it("uses equivalent gram and bhori thresholds and applies 2.5 percent to net assets", () => {

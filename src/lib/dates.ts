@@ -22,8 +22,9 @@ export function formatDay(day: string, options?: Intl.DateTimeFormatOptions, lan
     .format(new Date(`${day}T12:00:00Z`));
 }
 
-export function formatTime(date: Date, timeZone: string, language = "en") {
-  return new Intl.DateTimeFormat(language, { timeZone, hour: "numeric", minute: "2-digit" }).format(date);
+export function formatTime(date: Date, timeZone: string, language = "en", compact = false) {
+  const formatter = new Intl.DateTimeFormat(language, { timeZone, hour: "numeric", minute: "2-digit" });
+  return compact ? formatter.formatToParts(date).filter(part => part.type !== "dayPeriod").map(part => part.value).join("").trim() : formatter.format(date);
 }
 
 export function duration(ms: number, language = "en") {
