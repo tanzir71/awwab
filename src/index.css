@@ -319,6 +319,7 @@ progress::-moz-progress-bar { background: var(--control-primary); }
 .salah-study-content { display: grid; gap: 16px; min-width: 0; }
 .salah-intro { display: grid; gap: 16px; }
 .salah-intro h2 { max-width: 14em; font: var(--type-display-l); letter-spacing: var(--tracking-display-l); }
+:root[data-mode="adult"] .salah-intro h2 { max-width: 11.5em; }
 .salah-verse { display: grid; gap: 14px; }
 .salah-pick { min-height: 44px; margin-block: -12px; padding-block: 12px; text-align: left; }
 .salah-pick:hover { text-decoration: underline; text-underline-offset: .16em; }
