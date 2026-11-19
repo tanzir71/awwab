@@ -1,5 +1,5 @@
 import data from "../../public/data/quran-v1.json";
-import { normalizeWord, splitArabicWords } from "./wordAnatomy";
+import vocabulary from "../../docs/content/core-quran-words.json";
 
 export interface QuranVerse {
   ref: string;
@@ -9,10 +9,22 @@ export interface QuranVerse {
 }
 
 export const quranText: Record<string, QuranVerse[]> = data.surahs;
+export const coreWordTotal = vocabulary.words.length;
+export const coreWordCoverage = vocabulary.occurrences / vocabulary.corpusWords;
+export const coreWordSource = vocabulary.sourceUrl;
+export const fatihaMorphology: Record<string, { key: string; lemma?: string; root?: string }> = vocabulary.fatiha;
+const coreWords = new Set(vocabulary.words);
+
+export function knownCoreQuranWords(knownVerses: string[], knownVocabulary: string[]) {
+  const verses = new Set(knownVerses);
+  const keys = knownVocabulary.filter(key => coreWords.has(key));
+  for (const [location, word] of Object.entries(fatihaMorphology)) {
+    const verse = location.slice(0, location.lastIndexOf(":"));
+    if (verses.has(verse) && coreWords.has(word.key)) keys.push(word.key);
+  }
+  return new Set(keys);
+}
 
 export function countKnownQuranWords(knownVerses: string[], knownVocabulary: string[]) {
-  return new Set([
-    ...quranText[1].filter(verse => knownVerses.includes(verse.ref)).flatMap(verse => splitArabicWords(verse.uthmani).map(normalizeWord)),
-    ...knownVocabulary.map(item => item.replace(/^word:/, "")),
-  ]).size;
+  return knownCoreQuranWords(knownVerses, knownVocabulary).size;
 }

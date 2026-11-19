@@ -1,5 +1,5 @@
-import { asset } from "./config";
-import { normalizeWord } from "./wordAnatomy";
+import { asset } from "./config.ts";
+import { normalizeWord } from "./wordAnatomy.ts";
 
 const letters: Record<string, string> = {
   "'": "ء", "|": "آ", ">": "أ", "&": "ؤ", "<": "إ", "}": "ئ", A: "ا", b: "ب", p: "ة", t: "ت", v: "ث", j: "ج", H: "ح", x: "خ",
@@ -25,6 +25,20 @@ interface Corpus {
   positions: Map<string, Morphology>;
   vocabulary: (Morphology & { count: number })[];
   families: Map<string, Morphology[]>;
+}
+export function coreWordKey(word: Morphology) {
+  return `word:${normalizeWord(word.lemma ?? word.word)}`;
+}
+
+export function coreVocabulary(vocabulary: Corpus["vocabulary"]) {
+  const words = new Map<string, Corpus["vocabulary"][number] & { key: string }>();
+  for (const word of vocabulary) {
+    const key = coreWordKey(word);
+    const known = words.get(key);
+    if (known) known.count += word.count;
+    else words.set(key, { ...word, key });
+  }
+  return [...words.values()].sort((a, b) => b.count - a.count).slice(0, 125);
 }
 const types: Record<string, string> = {
   N: "Noun", V: "Verb", ADJ: "Adjective", PN: "Proper noun", PRON: "Pronoun", P: "Preposition",

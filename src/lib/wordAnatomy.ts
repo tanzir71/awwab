@@ -1,5 +1,5 @@
-import alphabet from "../../docs/content/arabic-letters.json";
-import sample from "../../docs/content/word-anatomy.sample.json";
+import alphabet from "../../docs/content/arabic-letters.json" with { type: "json" };
+import sample from "../../docs/content/word-anatomy.sample.json" with { type: "json" };
 
 const aliases: Record<string, string> = {
   "أ": "ا", "إ": "ا", "آ": "ا", "ٱ": "ا", "ى": "ي", "ی": "ي", "ة": "ت", "ؤ": "و", "ئ": "ي",

@@ -15,7 +15,7 @@ const sources = [
   ["Tanzil Quran Text", "Uthmani Quran text, © Tanzil Project, CC BY 3.0. The distributed verses are preserved verbatim.", "https://tanzil.net/docs/text_license"],
   ["M. M. Pickthall", "The Meaning of the Glorious Koran. English renderings from Tanzil’s translation archive.", "https://tanzil.net/trans/"],
   ["DigitalKhatt", "IndoPak 15-line Quran text (MIT), IndoPak and Madina fonts (SIL Open Font License). © Amine Anane and Tarteel Inc.", "https://digitalkhatt.org/"],
-  ["Quranic Arabic Corpus", "Version 0.4 morphology, © 2011 Kais Dukes, GNU GPL. The original source file is compressed without changes and read locally.", "https://corpus.quran.com/download/"],
+  ["Quranic Arabic Corpus", "Version 0.4 morphology, © 2011 Kais Dukes, GNU GPL. Awwab includes the original morphology file and derives its 125 core words and Fātiḥa lemma index from it.", "https://corpus.quran.com/download/"],
   ["Hadith API", "Distributed as public-domain data under the Unlicense. Individual narrations show their specific collection, reference and grade.", "https://github.com/fawazahmed0/hadith-api"],
   ["Adhan JS", "Prayer times are computed on this device with Adhan, MIT.", "https://github.com/batoulapps/adhan-js"],
   ["OpenStreetMap and Protomaps", "Haram points come from OpenStreetMap. The Makkah and Madinah map packs are Protomaps extracts. © OpenStreetMap contributors, Open Database License.", "https://www.openstreetmap.org/copyright"],

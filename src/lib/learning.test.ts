@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { gunzipSync } from "node:zlib";
 import { splitGraphemes, wordAnatomy } from "./wordAnatomy";
 import { isDue, reviewCard } from "./reviews";
-import { quranText } from "./quran";
+import { coreWordCoverage, coreWordTotal, fatihaMorphology, knownCoreQuranWords, quranText } from "./quran";
 import { splitArabicWords } from "./wordAnatomy";
-import { parseCorpus } from "./morphology";
+import { coreVocabulary, parseCorpus } from "./morphology";
+import snapshot from "../../docs/content/core-quran-words.json";
+import salah from "../../docs/content/salah-words.json";
 import { message } from "./copy";
 import { studyNames, studySearchTerm } from "./study-copy";
 
@@ -43,6 +47,35 @@ describe("Bundled Quran", () => {
     const corpus = parseCorpus("# Illustrative header\r\n(1:1:1:1)\tbi\tP\tPREFIX|bi+\r\n(1:1:1:2)\tsomi\tN\tSTEM|POS:N|LEM:{som|ROOT:smw|M|GEN\r\n");
     expect(corpus.positions.get("1:1:1")).toMatchObject({ word: "بِسْمِ", root: "سمو", type: "Noun" });
     expect(corpus.vocabulary[0]).toMatchObject({ count: 1 });
+  });
+});
+
+describe("Core Quran words", () => {
+  it("derives an identical 125-word list with measured occurrence coverage from the bundled corpus", () => {
+    const bundled = new URL("../../public/data/qac-morphology-0.4.txt.gz", import.meta.url);
+    const corpus = parseCorpus(gunzipSync(readFileSync(bundled)).toString("utf8"));
+    const vocabulary = coreVocabulary(corpus.vocabulary);
+    expect(new Set(snapshot.words).size).toBe(125);
+    expect(coreWordTotal).toBe(125);
+    expect(vocabulary.map(word => word.key)).toEqual(snapshot.words);
+    const count = vocabulary.reduce((total, word) => total + word.count, 0);
+    expect(coreWordCoverage).toBe(count / corpus.positions.size);
+  });
+
+  it("counts only enrolled lemmas and merges Fātiḥa familiarity without double-counting", () => {
+    const corpusKey = fatihaMorphology["1:2:2"].key;
+    const fromAyah = knownCoreQuranWords(["1:2"], []);
+    expect(fromAyah.has(corpusKey)).toBe(true);
+    expect(knownCoreQuranWords(["1:2", "1:2"], [corpusKey, "word:outside-enrolled-list"])).toEqual(fromAyah);
+    expect(knownCoreQuranWords([], [corpusKey, corpusKey])).toEqual(new Set([corpusKey]));
+  });
+
+  it("aligns all seven Fātiḥa glosses and morphology positions with the displayed text", () => {
+    for (const verse of quranText[1]) {
+      const words = splitArabicWords(verse.uthmani);
+      expect(salah.fatiha[verse.ref].glosses).toHaveLength(words.length);
+      for (const [index] of words.entries()) expect(fatihaMorphology[`${verse.ref}:${index + 1}`]).toBeDefined();
+    }
   });
 });
 

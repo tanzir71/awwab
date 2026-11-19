@@ -1,4 +1,4 @@
-import { useDeferredValue, useEffect, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Search } from "lucide-react";
 import { toast } from "sonner";
@@ -6,7 +6,8 @@ import { ArabicText } from "@/components/ArabicText";
 import { SectionNav } from "@/components/Surface";
 import { useRecord } from "@/hooks/use-awwab";
 import { dateKey, formatDay } from "@/lib/dates";
-import { loadMorphology } from "@/lib/morphology";
+import { coreVocabulary, loadMorphology } from "@/lib/morphology";
+import { coreWordTotal, knownCoreQuranWords } from "@/lib/quran";
 import { grades, isDue, reviewCard, type ReviewGrade, type Reviews } from "@/lib/reviews";
 import { useCopy } from "@/lib/copy";
 import { studyNames, studySearchTerm } from "@/lib/study-copy";
@@ -26,7 +27,6 @@ const meanings: Record<string, string> = {
 };
 
 type Corpus = Awaited<ReturnType<typeof loadMorphology>>;
-const reviewKey = (text: string) => `word:${normalizeWord(text)}`;
 
 function pronunciation(word: string) {
   return wordAnatomy(word).syllables.map(item => item.tr).join("");
@@ -44,7 +44,9 @@ export function WordBank() {
   const [session, review] = useState<string>();
   const [reveal, setReveal] = useState(false);
   const reviews = useRecord<Reviews>("reviews", {});
-  const known = useRecord<string[]>("word-bank-known", []);
+  const knownVocabulary = useRecord<string[]>("word-bank-known", []);
+  const knownVerses = useRecord<string[]>("words-known", []);
+  const known = knownCoreQuranWords(knownVerses, knownVocabulary);
   const term = useDeferredValue(studySearchTerm(query));
   const now = new Date();
   useEffect(() => {
@@ -53,11 +55,10 @@ export function WordBank() {
     return () => { current = false; };
   }, []);
 
-  const vocabulary = corpus?.vocabulary.slice(0, 125) ?? [];
+  const vocabulary = useMemo(() => corpus ? coreVocabulary(corpus.vocabulary) : [], [corpus]);
   const words = vocabulary.map(word => {
     const text = word.lemma ?? word.word;
-    const key = reviewKey(text);
-    return { ...word, text, key, en: meanings[normalizeWord(text)], tr: pronunciation(text), kind: studyNames.wordKind(language, word.type), known: known.includes(key), review: reviews[key] };
+    return { ...word, text, en: meanings[normalizeWord(text)], tr: pronunciation(text), kind: studyNames.wordKind(language, word.type), known: known.has(word.key), review: reviews[word.key] };
   });
   const filtered = words.filter(item => {
     if (filter === "known" && !item.known) return false;
@@ -71,7 +72,7 @@ export function WordBank() {
   return <div className="stack">
     <SectionNav title={t("quranWordBank")} back="/learn" />
     <div className="equal-row">
-      <div className="card"><h2>{numbers.format(known.length)}/{numbers.format(125)}</h2><small className="muted">{t("wordsKnown")}</small></div>
+      <div className="card"><h2>{numbers.format(known.size)}/{numbers.format(coreWordTotal)}</h2><small className="muted">{t("wordsKnown")}</small></div>
       <div className="card"><h2>{numbers.format(due.length)}</h2><small className="muted">{t("dueNow")}</small></div>
       <div className="card"><h2>{numbers.format(words.filter(item => item.review).length)}</h2><small className="muted">{t("inMyReview")}</small></div>
     </div>

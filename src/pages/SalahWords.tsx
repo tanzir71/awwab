@@ -1,0 +1,129 @@
+import { useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { toast } from "sonner";
+import { ArabicText } from "@/components/ArabicText";
+import { DesignIcon } from "@/components/DesignIcon";
+import { SectionNav } from "@/components/Surface";
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useRecord } from "@/hooks/use-awwab";
+import { useCopy } from "@/lib/copy";
+import { prayerGuidePath } from "@/lib/prayerGuide";
+import { coreWordCoverage, coreWordSource, coreWordTotal, countKnownQuranWords, fatihaMorphology, quranText } from "@/lib/quran";
+import { updateRecord } from "@/lib/storageService";
+import { studyNames } from "@/lib/study-copy";
+import { splitArabicWords } from "@/lib/wordAnatomy";
+import content from "../../docs/content/salah-words.json";
+
+const previews = ["salahTakbir", "salahBowing", "salahProstration", "salahRising"].flatMap(id => {
+  const entry = content.sections.find(section => section.preview?.id === id);
+  return entry ? [entry] : [];
+});
+const fatiha = quranText[1];
+const verseNotes: Record<string, { glosses: string[]; transliteration?: string }> = content.fatiha;
+
+export function SalahWords() {
+  const { language, t } = useCopy();
+  const [params] = useSearchParams();
+  const [ayah, selectAyah] = useState(2);
+  const [position, selectPosition] = useState(1);
+  const [chooserOpen, setChooserOpen] = useState(false);
+  const knownVerses = useRecord<string[]>("words-known", []);
+  const knownVocabulary = useRecord<string[]>("word-bank-known", []);
+  const verse = fatiha[ayah - 1];
+  const known = knownVerses.includes(verse.ref);
+  const words = splitArabicWords(verse.uthmani);
+  const notes = verseNotes[verse.ref];
+  const selected = fatihaMorphology[`${verse.ref}:${position}`];
+  const studied = countKnownQuranWords(knownVerses, knownVocabulary);
+  const number = new Intl.NumberFormat(language);
+  const coverage = new Intl.NumberFormat(language, { style: "percent" }).format(coreWordCoverage);
+  const lineSize = words.length <= 4 ? 4 : 3;
+  const lines = Array.from({ length: Math.ceil(words.length / lineSize) }, (_, index) => words.slice(index * lineSize, (index + 1) * lineSize).join(" "));
+
+  async function toggleFamiliar() {
+    try {
+      await updateRecord<string[]>("words-known", [], previous => known ? previous.filter(ref => ref !== verse.ref) : [...new Set([...previous, verse.ref])]);
+      toast(t(known ? "salahVerseUnmarked" : "salahVerseSaved"));
+    } catch {
+      toast.error(t("saveError"));
+    }
+  }
+
+  return <div className="salah-study">
+    <SectionNav title={t("understandSalah")} back={prayerGuidePath(params.get("fromPrayer")) ?? "/learn"}
+      backIcon={<DesignIcon name="guide-back" size={24} />}
+      action={<Link className="icon-button" to="/you/learning" aria-label={t("learningSettings")}><DesignIcon name="guide-settings" size={24} /></Link>} />
+    <div className="salah-study-content">
+      <header className="salah-intro"><h2>{t("salahWhatYouSay")}</h2><p className="muted">{t("salahIntro")}</p></header>
+      <section className="card salah-verse">
+        <div className="row-between">
+          <Dialog open={chooserOpen} onOpenChange={setChooserOpen}>
+            <DialogTrigger className="caption salah-pick" aria-label={`${t("salahPickAyah")} · ${t("salahAyahReference", { number: ayah })}`}>{t("salahAyahReference", { number: ayah })}</DialogTrigger>
+            <DialogContent className="awwab-dialog">
+              <DialogTitle>{t("fatihaWordByWord")}</DialogTitle>
+              <DialogDescription className="muted">{t("markFamiliarHint")}</DialogDescription>
+              <div className="salah-ayah-options" role="group" aria-label={t("salahPickAyah")}>
+                {fatiha.map((item, index) => <button key={item.ref} type="button" className={`action ${ayah === index + 1 ? "" : "light"}`}
+                  aria-label={t("salahAyahReference", { number: index + 1 })} aria-pressed={ayah === index + 1} onClick={() => {
+                    selectAyah(index + 1);
+                    selectPosition(1);
+                    setChooserOpen(false);
+                  }}>{number.format(index + 1)}</button>)}
+              </div>
+              <button type="button" className="action soft" onClick={() => void toggleFamiliar()}>
+                {t(known ? "salahRemoveFamiliarAyah" : "salahFamiliarAyah", { number: ayah })}
+              </button>
+              <a className="text-button" href={`https://quran.com/${verse.ref.replace(":", "/")}`}>{verse.ref}</a>
+            </DialogContent>
+          </Dialog>
+          <span className="chip soft caption">{t("salahEveryRakah")}</span>
+        </div>
+        <ArabicText text={lines.join("\n")} citation={verse.ref} verse={verse.ref} selectedPosition={position} onWordSelected={selectPosition}
+          words={words.map((_, index) => ({ gloss: notes.glosses[index], root: fatihaMorphology[`${verse.ref}:${index + 1}`]?.root }))} />
+        <p className="small muted" lang="en">{notes.transliteration && `${notes.transliteration} · `}“{verse.english}” <a href={`https://quran.com/${verse.ref.replace(":", "/")}`}>{verse.ref}</a></p>
+        <div className="salah-root small">
+          <ArabicText text={words[position - 1]} compact citation={verse.ref} verse={verse.ref} positionOffset={position - 1} />
+          <span lang="en">{notes.glosses[position - 1]}</span>
+          {selected?.root && <div className="with-icon">{t("root")}
+            <ArabicText text={[...selected.root].join(" ")} compact citation={verse.ref} />
+          </div>}
+        </div>
+      </section>
+      <section className="salah-positions">
+        <div className="row-between"><h2>{t("salahThroughPrayer")}</h2>
+          <Dialog>
+            <DialogTrigger className="text-button">{t("salahPractice")}</DialogTrigger>
+            <DialogContent className="awwab-dialog salah-practice">
+              <DialogTitle>{t("salahPracticePositions")}</DialogTitle>
+              <DialogDescription className="small muted">{t("prayerPositionNote")}</DialogDescription>
+              {content.sections.map(section => <section className="card compact-stack" key={section.url + section.title}>
+                <h2>{studyNames.prayerSection(language, section.title)}</h2>
+                <a href={section.url} className="caption">{section.source}</a>
+                {section.lines.map(([arabic, gloss], index) => <ArabicText key={index} text={String(arabic)} citation={section.source}
+                  words={(gloss as string[]).map(gloss => ({ gloss }))} />)}
+              </section>)}
+            </DialogContent>
+          </Dialog>
+        </div>
+        <div className="compact-stack">{previews.map(section => {
+          const [arabic, gloss] = section.lines[0];
+          return <article className="card salah-position" key={section.preview.id}>
+            <div className="row-between">
+              <div className="salah-position-label"><h3 className="caption">{t(section.preview.id)}</h3>
+                <a className="small muted" href={section.url}>{section.source}</a>
+              </div>
+              <ArabicText text={String(arabic)} citation={section.source} words={(gloss as string[]).map(gloss => ({ gloss }))} showGlosses={false} />
+            </div>
+            <p lang="en">{section.preview.meaning}</p>
+          </article>;
+        })}</div>
+      </section>
+      <section className="card tint salah-progress">
+        <div className="row-between"><Link className="salah-progress-link" to="/learn/words">{t("salahCoreLearned")}</Link><strong>{number.format(studied)} / {number.format(coreWordTotal)}</strong></div>
+        <progress value={studied} max={coreWordTotal} aria-label={t("salahCoreLearned")} />
+        <p className="small muted">{t("salahCoreCoverage", { coverage })}</p>
+        <div className="salah-source-links small"><a href={coreWordSource}>Quranic Arabic Corpus 0.4</a><a href="https://tanzil.net/docs/text_license">{t("tanzilCredit")}</a><span className="muted">{t("englishTranslationCredit")}</span></div>
+      </section>
+    </div>
+  </div>;
+}

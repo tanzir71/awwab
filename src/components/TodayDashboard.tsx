@@ -7,7 +7,7 @@ import { jamaatForPrayer, mosqueForPrayer, type MosquePlan } from "@/lib/mosques
 import { prayerDay } from "@/lib/prayerServices";
 import { guideRakats } from "@/lib/prayerGuide";
 import { finishQada, qadaBalances, qadaDefaults } from "@/lib/qada";
-import { countKnownQuranWords } from "@/lib/quran";
+import { coreWordTotal, countKnownQuranWords } from "@/lib/quran";
 import { isDue, type Reviews } from "@/lib/reviews";
 import { prayerStatistics, type Settings } from "@/lib/storageService";
 import { families } from "@/lib/takhti";
@@ -78,7 +78,7 @@ export function TodayDashboard({ settings, now, day, prayers, current, next, log
   const progress = [
     { key: "qaidaLessons", count: new Set(qaidaComplete).size, max: 17 },
     { key: "surahsSolid", count: practiceSurahs.filter(surah => reviews[surah.number]?.bucket === "manzil").length, max: practiceSurahs.length },
-    { key: "coreQuranWords", count: countKnownQuranWords(knownVerses, known), max: 125 },
+    { key: "coreQuranWords", count: countKnownQuranWords(knownVerses, known), max: coreWordTotal },
     { key: "takhtiFamilies", count: families.filter(family => takhti.includes(family.id)).length, max: families.length },
   ];
 

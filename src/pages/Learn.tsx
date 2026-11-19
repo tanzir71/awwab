@@ -9,7 +9,7 @@ import type { Settings } from "@/lib/storageService";
 import { families, lettersForFamily } from "@/lib/takhti";
 import qaida from "../../docs/content/qaida-lessons.json";
 import surahs from "../../docs/content/surahs-for-salah.json";
-import { countKnownQuranWords } from "@/lib/quran";
+import { coreWordTotal, countKnownQuranWords } from "@/lib/quran";
 import { message } from "@/lib/copy";
 import { studyNames } from "@/lib/study-copy";
 
@@ -119,7 +119,7 @@ export function Learn({ settings, desktop }: { settings: Settings; desktop: bool
     </section>
     <section className="card compact-stack">
       <SectionHeading title={t("quranWords")} to="/learn/words" label={`${t("wordBank")} →`} />
-      <p><strong className="numeral">{number.format(words)}</strong> {t("of125Words")}</p><progress value={Math.min(125, words)} max={125} aria-label={t("quranWordsKnown")} />
+      <p><strong className="numeral">{number.format(words)}</strong> {t("of125Words")}</p><progress value={words} max={coreWordTotal} aria-label={t("quranWordsKnown")} />
       <p className="muted">{t("startWithSalah")}</p>
       <ArabicText text="يَوْمٌ عِلْمٌ رَحْمَةٌ" compact />
     </section>

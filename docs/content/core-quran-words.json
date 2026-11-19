@@ -1,0 +1,274 @@
+{
+  "source": "Quranic Arabic Corpus morphology 0.4, Kais Dukes, GNU GPL",
+  "sourceUrl": "https://corpus.quran.com/download/",
+  "words": [
+    "word:من",
+    "word:الله",
+    "word:ما",
+    "word:إن",
+    "word:لا",
+    "word:فى",
+    "word:قال",
+    "word:الذى",
+    "word:على",
+    "word:كان",
+    "word:رب",
+    "word:أن",
+    "word:إلى",
+    "word:إلا",
+    "word:علم",
+    "word:ءامن",
+    "word:ذلك",
+    "word:أرض",
+    "word:إذا",
+    "word:عن",
+    "word:قد",
+    "word:يوم",
+    "word:قوم",
+    "word:ءاية",
+    "word:لهم",
+    "word:كل",
+    "word:لم",
+    "word:عمل",
+    "word:ثم",
+    "word:جعل",
+    "word:كفر",
+    "word:لكم",
+    "word:رسول",
+    "word:به",
+    "word:عذاب",
+    "word:هذا",
+    "word:سمآء",
+    "word:كتب",
+    "word:بين",
+    "word:نفس",
+    "word:شىء",
+    "word:أو",
+    "word:جآء",
+    "word:له",
+    "word:آتى",
+    "word:رءا",
+    "word:هم",
+    "word:حق",
+    "word:هو",
+    "word:أتى",
+    "word:خلق",
+    "word:عبد",
+    "word:كذب",
+    "word:قبل",
+    "word:أمر",
+    "word:ناس",
+    "word:إذ",
+    "word:شآء",
+    "word:هدى",
+    "word:آخر",
+    "word:أولئك",
+    "word:بعد",
+    "word:مؤمن",
+    "word:لو",
+    "word:عند",
+    "word:ذكر",
+    "word:أنزل",
+    "word:خير",
+    "word:سبيل",
+    "word:وهو",
+    "word:دعا",
+    "word:اتقى",
+    "word:مثل",
+    "word:عليم",
+    "word:مع",
+    "word:لما",
+    "word:أم",
+    "word:جنة",
+    "word:بعض",
+    "word:ملك",
+    "word:أيها",
+    "word:قتل",
+    "word:إله",
+    "word:غير",
+    "word:نار",
+    "word:دون",
+    "word:حتى",
+    "word:أراد",
+    "word:قلب",
+    "word:وهم",
+    "word:موسى",
+    "word:اتبع",
+    "word:ظلم",
+    "word:أخذ",
+    "word:أهل",
+    "word:أرسل",
+    "word:لكن",
+    "word:لعل",
+    "word:كفرون",
+    "word:ظالم",
+    "word:بل",
+    "word:اتخذ",
+    "word:وعد",
+    "word:يد",
+    "word:عظيم",
+    "word:ولى",
+    "word:مبين",
+    "word:رحيم",
+    "word:رزق",
+    "word:دنيا",
+    "word:رحمة",
+    "word:لن",
+    "word:وجد",
+    "word:سأل",
+    "word:أجر",
+    "word:أكل",
+    "word:فضل",
+    "word:عزيز",
+    "word:سمع",
+    "word:أخرج",
+    "word:دين",
+    "word:حكيم",
+    "word:هل",
+    "word:ذو",
+    "word:قول"
+  ],
+  "occurrences": 48037,
+  "corpusWords": 77429,
+  "fatiha": {
+    "1:1:1": {
+      "key": "word:اسم",
+      "lemma": "ٱسْم",
+      "root": "سمو"
+    },
+    "1:1:2": {
+      "key": "word:الله",
+      "lemma": "ٱللَّه",
+      "root": "اله"
+    },
+    "1:1:3": {
+      "key": "word:رحمن",
+      "lemma": "رَّحْمَٰن",
+      "root": "رحم"
+    },
+    "1:1:4": {
+      "key": "word:رحيم",
+      "lemma": "رَّحِيم",
+      "root": "رحم"
+    },
+    "1:2:1": {
+      "key": "word:حمد",
+      "lemma": "حَمْد",
+      "root": "حمد"
+    },
+    "1:2:2": {
+      "key": "word:الله",
+      "lemma": "ٱللَّه",
+      "root": "اله"
+    },
+    "1:2:3": {
+      "key": "word:رب",
+      "lemma": "رَبّ",
+      "root": "ربب"
+    },
+    "1:2:4": {
+      "key": "word:علمين",
+      "lemma": "عَٰلَمِين",
+      "root": "علم"
+    },
+    "1:3:1": {
+      "key": "word:رحمن",
+      "lemma": "رَّحْمَٰن",
+      "root": "رحم"
+    },
+    "1:3:2": {
+      "key": "word:رحيم",
+      "lemma": "رَّحِيم",
+      "root": "رحم"
+    },
+    "1:4:1": {
+      "key": "word:ملك",
+      "lemma": "مَٰلِك",
+      "root": "ملك"
+    },
+    "1:4:2": {
+      "key": "word:يوم",
+      "lemma": "يَوْم",
+      "root": "يوم"
+    },
+    "1:4:3": {
+      "key": "word:دين",
+      "lemma": "دِين",
+      "root": "دين"
+    },
+    "1:5:1": {
+      "key": "word:إيا",
+      "lemma": "إِيَّا"
+    },
+    "1:5:2": {
+      "key": "word:عبد",
+      "lemma": "عَبَدَ",
+      "root": "عبد"
+    },
+    "1:5:3": {
+      "key": "word:إيا",
+      "lemma": "إِيَّا"
+    },
+    "1:5:4": {
+      "key": "word:استعين",
+      "lemma": "ٱسْتَعِينُ",
+      "root": "عون"
+    },
+    "1:6:1": {
+      "key": "word:هدى",
+      "lemma": "هَدَى",
+      "root": "هدي"
+    },
+    "1:6:2": {
+      "key": "word:صرط",
+      "lemma": "صِرَٰط",
+      "root": "صرط"
+    },
+    "1:6:3": {
+      "key": "word:مستقيم",
+      "lemma": "مُّسْتَقِيم",
+      "root": "قوم"
+    },
+    "1:7:1": {
+      "key": "word:صرط",
+      "lemma": "صِرَٰط",
+      "root": "صرط"
+    },
+    "1:7:2": {
+      "key": "word:الذى",
+      "lemma": "ٱلَّذِى"
+    },
+    "1:7:3": {
+      "key": "word:أنعم",
+      "lemma": "أَنْعَمَ",
+      "root": "نعم"
+    },
+    "1:7:4": {
+      "key": "word:على",
+      "lemma": "عَلَىٰ"
+    },
+    "1:7:5": {
+      "key": "word:غير",
+      "lemma": "غَيْر",
+      "root": "غير"
+    },
+    "1:7:6": {
+      "key": "word:مغضوب",
+      "lemma": "مَغْضُوب",
+      "root": "غضب"
+    },
+    "1:7:7": {
+      "key": "word:على",
+      "lemma": "عَلَىٰ"
+    },
+    "1:7:8": {
+      "key": "word:لا",
+      "lemma": "لَا"
+    },
+    "1:7:9": {
+      "key": "word:ضآل",
+      "lemma": "ضَآلّ",
+      "root": "ضلل"
+    }
+  }
+}

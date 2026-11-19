@@ -57,7 +57,7 @@ function Tabs({ settings }: { settings: Settings }) {
   return <nav className="tabbar" aria-label={message(settings, "mainNavigation")}>
     {mobile.map(item => <NavLink to={item.to} key={item.to}>{({ isActive }) => <>
       <span className="tab-icon"><DesignIcon size={22} name={mode === "adult"
-        ? `tab-${item.tab}${isActive ? "" : "1"}`
+        ? `tab-${item.tab}${isActive === (item.tab === "home") ? "" : "1"}`
         : isActive || item.tab !== "home" ? `maktab-today-${item.tab === "book" || item.tab === "ret" ? `${item.tab}${item.tab === "book" ? "1" : "2"}` : item.tab}` : "tab-home1"} /></span>
       {navigationLabel(settings, item.title)}
     </>}</NavLink>)}
@@ -98,6 +98,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
   const fullscreen = location.pathname.startsWith("/umrah") || location.pathname.startsWith("/print/");
   const today = location.pathname === "/today";
   const prayerGuide = location.pathname.startsWith("/today/guide/");
+  const salahStudy = location.pathname === "/learn/salah";
   useLayoutEffect(() => {
     selectWord();
     setSearchOpen(false);
@@ -143,7 +144,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
         </div>
       </>}
     </nav>}
-    <main className="app-main" id="app-main" tabIndex={-1} data-page={prayerGuide ? "prayer-guide" : today ? "today" : undefined}>
+    <main className="app-main" id="app-main" tabIndex={-1} data-page={prayerGuide ? "prayer-guide" : salahStudy ? "salah-study" : today ? "today" : undefined}>
       {!fullscreen && !(today && settings.mode === "maktab") && <header className="topbar">
         <div>{today ? <h1>{title}</h1> : <h2>{title}</h2>}<p className="small muted">{date} · {hijriLabel(day, settings.hijriAdjust, calendar.anchors)}{today && ` · ${settings.city.name}`}</p></div>
         <Link className="chip night" to="/today">{nextPrayer}</Link>

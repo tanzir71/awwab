@@ -28,7 +28,7 @@ The repository includes versioned Quran, hadith, morphology, and map assets. Nor
 
 - `npm run content` refreshes the supported surahs from Tanzil, Pickthall, and DigitalKhatt.
 - `npm run hadith` refreshes Hadith API editions and retains explicitly graded entries without conflicting weak grades.
-- `npm run morphology` prepares the verbatim Quranic Arabic Corpus 0.4 file for offline use.
+- `npm run morphology` prepares the verbatim Quranic Arabic Corpus 0.4 file and derives the 125-word list and Fātiḥa lemma index. Add `-- --from-bundled` to regenerate the derived data from the checked-in corpus.
 - `npm run recitation -- --from-local` regenerates the per-āyah MP3s from the checked-in Aaqib Azeez recordings with FFmpeg. The command without `--from-local` fetches the originals. The cut sheet pins each original by SHA-256 so a new recording requires new timings.
 - `python scripts/build-landing-font.py` refreshes the landing page’s Arabic font subset after copy changes. It uses FontTools and Brotli.
 - `node scripts/build-umrah-pins.mjs` refreshes selected Haram features from OpenStreetMap.

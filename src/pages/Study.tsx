@@ -21,7 +21,6 @@ import hadith from "../../docs/content/hadith-curated.json";
 import { quranText } from "@/lib/quran";
 import { useUi } from "@/lib/uiState";
 import sample from "../../docs/content/word-anatomy.sample.json";
-import salah from "../../docs/content/salah-words.json";
 import { TraceBoard } from "./Takhti";
 
 const fullChapters = surahs.surahs.slice(0, 12);
@@ -253,51 +252,6 @@ function QaidaLesson({ lesson, settings }: {
       <TraceBoard letter={traceLetter} />
       <Link className="action soft" to="/print/takhti/boat">{t("printPracticeSheet")}</Link>
     </aside>
-  </div>;
-}
-
-const salahGlosses: Record<string, string[]> = {
-  "1:1": ["In the name", "of Allah", "the Most Compassionate", "the Most Merciful"],
-  "1:2": ["All praise", "is for Allah", "Lord", "of the worlds"],
-  "1:3": ["the Most Compassionate", "the Most Merciful"],
-  "1:4": ["Master", "of the Day", "of judgment"],
-  "1:5": ["You alone", "we worship", "and You alone", "we ask for help"],
-  "1:6": ["Guide us", "to the path", "that is straight"],
-  "1:7": ["the path", "of those", "You blessed", "upon them", "other than", "those who earned anger", "upon them", "and not", "those who went astray"],
-};
-
-export function SalahWords({ settings }: { settings: Settings }) {
-  const { language, t } = useCopy();
-  const [params] = useSearchParams();
-  const known = useRecord<string[]>("words-known", []);
-  return <div className="stack">
-    <SectionNav title={t("understandSalah")} back={prayerGuidePath(params.get("fromPrayer")) ?? "/learn"} />
-    <section className="card night compact-stack"><h2>{t("fatihaWordByWord")}</h2><p className="muted">{t("markFamiliarHint")}</p></section>
-    {quranText[1].map(verse => {
-      const glosses = salahGlosses[verse.ref];
-      const words = splitArabicWords(verse.uthmani);
-      return <section className="card stack" key={verse.ref}>
-        <a className="chip justify-self-start" href={`https://quran.com/${verse.ref.replace(":", "/")}`}>{verse.ref}</a>
-        <ArabicText text={words.reduce((lines, word, i) => lines + (i === 0 ? "" : i % 2 === 0 ? "\n" : " ") + word, "")}
-          citation={verse.ref} verse={verse.ref} words={words.map((_, i) => ({ gloss: glosses[i] }))} />
-        <p lang="en">{verse.english}</p>
-        <button className="action soft" aria-pressed={known.includes(verse.ref)} onClick={() => void updateRecord<string[]>("words-known", [], old =>
-          old.includes(verse.ref) ? old.filter(item => item !== verse.ref) : [...old, verse.ref])}>{t(known.includes(verse.ref) ? "familiar" : "markFamiliar")}</button>
-      </section>;
-    })}
-    <section className="compact-stack">
-      <h2>{t("eachPrayerPosition")}</h2>
-      <p className="muted">{t("prayerPositionNote")}</p>
-      {salah.sections.map(section => <details className="card" key={section.title}>
-        <summary><strong>{studyNames.prayerSection(language, section.title)}</strong></summary>
-        <div className="stack">
-          <a href={section.url} className="caption">{section.source}</a>
-          {section.lines.map(([arabic, gloss], i) => <ArabicText key={i} text={String(arabic)} citation={section.source}
-            words={(gloss as string[]).map(gloss => ({ gloss }))} />)}
-        </div>
-      </details>)}
-    </section>
-    <p className="small muted"><a href="https://tanzil.net/docs/text_license">{t("tanzilCredit")}</a> · {t("englishTranslationCredit")}</p>
   </div>;
 }
 
