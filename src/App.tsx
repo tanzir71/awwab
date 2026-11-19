@@ -12,6 +12,9 @@ import { CopyContext } from "@/lib/copy";
 import Today, { PrayerWeek } from "@/pages/Index";
 import { PrayerGuide } from "@/pages/PrayerGuide";
 import { Learn } from "@/pages/Learn";
+import { Paths, MaktabMap } from "@/pages/Paths";
+import { Hifz } from "@/pages/Hifz";
+import { PathCheck } from "@/pages/PathCheck";
 import { Plan } from "@/pages/Plan";
 import { ReturnPage, Sayyid } from "@/pages/Return";
 import { Qada } from "@/pages/Qada";
@@ -78,6 +81,12 @@ function Main() {
         <Route path="/today/guide/:id" element={<PrayerGuide settings={settings} desktop={desktop} />} />
         <Route path="/today/week" element={<PrayerWeek settings={settings} now={now} />} />
         <Route path="/learn" element={<Learn settings={settings} desktop={desktop} now={now} />} />
+        <Route path="/learn/tools" element={<Learn settings={settings} desktop={desktop} now={now} tools />} />
+        <Route path="/learn/paths/check/:track?" element={<PathCheck settings={settings} now={now} />} />
+        <Route path="/learn/paths/:track?/:level?" element={<Paths desktop={desktop} />} />
+        <Route path="/learn/map" element={<MaktabMap />} />
+        <Route path="/learn/hifz/:id/:portion?" element={<Hifz settings={settings} now={now} />} />
+        <Route path="/learn/speak" element={<Paths desktop={desktop} trackOverride="speak" />} />
         <Route path="/learn/qaida/:id?" element={<Qaida settings={settings} desktop={desktop} />} />
         <Route path="/learn/surahs/:id?" element={<SurahReader settings={settings} now={now} />} />
         <Route path="/learn/salah" element={<SalahWords settings={settings} />} />

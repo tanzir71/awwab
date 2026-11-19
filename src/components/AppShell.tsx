@@ -37,10 +37,12 @@ const mobile: NavItem[] = [
 const groups: { label: string; items: NavItem[] }[] = [
   { label: "Learn", items: [
     { title: "Study plan", to: "/learn", icon: "home", end: true },
+    { title: "Paths", to: "/learn/paths", icon: "sliders" },
     { title: "Qaida", to: "/learn/qaida", icon: "book" },
     { title: "Surahs", to: "/learn/surahs", icon: "headphones" },
     { title: "Word bank", to: "/learn/words", icon: "list" },
     { title: "Takhti", to: "/learn/takhti", icon: "pen" },
+    { title: "Speak", to: "/learn/speak", icon: "speech" },
     { title: "Fluency", to: "/learn/fluency", icon: "bulb" },
     { title: "Hadith", to: "/learn/hadith", icon: "scroll" },
   ] },
@@ -150,6 +152,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
   const fullscreen = shareSheet || shareMoment || (umrahRoute && !desktop) || location.pathname.startsWith("/print/");
   const today = location.pathname === "/today";
   const studyHome = desktop && location.pathname === "/learn";
+  const pathsHome = desktop && location.pathname === "/learn/paths";
   const chapter = location.pathname.startsWith("/learn/surahs/") ? surahs.surahs.slice(0, 12).find(item => String(item.number) === location.pathname.split("/").at(-1)) : undefined;
   const surahStudy = desktop && Boolean(chapter);
   const lesson = location.pathname.startsWith("/learn/qaida/") ? qaida.lessons.find(item => String(item.n) === location.pathname.split("/").at(-1)) : undefined;
@@ -163,7 +166,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
   const wordBank = location.pathname === "/learn/words";
   const fluency = location.pathname === "/learn/fluency";
   const wordBankStudy = desktop && wordBank;
-  const learnWorkspace = studyHome || surahStudy || qaidaStudy || wordBankStudy;
+  const learnWorkspace = studyHome || pathsHome || surahStudy || qaidaStudy || wordBankStudy;
   const review = chapter && reviews[chapter.number];
   const reviewDay = review && dateKey(new Date(review.card.due), settings.city.timeZone);
   const studySubtitle = chapter ? [
@@ -232,6 +235,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
       </> : <>
         {simple.map(item => <NavLink key={item.to} to={item.to}><DesignIcon name={`maktab-desk-${item.simple}`} />{navigationLabel(settings, item.title === "Today" ? "Prayers" : item.title)}</NavLink>)}
         <div className="sidebar-bottom">
+          <NavLink to="/learn/map"><DesignIcon name="desk-sliders" size={16} />{t("pathsMap")}</NavLink>
           <NavLink to="/print"><DesignIcon name="maktab-desk-download" /> {t("print")}</NavLink>
           {languageLink}
           <button className="sidebar-mode" type="button" role="switch" aria-checked="true" aria-label={t("maktabModeLabel")} onClick={() => void updateSettings({ mode: "adult", spellStyle: "en" })}>
@@ -240,12 +244,12 @@ export function AppShell({ children, settings, now, desktop }: { children: React
         </div>
       </>}
     </nav>}
-    <main className="app-main" id="app-main" tabIndex={-1} data-page={shareSheet ? "share-sheet" : shareMoment ? "share-moment" : umrahDesktop ? "umrah-prep" : prayerGuide ? "prayer-guide" : salahStudy ? "salah-study" : today ? "today" : planDesktop ? "plan-desktop" : mosquesDesktop ? "mosques-desktop" : returnDesktop ? "return-desktop" : hadithDesktop ? "hadith-desktop" : settingsDesktop ? "settings-desktop" : languageFlow ? "settings-language-flow" : studyHome ? "learn" : chapter ? "surah-reader" : lesson ? "qaida-lesson" : wordBank ? "word-bank" : fluency ? "fluency" : location.pathname.startsWith("/learn/takhti") ? "takhti" : undefined}>
+    <main className="app-main" id="app-main" tabIndex={-1} data-page={shareSheet ? "share-sheet" : shareMoment ? "share-moment" : umrahDesktop ? "umrah-prep" : prayerGuide ? "prayer-guide" : salahStudy ? "salah-study" : today ? "today" : planDesktop ? "plan-desktop" : mosquesDesktop ? "mosques-desktop" : returnDesktop ? "return-desktop" : hadithDesktop ? "hadith-desktop" : settingsDesktop ? "settings-desktop" : languageFlow ? "settings-language-flow" : pathsHome ? "paths" : studyHome ? "learn" : chapter ? "surah-reader" : lesson ? "qaida-lesson" : wordBank ? "word-bank" : fluency ? "fluency" : location.pathname.startsWith("/learn/takhti") ? "takhti" : undefined}>
       {!fullscreen && !((today || studyHome || surahStudy) && settings.mode === "maktab") && <header className="topbar">
         <div>{today || learnWorkspace || zakatPage || planDesktop || mosquesDesktop || returnDesktop || guideDesktop || hadithDesktop || settingsDesktop || umrahDesktop ? <h1>{umrahDesktop ? t("umrahPrepare") : settingsDesktop ? t("settingsDeskTitle") : guideDesktop ? t("howToPray") : qaidaStudy ? t("qaidaDesktopTitle", { number: lesson.n }) : surahStudy ? t("surahsForSalah") : wordBankStudy ? t("wordBankName") : title}</h1> : <h2>{title}</h2>}
           <p className="small muted">{guideDesktop ? <>
             <Link to={`/you/prayer?${guideSettingsQuery}`}>{t(guideReference(settings) === "hanafi" ? "prayerGuideHanafi" : "prayerGuideFard")} · {t("prayerGuideSettings")}</Link> · {t("guideDesktopAnatomy")}
-          </> : <>{planSubtitle ?? (umrahDesktop ? umrahSubtitle : settingsDesktop ? t("settingsDeskCaption") : hadithDesktop ? t("hadithDesktopIntro") : returnDesktop ? t("returnDeskSubtitle") : mosquesDesktop ? t("mosqueDeskCaption", { count: mosques.mosques.length }) : zakatPage ? zakatSubtitle : qaidaStudy ? qaidaSubtitle : surahStudy ? studySubtitle : wordBankStudy ? t("wordBankSubtitle") : date + " · " + hijriLabel(day, settings.hijriAdjust, calendar.anchors, locale))}{today && ` · ${settings.city.name}`}{studyHome && " · " + t("deskMinutesToday", { count: studyPlanMinutes(hidden) })}</>}</p></div>
+          </> : <>{planSubtitle ?? (pathsHome ? t("pathsSubtitle") : umrahDesktop ? umrahSubtitle : settingsDesktop ? t("settingsDeskCaption") : hadithDesktop ? t("hadithDesktopIntro") : returnDesktop ? t("returnDeskSubtitle") : mosquesDesktop ? t("mosqueDeskCaption", { count: mosques.mosques.length }) : zakatPage ? zakatSubtitle : qaidaStudy ? qaidaSubtitle : surahStudy ? studySubtitle : wordBankStudy ? t("wordBankSubtitle") : date + " · " + hijriLabel(day, settings.hijriAdjust, calendar.anchors, locale))}{today && ` · ${settings.city.name}`}{studyHome && " · " + t("deskMinutesToday", { count: studyPlanMinutes(hidden) })}</>}</p></div>
         <Link className="chip night" to="/today">{nextPrayer}</Link>
         {settings.mode === "adult" && <>
           <Link className="action" to={reviewDestination(nextReview ?? due[0]?.[0])}><DesignIcon name="desk-play" size={14} />{t("startReview")}{due.length ? ` · ${studyHome ? dueSurahs || due.length : due.length}` : ""}</Link>

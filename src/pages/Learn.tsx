@@ -7,6 +7,7 @@ import { useCopy } from "@/lib/copy";
 import { isDue, type Reviews } from "@/lib/reviews";
 import type { Settings } from "@/lib/storageService";
 import { studyNames } from "@/lib/study-copy";
+import { MaktabMap, Paths } from "./Paths";
 import qaida from "../../docs/content/qaida-lessons.json";
 import surahs from "../../docs/content/surahs-for-salah.json";
 
@@ -23,7 +24,7 @@ function LearnMobile({ settings, now }: { settings: Settings; now: Date }) {
   const title = t("lessonTitle", { number: lesson.n, title: studyNames.lesson(language, lesson.n, lesson.title) });
   const rowLabel = t("lessonRow", { name: lesson.traditional, row: row + 1 });
   return <div className="stack">
-    <header><p className="caption">{t("learn")}</p><h1>{t("studyHome")}</h1></header>
+    <header><Link className="text-button" to="/learn/paths">{t("paths")}</Link><h1>{t("pathsStudyLibrary")}</h1></header>
     <section className="card night compact-stack">
       <p className="caption">{t("continueLearning")}</p><h2>{title}</h2>
       <p className="muted">{rowLabel}</p>
@@ -41,6 +42,8 @@ function LearnMobile({ settings, now }: { settings: Settings; now: Date }) {
   </div>;
 }
 
-export function Learn({ settings, desktop, now }: { settings: Settings; desktop: boolean; now: Date }) {
-  return desktop ? <LearnDesktop settings={settings} now={now} /> : <LearnMobile settings={settings} now={now} />;
+export function Learn({ settings, desktop, now, tools = false }: { settings: Settings; desktop: boolean; now: Date; tools?: boolean }) {
+  if (tools) return <LearnMobile settings={settings} now={now} />;
+  if (desktop) return <LearnDesktop settings={settings} now={now} />;
+  return settings.mode === "maktab" ? <MaktabMap /> : <Paths desktop={false} />;
 }

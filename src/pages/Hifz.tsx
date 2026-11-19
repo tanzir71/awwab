@@ -1,0 +1,192 @@
+import { useEffect, useMemo, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { ArabicText } from "@/components/ArabicText";
+import { DesignIcon } from "@/components/DesignIcon";
+import { StudyText } from "@/components/StudyText";
+import { useRecord } from "@/hooks/use-awwab";
+import { useCopy } from "@/lib/copy";
+import { dateKey, formatDay } from "@/lib/dates";
+import { essentialPassages, getHifzPassage, groupPortions, nextPortion, passageLabel, portionBucket, portionPlan, studyPhrases, studyQuran, verseText,
+  type HifzPassage, type HifzPlans, type HifzPortion, type HifzReviews, type StudyQuran } from "@/lib/hifz";
+import { showEnglishQuranMeaning } from "@/lib/languagePreferences";
+import type { QuranVerse } from "@/lib/quran";
+import { saveHifzPlan, savePortionReview } from "@/lib/studyMilestones";
+import { studyNames } from "@/lib/study-copy";
+import type { ReviewGrade } from "@/lib/reviews";
+import type { Settings } from "@/lib/storageService";
+
+const dates = { month: "short", day: "numeric", year: "numeric" } as const;
+const emptyPlans: HifzPlans = {};
+const emptyReviews: HifzReviews = {};
+const bucketCopy = { sabaq: "hifzSabaq", sabqi: "hifzSabqi", manzil: "hifzManzil" };
+const recordGrades: ReviewGrade[] = ["forgot", "shaky", "got-it"];
+const base = (id: string) => `/learn/hifz/${id}`;
+
+function legacyLevel(passage: HifzPassage) {
+  return passage.id.startsWith("juz-") ? 5 : passage.id.startsWith("surah-") ? (passage.ranges[0].chapter >= 78 ? 2 : 5)
+    : /^(?:al-kahf|friday-fajr|jumuah-prayer|eid-prayer|witr)$/.test(passage.id) ? 4 : 3;
+}
+
+function PassageHeading({ title, subtitle, back }: { title: string; subtitle?: string; back: string }) {
+  const { t } = useCopy();
+  return <header className="hifz-heading">
+    <Link className="hifz-back" to={back} aria-label={t("back")}><DesignIcon name="ask-icon-chev-l" size={24} /></Link>
+    <div><h1>{title}</h1>{subtitle && <p className="small muted">{subtitle}</p>}</div>
+  </header>;
+}
+
+function VerseRead({ verse, settings }: { verse: QuranVerse; settings: Settings }) {
+  const { opening } = verseText(verse, settings.script);
+  return <article className="card compact-stack hifz-verse">
+    <strong className="small" dir="ltr">{verse.ref}</strong>
+    {opening && <ArabicText text={opening} mushaf={settings.script} />}
+    <ArabicText text={studyPhrases(verse, settings.script)} citation={verse.ref} verse={verse.ref} mushaf={settings.script} preserveSeparators />
+    {showEnglishQuranMeaning(settings) && <p className="muted" lang="en">{verse.english}</p>}
+  </article>;
+}
+
+function StudySources({ settings }: { settings: Settings }) {
+  const { t } = useCopy();
+  return <footer className="hifz-sources small muted">
+    {settings.script === "uthmani" ? <a href="https://tanzil.net/" rel="noreferrer">{t("hifzTanzil")}</a>
+      : <a href="https://github.com/DigitalKhatt/digitalkhatt-js" rel="noreferrer">{t("hifzIndopak")}</a>}
+    {showEnglishQuranMeaning(settings) && <a href="https://tanzil.net/trans/en.pickthall" rel="noreferrer">{t("hifzPickthall")}</a>}
+  </footer>;
+}
+
+function StudyPortion({ item, position, title, passage, settings, now, minutes }: { item: HifzPortion; position: number; title: string;
+  passage: HifzPassage; settings: Settings; now: Date; minutes: number }) {
+  const { t, locale } = useCopy();
+  const reviews = useRecord<HifzReviews>("hifz-portions", emptyReviews);
+  const [visible, show] = useState(true);
+  const [saving, markSaving] = useState(false);
+  const [status, setStatus] = useState("");
+  const progress = reviews[item.id];
+  const zone = settings.city.timeZone;
+  const today = dateKey(now, zone);
+  const bucket = portionBucket(progress, today);
+  async function rate(grade: ReviewGrade) {
+    if (saving) return;
+    markSaving(true);
+    setStatus("");
+    try { await savePortionReview(passage.id, item.id, grade, now, zone, minutes); setStatus(t("hifzSaved")); }
+    catch { setStatus(t("hifzSaveError")); }
+    finally { markSaving(false); }
+  }
+  return <div className="hifz-page compact-stack">
+    <PassageHeading title={t("hifzPortionTitle", { number: position })} subtitle={`${title} · ${item.ref}`} back={base(passage.id)} />
+    <section className="card compact-stack hifz-study-controls">
+      <div className="row-between"><span className="chip soft">{t(bucketCopy[bucket])}</span><button className="text-button" type="button" aria-expanded={visible}
+        onClick={() => show(!visible)}>{t(visible ? "hifzRepeat" : "hifzRead")}</button></div>
+      <p className="small muted">{t("hifzDays", { count: progress?.correctDays.length ?? 0 })}</p>
+      {bucket === "manzil" && <p className="small muted">{t("hifzReviewDue", { day: formatDay(dateKey(new Date(progress.review.card.due), zone), dates, locale) })}</p>}
+    </section>
+    {visible && item.verses.map(verse => <VerseRead key={verse.ref} verse={verse} settings={settings} />)}
+    {!visible && <div className="card hifz-hidden"><strong dir="ltr">{item.ref}</strong><span className="small muted">{t("hifzRepeat")}</span></div>}
+    <div className="equal-row hifz-grade-buttons" role="group" aria-label={t("hifzRepeat")}>
+      {recordGrades.map(grade => <button type="button" key={grade} disabled={saving}
+        className={`action${grade === "got-it" ? "" : " light"}`} onClick={() => void rate(grade)}>{t(grade)}</button>)}
+    </div>
+    {status && <p className="small muted" role="status">{status}</p>}
+    <StudySources settings={settings} />
+  </div>;
+}
+
+function PassagePlan({ passage, portions, settings, now }: { passage: HifzPassage; portions: HifzPortion[]; settings: Settings; now: Date }) {
+  const { t, language, locale } = useCopy();
+  const stored = useRecord<HifzPlans>("hifz-plans", emptyPlans);
+  const reviews = useRecord<HifzReviews>("hifz-portions", emptyReviews);
+  const [error, showError] = useState(false);
+  const { portion } = useParams();
+  const today = dateKey(now, settings.city.timeZone);
+  const start = stored[passage.id]?.start ?? today;
+  const maktab = settings.mode === "maktab";
+  const minutes = maktab ? Math.min(stored[passage.id]?.minutes ?? 3, 3) : stored[passage.id]?.minutes ?? 7;
+  const options = (maktab ? [1, 2, 3] : [3, 5, 7, 10, 15, 20, 30]);
+  const choices = [...new Set([...options, minutes])].sort((a, b) => a - b);
+  const plan = useMemo(() => portionPlan(portions, minutes, start), [portions, minutes, start]);
+  const due = nextPortion(portions, reviews, now, today);
+  const done = portions.filter(item => Boolean(reviews[item.id]?.learnedOn)).length;
+  const firstVerse = portions[0].verses[0];
+  const firstWord = verseText(firstVerse, settings.script).text.split(/\s+/)[0];
+  const essential = essentialPassages.find(item => item.id === passage.id);
+  const virtueNote = /^(ya-sin|al-waqiah)$/.test(passage.id) ? "hifzWeakNarrations"
+    : essential?.source?.grade.startsWith("scholars differ") ? "hifzScholarsDiffer" : undefined;
+  const number = new Intl.NumberFormat(locale, { useGrouping: false });
+  const title = passage.id.startsWith("juz-") ? t("hifzJuz", { number: Number(passage.id.slice(4)) })
+    : passage.id.startsWith("surah-") ? studyNames.surah(language, passage.ranges[0].chapter, passage.title) : passage.title;
+  const subtitle = [passageLabel(passage), t("hifzAyahs", { count: passage.ayahs }),
+    essential?.level === 3 && t("hifzEssentialLabel")].filter(Boolean).join(" · ");
+  const position = Number(portion);
+  const item = portions[position - 1];
+  const dueIndex = portions.indexOf(due);
+  const upcoming = due && portions.slice(dueIndex + 1).find(entry => !reviews[entry.id]?.learnedOn);
+
+  function selectMinutes(value: number) {
+    showError(false);
+    void saveHifzPlan(passage.id, value, today).catch(() => showError(true));
+  }
+
+  if (item) return <StudyPortion key={item.id} item={item} position={position} title={title} passage={passage} settings={settings} now={now} minutes={minutes} />;
+  return <div className="hifz-page compact-stack">
+    <PassageHeading title={title} subtitle={subtitle} back={`/learn/paths/memorise/${legacyLevel(passage)}`} />
+    <section className="card night compact-stack hifz-summary">
+      <div className="row-between"><div className="compact-stack"><p className="caption">{t("hifzYourPlan")}</p>
+        <h2>{t("hifzPlanSize", { portions: portions.length, days: plan.days })}</h2>
+        <p className="muted small">{t("hifzPlanRange", { minutes, end: formatDay(plan.end, dates, locale) })}</p>
+      </div><ArabicText text={firstWord} mushaf={settings.script} citation={firstVerse.ref} verse={firstVerse.ref} /></div>
+      <progress value={done} max={portions.length} aria-label={t("hifzCovered", { count: done, total: portions.length })} />
+    </section>
+    {passage.source && <section className="card compact-stack hifz-why"><h2>{t("hifzWhy")}</h2><p><StudyText text={passage.why} /></p>
+      <p className="small muted"><span className="chip soft">{t(passage.source.grade === "hasan" ? "hifzHasan" : "hifzSahih")}</span> {passage.source.ref}</p>
+    </section>}
+    {virtueNote && <p className="small muted">{t(virtueNote)}</p>}
+    <section className="card compact-stack hifz-portions">
+      <header className="row-between"><h2>{t("hifzPortions")}</h2>
+        <label className="hifz-minutes"><span>{t("hifzMinutes")}</span><select aria-label={t("hifzMinutes")} value={minutes}
+          onChange={event => selectMinutes(Number(event.currentTarget.value))}>
+          {choices.map(value => <option key={value} value={value}>{number.format(value)}</option>)}
+        </select></label></header>
+      {portions.map((entry, index) => {
+        const review = reviews[entry.id];
+        const bucket = portionBucket(review, today);
+        const state = entry === due ? "today" : review?.learnedOn ? "done" : "open";
+        return <Link key={entry.id} className="hifz-portion-row" data-state={state} to={`${base(passage.id)}/${index + 1}`}
+          onClick={() => { if (!stored[passage.id]) selectMinutes(minutes); }}>
+          <strong dir="ltr">{entry.ref}</strong><small>{review || state === "today" ? t(bucketCopy[bucket]) : formatDay(plan.dates[index].from, { month: "short", day: "numeric" }, locale)}</small>
+          {(state !== "open" || entry === upcoming) && <span className="chip">{t(state === "today" ? "hifzToday" : state === "done" ? "pathsDone" : "hifzNext")}</span>}
+        </Link>;
+      })}
+      {error && <p role="alert">{t("hifzSaveError")}</p>}
+    </section>
+    {due ? <Link className="action" to={`${base(passage.id)}/${dueIndex + 1}`}
+      onClick={() => { if (!stored[passage.id]) selectMinutes(minutes); }}>
+      {t((reviews[due.id]?.learnedOn ? "hifzReview" : "hifzStart"), { number: dueIndex + 1, ref: due.ref })}
+    </Link> : <p className="small muted" role="status">{t("hifzAllDone")}</p>}
+    <StudySources settings={settings} />
+  </div>;
+}
+
+export function Hifz({ settings, now }: { settings: Settings; now: Date }) {
+  const { id } = useParams();
+  const { t } = useCopy();
+  const [edition, setEdition] = useState<StudyQuran>();
+  const [error, failed] = useState(false);
+  const [request, retry] = useState(0);
+  const passage = useMemo(() => getHifzPassage(id), [id]);
+  const portions = useMemo(() => passage && edition ? groupPortions(passage, edition) : undefined, [passage, edition]);
+  useEffect(() => {
+    if (!passage) return;
+    let current = true;
+    void studyQuran().then(data => { if (current) setEdition(data); }, () => { if (current) failed(true); });
+    return () => { current = false; };
+  }, [passage, request]);
+
+  if (!passage) return <div className="hifz-page compact-stack"><PassageHeading title={t("pathsMemorise")} back="/learn/paths/memorise" /></div>;
+  if (portions?.length) return <PassagePlan key={passage.id} passage={passage} portions={portions} settings={settings} now={now} />;
+  return <div className="hifz-page compact-stack">
+    <PassageHeading title={passage.title} subtitle={passageLabel(passage)} back={`/learn/paths/memorise/${legacyLevel(passage)}`} />
+    <p role="status" className="card">{t(error ? "hifzUnavailable" : "hifzLoading")}</p>
+    {error && <button type="button" className="action light" onClick={() => { failed(false); retry(value => value + 1); }}>{t("pathsCheckAgain")}</button>}
+  </div>;
+}

@@ -129,6 +129,12 @@ const labels = z.array(z.string().max(500));
 const dateCounts = z.record(daySchema, count);
 const dateLists = z.record(daySchema, labels);
 const balances = z.object({ fajr: count, dhuhr: count, asr: count, maghrib: count, isha: count });
+const reviewSchema = z.object({
+  bucket: z.enum(["sabaq", "sabqi", "manzil"]), attempts: count.optional(), correct: count.optional(),
+  firstTries: z.record(daySchema, z.boolean()).optional(),
+  card: z.object({ due: instantSchema, last_review: instantSchema.optional() }).passthrough(),
+});
+const passageKey = z.string().regex(/^[a-z0-9-]+$/).max(80);
 const umrahPlanSchema = z.object({
   start: z.union([daySchema, z.literal("")]), end: z.union([daySchema, z.literal("")]),
   hotel: z.object({ name: z.string().max(120), room: z.string().max(25), point: point.optional() }),
@@ -153,6 +159,12 @@ export function readUmrahTripFile(text: string) {
 }
 
 const savedRecords: Record<string, z.ZodTypeAny> = {
+  "hifz-plans": z.record(passageKey, z.object({ minutes: count.min(1).max(90), start: daySchema })),
+  "hifz-current": passageKey,
+  "path-placement": z.partialRecord(z.enum(["read", "memorise", "understand", "speak"]), z.object({ level: count.min(1).max(5), score: count, total: count, day: daySchema })),
+  "hifz-portions": z.record(z.string().regex(/^\d{1,3}:\d{1,3}-\d{1,3}:\d{1,3}$/), z.object({
+    review: reviewSchema, correctDays: z.array(daySchema).max(3), lastDay: daySchema, learnedOn: daySchema.optional(),
+  })),
   "umrah-ask-settings": z.object({ variety: z.enum(askVarieties), voice: z.enum(askVoices), speaker: z.union([z.enum(askVoices), z.literal("")]), slow: z.boolean() }),
   "umrah-ask-volume-hint": z.boolean(),
   "umrah-custom-phrases": z.array(z.object({ id: z.string().uuid(), ar: z.string().trim().min(1).max(280), meaning: z.string().trim().min(1).max(280) })),
@@ -219,12 +231,7 @@ const savedRecords: Record<string, z.ZodTypeAny> = {
     sai: z.object({ count: count.max(7), last: z.enum(["safa", "marwah"]).optional(), lastAt: count.optional(), exited: z.boolean() }),
     dhikr: dateCounts, juz: dateCounts, haramPrayers: dateLists,
   }),
-  reviews: z.record(z.string(), z.object({
-    bucket: z.enum(["sabaq", "sabqi", "manzil"]),
-    attempts: count.optional(), correct: count.optional(),
-    firstTries: z.record(daySchema, z.boolean()).optional(),
-    card: z.object({ due: instantSchema, last_review: instantSchema.optional() }).passthrough(),
-  })),
+  reviews: z.record(z.string(), reviewSchema),
 };
 
 export async function migrateLegacy(storage: Pick<Storage, "getItem" | "removeItem">) {

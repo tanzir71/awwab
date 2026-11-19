@@ -20,12 +20,14 @@ import { applyGlossary, formatLocale } from "./languagePreferences";
 import { settingsMessages } from "./settings-copy";
 import { umrahPrepMessages } from "./umrah-prep-copy";
 import { askMessages } from "./umrah-ask-copy";
+import { pathsMessages } from "./paths-copy";
 
 type CopySettings = Pick<Settings, "mode" | "language" | "wordChoices" | "nativeDigits">;
 export type MessageCatalog = Record<string, Record<Settings["language"], string | [string, string]>>;
 export const CopyContext = createContext<CopySettings>({ mode: "adult", language: "en" });
 
 const messages: MessageCatalog = {
+  ...pathsMessages,
   ...askMessages,
   ...umrahPrepMessages,
   ...studyMessages,
@@ -297,6 +299,7 @@ const messages: MessageCatalog = {
 };
 
 const navMessages: Record<string, string> = {
+  Paths: "paths", Speak: "pathsSpeak",
   Today: "today", Learn: "learn", Return: "return", Plan: "plan", You: "you", Prayers: "prayers", "Study plan": "studyPlan",
   Qaida: "qaida", Surahs: "surahs", "Word bank": "wordBank", Takhti: "takhti", Fluency: "fluency", Hadith: "hadith",
   "My mosques": "mosques", Zakat: "zakat", "Umrah mode": "umrah", "Print & export": "print", Daily: "daily", Tools: "tools",

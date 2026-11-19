@@ -4,6 +4,7 @@ import { grades, qaidaGrades, reviewWithRating, type QaidaGrade, type ReviewGrad
 import type { Grade } from "ts-fsrs";
 import { db, getRecord } from "./storageService";
 import { qaidaReviewId, qaidaRows } from "./qaidaPractice";
+import { ratePortion, type HifzPlans, type HifzReviews } from "./hifz";
 import qaida from "../../docs/content/qaida-lessons.json";
 
 export const wordMilestones = [25, 50, 100, 125] as const;
@@ -39,6 +40,26 @@ async function saveStudyDay(now: Date, zone: string) {
   const days = await getRecord<string[]>("study-days", []);
   const today = dateKey(now, zone);
   if (!days.includes(today)) await db.records.put({ key: "study-days", value: [...days, today] });
+}
+
+export function saveHifzPlan(id: string, minutes: number, today: string) {
+  return db.transaction("rw", db.records, async () => {
+    const plans = await getRecord<HifzPlans>("hifz-plans", {});
+    await db.records.bulkPut([{ key: "hifz-plans", value: { ...plans, [id]: { minutes, start: plans[id]?.start ?? today } } },
+      { key: "hifz-current", value: id }]);
+  });
+}
+
+export function savePortionReview(id: string, portion: string, grade: ReviewGrade, now: Date, zone: string, minutes: number) {
+  return db.transaction("rw", db.records, async () => {
+    const [reviews, plans] = await Promise.all([getRecord<HifzReviews>("hifz-portions", {}), getRecord<HifzPlans>("hifz-plans", {})]);
+    const today = dateKey(now, zone);
+    const review = ratePortion(reviews[portion], grade, now, today);
+    if (!plans[id]) await db.records.put({ key: "hifz-plans", value: { ...plans, [id]: { minutes, start: today } } });
+    await db.records.bulkPut([{ key: "hifz-portions", value: { ...reviews, [portion]: review } }, { key: "hifz-current", value: id }]);
+    await saveStudyDay(now, zone);
+    return review;
+  });
 }
 
 async function writeReview(id: string, grade: Grade, recalled: boolean, now: Date, zone: string) {
