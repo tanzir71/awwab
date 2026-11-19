@@ -7,10 +7,12 @@ import { useQaidaPlace, useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { asset } from "@/lib/config";
 import { chapters, essentialPassages, getHifzPassage, juzs, kursiOpening, passageLabel, studyChapters, type HifzReviews } from "@/lib/hifz";
-import { juzAmma, learnedSurahs, levels, pathUrl, salahChapters, tracks, trackStatus, type PathLevel, type PathPlacement, type Track } from "@/lib/learningPaths";
+import { grammarReviewPrefix, juzAmma, learnedSurahs, levels, pathUrl, salahChapters, tracks, trackStatus, type PathLevel, type PathPlacement, type Track } from "@/lib/learningPaths";
 import { countKnownQuranWords, quranText } from "@/lib/quran";
 import { studyNames } from "@/lib/study-copy";
 import type { Reviews } from "@/lib/reviews";
+import spoken from "../../docs/content/spoken-arabic.json";
+import grammar from "../../docs/content/grammar-foundations.json";
 
 const trackKeys = { read: "pathsRead", memorise: "pathsMemorise", understand: "pathsUnderstand", speak: "pathsSpeak" };
 const root = "/learn/paths";
@@ -29,16 +31,20 @@ function usePathState() {
   const current = useRecord("hifz-current", "");
   const quranWords = useRecord<string[]>("words-known", emptyStrings);
   const vocabulary = useRecord<string[]>("word-bank-known", emptyStrings);
+  const spokenLessons = useRecord("speak-complete", emptyStrings);
   const known = useMemo(() => countKnownQuranWords(quranWords, vocabulary), [quranWords, vocabulary]);
   const learned = useMemo(() => learnedSurahs(hifz, earlier), [hifz, earlier]);
   const short = salahChapters.filter(number => learned.has(number)).length;
   const amma = juzAmma.filter(chapter => learned.has(chapter.number)).length;
+  const spokenCount = spoken.units.filter(unit => spokenLessons.includes(unit.id)).length;
+  const grammarCount = grammar.lessons.filter(lesson => earlier[grammarReviewPrefix + lesson.id]?.correct > 0).length;
   const complete = {
     read: completedQaida.length === 17 ? 1 : 0, memorise: short >= salahChapters.length ? (amma >= juzAmma.length ? 2 : 1) : 0,
-    understand: known >= 125 ? 1 : 0, speak: 0,
+    understand: known >= 125 ? (grammarCount === grammar.lessons.length ? 2 : 1) : 0,
+    speak: spokenCount === spoken.units.length ? 1 : 0,
   };
   const active = Object.fromEntries(tracks.map(track => [track, Math.min(5, Math.max(complete[track] + 1, placement[track]?.level ?? 1))])) as Record<Track, number>;
-  return { active, complete, completedQaida, learned, short, amma, known, current, placement };
+  return { active, complete, completedQaida, learned, short, amma, known, current, placement, spokenCount, grammarCount };
 }
 
 function headingLevel(track: Track, active: number) { return levels[track][active - 1]; }
@@ -57,6 +63,8 @@ function contextLabel(track: Track, level: number, state: ReturnType<typeof useP
   if (track === "memorise" && level === 1) return `${trackStatus.memorise[0]} · ${t("pathsSalahCount", { count: state.short, total: salahChapters.length })}`;
   if (track === "memorise" && level === 2) return `${trackStatus.memorise[1]} · ${t("pathsAmmaCount", { count: state.amma })}`;
   if (track === "understand" && level === 1) return t("pathsCoreCount", { count: state.known });
+  if (track === "understand" && level === 2) return t("pathsLessonProgress", { count: state.grammarCount, total: grammar.lessons.length });
+  if (track === "speak" && level === 1) return t("pathsLessonProgress", { count: state.spokenCount, total: spoken.units.length });
   return trackStatus[track][level - 1];
 }
 
@@ -230,7 +238,7 @@ function Outline({ track, item, number }: { track: Track; item: PathLevel; numbe
     read2: [{ to: "/learn/fluency", label: "fluency" }, { to: pathUrl("memorise", 2), label: "pathsIslandJuz" }],
     understand1: [{ to: "/learn/words", label: "wordBankName" }, { to: "/learn/salah", label: "understandSalah" }],
     understand4: [{ to: pathUrl("memorise", 2), label: "pathsIslandJuz" }],
-    speak1: [{ to: "/umrah/ask", label: "askHome" }], speak4: [{ to: "/umrah/ask", label: "askHome" }],
+    speak4: [{ to: "/umrah/ask", label: "askHome" }],
   };
   const available = links[track + number];
   const units = typeof item.units === "string" ? [trackStatus[track][number - 1]] : item.units;
@@ -242,10 +250,10 @@ function Outline({ track, item, number }: { track: Track; item: PathLevel; numbe
   </>;
 }
 
-export function Paths({ desktop, trackOverride }: { desktop: boolean; trackOverride?: Track }) {
+export function Paths({ desktop }: { desktop: boolean }) {
   const { t } = useCopy();
   const { track: id, level } = useParams();
-  const track = trackOverride ?? tracks.find(candidate => candidate === id);
+  const track = tracks.find(candidate => candidate === id);
   const number = Number(level);
   const item = track && levels[track][number - 1];
   if (!track) return <PathsHome desktop={desktop} />;

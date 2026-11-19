@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import catalogue from "../../public/packs/audio/index.json";
 import onboarding from "../../docs/content/onboarding.json";
 import { quranText } from "./quran";
-import { askClipIds, askPackPaths, reviewedAskAudio } from "./umrahAskAudio";
+import { askAudioPack, askClipIds, askPackPaths, packVoices } from "./umrahAskAudio";
 import { askPhrase } from "./umrahAsk";
 
 describe("Bundled recitation packs", () => {
@@ -20,12 +20,19 @@ describe("Bundled recitation packs", () => {
 
   it("uses cited catalogue excerpts for the starter recitations", () => {
     for (const [ref, sample] of Object.entries(onboarding.samples)) {
+      if (!("pack" in sample)) continue;
       const pack = catalogue.packs.find(item => item.id === sample.pack);
       expect(pack?.items).toContainEqual({ ref, path: sample.path });
     }
     const shareAlike = catalogue.packs.filter(pack => pack.licenseUrl === "https://creativecommons.org/licenses/by-sa/4.0/");
     expect(shareAlike.map(pack => pack.id)).toEqual([105, 106, 112, 113, 114].map(number => `aaqib-${number}`));
     expect(shareAlike.every(pack => pack.attribution.includes("trimmed and re-encoded"))).toBe(true);
+  });
+
+  it("bundles generated letter prompts alongside the recitation excerpts", () => {
+    const samples = Object.values(onboarding.samples).filter(sample => "generated" in sample);
+    expect(samples).toHaveLength(4);
+    for (const sample of samples) expect(statSync(new URL(`../../public/${sample.path}`, import.meta.url)).size).toBeGreaterThan(500);
   });
 });
 
@@ -41,10 +48,10 @@ describe("Umrah phrase recordings", () => {
   it("defines all voice and gate files without duplicates", () => {
     const paths = askPackPaths();
     expect(new Set(paths).size).toBe(paths.length);
-    expect(paths.filter(path => /\/number-\d+\.opus$/.test(path))).toHaveLength(1200);
+    expect(paths.filter(path => /\/number-\d+\.opus$/.test(path))).toHaveLength(2 * 300 * packVoices.length);
   });
 
-  it.skipIf(!reviewedAskAudio)("checks the published recording files and pack size", () => {
+  it("checks the published recording files and pack size", () => {
     let size = 0;
     for (const path of askPackPaths()) {
       const file = new URL(`../../public/${path}`, import.meta.url);
@@ -56,6 +63,6 @@ describe("Umrah phrase recordings", () => {
         size += statSync(file).size;
       } finally { closeSync(fd); }
     }
-    expect(size).toBe(reviewedAskAudio.bytes);
+    expect(size).toBe(askAudioPack?.bytes);
   });
 });

@@ -13,7 +13,7 @@ import { emptyPreparation, initialTrip, makkah, maskedPhone, type TripState, typ
 import { answerWords, arabicNumber, askCategories, askDefaults, askPhrase, askPlaces, askRelations, askVarieties, askVoices, helperDirections,
   quickAsks, readGate, renderAsk, umrahPhrases, type AskPhrase, type AskVariety, type AskVoice, type CustomPhrase } from "@/lib/umrahAsk";
 import { banglaPhrases } from "@/lib/umrah-ask-copy";
-import { askClipIds } from "@/lib/umrahAskAudio";
+import { askClipIds, packVoices } from "@/lib/umrahAskAudio";
 
 const home = "/umrah/ask";
 const cards = `${home}/cards`;
@@ -251,8 +251,8 @@ function PhraseControls({ item }: { item: ReturnType<typeof usePhrase> }) {
     <button type="button" className={`action ${item.settings.slow ? "soft" : "light"}`} aria-pressed={item.settings.slow} onClick={() => item.change({ slow: !item.settings.slow })}>{t("askSlow")}</button>
     <Dialog><DialogTrigger asChild><button type="button" className="action light">{t("askVoice")}</button></DialogTrigger>
       <DialogContent className="awwab-dialog" aria-describedby={undefined}><DialogTitle>{t("askVoice")}</DialogTitle>
-        <label className="field">{t("askVoice")}<select value={item.settings.voice} onChange={event => item.change({ voice: event.currentTarget.value as AskVoice })}>
-          {askVoices.map(voice => <option key={voice} value={voice}>{t(voice === "male" ? "askMale" : "askFemale")}</option>)}
+        <label className="field">{t("askVoice")}<select value={packVoices.includes(item.settings.voice) ? item.settings.voice : packVoices[0]} onChange={event => item.change({ voice: event.currentTarget.value as AskVoice })}>
+          {packVoices.map(voice => <option key={voice} value={voice}>{t(voice === "male" ? "askMale" : "askFemale")}</option>)}
         </select></label>
         <label className="field">{t("askSpeaker")}<select value={item.settings.speaker} onChange={event => item.change({ speaker: event.currentTarget.value as AskVoice | "" })}>
           <option value="">{t("askUnspecified")}</option>{askVoices.map(voice => <option key={voice} value={voice}>{t(voice === "male" ? "askMale" : "askFemale")}</option>)}

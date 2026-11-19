@@ -1,10 +1,12 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { ArabicText } from "@/components/ArabicText";
+import { CityForm } from "@/components/CityForm";
 import { DesignIcon } from "@/components/DesignIcon";
 import { PlacementAudio } from "@/components/PlacementAudio";
 import { IS_PREVIEW } from "@/lib/config";
 import { useCopy } from "@/lib/copy";
-import { completeOnboarding, placement } from "@/lib/onboarding";
+import { builtInLanguages, isBuiltIn, languages } from "@/lib/languagePreferences";
+import { completeOnboarding, desktopPlacement, desktopPlacementPassed, placement } from "@/lib/onboarding";
 import { quranText } from "@/lib/quran";
 import { restoreBackup, updateSettings, type Settings } from "@/lib/storageService";
 import { studyNames } from "@/lib/study-copy";
@@ -20,6 +22,41 @@ const scripts = [
   { id: "uthmani", label: "Uthmani", hint: "setupUthmani" },
 ] as const;
 const placementHints = ["setupLetterHint", "setupHarakatHint", "setupWordsHint", "setupAyahHint"] as const;
+const stepTitles = ["setupLanguageStep", "setupLearnStep", "setupCheckStep", "prayerTimes"];
+const answers = ["easy", "effort", "new"] as const;
+
+function WelcomeVerse() {
+  const { t } = useCopy();
+  return <section className="card onboarding-verse">
+    <ArabicText text={content.welcome.arabic} citation={content.welcome.source} verse="17:25" positionOffset={8} />
+    <p>{t("welcomeMeaning")}</p>
+    <a href={content.welcome.url} className="caption">{content.welcome.source}</a>
+  </section>;
+}
+
+function SetupWordmark() {
+  return <div className="onboarding-wordmark" lang="en">awwab<DesignIcon name="onboarding-fatha" size={35} height={17} /></div>;
+}
+
+function DesktopSetup({ step, language, children }: { step: number; language: ReactNode; children: ReactNode }) {
+  const { t } = useCopy();
+  return <div className="onboarding-desktop">
+    <aside className="onboarding-aside night" data-theme-preview="adult">
+      <SetupWordmark />
+      <div className="stack"><WelcomeVerse />
+        <ol className="setup-desktop-steps">{stepTitles.map((title, i) => <li key={title} data-passed={i < step - 1} aria-current={i === step - 1 ? "step" : undefined}>
+          <span aria-hidden="true">{i < step - 1 ? <DesignIcon name="onboarding-step-check" size={14} /> : i + 1}</span>{t(title)}
+        </li>)}</ol>
+      </div>
+      <p className="small">{t("setupDevice")}</p>
+    </aside>
+    <div className="onboarding-inner">
+      <header className="setup-desktop-header"><div className="row-between"><p className="small muted">{t("setupDesktopStep", { step })}</p>{language}</div>
+        <SetupProgress step={step} /></header>
+      {children}
+    </div>
+  </div>;
+}
 
 function SetupProgress({ step }: { step: number }) {
   const { t } = useCopy();
@@ -28,11 +65,17 @@ function SetupProgress({ step }: { step: number }) {
   </div>;
 }
 
-export function Onboarding({ settings }: { settings: Settings }) {
+export function Onboarding({ settings, desktop }: { settings: Settings; desktop: boolean }) {
   const { language, t } = useCopy();
   const [step, setStep] = useState(0);
+  const [desktopFlow] = useState(desktop);
   const [mode, setMode] = useState(settings.mode);
   const [script, setScript] = useState(settings.script);
+  const [spelling, setSpelling] = useState<Settings["spellStyle"]>();
+  const [responses, setResponses] = useState<string[]>([]);
+  const [question, setQuestion] = useState(0);
+  const [showLetters, setShowLetters] = useState(false);
+  const [startingPoint, setStartingPoint] = useState(0);
   const [notice, setNotice] = useState<string>();
   const [saving, setSaving] = useState(false);
   const heading = useRef<HTMLHeadingElement>(null);
@@ -42,13 +85,13 @@ export function Onboarding({ settings }: { settings: Settings }) {
     if (step === 0) return;
     window.scrollTo(0, 0);
     heading.current?.focus({ preventScroll: true });
-  }, [step]);
+  }, [step, question]);
 
-  async function finish(passed: number) {
+  async function finish(passed: number, preferences: Partial<Settings> = {}) {
     if (saving) return;
     setSaving(true);
     setNotice(undefined);
-    try { await completeOnboarding(mode, script, passed); }
+    try { await completeOnboarding(mode, script, passed, { ...preferences, ...(spelling ? { spellStyle: spelling } : {}) }); }
     catch {
       setNotice("setupSaveError");
       setSaving(false);
@@ -66,30 +109,26 @@ export function Onboarding({ settings }: { settings: Settings }) {
     }
   }
 
-  if (step === 0) return <main className="onboarding onboarding-welcome night" data-theme-preview="adult">
-    <div className="onboarding-inner">
-      <label className="onboarding-language">
+  const languagePicker = <label className="onboarding-language">
+        {desktopFlow && <DesignIcon name="onboarding-language-speech" size={14} />}
         <span className="sr-only">{t("interfaceLanguage")}</span>
         <select value={language} disabled={saving} onChange={async event => {
-          const next = event.currentTarget.value === "bn" ? "bn" : "en";
+          const next = event.currentTarget.value;
+          if (!isBuiltIn(next)) return;
           try { await updateSettings({ language: next }); setNotice(undefined); }
           catch { setNotice("setupSaveError"); }
         }}>
-          <option value="en" lang="en">English</option>
-          <option value="bn" lang="bn">বাংলা</option>
+          {languages.filter(item => builtInLanguages.some(code => code === item.code)).map(item => <option key={item.code} value={item.code} lang={item.code}>{item.native}</option>)}
         </select>
-      </label>
+      </label>;
+  const languageStep = <>
       <div className="onboarding-welcome-content">
         <header className="onboarding-brand">
-          <div className="onboarding-wordmark" lang="en">awwab<DesignIcon name="onboarding-fatha" size={35} height={17} /></div>
+          <SetupWordmark />
           <p className="onboarding-brand-note">{t("oneKeepsReturning")} · <ArabicText text="أَوَّاب" compact /></p>
         </header>
-        <h1>{t("welcomeHeading")}</h1>
-        <section className="card onboarding-verse">
-          <ArabicText text={content.welcome.arabic} citation={content.welcome.source} verse="17:25" positionOffset={8} />
-          <p>{t("welcomeMeaning")}</p>
-          <a href={content.welcome.url} className="caption">{content.welcome.source}</a>
-        </section>
+        <h1>{t(desktopFlow ? "setupPickLanguage" : "welcomeHeading")}</h1>
+        {desktopFlow ? <p className="muted">{t("setupChangeLanguage")}</p> : <WelcomeVerse />}
       </div>
       <div className="onboarding-welcome-footer">
         <p className="small">{t("welcomeOffline")}</p>
@@ -103,48 +142,105 @@ export function Onboarding({ settings }: { settings: Settings }) {
         }} />
         {notice && <p role="status" className="small">{t(notice)}</p>}
       </div>
-    </div>
+  </>;
+  if (step === 0) return <main className={desktopFlow ? "onboarding onboarding-desktop-page" : "onboarding onboarding-welcome night"} data-theme-preview="adult">
+    {desktopFlow ? <DesktopSetup step={1} language={languagePicker}>{languageStep}</DesktopSetup> : <div className="onboarding-inner">{languagePicker}{languageStep}</div>}
   </main>;
 
-  if (step === 1) return <main className="onboarding onboarding-choose" data-theme-preview="adult">
-    <div className="onboarding-inner">
-      <header className="row-between onboarding-step-header">
+  const choose = <>
+      {!desktopFlow && <header className="row-between onboarding-step-header">
         <SetupProgress step={2} />
         <button className="text-button muted" type="button" disabled={saving} onClick={() => void finish(0)}>{t("skip")}</button>
-      </header>
-      <h1 ref={heading} tabIndex={-1}>{t("chooseLearningMode")}</h1>
+      </header>}
+      <h1 ref={heading} tabIndex={-1}>{t(desktopFlow ? "setupHowLearn" : "chooseLearningMode")}</h1>
       <p className="muted">{t("modeChangeHint")}</p>
       <div className="onboarding-mode-list" role="group" aria-label={t("chooseLearningMode")}>
-        {modes.map(item => <section className="card onboarding-mode-card" key={item.id} data-theme-preview={item.id} data-selected={mode === item.id}>
+        {modes.map(item => <section className="card onboarding-mode-card" key={item.id} data-theme-preview={desktopFlow ? "adult" : item.id} data-selected={mode === item.id}>
           <div className="onboarding-mode-title">
-            <div className="onboarding-mode-example">
+            {!desktopFlow && <div className="onboarding-mode-example">
               <span lang="en">Aa</span>
               <ArabicText text={item.example} compact />
-            </div>
+            </div>}
             <div>
-              <h2 id={`onboarding-mode-${item.id}`}>{t(item.title)}</h2>
-              <p className="small">{t(item.subtitle)}</p>
+              <h2 id={`onboarding-mode-${item.id}`}>{t(desktopFlow ? item.id === "adult" ? "setupAdult" : "setupMaktab" : item.title)}</h2>
+              {!desktopFlow && <p className="small">{t(item.subtitle)}</p>}
             </div>
-            {mode === item.id ? item.id === "adult" ? <DesignIcon name="onboarding-script-check" size={24} /> : <span className="onboarding-mode-dot selected" /> : <span className="onboarding-mode-dot" />}
+            {mode === item.id ? desktopFlow ? <span className="onboarding-mode-dot setup-mode-checked"><DesignIcon name="onboarding-mode-check" size={14} /></span> : item.id === "adult" ? <DesignIcon name="onboarding-script-check" size={24} /> : <span className="onboarding-mode-dot selected" /> : <span className="onboarding-mode-dot" />}
           </div>
-          <p className="muted">{t(item.detail)}</p>
-          <div className="chips">{item.features.map(feature => <span className="chip soft" key={feature}>{t(feature)}</span>)}</div>
+          <p className="muted">{t(desktopFlow ? `setupMode-${item.id}` : item.detail)}</p>
+          {desktopFlow ? <><div className="onboarding-mode-example" data-lesson-mode={item.id}>
+            <ArabicText text="بَ" compact /><strong className="small">{t(`setupSample-${item.id}`)}</strong>
+          </div>
+            <ul className="setup-mode-features">{[1, 2, 3].map(i => <li key={i}><DesignIcon name="check-primary-14" size={14} />{t(`setupFeature-${item.id}-${i}`)}</li>)}</ul></>
+            : <div className="chips">{item.features.map(feature => <span className="chip soft" key={feature}>{t(feature)}</span>)}</div>}
           <button className="onboarding-mode-hit" type="button" disabled={saving} aria-pressed={mode === item.id}
             aria-labelledby={`onboarding-mode-${item.id}`} onClick={() => setMode(item.id)} />
         </section>)}
       </div>
-      <fieldset className="onboarding-scripts">
-        <legend>{t("chooseFamiliarScript")}</legend>
+      <div className={desktopFlow ? "equal-row setup-script-options" : undefined}><fieldset className="onboarding-scripts">
+        <legend>{t(desktopFlow ? "setupQuranScript" : "chooseFamiliarScript")}</legend>
         <div className="equal-row">
           {scripts.map(item => <button type="button" disabled={saving} key={item.id} aria-pressed={script === item.id} onClick={() => setScript(item.id)}>
             <strong lang="en">{item.label}</strong><small>{t(item.hint)}</small>
           </button>)}
         </div>
       </fieldset>
-      <button className="action onboarding-continue" type="button" disabled={saving} onClick={() => setStep(2)}>{t("continueToRecall")}</button>
+      {desktopFlow && <fieldset className="onboarding-scripts">
+        <legend>{t("setupSpellLetters")}</legend><div className="equal-row">
+          {(["ampara-bn", "en"] as const).map(style => <button type="button" key={style} aria-pressed={(spelling ?? (mode === "maktab" ? "ampara-bn" : "en")) === style}
+            onClick={() => setSpelling(style)}><strong>{t(style === "en" ? "setupEnglish" : "setupAmpara")}</strong>
+            <small lang={style === "en" ? "en" : "bn"}>{style === "en" ? "Bāʾ + fatha = ba" : "বা যবর বা"}</small></button>)}
+        </div></fieldset>}</div>
+      <footer className={desktopFlow ? "setup-desktop-actions row-between" : undefined}>
+        {desktopFlow && <button className="action light" type="button" onClick={() => setStep(0)}>{t("back")}</button>}
+        <button className="action onboarding-continue" type="button" disabled={saving} onClick={() => setStep(2)}>{t("continueToRecall")}</button>
+      </footer>
       {notice && <p role="status" className="small muted">{t(notice)}</p>}
-    </div>
+  </>;
+  if (step === 1) return <main className="onboarding onboarding-choose" data-theme-preview="adult">
+    {desktopFlow ? <DesktopSetup step={2} language={languagePicker}>{choose}</DesktopSetup> : <div className="onboarding-inner">{choose}</div>}
   </main>;
+
+  if (desktopFlow && step === 3) return <main className="onboarding onboarding-prayer" data-theme-preview={mode}>
+    <DesktopSetup step={4} language={languagePicker}>
+      <h1 ref={heading} tabIndex={-1}>{t("prayerTimes")}</h1>
+      <CityForm initial={settings} saving={saving} submitLabel="setupFinish" save={patch => finish(startingPoint, patch)} />
+      {notice && <p role="alert">{t(notice)}</p>}
+      <footer className="setup-desktop-actions"><button className="action light" type="button" disabled={saving} onClick={() => setStep(2)}>{t("back")}</button></footer>
+    </DesktopSetup>
+  </main>;
+
+  if (desktopFlow) {
+    const sample = desktopPlacement[question];
+    const ref = sample.chapter && `${sample.chapter}:${sample.verse}`;
+    const advance = (passed: number) => { setStartingPoint(passed); setStep(3); };
+    return <main className="onboarding onboarding-recall" data-theme-preview={mode}>
+      <DesktopSetup step={3} language={languagePicker}>
+        <h1 ref={heading} tabIndex={-1}>{t("setupCanRead")}</h1><p className="muted">{t("setupEightQuestions")}</p>
+        <section className="card onboarding-question">
+          <p className="caption">{t("pathsCheckQuestion", { number: question + 1, total: desktopPlacement.length })} · {t(sample.title)}</p>
+          <ArabicText text={sample.arabic} citation={ref || undefined} verse={ref || undefined} />
+          {ref && <span className="caption muted">{ref}</span>}
+          <div className="setup-question-tools">
+            <PlacementAudio key={sample.audioRef} reference={sample.audioRef} title={t(sample.title)} concise />
+            <button className="chip soft" type="button" aria-expanded={showLetters} onClick={() => setShowLetters(value => !value)}>{t("setupShowLetters")}</button>
+          </div>
+          {showLetters && <ArabicText text={[...sample.arabic].filter(letter => /\p{L}/u.test(letter)).join(" ")} compact />}
+        </section>
+        <div className="equal-row setup-desktop-answers">{answers.map(answer => <button type="button" className="action light" key={answer} aria-pressed={responses[question] === answer}
+          onClick={() => setResponses(values => [...values.slice(0, question), answer])}><strong>{t(`setupAnswer-${answer}`)}</strong><small>{t(`setupAnswerHint-${answer}`)}</small></button>)}</div>
+        <div className="setup-question-dots" aria-hidden="true">{desktopPlacement.map((_, i) => <span key={i} data-done={i < question} data-current={i === question} />)}</div>
+        <footer className="setup-desktop-actions row-between">
+          <button className="action light" type="button" onClick={() => advance(0)}>{t("setupSkipPlacement")}</button>
+          <button className="action" type="button" disabled={!responses[question]} onClick={() => {
+            setShowLetters(false);
+            if (question + 1 === desktopPlacement.length) advance(desktopPlacementPassed(responses));
+            else setQuestion(index => index + 1);
+          }}>{t("hifzNext")}</button>
+        </footer>
+      </DesktopSetup>
+    </main>;
+  }
 
   const index = step - 2;
   const item = placement[index];

@@ -15,6 +15,10 @@ export const qaidaGrades = { hard: Rating.Hard, okay: Rating.Good, easy: Rating.
 export type QaidaGrade = keyof typeof qaidaGrades;
 const scheduler = fsrs({ enable_fuzz: false });
 
+export function newReview(now: Date): Review {
+  return { card: createEmptyCard(now), bucket: "sabaq" };
+}
+
 export function reviewWithRating(previous: Review | undefined, grade: Grade, now: Date): Review {
   const saved = previous?.card;
   const card = saved ? { ...saved, due: new Date(saved.due), last_review: saved.last_review ? new Date(saved.last_review) : undefined } : createEmptyCard(now);

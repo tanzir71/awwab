@@ -1,6 +1,11 @@
 import type { MessageCatalog } from "./copy";
 
 export const pathsMessages: MessageCatalog = {
+  grammarTitle: { en: "Grammar foundations", bn: "ব্যাকরণের ভিত্তি" },
+  grammarSubtitle: { en: "Understand · Level 2", bn: "অর্থ বুঝি · দ্বিতীয় ধাপ" },
+  grammarCompare: { en: "Compare your choice with {word}.", bn: "আপনার বাছাইটি {word}-এর সঙ্গে মিলিয়ে দেখুন।" },
+  lessonCorrect: { en: "That’s right.", bn: "ঠিক হয়েছে।" },
+  pathsLessonProgress: { en: "{count, number}/{total, number} lessons complete", bn: "{total, number}টির মধ্যে {count, number}টি পাঠ শেষ" },
   paths: { en: "Paths", bn: "শেখার পথ" },
   pathsSubtitle: { en: "Four paths, five levels each · pick any level", bn: "চারটি পথ, প্রতিটিতে পাঁচটি স্তর · যেকোনো স্তর বেছে নিন" },
   pathsMobileSubtitle: { en: "Four paths, from first letters to fluency", bn: "প্রথম হরফ থেকে সাবলীলতা পর্যন্ত চারটি পথ" },

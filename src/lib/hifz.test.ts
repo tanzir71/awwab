@@ -8,6 +8,8 @@ import { parseCorpus } from "./morphology";
 import { reviewDestination } from "./studyDesk";
 import { normalizeWord, splitArabicWords } from "./wordAnatomy";
 import content from "../../docs/content/roots-and-patterns.json";
+import grammar from "../../docs/content/grammar-foundations.json";
+import tajweed from "../../docs/content/tajweed-nun.json";
 
 const quran = JSON.parse(gunzipSync(readFileSync(new URL("../../public/data/quran-study-v1.json.gz", import.meta.url))).toString()) as StudyQuran;
 
@@ -68,6 +70,21 @@ describe("Offline Quran study edition", () => {
 });
 
 describe("Learning path progress", () => {
+  it("keeps Tajweed and grammar excerpts inside the cited ayah in each script", () => {
+    const excerpt = (chapter: number, ayah: number, first: number, last: number, script: "indopak" | "uthmani") =>
+      splitArabicWords(verseText(quran.surahs[chapter][ayah - 1], script).text).slice(first - 1, last);
+    for (const script of ["indopak", "uthmani"] as const) {
+      for (const { chapter, ayah, first, last } of tajweed.samples) expect(excerpt(chapter, ayah, first, last, script)).toHaveLength(last - first + 1);
+      for (const { ayah: [chapter, ayah, first, last], words, answer } of grammar.lessons) {
+        expect(excerpt(chapter, ayah, first, last, script)).toHaveLength(last - first + 1);
+        expect(words[answer]).toBeDefined();
+      }
+      expect(normalizeWord(excerpt(104, 4, 2, 2, script)[0])).toContain("ينبذ");
+    }
+    expect(reviewDestination("rule:nun:1:7:3")).toBe("/learn/paths/read/3?review=1%3A7%3A3");
+    expect(reviewDestination("phrase:sim:0")).toBe("/learn/speak/sim?review=0");
+  });
+
   it("uses the sourced 2:2 morphology for the word family and routes pattern cards back to the drill", () => {
     const morphology = gunzipSync(readFileSync(new URL("../../public/data/qac-morphology-0.4.txt.gz", import.meta.url))).toString();
     const { chapter, ayah, last } = content.spot;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { HashRouter, Link, Navigate, Outlet, Route, Routes, parsePath, useLocation, useNavigate } from "react-router-dom";
 import { Toaster } from "sonner";
 import { AppShell } from "@/components/AppShell";
@@ -9,6 +9,7 @@ import { WordingSuggestionLayer } from "@/components/WordingSuggestions";
 import { useClock, useDesktop, useSettings } from "@/hooks/use-awwab";
 import { migrateLegacy } from "@/lib/storageService";
 import { CopyContext } from "@/lib/copy";
+import { readPseudoLocale } from "@/lib/pseudoLocale";
 import Today, { PrayerWeek } from "@/pages/Index";
 import { PrayerGuide } from "@/pages/PrayerGuide";
 import { Learn } from "@/pages/Learn";
@@ -16,6 +17,9 @@ import { Paths, MaktabMap } from "@/pages/Paths";
 import { Hifz } from "@/pages/Hifz";
 import { PathCheck } from "@/pages/PathCheck";
 import { RootsPatterns } from "@/pages/RootsPatterns";
+import { Tajweed } from "@/pages/Tajweed";
+import { Speak } from "@/pages/Speak";
+import { Grammar } from "@/pages/Grammar";
 import { Plan } from "@/pages/Plan";
 import { ReturnPage, Sayyid } from "@/pages/Return";
 import { Qada } from "@/pages/Qada";
@@ -42,7 +46,9 @@ import { AudioPacks } from "@/pages/AudioPacks";
 import AppInstallPrompt from "@/components/AppInstallPrompt";
 
 function Main() {
-  const settings = useSettings();
+  const saved = useSettings();
+  const [pseudoLocale] = useState(() => import.meta.env.DEV || import.meta.env.MODE === "preview" ? readPseudoLocale(window.location.search) : undefined);
+  const settings = useMemo(() => saved && (pseudoLocale ? { ...saved, language: "en" as const, pseudoLocale } : saved), [saved, pseudoLocale]);
   const desktop = useDesktop();
   const now = useClock();
   const location = useLocation();
@@ -62,13 +68,14 @@ function Main() {
     if (!settings) return;
     document.documentElement.dataset.mode = settings.mode;
     document.documentElement.dataset.textSize = settings.textSize ?? "default";
-    document.documentElement.lang = settings.language;
+    document.documentElement.lang = pseudoLocale ?? settings.language;
+    document.documentElement.dir = pseudoLocale === "en-XB" ? "rtl" : "ltr";
     document.querySelector('meta[name="theme-color"]')?.setAttribute("content", settings.mode === "adult" ? "#15302b" : "#25306b");
-  }, [settings]);
+  }, [settings, pseudoLocale]);
 
   if (storage === "error") return <main className="app-content stack"><h1>Device storage is unavailable</h1><p>Allow this site to use browser storage, then reload to open Awwab.</p></main>;
   if (!settings || storage === "loading") return <main className="app-content"><p role="status">Opening awwab…</p></main>;
-  if (!settings.onboarded && pathname !== "/install" && pathname !== "/sources") return <CopyContext.Provider value={settings}><Onboarding settings={settings} /><WordPanel desktop={false} settings={settings} /></CopyContext.Provider>;
+  if (!settings.onboarded && pathname !== "/install" && pathname !== "/sources") return <CopyContext.Provider value={settings}><Onboarding settings={settings} desktop={desktop} /><WordPanel desktop={false} settings={settings} /></CopyContext.Provider>;
   const shareDialog = desktop && pathname === "/share";
   const shareBackground = (location.state as ShareRouteState | null)?.shareBackground;
   const shareBack = shareDialog ? shareReturnPath(new URLSearchParams(search)) : "";
@@ -85,10 +92,13 @@ function Main() {
         <Route path="/learn/tools" element={<Learn settings={settings} desktop={desktop} now={now} tools />} />
         <Route path="/learn/paths/check/:track?" element={<PathCheck settings={settings} now={now} />} />
         <Route path="/learn/paths/understand/3" element={<RootsPatterns settings={settings} now={now} />} />
+        <Route path="/learn/paths/understand/2/:unit?" element={<Grammar settings={settings} now={now} />} />
+        <Route path="/learn/paths/read/3" element={<Tajweed key={search} settings={settings} now={now} />} />
         <Route path="/learn/paths/:track?/:level?" element={<Paths desktop={desktop} />} />
         <Route path="/learn/map" element={<MaktabMap />} />
         <Route path="/learn/hifz/:id/:portion?" element={<Hifz settings={settings} now={now} />} />
-        <Route path="/learn/speak" element={<Paths desktop={desktop} trackOverride="speak" />} />
+        <Route path="/learn/speak/:unit?" element={<Speak settings={settings} now={now} />} />
+        <Route path="/learn/paths/speak/1" element={<Navigate replace to="/learn/speak" />} />
         <Route path="/learn/qaida/:id?" element={<Qaida settings={settings} desktop={desktop} />} />
         <Route path="/learn/surahs/:id?" element={<SurahReader settings={settings} now={now} />} />
         <Route path="/learn/salah" element={<SalahWords settings={settings} />} />

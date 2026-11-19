@@ -9,7 +9,7 @@ import recordings from "../../public/packs/audio/index.json";
 
 const paths = Object.fromEntries(Object.entries(placementAudio).map(([ref, sample]) => [ref, asset(sample.path)]));
 
-export function PlacementAudio({ reference, title }: { reference: string; title: string }) {
+export function PlacementAudio({ reference, title, concise = false }: { reference: string; title: string; concise?: boolean }) {
   const { t } = useCopy();
   const [selecting, setSelecting] = useState(false);
   const player = useAudioPlayback([reference], paths);
@@ -22,10 +22,11 @@ export function PlacementAudio({ reference, title }: { reference: string; title:
       else setSelecting(value => !value);
     }}>
       <span><DesignIcon name="onboarding-volume" size={18} /></span>
-      {t(player.playing ? "setupPause" : available ? "setupHeard" : "addAudio")}
+      {t(player.playing ? "setupPause" : available ? concise ? "setupHear" : "setupHeard" : "addAudio")}
     </button>
     <audio ref={player.element} preload="none" {...player.events} aria-label={t("referenceAudioFor", { name: title })} />
     {player.error && <small role="status">{t("setupPlaybackError")}</small>}
+    {available && player.track && placementAudio[reference]?.generated && <small className="muted">{t("generatedSpeech")}</small>}
     {available && player.track && pack && <small className="muted">
       <a href={pack.source} target="_blank" rel="noreferrer" lang="en">{pack.speaker}</a> · <a href={pack.licenseUrl} target="_blank" rel="noreferrer" lang="en">{pack.attribution.split(" · ")[1]}</a>
       <br />{t("setupAudioExcerpt")}

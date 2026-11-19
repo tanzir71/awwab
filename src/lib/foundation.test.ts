@@ -13,7 +13,7 @@ import { applyGlossary, formatLocale, glossaryValue, isBuiltIn, languageMatches,
 import { updateWordChoice } from "./storageService";
 import { reviewCard, type Reviews } from "./reviews";
 import { countKnownQuranWords } from "./quran";
-import { completeOnboarding, placementLesson } from "./onboarding";
+import { completeOnboarding, desktopPlacementPassed, placementLesson } from "./onboarding";
 import { finishQaidaLesson, rememberQaidaPlace, saveFluencyPractice, saveQaidaRowReview, saveSurahReview, saveTakhtiPractice, saveWordReview, setAyahFamiliar, wordMilestones } from "./studyMilestones";
 import { reviewDestination, reviewQueue, studyPlanMinutes } from "./studyDesk";
 import coreWords from "../../docs/content/core-quran-words.json";
@@ -30,6 +30,12 @@ describe("onboarding", () => {
 
   it("recommends the first lesson beyond each confident placement answer", () => {
     expect([0, 1, 2, 3, 4].map(placementLesson)).toEqual([1, 2, 5, 6, 7]);
+  });
+
+  it("uses the earliest topic needing practice in the desktop placement", () => {
+    expect(desktopPlacementPassed([])).toBe(0);
+    expect(desktopPlacementPassed(["easy", "easy", "easy", "easy", "effort", "easy", "easy", "easy"])).toBe(1);
+    expect(desktopPlacementPassed(Array(8).fill("easy"))).toBe(4);
   });
 
   it("saves mode, script and placement together and keeps them after a second completion", async () => {

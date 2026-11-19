@@ -109,6 +109,7 @@ progress::-moz-progress-bar { background: var(--control-primary); }
 .tabbar a[aria-current] { color: var(--interactive-ink); font-weight: 700; }
 .tabbar a[aria-current] .tab-icon { background: var(--c-primary-soft); }
 .sidebar, .topbar { display: none; }
+:root[dir="rtl"] .icon-dir { transform: scaleX(-1); }
 .print-only { display: none; }
 .paper-header { align-items: end; gap: 10px; }
 .paper-header .wordmark { flex: 0 0 auto; }
@@ -543,14 +544,14 @@ table tbody tr:nth-child(even) { background: var(--c-surface-alt); }
   .sidebar .nav-group { margin: 10px 0 2px; }
   .sidebar a, .sidebar .search-button { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 10px; border-radius: var(--r-control); text-align: start; color: var(--c-ink); text-decoration: none; font: var(--type-small); }
   .sidebar .search-button { background: var(--c-surface-alt); width: 100%; }
-  .sidebar .search-button kbd { margin-left: auto; }
+  .sidebar .search-button kbd { margin-inline-start: auto; }
   .sidebar a[aria-current] { background: var(--c-primary-soft); color: var(--interactive-ink); font-weight: 700; }
   .sidebar .sidebar-bottom { margin-top: auto; padding-top: 16px; }
   :root[data-mode="adult"] .sidebar a, :root[data-mode="adult"] .sidebar .search-button { min-height: 32px; padding-block: 3px; }
   :root[data-mode="adult"] .sidebar .wordmark { font-size: 22px; margin: 0 0 3px; }
   :root[data-mode="adult"] .sidebar .chip { padding: 1px 7px; font-size: 12px; }
   :root[data-mode="adult"] .sidebar a[aria-current] .chip, :root[data-mode="adult"] .sidebar kbd { background: var(--c-surface); }
-  .sidebar-mode { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 10px; padding: 12px; border-radius: var(--r-control); background: var(--c-surface-alt); text-align: left; }
+  .sidebar-mode { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 10px; padding: 12px; border-radius: var(--r-control); background: var(--c-surface-alt); text-align: start; }
   .sidebar-mode small { display: block; }
   .mode-switch-track { position: relative; flex: 0 0 40px; height: 24px; border-radius: var(--r-pill); background: var(--c-primary-soft); }
   .mode-switch-track::after { content: ""; position: absolute; right: 3px; top: 3px; width: 18px; height: 18px; border-radius: var(--r-pill); background: var(--c-primary); }

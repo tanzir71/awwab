@@ -156,7 +156,7 @@
 .onboarding-scripts button { display: grid; justify-items: center; align-content: center; min-height: 56px; border-radius: var(--r-control); padding: 4px 6px; color: var(--c-ink-muted); }
 .onboarding-scripts button[aria-pressed="true"] { background: var(--c-surface); color: var(--c-ink); box-shadow: var(--shadow-card); }
 .onboarding-scripts small { color: var(--c-ink-muted); }
-.onboarding-continue { margin-top: 14px; }
+.onboarding-continue { margin-top: 14px; width: 100%; }
 .onboarding-placement { margin: 0; padding: 0; gap: 6px; list-style: none; }
 .onboarding-placement .chip { min-height: 30px; padding: 4px 12px; background: var(--c-surface); color: var(--c-ink); font: var(--type-small); box-shadow: var(--shadow-card); }
 .onboarding-placement [data-passed="true"] { background: var(--c-primary-soft); color: var(--interactive-ink); box-shadow: none; }
@@ -180,4 +180,99 @@
   .onboarding-mode-title { gap: 8px; }
   .onboarding-mode-example { padding-inline: 8px; }
   .onboarding-placement .chip { padding-inline: 8px; }
+}
+
+.onboarding:has(.onboarding-desktop) { padding: 0; }
+.onboarding-desktop {
+  display: grid;
+  grid-template-columns: minmax(300px, min(36.12vw, 520px)) minmax(0, 1fr);
+  min-height: 100svh;
+}
+.onboarding-aside {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  align-items: start;
+  justify-items: start;
+  gap: 28px;
+  padding: clamp(28px, 4vw, 56px);
+  background: var(--c-night);
+  color: var(--c-on-night);
+}
+.onboarding-aside > .stack { align-self: center; margin-block-end: 12vh; }
+.onboarding-aside .onboarding-wordmark { font-size: 35px; }
+.onboarding-aside .onboarding-verse {
+  min-height: 0;
+  padding: 0;
+  justify-items: start;
+  background: transparent;
+  color: var(--c-night-muted);
+}
+.onboarding-aside .onboarding-verse .arabic-text { color: var(--c-on-night); }
+.onboarding-aside > p { color: var(--c-night-muted); }
+.setup-desktop-steps { display: grid; gap: 10px; padding: 0; list-style: none; }
+.setup-desktop-steps li { display: flex; gap: 12px; align-items: center; color: var(--c-night-muted); }
+.setup-desktop-steps li:is([data-passed="true"], [aria-current]) { color: var(--c-on-night); }
+.setup-desktop-steps li > span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-pill);
+  background: var(--c-overlay-on-night);
+  font: var(--type-small);
+}
+.setup-desktop-steps li[data-passed="true"] > span { background: var(--c-on-night); }
+.setup-desktop-steps li[aria-current] > span { background: var(--c-primary); }
+.onboarding-desktop > .onboarding-inner {
+  width: 100%;
+  max-width: 920px;
+  min-height: 100%;
+  padding: 40px clamp(30px, 5.5vw, 96px);
+  grid-template-rows: auto;
+  align-content: start;
+  position: relative;
+}
+.onboarding-desktop > .onboarding-inner:has(.setup-desktop-actions) { padding-block-end: 115px; }
+.setup-desktop-header { display: grid; gap: 18px; }
+.setup-desktop-header .setup-steps span { flex: 1; height: 4px; }
+.setup-desktop-header .onboarding-language { display: flex; align-items: center; padding-inline-start: 12px; border-radius: var(--r-pill); background: var(--c-surface); }
+.setup-desktop-header .onboarding-language select { color: var(--c-ink); background: transparent; }
+.onboarding-desktop h1 { margin: 0; }
+.onboarding-desktop .onboarding-mode-list { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }
+.onboarding-desktop .onboarding-mode-card { gap: 12px; padding: 24px; }
+.onboarding-desktop .onboarding-mode-card[data-selected="true"] { background: var(--c-primary-soft); box-shadow: none; }
+.onboarding-desktop .onboarding-mode-title { grid-template-columns: 1fr 24px; }
+.onboarding-desktop .onboarding-mode-title h2 { font-family: var(--font-display); }
+.onboarding-desktop .setup-mode-checked { background: var(--c-primary); }
+.onboarding-desktop .onboarding-mode-example { min-height: 68px; background: var(--c-surface-alt); }
+.onboarding-desktop .onboarding-mode-example[data-lesson-mode="maktab"] { background: var(--c-tint); }
+.onboarding-desktop .onboarding-mode-example[data-lesson-mode="maktab"] .word-chip { color: var(--c-harakat-fatha); }
+.setup-mode-features { display: grid; gap: 10px; padding: 0; list-style: none; }
+.setup-mode-features li { display: flex; align-items: center; gap: 10px; }
+.setup-script-options { align-items: start; }
+.setup-desktop-actions { position: absolute; inset-inline: clamp(30px, 5.5vw, 96px); inset-block-end: 40px; }
+.setup-desktop-actions .action { min-height: 46px; width: auto; padding-inline: 22px; }
+.setup-desktop-actions .onboarding-continue { margin: 0; }
+.setup-question-tools { display: flex; align-items: start; justify-content: center; gap: 8px; }
+.setup-question-tools .setup-hear { padding-inline: 12px; border-radius: var(--r-pill); background: var(--c-surface-alt); color: var(--c-ink); }
+.setup-question-tools .setup-hear > span { display: none; }
+.onboarding-desktop .onboarding-question { min-height: 245px; align-content: center; }
+.onboarding-desktop .onboarding-question > .arabic-text { font-size: clamp(38px, 5vw, 62px); }
+.setup-desktop-answers .action { display: grid; gap: 2px; padding: 12px 8px; }
+.setup-desktop-answers [aria-pressed="true"] { background: var(--c-primary-soft); }
+.setup-desktop-answers small { color: var(--c-ink-muted); }
+.setup-question-dots { display: flex; justify-content: center; gap: 6px; }
+.setup-question-dots span { width: 8px; height: 8px; border-radius: var(--r-pill); background: var(--c-line); }
+.setup-question-dots [data-done="true"] { background: var(--control-primary); }
+.setup-question-dots [data-current="true"] { width: 20px; background: var(--c-night); }
+.onboarding-desktop-page .onboarding-welcome-content { justify-items: start; }
+.onboarding-desktop-page .onboarding-welcome-content .onboarding-brand { display: none; }
+.onboarding-desktop-page .onboarding-welcome-footer { justify-items: start; }
+.onboarding-desktop-page .onboarding-welcome-footer > p:first-child { margin: 0; max-width: 45ch; color: var(--c-ink-muted); }
+.onboarding-prayer form .field { max-width: 480px; }
+@media (max-width: 1023px) {
+  .onboarding-desktop { grid-template-columns: minmax(0, 1fr); }
+  .onboarding-aside { display: none; }
+  .onboarding-desktop .onboarding-mode-card { padding: 14px; }
+  .setup-desktop-actions .action { padding-inline: 10px; }
 }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { ArabicText } from "./ArabicText";
-import { AskAudioPack } from "./AskAudio";
+import { AskAudioButton, AskAudioPack } from "./AskAudio";
 import { DesignIcon } from "./DesignIcon";
 import { UmrahTripForm, UmrahTripImport } from "./UmrahTripForm";
 import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from "./ui/dialog";
@@ -10,23 +10,26 @@ import { downloadFile } from "@/lib/download";
 import { exportUmrahTrip, updateRecord } from "@/lib/storageService";
 import { emptyPreparation, initialTrip, maskedPhone, tripChecklist, tripDates, type TripCheck, type UmrahTrip } from "@/lib/umrah";
 import { cachedMapPack, mapPacks, mapRegions, saveMapPack, type MapRegion } from "@/lib/umrahMapPack";
+import { askDefaults, renderAsk } from "@/lib/umrahAsk";
+import { askClipIds } from "@/lib/umrahAskAudio";
+import { banglaPhrases } from "@/lib/umrah-ask-copy";
 import phraseData from "../../handovers/H2-languages-paths-arabic-help/data/umrah-phrases.json";
 
 const { phrases } = phraseData;
 const samples = ["toilet", "gate-number", "take-me-hotel"].map(id => phrases.find(item => item.id === id));
 const checklistColumns = [tripChecklist.slice(0, 6), tripChecklist.slice(6)];
 const mapMegabytes = Object.values(mapPacks).reduce((sum, size) => sum + size, 0) / 1_000_000;
-const arabicDigits = new Intl.NumberFormat("ar-u-nu-arab", { useGrouping: false });
 type Variety = "saudi" | "msa";
 type Phrase = typeof phrases[number];
 
 function PhraseText({ phrase, variety = "saudi", gate = 79, link = false }: { phrase: Phrase; variety?: Variety; gate?: number; link?: boolean }) {
-  const meaning = link && phrase.id === "gate-number" ? `Where is gate ${gate}?` : phrase.en.replace("{n}", String(gate));
+  const words = renderAsk(phrase, variety, { gate });
+  const meaning = link && phrase.id === "gate-number" ? `Where is gate ${gate}?` : words.en;
   const start = link ? <Link to={`/umrah?view=phrases#${phrase.id}`} className="umrah-phrase-link" lang="en">{meaning}</Link> : <strong lang="en">{meaning}</strong>;
   return <div className="umrah-phrase-row" id={link ? undefined : phrase.id}>
     {link && <DesignIcon name="umrah-prep-volume" size={16} />}
-    <div>{start}<small lang="en">{phrase[variety].tr.replace("{n}", String(gate))}</small></div>
-    <ArabicText text={phrase[variety].ar.replace("{n}", arabicDigits.format(gate))} showGlosses={false} preserveSeparators />
+    <div>{start}<small lang="en">{words.tr}</small></div>
+    <ArabicText text={words.ar} showGlosses={false} preserveSeparators />
   </div>;
 }
 
@@ -36,9 +39,10 @@ function PhraseLibrary() {
   const [query, search] = useState("");
   const [variety, setVariety] = useState<Variety>("saudi");
   const [gate, setGate] = useState("79");
+  const [active, setActive] = useState(() => hash.slice(1));
   const requestedGate = Math.max(1, Math.min(300, Math.floor(Number(gate)) || 79));
   const needle = query.trim().toLowerCase();
-  const results = phrases.filter(phrase => [phrase.en, phrase[variety].ar, phrase[variety].tr].some(value => value.toLowerCase().includes(needle)));
+  const results = phrases.filter(phrase => [phrase.en, phrase[variety].ar, phrase[variety].tr, banglaPhrases[phrase.id]].some(value => value?.toLowerCase().includes(needle)));
   useEffect(() => {
     if (hash) document.getElementById(hash.slice(1))?.scrollIntoView({ block: "center" });
   }, [hash]);
@@ -55,7 +59,12 @@ function PhraseLibrary() {
         onChange={event => setGate(event.currentTarget.value)} onBlur={() => setGate(String(requestedGate))} /></label>
     </div>
     {!results.length && <p role="status" className="muted">{t("umrahPrepNoPhrases")}</p>}
-    <ul className="umrah-phrase-results">{results.map(phrase => <li key={phrase.id}><PhraseText phrase={phrase} variety={variety} gate={requestedGate} /></li>)}</ul>
+    <AskAudioPack desktop />
+    <ul className="umrah-phrase-results">{results.map(phrase => <li key={phrase.id} className="compact-stack">
+      <PhraseText phrase={phrase} variety={variety} gate={requestedGate} />
+      {active === phrase.id ? <AskAudioButton key={`${phrase.id}:${variety}:${requestedGate}`} ids={askClipIds(phrase, { variety, gate: requestedGate })}
+        settings={{ ...askDefaults, variety }} label="askPlay" light /> : <button type="button" className="text-button" onClick={() => setActive(phrase.id)}>{t("practise")}</button>}
+    </li>)}</ul>
   </section>;
 }
 

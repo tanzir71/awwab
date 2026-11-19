@@ -25,6 +25,7 @@ import { initialTrip, tripDates } from "@/lib/umrah";
 import { formatLocale, languages } from "@/lib/languagePreferences";
 import qaida from "../../docs/content/qaida-lessons.json";
 import surahs from "../../docs/content/surahs-for-salah.json";
+import spoken from "../../docs/content/spoken-arabic.json";
 
 type NavItem = { title: string; to: string; icon: string; end?: boolean; simple?: string; tab?: string };
 const mobile: NavItem[] = [
@@ -124,7 +125,8 @@ export function AppShell({ children, settings, now, desktop }: { children: React
   };
   const destinations = groups.flatMap(group => group.items);
   const heading = [...destinations].sort((a, b) => b.to.length - a.to.length).find(item => location.pathname.startsWith(item.to));
-  const title = returnDesktop && location.pathname === "/return/qada" ? t("qadaTitle")
+  const spokenUnit = desktop && location.pathname.startsWith("/learn/speak/") && spoken.units.find(unit => unit.id === location.pathname.split("/").at(-1));
+  const title = spokenUnit ? `${t("pathsSpeak")} · A1 · ${spokenUnit.title[settings.language === "bn" ? 1 : 0]}` : returnDesktop && location.pathname === "/return/qada" ? t("qadaTitle")
     : returnDesktop && location.pathname === "/return/sayyid" ? t("sayyidTitle")
       : heading ? navigationLabel(settings, heading.title) : "awwab";
   const date = formatDay(day, { weekday: "short", day: "numeric", month: "short", year: "numeric" }, locale);
@@ -166,7 +168,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
   const wordBank = location.pathname === "/learn/words";
   const fluency = location.pathname === "/learn/fluency";
   const wordBankStudy = desktop && wordBank;
-  const learnWorkspace = studyHome || pathsHome || surahStudy || qaidaStudy || wordBankStudy;
+  const learnWorkspace = studyHome || pathsHome || surahStudy || qaidaStudy || wordBankStudy || Boolean(spokenUnit);
   const review = chapter && reviews[chapter.number];
   const reviewDay = review && dateKey(new Date(review.card.due), settings.city.timeZone);
   const studySubtitle = chapter ? [
@@ -249,7 +251,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
         <div>{today || learnWorkspace || zakatPage || planDesktop || mosquesDesktop || returnDesktop || guideDesktop || hadithDesktop || settingsDesktop || umrahDesktop ? <h1>{umrahDesktop ? t("umrahPrepare") : settingsDesktop ? t("settingsDeskTitle") : guideDesktop ? t("howToPray") : qaidaStudy ? t("qaidaDesktopTitle", { number: lesson.n }) : surahStudy ? t("surahsForSalah") : wordBankStudy ? t("wordBankName") : title}</h1> : <h2>{title}</h2>}
           <p className="small muted">{guideDesktop ? <>
             <Link to={`/you/prayer?${guideSettingsQuery}`}>{t(guideReference(settings) === "hanafi" ? "prayerGuideHanafi" : "prayerGuideFard")} · {t("prayerGuideSettings")}</Link> · {t("guideDesktopAnatomy")}
-          </> : <>{planSubtitle ?? (pathsHome ? t("pathsSubtitle") : umrahDesktop ? umrahSubtitle : settingsDesktop ? t("settingsDeskCaption") : hadithDesktop ? t("hadithDesktopIntro") : returnDesktop ? t("returnDeskSubtitle") : mosquesDesktop ? t("mosqueDeskCaption", { count: mosques.mosques.length }) : zakatPage ? zakatSubtitle : qaidaStudy ? qaidaSubtitle : surahStudy ? studySubtitle : wordBankStudy ? t("wordBankSubtitle") : date + " · " + hijriLabel(day, settings.hijriAdjust, calendar.anchors, locale))}{today && ` · ${settings.city.name}`}{studyHome && " · " + t("deskMinutesToday", { count: studyPlanMinutes(hidden) })}</>}</p></div>
+          </> : spokenUnit ? <><Link to="/learn/speak">{t("speakSaudi")}</Link> · {t("speakUnitNumber", { number: spoken.units.indexOf(spokenUnit) + 1 })}</> : <>{planSubtitle ?? (pathsHome ? t("pathsSubtitle") : umrahDesktop ? umrahSubtitle : settingsDesktop ? t("settingsDeskCaption") : hadithDesktop ? t("hadithDesktopIntro") : returnDesktop ? t("returnDeskSubtitle") : mosquesDesktop ? t("mosqueDeskCaption", { count: mosques.mosques.length }) : zakatPage ? zakatSubtitle : qaidaStudy ? qaidaSubtitle : surahStudy ? studySubtitle : wordBankStudy ? t("wordBankSubtitle") : date + " · " + hijriLabel(day, settings.hijriAdjust, calendar.anchors, locale))}{today && ` · ${settings.city.name}`}{studyHome && " · " + t("deskMinutesToday", { count: studyPlanMinutes(hidden) })}</>}</p></div>
         <Link className="chip night" to="/today">{nextPrayer}</Link>
         {settings.mode === "adult" && <>
           <Link className="action" to={reviewDestination(nextReview ?? due[0]?.[0])}><DesignIcon name="desk-play" size={14} />{t("startReview")}{due.length ? ` · ${studyHome ? dueSurahs || due.length : due.length}` : ""}</Link>

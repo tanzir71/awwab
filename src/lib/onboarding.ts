@@ -19,16 +19,30 @@ export const placement: Placement[] = [
   { title: "ayah", arabic: quranText[103][1].uthmani, audioRef: "103:2", next: 7, chapter: 103, verse: 2 },
 ];
 
-export const placementAudio: Record<string, { path: string; pack: string }> = onboarding.samples;
+export const placementAudio: Record<string, { path: string; pack?: string; generated?: boolean }> = onboarding.samples;
+
+export const desktopPlacement: Placement[] = [
+  placement[0], { ...placement[0], arabic: "م", audioRef: "placement:2" },
+  { ...placement[2], arabic: "بِسْمِ ٱللَّهِ", audioRef: "1:1", chapter: 1, verse: 1 }, placement[2],
+  placement[1], { ...placement[1], arabic: "بُ", audioRef: "placement:3" },
+  placement[3], { ...placement[3], arabic: quranText[112][2].uthmani, audioRef: "112:3", chapter: 112, verse: 3 },
+];
+
+export function desktopPlacementPassed(answers: readonly string[]) {
+  const pairs = [[0, 1], [4, 5], [2, 3], [6, 7]];
+  const firstPractice = pairs.findIndex(pair => !pair.every(index => answers[index] === "easy"));
+  return firstPractice === -1 ? pairs.length : firstPractice;
+}
 
 export function placementLesson(passed: number) {
   return placement[passed - 1]?.next ?? 1;
 }
 
-export function completeOnboarding(mode: Settings["mode"], script: Settings["script"], passed: number) {
+export function completeOnboarding(mode: Settings["mode"], script: Settings["script"], passed: number,
+  preferences: Partial<Pick<Settings, "spellStyle" | "city" | "method" | "school" | "prayerGuide">> = {}) {
   return db.transaction("rw", db.records, async () => {
     if ((await getRecord("settings", defaults)).onboarded) return;
     await db.records.put({ key: "qaida-current", value: placementLesson(passed) });
-    await updateSettings({ onboarded: true, mode, script, spellStyle: mode === "maktab" ? "ampara-bn" : "en" });
+    await updateSettings({ onboarded: true, mode, script, spellStyle: mode === "maktab" ? "ampara-bn" : "en", ...preferences });
   });
 }

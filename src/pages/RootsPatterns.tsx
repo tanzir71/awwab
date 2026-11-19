@@ -9,7 +9,7 @@ import { studyQuran, verseText } from "@/lib/hifz";
 import { pathUrl, patternPracticePath, patternReviewPrefix } from "@/lib/learningPaths";
 import type { QuranVerse } from "@/lib/quran";
 import { isDue, type ReviewGrade, type Reviews } from "@/lib/reviews";
-import { savePatternReview } from "@/lib/studyMilestones";
+import { saveLearningReview } from "@/lib/studyMilestones";
 import { getRecord, type Settings } from "@/lib/storageService";
 import { splitArabicWords } from "@/lib/wordAnatomy";
 import content from "../../docs/content/roots-and-patterns.json";
@@ -69,7 +69,7 @@ function PatternDrill({ items, settings, now, reviewMode }: { items: Pattern[]; 
     setError(false);
     const grade: ReviewGrade = pattern.id === current.id ? "got-it" : "forgot";
     try {
-      await savePatternReview(reviewKey(current.id), grade, now, settings.city.timeZone);
+      await saveLearningReview(reviewKey(current.id), grade, now, settings.city.timeZone);
       setSelected(pattern.id);
     } catch { setError(true); }
     finally { setSaving(false); }

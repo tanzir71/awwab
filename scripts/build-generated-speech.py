@@ -1,0 +1,95 @@
+"""Build the offline spoken Arabic clips using a local Piper ONNX voice and ffmpeg."""
+
+import argparse
+import io
+import json
+from pathlib import Path
+import subprocess
+import wave
+
+from piper import PiperVoice
+
+
+ROOT = Path(__file__).resolve().parent.parent
+PHRASES = ROOT / "handovers/H2-languages-paths-arabic-help/data/umrah-phrases.json"
+CONTENT = ROOT / "docs/content"
+OUTPUT = ROOT / "public/packs"
+MODEL = "https://huggingface.co/vadimbelsky/arabic-emirati-female-piper/tree/cfe173969620e40be65b5dd8ed4d97d55a864325"
+
+
+def read(path):
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def write(path, data):
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def phrase_clips(phrases, variety):
+    for phrase in phrases:
+        slug = phrase["id"]
+        line = phrase[variety]["ar"]
+        if slug == "bus-to":
+            for place, name in {"madinah": "المدينة", "jeddah": "جدة", "airport": "المطار", "hotel": "الفندق"}.items():
+                yield f"{slug}-{place}", line.replace("{place}", name)
+        elif slug == "lost-family":
+            for relation, name in {"mother": "أمي", "father": "أبوي", "son": "ولدي", "daughter": "بنتي", "wife": "زوجتي", "husband": "زوجي"}.items():
+                gendered = line.replace("ضاع", "ضاعت") if variety == "saudi" and relation in ("mother", "daughter", "wife") else line
+                yield f"{slug}-{relation}", gendered.replace("{relation}", name)
+        else:
+            yield slug, line.replace("{n}", "").rstrip(" ؟?") if slug == "gate-number" else line
+            for suffix, key in [("speaker-female", "speakerFemale"), ("to-woman", "toFemale")]:
+                alternative = phrase.get("gender", {}).get(key, {}).get(variety)
+                if alternative:
+                    yield f"{slug}-{suffix}", alternative[0]
+    for number in range(1, 301):
+        yield f"number-{number}", str(number)
+
+
+def encode(voice, path, text):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    wav = io.BytesIO()
+    with wave.open(wav, "wb") as stream:
+        voice.synthesize_wav(text, stream)
+    result = subprocess.run(
+        ["ffmpeg", "-nostdin", "-loglevel", "error", "-i", "pipe:0", "-af",
+         "loudnorm=I=-16:TP=-1:LRA=7,adelay=150,apad=pad_dur=0.15", "-ac", "1", "-ar", "48000",
+         "-c:a", "libopus", "-b:a", "32k", "-f", "ogg", "pipe:1"],
+        input=wav.getvalue(), stdout=subprocess.PIPE, check=True,
+    )
+    if len(result.stdout) <= 500:
+        raise ValueError(f"Empty clip for {path.name}")
+    path.write_bytes(result.stdout)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("model", type=Path, help="Emirati female Piper model with its .onnx.json config")
+    args = parser.parse_args()
+    voice = PiperVoice.load(args.model)
+    units = read(CONTENT / "spoken-arabic.json")
+    prompts = {"ghayn": "غَيْن", "mim": "مِيم", "bi": "بِ", "bu": "بُ"}
+    prompts.update({f"sim-{i}": line["ar"] for i, line in enumerate(units["simDialogue"], start=1)})
+    prompts.update({f"sim-word-{i}": line["ar"] for i, line in enumerate(units["simWords"], start=1)})
+    prompts.update({f"sign-{unit['id']}": unit["sign"] for unit in units["units"]})
+    for slug, line in prompts.items():
+        encode(voice, OUTPUT / "study-speech" / f"{slug}.opus", line)
+
+    phrases = read(PHRASES)["phrases"]
+    bytes_total = 0
+    for variety in ("saudi", "msa"):
+        for slug, line in phrase_clips(phrases, variety):
+            path = OUTPUT / "phrases" / variety / "female" / f"{slug}.opus"
+            other = OUTPUT / "phrases" / "saudi" / "female" / path.name
+            if slug.startswith("number-") and variety == "msa":
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(other.read_bytes())
+            else:
+                encode(voice, path, line)
+            bytes_total += path.stat().st_size
+        print(f"Encoded {variety} phrase clips", flush=True)
+    write(CONTENT / "umrah-phrase-audio.json", {"version": 1, "bytes": bytes_total, "attribution": "Piper · Emirati Arabic voice", "source": MODEL, "generated": True, "voices": ["female"]})
+
+
+if __name__ == "__main__":
+    main()

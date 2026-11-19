@@ -2,12 +2,13 @@ import { asset } from "./config";
 import { audioCache } from "./audio";
 import { askPlaces, askRelations, askVarieties, askVoices, umrahPhrases, type AskPhrase, type AskVariety, type AskVoice } from "./umrahAsk";
 
-type AudioManifest = { version: 1; bytes: number; attribution: string };
+type AudioManifest = { version: 1; bytes: number; attribution: string; source?: string; generated?: boolean; voices?: AskVoice[] };
 const manifests = import.meta.glob<AudioManifest>("../../docs/content/umrah-phrase-audio.json", { eager: true, import: "default" });
 const supplied = Object.values(manifests)[0];
-export const reviewedAskAudio = supplied?.version === 1 && Number.isSafeInteger(supplied.bytes) && supplied.bytes > 0
+export const askAudioPack = supplied?.version === 1 && Number.isSafeInteger(supplied.bytes) && supplied.bytes > 0
   && typeof supplied.attribution === "string" && supplied.attribution.trim()
   ? supplied : undefined;
+export const packVoices = askAudioPack?.voices ?? askVoices;
 
 export function askClipIds(phrase: AskPhrase, options: { variety: AskVariety; speaker?: AskVoice | ""; toFemale?: boolean;
   gate?: number; place?: keyof typeof askPlaces; relation?: keyof typeof askRelations }) {
@@ -31,11 +32,11 @@ function recordings(variety: AskVariety) {
 }
 
 const clipPath = (variety: AskVariety, voice: AskVoice, id: string) => `packs/phrases/${variety}/${voice}/${id}.opus`;
-export const askPackPaths = () => askVarieties.flatMap(variety => askVoices.flatMap(voice => recordings(variety).map(id => clipPath(variety, voice, id))));
+export const askPackPaths = () => askVarieties.flatMap(variety => packVoices.flatMap(voice => recordings(variety).map(id => clipPath(variety, voice, id))));
 const absolute = (path: string) => new URL(asset(path), location.origin).href;
 
 export async function downloadAskAudio(onProgress: (done: number, total: number) => void) {
-  if (!reviewedAskAudio) throw new Error("The reviewed phrase pack is unavailable");
+  if (!askAudioPack) throw new Error("The phrase pack is unavailable");
   const cache = await caches.open(audioCache);
   const urls = askPackPaths().map(absolute);
   let next = 0;

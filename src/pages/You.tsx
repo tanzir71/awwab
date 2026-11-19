@@ -1,18 +1,19 @@
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Bell, BookOpen, Calendar, Compass, Download, Languages, Share2, Sparkles } from "lucide-react";
 import AppInstallPrompt from "@/components/AppInstallPrompt";
+import { CityForm } from "@/components/CityForm";
 import MosqueProgress from "@/components/MosqueProgress";
 import { ListLink, SectionNav } from "@/components/Surface";
 import { usePrayerLogs, useRecord } from "@/hooks/use-awwab";
 import { backup, defaults, getRecord, prayerStatistics, restoreBackup, updateSettings, type Settings } from "@/lib/storageService";
-import { cities, methodNames, type City, type PrayerMethod } from "@/lib/prayerServices";
+import { methodNames } from "@/lib/prayerServices";
 import { dateKey } from "@/lib/dates";
 import { downloadFile } from "@/lib/download";
 import { prayerReminders, saveCalendar, eventReminders } from "@/lib/calendarFile";
 import { calendarDefaults } from "@/lib/hijri";
 import { message as copy, useCopy } from "@/lib/copy";
-import { guideReference, prayerGuidePath } from "@/lib/prayerGuide";
+import { prayerGuidePath } from "@/lib/prayerGuide";
 import { textSizes } from "@/lib/languagePreferences";
 
 function Profile({ settings, now, desktop = false }: { settings: Settings; now: Date; desktop?: boolean }) {
@@ -42,7 +43,6 @@ function Profile({ settings, now, desktop = false }: { settings: Settings; now: 
     </section>
   </section>;
 }
-
 export function You({ settings, now, desktop }: { settings: Settings; now: Date; desktop: boolean }) {
   const { t } = useCopy();
   if (desktop) return <div className="settings-profile-workspace">
@@ -177,56 +177,4 @@ export function SettingsPage({ settings, now, panel, desktop }: { settings: Sett
       <a className="text-button" href="https://github.com/tanzir71/awwab">{t("settingsAboutProject")}</a></section><AppInstallPrompt /></>}
     {message && <p className="card soft" role="status">{message}</p>}
   </div>;
-}
-
-function CityForm({ initial, save }: { initial: Settings; save: (patch: Partial<Settings>) => Promise<void> }) {
-  const t = copy.bind(null, initial);
-  const [preset, setPreset] = useState(cities.some(item => item.name === initial.city.name && item.latitude === initial.city.latitude) ? initial.city.name : "");
-  const [city, setCity] = useState(initial.city);
-  const [error, setError] = useState("");
-  function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    try {
-      dateKey(new Date(), city.timeZone);
-      setError("");
-      void save({ city: { ...city, name: city.name.trim() }, method: data.get("method") as PrayerMethod,
-        school: data.get("school") as Settings["school"], prayerGuide: data.get("prayerGuide") === "hanafi" ? "hanafi" : "fard" });
-    } catch {
-      setError(t("settingsTimeZoneError"));
-    }
-  }
-  const patch = (values: Partial<City>) => setCity(current => ({ ...current, ...values }));
-  return <form className="card stack" onSubmit={submit}>
-    <label className="field">{t("settingsCity")}
-      <select value={preset} onChange={event => {
-        setPreset(event.target.value);
-        const selected = cities.find(item => item.name === event.target.value);
-        if (selected) setCity(selected);
-      }}>
-        {cities.map(item => <option key={item.name}>{item.name}</option>)}<option value="">{t("settingsCityManual")}</option>
-      </select>
-    </label>
-    {!preset && <>
-      <label className="field">{t("settingsCityName")}<input value={city.name} required maxLength={100} onChange={event => patch({ name: event.target.value })} /></label>
-      <div className="equal-row">
-        <label className="field">{t("settingsLatitude")}<input type="number" step="any" min="-90" max="90" required value={Number.isFinite(city.latitude) ? city.latitude : ""} onChange={event => patch({ latitude: event.target.valueAsNumber })} /></label>
-        <label className="field">{t("settingsLongitude")}<input type="number" step="any" min="-180" max="180" required value={Number.isFinite(city.longitude) ? city.longitude : ""} onChange={event => patch({ longitude: event.target.valueAsNumber })} /></label>
-      </div>
-      <label className="field">{t("settingsTimeZone")}<input value={city.timeZone} required onChange={event => patch({ timeZone: event.target.value.trim() })} /></label>
-    </>}
-    <label className="field">{t("settingsCalcMethod")}<select name="method" defaultValue={initial.method}>{Object.entries(methodNames).map(([id, label]) => <option value={id} key={id}>{label}</option>)}</select></label>
-    <label className="field">{t("settingsAsrCalc")}<select name="school" defaultValue={initial.school}>
-      <option value="hanafi">{t("prayerGuideHanafi")}</option><option value="shafi">{t("settingsCalcSchoolOther")}</option>
-    </select></label>
-    <label className="field">{t("prayerGuidePreference")}
-      <select name="prayerGuide" defaultValue={guideReference(initial)} aria-describedby="prayer-guide-preference-note">
-        <option value="hanafi">{t("prayerGuideHanafi")}</option><option value="fard">{t("prayerGuideFard")}</option>
-      </select>
-    </label>
-    <p id="prayer-guide-preference-note" className="small muted">{t("prayerGuidePreferenceNote")}</p>
-    {error && <p role="alert">{error}</p>}
-    <button className="action">{t("settingsPrayerSave")}</button>
-    <p className="muted small">{t("settingsPrayerLocal")}</p>
-  </form>;
 }

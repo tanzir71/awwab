@@ -85,7 +85,7 @@ export function saveWordReview(id: string, grade: ReviewGrade, now: Date, zone: 
   });
 }
 
-export function savePatternReview(id: string, grade: ReviewGrade, now: Date, zone: string) {
+export function saveLearningReview(id: string, grade: ReviewGrade, now: Date, zone: string) {
   return db.transaction("rw", db.records, () => writeReview(id, grades[grade], grade === "got-it", now, zone));
 }
 

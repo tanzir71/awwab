@@ -1,5 +1,11 @@
 {
   "samples": {
+    "placement:0": { "path": "packs/study-speech/ghayn.opus", "generated": true },
+    "placement:1": { "path": "packs/study-speech/bi.opus", "generated": true },
+    "placement:2": { "path": "packs/study-speech/mim.opus", "generated": true },
+    "placement:3": { "path": "packs/study-speech/bu.opus", "generated": true },
+    "1:1": { "path": "packs/audio/aaqib-azeez/1-1.mp3", "pack": "aaqib-1" },
+    "112:3": { "path": "packs/audio/aaqib-azeez/112-3.mp3", "pack": "aaqib-112" },
     "112:1": { "path": "packs/audio/aaqib-azeez/112-1.mp3", "pack": "aaqib-112" },
     "103:2": { "path": "packs/audio/aaqib-azeez/103-2.mp3", "pack": "aaqib-103" }
   }

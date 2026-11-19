@@ -8,6 +8,13 @@ Three features, designed in Figma first (page **H2 · Languages, learning paths 
 
 Seed data lives in [`data/`](data). Everything is draft content: it must pass native-speaker and scholar review before launch (see each doc).
 
+## Implementation status
+
+- Languages currently use the English and Bangla ICU catalogues. Preview builds also accept `?locale=en-XA` (expanded text) and `?locale=en-XB` (RTL) before the app’s hash route. The remaining locale packs, translation rights and reviewer sign-off are pending.
+- Read includes the nūn sākin and tanwīn lesson. Understand includes ten Grammar Foundations units and the Roots & Patterns lesson. Other curriculum units remain listed in their path outlines.
+- Speak includes twelve starter units built from the Saudi phrase set, with the full SIM-card dialogue and offline practice. Review of dialect, Bangla copy and generated pronunciation is still pending. Gulf, Modern Standard and later Speak levels need their own curriculum.
+- Ask in Arabic offers a downloadable generated Opus pack for both text varieties, with one Emirati synthetic voice. The second voice and native pronunciation review remain pending. The pack can be rebuilt with `python scripts/build-generated-speech.py <model.onnx>` using `piper-tts`, the [voice model and config](https://huggingface.co/vadimbelsky/arabic-emirati-female-piper/tree/cfe173969620e40be65b5dd8ed4d97d55a864325), and FFmpeg. The Quran examples use cited recitations where available.
+
 ## Hard rules (unchanged)
 No backend · fully offline after first load (language packs and audio packs are downloaded once and cached by the service worker) · tokens only · no container borders · equal-width siblings · every Arabic word opens Word anatomy · mercy-first copy · sources shown.
 

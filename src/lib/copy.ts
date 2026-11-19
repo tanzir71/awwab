@@ -1,4 +1,4 @@
-import { IntlMessageFormat } from "intl-messageformat";
+import { IntlMessageFormat, PART_TYPE } from "intl-messageformat";
 import { createContext, useContext, useMemo } from "react";
 import { prayerNames, prayerStatusNames } from "../types/Prayer";
 import { rakatNames } from "./prayerServices";
@@ -21,12 +21,17 @@ import { settingsMessages } from "./settings-copy";
 import { umrahPrepMessages } from "./umrah-prep-copy";
 import { askMessages } from "./umrah-ask-copy";
 import { pathsMessages } from "./paths-copy";
+import { tajweedMessages } from "./tajweed-copy";
+import { speakMessages } from "./speak-copy";
+import { pseudoLiteral, type PseudoLocale } from "./pseudoLocale";
 
-type CopySettings = Pick<Settings, "mode" | "language" | "wordChoices" | "nativeDigits">;
+type CopySettings = Pick<Settings, "mode" | "language" | "wordChoices" | "nativeDigits"> & { pseudoLocale?: PseudoLocale };
 export type MessageCatalog = Record<string, Record<Settings["language"], string | [string, string]>>;
 export const CopyContext = createContext<CopySettings>({ mode: "adult", language: "en" });
 
 const messages: MessageCatalog = {
+  ...speakMessages,
+  ...tajweedMessages,
   ...pathsMessages,
   ...askMessages,
   ...umrahPrepMessages,
@@ -307,19 +312,23 @@ const navMessages: Record<string, string> = {
 
 const formats = new Map<string, IntlMessageFormat<Record<string, string | number>>>();
 export function message(settings: CopySettings, id: string, values?: Record<string, string | number>) {
-  const draft = messages[id]?.[settings.language] ?? id;
-  const format = applyGlossary(typeof draft === "string" ? draft : draft[settings.mode === "maktab" ? 1 : 0], settings.language, settings.wordChoices);
-  const locale = formatLocale(settings);
+  const language = settings.pseudoLocale ? "en" : settings.language;
+  const draft = messages[id]?.[language] ?? id;
+  const format = applyGlossary(typeof draft === "string" ? draft : draft[settings.mode === "maktab" ? 1 : 0], language, settings.wordChoices);
+  const locale = formatLocale({ ...settings, language });
   const key = locale + ":" + format;
   if (!formats.has(key)) formats.set(key, new IntlMessageFormat<Record<string, string | number>>(format, locale));
-  return formats.get(key).format(values) as string;
+  const formatter = formats.get(key);
+  if (settings.pseudoLocale && messages[id]) return formatter.formatToParts(values).map(part =>
+    part.type === PART_TYPE.literal ? pseudoLiteral(part.value, settings.pseudoLocale) : part.value).join("");
+  return formatter.format(values) as string;
 }
 
 export function useCopy() {
-  const { mode, language, nativeDigits, wordChoices } = useContext(CopyContext);
+  const { mode, language, nativeDigits, wordChoices, pseudoLocale } = useContext(CopyContext);
   return useMemo(() => ({ language, locale: formatLocale({ language, nativeDigits }),
-    t: message.bind(null, { mode, language, nativeDigits, wordChoices }),
-  }), [mode, language, nativeDigits, wordChoices]);
+    t: message.bind(null, { mode, language, nativeDigits, wordChoices, pseudoLocale }),
+  }), [mode, language, nativeDigits, wordChoices, pseudoLocale]);
 }
 
 export function navigationLabel(settings: Settings, title: string) {

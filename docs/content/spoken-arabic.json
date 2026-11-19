@@ -1,0 +1,29 @@
+{
+  "units": [
+    { "id": "greetings", "title": ["Greetings & polite words", "শুভেচ্ছা ও ভদ্র কথা"], "phrases": ["excuse-me", "thank-you"], "sign": "أهلا وسهلا", "meaning": ["Welcome", "স্বাগতম"] },
+    { "id": "money", "title": ["Numbers & money", "সংখ্যা ও টাকা"], "phrases": ["how-much", "card-payment"], "sign": "نقدا فقط", "meaning": ["Cash only", "শুধু নগদ"] },
+    { "id": "directions", "title": ["Directions", "পথের নির্দেশনা"], "phrases": ["exit", "show-map"], "sign": "المخرج", "meaning": ["Exit", "বের হওয়ার পথ"] },
+    { "id": "sim", "title": ["Buying a SIM card", "সিম কার্ড কেনা"], "phrases": ["buy-sim", "sim-internet"], "sign": "شرائح واتصالات", "meaning": ["SIM cards & telecom", "সিম কার্ড ও টেলিযোগাযোগ"] },
+    { "id": "transport", "title": ["Taxi & bus", "ট্যাক্সি ও বাস"], "phrases": ["taxi-stand", "stop-here"], "sign": "موقف الحافلات", "meaning": ["Bus stop", "বাস স্টপ"] },
+    { "id": "food", "title": ["Food & water", "খাবার ও পানি"], "phrases": ["restaurant", "water"], "sign": "مطعم", "meaning": ["Restaurant", "রেস্তোরাঁ"] },
+    { "id": "health", "title": ["Health & help", "স্বাস্থ্য ও সাহায্য"], "phrases": ["pharmacy", "need-doctor"], "sign": "صيدلية", "meaning": ["Pharmacy", "ওষুধের দোকান"] },
+    { "id": "hotel", "title": ["Hotel", "হোটেল"], "phrases": ["key-broken", "wifi"], "sign": "الاستقبال", "meaning": ["Reception", "অভ্যর্থনা ডেস্ক"] },
+    { "id": "shopping", "title": ["Shopping", "কেনাকাটা"], "phrases": ["discount", "recharge"], "sign": "تخفيضات", "meaning": ["Sale", "মূল্যছাড়"] },
+    { "id": "time", "title": ["Time & days", "সময় ও দিন"], "phrases": ["checkout", "repeat"], "sign": "ساعات العمل", "meaning": ["Opening hours", "খোলা থাকার সময়"] },
+    { "id": "mosque", "title": ["At the mosque", "মসজিদে"], "phrases": ["nearest-mosque", "wudu"], "sign": "مكان الوضوء", "meaning": ["Wudu area", "ওজুর জায়গা"] },
+    { "id": "help", "title": ["Asking for help", "সাহায্য চাইতে"], "phrases": ["lost", "call-number"], "sign": "المفقودات", "meaning": ["Lost and found", "হারানো জিনিসের দপ্তর"] }
+  ],
+  "simDialogue": [
+    { "ar": "السلام عليكم، أبغى شريحة لو سمحت.", "tr": "as-salāmu ʿalaykum, abgha sharīḥa law samaḥt.", "meaning": ["Peace be upon you. I’d like a SIM card, please.", "আপনার ওপর শান্তি বর্ষিত হোক। দয়া করে একটি সিম কার্ড দিন।"] },
+    { "ar": "وعليكم السلام. تبغى باقة إنترنت؟", "tr": "wa ʿalaykum as-salām. tabgha bāgat internet?", "meaning": ["And peace be upon you. Do you want an internet package?", "আপনার ওপরও শান্তি বর্ষিত হোক। ইন্টারনেট প্যাকেজ চান?"] },
+    { "ar": "إيوه، كم سعرها؟", "tr": "aywa, kam siʿrha?", "meaning": ["Yes. How much is it?", "হ্যাঁ। এর দাম কত?"] },
+    { "ar": "بخمسين ريال. أبغى جوازك.", "tr": "bi-khamsīn riyāl. abgha jawāzak.", "meaning": ["Fifty riyals. I need your passport.", "পঞ্চাশ রিয়াল। আপনার পাসপোর্ট লাগবে।"] }
+  ],
+  "simWords": [
+    { "ar": "شريحة", "tr": "sharīḥa", "meaning": ["SIM card", "সিম কার্ড"], "root": "ش ر ح" },
+    { "ar": "أبغى", "tr": "abgha", "meaning": ["I want", "আমি চাই"] },
+    { "ar": "باقة", "tr": "bāga", "meaning": ["package, bundle", "প্যাকেজ"] },
+    { "ar": "سعر", "tr": "siʿr", "meaning": ["price", "দাম"] },
+    { "ar": "جواز", "tr": "jawāz", "meaning": ["passport", "পাসপোর্ট"], "root": "ج و ز" }
+  ]
+}

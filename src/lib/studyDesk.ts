@@ -1,5 +1,5 @@
 import { addDays, dateKey } from "./dates";
-import { patternPracticePath, patternReviewPrefix } from "./learningPaths";
+import { grammarPath, grammarReviewPrefix, pathUrl, patternPracticePath, patternReviewPrefix, phraseReviewPrefix, tajweedReviewPrefix } from "./learningPaths";
 import { isDue, type Reviews } from "./reviews";
 import { parseQaidaReview } from "./qaidaPractice";
 
@@ -40,6 +40,12 @@ export function reviewDestination(id?: string) {
   if (!id) return "/learn/surahs";
   if (/^\d+$/.test(id)) return `/learn/surahs/${id}?mode=recall`;
   if (id.startsWith(patternReviewPrefix)) return patternPracticePath;
+  if (id.startsWith(tajweedReviewPrefix)) return `${pathUrl("read", 3)}?review=${encodeURIComponent(id.slice(tajweedReviewPrefix.length))}`;
+  if (id.startsWith(grammarReviewPrefix)) return `${grammarPath}/${encodeURIComponent(id.slice(grammarReviewPrefix.length))}`;
+  if (id.startsWith(phraseReviewPrefix)) {
+    const [unit, word] = id.slice(phraseReviewPrefix.length).split(":");
+    return `/learn/speak/${encodeURIComponent(unit)}?review=${encodeURIComponent(word ?? "")}`;
+  }
   const qaida = parseQaidaReview(id);
   if (qaida) return `/learn/qaida/${qaida.lesson}?row=${qaida.row + 1}`;
   if (id.startsWith("letter:")) return "/learn/qaida";

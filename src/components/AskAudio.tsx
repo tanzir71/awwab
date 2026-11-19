@@ -3,7 +3,7 @@ import { DesignIcon } from "./DesignIcon";
 import { useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { updateRecord } from "@/lib/storageService";
-import { downloadAskAudio, playAskAudio, reviewedAskAudio } from "@/lib/umrahAskAudio";
+import { askAudioPack, downloadAskAudio, packVoices, playAskAudio } from "@/lib/umrahAskAudio";
 import type { askDefaults } from "@/lib/umrahAsk";
 
 const packKey = "umrah-ask-audio";
@@ -15,18 +15,19 @@ export function AskAudioPack({ desktop = false }: { desktop?: boolean }) {
   const [progress, setProgress] = useState<{ done: number; total: number }>();
   const [failed, setFailed] = useState(false);
   const working = Boolean(progress);
-  const ready = version === reviewedAskAudio?.version;
-  if (!reviewedAskAudio) return desktop ? <span className="chip">{t("umrahPrepAudioPending")}</span> : null;
+  const ready = version === askAudioPack?.version;
+  if (!askAudioPack) return desktop ? <span className="chip">{t("umrahPrepAudioPending")}</span> : null;
 
   return <div className={desktop ? "ask-pack-desktop" : "card ask-pack compact-stack"}>
     {!desktop && <h2>{t("askHome")}</h2>}
-    <p className="small muted">{t("fileSizeMB", { size: reviewedAskAudio.bytes / 1_000_000 })} · {reviewedAskAudio.attribution}</p>
+    <p className="small muted">{t("fileSizeMB", { size: askAudioPack.bytes / 1_000_000 })} · {askAudioPack.source
+      ? <a href={askAudioPack.source} rel="noreferrer">{askAudioPack.generated ? t("generatedSpeech") : askAudioPack.attribution}</a> : askAudioPack.attribution}</p>
     <button type="button" className="action soft" disabled={working} onClick={() => {
       if (working) return;
       setFailed(false);
       setProgress({ done: 0, total: 1 });
       void downloadAskAudio((done, total) => setProgress({ done, total })).then(() =>
-        updateRecord(packKey, 0, () => reviewedAskAudio.version)).catch(() => setFailed(true)).finally(() => setProgress(undefined));
+        updateRecord(packKey, 0, () => askAudioPack.version)).catch(() => setFailed(true)).finally(() => setProgress(undefined));
     }}>{t(working ? "umrahPrepDownloading" : ready ? "askRepairPack" : "askDownloadAudio")}</button>
     {progress && <progress value={progress.done} max={progress.total} aria-label={t("umrahPrepDownloading")} />}
     {failed && <p className="small" role="alert">{t("askAudioError")}</p>}
@@ -42,8 +43,8 @@ export function AskAudioButton({ ids, settings, label, icon = true, light = fals
   const [status, setStatus] = useState("");
   const [playing, setPlaying] = useState(false);
   const id = useId();
-  const pending = !reviewedAskAudio || version !== reviewedAskAudio.version;
-  const description = status || (pending ? t(reviewedAskAudio ? "askDownloadFirst" : "askAudioPending") : "");
+  const pending = !askAudioPack || version !== askAudioPack.version;
+  const description = status || (pending ? t(askAudioPack ? "askDownloadFirst" : "askAudioPending") : askAudioPack?.generated ? t("generatedSpeech") : "");
 
   useEffect(() => () => { if (current.current) void current.current.close().catch(() => {}); }, []);
 
@@ -60,7 +61,8 @@ export function AskAudioButton({ ids, settings, label, icon = true, light = fals
     setPlaying(true);
     setStatus(used ? "" : t("askVolumeHint"));
     if (!used) void updateRecord(volumeKey, false, () => true).catch(() => {});
-    void context.resume().then(() => playAskAudio(context, ids, settings.variety, settings.voice, settings.slow))
+    const voice = packVoices.includes(settings.voice) ? settings.voice : packVoices[0];
+    void context.resume().then(() => playAskAudio(context, ids, settings.variety, voice, settings.slow))
       .catch(() => { if (current.current === context) setStatus(t("askAudioError")); })
       .finally(() => {
         if (current.current === context) {

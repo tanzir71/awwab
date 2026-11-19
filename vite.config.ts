@@ -9,6 +9,8 @@ import { wordAnatomy } from "./src/lib/wordAnatomy";
 import returnCopy from "./docs/content/return.json";
 import anatomySample from "./docs/content/word-anatomy.sample.json";
 import onboarding from "./docs/content/onboarding.json";
+import spoken from "./docs/content/spoken-arabic.json";
+import tajweed from "./docs/content/tajweed-nun.json";
 
 const base = "/awwab/";
 
@@ -68,6 +70,9 @@ export default defineConfig(({ mode }) => ({
         globPatterns: [
           "app/**/*.{html,webmanifest,png,svg,otf,woff2,mjs}", "assets/**/*", "design/**/*", "data/**/*", "packs/audio/index.json",
           ...Object.values(onboarding.samples).map(item => item.path),
+          "packs/study-speech/*.opus",
+          ...spoken.units.flatMap(unit => unit.id === "sim" ? [] : unit.phrases.map(id => `packs/phrases/saudi/female/${id}.opus`)),
+          ...tajweed.samples.filter(sample => sample.audio).map(sample => `packs/audio/aaqib-azeez/${sample.chapter}-${sample.ayah}.mp3`),
         ],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         modifyURLPrefix: { "": base },
