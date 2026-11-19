@@ -1,11 +1,23 @@
-import type { Prayer } from "@/types/Prayer";
+import type { Prayer, RakatGroup } from "@/types/Prayer";
 import type { Settings } from "@/lib/storageService";
 import { message, rakatLabel } from "@/lib/copy";
 import { duration, formatTime } from "@/lib/dates";
 import { jamaatForPrayer, type MosquePlan } from "@/lib/mosques";
+import { guideRakats } from "@/lib/prayerGuide";
 import { DesignIcon } from "./DesignIcon";
 
 const icons = { upcoming: "clock1", now: "clock", done: "check", late: "check", missed: "ret", qada: "check" };
+
+export function RakatCards({ groups, settings }: { groups: RakatGroup[]; settings: Settings }) {
+  const t = message.bind(null, settings);
+  const number = new Intl.NumberFormat(settings.language);
+  return <div className="rakat-grid" data-count={groups.length}>
+    {groups.map((group, i) => <div data-fard={group.type === "fard"} key={i}>
+      <strong><span className="rakat-number">{number.format(group.count)}</span> {rakatLabel(settings, group.type)}</strong>
+      <small>{t(group.type === "fard" ? "rakatsObligatory" : group.type === "witr" ? "rakatsWajib" : "rakatsOptional")}</small>
+    </div>)}
+  </div>;
+}
 
 export default function PrayerTimeline({ prayers, settings, now, mosques, onAction }: {
   prayers: Prayer[]; settings: Settings; now: Date; mosques?: MosquePlan; onAction: (prayer: Prayer) => void;
@@ -18,7 +30,7 @@ export default function PrayerTimeline({ prayers, settings, now, mosques, onActi
     {prayers.map(prayer => {
       const available = Number.isFinite(prayer.starts.valueOf());
       const jamaat = mosques && jamaatForPrayer(prayer, zone, mosques);
-      const rakats = prayer.rakats.map(rakat => `${number.format(rakat.count)} ${rakatLabel(settings, rakat.type)}`).join(" → ");
+      const rakats = guideRakats(prayer.rakats, settings).map(rakat => `${number.format(rakat.count)} ${rakatLabel(settings, rakat.type)}`).join(" → ");
       const status = prayer.status === "now" ? t("prayerRowNow", { time: duration(prayer.ends.valueOf() - now.valueOf(), settings.language) }) : t(prayer.status);
       const detail = prayer.status === "missed" ? t("missedEncouragement") : [
         prayer.status !== "upcoming" || !available ? status : undefined,

@@ -5,6 +5,7 @@ import { addDays, duration, formatDay, formatTime } from "@/lib/dates";
 import { eventDisplayDates, hijriOn, monthStart, type CalendarEvent, type CalendarSettings } from "@/lib/hijri";
 import { jamaatForPrayer, mosqueForPrayer, type MosquePlan } from "@/lib/mosques";
 import { prayerDay } from "@/lib/prayerServices";
+import { guideRakats } from "@/lib/prayerGuide";
 import { finishQada, qadaBalances, qadaDefaults } from "@/lib/qada";
 import { countKnownQuranWords } from "@/lib/quran";
 import { isDue, type Reviews } from "@/lib/reviews";
@@ -109,7 +110,7 @@ export function TodayDashboard({ settings, now, day, prayers, current, next, log
             <tbody>{prayers.map(prayer => {
               const mosque = mosqueForPrayer(day, prayer.id, mosques);
               const time = jamaatForPrayer(prayer, zone, mosques)?.time;
-              const rakats = prayer.rakats.map(item => {
+              const rakats = guideRakats(prayer.rakats, settings).map(item => {
                 const name = rakatLabel(settings, item.type);
                 return `${number.format(item.count)}${locale === "en" ? name[0] : ` ${name}`}`;
               }).join(" · ");

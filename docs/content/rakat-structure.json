@@ -117,5 +117,12 @@
    }
   ]
  },
- "fardRakahGuide": "Rakʿah 1–2: Al-Fātiḥa + a short surah; first sitting after rakʿah 2 (Tashahhud) in 3/4-rakʿah prayers; rakʿah 3–4: Al-Fātiḥa only; final sitting: Tashahhud → Ṣalawāt → duʿāʾ → Salām."
+ "fardRakahGuide": {
+  "withAdditionalSurahThrough": 2,
+  "firstSittingAfter": 2,
+  "recitationSource": { "collection": "Bukhari", "number": 776, "grade": "Sahih", "url": "https://sunnah.com/bukhari:776" },
+  "firstSittingSource": { "collection": "Bukhari", "number": 829, "grade": "Sahih", "url": "https://sunnah.com/bukhari:829" },
+  "finalSittingSource": { "collection": "Bukhari", "number": 831, "grade": "Sahih", "url": "https://sunnah.com/bukhari:831" },
+  "summary": "Rakʿah 1–2: Al-Fātiḥa + a short surah; first sitting after rakʿah 2 (Tashahhud) in 3/4-rakʿah prayers; rakʿah 3–4: Al-Fātiḥa only; final sitting: Tashahhud → Ṣalawāt → duʿāʾ → Salām."
+ }
 }

@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Bell, BookOpen, Calendar, Compass, Download, Share2, Sparkles } from "lucide-react";
 import AppInstallPrompt from "@/components/AppInstallPrompt";
 import MosqueProgress from "@/components/MosqueProgress";
@@ -12,6 +12,7 @@ import { downloadFile } from "@/lib/download";
 import { prayerReminders, saveCalendar, eventReminders } from "@/lib/calendarFile";
 import { calendarDefaults } from "@/lib/hijri";
 import { message as copy } from "@/lib/copy";
+import { guideReference, prayerGuidePath } from "@/lib/prayerGuide";
 
 export function You({ settings, now }: { settings: Settings; now: Date }) {
   const t = copy.bind(null, settings);
@@ -51,6 +52,7 @@ export function You({ settings, now }: { settings: Settings; now: Date }) {
 export function SettingsPage({ settings, now, panel }: { settings: Settings; now: Date; panel: string }) {
   const t = copy.bind(null, settings);
   const title = ({ learning: t("learningSettings"), prayer: t("prayerTimes"), hijri: "Hijri date", reminders: t("reminders"), data: "Your data" })[panel];
+  const [search] = useSearchParams();
   const [message, setMessage] = useState("");
   const calendar = useRecord("calendar", calendarDefaults);
   const [file, setFile] = useState<File>();
@@ -69,7 +71,7 @@ export function SettingsPage({ settings, now, panel }: { settings: Settings; now
 
   if (!title) return <Link to="/you">Go to settings</Link>;
   return <div className="stack">
-    <SectionNav title={title} back="/you" />
+    <SectionNav title={title} back={(panel === "prayer" && prayerGuidePath(search.get("fromPrayer"))) || "/you"} />
     {panel === "learning" && <section className="card stack" id="script">
       <label className="field">{t("learningMode")}
         <select value={settings.mode} onChange={event => {
@@ -134,6 +136,7 @@ export function SettingsPage({ settings, now, panel }: { settings: Settings; now
 }
 
 function CityForm({ initial, save }: { initial: Settings; save: (patch: Partial<Settings>) => Promise<void> }) {
+  const t = copy.bind(null, initial);
   const [preset, setPreset] = useState(cities.some(item => item.name === initial.city.name && item.latitude === initial.city.latitude) ? initial.city.name : "");
   const [city, setCity] = useState(initial.city);
   const [error, setError] = useState("");
@@ -143,7 +146,8 @@ function CityForm({ initial, save }: { initial: Settings; save: (patch: Partial<
     try {
       dateKey(new Date(), city.timeZone);
       setError("");
-      void save({ city: { ...city, name: city.name.trim() }, method: data.get("method") as PrayerMethod, school: data.get("school") as Settings["school"] });
+      void save({ city: { ...city, name: city.name.trim() }, method: data.get("method") as PrayerMethod,
+        school: data.get("school") as Settings["school"], prayerGuide: data.get("prayerGuide") === "hanafi" ? "hanafi" : "fard" });
     } catch {
       setError("Enter a time zone such as Asia/Dhaka or Europe/London.");
     }
@@ -171,6 +175,12 @@ function CityForm({ initial, save }: { initial: Settings; save: (patch: Partial<
     <label className="field">Asr calculation<select name="school" defaultValue={initial.school}>
       <option value="hanafi">Hanafi</option><option value="shafi">Shafiʿi, Maliki and Hanbali</option>
     </select></label>
+    <label className="field">{t("prayerGuidePreference")}
+      <select name="prayerGuide" defaultValue={guideReference(initial)} aria-describedby="prayer-guide-preference-note">
+        <option value="hanafi">{t("prayerGuideHanafi")}</option><option value="fard">{t("prayerGuideFard")}</option>
+      </select>
+    </label>
+    <p id="prayer-guide-preference-note" className="small muted">{t("prayerGuidePreferenceNote")}</p>
     {error && <p role="alert">{error}</p>}
     <button className="action">Save prayer settings</button>
     <p className="muted small">Times use the selected city and stay on your device. Local mosque timetables can differ.</p>

@@ -8,6 +8,7 @@ import { SectionNav } from "@/components/Surface";
 import { useDesktop, useRecord } from "@/hooks/use-awwab";
 import { dateKey } from "@/lib/dates";
 import { asset } from "@/lib/config";
+import { prayerGuidePath } from "@/lib/prayerGuide";
 import { grades, isDue, reviewCard, type ReviewGrade, type Reviews } from "@/lib/reviews";
 import { useCopy } from "@/lib/copy";
 import { studyNames, studySearchTerm } from "@/lib/study-copy";
@@ -111,7 +112,7 @@ function SurahStudy({ surah, settings }: { surah: typeof fullChapters[number]; s
   return <div className="study-workspace">
     <aside className="desktop-queue stack" aria-label={t("surahList")}><h2>{t("surahsForSalah")}</h2><SurahList selected={surah.number} /></aside>
     <div className="stack">
-      <SectionNav title={t("chapterHeading", { name, number: surah.number })} back="/learn/surahs" />
+      <SectionNav title={t("chapterHeading", { name, number: surah.number })} back={prayerGuidePath(params.get("fromPrayer")) ?? "/learn/surahs"} />
       <div className="equal-row study-tabs" role="group" aria-label={t("studyMode")}>
         {studyModes.map(item => <button className={`action ${mode === item ? "light" : "plain"}`} aria-pressed={mode === item} key={item} onClick={() => { setMode(item); setSaved(false); }}>{t(item)}</button>)}
       </div>
@@ -267,9 +268,10 @@ const salahGlosses: Record<string, string[]> = {
 
 export function SalahWords({ settings }: { settings: Settings }) {
   const { language, t } = useCopy();
+  const [params] = useSearchParams();
   const known = useRecord<string[]>("words-known", []);
   return <div className="stack">
-    <SectionNav title={t("understandSalah")} back="/learn" />
+    <SectionNav title={t("understandSalah")} back={prayerGuidePath(params.get("fromPrayer")) ?? "/learn"} />
     <section className="card night compact-stack"><h2>{t("fatihaWordByWord")}</h2><p className="muted">{t("markFamiliarHint")}</p></section>
     {quranText[1].map(verse => {
       const glosses = salahGlosses[verse.ref];

@@ -97,6 +97,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
     ? t("nextPrayerIn", { name: t(next.id), time: duration(next.starts.valueOf() - now.valueOf(), settings.language) }) : t("prayerTimes");
   const fullscreen = location.pathname.startsWith("/umrah") || location.pathname.startsWith("/print/");
   const today = location.pathname === "/today";
+  const prayerGuide = location.pathname.startsWith("/today/guide/");
   useLayoutEffect(() => {
     selectWord();
     setSearchOpen(false);
@@ -142,7 +143,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
         </div>
       </>}
     </nav>}
-    <main className="app-main" id="app-main" tabIndex={-1} data-page={today ? "today" : undefined}>
+    <main className="app-main" id="app-main" tabIndex={-1} data-page={prayerGuide ? "prayer-guide" : today ? "today" : undefined}>
       {!fullscreen && !(today && settings.mode === "maktab") && <header className="topbar">
         <div>{today ? <h1>{title}</h1> : <h2>{title}</h2>}<p className="small muted">{date} · {hijriLabel(day, settings.hijriAdjust, calendar.anchors)}{today && ` · ${settings.city.name}`}</p></div>
         <Link className="chip night" to="/today">{nextPrayer}</Link>
@@ -158,7 +159,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
         <WordPanel desktop={desktop} settings={settings} />
       </div>
     </main>
-    {!fullscreen && <Tabs settings={settings} />}
+    {!fullscreen && !prayerGuide && <Tabs settings={settings} />}
     <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
       <DialogContent className="awwab-dialog" aria-describedby={undefined}>
         <DialogTitle>{t("searchApp")}</DialogTitle>

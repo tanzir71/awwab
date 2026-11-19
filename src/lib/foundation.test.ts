@@ -6,6 +6,8 @@ import { cities, currentPrayerSchedule, prayerDay, schedule } from "./prayerServ
 import { db, backup, logPrayer, migrateLegacy, prayerStatistics, restoreBackup, updateSettings } from "./storageService";
 import { calendarFile } from "./calendarFile";
 import { estimateQada, finishQada } from "./qada";
+import { guideReference, prayerGuide } from "./prayerGuide";
+import { reviewCard } from "./reviews";
 
 const dhaka = cities[0];
 const day = "2026-11-19";
@@ -37,6 +39,28 @@ describe("daily prayer times", () => {
   });
 });
 
+describe("prayer guide", () => {
+  it("builds the right first and final sittings for two-, three- and four-rakʿah prayers", () => {
+    const settings = { school: "hanafi" } as const;
+    const result = (["fajr", "dhuhr", "asr", "maghrib", "isha"] as const).map(prayer => prayerGuide(prayer, settings, {}));
+    expect(result.map(guide => guide.total)).toEqual([4, 12, 8, 7, 17]);
+    expect(result.map(guide => guide.fardCount)).toEqual([2, 4, 4, 3, 4]);
+    expect(result[0].steps.map(step => step.sitting)).toEqual([undefined, "final"]);
+    expect(result[3].steps.map(step => step.sitting)).toEqual([undefined, "first", "final"]);
+    expect(result[4].steps.map(step => step.sitting)).toEqual([undefined, "first", undefined, "final"]);
+    expect(result[2].steps.map(step => step.suggestion?.number)).toEqual([108, 103, undefined, undefined]);
+  });
+
+  it("prefers solid surahs and keeps the guide preference independent from calculation", () => {
+    const solid = { ...reviewCard(undefined, "got-it", times.fajr), bucket: "manzil" } as const;
+    const guide = prayerGuide("asr", { school: "hanafi", prayerGuide: "fard" }, { 1: solid, 112: solid, 106: solid });
+    expect(guide.groups).toEqual([{ type: "fard", count: 4, recitation: "silent" }]);
+    expect(guide.steps.map(step => step.suggestion?.number)).toEqual([112, 106, undefined, undefined]);
+    expect(guideReference({ school: "shafi" })).toBe("fard");
+    expect(guideReference({ school: "shafi", prayerGuide: "hanafi" })).toBe("hanafi");
+  });
+});
+
 describe("device prayer records", () => {
   beforeEach(async () => {
     await db.prayers.clear();
@@ -60,6 +84,14 @@ describe("device prayer records", () => {
     expect((await db.records.get("settings")).value).toMatchObject({ mode: "maktab" });
     await expect(restoreBackup("{}")).rejects.toThrow();
     expect(await db.prayers.count()).toBe(1);
+  });
+
+  it("preserves a saved guide preference separately from Asr calculation in backups", async () => {
+    await updateSettings({ school: "shafi", prayerGuide: "hanafi" });
+    const file = await backup();
+    await db.records.clear();
+    await restoreBackup(file);
+    expect((await db.records.get("settings")).value).toMatchObject({ school: "shafi", prayerGuide: "hanafi" });
   });
 
   it("ignores a future event and records a make-up without double-counting", async () => {

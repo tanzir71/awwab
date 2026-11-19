@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { CalendarDays } from "lucide-react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { ArabicText } from "@/components/ArabicText";
 import { DesignIcon } from "@/components/DesignIcon";
-import PrayerTimeline from "@/components/PrayerTimeline";
+import PrayerTimeline, { RakatCards } from "@/components/PrayerTimeline";
 import { SectionHeading, SectionNav } from "@/components/Surface";
 import { TodayDashboard, type TodayPracticeItem } from "@/components/TodayDashboard";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -15,11 +15,11 @@ import { currentPrayerSchedule, methodNames, prayerDay } from "@/lib/prayerServi
 import { jamaatForPrayer, mosqueDefaults } from "@/lib/mosques";
 import { db, logPrayer, type Settings } from "@/lib/storageService";
 import { isDue, type Reviews } from "@/lib/reviews";
-import { message, rakatLabel } from "@/lib/copy";
+import { message } from "@/lib/copy";
+import { guideRakats } from "@/lib/prayerGuide";
 import { studyNames } from "@/lib/study-copy";
-import { prayerIds, prayerNames, prayerStatusNames, type Prayer, type RakatGroup } from "@/types/Prayer";
+import { prayerStatusNames, type Prayer } from "@/types/Prayer";
 import hadith from "../../docs/content/hadith-curated.json";
-import rakat from "../../docs/content/rakat-structure.json";
 import qaida from "../../docs/content/qaida-lessons.json";
 import surahs from "../../docs/content/surahs-for-salah.json";
 
@@ -27,17 +27,6 @@ const prayerArabic = { fajr: "الفجر", dhuhr: "الظهر", asr: "العصر
 const statusSaved = ["done", "late", "qada"];
 export const istighfar = "أَسْتَغْفِرُ ٱللَّهَ";
 const collectionNames = { bukhari: "Bukhari", muslim: "Muslim", tirmidhi: "Tirmidhi" };
-
-export function RakatCards({ groups, settings }: { groups: RakatGroup[]; settings: Settings }) {
-  const t = message.bind(null, settings);
-  const number = new Intl.NumberFormat(settings.language);
-  return <div className="rakat-grid" data-count={groups.length}>
-    {groups.map((group, i) => <div data-fard={group.type === "fard"} key={i}>
-      <strong><span className="rakat-number">{number.format(group.count)}</span> {rakatLabel(settings, group.type)}</strong>
-      <small>{t(group.type === "fard" ? "rakatsObligatory" : group.type === "witr" ? "rakatsWajib" : "rakatsOptional")}</small>
-    </div>)}
-  </div>;
-}
 
 export default function Today({ settings, now, desktop }: { settings: Settings; now: Date; desktop: boolean }) {
   const logs = usePrayerLogs();
@@ -123,7 +112,7 @@ export default function Today({ settings, now, desktop }: { settings: Settings; 
       <div className="with-icon prayer-hero-title"><h2>{t(headline.id)}</h2><ArabicText text={prayerArabic[headline.id]} /></div>
       {(!maktabDesktop || !hasTimes) && <p className="prayer-remaining">{hasTimes ? t(current ? "prayerRemaining" : "prayerStarts", { time: countdown, count: fard?.count ?? 0 }) : t("prayerUnavailable")}</p>}
       {jamaat && <Link to="/plan/mosques" className="chip jamaat"><DesignIcon size={16} name={`${group}-pin1`} /> <span>{t("jamaat", jamaat)}</span></Link>}
-      <RakatCards groups={headline.rakats} settings={settings} />
+      <RakatCards groups={guideRakats(headline.rakats, settings)} settings={settings} />
       <div className="equal-row">
         {current && !statusSaved.includes(current.status)
           ? <button className="action gold" onClick={() => void record(current, "log")}>{t("iPrayed", { name: t(current.id) })}</button>
@@ -195,39 +184,6 @@ export default function Today({ settings, now, desktop }: { settings: Settings; 
       </DialogContent>}
     </Dialog>
   </>;
-}
-
-export function PrayerGuide({ settings }: { settings: Settings }) {
-  const { id } = useParams();
-  const reviews = useRecord<Reviews>("reviews", {});
-  const prayer = prayerIds.find(item => item === id);
-  if (!prayer) return <Link to="/today">Back to Today</Link>;
-  const groups = rakat.prayers[prayer];
-  const count = groups.find(group => group.type === "fard").count;
-  const solid = surahs.surahs.filter(surah => surah.number !== 1 && reviews[surah.number]?.bucket === "manzil");
-  return <div className="stack">
-    <SectionNav title={`How to pray ${prayerNames[prayer]}`} back="/today" />
-    <section className="card night compact-stack">
-      <p className="caption">{groups.reduce((total, group) => total + group.count, 0)} rakʿāt in total</p>
-      <RakatCards groups={groups} settings={settings} />
-      <p>Short on time? Start with the {count} Fard.</p>
-    </section>
-    <p className="muted"><span className="chip soft">Hanafi reference</span> Scholars differ on details, including Witr.</p>
-    <section className="compact-stack">
-      <h2>The {count} Fard, rakʿah by rakʿah</h2>
-      {Array.from({ length: count }, (_, i) => <div className="list-row" key={i}>
-        <span className="icon-box">{i + 1}</span>
-        <span><strong>{i < 2 ? "Al-Fātiḥa and a short surah" : "Al-Fātiḥa only"}{i + 1 === count ? ", then final sitting" : i === 1 ? ", then sit" : ""}</strong>
-          <small>{i + 1 === count ? "Tashahhud → Ṣalawāt → duʿāʾ → Salām" : i === 1 ? "First sitting: Tashahhud" : i === 0 ? `Try ${solid[0]?.transliteration ?? "Al-Kawthar"}` : "Continue to the next rakʿah"}</small></span>
-      </div>)}
-    </section>
-    <section className="card tint compact-stack">
-      <h2>Lost count mid-prayer?</h2>
-      <p>If you’re unsure whether you prayed three or four, build on what you’re sure of. The narration describes two prostrations before salām. Scholars differ on how to apply this guidance.</p>
-      <a className="small" href="https://sunnah.com/muslim:571a">Ṣaḥīḥ Muslim 571a · Sahih</a>
-    </section>
-    <div className="equal-row"><Link className="action" to="/learn/surahs/1?mode=listen">Practise with audio</Link><Link className="action soft" to="/learn/salah">Word by word</Link></div>
-  </div>;
 }
 
 export function PrayerWeek({ settings, now }: { settings: Settings; now: Date }) {

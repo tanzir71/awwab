@@ -3,11 +3,13 @@ import { z } from "zod";
 import { prayerIds, type PrayerLog, type Prayer, type PrayerId } from "../types/Prayer";
 import { addDays, dateKey } from "./dates";
 import { cities, methodNames, type AsrSchool, type City, type PrayerMethod } from "./prayerServices";
+import { guideReferences, type GuideReference } from "./prayerGuide";
 
 export interface Settings {
   mode: "adult" | "maktab";
   script: "indopak" | "uthmani";
   school: AsrSchool;
+  prayerGuide?: GuideReference;
   method: PrayerMethod;
   city: City;
   hijriAdjust: number;
@@ -86,6 +88,7 @@ const settingsSchema = z.object({
   mode: z.enum(["adult", "maktab"]),
   script: z.enum(["indopak", "uthmani"]),
   school: z.enum(["hanafi", "shafi"]),
+  prayerGuide: z.enum(guideReferences).optional(),
   method: z.custom<PrayerMethod>(value => typeof value === "string" && Object.prototype.hasOwnProperty.call(methodNames, value)),
   city: citySchema,
   hijriAdjust: z.number().int().min(-2).max(2),

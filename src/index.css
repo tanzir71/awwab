@@ -134,6 +134,7 @@ progress::-moz-progress-bar { background: var(--control-primary); }
 .prayer-hero .jamaat img { flex: none; }
 .prayer-hero .action.light, .today-print .action.light, .today-print-actions .action { font: var(--type-body-strong); padding: 14px 20px; }
 .rakat-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+.rakat-grid[data-count="1"] { grid-template-columns: minmax(0, 1fr); }
 .rakat-grid > div { display: grid; padding: 10px 12px; background: var(--c-overlay-on-night); border-radius: var(--r-control); align-content: start; }
 .rakat-grid[data-count="3"] { grid-template-columns: repeat(3,minmax(0,1fr)); }
 .rakat-grid > [data-fard="true"] { background: var(--c-accent); color: var(--c-on-primary); }
@@ -284,6 +285,37 @@ progress::-moz-progress-bar { background: var(--control-primary); }
 .word-side .row-between { margin-top: 32px; }
 .section-nav { display: flex; align-items: center; gap: 12px; }
 .section-nav h1 { flex: 1; text-align: center; font: var(--type-title); }
+.prayer-guide { display: grid; gap: 16px; width: min(100%, 640px); margin-inline: auto; }
+.prayer-guide .section-nav { min-height: 56px; gap: 8px; margin-inline: -10px; }
+.prayer-guide .section-nav .icon-button { position: relative; isolation: isolate; background: transparent; box-shadow: none; }
+.prayer-guide .section-nav .icon-button::before { content: ""; position: absolute; inset: 2px; z-index: -1; border-radius: var(--r-pill); background: var(--c-surface); box-shadow: var(--shadow-card); }
+.guide-content { display: grid; gap: 14px; }
+.guide-summary { display: grid; gap: 10px; box-shadow: none; }
+.guide-summary h2 { margin: 0; }
+.guide-summary > p { font: var(--type-small); opacity: .85; }
+.guide-summary .rakat-grid strong { font: var(--type-title); }
+.guide-summary .rakat-grid small { color: var(--c-night-muted); font: var(--type-caption); letter-spacing: var(--tracking-caption); text-transform: uppercase; }
+.guide-summary .rakat-grid [data-fard="true"] small { color: inherit; }
+.guide-reference { position: relative; display: flex; align-items: center; gap: 6px; min-height: 30px; color: var(--interactive-ink); }
+.guide-reference::before { content: ""; position: absolute; inset: -7px 0; }
+.guide-reference .chip { flex: none; padding: 6px 12px; }
+.guide-rakahs { display: grid; gap: 12px; }
+.guide-rakahs h2 { margin: 0; }
+.guide-rakahs ol { margin: 0; padding: 0; }
+.guide-rakah .icon-box { width: 36px; height: 36px; flex-basis: 36px; border-radius: var(--r-pill); font: var(--type-title); }
+.guide-rakah[data-final="true"] .icon-box { background: var(--control-primary); color: var(--c-on-primary); }
+.guide-rakah strong { font: var(--type-body-strong); }
+.guide-rakah small { margin-top: 2px; }
+.guide-rakah small a { color: inherit; }
+.guide-rakah small a:hover { text-decoration: underline; text-underline-offset: .16em; }
+.guide-lost { display: grid; gap: 6px; box-shadow: none; }
+.guide-lost h2 { font: var(--type-title); margin: 0; }
+.guide-citation { display: inline-flex; justify-self: start; align-items: center; min-height: 24px; }
+.guide-citation .chip { font: var(--type-caption); letter-spacing: var(--tracking-caption); padding: 3px 8px; }
+.guide-actions .action { padding: 14px 12px; font: var(--type-body-strong); }
+.guide-source-list { display: flex; flex-wrap: wrap; gap: 2px 14px; }
+.guide-source-list a { align-content: center; min-height: 44px; }
+.guide-audio h2 { margin: 0; }
 .masjid { position: relative; width: min(290px, 100%); aspect-ratio: 2 / 1; margin: 2px auto 12px; }
 .masjid .foundation { position: absolute; inset: auto 2% 0; height: 7%; border-radius: var(--r-pill); background: var(--c-night-muted); }
 .masjid .wall { position: absolute; inset: auto 22% 6% 22%; height: 39%; border-radius: 7px 7px 0 0; background: var(--c-on-night); }
@@ -413,6 +445,7 @@ table tbody tr:nth-child(even) { background: var(--c-surface-alt); }
 }
 @media (max-width: 1023px) {
   [data-page="today"] .app-content { padding-top: calc(8px + env(safe-area-inset-top)); }
+  [data-page="prayer-guide"] .app-content { padding-top: env(safe-area-inset-top); padding-bottom: calc(28px + env(safe-area-inset-bottom)); }
 }
 @media (min-width: 1360px) {
   .anatomy-open .study-workspace { grid-template-columns: minmax(165px,.7fr) minmax(300px,1.5fr); }

@@ -13,12 +13,12 @@ export function ListLink({ to, icon, title, detail }: {
   </Link>;
 }
 
-export function SectionNav({ title, back }: { title: string; back: string }) {
+export function SectionNav({ title, back, backIcon, action }: { title: string; back: string; backIcon?: ReactNode; action?: ReactNode }) {
   const { t } = useCopy();
   return <header className="section-nav">
-    <Link to={back} className="icon-button" aria-label={t("back")}><ChevronLeft size={22} /></Link>
+    <Link to={back} className="icon-button" aria-label={t("back")}>{backIcon ?? <ChevronLeft size={22} />}</Link>
     <h1>{title}</h1>
-    <span className="w-11" />
+    {action ?? <span className="w-11" />}
   </header>;
 }
 
