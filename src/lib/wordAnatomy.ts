@@ -7,7 +7,7 @@ const aliases: Record<string, string> = {
 const longVowels: Record<string, [string, string]> = { "ا": ["a", "ā"], "ى": ["a", "ā"], "و": ["u", "ū"], "ي": ["i", "ī"] };
 const annotation = /[\u0610-\u061A\u06D6-\u06ED]/gu;
 const letterPattern = /\p{L}/u;
-const arabicWordPattern = /[\p{Script=Arabic}\p{M}\u200C\u200D]+/gu;
+const arabicWordPattern = /[\p{Script=Arabic}\p{M}\u0640\u200C\u200D]+/gu;
 
 export const normalizeWord = (word: string) => word.normalize("NFC")
   .replace(annotation, "").replace(/[\p{M}\u0640\u200C\u200D]/gu, "").replace(/ٱ/g, "ا");

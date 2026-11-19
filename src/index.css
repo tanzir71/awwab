@@ -7,7 +7,6 @@
 :root {
   --control-primary: var(--c-primary);
   --interactive-ink: var(--c-primary);
-  --on-accent: var(--c-ink);
   color-scheme: light;
 }
 :root[data-mode="maktab"] {
@@ -56,7 +55,7 @@ time { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .action:disabled { cursor: default; opacity: .65; }
 .action.soft { background: var(--c-primary-soft); color: var(--interactive-ink); }
 .action.light, .icon-button { background: var(--c-surface); color: var(--c-ink); box-shadow: var(--shadow-card); }
-.action.gold { background: var(--c-accent); color: var(--on-accent); }
+.action.gold { background: var(--c-accent); color: var(--c-on-primary); font: var(--type-body-strong); padding: 14px 20px; }
 .action.plain { background: transparent; color: inherit; }
 .icon-button { width: 44px; padding: 0; border-radius: var(--r-pill); flex: 0 0 auto; }
 .text-button { min-height: 44px; display: inline-flex; align-items: center; color: var(--interactive-ink); font: var(--type-small); text-decoration: none; }
@@ -89,6 +88,35 @@ progress::-moz-progress-bar { background: var(--control-primary); }
 .tabbar a[aria-current] .tab-icon { background: var(--c-primary-soft); }
 .sidebar, .topbar { display: none; }
 .print-only { display: none; }
+.paper-header { align-items: end; gap: 10px; }
+.paper-header .wordmark { flex: 0 0 auto; }
+.paper-note { color: var(--c-ink-muted); font: var(--type-small); }
+.paper-timetable thead { color: var(--c-on-primary); background: var(--c-primary); }
+.paper-timetable thead th:first-child { border-start-start-radius: 6px; }
+.paper-timetable thead th:last-child { border-start-end-radius: 6px; }
+.paper-timetable :is(td, th):nth-child(n+4) { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.paper-timetable tr[data-friday="true"] { background: var(--c-primary-soft); }
+.paper-timetable tr[data-friday="true"] td:first-child { font-weight: 700; }
+.paper-mosques { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(12rem, 100%), 1fr)); gap: 8px; }
+.paper-mosques .card, .paper-harakat .card, .paper-pocket-cards .card { background: var(--c-surface-alt); }
+.paper-name-fields span { display: flex; align-items: end; gap: 8px; }
+.paper-name-fields span::after { content: ""; flex: 1; border-bottom: 1px solid var(--c-line); }
+.paper-letter-rows { display: grid; gap: 8px; }
+.paper-letter-row { display: grid; grid-template-columns: minmax(42px, 17%) minmax(0, 1fr); align-items: center; padding: 8px; border-radius: var(--r-control); }
+.paper-letter-row:nth-child(odd) { background: var(--c-surface-alt); }
+.paper-letter-row .arabic-line { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.paper-letter-row .word-chip { min-width: 0; padding-inline: 0; opacity: .18; }
+.paper-letter-row .word-chip:last-child, .paper-letter-row .word-chip:focus-visible { opacity: 1; }
+.paper-joining .equal-row, .paper-harakat { text-align: center; }
+.paper-harakat .arabic-text { color: var(--mark-color); }
+.paper-pocket-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.paper-pocket-cards .card { display: grid; align-content: start; gap: 8px; }
+.paper-pocket-cards h2, .paper-transliteration { color: var(--c-primary); }
+.paper-card-verses { display: grid; justify-items: start; }
+@media screen and (max-width: 599px) {
+  .paper-pocket-cards { grid-template-columns: minmax(0, 1fr); }
+  .paper-header .wordmark { font-size: 22px; }
+}
 
 .prayer-hero { position: relative; overflow: hidden; padding: 20px; }
 .prayer-hero > :not(.hero-motif) { z-index: 1; position: relative; }
@@ -99,7 +127,10 @@ progress::-moz-progress-bar { background: var(--control-primary); }
 .rakat-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
 .rakat-grid > div { display: grid; padding: 10px 12px; background: var(--c-overlay-on-night); border-radius: var(--r-control); align-content: start; }
 .rakat-grid[data-count="3"] { grid-template-columns: repeat(3,minmax(0,1fr)); }
-.rakat-grid > [data-fard="true"] { background: var(--c-accent); color: var(--on-accent); }
+.rakat-grid > [data-fard="true"] { background: var(--c-accent); color: var(--c-on-primary); }
+@media (prefers-contrast: more) {
+  .action.gold, .rakat-grid > [data-fard="true"] { background: color-mix(in srgb, var(--c-accent) 57%, var(--c-ink)); }
+}
 .rakat-grid > div small { font-size: 11px; }
 .prayer-row { padding: 10px 14px; }
 .prayer-row[data-now="true"] { background: var(--control-primary); color: var(--c-on-primary); }
@@ -263,4 +294,30 @@ table tbody tr:nth-child(even) { background: var(--c-surface-alt); }
   table { width: 100%; border-collapse: collapse; }
   tr { break-inside: avoid; }
   tr:nth-child(even) { background: var(--c-surface-alt); print-color-adjust: exact; }
+  .print-page { gap: 10pt; print-color-adjust: exact; }
+  .paper-header h1 { font: 600 20pt/26pt var(--font-display); }
+  .paper-header .wordmark { font-size: 21.76pt; }
+  .paper-note { font: 500 9pt/12pt var(--font-body); }
+  .paper-header .paper-note { font-size: 10pt; }
+  .print-page .word-chip > span:not(.sr-only) { text-decoration: none; }
+  .paper-timetable { font: 500 9pt/12pt var(--font-body); }
+  .paper-timetable td { padding: 2pt 5pt; }
+  .paper-timetable th { padding: 5pt; }
+  .paper-timetable td small { font: 500 7.5pt/9pt var(--font-body); }
+  .paper-mosques .card { padding: 7pt; font-size: 9pt; }
+  .paper-mosques small { font-size: 8pt; }
+  .paper-name-fields { font-size: 9pt; }
+  .paper-letter-rows { gap: 10pt; }
+  .paper-letter-row { min-height: 76pt; padding: 8pt; }
+  .paper-letter-row h2 { font: 700 11pt/15pt var(--font-body); }
+  .paper-letter-row .arabic-text { font-size: 36pt; line-height: 1.3; }
+  .paper-joining, .paper-harakat .card { padding: 8pt; font: 500 9pt/12pt var(--font-body); }
+  .paper-joining .arabic-text, .paper-harakat .arabic-text { font-size: 24pt; line-height: 1.35; }
+  .paper-pocket-cards { gap: 12pt; }
+  .paper-pocket-cards .card { min-height: 331pt; padding: 12pt; gap: 6pt; font: 500 9pt/12pt var(--font-body); }
+  .paper-pocket-cards h2 { font: 700 11pt/15pt var(--font-body); }
+  .paper-pocket-cards small { font: 500 8pt/12pt var(--font-body); }
+  .paper-card-verses .arabic-text[data-script] { font-size: 15pt; line-height: 1.35; }
+  .paper-card-verses .arabic-line { padding: 0; }
+  .paper-card-verses .word-chip { min-width: 0; padding-inline: 1pt; }
 }

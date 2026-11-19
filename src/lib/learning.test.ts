@@ -21,6 +21,11 @@ describe("Word anatomy", () => {
     expect(wordAnatomy("وَٱلۡعَصۡرِ").joining.map(item => item.position)).toEqual(["isolated", "isolated", "initial", "medial", "medial", "final"]);
     expect(wordAnatomy("بَابٌ").syllables.map(item => item.tr)).toEqual(["bā", "bun"]);
   });
+
+  it("keeps joining strokes in display words and excludes them from letter counting", () => {
+    expect(splitArabicWords("ـب ـبـ بـ ب ـ")).toEqual(["ـب", "ـبـ", "بـ", "ب"]);
+    expect(splitGraphemes("ـبـ")).toEqual(["ب"]);
+  });
 });
 
 describe("Bundled Quran", () => {
