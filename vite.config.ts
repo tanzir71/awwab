@@ -46,8 +46,7 @@ export default defineConfig(({ mode }) => ({
           .replaceAll('href="#install"', 'href="#features"')
           .replaceAll('app/#/install"', '#features"')
           .replaceAll("How do I install it?", "When can I install it?")
-          .replaceAll("Open Awwab in your browser. Look for Install app or Add to Home Screen in the browser menu.", "Installation opens when the app is released.")
-          .replace('          <div class="hero-copy">', '          <div class="hero-copy"><p class="pill">Landing milestone · app preview</p>');
+          .replaceAll("Open Awwab in your browser. Look for Install app or Add to Home Screen in the browser menu.", "Installation opens when the app is released.");
       },
     },
     mode === "landing" && {
