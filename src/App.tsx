@@ -70,9 +70,9 @@ function Main() {
       <Route path="/learn/words" element={<WordBank settings={settings} desktop={desktop} now={now} />} />
       <Route path="/learn/takhti/:family?" element={<Takhti />} />
       <Route path="/learn/hadith" element={<Hadith />} />
-      <Route path="/return" element={<ReturnPage settings={settings} now={now} />} />
-      <Route path="/return/sayyid" element={<Sayyid settings={settings} />} />
-      <Route path="/return/qada" element={<Qada settings={settings} now={now} />} />
+      <Route path="/return" element={<ReturnPage settings={settings} now={now} desktop={desktop} />} />
+      <Route path="/return/sayyid" element={<Sayyid settings={settings} desktop={desktop} />} />
+      <Route path="/return/qada" element={<Qada settings={settings} now={now} desktop={desktop} />} />
       <Route path="/plan" element={<Plan settings={settings} now={now} desktop={desktop} />} />
       <Route path="/plan/mosques" element={<Mosques settings={settings} now={now} desktop={desktop} />} />
       <Route path="/plan/zakat" element={<Zakat settings={settings} now={now} desktop={desktop} />} />

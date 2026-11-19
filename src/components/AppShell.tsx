@@ -96,6 +96,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
   const zakatPage = location.pathname === "/plan/zakat";
   const planDesktop = desktop && location.pathname === "/plan";
   const mosquesDesktop = desktop && location.pathname === "/plan/mosques";
+  const returnDesktop = desktop && location.pathname.startsWith("/return");
   const hawl = zakatHawl(day, zakat, settings.hijriAdjust, calendar.anchors);
   const number = new Intl.NumberFormat(settings.language, { useGrouping: false });
   const zakatSubtitle = [
@@ -116,7 +117,9 @@ export function AppShell({ children, settings, now, desktop }: { children: React
   };
   const destinations = groups.flatMap(group => group.items);
   const heading = [...destinations].sort((a, b) => b.to.length - a.to.length).find(item => location.pathname.startsWith(item.to));
-  const title = heading ? navigationLabel(settings, heading.title) : "awwab";
+  const title = returnDesktop && location.pathname === "/return/qada" ? t("qadaTitle")
+    : returnDesktop && location.pathname === "/return/sayyid" ? t("sayyidTitle")
+      : heading ? navigationLabel(settings, heading.title) : "awwab";
   const date = formatDay(day, { weekday: "short", day: "numeric", month: "short", year: "numeric" }, settings.language);
   const planSubtitle = (() => {
     if (!planDesktop) return;
@@ -214,15 +217,15 @@ export function AppShell({ children, settings, now, desktop }: { children: React
         </div>
       </>}
     </nav>}
-    <main className="app-main" id="app-main" tabIndex={-1} data-page={shareSheet ? "share-sheet" : shareMoment ? "share-moment" : prayerGuide ? "prayer-guide" : salahStudy ? "salah-study" : today ? "today" : planDesktop ? "plan-desktop" : mosquesDesktop ? "mosques-desktop" : studyHome ? "learn" : chapter ? "surah-reader" : lesson ? "qaida-lesson" : wordBank ? "word-bank" : fluency ? "fluency" : location.pathname.startsWith("/learn/takhti") ? "takhti" : undefined}>
+    <main className="app-main" id="app-main" tabIndex={-1} data-page={shareSheet ? "share-sheet" : shareMoment ? "share-moment" : prayerGuide ? "prayer-guide" : salahStudy ? "salah-study" : today ? "today" : planDesktop ? "plan-desktop" : mosquesDesktop ? "mosques-desktop" : returnDesktop ? "return-desktop" : studyHome ? "learn" : chapter ? "surah-reader" : lesson ? "qaida-lesson" : wordBank ? "word-bank" : fluency ? "fluency" : location.pathname.startsWith("/learn/takhti") ? "takhti" : undefined}>
       {!fullscreen && !((today || studyHome || surahStudy) && settings.mode === "maktab") && <header className="topbar">
-        <div>{today || learnWorkspace || zakatPage || planDesktop || mosquesDesktop ? <h1>{qaidaStudy ? t("qaidaDesktopTitle", { number: lesson.n }) : surahStudy ? t("surahsForSalah") : wordBankStudy ? t("wordBankName") : title}</h1> : <h2>{title}</h2>}
-          <p className="small muted">{planSubtitle ?? (mosquesDesktop ? t("mosqueDeskCaption", { count: mosques.mosques.length }) : zakatPage ? zakatSubtitle : qaidaStudy ? qaidaSubtitle : surahStudy ? studySubtitle : wordBankStudy ? t("wordBankSubtitle") : date + " · " + hijriLabel(day, settings.hijriAdjust, calendar.anchors))}{today && ` · ${settings.city.name}`}{studyHome && " · " + t("deskMinutesToday", { count: studyPlanMinutes(hidden) })}</p></div>
+        <div>{today || learnWorkspace || zakatPage || planDesktop || mosquesDesktop || returnDesktop ? <h1>{qaidaStudy ? t("qaidaDesktopTitle", { number: lesson.n }) : surahStudy ? t("surahsForSalah") : wordBankStudy ? t("wordBankName") : title}</h1> : <h2>{title}</h2>}
+          <p className="small muted">{planSubtitle ?? (returnDesktop ? t("returnDeskSubtitle") : mosquesDesktop ? t("mosqueDeskCaption", { count: mosques.mosques.length }) : zakatPage ? zakatSubtitle : qaidaStudy ? qaidaSubtitle : surahStudy ? studySubtitle : wordBankStudy ? t("wordBankSubtitle") : date + " · " + hijriLabel(day, settings.hijriAdjust, calendar.anchors))}{today && ` · ${settings.city.name}`}{studyHome && " · " + t("deskMinutesToday", { count: studyPlanMinutes(hidden) })}</p></div>
         <Link className="chip night" to="/today">{nextPrayer}</Link>
         {settings.mode === "adult" && <>
           <Link className="action" to={reviewDestination(nextReview ?? due[0]?.[0])}><DesignIcon name="desk-play" size={14} />{t("startReview")}{due.length ? ` · ${studyHome ? dueSurahs || due.length : due.length}` : ""}</Link>
           <Link className="action soft" to="/today?log=1"><DesignIcon name="desk-plus" size={14} />{t("logPrayer")}</Link>
-          <Link className="action light" to={today ? "/share?from=today" : "/share?from=learn"}><DesignIcon name="desk-share" size={14} />{t("share")}</Link>
+          <Link className="action light" to={today ? "/share?from=today" : returnDesktop ? "/share?template=return&from=return" : "/share?from=learn"}><DesignIcon name="desk-share" size={14} />{t("share")}</Link>
         </>}
         <Link className="icon-button" to="/you/reminders" aria-label={t("reminders")}><DesignIcon name="desk-bell" size={18} /></Link>
       </header>}

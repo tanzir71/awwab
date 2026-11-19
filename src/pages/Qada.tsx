@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState, type FormEvent, type MouseEvent } from "react";
 import { X } from "lucide-react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { DesignIcon } from "@/components/DesignIcon";
 import { PracticeHeader } from "@/components/PracticeHeader";
@@ -8,16 +9,19 @@ import { usePrayerLogs, useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { addDays, dateKey, formatDay } from "@/lib/dates";
 import { calendarDefaults, calendarEvents } from "@/lib/hijri";
-import { estimateQada, qadaBalances, qadaDefaults, qadaForecast } from "@/lib/qada";
+import { calendarWeekStart } from "@/lib/plan-calendar";
+import { adjustQadaTotals, estimateQada, qadaBalances, qadaCountBetween, qadaDefaults, qadaForecast, recordQada, type QadaPlan } from "@/lib/qada";
 import { type Settings, updateRecord } from "@/lib/storageService";
 import { prayerIds } from "@/types/Prayer";
 
-type QadaPlan = typeof qadaDefaults;
-type QadaPanel = "edit" | "estimate" | "fasts";
-const panelTitles = { edit: "qadaEditTitle", estimate: "qadaEstimateTitle", fasts: "qadaFasts" };
-const panelHints = { edit: "qadaEditHint", estimate: "qadaEstimateHint", fasts: "qadaFastHint" };
+type QadaPanel = "edit" | "estimate" | "fasts" | "pace";
+const panelTitles = { edit: "qadaEditTitle", estimate: "qadaEstimateTitle", fasts: "qadaFasts", pace: "qadaDailyGoals" };
+const panelHints = { edit: "qadaEditHint", estimate: "qadaEstimateHint", fasts: "qadaFastHint", pace: "qadaDeskPaceHint" };
+const totalOf = (values: QadaPlan["madeUp"]) => Object.values(values).reduce((total, count) => total + count, 0);
 
-export function Qada({ settings, now }: { settings: Settings; now: Date }) {
+export function Qada({ settings, now, desktop = false, embedded = false }: {
+  settings: Settings; now: Date; desktop?: boolean; embedded?: boolean;
+}) {
   const { language, t } = useCopy();
   const number = new Intl.NumberFormat(language);
   const plan = useRecord("qada", qadaDefaults);
@@ -30,7 +34,7 @@ export function Qada({ settings, now }: { settings: Settings; now: Date }) {
   const today = dateKey(now, settings.city.timeZone);
   const balances = qadaBalances(plan, logs);
   const { madeUp, remaining, totalLeft } = balances;
-  const totalMade = Object.values(madeUp).reduce((total, count) => total + count, 0);
+  const totalMade = totalOf(madeUp);
   const { days, end } = qadaForecast(today, balances, plan);
   const unit = days < 60 ? "day" : "month";
   const duration = new Intl.NumberFormat(language, { style: "unit", unit, unitDisplay: "long" })
@@ -41,6 +45,7 @@ export function Qada({ settings, now }: { settings: Settings; now: Date }) {
   const daysToRamadan = ramadan ? Math.max(0, Math.round((Date.parse(ramadan.dates[0]) - Date.parse(today)) / 86400000)) : undefined;
   const maktab = settings.mode === "maktab";
   const chevron = maktab ? "return-maktab-chevron" : "return-chevron";
+  const pace = plan.withEachPrayer ? t("qadaEach") : t("qadaPace", { count: plan.dailyGoal });
 
   async function save(update: (previous: QadaPlan) => QadaPlan) {
     try {
@@ -73,21 +78,78 @@ export function Qada({ settings, now }: { settings: Settings; now: Date }) {
             const correction = Number(values.get("made-" + id)) - editor.initial.madeUp[id];
             madeUp[id] = Math.max(0, madeUp[id] + correction);
           }
-          return { ...old, estimated, madeUp };
+          return adjustQadaTotals(old, estimated, madeUp);
         }
         case "estimate":
           return { ...old, estimated: estimateQada(Number(values.get("years")), Number(values.get("prayed"))) };
         case "fasts":
           return { ...old, fasts: Number(values.get("fasts")) };
+        case "pace": {
+          const pace = values.get("pace");
+          return pace === "each" ? { ...old, withEachPrayer: true }
+            : { ...old, dailyGoal: Number(pace), withEachPrayer: false };
+        }
       }
     });
     setSaving(false);
     if (saved) setEditor(undefined);
   }
 
-  return <div className="qada-page">
-    <PracticeHeader title={t("qadaTitle")} back="/return" maktab={maktab} settingsTo="/you/prayer" />
-    <div className="qada-content">
+  const logPrayer = (id: typeof prayerIds[number]) =>
+    save(old => recordQada(old, id, dateKey(new Date(), settings.city.timeZone)));
+  const logFast = () => save(old => old.fastsMadeUp >= old.fasts ? old : { ...old, fastsMadeUp: old.fastsMadeUp + 1 });
+  let desktopContent;
+  if (desktop) {
+    const first = calendarWeekStart(language, settings.city.timeZone, navigator.languages);
+    const weekday = new Date(today + "T12:00:00Z").getUTCDay();
+    const weekStart = addDays(today, -((weekday + 7 - first) % 7));
+    const thisWeek = qadaCountBetween(plan, logs, weekStart, today, settings.city.timeZone);
+    desktopContent = <section className="card qada-desk-summary" aria-label={t("qadaDeskTitle")}>
+      <header className="row-between">
+        <h2>{t("qadaDeskTitle")}</h2>
+        <button type="button" className="text-button" onClick={event => open(event, "estimate")} aria-haspopup="dialog">{t("qadaDeskEstimate")}</button>
+      </header>
+      <div className="qada-desk-metrics equal-row">
+        <button type="button" onClick={event => open(event, "edit")} aria-haspopup="dialog" title={t("qadaEditTitle")}>
+          <span className="caption">{t("qadaDeskLeft")}</span><strong aria-live="polite">{number.format(totalLeft)}</strong>
+          <small>{t("qadaDeskEstimated", { count: totalOf(plan.estimated) })}</small>
+        </button>
+        <button type="button" onClick={event => open(event, "pace")} aria-haspopup="dialog" title={t("qadaDailyGoals")}>
+          <span className="caption">{t("qadaDeskWeek")}</span><strong aria-live="polite">{t("qadaDeskCount", { count: thisWeek })}</strong><small>{pace}</small>
+        </button>
+        <div><span className="caption">{t("qadaDeskFinish")}</span><strong>{end
+          ? <time dateTime={end}>~{formatDay(end, { month: "short", year: "numeric" }, language)}</time> : "—"}</strong>
+          <small>{t("qadaDeskAtPace")}</small>
+        </div>
+      </div>
+      <table className="qada-desk-table" aria-label={t("qadaByPrayer")}>
+        <thead><tr>
+          <th scope="col">{t("qadaDeskPrayer")}</th><th scope="col">{t("qadaDeskLeft")}</th><th scope="col">{t("qadaDeskMadeUp")}</th>
+          <th scope="col">{t("qadaDeskProgress")}</th><th scope="col">{t("today")}</th>
+        </tr></thead>
+        <tbody>{prayerIds.map(id => {
+          const total = plan.estimated[id];
+          return <tr key={id}>
+            <th scope="row">{t(id)}</th><td>{number.format(remaining[id])}</td><td>{number.format(madeUp[id])}</td>
+            <td><progress value={Math.min(madeUp[id], total)} max={total || 1} aria-label={t("qadaBalanceProgress") + " · " + t(id)} /></td>
+            <td><button className="action soft qada-desk-log" type="button" onClick={() => void logPrayer(id)}>{t("qadaDeskLog")}
+              <span className="sr-only"> · {t("qadaAdd", { prayer: t(id) })}</span></button></td>
+          </tr>;
+        })}</tbody>
+      </table>
+      <div className="qada-desk-fasts">
+        <button type="button" className="text-button" onClick={event => open(event, "fasts")} aria-haspopup="dialog">{t("qadaDeskFasts", { count: fastsLeft })}</button>
+        {fastsLeft > 0 && <button type="button" className="text-button" onClick={() => void logFast()}>{t("qadaDeskLogFast")}</button>}
+      </div>
+      <p className="small muted">{t("qadaScholars")}</p>
+    </section>;
+  }
+
+  return <div className={desktop ? "qada-desk" : "qada-page"} data-embedded={embedded}>
+    {!embedded && (desktop
+      ? <Link className="text-button qada-desk-back" to="/return">{t("back")} · {t("return")}</Link>
+      : <PracticeHeader title={t("qadaTitle")} back="/return" maktab={maktab} settingsTo="/you/prayer" />)}
+    {desktopContent ?? <div className="qada-content">
       <section className="card qada-summary">
         <h2 className="caption">{t("qadaLeftTitle")}</h2>
         <div className="qada-balance"><strong>{number.format(totalLeft)}</strong><span className="muted">{t("qadaUnit", { count: totalLeft })}</span></div>
@@ -107,7 +169,7 @@ export function Qada({ settings, now }: { settings: Settings; now: Date }) {
           {prayerIds.map(id => <li className="list-row qada-prayer" key={id}>
             <div><strong>{t(id)}</strong><small>{t("qadaMade", { count: madeUp[id] })}</small></div>
             <span className="qada-prayer-left">{t("qadaLeft", { count: remaining[id] })}</span>
-            <button className="action" onClick={() => void save(old => ({ ...old, madeUp: { ...old.madeUp, [id]: old.madeUp[id] + 1 } }))}>
+            <button className="action" onClick={() => void logPrayer(id)}>
               + {number.format(1)}<span className="sr-only"> {t("qadaAdd", { prayer: t(id) })}</span>
             </button>
           </li>)}
@@ -128,7 +190,7 @@ export function Qada({ settings, now }: { settings: Settings; now: Date }) {
         <p>{t("qadaEncourage")}</p>
         <p className="muted small">{t("qadaScholars")}</p>
       </section>
-    </div>
+    </div>}
 
     <Dialog open={!!editor} onOpenChange={open => { if (!open && !saving) setEditor(undefined); }}>
       {editor && panel && <DialogContent className="awwab-dialog qada-dialog" showCloseButton={false}
@@ -154,10 +216,18 @@ export function Qada({ settings, now }: { settings: Settings; now: Date }) {
             <p aria-live="polite">{t("qadaLeft", { count: fastsLeft })} · {t("qadaMade", { count: plan.fastsMadeUp })}</p>
             <label className="field">{t("qadaFastsTotal")}<input type="number" name="fasts" min="0" defaultValue={plan.fasts} required /></label>
           </>}
+          {panel === "pace" && <fieldset className="stack qada-desk-pace">
+            <legend className="sr-only">{t("qadaDailyGoals")}</legend>
+            {[...new Set([1, 3, 5, editor.initial.dailyGoal])].sort((a, b) => a - b).map(goal => <label key={goal} className="list-row">
+              <input name="pace" type="radio" value={goal} required defaultChecked={!editor.initial.withEachPrayer && editor.initial.dailyGoal === goal} />
+              {t("qadaGoal", { count: goal })}
+            </label>)}
+            <label className="list-row"><input name="pace" type="radio" value="each" required defaultChecked={editor.initial.withEachPrayer} />{t("qadaEach")}</label>
+          </fieldset>}
           <button className="action" disabled={saving}>{t("qadaSave")}</button>
         </form>
         {panel === "fasts" && <button className="action soft qada-add-fast" disabled={saving || fastsLeft === 0}
-          onClick={() => void save(old => old.fastsMadeUp >= old.fasts ? old : { ...old, fastsMadeUp: old.fastsMadeUp + 1 })}>{t("qadaFastsAdd")}</button>}
+          onClick={() => void logFast()}>{t("qadaFastsAdd")}</button>}
       </DialogContent>}
     </Dialog>
   </div>;

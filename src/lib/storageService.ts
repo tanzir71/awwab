@@ -115,12 +115,14 @@ const savedRecords: Record<string, z.ZodTypeAny> = {
   "study-plan-hidden": z.array(z.enum(deskActivities)),
   "surah-lines-known": z.array(z.string().regex(/^\d{1,3}:\d{1,3}$/)),
   "sayyid-line": count.max(6),
+  "sayyid-reviewed": z.array(count.max(6)),
   "words-known": labels,
   "takhti-practised": labels,
   "word-bank-known": labels,
   "word-milestones": z.array(z.union([z.literal(25), z.literal(50), z.literal(100), z.literal(125)])),
   istighfar: dateCounts,
-  qada: z.object({ estimated: balances, madeUp: balances, dailyGoal: count.min(1).max(100), withEachPrayer: z.boolean().optional(), fasts: count, fastsMadeUp: count }),
+  qada: z.object({ estimated: balances, madeUp: balances, dailyGoal: count.min(1).max(100), withEachPrayer: z.boolean().optional(),
+    fasts: count, fastsMadeUp: count, manualDays: z.record(daySchema, z.partialRecord(z.enum(prayerIds), count)).optional() }),
   calendar: z.object({
     anchors: z.array(z.object({ year: count.min(1), month: count.min(1).max(12), date: daySchema, source: z.string().max(100) })),
     overrides: z.record(z.string(), z.object({ date: daySchema.optional(), source: z.string().max(100).optional(), adjust: z.union([z.literal(-1), z.literal(0), z.literal(1)]) })),
@@ -294,11 +296,11 @@ export function prayerStatistics(logs: PrayerLog[], today: string) {
     if (log.date <= today) counts.set(log.date, (counts.get(log.date) ?? 0) + 1);
   }
   const activeDays = [...counts.keys()].sort();
-  const returns = activeDays.filter((day, i) => i > 0 && addDays(activeDays[i - 1], 1) < day).length;
+  const returnDays = activeDays.filter((day, i) => i > 0 && addDays(activeDays[i - 1], 1) < day);
   const recent = Array.from({ length: 30 }, (_, i) => {
     const day = addDays(today, i - 29);
     return { day, count: counts.get(day) ?? 0 };
   });
   const consistency = Math.round(recent.reduce((sum, day) => sum + day.count, 0) * 100 / 150);
-  return { consistency, recent, returns, activeDays: activeDays.length };
+  return { consistency, recent, returns: returnDays.length, returnDays, activeDays: activeDays.length };
 }

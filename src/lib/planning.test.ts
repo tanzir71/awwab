@@ -6,8 +6,8 @@ import { addDays } from "./dates";
 import { baselineMonthStart, calendarDefaults, calendarEventById, dayDifference, eventDisplayDates, monthStartEvent } from "./hijri";
 import { eventReminders } from "./calendarFile";
 import { calendarDayEvents, calendarWeekStart, fridayMosque, gregorianMonthCells, readCalendarDay, readCalendarMonth, shiftPlanEvent } from "./plan-calendar";
-import { defaults } from "./storageService";
-import { qadaBalances, qadaDefaults, qadaForecast } from "./qada";
+import { defaults, prayerStatistics } from "./storageService";
+import { adjustQadaTotals, qadaBalances, qadaCountBetween, qadaDefaults, qadaForecast, recordQada } from "./qada";
 import { assignedMosque, mapMosque, mosqueCheckedAge, mosqueDefaults, mosqueTime, mosqueWeek, timetableNotice, weeklyMosque, type Mosque } from "./mosques";
 
 describe("Today summaries", () => {
@@ -37,6 +37,34 @@ describe("Today summaries", () => {
     expect(qadaForecast(today, balances, { dailyGoal: 3 })).toEqual({ days: 3, end: "2026-11-21" });
     expect(qadaForecast(today, balances, { dailyGoal: 3, withEachPrayer: true })).toEqual({ days: 7, end: "2026-11-25" });
     expect(qadaForecast(today, qadaBalances(qadaDefaults, []), { dailyGoal: 3, withEachPrayer: true })).toEqual({ days: 0, end: null });
+  });
+
+  it("counts dated make-ups in the selected week and uses the local recording date for older prayers", () => {
+    const legacy = { ...qadaDefaults, madeUp: { ...qadaDefaults.madeUp, fajr: 5 } };
+    const plan = recordQada(recordQada(legacy, "fajr", "2026-11-15"), "asr", "2026-11-10");
+    const logs = [
+      { date: "2026-11-02", prayer: "fajr", status: "qada", at: "2026-11-14T18:10:00.000Z" },
+      { date: "2026-11-10", prayer: "fajr", status: "qada", at: "2026-11-14T17:59:00.000Z" },
+      { date: "2026-11-19", prayer: "asr", status: "done", at: "2026-11-19T08:00:00.000Z" },
+    ] as const;
+    expect(qadaCountBetween(legacy, [], "2026-11-15", "2026-11-19", "Asia/Dhaka")).toBe(0);
+    expect(qadaCountBetween(plan, [...logs], "2026-11-15", "2026-11-19", "Asia/Dhaka")).toBe(2);
+    expect(qadaBalances(plan, [...logs]).madeUp.fajr).toBe(8);
+  });
+
+  it("keeps dated make-ups through legacy adjustments and trims recent entries when the balance is smaller", () => {
+    const legacy = { ...qadaDefaults, madeUp: { ...qadaDefaults.madeUp, fajr: 3 } };
+    const plan = recordQada(recordQada(recordQada(legacy, "fajr", "2026-11-16"), "fajr", "2026-11-19"), "asr", "2026-11-19");
+    expect(adjustQadaTotals(plan, plan.estimated, { ...plan.madeUp, fajr: 2 }).manualDays).toEqual(plan.manualDays);
+    expect(adjustQadaTotals(plan, plan.estimated, { ...plan.madeUp, fajr: 1 }).manualDays).toEqual({
+      "2026-11-16": { fajr: 1 }, "2026-11-19": { fajr: 0, asr: 1 },
+    });
+  });
+
+  it("returns the actual comeback dates once each and ignores future logs", () => {
+    const logs = ["2026-11-01", "2026-11-02", "2026-11-04", "2026-11-04", "2026-11-11", "2026-11-21"].map(date =>
+      ({ date, prayer: "fajr" as const, status: "done" as const, at: date + "T10:00:00Z" }));
+    expect(prayerStatistics(logs, "2026-11-19")).toMatchObject({ returns: 2, returnDays: ["2026-11-04", "2026-11-11"] });
   });
 });
 

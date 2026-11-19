@@ -279,16 +279,19 @@ describe("device prayer records", () => {
     expect(await getRecord("zakat", initialZakat)).toEqual(profile);
   });
 
-  it("round trips a make-up plan with one per prayer and accepts an older plan without the field", async () => {
-    const plan = { ...qadaDefaults, withEachPrayer: true, fasts: 12, fastsMadeUp: 1 };
-    await db.records.put({ key: "qada", value: plan });
+  it("round trips dated make-ups and Sayyid review, and accepts an older make-up plan", async () => {
+    const plan = { ...qadaDefaults, withEachPrayer: true, fasts: 12, fastsMadeUp: 1,
+      madeUp: { ...qadaDefaults.madeUp, fajr: 3 }, manualDays: { "2026-11-19": { fajr: 2 } } };
+    await db.records.bulkPut([{ key: "qada", value: plan }, { key: "sayyid-reviewed", value: [0, 2, 6] }]);
     const file = await backup();
     await db.records.clear();
     await restoreBackup(file);
     expect(await getRecord("qada", qadaDefaults)).toEqual(plan);
+    expect(await getRecord("sayyid-reviewed", [])).toEqual([0, 2, 6]);
 
     const legacy = JSON.parse(file);
     delete legacy.records.find(record => record.key === "qada").value.withEachPrayer;
+    delete legacy.records.find(record => record.key === "qada").value.manualDays;
     await restoreBackup(JSON.stringify(legacy));
     expect(await getRecord("qada", qadaDefaults)).toMatchObject({ dailyGoal: 3, fasts: 12, fastsMadeUp: 1 });
   });
