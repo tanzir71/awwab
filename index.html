@@ -18,7 +18,8 @@
     <meta name="twitter:title" content="awwab · For those who keep coming back">
     <meta name="twitter:description" content="Return to prayer and relearn Quranic Arabic at your own pace.">
     <meta name="twitter:image" content="https://tanzir71.github.io/awwab/landing/cover.png">
-    <link rel="preload" as="image" imagesrcset="%BASE_URL%landing/hero-today.webp 290w, %BASE_URL%landing/hero-today-420.webp 420w, %BASE_URL%landing/hero-today@2x.webp 580w" imagesizes="(max-width: 1023px) 218px, 273px" fetchpriority="high">
+    <link rel="preload" as="image" type="image/webp" media="(width >= 1024px)" imagesrcset="%BASE_URL%landing/previews/hero-desktop.webp 1x, %BASE_URL%landing/previews/hero-desktop@2x.webp 2x" fetchpriority="high">
+    <link rel="preload" as="image" type="image/webp" media="(width < 1024px)" imagesrcset="%BASE_URL%landing/previews/hero-mobile.webp 1x, %BASE_URL%landing/previews/hero-mobile@2x.webp 2x" fetchpriority="high">
     <link rel="preload" as="font" type="font/woff2" crossorigin href="/node_modules/@fontsource-variable/noto-sans/files/noto-sans-latin-wght-normal.woff2">
     <link rel="preload" as="font" type="font/woff2" crossorigin href="/node_modules/@fontsource-variable/noto-serif/files/noto-serif-latin-wght-normal.woff2">
     <link rel="stylesheet" href="./src/landing.css">
@@ -45,10 +46,10 @@
             <div class="ctas"><a class="btn gold" href="%BASE_URL%app/">Open awwab</a><a class="btn light hero-secondary" href="#features">See how it works</a></div>
             <ul class="trust checks"><li>No account</li><li><span class="trust-desktop">Works fully offline</span><span class="trust-mobile">Works offline</span></li><li><span class="trust-desktop">Nothing leaves your phone</span><span class="trust-mobile">Private</span></li><li class="trust-desktop">Install on any phone or computer</li></ul>
           </div>
-          <div class="hero-devices">
-            <figure class="device phone primary-phone"><img src="%BASE_URL%landing/hero-today.webp" srcset="%BASE_URL%landing/hero-today.webp 290w, %BASE_URL%landing/hero-today-420.webp 420w, %BASE_URL%landing/hero-today@2x.webp 580w" sizes="(max-width: 1023px) 218px, 273px" width="290" height="628" alt="Today in Awwab with a prayer countdown and prayer log" fetchpriority="high" loading="eager"></figure>
-            <figure class="device phone secondary-phone"><img src="%BASE_URL%landing/word.webp" srcset="%BASE_URL%landing/word.webp 1x, %BASE_URL%landing/word@2x.webp 2x" width="390" height="844" alt="Word anatomy showing how a Quranic word is spelled" loading="lazy" decoding="async"></figure>
-          </div>
+          <picture class="hero-devices preview-art">
+            <source media="(width < 1024px)" srcset="%BASE_URL%landing/previews/hero-mobile.webp 1x, %BASE_URL%landing/previews/hero-mobile@2x.webp 2x" width="350" height="559">
+            <img src="%BASE_URL%landing/previews/hero-desktop.webp" srcset="%BASE_URL%landing/previews/hero-desktop.webp 1x, %BASE_URL%landing/previews/hero-desktop@2x.webp 2x" width="590" height="700" alt="Today in Awwab with the Asr countdown, rakʿāt and prayer log" fetchpriority="high">
+          </picture>
         </div>
       </section>
       <section class="verse paper" aria-label="The verse our name comes from">
@@ -76,7 +77,12 @@
           <p class="lead mobile-only">Calculated on your phone, with your mosque’s jamaat beside it, and every prayer rakʿah by rakʿah.</p>
           <ul class="checks desktop-only"><li>On-device prayer times</li><li>Your mosque’s jamaat beside each prayer</li><li>Every prayer, rakʿah by rakʿah</li><li>One tap to log a prayer</li></ul>
         </div>
-        <a class="feature-preview" href="%BASE_URL%app/#/today" aria-label="Open Today"><figure class="device phone"><img src="%BASE_URL%landing/today.webp" srcset="%BASE_URL%landing/today.webp 1x, %BASE_URL%landing/today@2x.webp 2x" width="390" height="844" alt="Today screen with prayer times and rakʿāt" loading="lazy" decoding="async"></figure></a>
+        <a class="feature-preview" href="%BASE_URL%app/#/today" aria-label="Open Today">
+          <picture class="preview-art">
+            <source media="(width < 1024px)" srcset="%BASE_URL%landing/previews/today-mobile.webp 1x, %BASE_URL%landing/previews/today-mobile@2x.webp 2x" width="350" height="569">
+            <img src="%BASE_URL%landing/previews/today-desktop.webp" srcset="%BASE_URL%landing/previews/today-desktop.webp 1x, %BASE_URL%landing/previews/today-desktop@2x.webp 2x" width="604" height="706" alt="Today with the Asr countdown and prayer times" loading="lazy" decoding="async">
+          </picture>
+        </a>
       </div>
     </section>
 <section id="return" class="band paper">
@@ -86,7 +92,12 @@
           <p class="lead mobile-only">Istighfar, a make-up plan at your pace, and streaks that never fall to zero.</p>
           <ul class="checks desktop-only"><li>Daily istighfar counter</li><li>Sayyid al-Istighfār, line by line</li><li>A make-up prayer and fasting plan</li><li>Progress that keeps growing when you return</li></ul>
         </div>
-        <a class="feature-preview" href="%BASE_URL%app/#/return" aria-label="Open Return"><figure class="device phone return-preview"><img src="%BASE_URL%landing/return.webp" srcset="%BASE_URL%landing/return.webp 1x, %BASE_URL%landing/return@2x.webp 2x" width="390" height="1013" alt="Return screen with the daily istighfar counter and Sayyid al-Istighfār lesson" loading="lazy" decoding="async"></figure></a>
+        <a class="feature-preview" href="%BASE_URL%app/#/return" aria-label="Open Return">
+          <picture class="preview-art">
+            <source media="(width < 1024px)" srcset="%BASE_URL%landing/previews/return-mobile.webp 1x, %BASE_URL%landing/previews/return-mobile@2x.webp 2x" width="350" height="569">
+            <img src="%BASE_URL%landing/previews/return-desktop.webp" srcset="%BASE_URL%landing/previews/return-desktop.webp 1x, %BASE_URL%landing/previews/return-desktop@2x.webp 2x" width="604" height="706" alt="Return with the daily istighfar counter and Sayyid al-Istighfār lesson" loading="lazy" decoding="async">
+          </picture>
+        </a>
       </div>
     </section>
 <section id="word" class="band ground">
@@ -98,7 +109,12 @@
           <div class="letter-preview desktop-only" dir="rtl" aria-label="Al-Asr, letter by letter"><!-- awwab-letter-tiles --></div>
           <div class="letter-result desktop-only"><span>wa + (silent) + l + ʿa + ṣ + ri = wal-ʿaṣri · “By time”</span><!-- awwab-asr-word --></div>
         </div>
-        <a class="feature-preview" href="%BASE_URL%app/#/learn/surahs/103?anatomy=103:1:1" aria-label="Open Word anatomy"><figure class="device phone"><img src="%BASE_URL%landing/word.webp" srcset="%BASE_URL%landing/word.webp 1x, %BASE_URL%landing/word@2x.webp 2x" width="390" height="844" alt="Word anatomy sheet for Al-Asr" loading="lazy" decoding="async"></figure></a>
+        <a class="feature-preview" href="%BASE_URL%app/#/learn/surahs/103?anatomy=103:1:1" aria-label="Open Word anatomy">
+          <picture class="preview-art">
+            <source media="(width < 1024px)" srcset="%BASE_URL%landing/previews/word-mobile.webp 1x, %BASE_URL%landing/previews/word-mobile@2x.webp 2x" width="350" height="569">
+            <img src="%BASE_URL%landing/previews/word-desktop.webp" srcset="%BASE_URL%landing/previews/word-desktop.webp 1x, %BASE_URL%landing/previews/word-desktop@2x.webp 2x" width="560" height="676" alt="Word anatomy for Al-Asr with its letters, sounds and joining forms" loading="lazy" decoding="async">
+          </picture>
+        </a>
       </div>
     </section>
 <section id="learn" class="band ground">
@@ -109,7 +125,12 @@
           <p class="lead mobile-only">Noorani Qaida order, Ampara-style spelling in English or বাংলা, short surahs first, and a takhti.</p>
           <ul class="checks desktop-only"><li>Seventeen lessons in Noorani Qaida order</li><li>Ampara-style spelling in English or বাংলা</li><li>Listen, read and recall</li><li>Short surahs first</li><li>Takhti letter tracing</li></ul>
         </div>
-        <a class="feature-preview" href="%BASE_URL%app/#/learn" aria-label="Open Learn Arabic"><figure class="device phone qaida-preview"><img src="%BASE_URL%landing/qaida-adult.webp" srcset="%BASE_URL%landing/qaida-adult.webp 1x, %BASE_URL%landing/qaida-adult@2x.webp 2x" width="390" height="1210" alt="Adult Qaida Harakat lesson" loading="lazy" decoding="async"></figure></a>
+        <a class="feature-preview" href="%BASE_URL%app/#/learn" aria-label="Open Learn Arabic">
+          <picture class="preview-art">
+            <source media="(width < 1024px)" srcset="%BASE_URL%landing/previews/learn-mobile.webp 1x, %BASE_URL%landing/previews/learn-mobile@2x.webp 2x" width="350" height="569">
+            <img src="%BASE_URL%landing/previews/learn-desktop.webp" srcset="%BASE_URL%landing/previews/learn-desktop.webp 1x, %BASE_URL%landing/previews/learn-desktop@2x.webp 2x" width="604" height="706" alt="Qaida Harakat lesson showing how to read the short vowels" loading="lazy" decoding="async">
+          </picture>
+        </a>
       </div>
     </section>
 <section id="plan" class="band paper">
@@ -119,17 +140,46 @@
           <p class="lead mobile-only">Expected dates until you confirm. Your mosques’ jamaats, Eid wherever you are, and zakat in bhori.</p>
           <ul class="checks desktop-only"><li>Expected dates until you confirm them</li><li>Your mosques and their weekly jamaat times</li><li>Eid jamaat times for home or your hometown</li><li>Zakat calculator in grams or bhori</li></ul>
         </div>
-        <a class="feature-preview" href="%BASE_URL%app/#/plan" aria-label="Open Plan"><figure class="device phone plan-preview"><img src="%BASE_URL%landing/plan.webp" srcset="%BASE_URL%landing/plan.webp 1x, %BASE_URL%landing/plan@2x.webp 2x" width="390" height="1017" alt="Islamic calendar with the moon-watch prompt and expected Hijri events" loading="lazy" decoding="async"></figure></a>
+        <a class="feature-preview" href="%BASE_URL%app/#/plan" aria-label="Open Plan">
+          <picture class="preview-art">
+            <source media="(width < 1024px)" srcset="%BASE_URL%landing/previews/plan-mobile.webp 1x, %BASE_URL%landing/previews/plan-mobile@2x.webp 2x" width="350" height="569">
+            <img src="%BASE_URL%landing/previews/plan-desktop.webp" srcset="%BASE_URL%landing/previews/plan-desktop.webp 1x, %BASE_URL%landing/previews/plan-desktop@2x.webp 2x" width="604" height="706" alt="Islamic calendar with the moon-watch prompt and expected Hijri events" loading="lazy" decoding="async">
+          </picture>
+        </a>
       </div>
     </section>
       <section class="night band" id="umrah"><div class="wrap">
         <div class="center intro"><p class="kicker">Umrah mode</p><h2>A guide that walks with you<span class="desktop-only">, from the mīqāt to the last lap</span></h2>
           <p class="lead desktop-only">Switch it on for your trip. It knows the time in Makkah, asks what you’re doing, and plans around your hotel and the Haram. Everything, including the map, works without data roaming.</p>
           <p class="lead mobile-only">It knows the time in Makkah, asks what you’re doing, and plans around your hotel and the Haram. The map works with no roaming data.</p></div>
-        <div class="three map-phones">
-          <figure class="umrah-now"><a class="device phone" href="%BASE_URL%app/#/umrah"><img src="%BASE_URL%landing/umrah-now.webp" srcset="%BASE_URL%landing/umrah-now.webp 1x, %BASE_URL%landing/umrah-now@2x.webp 2x" width="390" height="844" alt="Open the Umrah Now card and Makkah prayer timeline" loading="lazy" decoding="async"></a><figcaption>Now · what to do next, by time and place</figcaption></figure>
-          <figure><a class="device phone" href="%BASE_URL%app/#/umrah/map"><img src="%BASE_URL%landing/umrah-map.webp" srcset="%BASE_URL%landing/umrah-map.webp 1x, %BASE_URL%landing/umrah-map@2x.webp 2x" width="390" height="844" alt="Open the offline map of Makkah with Haram pins" loading="lazy" decoding="async"></a><figcaption>Offline map</figcaption></figure>
-          <figure><a class="device phone" href="%BASE_URL%app/#/umrah/rituals"><img src="%BASE_URL%landing/umrah-sai.webp" srcset="%BASE_URL%landing/umrah-sai.webp 1x, %BASE_URL%landing/umrah-sai@2x.webp 2x" width="390" height="844" alt="Open the saʿy guide and lap counter" loading="lazy" decoding="async"></a><figcaption>Live saʿy guide</figcaption></figure>
+        <div class="map-phones">
+          <figure class="umrah-now">
+            <a href="%BASE_URL%app/#/umrah">
+              <picture class="preview-art">
+                <source media="(width < 1024px)" srcset="%BASE_URL%landing/previews/umrah-now-mobile.webp 1x, %BASE_URL%landing/previews/umrah-now-mobile@2x.webp 2x" width="253" height="569">
+                <img src="%BASE_URL%landing/previews/umrah-now-desktop.webp" srcset="%BASE_URL%landing/previews/umrah-now-desktop.webp 1x, %BASE_URL%landing/previews/umrah-now-desktop@2x.webp 2x" width="304" height="704" alt="Open Umrah Now" loading="lazy" decoding="async">
+              </picture>
+            </a>
+            <figcaption><span>Now</span><span class="mobile-only"> · </span><span>what to do next, by time and place</span></figcaption>
+          </figure>
+          <figure class="umrah-map">
+            <a href="%BASE_URL%app/#/umrah/map">
+              <picture class="preview-art">
+                <source media="(width < 1024px)" srcset="%BASE_URL%landing/previews/umrah-map-mobile.webp 1x, %BASE_URL%landing/previews/umrah-map-mobile@2x.webp 2x" width="160" height="363">
+                <img src="%BASE_URL%landing/previews/umrah-map-desktop.webp" srcset="%BASE_URL%landing/previews/umrah-map-desktop.webp 1x, %BASE_URL%landing/previews/umrah-map-desktop@2x.webp 2x" width="264" height="618" alt="Open the offline map of Makkah" loading="lazy" decoding="async">
+              </picture>
+            </a>
+            <figcaption><span>Offline map</span><span class="desktop-only">Hotel, gate and meeting point saved</span></figcaption>
+          </figure>
+          <figure class="umrah-say">
+            <a href="%BASE_URL%app/#/umrah/rituals">
+              <picture class="preview-art">
+                <source media="(width < 1024px)" srcset="%BASE_URL%landing/previews/umrah-say-mobile.webp 1x, %BASE_URL%landing/previews/umrah-say-mobile@2x.webp 2x" width="160" height="363">
+                <img src="%BASE_URL%landing/previews/umrah-say-desktop.webp" srcset="%BASE_URL%landing/previews/umrah-say-desktop.webp 1x, %BASE_URL%landing/previews/umrah-say-desktop@2x.webp 2x" width="264" height="618" alt="Open the live saʿy guide" loading="lazy" decoding="async">
+              </picture>
+            </a>
+            <figcaption><span class="desktop-only">Live guide</span><span class="mobile-only">Live saʿy guide</span><span class="desktop-only">Saʿy laps count themselves</span></figcaption>
+          </figure>
         </div>
         <div class="three tiles dark-tiles">
           <article><span class="glyph"><img src="%BASE_URL%landing/umrah-clock.svg" alt="" width="22" height="22"></span><div><h3>Knows the time in Makkah</h3><p>See when to leave for Fajr, planned around your hotel.</p></div></article>
@@ -146,26 +196,29 @@
         <div class="two tiles modes">
           <article><h3>Adult</h3><p class="desktop-only">Short lessons, word meanings, and sources you can check.</p><p class="mobile-only">Calm, meaning-first, private.</p>
             <span class="mode-swatches mobile-only" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-            <figure class="device phone qaida-preview desktop-only"><img src="%BASE_URL%landing/qaida-adult.webp" srcset="%BASE_URL%landing/qaida-adult.webp 1x, %BASE_URL%landing/qaida-adult@2x.webp 2x" width="390" height="1210" alt="Adult mode in a Qaida lesson" loading="lazy" decoding="async"></figure></article>
+            <figure class="mode-preview preview-art desktop-only"><img src="%BASE_URL%landing/previews/mode-adult.webp" srcset="%BASE_URL%landing/previews/mode-adult.webp 1x, %BASE_URL%landing/previews/mode-adult@2x.webp 2x" width="344" height="550" alt="The Harakat lesson in Adult mode" loading="lazy" decoding="async"></figure></article>
           <article class="maktab" data-theme-preview="maktab"><h3>Maktab</h3><p class="desktop-only">Bigger letters, colour-coded harakat, stickers, and a takhti to write on.</p><p class="mobile-only">Like you’re 12: colours, takhti, stickers.</p>
             <span class="mode-swatches mobile-only" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-            <figure class="device phone qaida-preview desktop-only"><img src="%BASE_URL%landing/qaida-maktab.webp" srcset="%BASE_URL%landing/qaida-maktab.webp 1x, %BASE_URL%landing/qaida-maktab@2x.webp 2x" width="390" height="1210" alt="Maktab mode in the same Qaida lesson" loading="lazy" decoding="async"></figure></article>
+            <figure class="mode-preview preview-art desktop-only"><img src="%BASE_URL%landing/previews/mode-maktab.webp" srcset="%BASE_URL%landing/previews/mode-maktab.webp 1x, %BASE_URL%landing/previews/mode-maktab@2x.webp 2x" width="344" height="550" alt="The Harakat lesson in Maktab mode" loading="lazy" decoding="async"></figure></article>
         </div>
       </div></section>
       <section class="band" id="share"><div class="wrap">
         <div class="center intro"><p class="kicker">Share your progress</p><h2>Small wins are worth sharing</h2>
           <p class="lead desktop-only">Made a surah part of your salah? Turn a moment in your learning into an image for WhatsApp, Instagram, or Facebook, with a link so friends can start too. Prayer numbers stay hidden unless you choose to show them.</p>
           <p class="lead mobile-only">Turn a learned surah or a Quran word milestone into an image for WhatsApp or Instagram, with your link inside. Prayer numbers stay hidden unless you show them.</p></div>
-        <div class="three share-stories"><img src="%BASE_URL%landing/share-surah.webp" srcset="%BASE_URL%landing/share-surah.webp 1x, %BASE_URL%landing/share-surah@2x.webp 2x" width="360" height="640" alt="Surah learned share card" loading="lazy" decoding="async"><img src="%BASE_URL%landing/share-return.webp" srcset="%BASE_URL%landing/share-return.webp 1x, %BASE_URL%landing/share-return@2x.webp 2x" width="360" height="640" alt="Coming back share card" loading="lazy" decoding="async"><img src="%BASE_URL%landing/share-qaida.webp" srcset="%BASE_URL%landing/share-qaida.webp 1x, %BASE_URL%landing/share-qaida@2x.webp 2x" width="360" height="640" alt="Qaida share card" loading="lazy" decoding="async"></div>
+        <picture class="share-stories preview-art">
+          <source media="(width < 1024px)" srcset="%BASE_URL%landing/previews/stories-mobile.webp 1x, %BASE_URL%landing/previews/stories-mobile@2x.webp 2x" width="390" height="341">
+          <img src="%BASE_URL%landing/previews/stories-desktop.webp" srcset="%BASE_URL%landing/previews/stories-desktop.webp 1x, %BASE_URL%landing/previews/stories-desktop@2x.webp 2x" width="1200" height="564" alt="Three share cards for Quran words, a learned surah, and coming back to prayer" loading="lazy" decoding="async">
+        </picture>
         <ul class="checks share-points desktop-only"><li>Story, post and wide sizes</li><li>Created on your device</li><li>Awwab link on every card</li><li>Prayer counts hidden by default</li></ul>
       </div></section>
       <section class="band paper desktop-only" id="print"><div class="wrap">
         <div class="center intro"><p class="kicker">Phone · laptop · paper</p><h2>On your phone, your laptop, and your wall</h2><p class="lead">On a laptop it becomes a study desk. Qaida drills, word anatomy, and writing practice side by side. Print what you want on the wall.</p></div>
         <div class="print-preview">
-          <a class="laptop" href="%BASE_URL%app/#/learn"><figure class="device"><img src="%BASE_URL%landing/desktop.webp" srcset="%BASE_URL%landing/desktop.webp 1x, %BASE_URL%landing/desktop@2x.webp 2x" width="1440" height="900" alt="Open the desktop study plan" loading="lazy" decoding="async"></figure></a>
+          <a class="laptop preview-art" href="%BASE_URL%app/#/learn"><img src="%BASE_URL%landing/previews/laptop.webp" srcset="%BASE_URL%landing/previews/laptop.webp 1x, %BASE_URL%landing/previews/laptop@2x.webp 2x" width="1056" height="643" alt="Open the desktop study plan" loading="lazy" decoding="async"></a>
           <div class="paper-shots">
-            <a href="%BASE_URL%app/#/print/timetable"><img src="%BASE_URL%landing/print-timetable-a4.webp" srcset="%BASE_URL%landing/print-timetable-a4.webp 1x, %BASE_URL%landing/print-timetable-a4@2x.webp 2x" width="620" height="877" alt="Open the A4 prayer timetable" loading="lazy" decoding="async"></a>
-            <a href="%BASE_URL%app/#/print/surah-cards"><img src="%BASE_URL%landing/print-surah-cards-a4.webp" srcset="%BASE_URL%landing/print-surah-cards-a4.webp 1x, %BASE_URL%landing/print-surah-cards-a4@2x.webp 2x" width="620" height="877" alt="Open the A4 surah pocket cards" loading="lazy" decoding="async"></a>
+            <a href="%BASE_URL%app/#/print/timetable"><img src="%BASE_URL%landing/previews/timetable.webp" srcset="%BASE_URL%landing/previews/timetable.webp 1x, %BASE_URL%landing/previews/timetable@2x.webp 2x" width="179" height="263" alt="Open the A4 prayer timetable" loading="lazy" decoding="async"></a>
+            <a href="%BASE_URL%app/#/print/surah-cards"><img src="%BASE_URL%landing/previews/surah-cards.webp" srcset="%BASE_URL%landing/previews/surah-cards.webp 1x, %BASE_URL%landing/previews/surah-cards@2x.webp 2x" width="179" height="256" alt="Open the A4 surah pocket cards" loading="lazy" decoding="async"></a>
           </div>
         </div>
         <p class="print-caption center">Print a monthly timetable with your mosques’ jamaat times · a Ramadan timetable · <a href="%BASE_URL%app/#/print/takhti">Takhti tracing sheets</a> · surah pocket cards · an Umrah pocket guide</p>

@@ -77,14 +77,15 @@ main:focus { outline: 0; }
 .trust { display: flex; flex-wrap: wrap; gap: 10px 20px; color: var(--c-night-muted); font: var(--type-small); }
 .trust li::before { content: ""; flex: 0 0 16px; height: 16px; margin-block: 1px; background: url('/landing/figma-35-29-iconcheck.svg') center / contain no-repeat; }
 .trust li:last-child { width: 100%; }
-.hero-devices { position: relative; margin-top: 30px; }
-.device { background: var(--c-ink); border-radius: 33px; padding: 7px; box-shadow: var(--shadow-raised); min-width: 0; }
-.device img { display: block; width: 100%; height: auto; border-radius: 26px; background: var(--c-bg); }
-.phone { width: min(100%, 300px); margin-inline: auto; }
-.phone img { aspect-ratio: 390 / 844; object-fit: contain; }
-.qaida-preview img, .return-preview img, .plan-preview img { aspect-ratio: auto; }
-.hero-devices .primary-phone { position: relative; z-index: 1; width: 51.25%; margin: 0 0 0 5%; }
-.hero-devices .secondary-phone { position: absolute; top: 40px; left: 46.25%; width: 48.5%; margin: 0; }
+.preview-art { display: block; position: relative; min-width: 0; }
+.preview-art img, .paper-shots img { display: block; width: 100%; height: auto; }
+/* The exports include the Figma shadows outside each layout frame. */
+.hero-devices { aspect-ratio: 560 / 612; margin-top: 30px; }
+.hero-devices img {
+  position: absolute;
+  width: calc(100% * 590 / 560);
+  inset: calc(100% * -12 / 612) auto auto calc(100% * -15 / 560);
+}
 .verse { text-align: center; padding: 72px 0; }
 .verse .wrap { display: grid; gap: 12px; justify-items: center; }
 .quran-verse { font: 400 44px/80px var(--font-arabic); }
@@ -113,10 +114,16 @@ main:focus { outline: 0; }
 .copy h2 { font: 600 clamp(36px, 3.06vw, 44px)/1.182 var(--font-display); letter-spacing: -.023em; }
 .copy .lead { font-size: 18px; line-height: 28px; }
 .copy .checks { gap: 12px; font-size: 17px; line-height: 26px; }
-.feature-preview { display: grid; place-items: center; width: 100%; border-radius: var(--r-card); }
-.feature .phone, .modes .phone { display: grid; place-items: center; width: max-content; max-width: 100%; height: var(--preview-height, 618px); }
-.feature .phone img, .modes .phone img { width: auto; height: 100%; max-width: 100%; aspect-ratio: auto; object-fit: contain; min-height: 0; }
-#word { --preview-height: 588px; }
+.feature-preview { display: block; width: 100%; position: relative; }
+.feature-preview .preview-art { aspect-ratio: 560 / var(--preview-height, 618); }
+.feature-preview img {
+  position: absolute;
+  width: calc(100% * 604 / 560);
+  inset: calc(100% * -12 / var(--preview-height, 618)) auto auto calc(100% * -22 / 560);
+  pointer-events: none;
+}
+#word { --preview-height: 588; }
+#word .feature-preview img { width: 100%; left: 0; }
 #word .feature { min-height: 608px; }
 .text-link { font-weight: 700; color: var(--c-primary); min-height: 44px; display: inline-flex; align-items: center; gap: 5px; text-decoration: none; text-underline-offset: 4px; }
 .text-link:hover { text-decoration: underline; }
@@ -133,10 +140,23 @@ main:focus { outline: 0; }
 #umrah .intro { max-width: 780px; margin-bottom: 64px; gap: 16px; }
 #umrah .intro h2, #share .intro h2 { font: 600 clamp(36px, 3.06vw, 44px)/1.182 var(--font-display); }
 #umrah .intro .lead, #share .intro .lead { font-size: 18px; }
-.map-phones { align-items: start; gap: 56px; }
-.map-phones figure { display: grid; justify-items: center; gap: 12px; text-align: center; }
-.map-phones .phone { display: block; width: min(100%, 319px); }
-.map-phones figcaption { font: var(--type-small); color: var(--c-night-muted); }
+.map-phones {
+  display: grid;
+  grid-template-columns: minmax(0, 264px) minmax(0, 304px) minmax(0, 264px);
+  gap: 56px;
+  justify-content: center;
+  align-items: end;
+}
+.map-phones figure { display: grid; gap: 20px; min-width: 0; text-align: center; }
+.map-phones a { display: block; }
+.map-phones .preview-art { aspect-ratio: 264 / 555; }
+.map-phones img, .share-stories img, .paper-shots img { position: absolute; inset: 0; pointer-events: none; }
+.map-phones .umrah-now { grid-area: 1 / 2; }
+.map-phones .umrah-map { grid-area: 1 / 1; }
+.map-phones .umrah-say { grid-area: 1 / 3; }
+.map-phones .umrah-now .preview-art { aspect-ratio: 304 / 642; }
+.map-phones figcaption { position: relative; font: var(--type-small); color: var(--c-night-muted); }
+.map-phones figcaption span:first-child { color: var(--c-on-night); }
 .dark-tiles { margin-top: 64px; gap: 16px; }
 .dark-tiles article { display: flex; align-items: start; min-height: 200px; color: var(--c-on-night); background: var(--c-overlay-on-night); box-shadow: none; }
 .dark-tiles article h3 { font: 600 20px/26px var(--font-body); }
@@ -145,8 +165,9 @@ main:focus { outline: 0; }
 .umrah-benefits { display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; margin-top: 64px; color: var(--c-on-night); font: var(--type-small); }
 .umrah-benefits li::before { color: currentColor; }
 
-.modes article { min-height: 680px; --preview-height: 540px; }
+.modes article { position: relative; min-height: 680px; }
 .modes article h3 { font: 600 26px/32px var(--font-display); }
+.mode-preview { position: absolute; inset: 130px auto auto 50%; width: min(100%, 344px); translate: -50%; }
 .modes .maktab { background: var(--c-surface); color: var(--c-ink); border-radius: var(--r-card); }
 .modes .maktab p { color: var(--c-ink-muted); font-family: var(--font-body); }
 .mode-swatches i { width: 16px; height: 16px; border-radius: 4px; background: var(--c-primary); }
@@ -156,18 +177,24 @@ main:focus { outline: 0; }
 
 #share { background: var(--c-surface-alt); }
 #share .intro { max-width: 760px; margin-bottom: 56px; gap: 16px; }
-.share-stories { width: min(100%, 942px); gap: 32px; margin-inline: auto; }
-.share-stories img { display: block; width: 100%; height: auto; border-radius: var(--r-card); box-shadow: var(--shadow-raised); }
+.share-stories { aspect-ratio: 1200 / 520; }
 .share-points { display: flex; justify-content: center; flex-wrap: wrap; gap: 16px 28px; margin-top: 56px; font: var(--type-small); }
 
 .print-preview { display: grid; grid-template-columns: minmax(0, 968fr) minmax(0,179fr); gap: 40px; align-items: center; width: min(100%, 1187px); margin-inline: auto; }
-.laptop { width: 100%; display: grid; justify-items: center; text-decoration: none; }
-.laptop .device { display: grid; place-items: center; width: 90.7%; aspect-ratio: 878 / 541; grid-template-rows: minmax(0,1fr); border-radius: 19px; padding: 9px; }
-.laptop img { height: 100%; object-fit: contain; border-radius: 11px; }
-.laptop::after { content: ""; width: 100%; height: 14px; border-radius: 0 0 14px 14px; background: var(--c-ink); box-shadow: var(--shadow-raised); }
+.laptop { aspect-ratio: 968 / 555; }
+.laptop img {
+  position: absolute;
+  width: calc(100% * 1056 / 968);
+  inset: calc(100% * -12 / 555) auto auto calc(100% * -44 / 968);
+  pointer-events: none;
+}
 .paper-shots { display: grid; gap: 24px; }
-.paper-shots a { display: block; }
-.paper-shots img { display: block; width: 100%; height: auto; aspect-ratio: 210 / 297; object-fit: contain; background: var(--c-surface); border-radius: 2px; box-shadow: var(--shadow-card); }
+.paper-shots a { display: block; position: relative; aspect-ratio: 179 / 253; }
+@media (width >= 1024px) {
+  .map-phones figcaption span:first-child { display: block; margin-bottom: 4px; font-weight: 600; }
+  .umrah-now figcaption span:last-child { display: block; }
+  .umrah-now figcaption span:last-child::first-letter { text-transform: uppercase; }
+}
 .print-caption { margin-top: 48px; color: var(--c-ink-muted); font-size: 16px; }
 .print-caption a { text-underline-offset: 3px; }
 
@@ -194,7 +221,7 @@ main:focus { outline: 0; }
 .foot a { min-height: 18px; position: relative; }
 .foot a::after { content: ""; position: absolute; inset: -8px 0; }
 .foot-legal a { color: var(--c-on-night); display: inline; font-weight: 600; }
-@media (max-width: 1023px) {
+@media (width < 1024px) {
   .band { padding-block: 48px; }
   h2, .copy h2, #umrah .intro h2, #share .intro h2 { font: 600 28px/34px var(--font-display); letter-spacing: -.022em; }
   .mobile-only { display: initial; }
@@ -222,11 +249,8 @@ main:focus { outline: 0; }
   .trust { gap: 8px 14px; }
   .trust li { gap: 6px; }
   .trust li::before { flex-basis: 14px; height: 14px; margin-block: 2px; }
-  .hero-devices { margin-top: 0; }
-  .hero-devices .primary-phone { width: min(100%, 230px); margin-inline: auto; }
-  .hero-devices .secondary-phone { display: none; }
-  .device { border-radius: 28px; padding: 6px; }
-  .device img { border-radius: 22px; }
+  .hero-devices { width: min(100%, 350px); margin: 0 auto; aspect-ratio: 350 / 517; }
+  .hero-devices img { width: 100%; inset: 0; }
   .verse { padding-block: 40px; }
   .verse .wrap { gap: 8px; }
   .quran-verse { font: 400 30px/56px var(--font-arabic); }
@@ -234,10 +258,13 @@ main:focus { outline: 0; }
   .verse blockquote a { text-underline-offset: 3px; }
   .copy { gap: 12px; }
   .copy .lead, #umrah .intro .lead, #share .intro .lead { font-size: 16px; line-height: 24px; }
-  .feature { grid-template-columns: 1fr; gap: 12px; --preview-height: 485px; }
-  #word .feature { --preview-height: 485px; min-height: 0; }
+  .feature { grid-template-columns: 1fr; gap: 12px; }
+  .band:has(.feature-preview) { overflow: clip; }
+  #word .feature { min-height: 0; }
   .feature.reverse .copy { order: initial; }
-  .feature-preview { padding-block: 8px 24px; }
+  .feature-preview { width: min(100%, 350px); margin-inline: auto; }
+  .feature-preview .preview-art { aspect-ratio: 350 / 517; }
+  .feature-preview img { width: 100%; inset: 0; }
   #learn, #privacy { background: var(--c-surface); }
   #plan { background: var(--c-bg); }
 
@@ -245,13 +272,14 @@ main:focus { outline: 0; }
   #umrah > .wrap { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 16px; row-gap: 28px; }
   #umrah .intro { grid-area: 1 / 1 / 2 / -1; margin-bottom: 0; gap: 28px; }
   .map-phones { display: contents; }
-  .map-phones figure { gap: 10px; align-content: start; grid-row: 4; }
-  .map-phones figure:not(.umrah-now) { padding-top: 12px; }
-  .map-phones .phone { width: min(100%, 160px); border-radius: 24px; padding: 5px; }
-  .map-phones .phone img { border-radius: 19px; }
-  .map-phones .umrah-now { grid-area: 2 / 1 / 3 / -1; padding-block: 8px; }
-  .map-phones .umrah-now .phone { width: min(100%, 249px); border-radius: 28px; padding: 6px; }
-  .map-phones .umrah-now .phone img { border-radius: 22px; }
+  .map-phones figure { gap: 10px; align-content: start; justify-self: center; width: min(100%, 160px); padding-top: 12px; }
+  .map-phones .umrah-map { grid-area: 4 / 1; }
+  .map-phones .umrah-say { grid-area: 4 / 2; }
+  .map-phones .preview-art { aspect-ratio: 160 / 335; }
+  .map-phones .umrah-now { grid-area: 2 / 1 / 3 / -1; width: min(100%, 253px); padding-block: 8px; }
+  .map-phones .umrah-now .preview-art { aspect-ratio: 253 / 523; }
+  .map-phones .umrah-now figcaption { margin-inline: -8px; }
+  .umrah-say .mobile-only { color: var(--c-on-night); }
   .dark-tiles { grid-area: 3 / 1 / 4 / -1; grid-template-columns: 1fr; gap: 10px; margin: 0; }
   .dark-tiles article { min-height: 0; padding: 14px; gap: 12px; }
   .dark-tiles .glyph { flex-basis: 36px; height: 36px; }
@@ -264,11 +292,8 @@ main:focus { outline: 0; }
 
   #share { padding-block: 56px; }
   #share .intro, #modes .intro, #privacy .intro { text-align: start; margin-bottom: 12px; gap: 12px; }
-  #share .intro { margin-bottom: 16px; gap: 16px; }
-  .share-stories { display: flex; justify-content: center; align-items: center; gap: 0; min-height: 330px; }
-  .share-stories img { position: relative; width: min(47%, 164px); border-radius: var(--r-control); }
-  .share-stories img:nth-child(2) { z-index: 1; margin-inline: -36px; }
-  .share-stories img:first-child, .share-stories img:last-child { width: min(43%, 148px); }
+  #share .intro { text-align: center; margin-bottom: 16px; gap: 16px; }
+  .share-stories { width: min(390px, calc(100% + 40px)); aspect-ratio: 390 / 330; left: 50%; translate: -50%; }
   .modes { gap: 10px; }
   .modes article, #privacy .tiles article { min-height: 0; padding: 20px 16px; gap: 6px; }
   .modes article h3 { font: var(--type-display-m); }
