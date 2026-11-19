@@ -4,6 +4,7 @@ import { ArrowLeft, CalendarDays, Compass, Download, Heart, MapPin, Plus } from 
 import { toast } from "sonner";
 import { ArabicText } from "@/components/ArabicText";
 import { SectionNav } from "@/components/Surface";
+import { ShareLink } from "@/components/ShareLink";
 import { VerseAudio } from "@/components/VerseAudio";
 import { useRecord } from "@/hooks/use-awwab";
 import { duration, formatTime } from "@/lib/dates";
@@ -140,7 +141,7 @@ export function UmrahNow() {
       </div>
       <Link className="action soft" to="/umrah/focus">Open Haram focus</Link>
     </section>
-    <Link className="action soft" to="/share?template=umrah&from=umrah">Share an Umrah card</Link>
+    <ShareLink className="action soft" to="/share?template=umrah&from=umrah">Share an Umrah card</ShareLink>
   </>;
 }
 

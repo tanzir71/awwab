@@ -38,6 +38,7 @@ export interface ShareCard {
   tiles?: ShareTile[];
   activity?: number[];
   numbers?: { title: string; label: string };
+  tagline?: string;
 }
 
 export interface ShareModel {
@@ -49,7 +50,7 @@ export interface ShareModel {
 }
 
 export const shareUrl = (id: TemplateId) => SHARE_URL + "?ref=share-" + id;
-const footerLink = SHARE_URL.replace(/^https:\/\//, "").replace(/\/$/, "");
+export const shareFooterLink = SHARE_URL.replace(/^https:\/\//, "").replace(/\/$/, "");
 const arabicFont = '"Noto Sans Arabic Variable"';
 const wordmarkFont = '"Noto Sans Variable"';
 const banglaFont = '"Noto Sans Bengali Variable"';
@@ -350,8 +351,9 @@ export async function drawShare(canvas: HTMLCanvasElement, model: ShareModel) {
   const footerTop = h - (format === "wide" ? 64 : 68);
   paint.write("awwab", margin, footerTop + 12, 26, 650, { face: "wordmark", align: "left", width: 120, maxLines: 1 });
   ctx.drawImage(fatha, margin + 2.94, footerTop + 12);
-  paint.write("FREE · WORKS OFFLINE · NO ACCOUNT", w - margin, footerTop + 2, 10, 700, { align: "right", width: 216, color: "muted", letterSpacing: ".5px", maxLines: 1 });
-  paint.write(footerLink, w - margin, footerTop + 20, 13, 600, { align: "right", width: 218, maxLines: 1 });
+  paint.write((card.tagline ?? "Free · Works offline · No account").toUpperCase(), w - margin, footerTop + 2, 10, 700,
+    { align: "right", width: 216, color: "muted", letterSpacing: bangla.test(card.tagline ?? "") ? "0px" : ".5px", maxLines: 1 });
+  paint.write(shareFooterLink, w - margin, footerTop + 20, 13, 600, { align: "right", width: 218, maxLines: 1 });
 }
 
 export function imageFile(canvas: HTMLCanvasElement, id: ShareModel["template"]) {

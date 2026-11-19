@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { ArabicText } from "@/components/ArabicText";
 import { DesignIcon } from "@/components/DesignIcon";
 import { PracticeHeader } from "@/components/PracticeHeader";
+import { ShareLink } from "@/components/ShareLink";
 import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useDesktop, usePrayerLogs, useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
@@ -116,7 +117,7 @@ function MobileReturn({ settings, now }: ReturnProps) {
       <span><strong>{t("qadaTitle")}</strong><small>{t("qadaSummary", { left: totalLeft, made: totalMade, pace: plan.withEachPrayer ? t("qadaEach") : t("qadaPace", { count: plan.dailyGoal }) })}</small></span>
       <DesignIcon name={icons + "-chevron"} size={20} />
     </Link>
-    <Link to="/share?template=return&from=return" className="text-button return-share">{t("returnShare")}</Link>
+    <ShareLink to="/share?template=return&from=return" className="text-button return-share">{t("returnShare")}</ShareLink>
   </div>;
 }
 
@@ -204,7 +205,7 @@ function ReturnHistory({ returnDays }: { returnDays: string[] }) {
     {returnDays.length ? <ol className="compact-stack">{returnDays.slice().reverse().map(date => <li key={date} className="list-row">
       <time dateTime={date}>{formatDay(date, historyDate, locale)}</time>
     </li>)}</ol> : <p className="muted">{t("returnDeskHistoryEmpty")}</p>}
-    <Link to="/share?template=return&from=return" className="text-button">{t("returnShare")}</Link>
+    <DialogClose asChild><ShareLink to="/share?template=return&from=return" className="text-button">{t("returnShare")}</ShareLink></DialogClose>
   </>;
 }
 

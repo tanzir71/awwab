@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useState, type ReactNode } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { DesignIcon, Wordmark } from "./DesignIcon";
+import { ShareLink } from "./ShareLink";
 import { WordPanel } from "./WordPanel";
 import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
 import { useRecord, usePrayerLogs } from "@/hooks/use-awwab";
@@ -242,7 +243,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
         {settings.mode === "adult" && <>
           <Link className="action" to={reviewDestination(nextReview ?? due[0]?.[0])}><DesignIcon name="desk-play" size={14} />{t("startReview")}{due.length ? ` · ${studyHome ? dueSurahs || due.length : due.length}` : ""}</Link>
           <Link className="action soft" to="/today?log=1"><DesignIcon name="desk-plus" size={14} />{t("logPrayer")}</Link>
-          <Link className="action light" to={today ? "/share?from=today" : returnDesktop ? "/share?template=return&from=return" : "/share?from=learn"}><DesignIcon name="desk-share" size={14} />{t("share")}</Link>
+          <ShareLink className="action light" to={today ? "/share?from=today" : returnDesktop ? "/share?template=return&from=return" : "/share?from=learn"}><DesignIcon name="desk-share" size={14} />{t("share")}</ShareLink>
         </>}
         <Link className="icon-button" to="/you/reminders" aria-label={t("reminders")}><DesignIcon name="desk-bell" size={18} /></Link>
       </header>}

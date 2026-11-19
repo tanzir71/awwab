@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { DesignIcon } from "@/components/DesignIcon";
 import { ShareArtwork } from "@/components/ShareArtwork";
+import { ShareLink } from "@/components/ShareLink";
 import { useRecord } from "@/hooks/use-awwab";
 import { shareChapters, useShareCards } from "@/hooks/use-share-cards";
 import { useCopy } from "@/lib/copy";
@@ -70,7 +71,7 @@ export function Milestone({ settings, now }: { settings: Settings; now: Date }) 
       <ShareArtwork model={model} label={t("shareCardLabel", { title: moment.title })} />
     </div>
     <div className="moment-actions">
-      <Link className="action" to={share}>{t("shareThis")}</Link>
+      <ShareLink className="action" to={share}>{t("shareThis")}</ShareLink>
       <Link className="action light" to={moment.next}>{moment.continueLabel}</Link>
     </div>
   </section>;

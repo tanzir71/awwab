@@ -454,14 +454,52 @@ progress::-moz-progress-bar { background: var(--control-primary); }
 }
 .share-switch .compact-stack { gap: 2px; }
 .share-switch small { color: var(--c-ink-muted); }
-.share-switch-off, .share-switch-on { flex: 0 0 44px; height: 26px; }
-.share-switch-on { display: flex; align-items: center; justify-content: flex-end; padding: 3px; border-radius: var(--r-pill); background: var(--control-primary); }
-.share-switch-on::before { content: ""; width: 20px; height: 20px; border-radius: var(--r-pill); background: var(--c-on-primary); }
+.share-switch-track { flex: 0 0 44px; height: 26px; display: flex; align-items: center; padding: 3px; border-radius: var(--r-pill); background: var(--c-surface-alt); }
+.share-switch-track::before { content: ""; height: 100%; aspect-ratio: 1; border-radius: var(--r-pill); background: var(--c-on-primary); }
+.share-switch[aria-checked="true"] .share-switch-track { justify-content: flex-end; background: var(--control-primary); }
 .share-actions .action, .moment-actions .action { min-height: 50px; padding-block: 12px; font: var(--type-body-strong); }
 .share-actions { margin-top: 12px; }
 .share-privacy, .share-copy-status { text-align: center; }
 .share-copy-status { overflow-wrap: anywhere; }
 .share-copy-button { display: none; }
+:root .share-desktop-overlay { background: color-mix(in srgb, var(--c-ink) 55%, transparent); }
+:root .awwab-dialog.share-desktop-dialog {
+  grid-template-columns: minmax(0, 329fr) minmax(0, 467fr);
+  width: min(calc(100vw - 48px), 880px); max-width: none; max-height: calc(100svh - 40px);
+  padding: 28px; gap: 28px; border-radius: var(--r-sheet);
+}
+.share-desktop-gallery {
+  align-self: start; display: grid; gap: 4px; min-width: 0; padding: 24px 24px 12px;
+  border-radius: var(--r-card); background: var(--c-surface-alt);
+}
+.share-desktop-preview { display: grid; place-items: center; height: clamp(280px, calc(100svh - 142px), 500px); }
+.share-desktop-preview .share-artwork { width: auto; max-width: 100%; max-height: 100%; border-radius: var(--r-card); box-shadow: var(--shadow-card); }
+.share-desktop-gallery .share-dots { gap: 0; }
+.share-desktop-gallery .share-dots button { width: 12px; height: 22px; display: grid; place-items: center; border-radius: var(--r-pill); }
+.share-desktop-gallery .share-dots button::after { content: ""; width: 6px; height: 6px; border-radius: var(--r-pill); background: var(--c-surface); }
+.share-desktop-gallery .share-dots button[aria-pressed="true"] { width: 24px; }
+.share-desktop-gallery .share-dots button[aria-pressed="true"]::after { width: 18px; background: var(--control-primary); }
+.share-desktop-controls { display: flex; min-width: 0; flex-direction: column; gap: 16px; }
+.share-desktop-header { align-items: start; min-height: 28px; }
+.share-desktop-header h2 { font: 650 24px/28px var(--font-display); letter-spacing: 0; outline: none; }
+.share-desktop-header .share-close { width: 32px; min-height: 32px; margin: -3px -5px -1px 0; color: var(--c-ink-muted); }
+.share-desktop-controls-group { display: grid; gap: 14px; }
+.share-desktop-templates .chip { min-height: 30px; padding: 4px 12px; justify-content: center; font: var(--type-small); font-weight: 600; }
+.share-desktop-templates .chip[aria-pressed="true"] { background: var(--control-primary); color: var(--c-on-primary); }
+.share-desktop-templates .chip:hover { filter: brightness(.95); }
+.share-desktop-controls .share-format-row .action {
+  min-height: 48px; flex-direction: column; gap: 0; padding-block: 6px; font: var(--type-small); font-weight: 600; color: var(--c-ink-muted);
+}
+.share-desktop-controls .share-format-row .action[aria-pressed="true"] { color: var(--c-ink); }
+.share-desktop-controls .share-format-row .action small, .share-desktop-controls .share-switch small, .share-desktop-controls .share-desktop-privacy { font-size: 12px; line-height: 16px; color: var(--c-ink-muted); }
+.share-desktop-controls .share-options { padding: 4px 14px; }
+.share-desktop-controls .share-switch { min-height: 49px; font: var(--type-small); }
+.share-desktop-controls .share-switch .compact-stack { gap: 0; }
+.share-desktop-controls .share-switch strong { font-weight: 600; }
+.share-desktop-controls .share-switch-track { flex-basis: 40px; height: 24px; }
+.share-desktop-controls .share-actions { margin-top: auto; padding-top: 8px; }
+.share-desktop-controls .share-actions .action { min-height: 40px; padding: 8px 6px; font: var(--type-small); font-weight: 600; }
+.share-desktop-controls .share-copy-status { text-align: start; }
 .share-moment {
   position: relative; display: grid; grid-template-rows: 1fr auto; gap: 20px;
   min-height: 100svh; padding: max(34px, env(safe-area-inset-top)) 20px max(28px, env(safe-area-inset-bottom));
