@@ -195,7 +195,7 @@ main:focus { outline: 0; }
   .umrah-now figcaption span:last-child { display: block; }
   .umrah-now figcaption span:last-child::first-letter { text-transform: uppercase; }
 }
-.print-caption { margin-top: 48px; color: var(--c-ink-muted); font-size: 16px; }
+.print-caption { position: relative; margin-top: 48px; color: var(--c-ink-muted); font-size: 16px; }
 .print-caption a { text-underline-offset: 3px; }
 
 #privacy .tiles article { min-height: 250px; }
