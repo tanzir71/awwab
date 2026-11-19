@@ -180,6 +180,7 @@
   .return-desk-column .return-hope .arabic-text { width: fit-content; font: 400 21px/30px var(--font-arabic); }
   .return-desk-column .return-hope .word-chip { min-width: 24px; min-height: 36px; padding: 0 2px; }
   .return-desk-reflection-trigger { grid-column: 1 / -1; justify-self: start; }
+  .return-history-back { justify-self: start; }
 
   .qada-desk-summary { gap: 8px; }
   .qada-desk-back { justify-self: start; }

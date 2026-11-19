@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { X } from "lucide-react";
 import { toast } from "sonner";
@@ -134,10 +134,32 @@ function DesktopReturn({ settings, now }: ReturnProps) {
   const wide = useDesktop(1280);
   const word = useUi(state => state.word);
   const [reflectionOpen, setReflectionOpen] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const historyButton = useRef<HTMLButtonElement>(null);
+  const backButton = useRef<HTMLButtonElement>(null);
+  const returningFromHistory = useRef(false);
   const day = dateKey(now, settings.city.timeZone);
+  const stats = prayerStatistics(usePrayerLogs(), day);
   const inlineReflection = wide && !word;
 
-  useEffect(() => { if (word) setReflectionOpen(false); }, [word]);
+  useEffect(() => {
+    if (word || wide) {
+      setReflectionOpen(false);
+      setShowHistory(false);
+    }
+  }, [word, wide]);
+  useLayoutEffect(() => {
+    if (showHistory) backButton.current?.focus();
+    else if (returningFromHistory.current) {
+      returningFromHistory.current = false;
+      historyButton.current?.focus();
+    }
+  }, [showHistory]);
+
+  function backToReflection() {
+    returningFromHistory.current = true;
+    setShowHistory(false);
+  }
 
   return <div className="return-desk" data-reflection={inlineReflection}>
     <div className="return-desk-column">
@@ -145,28 +167,52 @@ function DesktopReturn({ settings, now }: ReturnProps) {
       <SayyidPath />
     </div>
     <Qada settings={settings} now={now} desktop embedded />
-    {inlineReflection ? <ReturnReflection day={day} /> : <Dialog open={reflectionOpen} onOpenChange={setReflectionOpen}>
+    {inlineReflection ? <ReturnReflection day={day} stats={stats} /> : <Dialog open={reflectionOpen} onOpenChange={open => {
+      if (!open) setShowHistory(false);
+      setReflectionOpen(open);
+    }}>
       <DialogTrigger asChild><button type="button" className="action soft return-desk-reflection-trigger">{t("returnDeskReflection")}</button></DialogTrigger>
       <DialogContent className="awwab-dialog desktop-detail-drawer return-desk-drawer" overlayClassName="desktop-detail-overlay" showCloseButton={false}
         aria-describedby={undefined} onCloseAutoFocus={event => {
           if (!useUi.getState().word) return;
           event.preventDefault();
           document.querySelector<HTMLButtonElement>(".word-side .anatomy-close")?.focus();
+        }} onEscapeKeyDown={event => {
+          if (!showHistory) return;
+          event.preventDefault();
+          backToReflection();
         }}>
-        <header className="row-between"><DialogTitle>{t("returnDeskReflection")}</DialogTitle>
+        <header className="row-between"><DialogTitle>{t(showHistory ? "returnDeskHistoryTitle" : "returnDeskReflection")}</DialogTitle>
           <DialogClose asChild><button type="button" className="icon-button" aria-label={t("qadaClose")}><X size={20} /></button></DialogClose>
         </header>
-        <ReturnReflection day={day} />
+        {showHistory ? <>
+          <button type="button" ref={backButton} className="text-button return-history-back" onClick={backToReflection}>{t("back")} · {t("returnDeskReflection")}</button>
+          <ReturnHistory returnDays={stats.returnDays} />
+        </> : <ReturnReflection day={day} stats={stats} historyTrigger={
+          <button type="button" ref={historyButton} className="text-button" onClick={() => setShowHistory(true)}>{t("returnDeskHistory")}</button>
+        } />}
       </DialogContent>
     </Dialog>}
   </div>;
 }
 
-function ReturnReflection({ day }: { day: string }) {
+const historyDate = { day: "numeric", month: "short", year: "numeric" } as const;
+
+function ReturnHistory({ returnDays }: { returnDays: string[] }) {
+  const { language, t } = useCopy();
+  return <>
+    {returnDays.length ? <ol className="compact-stack">{returnDays.slice().reverse().map(date => <li key={date} className="list-row">
+      <time dateTime={date}>{formatDay(date, historyDate, language)}</time>
+    </li>)}</ol> : <p className="muted">{t("returnDeskHistoryEmpty")}</p>}
+    <Link to="/share?template=return&from=return" className="text-button">{t("returnShare")}</Link>
+  </>;
+}
+
+function ReturnReflection({ day, stats: { returnDays, returns }, historyTrigger }: {
+  day: string; stats: ReturnType<typeof prayerStatistics>; historyTrigger?: ReactNode;
+}) {
   const { language, t } = useCopy();
   const number = new Intl.NumberFormat(language);
-  const { returnDays, returns } = prayerStatistics(usePrayerLogs(), day);
-  const dateOptions = { day: "numeric", month: "short", year: "numeric" } as const;
   const weeks = Array.from({ length: 10 }, (_, index) => {
     const until = addDays(day, (index - 9) * 7);
     const from = addDays(until, -6);
@@ -177,23 +223,20 @@ function ReturnReflection({ day }: { day: string }) {
   return <div className="return-desk-column">
     <section className="card return-desk-history">
       <header className="row-between"><h2>{t("returnDeskReturns")}</h2>
-        <Dialog>
+        {historyTrigger ?? <Dialog>
           <DialogTrigger asChild><button type="button" className="text-button">{t("returnDeskHistory")}</button></DialogTrigger>
           <DialogContent className="awwab-dialog return-history-dialog" aria-describedby={undefined} showCloseButton={false}>
             <header className="row-between"><DialogTitle>{t("returnDeskHistoryTitle")}</DialogTitle>
               <DialogClose asChild><button type="button" className="icon-button" aria-label={t("qadaClose")}><X size={20} /></button></DialogClose>
             </header>
-            {returnDays.length ? <ol className="compact-stack">{returnDays.slice().reverse().map(date => <li key={date} className="list-row">
-              <time dateTime={date}>{formatDay(date, dateOptions, language)}</time>
-            </li>)}</ol> : <p className="muted">{t("returnDeskHistoryEmpty")}</p>}
-            <Link to="/share?template=return&from=return" className="text-button">{t("returnShare")}</Link>
+            <ReturnHistory returnDays={returnDays} />
           </DialogContent>
-        </Dialog>
+        </Dialog>}
       </header>
       <div className="return-desk-history-total"><strong>{number.format(returns)}</strong><small>{t("returnDeskReturnedTimes", { count: returns })}</small></div>
       <ol className="return-desk-bars" aria-label={t("returnDeskWeeks")}>
         {weeks.map(({ from, count }) => {
-          const label = t("returnDeskWeek", { date: formatDay(from, dateOptions, language), count });
+          const label = t("returnDeskWeek", { date: formatDay(from, historyDate, language), count });
           return <li key={from} title={label} data-active={count > 0} style={{ "--bar-height": (100 * count / maxWeeks) + "%" } as CSSProperties}>
             <span className="sr-only">{label}</span>
           </li>;
