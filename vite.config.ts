@@ -5,7 +5,9 @@ import { resolve } from "node:path";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { ArabicText } from "./src/components/ArabicText";
+import { wordAnatomy } from "./src/lib/wordAnatomy";
 import returnCopy from "./docs/content/return.json";
+import anatomySample from "./docs/content/word-anatomy.sample.json";
 import onboarding from "./docs/content/onboarding.json";
 
 const base = "/awwab/";
@@ -41,8 +43,15 @@ export default defineConfig(({ mode }) => ({
           text: returnCopy.welcome.arabic,
           wordLink: position => `${base}app/#/sources?word=${position}`,
         }));
-        const withVerse = html.replace("<!-- awwab-welcome-verse -->", verse);
-        return mode === "preview" ? withVerse.replaceAll(">Open awwab<", ">App preview<") : withVerse;
+        const wordLink = () => `${base}app/#/learn/surahs/103?anatomy=103:1:1`;
+        const tiles = wordAnatomy(anatomySample.word).letters.map(tile => renderToStaticMarkup(createElement("div", {
+          className: "landing-letter-tile", "data-silent": tile.silent, style: { "--mark-color": `var(--c-${tile.color})` },
+        }, createElement(ArabicText, { text: tile.glyph, compact: true, wordLink }),
+        createElement("small", { dir: "ltr" }, tile.name), createElement("small", { dir: "ltr" }, tile.mark))));
+        const asrWord = renderToStaticMarkup(createElement(ArabicText, { text: anatomySample.word, compact: true, wordLink }));
+        const content = html.replace("<!-- awwab-welcome-verse -->", verse)
+          .replace("<!-- awwab-letter-tiles -->", tiles.join("")).replace("<!-- awwab-asr-word -->", asrWord);
+        return mode === "preview" ? content.replaceAll(">Open awwab<", ">App preview<") : content;
       },
     },
     react(),
