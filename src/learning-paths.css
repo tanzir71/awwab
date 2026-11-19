@@ -272,5 +272,14 @@
   .app-shell:has(.word-side) :is(.speak-workspace-nav, .speak-workspace-side) { display: none; }
 }
 .grammar-page .roots-patterns > .grammar-word { grid-template-columns: minmax(0, 1fr) auto; }
+.grammar-examples { display: grid; gap: 8px; }
+.grammar-example-note { grid-column: 1 / -1; }
+.grammar-page[data-course="sentence"] .roots-spot { align-content: start; }
+.grammar-page[data-course="sentence"] .roots-spot .arabic-text { min-width: 0; }
+.grammar-page[data-course="sentence"] .roots-spot .arabic-line { flex-wrap: wrap; }
+@media (min-width: 1024px) {
+  .grammar-page[data-course="sentence"] { max-width: 940px; }
+  .grammar-page[data-course="sentence"] .grammar-examples { grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
+}
 .grammar-index { padding-inline-start: 40px; }
 .grammar-index a { min-height: 44px; color: var(--c-ink); gap: 8px; }

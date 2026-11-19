@@ -9,6 +9,7 @@ import { reviewDestination } from "./studyDesk";
 import { normalizeWord, splitArabicWords } from "./wordAnatomy";
 import content from "../../docs/content/roots-and-patterns.json";
 import grammar from "../../docs/content/grammar-foundations.json";
+import sentence from "../../docs/content/sentence-structure.json";
 import { correctTajweedSamples, tajweedExcerpt, tajweedLessons, tajweedPracticeSamples, tajweedProgress, tajweedReviewId } from "./tajweed";
 import { newReview } from "./reviews";
 import { practiceChapters, readingPortions } from "./readingPractice";
@@ -96,6 +97,13 @@ describe("Learning path progress", () => {
       for (const { ayah: [chapter, ayah, first, last], words, answer } of grammar.lessons) {
         expect(excerpt(chapter, ayah, first, last, script)).toHaveLength(last - first + 1);
         expect(words[answer]).toBeDefined();
+      }
+      for (const { id, examples, words, answer } of sentence.lessons) {
+        for (const { ayah: [chapter, ayah, first, last] } of examples) {
+          expect(excerpt(chapter, ayah, first, last, script)).toHaveLength(last - first + 1);
+        }
+        expect(words[answer]).toBeDefined();
+        expect(reviewDestination(`sentence:${id}`)).toBe(`/learn/paths/understand/5/${id}`);
       }
       expect(normalizeWord(excerpt(104, 4, 2, 2, script)[0])).toContain("ينبذ");
     }

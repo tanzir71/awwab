@@ -49,4 +49,6 @@ export const patternReviewPrefix = "pattern:ktb:";
 export const patternPracticePath = pathUrl("understand", 3) + "?practice";
 export const grammarReviewPrefix = "grammar:";
 export const grammarPath = pathUrl("understand", 2);
+export const sentenceStructurePath = pathUrl("understand", 5);
+export const sentenceReviewPrefix = "sentence:";
 export const phraseReviewPrefix = "phrase:";

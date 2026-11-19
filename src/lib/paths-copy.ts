@@ -3,6 +3,10 @@ import type { MessageCatalog } from "./copy";
 export const pathsMessages: MessageCatalog = {
   grammarTitle: { en: "Grammar foundations", bn: "ব্যাকরণের ভিত্তি" },
   grammarSubtitle: { en: "Understand · Level 2", bn: "অর্থ বুঝি · দ্বিতীয় ধাপ" },
+  sentenceTitle: { en: "Sentence structure", bn: "বাক্যের গঠন" },
+  sentenceSubtitle: { en: "Understand · Level 5", bn: "অর্থ বুঝি · পঞ্চম ধাপ" },
+  sentenceTafsirSource: { en: "Ibn Kathīr’s tafsīr · {ref}", bn: "ইবন কাসিরের তাফসির · {ref}" },
+  sentenceTafsirNote: { en: "A note from the tafsīr", bn: "তাফসির থেকে একটি টীকা" },
   grammarCompare: { en: "Compare your choice with {word}.", bn: "আপনার বাছাইটি {word}-এর সঙ্গে মিলিয়ে দেখুন।" },
   lessonCorrect: { en: "That’s right.", bn: "ঠিক হয়েছে।" },
   pathsLessonProgress: { en: "{count, number}/{total, number} lessons complete", bn: "{total, number}টির মধ্যে {count, number}টি পাঠ শেষ" },
