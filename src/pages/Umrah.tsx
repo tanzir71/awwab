@@ -1,10 +1,12 @@
 import { Suspense, lazy, useEffect, useRef, useState } from "react";
-import { Link, NavLink, Outlet, useOutletContext } from "react-router-dom";
-import { ArrowLeft, CalendarDays, Compass, Download, Heart, MapPin, Plus } from "lucide-react";
+import { Link, NavLink, Outlet, useNavigate, useOutletContext } from "react-router-dom";
+import { ArrowLeft, Compass, Download, Heart, MapPin, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { ArabicText } from "@/components/ArabicText";
 import { SectionNav } from "@/components/Surface";
 import { ShareLink } from "@/components/ShareLink";
+import { UmrahPreparation } from "@/components/UmrahPreparation";
+import { UmrahTripForm, UmrahTripImport } from "@/components/UmrahTripForm";
 import { VerseAudio } from "@/components/VerseAudio";
 import { useRecord } from "@/hooks/use-awwab";
 import { duration, formatTime } from "@/lib/dates";
@@ -25,6 +27,7 @@ const marwah = pins.find(item => item.zone === "marwah");
 const mataf = pins.find(item => item.zone === "mataf");
 const haram = pins.find(item => item.zone === "haram");
 const gates = pins.filter(item => item.id.startsWith("gate-"));
+const gateNames = gates.map(gate => gate.title);
 type Trip = typeof initialTrip;
 type TripUpdater = (update: (trip: Trip) => Trip) => Promise<void>;
 
@@ -32,7 +35,7 @@ interface UmrahContext { trip: Trip; now: Date; point?: Coord; save: TripUpdater
 const useTrip = () => useOutletContext<UmrahContext>();
 const localTime = (date: Date) => formatTime(date, makkah.timeZone);
 
-export function UmrahShell({ now }: { now: Date }) {
+export function UmrahShell({ now, desktop }: { now: Date; desktop: boolean }) {
   const trip = useRecord("umrah", initialTrip);
   const [point, setPoint] = useState<Coord>();
   const [locationError, setLocationError] = useState("");
@@ -43,7 +46,7 @@ export function UmrahShell({ now }: { now: Date }) {
   const configured = Boolean(trip.start && trip.end);
 
   useEffect(() => {
-    if (!trip.gps) return;
+    if (desktop || !trip.gps) return;
     if (!navigator.geolocation) { setLocationError("Location is unavailable on this device."); return; }
     let last: { point: Coord; at: number } | undefined;
     let traveled = 0;
@@ -76,7 +79,9 @@ export function UmrahShell({ now }: { now: Date }) {
     }, () => setLocationError("Location signal unavailable. You can still use the manual guide."),
     { enableHighAccuracy: true, maximumAge: 8000, timeout: 18000 });
     return () => { navigator.geolocation.clearWatch(watch); setPoint(undefined); setLocationError(""); };
-  }, [trip.gps]);
+  }, [desktop, trip.gps]);
+
+  if (desktop) return <UmrahPreparation trip={trip} gates={gateNames} />;
 
   const tabs = [
     { name: "Now", path: "/umrah" }, { name: "Rituals", path: "/umrah/rituals" }, { name: "Map", path: "/umrah/map" },
@@ -248,42 +253,12 @@ export function UmrahDuas() {
 }
 
 export function UmrahPlan() {
-  const { trip, save } = useTrip();
-  const [error, setError] = useState("");
+  const { trip } = useTrip();
+  const navigate = useNavigate();
   return <>
     <SectionNav title="Your Umrah trip" back="/umrah" />
-    <form className="card stack" onSubmit={event => {
-      event.preventDefault();
-      const values = new FormData(event.currentTarget);
-      const start = String(values.get("start"));
-      const end = String(values.get("end"));
-      if (end < start) { setError("Pick an end date on or after the start date."); return; }
-      void save(old => ({
-        ...old, start, end, group: String(values.get("group")).trim(),
-        hotel: { ...old.hotel, name: String(values.get("hotel")).trim(), room: String(values.get("room")).trim() },
-        walk: Number(values.get("walk")), crowd: Number(values.get("crowd")), iqamah: Number(values.get("iqamah")),
-        gate: String(values.get("gate")).trim(),
-      }));
-      setError("");
-      toast("Trip plan saved on this device.");
-    }}>
-      <div className="equal-row">
-        <label className="field">Start<input name="start" type="date" required defaultValue={trip.start} /></label>
-        <label className="field">End<input name="end" type="date" required defaultValue={trip.end} /></label>
-      </div>
-      <label className="field">Hotel name<input name="hotel" defaultValue={trip.hotel.name} maxLength={120} /></label>
-      <label className="field">Room (optional)<input name="room" defaultValue={trip.hotel.room} maxLength={25} /></label>
-      <label className="field">Group (optional)<input name="group" defaultValue={trip.group} maxLength={120} /></label>
-      <label className="field">Entry gate<input name="gate" defaultValue={trip.gate} list="haram-gates" maxLength={120} /></label>
-      <datalist id="haram-gates">{gates.map(gate => <option key={gate.id} value={gate.title} />)}</datalist>
-      <div className="form-grid">
-        <label className="field">Walk minutes<input type="number" name="walk" min="0" max="120" required defaultValue={trip.walk} /></label>
-        <label className="field">Crowd buffer<input type="number" name="crowd" min="0" max="90" required defaultValue={trip.crowd} /></label>
-        <label className="field">Iqāmah offset<input type="number" name="iqamah" min="0" max="90" required defaultValue={trip.iqamah} /></label>
-      </div>
-      {error && <p role="alert">{error}</p>}
-      <button className="action"><CalendarDays size={18} /> Save trip plan</button>
-    </form>
+    <UmrahTripForm trip={trip} gates={gateNames} />
+    <UmrahTripImport onImported={() => navigate("/umrah")} />
     <Link className="action soft" to="/umrah/location">Walk with me</Link>
   </>;
 }

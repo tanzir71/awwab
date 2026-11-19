@@ -93,7 +93,7 @@ function Main() {
         <Route path="/share" element={<Share key={search} settings={settings} now={now} />} />
         <Route path="/share/milestone/:kind/:number" element={<Milestone settings={settings} now={now} />} />
         <Route path="/install" element={<div className="stack"><AppInstallPrompt /><Link className="action soft" to="/">Continue to awwab</Link></div>} />
-        <Route path="/umrah" element={<UmrahShell now={now} />}>
+        <Route path="/umrah" element={<UmrahShell now={now} desktop={desktop} />}>
           <Route index element={<UmrahNow />} />
           <Route path="rituals" element={<UmrahRituals />} />
           <Route path="focus" element={<HaramFocus />} />

@@ -1,5 +1,5 @@
 import React, { type ReactNode } from "react";
-import { splitArabicWords, splitGraphemes, wordAnatomy } from "../lib/wordAnatomy";
+import { splitArabicPhrase, splitArabicWords, splitGraphemes, wordAnatomy } from "../lib/wordAnatomy";
 import { useUi } from "../lib/uiState";
 import { useCopy } from "../lib/copy";
 
@@ -27,7 +27,7 @@ export interface WordDetail {
 }
 
 export function ArabicText({ text, citation, words, recall = "read", mushaf, compact = false, verse, positionOffset = 0, wordLink,
-  selectedPosition, onWordSelected, showGlosses = true, indicators }: {
+  selectedPosition, onWordSelected, showGlosses = true, indicators, preserveSeparators = false }: {
   text: string;
   citation?: string;
   words?: WordDetail[];
@@ -41,6 +41,7 @@ export function ArabicText({ text, citation, words, recall = "read", mushaf, com
   onWordSelected?: (position: number) => boolean | void;
   showGlosses?: boolean;
   indicators?: WordIndicator[];
+  preserveSeparators?: boolean;
 }) {
   const selectWord = useUi(state => state.selectWord);
   const { language, t } = useCopy();
@@ -48,8 +49,10 @@ export function ArabicText({ text, citation, words, recall = "read", mushaf, com
   return (
     <span className={`arabic-text ${compact ? "arabic-compact" : ""}`} data-script={mushaf} dir="rtl" lang="ar">
       {text.split("\n").map((line, lineIndex) => (
-        <span className="arabic-line" key={lineIndex}>
-          {splitArabicWords(line).map(word => {
+        <span className={preserveSeparators ? "arabic-line arabic-phrase-line" : "arabic-line"} key={lineIndex}>
+          {(preserveSeparators ? splitArabicPhrase(line) : splitArabicWords(line).map(text => ({ text, word: true }))).map((part, partIndex) => {
+            if (!part.word) return <React.Fragment key={partIndex}>{part.text}</React.Fragment>;
+            const word = part.text;
             const index = wordIndex++;
             const position = positionOffset + index + 1;
             const chipRecall = typeof recall === "function" ? recall(position) : recall;
@@ -60,7 +63,7 @@ export function ArabicText({ text, citation, words, recall = "read", mushaf, com
             const shown = chipRecall === "hidden" ? "···" : chipRecall === "hint" ? `${splitGraphemes(word)[0]}···` : detail?.displayText ?? word;
             const screenReaderText = chipRecall === "read" ? transliteration : t("revealWord", { number: index + 1 });
             return (
-              <WordChip key={index} recall={chipRecall} href={wordLink?.(index + 1)} selected={selectedPosition === undefined ? undefined : selectedPosition === position} indicator={indicator}
+              <WordChip key={partIndex} recall={chipRecall} href={wordLink?.(index + 1)} selected={selectedPosition === undefined ? undefined : selectedPosition === position} indicator={indicator}
                 onSelect={() => {
                   if (onWordSelected?.(position) === false) return;
                   selectWord({ word: anatomyWord, citation, connected: index > 0, verse, position, ...detail });

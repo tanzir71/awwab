@@ -21,6 +21,7 @@ import { qaidaRows, resolveQaidaRow } from "@/lib/qaidaPractice";
 import { planMonth } from "@/lib/plan-copy";
 import { gregorianMonthBounds, readCalendarMonth } from "@/lib/plan-calendar";
 import { zakatHawl, type ZakatProfile } from "@/lib/zakat";
+import { initialTrip, tripDates } from "@/lib/umrah";
 import { formatLocale, languages } from "@/lib/languagePreferences";
 import qaida from "../../docs/content/qaida-lessons.json";
 import surahs from "../../docs/content/surahs-for-salah.json";
@@ -140,7 +141,12 @@ export function AppShell({ children, settings, now, desktop }: { children: React
     ? t("nextPrayerIn", { name: t(next.id), time: duration(next.starts.valueOf() - now.valueOf(), locale) }) : t("prayerTimes");
   const shareSheet = location.pathname === "/share";
   const shareMoment = location.pathname.startsWith("/share/milestone/");
-  const fullscreen = shareSheet || shareMoment || location.pathname.startsWith("/umrah") || location.pathname.startsWith("/print/");
+  const umrahRoute = /^\/umrah(?:\/|$)/.test(location.pathname);
+  const umrahDesktop = desktop && umrahRoute;
+  const trip = useRecord("umrah", initialTrip);
+  const umrahDates = umrahDesktop && tripDates(trip, locale);
+  const umrahSubtitle = [umrahDates && t("umrahTripDates", { dates: umrahDates }), t("umrahPrepareHint")].filter(Boolean).join(" · ");
+  const fullscreen = shareSheet || shareMoment || (umrahRoute && !desktop) || location.pathname.startsWith("/print/");
   const today = location.pathname === "/today";
   const studyHome = desktop && location.pathname === "/learn";
   const chapter = location.pathname.startsWith("/learn/surahs/") ? surahs.surahs.slice(0, 12).find(item => String(item.number) === location.pathname.split("/").at(-1)) : undefined;
@@ -233,17 +239,17 @@ export function AppShell({ children, settings, now, desktop }: { children: React
         </div>
       </>}
     </nav>}
-    <main className="app-main" id="app-main" tabIndex={-1} data-page={shareSheet ? "share-sheet" : shareMoment ? "share-moment" : prayerGuide ? "prayer-guide" : salahStudy ? "salah-study" : today ? "today" : planDesktop ? "plan-desktop" : mosquesDesktop ? "mosques-desktop" : returnDesktop ? "return-desktop" : hadithDesktop ? "hadith-desktop" : settingsDesktop ? "settings-desktop" : languageFlow ? "settings-language-flow" : studyHome ? "learn" : chapter ? "surah-reader" : lesson ? "qaida-lesson" : wordBank ? "word-bank" : fluency ? "fluency" : location.pathname.startsWith("/learn/takhti") ? "takhti" : undefined}>
+    <main className="app-main" id="app-main" tabIndex={-1} data-page={shareSheet ? "share-sheet" : shareMoment ? "share-moment" : umrahDesktop ? "umrah-prep" : prayerGuide ? "prayer-guide" : salahStudy ? "salah-study" : today ? "today" : planDesktop ? "plan-desktop" : mosquesDesktop ? "mosques-desktop" : returnDesktop ? "return-desktop" : hadithDesktop ? "hadith-desktop" : settingsDesktop ? "settings-desktop" : languageFlow ? "settings-language-flow" : studyHome ? "learn" : chapter ? "surah-reader" : lesson ? "qaida-lesson" : wordBank ? "word-bank" : fluency ? "fluency" : location.pathname.startsWith("/learn/takhti") ? "takhti" : undefined}>
       {!fullscreen && !((today || studyHome || surahStudy) && settings.mode === "maktab") && <header className="topbar">
-        <div>{today || learnWorkspace || zakatPage || planDesktop || mosquesDesktop || returnDesktop || guideDesktop || hadithDesktop || settingsDesktop ? <h1>{settingsDesktop ? t("settingsDeskTitle") : guideDesktop ? t("howToPray") : qaidaStudy ? t("qaidaDesktopTitle", { number: lesson.n }) : surahStudy ? t("surahsForSalah") : wordBankStudy ? t("wordBankName") : title}</h1> : <h2>{title}</h2>}
+        <div>{today || learnWorkspace || zakatPage || planDesktop || mosquesDesktop || returnDesktop || guideDesktop || hadithDesktop || settingsDesktop || umrahDesktop ? <h1>{umrahDesktop ? t("umrahPrepare") : settingsDesktop ? t("settingsDeskTitle") : guideDesktop ? t("howToPray") : qaidaStudy ? t("qaidaDesktopTitle", { number: lesson.n }) : surahStudy ? t("surahsForSalah") : wordBankStudy ? t("wordBankName") : title}</h1> : <h2>{title}</h2>}
           <p className="small muted">{guideDesktop ? <>
             <Link to={`/you/prayer?${guideSettingsQuery}`}>{t(guideReference(settings) === "hanafi" ? "prayerGuideHanafi" : "prayerGuideFard")} · {t("prayerGuideSettings")}</Link> · {t("guideDesktopAnatomy")}
-          </> : <>{planSubtitle ?? (settingsDesktop ? t("settingsDeskCaption") : hadithDesktop ? t("hadithDesktopIntro") : returnDesktop ? t("returnDeskSubtitle") : mosquesDesktop ? t("mosqueDeskCaption", { count: mosques.mosques.length }) : zakatPage ? zakatSubtitle : qaidaStudy ? qaidaSubtitle : surahStudy ? studySubtitle : wordBankStudy ? t("wordBankSubtitle") : date + " · " + hijriLabel(day, settings.hijriAdjust, calendar.anchors, locale))}{today && ` · ${settings.city.name}`}{studyHome && " · " + t("deskMinutesToday", { count: studyPlanMinutes(hidden) })}</>}</p></div>
+          </> : <>{planSubtitle ?? (umrahDesktop ? umrahSubtitle : settingsDesktop ? t("settingsDeskCaption") : hadithDesktop ? t("hadithDesktopIntro") : returnDesktop ? t("returnDeskSubtitle") : mosquesDesktop ? t("mosqueDeskCaption", { count: mosques.mosques.length }) : zakatPage ? zakatSubtitle : qaidaStudy ? qaidaSubtitle : surahStudy ? studySubtitle : wordBankStudy ? t("wordBankSubtitle") : date + " · " + hijriLabel(day, settings.hijriAdjust, calendar.anchors, locale))}{today && ` · ${settings.city.name}`}{studyHome && " · " + t("deskMinutesToday", { count: studyPlanMinutes(hidden) })}</>}</p></div>
         <Link className="chip night" to="/today">{nextPrayer}</Link>
         {settings.mode === "adult" && <>
           <Link className="action" to={reviewDestination(nextReview ?? due[0]?.[0])}><DesignIcon name="desk-play" size={14} />{t("startReview")}{due.length ? ` · ${studyHome ? dueSurahs || due.length : due.length}` : ""}</Link>
           <Link className="action soft" to="/today?log=1"><DesignIcon name="desk-plus" size={14} />{t("logPrayer")}</Link>
-          <ShareLink className="action light" to={today ? "/share?from=today" : returnDesktop ? "/share?template=return&from=return" : "/share?from=learn"}><DesignIcon name="desk-share" size={14} />{t("share")}</ShareLink>
+          <ShareLink className="action light" to={today ? "/share?from=today" : umrahDesktop ? "/share?template=umrah&from=umrah" : returnDesktop ? "/share?template=return&from=return" : "/share?from=learn"}><DesignIcon name="desk-share" size={14} />{t("share")}</ShareLink>
         </>}
         <Link className="icon-button" to="/you/reminders" aria-label={t("reminders")}><DesignIcon name="desk-bell" size={18} /></Link>
       </header>}

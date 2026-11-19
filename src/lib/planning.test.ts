@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { calculateZakat, gramsPerBhori, initialZakat, nisabWeight, paymentsForHawl,
   zakatHawl, zakatMoney, zakatPrices, zakatProfileTotals, type ZakatProfile } from "./zakat";
-import { advanceSai, bearing, correctSai, distance, initialSai } from "./umrah";
+import { advanceSai, bearing, correctSai, distance, emptyPreparation, initialSai, initialTrip, tripDates } from "./umrah";
 import { addDays } from "./dates";
 import { baselineMonthStart, calendarDefaults, calendarEventById, dayDifference, eventDisplayDates, monthStartEvent } from "./hijri";
 import { eventReminders } from "./calendarFile";
 import { calendarDayEvents, calendarWeekStart, fridayMosque, gregorianMonthCells, readCalendarDay, readCalendarMonth, shiftPlanEvent } from "./plan-calendar";
-import { defaults, prayerStatistics } from "./storageService";
+import { defaults, exportUmrahTrip, prayerStatistics, readUmrahTripFile } from "./storageService";
 import { adjustQadaTotals, qadaBalances, qadaCountBetween, qadaDefaults, qadaForecast, recordQada } from "./qada";
 import { assignedMosque, mapMosque, mosqueCheckedAge, mosqueDefaults, mosqueTime, mosqueWeek, timetableNotice, weeklyMosque, type Mosque } from "./mosques";
 
@@ -252,5 +252,26 @@ describe("saʿy location hysteresis", () => {
   it("calculates hotel distance and bearing without a network", () => {
     expect(distance({ lat: 0, lon: 0 }, { lat: 0, lon: .01 })).toBeCloseTo(1111.95, 1);
     expect(bearing({ lat: 0, lon: 0 }, { lat: 0, lon: .01 })).toBe(90);
+  });
+});
+
+describe("Umrah trip transfer", () => {
+  it("transfers trip details and preparation without live tracking state", () => {
+    const plan = readUmrahTripFile(exportUmrahTrip({ ...initialTrip, start: "2027-02-02", end: "2027-02-10", gps: true, auto: true, tawaf: 5,
+      hotel: { name: "Hotel", room: "12", point: { lat: 21.4, lon: 39.8 } },
+      preparation: { ...emptyPreparation, hotelArabic: "الفندق", completed: ["ihram"] } }));
+    expect(plan).toMatchObject({ start: "2027-02-02", hotel: { name: "Hotel", point: { lat: 21.4, lon: 39.8 } },
+      preparation: { hotelArabic: "الفندق", completed: ["ihram"] } });
+    expect(plan).not.toHaveProperty("gps");
+    expect(plan).not.toHaveProperty("auto");
+    expect(plan).not.toHaveProperty("tawaf");
+    expect(tripDates({ ...initialTrip, ...plan }, "en")).toMatch(/^2.*10 Feb 2027$/);
+  });
+
+  it("accepts trips with no preparation fields and rejects invalid trip files", () => {
+    const original = JSON.parse(exportUmrahTrip(initialTrip));
+    expect(readUmrahTripFile(JSON.stringify(original)).preparation).toBeUndefined();
+    expect(() => readUmrahTripFile(JSON.stringify({ ...original, awwabUmrahTrip: 2 }))).toThrow();
+    expect(() => readUmrahTripFile(JSON.stringify({ ...original, trip: { ...original.trip, start: "2027-02-28", end: "2027-02-02" } }))).toThrow();
   });
 });

@@ -12,6 +12,7 @@
 @import "./mosques.css";
 @import "./zakat.css";
 @import "./settings.css";
+@import "./umrah-prep.css";
 
 @tailwind base;
 @tailwind components;
@@ -284,6 +285,8 @@ progress::-moz-progress-bar { background: var(--control-primary); }
 }
 [lang="bn"] { font-family: "Noto Sans Bengali Variable", var(--font-body); }
 .arabic-line { display: flex; flex-direction: row; gap: 3px; max-width: 100%; overflow-x: auto; scrollbar-width: thin; padding: 3px; }
+.arabic-line.arabic-phrase-line { display: block; overflow: visible; }
+.arabic-phrase-line .word-chip { vertical-align: middle; }
 .word-chip { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; flex: 0 0 auto; min-width: 44px; min-height: 44px; background: transparent; border: 0; color: inherit; font: inherit; padding: 0 4px; border-radius: var(--r-control); }
 .word-chip > span { text-decoration: underline; text-decoration-color: var(--c-line); text-underline-offset: 5px; text-decoration-thickness: 2px; }
 .word-chip:hover, .word-chip[data-recall]:not([data-recall="read"]) { background: var(--c-primary-soft); color: var(--c-ink); }

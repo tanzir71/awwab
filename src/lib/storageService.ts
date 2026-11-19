@@ -7,6 +7,7 @@ import { guideReferences, type GuideReference } from "./prayerGuide";
 import { deskActivities } from "./studyDesk";
 import type { MosquePlan } from "./mosques";
 import { zakatBalances } from "./zakat";
+import { emptyPreparation, tripChecklist, type UmrahTrip } from "./umrah";
 import { builtInLanguages, glossaryOptions, glossaryTerms, textSizes, type AppLanguage, type GlossaryTerm, type WordChoices } from "./languagePreferences";
 
 export interface Settings {
@@ -127,6 +128,29 @@ const labels = z.array(z.string().max(500));
 const dateCounts = z.record(daySchema, count);
 const dateLists = z.record(daySchema, labels);
 const balances = z.object({ fajr: count, dhuhr: count, asr: count, maghrib: count, isha: count });
+const umrahPlanSchema = z.object({
+  start: z.union([daySchema, z.literal("")]), end: z.union([daySchema, z.literal("")]),
+  hotel: z.object({ name: z.string().max(120), room: z.string().max(25), point: point.optional() }),
+  group: z.string().max(120), meeting: point.optional(), gate: z.string().max(120),
+  walk: count.max(120), crowd: count.max(90), iqamah: count.max(90),
+  preparation: z.object({
+    hotelArabic: z.string().max(120), hotelAddress: z.string().max(240), leader: z.string().max(120), phone: z.string().max(30),
+    makkahNights: count.max(90).optional(), madinahNights: count.max(90).optional(), completed: z.array(z.enum(tripChecklist)).max(tripChecklist.length),
+  }).optional(),
+  requests: z.array(z.object({ id: z.string(), name: z.string().max(100), for: z.string().max(500), done: z.array(daySchema) })),
+});
+const umrahFileSchema = z.object({ awwabUmrahTrip: z.literal(1), trip: umrahPlanSchema.refine(trip => trip.end >= trip.start) });
+
+export function exportUmrahTrip(trip: UmrahTrip) {
+  return JSON.stringify({ awwabUmrahTrip: 1, trip: umrahPlanSchema.parse(trip) }, null, 2);
+}
+
+export function readUmrahTripFile(text: string) {
+  const { trip } = umrahFileSchema.parse(JSON.parse(text));
+  return { ...trip, start: trip.start, end: trip.end, meeting: trip.meeting, hotel: { ...trip.hotel, point: trip.hotel.point },
+    preparation: trip.preparation ? { ...emptyPreparation, ...trip.preparation } : undefined };
+}
+
 const savedRecords: Record<string, z.ZodTypeAny> = {
   settings: settingsSchema,
   "wording-suggestions": z.array(z.object({ language: z.enum(builtInLanguages), page: z.string().max(160), original: z.string().max(500), proposed: z.string().max(500) })).max(300),
@@ -184,16 +208,12 @@ const savedRecords: Record<string, z.ZodTypeAny> = {
     payments: z.array(z.object({ day: daySchema, amount: z.number().finite().nonnegative(), currency: z.string().regex(/^[A-Z]{3}$/),
       hawlYear: count.min(1).optional(), name: z.string().max(100).optional() })),
   }),
-  umrah: z.object({
-    start: z.union([daySchema, z.literal("")]), end: z.union([daySchema, z.literal("")]),
-    hotel: z.object({ name: z.string().max(120), room: z.string().max(25), point: point.optional() }),
-    group: z.string().max(120), meeting: point.optional(), gate: z.string().max(120),
+  umrah: umrahPlanSchema.extend({
     state: z.enum(["At the hotel", "Walking", "In the Haram", "Doing Umrah", "Resting", "Eating out"]),
-    walk: count.max(120), crowd: count.max(90), iqamah: count.max(90), gps: z.boolean(), auto: z.boolean(),
+    gps: z.boolean(), auto: z.boolean(),
     tawaf: count.max(7), step: count.max(6),
     sai: z.object({ count: count.max(7), last: z.enum(["safa", "marwah"]).optional(), lastAt: count.optional(), exited: z.boolean() }),
     dhikr: dateCounts, juz: dateCounts, haramPrayers: dateLists,
-    requests: z.array(z.object({ id: z.string(), name: z.string().max(100), for: z.string().max(500), done: z.array(daySchema) })),
   }),
   reviews: z.record(z.string(), z.object({
     bucket: z.enum(["sabaq", "sabqi", "manzil"]),

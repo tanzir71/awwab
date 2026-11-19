@@ -9,6 +9,14 @@ export type Coord = { lat: number; lon: number };
 export type SaiEnd = "safa" | "marwah";
 export type SaiProgress = { count: number; last?: SaiEnd; lastAt?: number; exited: boolean };
 export const initialSai: SaiProgress = { count: 0, exited: true };
+export const tripChecklist = ["passport", "rawdah", "ihram", "toiletries", "sandals", "shoeBag",
+  "talbiyah", "miqat", "phrases", "rituals", "duas", "family"] as const;
+export type TripCheck = typeof tripChecklist[number];
+export const emptyPreparation = {
+  hotelArabic: "", hotelAddress: "", leader: "", phone: "", makkahNights: undefined as number | undefined,
+  madinahNights: undefined as number | undefined, completed: [] as TripCheck[],
+};
+
 export const initialTrip = {
   start: "", end: "", hotel: { name: "", room: "", point: undefined as Coord | undefined }, group: "",
   meeting: undefined as Coord | undefined, gate: "", state: "At the hotel" as TripState,
@@ -16,7 +24,19 @@ export const initialTrip = {
   tawaf: 0, step: 0, sai: initialSai, dhikr: {} as Record<string, number>,
   juz: {} as Record<string, number>, haramPrayers: {} as Record<string, string[]>,
   requests: [] as { id: string; name: string; for: string; done: string[] }[],
+  preparation: undefined as typeof emptyPreparation | undefined,
 };
+export type UmrahTrip = typeof initialTrip;
+
+export function tripDates(trip: Pick<UmrahTrip, "start" | "end">, locale: string) {
+  if (!trip.start || !trip.end || trip.start > trip.end) return undefined;
+  const start = new Date(`${trip.start}T12:00Z`);
+  const end = new Date(`${trip.end}T12:00Z`);
+  if (!Number.isFinite(start.valueOf()) || !Number.isFinite(end.valueOf())) return undefined;
+  const format: Intl.DateTimeFormat & { formatRange?: (start: Date, end: Date) => string } = new Intl.DateTimeFormat(locale === "en" ? "en-GB" : locale,
+    { timeZone: "UTC", day: "numeric", month: "short", year: "numeric" });
+  return format.formatRange?.(start, end) ?? (trip.start === trip.end ? format.format(start) : `${format.format(start)} – ${format.format(end)}`);
+}
 
 const radians = (degrees: number) => degrees * Math.PI / 180;
 

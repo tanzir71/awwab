@@ -4,7 +4,7 @@ import { gunzipSync } from "node:zlib";
 import { normalizeWord, splitGraphemes, wordAnatomy } from "./wordAnatomy";
 import { isDue, reviewCard } from "./reviews";
 import { coreWordCoverage, coreWordTotal, fatihaMorphology, knownCoreQuranWords, quranText } from "./quran";
-import { splitArabicWords } from "./wordAnatomy";
+import { splitArabicPhrase, splitArabicWords } from "./wordAnatomy";
 import { coreVocabulary, parseCorpus } from "./morphology";
 import snapshot from "../../docs/content/core-quran-words.json";
 import salah from "../../docs/content/salah-words.json";
@@ -65,6 +65,13 @@ describe("Word anatomy", () => {
   it("keeps joining strokes in display words and excludes them from letter counting", () => {
     expect(splitArabicWords("ـب ـبـ بـ ب ـ")).toEqual(["ـب", "ـبـ", "بـ", "ب"]);
     expect(splitGraphemes("ـبـ")).toEqual(["ب"]);
+  });
+
+  it("keeps gate digits and punctuation outside tappable Arabic words", () => {
+    const phrase = "فين باب رقم ٧٩؟";
+    const parts = splitArabicPhrase(phrase);
+    expect(parts.map(part => part.text).join("")).toBe(phrase);
+    expect(parts.filter(part => part.word).map(part => part.text)).toEqual(["فين", "باب", "رقم"]);
   });
 });
 

@@ -8,6 +8,7 @@ const longVowels: Record<string, [string, string]> = { "ا": ["a", "ā"], "ى": 
 const annotation = /[\u0610-\u061A\u06D6-\u06ED]/gu;
 const letterPattern = /\p{L}/u;
 const arabicWordPattern = /[\p{Script=Arabic}\p{M}\u0640\u200C\u200D]+/gu;
+const arabicPhraseWord = /(?:(?=\p{Script=Arabic})\p{L}|[\p{M}\u0640\u200C\u200D])+/gu;
 
 export const normalizeWord = (word: string) => word.normalize("NFC")
   .replace(annotation, "").replace(/[\p{M}\u0640\u200C\u200D]/gu, "").replace(/ٱ/g, "ا");
@@ -26,6 +27,19 @@ export function splitGraphemes(word: string) {
 
 export function splitArabicWords(line: string) {
   return [...line.matchAll(arabicWordPattern)].map(match => match[0]).filter(word => splitGraphemes(word).length > 0);
+}
+
+export function splitArabicPhrase(line: string) {
+  const parts: { text: string; word: boolean }[] = [];
+  let offset = 0;
+  for (const match of line.matchAll(arabicPhraseWord)) {
+    if (!splitGraphemes(match[0]).length) continue;
+    if (match.index > offset) parts.push({ text: line.slice(offset, match.index), word: false });
+    parts.push({ text: match[0], word: true });
+    offset = match.index + match[0].length;
+  }
+  if (offset < line.length) parts.push({ text: line.slice(offset), word: false });
+  return parts;
 }
 
 function letterTile(glyph: string, index: number, connected: boolean) {

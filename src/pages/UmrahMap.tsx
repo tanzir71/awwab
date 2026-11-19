@@ -6,19 +6,17 @@ import { FileSource, PMTiles } from "pmtiles";
 import mapWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?url";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { SectionNav } from "@/components/Surface";
-import { asset, SHARE_URL } from "@/lib/config";
+import { SHARE_URL } from "@/lib/config";
 import { bearing, distance, initialTrip, makkah, madinah, type Coord } from "@/lib/umrah";
+import { cachedMapPack, saveMapPack, type MapRegion } from "@/lib/umrahMapPack";
 
 type Pin = { id: string; title: string; point: Coord };
 type Trip = typeof initialTrip;
-type Region = "makkah" | "madinah";
+type Region = MapRegion;
 type HeadingEvent = DeviceOrientationEvent & { webkitCompassHeading?: number };
 type Orientation = typeof DeviceOrientationEvent & { requestPermission?: () => Promise<"granted" | "denied"> };
 
-const cacheKey = "awwab-packs-v1";
 setWorkerUrl(mapWorkerUrl);
-const mapUrl = (region: Region) => asset(`packs/${region}-v1.pmtiles`);
-const packKey = (region: Region) => new URL(mapUrl(region), location.origin).href;
 
 function MapCanvas({ region, file, pins, user, onPoint }: { region: Region; file?: File; pins: Pin[]; user?: Coord; onPoint: (point: Coord) => void }) {
   const target = useRef<HTMLDivElement>(null);
@@ -111,13 +109,9 @@ export default function UmrahMap({ trip, point, points, save }: {
   const primaryPins = query.trim() ? matches : pins.filter(pin =>
     !pin.id.startsWith("gate-") || /fahd|abdul aziz|marwah/i.test(pin.title));
   useEffect(() => {
-    if (!("caches" in window)) return;
     let active = true;
-    void caches.open(cacheKey).then(cache => cache.match(packKey(region))).then(async response => {
-      if (response && active) {
-        const local = new File([await response.blob()], `${region}-v1.pmtiles`);
-        if (active) setPack({ region, file: local });
-      }
+    void cachedMapPack(region).then(local => {
+      if (local && active) setPack({ region, file: local });
     }).catch(() => {});
     return () => { active = false; };
   }, [region]);
@@ -138,15 +132,7 @@ export default function UmrahMap({ trip, point, points, save }: {
     setLoading(true);
     setMessage("");
     try {
-      const response = imported ? new Response(imported) : await fetch(mapUrl(region), { signal: AbortSignal.timeout(90_000) });
-      if (!response.ok) throw new Error("Map download unavailable");
-      const blob = await response.blob();
-      const loaded = new File([blob], `${region}-v1.pmtiles`);
-      const archive = new PMTiles(new FileSource(loaded));
-      await archive.getHeader();
-      if (imported || !navigator.serviceWorker?.controller) {
-        await (await caches.open(cacheKey)).put(packKey(region), new Response(blob, { headers: { "Content-Type": "application/octet-stream" } }));
-      }
+      const loaded = await saveMapPack(region, imported);
       setPack({ region, file: loaded });
       setMessage("Map pack saved for offline use.");
     } catch {

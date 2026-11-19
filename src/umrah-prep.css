@@ -1,0 +1,59 @@
+.umrah-prep-region { container-type: inline-size; }
+.umrah-prep { display: grid; grid-template-columns: minmax(0, 1.87fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.umrah-prep > .umrah-prep-column { min-width: 0; gap: 16px; }
+.umrah-prep .card, .umrah-phrase-library.card { gap: 10px; padding: 14px 16px 16px; }
+.umrah-prep h2, .umrah-phrase-library h2 { font: var(--type-body-strong); margin-block: 0; }
+.umrah-prep .text-button, .umrah-phrase-library .text-button { min-height: 22px; padding-inline: 2px; font-weight: 600; text-align: end; }
+:root .app-content .umrah-prep button[aria-expanded].text-button { min-height: 22px; }
+.umrah-prep .text-button:disabled, .umrah-prep-download:disabled { opacity: .65; cursor: default; }
+.umrah-prep .row-between > small { color: var(--interactive-ink); }
+.umrah-prep-details > div, .umrah-prep-pack-row, .umrah-phrase-row { border-radius: var(--r-control); background: var(--c-surface-alt); }
+.umrah-prep-details > div { padding: 10px 12px; display: grid; align-content: start; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.umrah-prep-details strong, .umrah-prep-pack-row strong, .umrah-phrase-row strong { font-size: 13px; font-weight: 600; line-height: 18px; }
+.umrah-prep-details small, .umrah-prep-pack-row small, .umrah-phrase-row small, .umrah-prep .night p { font-size: 12px; line-height: 16px; }
+.umrah-prep-details small, .umrah-prep-pack-row small { color: var(--c-ink-muted); }
+.umrah-prep-phone { white-space: normal; }
+.umrah-prep-pack-row { display: flex; align-items: center; gap: 12px; padding: 8px 12px; }
+.umrah-prep-pack-row > div:first-child, .umrah-phrase-row > div { min-width: 0; flex: 1 1 auto; display: grid; }
+.umrah-prep-pack-row > .chip { flex: 0 0 auto; min-width: 80px; max-width: 42%; justify-content: center; padding: 3px 8px; text-align: center; }
+.umrah-prep-pack-row > .chip:not(.umrah-prep-download) { background: var(--c-bg); color: var(--c-ink-muted); }
+.umrah-prep-pack-row > .chip.soft { background: var(--c-primary-soft); color: var(--interactive-ink); }
+.umrah-prep-pack-row .umrah-prep-download { background: var(--control-primary); color: var(--c-on-primary); font-weight: 600; }
+.umrah-prep-checks label { display: flex; align-items: center; gap: 8px; min-height: 24px; font-size: 13px; line-height: 18px; }
+.umrah-prep-checks label:has(:checked) { color: var(--c-ink-muted); }
+.umrah-prep-checks input {
+  appearance: none; margin: 0; width: 18px; height: 18px; flex: 0 0 18px; display: inline-grid; place-items: center;
+  border-radius: 5px; background: var(--c-surface-alt); color: var(--c-on-primary);
+}
+.umrah-prep-checks input:checked { background: var(--control-primary); }
+.umrah-prep-checks input:checked::before { content: "✓"; font-weight: 700; }
+.umrah-phrase-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; min-width: 0; }
+.umrah-phrase-row > img { flex: 0 0 16px; }
+.umrah-phrase-row small, .umrah-phrase-link { color: var(--interactive-ink); }
+.umrah-phrase-link { width: fit-content; max-width: 100%; color: var(--c-ink); font-size: 13px; font-weight: 600; line-height: 18px; }
+.umrah-phrase-link:hover { text-decoration: underline; }
+.umrah-phrase-row .arabic-text { flex: 0 1 150px; min-width: 0; font: 400 16px/29px var(--font-arabic); text-align: start; }
+.umrah-phrase-row .arabic-line.arabic-phrase-line { padding: 0; }
+.umrah-phrase-row .word-chip { font: inherit; min-height: 27px; min-width: 0; padding-inline: 1px; }
+.umrah-phrase-results { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; }
+.umrah-phrase-results li { display: grid; }
+.umrah-prep .night .action { min-height: 34px; padding: 7px 6px; font-size: 12px; line-height: 17px; }
+.umrah-prep .night .action.light { color: var(--interactive-ink); }
+.umrah-prep .umrah-prep-print { background: var(--c-overlay-on-night); color: var(--c-on-night); }
+.umrah-trip-form :is(input, select) { max-width: 480px; width: 100%; }
+.umrah-trip-form input[lang="ar"] { font-family: var(--font-arabic); }
+.umrah-prep-edit .umrah-trip-form { padding: 0; box-shadow: none; background: transparent; }
+
+@container (max-width: 840px) {
+  .umrah-prep { grid-template-columns: minmax(0, 1.5fr) minmax(260px, 1fr); }
+  .umrah-phrase-row .arabic-text { flex-basis: 105px; }
+  .umrah-prep-details > div { padding-inline: 8px; }
+}
+@container (max-width: 680px) {
+  .umrah-prep { grid-template-columns: minmax(0, 1fr); }
+  .umrah-phrase-row .arabic-text { flex-basis: 150px; }
+}
+@media (min-width: 1024px) {
+  :root [data-page="umrah-prep"] .app-content { padding: 4px 24px 24px; }
+  :root [data-page="umrah-prep"] .topbar h1 { font: var(--type-display-m); }
+}

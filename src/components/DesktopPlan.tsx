@@ -242,6 +242,7 @@ export function DesktopPlan({ today, now, settings, config, mosques, hawl, saved
         shift={step => void saveCalendar(old => shiftPlanEvent(old, moon.id, step))} />
       <UpcomingCard events={upcoming.filter(event => event.id !== moon.id)} hawl={hawl} today={today} open={openEvent} />
       <EidCard event={eid} mosques={mosques} open={openEvent} />
+      {settings.mode === "maktab" && <Link className="action soft" to="/umrah">{t("umrahPrepare")}</Link>}
     </>;
 
   return <div className="plan-desktop" data-wide={wide} onKeyDown={key => {
