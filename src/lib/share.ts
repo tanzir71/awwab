@@ -41,7 +41,7 @@ export interface ShareCard {
 }
 
 export interface ShareModel {
-  template: TemplateId;
+  template: TemplateId | "hadith";
   format: ShareFormat;
   light: boolean;
   showPrayerNumbers: boolean;
@@ -276,6 +276,18 @@ function drawMaktab(paint: Painter, card: ShareCard) {
   write(card.detail, 180, y + 188, 15, 400, { color: "muted", maxLines: 3 });
 }
 
+function drawHadith({ badge, write, tile }: Painter, card: ShareCard, width: number) {
+  const center = width / 2;
+  badge(card.badge, center, 26);
+  const titleBottom = write(card.title, center, 67, 26, 600, { face: "display", width: width - 58, line: 32, maxLines: 2 });
+  tile(28, titleBottom + 12, width - 56, 190, 16);
+  const top = titleBottom + 32;
+  const body = card.arabic ? write(card.arabic, center, top, 18, 500, { width: width - 72, face: "arabic", line: 26, maxLines: 3 }) + 8 : top;
+  write(card.detail, center, body, 13, 500, { width: width - 88, line: 17, maxLines: card.arabic ? 5 : 8 });
+  write(card.citation, center, titleBottom + 215, 12, 600, { width: width - 56, line: 16, maxLines: 2 });
+  write(card.note, center, titleBottom + 249, 11, 500, { color: "muted", width: width - 56, line: 14, maxLines: 2 });
+}
+
 export async function drawShare(canvas: HTMLCanvasElement, model: ShareModel) {
   const { card, template, format, light } = model;
   const maktab = template === "maktab";
@@ -305,13 +317,13 @@ export async function drawShare(canvas: HTMLCanvasElement, model: ShareModel) {
   ctx.fillRect(0, 0, w, h);
 
   const motifPosition = format === "wide" ? [420, 120] : format === "post" ? [200, -100] : {
-    surah: [170, -120], words: [-150, 380], return: [190, 420], qaida: [-140, 430], umrah: [190, 430], maktab: [200, -120],
+    surah: [170, -120], words: [-150, 380], return: [190, 420], qaida: [-140, 430], umrah: [190, 430], maktab: [200, -120], hadith: [170, -120],
   }[template];
   ctx.drawImage(motif, ...motifPosition as [number, number]);
 
   const paint = painter(ctx, colors);
   ctx.save();
-  if (format === "post" && template !== "surah") {
+  if (format === "post" && template !== "surah" && template !== "hadith") {
     ctx.translate(57.6, 6);
     ctx.scale(.68, .68);
   } else if (format === "wide" && template !== "words") {
@@ -325,6 +337,7 @@ export async function drawShare(canvas: HTMLCanvasElement, model: ShareModel) {
     case "qaida": drawQaida(paint, card, colors, Object.fromEntries(dots), ctx); break;
     case "umrah": drawUmrah(paint, card); break;
     case "maktab": drawMaktab(paint, card); break;
+    case "hadith": drawHadith(paint, card, w); break;
   }
   ctx.restore();
 
@@ -341,7 +354,7 @@ export async function drawShare(canvas: HTMLCanvasElement, model: ShareModel) {
   paint.write(footerLink, w - margin, footerTop + 20, 13, 600, { align: "right", width: 218, maxLines: 1 });
 }
 
-export function imageFile(canvas: HTMLCanvasElement, id: TemplateId) {
+export function imageFile(canvas: HTMLCanvasElement, id: ShareModel["template"]) {
   return new Promise<File>((resolve, reject) => canvas.toBlob(blob => {
     if (blob) resolve(new File([blob], "awwab-" + id + ".png", { type: "image/png" }));
     else reject(new Error("Image could not be rendered."));

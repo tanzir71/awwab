@@ -1,9 +1,11 @@
 import { asset } from "./config";
-import { collectionIds, editionUrl, hadithCollections, type HadithCollection, type HadithGrade, type HadithNarration } from "./hadith-catalogue";
+import { collectionIds, editionUrl, hadithArchiveVersion, hadithCollections, type HadithCollection, type HadithGrade, type HadithNarration } from "./hadith-catalogue";
 import { studySearchTerm } from "./study-copy";
 import curated from "../../docs/content/hadith-curated.json";
 
 export type CollectionScope = HadithCollection | "all" | "riyadussalihin";
+export const hadithTopics = ["all", "prayer", "repentance", "character", "family", "knowledge"] as const;
+export type HadithTopic = typeof hadithTopics[number];
 export type CuratedNarration = {
   collection: HadithCollection;
   number: number | string;
@@ -14,6 +16,9 @@ export type CuratedNarration = {
   alsoIn: string | null;
   url: string;
   qudsi?: boolean;
+  narrator?: string;
+  excerptAr?: string;
+  excerptEn?: string;
 };
 type Language = "en" | "bn";
 
@@ -25,12 +30,27 @@ export const riyadSelections = curated.riyad;
 const archives = new Map<HadithCollection, Promise<HadithNarration[]>>();
 const curatedById = new Map(curatedHadith.map(item => [hadithId(item.collection, item.number), item]));
 const searchText = new WeakMap<HadithNarration, string>();
+const repentanceReading = ["tirmidhi:3540", "bukhari:6307", "bukhari:6464", "bukhari:6306", "bukhari:1"];
+
+export const desktopHadith = [...repentanceReading.map(id => curatedById.get(id)),
+  ...curatedHadith.filter(item => !repentanceReading.includes(hadithId(item.collection, item.number)))];
+
+export function curatedHadithFor(id: string) {
+  return curatedById.get(id);
+}
+
+export function topicMatches(topic: HadithTopic, item?: CuratedNarration) {
+  if (topic === "all") return true;
+  if (!item) return false;
+  if (topic === "repentance") return ["mercy", "return"].includes(item.theme) || repentanceReading.includes(hadithId(item.collection, item.number));
+  return item.theme === topic;
+}
 
 export function loadHadith(collection: HadithCollection) {
   const existing = archives.get(collection);
   if (existing) return existing;
   const pending = (async () => {
-    const response = await fetch(asset(`data/hadith-${collection}-v2.json.gz`));
+    const response = await fetch(asset(`data/hadith-${collection}-v${hadithArchiveVersion}.json.gz`));
     if (!response.ok) throw new Error("Collection unavailable");
     const buffer = await response.arrayBuffer();
     const header = new Uint8Array(buffer, 0, Math.min(2, buffer.byteLength));
@@ -38,7 +58,7 @@ export function loadHadith(collection: HadithCollection) {
       ? await new Response(new Blob([buffer]).stream().pipeThrough(new DecompressionStream("gzip"))).text()
       : new TextDecoder().decode(buffer);
     const data = JSON.parse(text);
-    if (data.version !== 2 || !Array.isArray(data.items)) throw new Error("Unsupported collection");
+    if (data.version !== hadithArchiveVersion || !Array.isArray(data.items)) throw new Error("Unsupported collection");
     return data.items as HadithNarration[];
   })().catch(error => {
     archives.delete(collection);
@@ -74,7 +94,7 @@ export function hadithName(collection: HadithCollection, language: Language, sho
 }
 
 export function normalizeHadithSearch(text: string) {
-  return studySearchTerm(text).normalize("NFD").replace(/(\p{Script=Latin})\p{M}+/gu, "$1").normalize("NFC")
+  return studySearchTerm(text).normalize("NFD").replace(/([\p{Script=Latin}\p{Script=Arabic}])\p{M}+/gu, "$1").normalize("NFC")
     .replace(/[’'ʿʾ]/g, "").replace(/[:#-]+/g, " ").replace(/\s+/g, " ").trim();
 }
 
@@ -109,7 +129,7 @@ export function searchHadith(query: string, narrations: HadithNarration[], scope
     if (haystack === undefined) {
       const seed = curatedById.get(hadithId(narration.collection, narration.number));
       haystack = normalizeHadithSearch([
-        narration.text, narration.grade.label, narration.grade.grader, ...Object.values(hadithCollections[narration.collection]),
+        narration.text, narration.arabic, narration.grade.label, narration.grade.grader, ...Object.values(hadithCollections[narration.collection]),
         seed?.summary, seed?.summaryBn, seed?.theme,
       ].filter(Boolean).join(" "));
       searchText.set(narration, haystack);

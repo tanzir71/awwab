@@ -18,6 +18,7 @@ export type HadithNarration = {
   book: number;
   inBook: number;
   text: string;
+  arabic?: string;
   grade: HadithGrade;
 };
 type GradeAnnotation = { name: string; grade: string };
@@ -46,6 +47,8 @@ export function narrationGrade(collection: HadithCollection, book: number, grade
   return undefined;
 }
 
-export function editionUrl(collection: HadithCollection) {
-  return `${hadithEditionBase}/eng-${collection}.min.json`;
+export const hadithArchiveVersion = 3;
+
+export function editionUrl(collection: HadithCollection, language: "eng" | "ara" = "eng") {
+  return `${hadithEditionBase}/${language}-${collection}.min.json`;
 }

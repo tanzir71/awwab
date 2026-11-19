@@ -17,6 +17,7 @@
    "number": 1,
    "grade": "Sahih",
    "theme": "intentions",
+   "narrator": "ʿUmar ibn al-Khaṭṭāb",
    "summary": "Actions are by intentions.",
    "summaryBn": "কাজের মূল্য নিয়তের ওপর নির্ভর করে।",
    "alsoIn": "muslim:1907a",
@@ -27,6 +28,7 @@
    "number": 6464,
    "grade": "Sahih",
    "theme": "consistency",
+   "narrator": "ʿĀʾishah",
    "summary": "The most beloved deeds to Allah are the most consistent, even if small.",
    "summaryBn": "অল্প হলেও নিয়মিত করা কাজ আল্লাহর কাছে প্রিয়।",
    "alsoIn": null,
@@ -47,6 +49,9 @@
    "number": 3540,
    "grade": "Hasan",
    "theme": "mercy",
+   "narrator": "Anas ibn Mālik",
+   "excerptAr": "يَا ابْنَ آدَمَ لَوْ بَلَغَتْ ذُنُوبُكَ عَنَانَ السَّمَاءِ ثُمَّ اسْتَغْفَرْتَنِي غَفَرْتُ لَكَ وَلاَ أُبَالِي",
+   "excerptEn": "O son of Adam! Were your sins to reach the clouds of the sky, then you sought forgiveness from Me, I would forgive you, and I would not mind.",
    "summary": "Ḥadīth qudsī: even if your sins reached the clouds, then you sought forgiveness, I would forgive you.",
    "summaryBn": "পাপ মেঘ পর্যন্ত পৌঁছালেও তুমি ক্ষমা চাইলে আমি তোমাকে ক্ষমা করব।",
    "qudsi": true,
@@ -82,6 +87,9 @@
    "summaryBn": "তিন না চার রাকাত নিয়ে সন্দেহ হলে নিশ্চিত সংখ্যাটি ধরে সালামের আগে দুটি সিজদা করুন।",
    "alsoIn": null,
    "url": "https://sunnah.com/muslim:571a"
-  }
+  },
+  { "collection": "bukhari", "number": 6307, "grade": "Sahih", "theme": "return", "narrator": "Abū Hurayrah", "summary": "The Prophet asked Allah for forgiveness and turned to Him in repentance more than seventy times a day.", "summaryBn": "নবী দিনে সত্তরের বেশি বার আল্লাহর কাছে ক্ষমা চাইতেন ও তওবা করতেন।", "alsoIn": null, "url": "https://sunnah.com/bukhari:6307" },
+  { "collection": "bukhari", "number": 5971, "grade": "Sahih", "theme": "family", "narrator": "Abū Hurayrah", "summary": "When asked who most deserved good companionship, the Prophet named the mother three times, then the father.", "summaryBn": "উত্তম সাহচর্য পাওয়ার সবচেয়ে বেশি হক কার, জিজ্ঞেস করলে নবী তিনবার মায়ের কথা বলেন, তারপর বাবার কথা বলেন।", "alsoIn": null, "url": "https://sunnah.com/bukhari:5971" },
+  { "collection": "bukhari", "number": 5027, "grade": "Sahih", "theme": "knowledge", "narrator": "ʿUthmān ibn ʿAffān", "summary": "The best among you learn the Quran and teach it.", "summaryBn": "তোমাদের মধ্যে উত্তম তারা, যারা কুরআন শেখে ও শেখায়।", "alsoIn": null, "url": "https://sunnah.com/bukhari:5027" }
  ]
 }

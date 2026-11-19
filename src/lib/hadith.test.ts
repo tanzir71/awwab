@@ -1,11 +1,11 @@
 import { readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
-import { curatedHadith, hadithId, hadithSource, parseHadithId, riyadSelections, searchHadith } from "./hadith";
-import { canonicalHadithNumber, collectionIds, narrationGrade, type HadithNarration } from "./hadith-catalogue";
+import { curatedHadith, curatedHadithFor, desktopHadith, hadithId, hadithSource, parseHadithId, riyadSelections, searchHadith, topicMatches } from "./hadith";
+import { canonicalHadithNumber, collectionIds, hadithArchiveVersion, narrationGrade, type HadithNarration } from "./hadith-catalogue";
 
 const archive = collectionIds.flatMap(collection => {
-  const file = new URL(`../../public/data/hadith-${collection}-v2.json.gz`, import.meta.url);
+  const file = new URL(`../../public/data/hadith-${collection}-v${hadithArchiveVersion}.json.gz`, import.meta.url);
   const source = JSON.parse(gunzipSync(readFileSync(file)).toString()) as { items: HadithNarration[] };
   return source.items;
 });
@@ -38,6 +38,7 @@ describe("hadith editions", () => {
     expect(new Set(archive.map(item => item.collection))).toEqual(new Set(collectionIds));
     for (const reference of curatedHadith) {
       expect(byId.get(hadithId(reference.collection, reference.number))?.text, reference.url).toBeTruthy();
+      expect(byId.get(hadithId(reference.collection, reference.number))?.arabic, reference.url).toMatch(/\p{Script=Arabic}/u);
       if (reference.alsoIn) expect(byId.has(reference.alsoIn)).toBe(true);
     }
     for (const reference of riyadSelections) expect(byId.has(reference.original)).toBe(true);
@@ -52,5 +53,17 @@ describe("hadith editions", () => {
     expect(searchHadith("প্রতিবেশীর ক্ষতি", archive, "all").matches.some(item => item.number === "6018")).toBe(true);
     expect(searchHadith("Riyad 14", archive, "riyadussalihin").riyad.map(item => item.original)).toEqual(["muslim:2702b"]);
     expect(searchHadith("999999999", archive, "all")).toEqual({ matches: [], riyad: [] });
+  });
+
+  it("keeps the desktop topics and highlighted bilingual excerpt attached to their verified references", () => {
+    const selected = desktopHadith[0];
+    const edition = byId.get(hadithId(selected.collection, selected.number));
+    expect(edition?.arabic.normalize()).toContain(selected.excerptAr?.normalize());
+    expect(edition?.text).toContain(selected.excerptEn);
+    expect(topicMatches("repentance", selected)).toBe(true);
+    expect(topicMatches("family", selected)).toBe(false);
+    expect(topicMatches("family", curatedHadithFor("bukhari:5971"))).toBe(true);
+    expect(topicMatches("knowledge", curatedHadithFor("bukhari:5027"))).toBe(true);
+    expect(searchHadith("ذنوبك عنان السماء", [edition!], "all").matches[0]?.number).toBe("3540");
   });
 });

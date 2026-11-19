@@ -1,13 +1,16 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ArabicText } from "@/components/ArabicText";
+import { DesktopHadith } from "@/components/DesktopHadith";
+import { GradeBadge, HadithSnippet, HadithTranslation } from "@/components/HadithText";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useCopy } from "@/lib/copy";
+import { useHadithEditions, useHadithNarration } from "@/hooks/use-hadith";
 import {
   curatedGrade, curatedHadith, featuredArabic, featuredHadith, hadithId, hadithName, hadithNumberLabel, hadithSource,
-  loadHadith, parseHadithId, riyadSelections, searchHadith, type CollectionScope,
+  parseHadithId, searchHadith, type CollectionScope,
 } from "@/lib/hadith";
-import { collectionIds, editionUrl, type HadithCollection, type HadithGrade, type HadithNarration } from "@/lib/hadith-catalogue";
+import { collectionIds, editionUrl } from "@/lib/hadith-catalogue";
 import { splitArabicWords } from "@/lib/wordAnatomy";
 import { useUi } from "@/lib/uiState";
 
@@ -15,43 +18,11 @@ const topics = ["all", "mercy", "prayer", "character"] as const;
 type Topic = typeof topics[number];
 const topicLabels = { all: "hadithAll", mercy: "hadithMercy", prayer: "hadithPrayer", character: "hadithCharacter" } as const;
 const mercy = new Set(["bukhari:6464", "bukhari:528", "tirmidhi:3540", "muslim:2702a"]);
-const arabicRun = /(\p{Script=Arabic}[\p{Script=Arabic}\p{M}\u0640]*(?:[ \t]+\p{Script=Arabic}[\p{Script=Arabic}\p{M}\u0640]*)*)/gu;
-
-function GradeBadge({ grade }: { grade: HadithGrade }) {
-  const { t } = useCopy();
-  return <span className="hadith-grade" data-grade={grade.tier}>{t(grade.tier === "sahih" ? "hadithSahih" : "hadithHasan")}</span>;
-}
-
-function NarrationText({ text, source, close }: { text: string; source: string; close?: () => void }) {
-  const paragraphs = text.replace(/ﷺ/gu, "صَلَّى ٱللَّهُ عَلَيْهِ وَسَلَّمَ").split(/\n+/g);
-  return <div className="hadith-translation" lang="en">{paragraphs.map((paragraph, index) =>
-    <p key={index}>{paragraph.split(arabicRun).map((part, i) => i % 2
-      ? <ArabicText key={i} text={part} compact citation={source} onWordSelected={close} />
-      : part)}</p>)}</div>;
-}
 
 function HadithDetail({ id, close }: { id: string; close: () => void }) {
   const { language, t } = useCopy();
-  const related = riyadSelections.find(item => hadithId("riyadussalihin", item.number) === id);
-  const actual = related?.original ?? id;
-  const ref = parseHadithId(actual);
-  const collection = ref?.collection;
-  const number = ref?.number;
-  const seed = curatedHadith.find(item => hadithId(item.collection, item.number) === actual);
-  const [narration, setNarration] = useState<HadithNarration>();
-  const [status, setStatus] = useState<"loading" | "missing" | "unavailable">("loading");
-
-  useEffect(() => {
-    if (!collection) { setStatus("missing"); return; }
-    let current = true;
-    void loadHadith(collection).then(items => {
-      if (!current) return;
-      const match = items.find(item => item.number === number);
-      setNarration(match);
-      if (!match) setStatus("missing");
-    }, () => { if (current) setStatus("unavailable"); });
-    return () => { current = false; };
-  }, [collection, number]);
+  const { actual, ref, seed, related, narration, status } = useHadithNarration(id);
+  const [arabicOpen, setArabicOpen] = useState(false);
 
   const citation = ref ? `${hadithName(ref.collection, language)} ${hadithNumberLabel(ref.number, language)}` : "";
   const title = related ? `${t("hadithRiyad")} ${hadithNumberLabel(related.number, language)}` : citation || t("hadithRead");
@@ -70,8 +41,12 @@ function HadithDetail({ id, close }: { id: string; close: () => void }) {
       {!narration ? <p className="small muted" role="status">{t(status === "missing" ? "hadithNotFound" : status === "unavailable" ? "collectionUnavailable" : "openingCollection")}</p> :
         <>
           <p className="caption">{t("hadithEnglishTranslation")}</p>
-          <NarrationText text={narration.text} source={citation} close={close} />
+          <HadithTranslation text={narration.text} source={citation} close={close} />
           <p className="small muted">{t("narrationReference", { book: narration.book, number: narration.inBook })}</p>
+          {narration.arabic && <details className="hadith-full-arabic" onToggle={event => setArabicOpen(event.currentTarget.open)}>
+            <summary className="text-button">{t("hadithArabic")}</summary>
+            {arabicOpen && <ArabicText text={narration.arabic} citation={citation} onWordSelected={close} />}
+          </details>}
         </>}
       {seed?.alsoIn && parseHadithId(seed.alsoIn) && <p className="small muted">
         {t("hadithAlsoNarrated")}{" "}
@@ -90,7 +65,7 @@ function ArchiveSearch({ onRead, initialQuery }: { onRead: (id: string) => void;
   const [query, setQuery] = useState(initialQuery);
   const [scope, setScope] = useState<CollectionScope>("all");
   const [limit, setLimit] = useState(12);
-  const [data, setData] = useState<{ scope: CollectionScope; items: HadithNarration[]; missing: number }>();
+  const data = useHadithEditions(scope, true);
   const input = useRef<HTMLInputElement>(null);
   const deferred = useDeferredValue(query);
   const search = deferred.trim();
@@ -100,17 +75,6 @@ function ArchiveSearch({ onRead, initialQuery }: { onRead: (id: string) => void;
   useEffect(() => {
     input.current?.focus();
   }, []);
-
-  useEffect(() => {
-    let current = true;
-    const requested: HadithCollection[] = scope === "all" ? collectionIds : [scope === "riyadussalihin" ? "muslim" : scope];
-    void Promise.allSettled(requested.map(loadHadith)).then(loaded => {
-      if (!current) return;
-      const items = loaded.flatMap(entry => entry.status === "fulfilled" ? entry.value : []);
-      setData({ scope, items, missing: loaded.filter(entry => entry.status === "rejected").length });
-    });
-    return () => { current = false; };
-  }, [scope]);
 
   return <div className="hadith-search">
     <label className="field">{t("searchOffline")}<input ref={input} type="search" value={query} placeholder={t("hadithSearchHint")} onChange={event => {
@@ -145,7 +109,7 @@ function ArchiveSearch({ onRead, initialQuery }: { onRead: (id: string) => void;
           const seed = curatedHadith.find(entry => hadithId(entry.collection, entry.number) === id);
           const preview = seed ? (language === "bn" ? seed.summaryBn : seed.summary) : item.text;
           return <button className="card hadith-list-item" type="button" key={id} onClick={() => onRead(id)}>
-            <span className="hadith-search-snippet" lang={seed ? language : "en"}>{preview.replace(arabicRun, "")}</span>
+            <HadithSnippet text={preview} language={seed ? language : "en"} />
             <span className="hadith-item-source">
               <small>{hadithName(item.collection, language, true)} {hadithNumberLabel(item.number, language)}</small>
               <GradeBadge grade={item.grade} />
@@ -158,7 +122,11 @@ function ArchiveSearch({ onRead, initialQuery }: { onRead: (id: string) => void;
   </div>;
 }
 
-export function Hadith() {
+export function Hadith({ desktop }: { desktop: boolean }) {
+  return desktop ? <DesktopHadith /> : <MobileHadith />;
+}
+
+function MobileHadith() {
   const { language, t } = useCopy();
   const [params, setParams] = useSearchParams();
   const [topic, setTopic] = useState<Topic>("mercy");
