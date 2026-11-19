@@ -6,12 +6,14 @@ import { db } from "@/lib/storageService";
 import { useCopy } from "@/lib/copy";
 import { LocalRecorder } from "./LocalRecorder";
 
-export function VerseAudio({ audioRef, label, compare = false }: { audioRef: string; label: string; compare?: boolean }) {
+export function VerseAudio({ audioRef, label, compare = false, startExpanded = false }: {
+  audioRef: string; label: string; compare?: boolean; startExpanded?: boolean;
+}) {
   const { t } = useCopy();
   const clip = useLiveQuery(() => db.audio.get(audioRef), [audioRef]);
   const [url, setUrl] = useState("");
   const [loop, setLoop] = useState(false);
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(startExpanded);
   useEffect(() => {
     if (!clip?.blob) { setUrl(""); return; }
     const url = URL.createObjectURL(clip.blob);
@@ -26,7 +28,7 @@ export function VerseAudio({ audioRef, label, compare = false }: { audioRef: str
       </div>
       <audio className="w-full" controls loop={loop} preload="none" src={url} aria-label={t("referenceAudioFor", { name: label })} />
       <button type="button" className="text-button justify-self-start" aria-expanded={expanded} onClick={() => setExpanded(value => !value)}>{t("replaceAudio")}</button>
-    </div> : <button type="button" className="action soft" aria-expanded={expanded} onClick={() => setExpanded(value => !value)}><Headphones size={17} /> {t("addAudio")}</button>}
+    </div> : !startExpanded && <button type="button" className="action soft" aria-expanded={expanded} onClick={() => setExpanded(value => !value)}><Headphones size={17} /> {t("addAudio")}</button>}
     {expanded && <label className="field small">{t("chooseAudioFor", { name: label })}
       <input type="file" accept="audio/*" onChange={async event => {
         const file = event.target.files?.[0];

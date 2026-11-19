@@ -221,7 +221,7 @@ export async function backup() {
   return JSON.stringify({ app: "awwab", version: 1, records, prayers, audio }, null, 2);
 }
 
-export async function restoreBackup(file: string) {
+export async function restoreBackup(file: string, options?: { completeOnboarding?: boolean }) {
   const data = backupSchema.parse(JSON.parse(file));
   const records = data.records.map(({ key, value }) => {
     if (key === "umrah") {
@@ -246,6 +246,7 @@ export async function restoreBackup(file: string) {
     await db.records.bulkPut(records);
     await db.prayers.bulkPut(data.prayers as PrayerLog[]);
     await db.audio.bulkPut(audio);
+    if (options?.completeOnboarding) await updateSettings({ onboarded: true });
   });
 }
 

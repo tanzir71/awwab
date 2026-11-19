@@ -3,12 +3,13 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { addDays } from "./dates";
 import { baselineMonthStart, calendarEvents, hijriOn, monthStart } from "./hijri";
 import { cities, currentPrayerSchedule, prayerDay, schedule } from "./prayerServices";
-import { db, backup, getRecord, logPrayer, migrateLegacy, prayerStatistics, restoreBackup, updateSettings } from "./storageService";
+import { db, backup, defaults, getRecord, logPrayer, migrateLegacy, prayerStatistics, restoreBackup, updateSettings } from "./storageService";
 import { calendarFile } from "./calendarFile";
 import { estimateQada, finishQada } from "./qada";
 import { guideReference, prayerGuide } from "./prayerGuide";
 import { reviewCard, type Reviews } from "./reviews";
 import { countKnownQuranWords } from "./quran";
+import { completeOnboarding, placementLesson } from "./onboarding";
 import { finishQaidaLesson, rememberQaidaPlace, saveFluencyPractice, saveQaidaRowReview, saveSurahReview, saveTakhtiPractice, saveWordReview, setAyahFamiliar, wordMilestones } from "./studyMilestones";
 import { reviewDestination, reviewQueue, studyPlanMinutes } from "./studyDesk";
 import coreWords from "../../docs/content/core-quran-words.json";
@@ -17,6 +18,37 @@ import qaida from "../../docs/content/qaida-lessons.json";
 const dhaka = cities[0];
 const day = "2026-11-19";
 const times = schedule(day, dhaka, "Karachi", "hanafi");
+
+describe("onboarding", () => {
+  beforeEach(async () => {
+    await db.records.clear();
+  });
+
+  it("recommends the first lesson beyond each confident placement answer", () => {
+    expect([0, 1, 2, 3, 4].map(placementLesson)).toEqual([1, 2, 5, 6, 7]);
+  });
+
+  it("saves mode, script and placement together and keeps them after a second completion", async () => {
+    await updateSettings({ language: "bn" });
+    await completeOnboarding("maktab", "uthmani", 2);
+    await completeOnboarding("adult", "indopak", 0);
+    expect(await getRecord("settings", defaults)).toMatchObject({
+      onboarded: true, mode: "maktab", script: "uthmani", spellStyle: "ampara-bn", language: "bn",
+    });
+    expect(await getRecord("qaida-current", 1)).toBe(5);
+  });
+
+  it("restores a pre-onboarding backup and its lesson without resetting the placement", async () => {
+    const file = JSON.stringify({
+      app: "awwab", version: 1, records: [{ key: "settings", value: { ...defaults, language: "bn" } }, { key: "qaida-current", value: 6 }], prayers: [],
+    });
+    await expect(restoreBackup("{}", { completeOnboarding: true })).rejects.toThrow();
+    expect((await getRecord("settings", defaults)).onboarded).toBe(false);
+    await restoreBackup(file, { completeOnboarding: true });
+    expect(await getRecord("settings", defaults)).toMatchObject({ onboarded: true, language: "bn" });
+    expect(await getRecord("qaida-current", 1)).toBe(6);
+  });
+});
 
 describe("saved study milestones", () => {
   beforeEach(async () => {

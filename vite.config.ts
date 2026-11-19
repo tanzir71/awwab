@@ -7,6 +7,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { ArabicText } from "./src/components/ArabicText";
 import returnCopy from "./docs/content/return.json";
+import onboarding from "./docs/content/onboarding.json";
 
 const base = "/awwab/";
 
@@ -73,7 +74,10 @@ export default defineConfig(({ mode }) => ({
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
-        globPatterns: ["app/**/*.{html,webmanifest,png,svg,otf,woff2,mjs}", "assets/**/*", "design/**/*", "data/**/*", "packs/audio/index.json"],
+        globPatterns: [
+          "app/**/*.{html,webmanifest,png,svg,otf,woff2,mjs}", "assets/**/*", "design/**/*", "data/**/*", "packs/audio/index.json",
+          ...Object.values(onboarding.samples).map(item => item.path),
+        ],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         modifyURLPrefix: { "": base },
         navigateFallback: `${base}app/index.html`,

@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, type LocalAudio } from "@/lib/storageService";
 
-export function useAudioPlayback(refs: string[]) {
+export function useAudioPlayback(refs: string[], localSources?: Readonly<Record<string, string>>) {
   const clips = useLiveQuery(() => db.audio.bulkGet(refs), [refs.join("|")], []);
   const element = useRef<HTMLAudioElement>(null);
-  const source = useRef<{ clip: LocalAudio; url: string }>();
+  const source = useRef<{ ref: string; clip?: LocalAudio; url: string }>();
   const [track, setTrack] = useState<string>();
   const [playing, setPlaying] = useState(false);
   const [elapsed, setElapsed] = useState(0);
@@ -16,27 +16,28 @@ export function useAudioPlayback(refs: string[]) {
     const player = element.current;
     return () => {
       player?.pause();
-      if (source.current) URL.revokeObjectURL(source.current.url);
+      if (source.current?.clip) URL.revokeObjectURL(source.current.url);
     };
   }, []);
 
   function has(ref: string) {
-    return clips.some(clip => clip?.ref === ref);
+    return Boolean(localSources?.[ref]) || clips.some(clip => clip?.ref === ref);
   }
 
   function play(ref: string, speed = 1, loop = false) {
     const clip = clips.find(item => item?.ref === ref);
+    const localUrl = localSources?.[ref];
     const player = element.current;
-    if (!player || !clip) return;
-    if (source.current?.clip === clip && !player.paused) {
+    if (!player || (!clip && !localUrl)) return;
+    const changing = source.current?.ref !== ref || source.current?.clip !== clip;
+    if (!changing && !player.paused) {
       player.pause();
       return;
     }
-    const changing = source.current?.clip !== clip;
     if (changing) {
-      const url = URL.createObjectURL(clip.blob);
-      if (source.current) URL.revokeObjectURL(source.current.url);
-      source.current = { clip, url };
+      const url = clip ? URL.createObjectURL(clip.blob) : localUrl!;
+      if (source.current?.clip) URL.revokeObjectURL(source.current.url);
+      source.current = { ref, clip, url };
       player.src = url;
       setTrack(ref);
       setElapsed(0);

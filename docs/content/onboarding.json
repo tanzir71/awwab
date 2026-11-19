@@ -1,0 +1,6 @@
+{
+  "samples": {
+    "112:1": { "path": "packs/audio/aaqib-azeez/112-1.mp3", "pack": "aaqib-112" },
+    "103:2": { "path": "packs/audio/aaqib-azeez/103-2.mp3", "pack": "aaqib-103" }
+  }
+}

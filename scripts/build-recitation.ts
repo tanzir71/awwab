@@ -42,9 +42,10 @@ async function getRecording(number: number, name: string, version: string) {
   const title = `File:Chapter ${number}, ${name} (Murattal)${version} - Recitation of the Holy Qur'an.mp3`;
   const page = "https://commons.wikimedia.org/wiki/" + encodeURIComponent(title.replaceAll(" ", "_"));
   const html = contentDir ? await readFile(join(contentDir, `audio-${number}.html`), "utf8") : await (await request(page)).text();
-  const sourceBox = html.split('id="Licensing"')[1]?.split('id="File_history"')[0] ?? html;
-  const zero = /creativecommons\.org\/publicdomain\/zero\/1\.0/.test(sourceBox);
-  const shareAlike = /creativecommons\.org\/licenses\/by-sa\/4\.0/.test(sourceBox);
+  const sourceBox = html.match(/id="Licensing"([\s\S]*?)(?:id="(?:File_history|filehistory)"|$)/i)?.[1] ?? "";
+  const labels = new Set([...sourceBox.matchAll(/class="licensetpl(?:_|&#95;)short"[^>]*>\s*([^<]+)/gi)].map(match => match[1].trim()));
+  const zero = labels.has("CC0");
+  const shareAlike = labels.has("CC BY-SA 4.0");
   if ((!zero && !shareAlike) || !/Aaqib Azeez/i.test(html) || !/Own work/i.test(html)) throw new Error("Recording terms could not be verified from the file page.");
   const license = zero ? "CC0 1.0" : "CC BY-SA 4.0";
   const licenseUrl = zero ? "https://creativecommons.org/publicdomain/zero/1.0/" : "https://creativecommons.org/licenses/by-sa/4.0/";
@@ -52,7 +53,8 @@ async function getRecording(number: number, name: string, version: string) {
   if (!file) throw new Error("Original MP3 URL was not found.");
   const bytes = contentDir ? await readFile(join(contentDir, `audio-${number}.mp3`)) : Buffer.from(await (await request(file)).arrayBuffer());
   if (bytes.length < 10_000 || !(bytes.subarray(0, 3).toString() === "ID3" || bytes[0] === 0xff)) throw new Error("The downloaded file is not an MP3.");
-  return { source: { id, source: page, attribution: `Aaqib Azeez · ${license} · Wikimedia Commons`, licenseUrl }, bytes };
+  const attribution = `Aaqib Azeez · ${license} · Wikimedia Commons${zero ? "" : " · āyah clips trimmed and re-encoded"}`;
+  return { source: { id, source: page, attribution, licenseUrl }, bytes };
 }
 
 const recordings = [];

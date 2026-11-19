@@ -1,0 +1,183 @@
+.onboarding {
+  display: grid;
+  align-items: start;
+  min-height: 100svh;
+  padding: calc(env(safe-area-inset-top) + 8px) 20px calc(env(safe-area-inset-bottom) + 24px);
+  background: var(--c-bg);
+  color: var(--c-ink);
+  --control-primary: var(--c-primary);
+  --interactive-ink: var(--c-primary);
+}
+.onboarding[data-theme-preview="maktab"], .onboarding .onboarding-mode-card[data-theme-preview="maktab"] {
+  --control-primary: color-mix(in srgb, var(--c-primary) 79%, var(--c-ink));
+  --interactive-ink: color-mix(in srgb, var(--c-primary) 67%, var(--c-ink));
+}
+:root[lang="bn"] .onboarding[data-theme-preview="adult"], :root[lang="bn"] .onboarding-mode-card[data-theme-preview="adult"] {
+  --font-display: "Noto Sans Bengali Variable", "Noto Serif Variable", serif;
+  --font-body: "Noto Sans Bengali Variable", "Noto Sans Variable", sans-serif;
+}
+:root[lang="bn"] .onboarding [data-theme-preview="maktab"], :root[lang="bn"] .onboarding[data-theme-preview="maktab"] {
+  --font-display: "Noto Sans Bengali Variable", "Baloo 2 Variable", sans-serif;
+  --font-body: "Noto Sans Bengali Variable", "Nunito Variable", sans-serif;
+}
+.onboarding-inner {
+  display: grid;
+  gap: 16px;
+  width: min(100%, 435px);
+  margin-inline: auto;
+  min-width: 0;
+  font: var(--type-body);
+  font-family: var(--font-body);
+}
+.onboarding :is(.onboarding-question, .onboarding-verse, .onboarding-mode-example, .onboarding-brand-note) .word-chip > span:first-child { text-decoration: none; }
+.onboarding h1 { font-family: var(--font-display); }
+.onboarding h1[tabindex]:focus { outline: none; }
+.onboarding .action { min-height: 50px; font: 600 15px/22px var(--font-body); }
+.onboarding-welcome.night {
+  align-items: stretch;
+  padding-top: max(8px, env(safe-area-inset-top));
+  background: var(--c-night);
+  color: var(--c-on-night);
+  text-align: center;
+}
+.onboarding-welcome .onboarding-inner {
+  grid-template-rows: auto minmax(min-content, 1fr) auto;
+  row-gap: 20px;
+}
+.onboarding-language { justify-self: end; }
+.onboarding-language select {
+  min-height: 36px;
+  padding-inline: 9px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--c-overlay-on-night);
+  color: var(--c-on-night);
+  font: var(--type-small);
+}
+.onboarding-language option { color: var(--c-ink); background: var(--c-surface); }
+.onboarding-welcome-content {
+  display: grid;
+  align-self: center;
+  gap: 20px;
+  padding-block: 14px;
+}
+.onboarding-brand { display: grid; justify-items: center; gap: 8px; }
+.onboarding-wordmark {
+  position: relative;
+  display: inline-block;
+  font: 600 clamp(62px, 18.87vw, 73.6px)/1 "Noto Sans Variable", sans-serif;
+  letter-spacing: -.03em;
+}
+.onboarding-wordmark img { position: absolute; top: .11em; left: .11em; width: .47em; height: auto; }
+.onboarding-brand-note, .onboarding-welcome-footer > .small { color: var(--c-night-muted); }
+.onboarding-brand-note { font: var(--type-small); }
+.onboarding-brand-note .arabic-text { display: inline-flex; vertical-align: middle; font: 500 14px/18px var(--font-arabic); }
+.onboarding-brand-note .arabic-line { padding: 0; }
+.onboarding-brand-note .word-chip { min-height: 20px; min-width: 0; padding: 0; }
+.onboarding-welcome h1 { justify-self: center; max-width: 15em; }
+.onboarding .onboarding-verse {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 8px;
+  min-height: 160px;
+  background: var(--c-overlay-on-night);
+  color: var(--c-on-night);
+  box-shadow: none;
+}
+.onboarding-verse .arabic-text { font: 400 clamp(23px, 7.7vw, 30px)/54px var(--font-arabic); }
+.onboarding-verse .arabic-line { padding: 0; justify-content: center; }
+.onboarding-verse .word-chip { min-width: 0; padding-inline: 1px; }
+.onboarding-verse .caption { color: var(--c-night-muted); }
+.onboarding-welcome-footer { display: grid; gap: 16px; }
+.onboarding-welcome-footer > p:first-child { margin-inline: auto; max-width: 350px; }
+.onboarding-welcome .action.onboarding-accent {
+  background: color-mix(in srgb, var(--c-accent) 83%, var(--c-night));
+  color: var(--c-on-primary);
+}
+.onboarding-welcome-footer .action.plain { color: var(--c-on-night); }
+.onboarding-step-header { min-height: 20px; }
+.onboarding-step-header .text-button { position: relative; min-height: 20px; color: var(--c-ink-muted); }
+.onboarding-step-header .text-button::before { content: ""; position: absolute; inset: -8px -4px; }
+.setup-steps { display: flex; gap: 6px; align-items: center; }
+.setup-steps span { width: 8px; height: 8px; background: var(--c-line); border-radius: var(--r-pill); }
+.setup-steps [data-done="true"] { background: var(--control-primary); }
+.setup-steps [data-current="true"] { width: 24px; }
+.onboarding-choose .onboarding-inner, .onboarding-mode-list { display: grid; gap: 14px; }
+.onboarding-mode-list :is(.card, .chips) { min-width: 0; }
+.onboarding-mode-card {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  color: var(--c-ink);
+  font: var(--type-body);
+  font-family: var(--font-body);
+}
+.onboarding-mode-card[data-theme-preview="maktab"] { background: var(--c-surface-alt); }
+.onboarding-mode-card[data-selected="true"] { box-shadow: var(--shadow-raised); }
+.onboarding-mode-title {
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr) 24px;
+  gap: 12px;
+  align-items: center;
+}
+.onboarding-mode-title h2 { font: var(--type-title); font-family: var(--font-body); }
+.onboarding-mode-title p { margin-top: 2px; color: var(--interactive-ink); }
+.onboarding-mode-example {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 52px;
+  padding: 6px 12px;
+  background: var(--c-primary-soft);
+  border-radius: var(--r-control);
+  font: var(--type-display-m);
+}
+[data-theme-preview="maktab"] > .onboarding-mode-title .onboarding-mode-example { background: var(--c-tint); }
+[data-theme-preview="maktab"] > .onboarding-mode-title .onboarding-mode-example > span[lang="en"] { font-family: var(--font-body); }
+.onboarding-mode-example .arabic-text { z-index: 1; font: var(--type-arabic-m); }
+.onboarding-mode-example .arabic-line { gap: 3px; padding: 0; }
+.onboarding-mode-example .word-chip { min-width: 0; min-height: 40px; padding: 0; }
+[data-theme-preview="maktab"] .onboarding-mode-example .word-chip:nth-child(1) { color: color-mix(in srgb, var(--c-harakat-damma) 67%, var(--c-ink)); }
+[data-theme-preview="maktab"] .onboarding-mode-example .word-chip:nth-child(2) { color: color-mix(in srgb, var(--c-harakat-kasra) 75%, var(--c-ink)); }
+[data-theme-preview="maktab"] .onboarding-mode-example .word-chip:nth-child(3) { color: color-mix(in srgb, var(--c-harakat-fatha) 75%, var(--c-ink)); }
+.onboarding-mode-dot { display: grid; place-items: center; width: 24px; height: 24px; border-radius: var(--r-pill); background: var(--c-line); }
+.onboarding-mode-dot.selected { background: var(--control-primary); }
+.onboarding-mode-dot.selected::before { content: ""; width: 8px; height: 8px; border-radius: var(--r-pill); background: var(--c-on-primary); }
+.onboarding-mode-hit { position: absolute; inset: 0; border-radius: var(--r-card); }
+.onboarding-mode-card .chip { min-height: 30px; padding: 4px 12px; color: var(--interactive-ink); font: var(--type-small); }
+.onboarding-mode-card .chips { gap: 6px; }
+.onboarding-mode-card[data-theme-preview="adult"] .chips { max-width: 270px; }
+.onboarding-scripts { min-width: 0; padding: 0; border: 0; }
+.onboarding-scripts legend { margin-bottom: 12px; font: var(--type-body-strong); }
+.onboarding-scripts .equal-row { background: var(--c-surface-alt); border-radius: var(--r-control); padding: 4px; gap: 4px; }
+.onboarding-scripts button { display: grid; justify-items: center; align-content: center; min-height: 56px; border-radius: var(--r-control); padding: 4px 6px; color: var(--c-ink-muted); }
+.onboarding-scripts button[aria-pressed="true"] { background: var(--c-surface); color: var(--c-ink); box-shadow: var(--shadow-card); }
+.onboarding-scripts small { color: var(--c-ink-muted); }
+.onboarding-continue { margin-top: 14px; }
+.onboarding-placement { margin: 0; padding: 0; gap: 6px; list-style: none; }
+.onboarding-placement .chip { min-height: 30px; padding: 4px 12px; background: var(--c-surface); color: var(--c-ink); font: var(--type-small); box-shadow: var(--shadow-card); }
+.onboarding-placement [data-passed="true"] { background: var(--c-primary-soft); color: var(--interactive-ink); box-shadow: none; }
+.onboarding-placement [aria-current="step"] { background: var(--control-primary); color: var(--c-on-primary); box-shadow: none; }
+.onboarding .onboarding-question { display: grid; gap: 14px; justify-items: center; padding: 28px 16px 24px; text-align: center; }
+.onboarding-question > .arabic-text { max-width: 100%; font: 400 clamp(29px, 10.3vw, 40px)/72px var(--font-arabic); }
+.onboarding-question > .arabic-text .arabic-line { justify-content: center; gap: 4px; padding: 0; }
+.onboarding-question .word-chip { min-height: 64px; min-width: 0; padding-inline: 3px; }
+.setup-audio { display: grid; justify-items: center; gap: 6px; min-width: 0; max-width: 100%; }
+.setup-hear { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; color: var(--c-ink-muted); font: var(--type-small); }
+.setup-hear > span { display: grid; place-items: center; width: 34px; height: 34px; border-radius: var(--r-pill); background: var(--c-primary-soft); }
+.setup-audio .field, .setup-audio input { min-width: 0; width: 100%; }
+.onboarding-recall-actions { display: grid; gap: 8px; }
+.onboarding .onboarding-recognition { display: grid; gap: 6px; background: var(--c-tint); box-shadow: none; }
+.onboarding-recognition h2 { display: flex; align-items: center; gap: 8px; margin: 0; font: var(--type-body-strong); }
+.onboarding-recognition p + p { margin: 0; }
+.onboarding-recall .onboarding-inner > .text-button { justify-self: end; }
+.onboarding :is(.caption, .chip, .small, .text-button, .setup-hear) { font-family: var(--font-body); }
+@media (max-width: 359px) {
+  .onboarding { padding-inline: 12px; }
+  .onboarding-mode-title { gap: 8px; }
+  .onboarding-mode-example { padding-inline: 8px; }
+  .onboarding-placement .chip { padding-inline: 8px; }
+}
