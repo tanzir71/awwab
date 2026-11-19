@@ -1,0 +1,129 @@
+.app-content:has(.return-page, .qada-page, .sayyid-page) {
+  padding-top: calc(8px + env(safe-area-inset-top));
+}
+
+.return-page, .qada-page, .sayyid-page, .qada-content {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+  min-width: 0;
+}
+
+.return-heading h1 {
+  font: var(--type-display-xl);
+  letter-spacing: var(--tracking-display-xl);
+}
+.return-heading > .muted { margin-top: 14px; }
+.return-counter {
+  display: grid;
+  gap: 14px;
+  justify-items: center;
+  padding: 24px 16px 22px;
+  border-radius: var(--r-card);
+  text-align: center;
+}
+.count-ring {
+  display: grid;
+  width: min(184px, 100%);
+  aspect-ratio: 1;
+  padding: 10px;
+  border-radius: 50%;
+  background: conic-gradient(var(--c-accent) var(--count), var(--c-overlay-on-night) 0);
+}
+.count-window {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  border-radius: 50%;
+  background: var(--c-night);
+}
+.count-window strong { font: 600 52px/56px var(--font-display); letter-spacing: var(--tracking-display-xl); font-variant-numeric: tabular-nums; }
+.count-window small { color: var(--c-night-muted); }
+.return-counter .return-phrase .arabic-text { font: 400 30px/46px var(--font-arabic); }
+.return-phrase .arabic-line { justify-content: center; }
+.return-page .arabic-line, .sayyid-page .arabic-line { flex-wrap: wrap; overflow: visible; padding: 0; }
+.return-page .word-chip, .sayyid-page .word-chip { padding: 2px 8px 4px; }
+.return-page .word-chip > span:first-child, .sayyid-page .word-chip > span:first-child { text-decoration: none; }
+.return-page .word-chip::after, .sayyid-page .word-chip::after {
+  content: "";
+  width: 28px;
+  height: 2px;
+  border-radius: var(--r-pill);
+  background: var(--c-line);
+}
+.action.return-count {
+  width: 100%;
+  min-height: 50px;
+  font: var(--type-body-strong);
+  color: var(--c-on-primary);
+  background: color-mix(in srgb, var(--c-accent) 82%, var(--c-night));
+}
+:root[data-mode="maktab"] .action.return-count {
+  background: color-mix(in srgb, var(--c-accent) 56%, var(--c-night));
+  background: hsl(from var(--c-accent) h s calc(l * .615));
+}
+.return-counter-source { font: var(--type-caption); color: var(--c-night-muted); letter-spacing: var(--tracking-caption); }
+
+.return-sayyid { display: grid; gap: 10px; }
+.return-sayyid > h2, .return-steps > h2 { margin: 0; }
+.return-source-row { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
+.return-source-row .return-source-badge {
+  padding: 3px 8px;
+  border-radius: var(--r-pill);
+  color: var(--interactive-ink);
+  background: var(--c-primary-soft);
+}
+.return-sayyid-arabic .arabic-text, .return-hope .arabic-text { font: 400 22px/46px var(--font-arabic); }
+.return-sayyid-arabic .arabic-text { width: 100%; }
+.return-sayyid .arabic-line, .return-hope .arabic-line { gap: 0; }
+.return-page .return-list-link, .qada-page .return-list-link { padding: 12px 14px; }
+.return-list-link strong { font: var(--type-body-strong); }
+.return-list-link > img:last-child { flex: 0 0 auto; }
+.return-steps .return-step { padding: 10px 16px; }
+.return-step .icon-box { width: 32px; height: 32px; flex-basis: 32px; border-radius: 50%; font: var(--type-body-strong); }
+.return-step strong { font: var(--type-body-strong); }
+.return-hope { background: var(--c-primary-soft); padding: 16px; border-radius: var(--r-card); }
+.return-hope > a { justify-self: start; }
+.return-share { justify-self: center; }
+.sayyid-study { gap: 16px; }
+.sayyid-study .arabic-line { min-height: 58px; justify-content: center; }
+.sayyid-study > a { justify-self: start; }
+
+.qada-content { gap: 14px; }
+.qada-summary { display: grid; gap: 10px; }
+.qada-summary > h2 { margin: 0; }
+.qada-summary p { font: var(--type-small); }
+.qada-summary > small { color: var(--c-ink-muted); }
+.qada-summary time { white-space: normal; }
+.qada-balance { display: flex; flex-wrap: wrap; gap: 0 8px; align-items: baseline; }
+.qada-balance strong { font: var(--type-numeral-l); letter-spacing: var(--tracking-display-xl); }
+.qada-goals { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.qada-goals .qada-goal {
+  min-height: 44px;
+  padding: 4px;
+  border-radius: var(--r-pill);
+  background: var(--c-surface);
+  box-shadow: var(--shadow-card);
+  font: var(--type-small);
+}
+.qada-goals .qada-goal[aria-pressed="true"] { color: var(--c-on-primary); background: var(--control-primary); }
+.qada-by-prayer .text-button { padding-inline: 8px; }
+.qada-by-prayer h2 { margin: 0; }
+.qada-by-prayer .qada-prayer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  padding: 8px 16px;
+}
+.qada-prayer strong { font: var(--type-title); }
+.qada-prayer-left { font: var(--type-body-strong); }
+.qada-prayer .action { min-width: 48px; padding-inline: 8px; }
+.qada-note { display: grid; gap: 6px; padding: 16px; border-radius: var(--r-card); background: var(--c-tint); }
+.qada-note > p:first-child { font: var(--type-body-strong); }
+.awwab-dialog.qada-dialog .qada-adjust { margin: 0; }
+.awwab-dialog.qada-dialog .qada-adjust legend { padding-inline: 4px; font: var(--type-body-strong); }
+.qada-adjust .field { align-content: space-between; font: var(--type-small); }
+.awwab-dialog.qada-dialog .qada-add-fast:last-child { position: static; width: 100%; height: auto; }
+
+@media (min-width: 1024px) {
+  .return-page, .qada-page, .sayyid-page { max-width: 590px; margin: 16px auto 0; }
+}

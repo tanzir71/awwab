@@ -6,7 +6,7 @@ import { eventDisplayDates, hijriOn, monthStart, type CalendarEvent, type Calend
 import { jamaatForPrayer, mosqueForPrayer, type MosquePlan } from "@/lib/mosques";
 import { prayerDay } from "@/lib/prayerServices";
 import { guideRakats } from "@/lib/prayerGuide";
-import { finishQada, qadaBalances, qadaDefaults } from "@/lib/qada";
+import { qadaBalances, qadaDefaults, qadaForecast } from "@/lib/qada";
 import { coreWordTotal, countKnownQuranWords } from "@/lib/quran";
 import { isDue, type Reviews } from "@/lib/reviews";
 import { prayerStatistics, type Settings } from "@/lib/storageService";
@@ -63,8 +63,9 @@ export function TodayDashboard({ settings, now, day, prayers, current, next, log
   const qada = useRecord("qada", qadaDefaults);
   const zakat = useRecord<typeof initialZakat | null>("zakat", null);
   const stats = prayerStatistics(logs, day);
-  const { madeUp, remaining, totalLeft } = qadaBalances(qada, logs);
-  const finish = finishQada(day, totalLeft, qada.dailyGoal);
+  const balances = qadaBalances(qada, logs);
+  const { madeUp, remaining, totalLeft } = balances;
+  const { end: finish } = qadaForecast(day, balances, qada);
   const dueCount = Object.values(reviews).filter(review => isDue(review, now)).length;
   const headline = current ?? next;
   const jamaat = jamaatForPrayer(headline, zone, mosques);
@@ -140,7 +141,7 @@ export function TodayDashboard({ settings, now, day, prayers, current, next, log
         <Link className="daily-practice-row" to="/return"><span><strong>Astaghfirullah</strong><small className="muted">{t("todayIstighfarProgress", { count: istighfar })}</small></span><span className="chip">{t("tapAction")}</span></Link>
       </section>
       <section className="card compact-stack"><SectionHeading title={t("makeUpPrayers")} to="/return/qada" label={`${t("plan")} →`} />
-        <p className="daily-balance"><strong className="daily-value">{number.format(totalLeft)}</strong>{finish && <small className="muted">{t("qadaTargetDate", { count: qada.dailyGoal, date: formatDay(finish, { month: "short", day: "numeric", year: "numeric" }, locale) })}</small>}</p>
+        <p className="daily-balance"><strong className="daily-value">{number.format(totalLeft)}</strong>{finish && <small className="muted">{t(qada.withEachPrayer ? "qadaProjectedDate" : "qadaTargetDate", { count: qada.dailyGoal, date: formatDay(finish, { month: "short", day: "numeric", year: "numeric" }, locale) })}</small>}</p>
         {prayerIds.map(id => <div className="daily-qada-row" key={id}><b>{t(id)}</b><progress max={Math.max(1, madeUp[id] + remaining[id])} value={madeUp[id]} aria-label={t(id)} /><small className="muted">{t("prayersLeft", { count: remaining[id] })}</small></div>)}
       </section>
       <section className="card compact-stack"><SectionHeading title={t("comingUp")} to="/plan" label={`${t("calendar")} →`} />

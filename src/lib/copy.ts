@@ -11,6 +11,7 @@ import { qaidaMessages } from "./qaida-copy";
 import { fluencyMessages } from "./fluency-copy";
 import { onboardingMessages } from "./onboarding-copy";
 import { hadithMessages } from "./hadith-copy";
+import { returnMessages } from "./return-copy";
 
 type CopySettings = Pick<Settings, "mode" | "language">;
 export type MessageCatalog = Record<string, Record<Settings["language"], string | [string, string]>>;
@@ -25,6 +26,7 @@ const messages: MessageCatalog = {
   ...fluencyMessages,
   ...onboardingMessages,
   ...hadithMessages,
+  ...returnMessages,
   today: { en: "Today", bn: "আজ" },
   learn: { en: "Learn", bn: "শিখি" },
   return: { en: "Return", bn: "ফিরে আসি" },

@@ -6,6 +6,7 @@
 @import "./fluency.css";
 @import "./onboarding.css";
 @import "./hadith.css";
+@import "./return.css";
 
 @tailwind base;
 @tailwind components;
@@ -363,9 +364,7 @@ progress::-moz-progress-bar { background: var(--control-primary); }
 .masjid .minaret.right { left: auto; right: 11%; }
 .masjid .spike { position: absolute; bottom: 78%; height: 16%; width: 4px; left: calc(50% - 2px); border-radius: var(--r-pill); background: var(--c-accent); }
 .night .word-chip:hover { background: var(--c-overlay-on-night); color: var(--c-on-night); }
-.count-ring { width: min(180px, 72%); aspect-ratio: 1; margin-inline: auto; display: grid; place-items: center; border-radius: 50%; padding: 10px; background: conic-gradient(var(--c-accent) var(--count), var(--c-overlay-on-night) 0); }
-.count-ring div { width: 100%; height: 100%; border-radius: 50%; background: var(--c-night); display: grid; place-content: center; }
-.count-ring strong, .numeral { font: var(--type-numeral-l); }
+.numeral { font: var(--type-numeral-l); }
 .study-item { display: flex; min-height: 44px; align-items: center; justify-content: space-between; gap: 5px; text-decoration: none; }
 .qaida-queue, .qaida-trace { display: none; }
 .study-tabs { padding: 3px; background: var(--c-surface-alt); border-radius: var(--r-control); gap: 4px; }

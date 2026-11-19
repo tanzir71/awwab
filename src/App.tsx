@@ -10,7 +10,8 @@ import Today, { PrayerWeek } from "@/pages/Index";
 import { PrayerGuide } from "@/pages/PrayerGuide";
 import { Learn } from "@/pages/Learn";
 import { Plan } from "@/pages/Plan";
-import { Qada, ReturnPage, Sayyid } from "@/pages/Return";
+import { ReturnPage, Sayyid } from "@/pages/Return";
+import { Qada } from "@/pages/Qada";
 import { SettingsPage, You } from "@/pages/You";
 import { Onboarding } from "@/pages/Onboarding";
 import { Hadith } from "@/pages/Hadith";
@@ -70,7 +71,7 @@ function Main() {
       <Route path="/learn/takhti/:family?" element={<Takhti />} />
       <Route path="/learn/hadith" element={<Hadith />} />
       <Route path="/return" element={<ReturnPage settings={settings} now={now} />} />
-      <Route path="/return/sayyid" element={<Sayyid />} />
+      <Route path="/return/sayyid" element={<Sayyid settings={settings} />} />
       <Route path="/return/qada" element={<Qada settings={settings} now={now} />} />
       <Route path="/plan" element={<Plan settings={settings} now={now} />} />
       <Route path="/plan/mosques" element={<Mosques settings={settings} now={now} />} />

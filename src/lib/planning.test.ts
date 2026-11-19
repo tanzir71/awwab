@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { calculateZakat, gramsPerBhori, nisabWeight } from "./zakat";
 import { advanceSai, bearing, correctSai, distance, initialSai } from "./umrah";
 import { eventDisplayDates } from "./hijri";
-import { qadaBalances, qadaDefaults } from "./qada";
+import { qadaBalances, qadaDefaults, qadaForecast } from "./qada";
 
 describe("Today summaries", () => {
   it("shows both possible three-day White Days windows across a Gregorian month boundary", () => {
@@ -23,6 +23,14 @@ describe("Today summaries", () => {
     expect(result.remaining.fajr).toBe(0);
     expect(result.remaining.asr).toBe(3);
     expect(result.totalLeft).toBe(3);
+  });
+
+  it("forecasts make-ups with each prayer using the largest remaining balance", () => {
+    const balances = qadaBalances({ ...qadaDefaults, estimated: { ...qadaDefaults.estimated, fajr: 7, asr: 2 } }, []);
+    const today = "2026-11-19";
+    expect(qadaForecast(today, balances, { dailyGoal: 3 })).toEqual({ days: 3, end: "2026-11-21" });
+    expect(qadaForecast(today, balances, { dailyGoal: 3, withEachPrayer: true })).toEqual({ days: 7, end: "2026-11-25" });
+    expect(qadaForecast(today, qadaBalances(qadaDefaults, []), { dailyGoal: 3, withEachPrayer: true })).toEqual({ days: 0, end: null });
   });
 });
 

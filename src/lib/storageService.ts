@@ -118,7 +118,7 @@ const savedRecords: Record<string, z.ZodTypeAny> = {
   "word-bank-known": labels,
   "word-milestones": z.array(z.union([z.literal(25), z.literal(50), z.literal(100), z.literal(125)])),
   istighfar: dateCounts,
-  qada: z.object({ estimated: balances, madeUp: balances, dailyGoal: count.min(1).max(100), fasts: count, fastsMadeUp: count }),
+  qada: z.object({ estimated: balances, madeUp: balances, dailyGoal: count.min(1).max(100), withEachPrayer: z.boolean().optional(), fasts: count, fastsMadeUp: count }),
   calendar: z.object({
     anchors: z.array(z.object({ year: count.min(1), month: count.min(1).max(12), date: daySchema, source: z.string().max(100) })),
     overrides: z.record(z.string(), z.object({ date: daySchema.optional(), source: z.string().max(100).optional(), adjust: z.union([z.literal(-1), z.literal(0), z.literal(1)]) })),

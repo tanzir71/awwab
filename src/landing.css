@@ -82,7 +82,7 @@ main:focus { outline: 0; }
 .device img { display: block; width: 100%; height: auto; border-radius: 26px; background: var(--c-bg); }
 .phone { width: min(100%, 300px); margin-inline: auto; }
 .phone img { aspect-ratio: 390 / 844; object-fit: contain; }
-.qaida-preview img { aspect-ratio: auto; }
+.qaida-preview img, .return-preview img { aspect-ratio: auto; }
 .hero-devices .primary-phone { position: relative; z-index: 1; width: 51.25%; margin: 0 0 0 5%; }
 .hero-devices .secondary-phone { position: absolute; top: 40px; left: 46.25%; width: 48.5%; margin: 0; }
 .verse { text-align: center; padding: clamp(45px, 6vw, 88px) 0; }

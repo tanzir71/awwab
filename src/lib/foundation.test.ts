@@ -5,7 +5,7 @@ import { baselineMonthStart, calendarEvents, hijriOn, monthStart } from "./hijri
 import { cities, currentPrayerSchedule, prayerDay, schedule } from "./prayerServices";
 import { db, backup, defaults, getRecord, logPrayer, migrateLegacy, prayerStatistics, restoreBackup, updateSettings } from "./storageService";
 import { calendarFile } from "./calendarFile";
-import { estimateQada, finishQada } from "./qada";
+import { estimateQada, finishQada, qadaDefaults } from "./qada";
 import { guideReference, prayerGuide } from "./prayerGuide";
 import { reviewCard, type Reviews } from "./reviews";
 import { countKnownQuranWords } from "./quran";
@@ -255,6 +255,20 @@ describe("device prayer records", () => {
     await db.records.clear();
     await restoreBackup(file);
     expect((await db.records.get("settings")).value).toMatchObject({ school: "shafi", prayerGuide: "hanafi" });
+  });
+
+  it("round trips a make-up plan with one per prayer and accepts an older plan without the field", async () => {
+    const plan = { ...qadaDefaults, withEachPrayer: true, fasts: 12, fastsMadeUp: 1 };
+    await db.records.put({ key: "qada", value: plan });
+    const file = await backup();
+    await db.records.clear();
+    await restoreBackup(file);
+    expect(await getRecord("qada", qadaDefaults)).toEqual(plan);
+
+    const legacy = JSON.parse(file);
+    delete legacy.records.find(record => record.key === "qada").value.withEachPrayer;
+    await restoreBackup(JSON.stringify(legacy));
+    expect(await getRecord("qada", qadaDefaults)).toMatchObject({ dailyGoal: 3, fasts: 12, fastsMadeUp: 1 });
   });
 
   it("ignores a future event and records a make-up without double-counting", async () => {

@@ -1,12 +1,21 @@
 {
   "istighfar": {
     "arabic": "أَسْتَغْفِرُ ٱللَّهَ",
-    "source": "Muslim 2702b · Sahih",
-    "url": "https://sunnah.com/muslim:2702b"
+    "source": "Muslim 2702a · Sahih",
+    "url": "https://sunnah.com/muslim:2702a"
   },
   "sayyid": {
     "source": "Bukhari 6306 · Sahih",
     "url": "https://sunnah.com/bukhari:6306",
+    "meaningsBn": [
+      "হে আল্লাহ, আপনিই আমার রব।",
+      "আপনি ছাড়া ইবাদতের যোগ্য কেউ নেই।",
+      "আপনি আমাকে সৃষ্টি করেছেন, আর আমি আপনার বান্দা।",
+      "সাধ্যমতো আমি আপনার সঙ্গে করা অঙ্গীকার ও প্রতিশ্রুতি পালন করি।",
+      "আমি আমার কাজের অনিষ্ট থেকে আপনার আশ্রয় চাই।",
+      "আমার প্রতি আপনার নেয়ামত স্বীকার করছি এবং আমার পাপও স্বীকার করছি।",
+      "আমাকে ক্ষমা করুন। আপনি ছাড়া কেউ পাপ ক্ষমা করেন না।"
+    ],
     "lines": [
       [
         "اللَّهُمَّ أَنْتَ رَبِّي",
@@ -42,7 +51,8 @@
     "arabic": "لَا تَقْنَطُوا۟ مِن رَّحْمَةِ ٱللَّهِ",
     "source": "Az-Zumar 39:53",
     "url": "https://quran.com/39/53",
-    "meaning": "Do not lose hope in Allah’s mercy."
+    "meaning": "Do not lose hope in Allah’s mercy. Indeed, Allah forgives all sins.",
+    "meaningBn": "আল্লাহর রহমত থেকে নিরাশ হয়ো না। নিশ্চয়ই আল্লাহ সব পাপ ক্ষমা করেন।"
   },
   "welcome": {
     "arabic": "فَإِنَّهُۥ كَانَ لِلْأَوَّٰبِينَ غَفُورًۭا",
