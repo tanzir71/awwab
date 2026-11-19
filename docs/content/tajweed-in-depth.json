@@ -1,0 +1,112 @@
+[
+  {
+    "id": "makharij",
+    "rules": {
+      "makhraj-mouth": "ا و ي",
+      "makhraj-throat": "ء ه ع ح غ خ",
+      "makhraj-tongue": "ق ك ج ش ي ض ل ن ر ط د ت ص ز س ظ ذ ث",
+      "makhraj-lips": "ف ب م و",
+      "makhraj-nose": "نّ مّ"
+    },
+    "articulation": {
+      "makhraj-mouth": [
+        { "name": ["Open space of the mouth and throat", "মুখ ও গলার খোলা অংশ"], "letters": "ا و ي" }
+      ],
+      "makhraj-throat": [
+        { "name": ["Deep throat", "গলার গভীর অংশ"], "letters": "ء ه" },
+        { "name": ["Middle of the throat", "গলার মাঝের অংশ"], "letters": "ع ح" },
+        { "name": ["Throat nearest the mouth", "মুখের কাছের গলা"], "letters": "غ خ" }
+      ],
+      "makhraj-tongue": [
+        { "name": ["Farthest back of the tongue against the palate", "জিহ্বার সবচেয়ে পেছনের অংশ তালুতে"], "letters": "ق" },
+        { "name": ["Back of the tongue, slightly farther forward", "জিহ্বার পেছনের অংশ, একটু সামনে"], "letters": "ك" },
+        { "name": ["Middle of the tongue against the palate", "জিহ্বার মাঝের অংশ তালুতে"], "letters": "ج ش ي" },
+        { "name": ["Side of the tongue against the upper molars", "জিহ্বার পাশ ওপরের পেছনের দাঁতে"], "letters": "ض" },
+        { "name": ["Front edge and tip of the tongue at the upper gums", "জিহ্বার সামনের ধার ও ডগা ওপরের মাড়িতে"], "letters": "ل" },
+        { "name": ["Tip of the tongue at the upper gums", "জিহ্বার ডগা ওপরের মাড়িতে"], "letters": "ن" },
+        { "name": ["Tip and upper surface of the tongue at the upper gums", "জিহ্বার ডগা ও ওপরের অংশ ওপরের মাড়িতে"], "letters": "ر" },
+        { "name": ["Tip of the tongue at the roots of the upper front teeth", "জিহ্বার ডগা ওপরের সামনের দাঁতের গোড়ায়"], "letters": "ط د ت" },
+        { "name": ["Tip of the tongue near the lower front teeth", "জিহ্বার ডগা নিচের সামনের দাঁতের কাছে"], "letters": "ص ز س" },
+        { "name": ["Tip of the tongue at the edges of the upper front teeth", "জিহ্বার ডগা ওপরের সামনের দাঁতের কিনারায়"], "letters": "ظ ذ ث" }
+      ],
+      "makhraj-lips": [
+        { "name": ["Inside of the lower lip at the upper front teeth", "নিচের ঠোঁটের ভেতরের অংশ ওপরের সামনের দাঁতে"], "letters": "ف" },
+        { "name": ["The two lips, closed or rounded depending on the letter", "হরফ অনুযায়ী দুই ঠোঁট বন্ধ বা গোল হয়"], "letters": "ب م و" }
+      ],
+      "makhraj-nose": [
+        { "name": ["Nasal passage for ghunnah", "গুন্নাহর জন্য নাকের পথ"], "letters": "نّ مّ" }
+      ]
+    },
+    "samples": [
+      { "rule": "makhraj-mouth", "chapter": 109, "ayah": 2, "first": 3, "last": 3, "target": "ا" },
+      { "rule": "makhraj-throat", "chapter": 113, "ayah": 5, "first": 3, "last": 3, "target": "ح" },
+      { "rule": "makhraj-tongue", "chapter": 109, "ayah": 1, "first": 1, "last": 1, "target": "ق" },
+      { "rule": "makhraj-lips", "chapter": 108, "ayah": 2, "first": 2, "last": 2, "target": "ب" },
+      { "rule": "makhraj-nose", "chapter": 114, "ayah": 2, "first": 2, "last": 2, "target": "نّ" },
+      { "rule": "makhraj-mouth", "chapter": 1, "ayah": 3, "first": 2, "last": 2, "target": "ي" },
+      { "rule": "makhraj-tongue", "chapter": 109, "ayah": 4, "first": 5, "last": 5, "target": "ت" },
+      { "rule": "makhraj-lips", "chapter": 110, "ayah": 3, "first": 1, "last": 1, "target": "ف" }
+    ]
+  },
+  {
+    "id": "sifat-breath",
+    "rules": { "sifat-hams": "ف ح ث ه ش خ ص س ك ت", "sifat-jahr": "ب د ع م" },
+    "samples": [
+      { "rule": "sifat-hams", "chapter": 1, "ayah": 5, "first": 4, "last": 4, "target": "س" },
+      { "rule": "sifat-jahr", "chapter": 112, "ayah": 3, "first": 2, "last": 2, "target": "د" },
+      { "rule": "sifat-hams", "chapter": 106, "ayah": 2, "first": 2, "last": 2, "target": "ح" },
+      { "rule": "sifat-jahr", "chapter": 108, "ayah": 3, "first": 4, "last": 4, "target": "ب" },
+      { "rule": "sifat-hams", "chapter": 105, "ayah": 5, "first": 2, "last": 2, "target": "ص" },
+      { "rule": "sifat-jahr", "chapter": 105, "ayah": 1, "first": 1, "last": 1, "target": "م" },
+      { "rule": "sifat-hams", "chapter": 110, "ayah": 1, "first": 5, "last": 5, "target": "ت" },
+      { "rule": "sifat-jahr", "chapter": 1, "ayah": 5, "first": 2, "last": 2, "target": "ع" }
+    ]
+  },
+  {
+    "id": "sifat-flow",
+    "rules": { "sifat-shiddah": "ء ج د ق ط ب ك ت", "sifat-rikhwah": "ح غ ص", "sifat-tawassut": "ل ن ع م ر" },
+    "samples": [
+      { "rule": "sifat-shiddah", "chapter": 112, "ayah": 3, "first": 4, "last": 4, "target": "د" },
+      { "rule": "sifat-rikhwah", "chapter": 110, "ayah": 3, "first": 1, "last": 1, "target": "ح" },
+      { "rule": "sifat-tawassut", "chapter": 1, "ayah": 5, "first": 2, "last": 2, "target": "ع" },
+      { "rule": "sifat-shiddah", "chapter": 108, "ayah": 3, "first": 4, "last": 4, "target": "ب" },
+      { "rule": "sifat-rikhwah", "chapter": 1, "ayah": 7, "first": 6, "last": 6, "target": "غ" },
+      { "rule": "sifat-tawassut", "chapter": 108, "ayah": 2, "first": 3, "last": 3, "target": "ر" },
+      { "rule": "sifat-shiddah", "chapter": 106, "ayah": 4, "first": 2, "last": 2, "target": "ط" },
+      { "rule": "sifat-rikhwah", "chapter": 105, "ayah": 5, "first": 2, "last": 2, "target": "ص" }
+    ]
+  },
+  {
+    "id": "heavy-letters",
+    "rules": { "heavy-raised": "خ ص ض غ ط ق ظ", "heavy-light": "س ت ذ" },
+    "samples": [
+      { "rule": "heavy-raised", "chapter": 112, "ayah": 2, "first": 2, "last": 2, "target": "ص" },
+      { "rule": "heavy-light", "chapter": 114, "ayah": 4, "first": 3, "last": 3, "target": "س" },
+      { "rule": "heavy-raised", "chapter": 105, "ayah": 2, "first": 5, "last": 5, "target": "ض" },
+      { "rule": "heavy-raised", "chapter": 105, "ayah": 3, "first": 3, "last": 3, "target": "ط" },
+      { "rule": "heavy-raised", "chapter": 113, "ayah": 2, "first": 4, "last": 4, "target": "خ" },
+      { "rule": "heavy-raised", "chapter": 113, "ayah": 3, "first": 3, "last": 3, "target": "غ" },
+      { "rule": "heavy-raised", "chapter": 113, "ayah": 1, "first": 1, "last": 1, "target": "ق" },
+      { "rule": "heavy-raised", "chapter": 2, "ayah": 255, "first": 50, "last": 50, "target": "ظ" }
+    ]
+  },
+  {
+    "id": "mushaf-marks",
+    "rules": { "script-wasl": "", "script-maddah": "", "script-pair": "", "script-iqlab": "" },
+    "sources": [
+      { "title": "Tanzil Project · pause marks", "url": "https://tanzil.net/docs/pause_marks" },
+      { "title": "Quranic Universal Library · Hamzat al-waṣl", "url": "https://qul.tarteel.ai/tajweed_rule/ham_wasl" },
+      { "title": "Quranic Universal Library · Iqlāb", "url": "https://qul.tarteel.ai/tajweed_rule/iqlab" }
+    ],
+    "samples": [
+      { "rule": "script-wasl", "chapter": 1, "ayah": 6, "first": 1, "last": 1 },
+      { "rule": "script-maddah", "chapter": 110, "ayah": 1, "first": 2, "last": 2 },
+      { "rule": "script-pair", "chapter": 2, "ayah": 2, "first": 4, "last": 5 },
+      { "rule": "script-iqlab", "chapter": 2, "ayah": 181, "first": 1, "last": 2 },
+      { "rule": "script-wasl", "chapter": 108, "ayah": 2, "first": 3, "last": 3 },
+      { "rule": "script-maddah", "chapter": 106, "ayah": 2, "first": 3, "last": 3 },
+      { "rule": "script-iqlab", "chapter": 2, "ayah": 256, "first": 13, "last": 14 },
+      { "rule": "script-maddah", "chapter": 1, "ayah": 7, "first": 9, "last": 9 }
+    ]
+  }
+]

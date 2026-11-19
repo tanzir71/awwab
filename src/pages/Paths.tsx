@@ -11,7 +11,7 @@ import { grammarReviewPrefix, juzAmma, learnedSurahs, levels, pathUrl, salahChap
 import { countKnownQuranWords, quranText } from "@/lib/quran";
 import { studyNames } from "@/lib/study-copy";
 import type { Reviews } from "@/lib/reviews";
-import { tajweedIndex, tajweedLessons, tajweedProgress } from "@/lib/tajweed";
+import { tajweedDepthLessons, tajweedIndex, tajweedLessons, tajweedProgress } from "@/lib/tajweed";
 import { completedReadingChapters, emptyReadingPractice, practiceChapters, teacherChecklistComplete } from "@/lib/readingPractice";
 import spoken from "../../docs/content/spoken-arabic.json";
 import grammar from "../../docs/content/grammar-foundations.json";
@@ -45,17 +45,26 @@ function usePathState() {
   const grammarCount = grammar.lessons.filter(lesson => earlier[grammarReviewPrefix + lesson.id]?.correct > 0).length;
   const sentenceCount = sentence.lessons.filter(lesson => earlier[sentenceReviewPrefix + lesson.id]?.correct > 0).length;
   const tajweed = tajweedProgress(earlier);
+  const tajweedDepth = tajweedProgress(earlier, tajweedDepthLessons);
   const fluent = completedReadingChapters("flow", reading);
   const understood = completedReadingChapters("meaning", reading);
   const prepared = Object.values(reading.teacher).filter(teacherChecklistComplete).length;
+  const readLevels = [
+    completedQaida.length === 17,
+    fluent === juzAmma.length,
+    tajweed.completed === tajweedLessons.length,
+    tajweedDepth.completed === tajweedDepthLessons.length,
+    prepared === practiceChapters.teacher.length,
+  ];
+  const nextRead = readLevels.indexOf(false);
   const complete = {
-    read: completedQaida.length === 17 ? (fluent === juzAmma.length ? (tajweed.completed === tajweedLessons.length ? 3 : 2) : 1) : 0,
+    read: nextRead < 0 ? readLevels.length : nextRead,
     memorise: short >= salahChapters.length ? (amma >= juzAmma.length ? 2 : 1) : 0,
     understand: known >= 125 ? (grammarCount === grammar.lessons.length ? 2 : 1) : 0,
     speak: spokenCount === spoken.units.length ? 1 : 0,
   };
   const active = Object.fromEntries(tracks.map(track => [track, Math.min(5, Math.max(complete[track] + 1, placement[track]?.level ?? 1))])) as Record<Track, number>;
-  return { active, complete, completedQaida, learned, short, amma, known, current, placement, spokenCount, grammarCount, sentenceCount, tajweed, fluent, understood, prepared };
+  return { active, complete, completedQaida, learned, short, amma, known, current, placement, spokenCount, grammarCount, sentenceCount, tajweed, tajweedDepth, fluent, understood, prepared };
 }
 
 function headingLevel(track: Track, active: number) { return levels[track][active - 1]; }
@@ -63,6 +72,7 @@ function levelDone(track: Track, level: number, state: ReturnType<typeof usePath
   return level <= state.complete[track] ||
     (track === "read" && level === 2 && state.fluent === juzAmma.length) ||
     (track === "read" && level === 3 && state.tajweed.completed === tajweedLessons.length) ||
+    (track === "read" && level === 4 && state.tajweedDepth.completed === tajweedDepthLessons.length) ||
     (track === "read" && level === 5 && state.prepared === practiceChapters.teacher.length) ||
     (track === "understand" && level === 4 && state.understood === juzAmma.length) ||
     (track === "understand" && level === 5 && state.sentenceCount === sentence.lessons.length);
@@ -81,6 +91,7 @@ function contextLabel(track: Track, level: number, state: ReturnType<typeof useP
   if (track === "read" && level === 1) return t("pathsQaidaCount", { count: state.completedQaida.length });
   if (track === "read" && level === 2) return t("readingSurahsProgress", { count: state.fluent, total: juzAmma.length });
   if (track === "read" && level === 3) return t("pathsLessonProgress", { count: state.tajweed.completed, total: tajweedLessons.length });
+  if (track === "read" && level === 4) return t("pathsLessonProgress", { count: state.tajweedDepth.completed, total: tajweedDepthLessons.length });
   if (track === "read" && level === 5) return t("readingPreparedCount", { count: state.prepared });
   if (track === "memorise" && level === 1) return `${trackStatus.memorise[0]} · ${t("pathsSalahCount", { count: state.short, total: salahChapters.length })}`;
   if (track === "memorise" && level === 2) return `${trackStatus.memorise[1]} · ${t("pathsAmmaCount", { count: state.amma })}`;

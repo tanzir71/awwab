@@ -4,6 +4,7 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ArabicText } from "@/components/ArabicText";
 import { DesignIcon } from "@/components/DesignIcon";
 import { LocalRecorder } from "@/components/LocalRecorder";
+import { QuranStudySources } from "@/components/QuranStudySources";
 import { StudyText } from "@/components/StudyText";
 import { useAudioPlayback } from "@/hooks/use-audio-playback";
 import { asset } from "@/lib/config";
@@ -14,24 +15,42 @@ import { quranText } from "@/lib/quran";
 import type { Reviews } from "@/lib/reviews";
 import { getRecord, type Settings } from "@/lib/storageService";
 import { saveLearningReview } from "@/lib/studyMilestones";
-import { correctTajweedSamples, tajweedClip, tajweedExcerpt, tajweedIndex, tajweedIntroKey, tajweedLessonPath, tajweedLessons,
+import { correctTajweedSamples, tajweedClip, tajweedDepthIndex, tajweedDepthLessons, tajweedExcerpt, tajweedIndex, tajweedIntroKey, tajweedLessonPath, tajweedLessons,
   tajweedPracticeSamples, tajweedReference, tajweedReviewId, tajweedSampleKey, tajweedTitleKey, type TajweedLesson, type TajweedSample } from "@/lib/tajweed";
 
 const tones = ["neutral", "tint", "soft", "accent"] as const;
 const ruleSource = "https://qul.tarteel.ai/tajweed_words/85:13:3";
+const jazariSource = { title: "Ibn al-Jazarī · Al-Muqaddimah al-Jazariyyah", url: "https://mutun.al-asl.com/jazariyyah.html" };
+const scripts = [["indopak", "readingIndopak"], ["uthmani", "readingUthmani"]] as const;
 
-function TajweedHeading({ title, back }: { title: string; back: string }) {
+function TajweedHeading({ title, back, depth }: { title: string; back: string; depth: boolean }) {
   const { t } = useCopy();
   return <header className="hifz-heading">
     <Link className="hifz-back" to={back} aria-label={t("back")}><DesignIcon name="ask-icon-chev-l" size={24} /></Link>
-    <div><h1>{t("tajweedTitle")}</h1><p className="small muted">{title}</p></div>
+    <div><h1>{t(depth ? "tajweedDepthTitle" : "tajweedTitle")}</h1><p className="small muted">{title}</p></div>
   </header>;
 }
 
-function RuleLesson({ settings, now, lesson, reviews }: { settings: Settings; now: Date; lesson: TajweedLesson; reviews: Reviews }) {
+function ArticulationPoints({ regions }: { regions: NonNullable<TajweedLesson["articulation"]> }) {
+  const { t, language } = useCopy();
+  return <details className="card compact-stack tajweed-articulation">
+    <summary>{t("tajweedArticulationPoints")}</summary>
+    {Object.entries(regions).map(([region, points]) => <section key={region} className="compact-stack">
+      <h2>{t(`tajweedRule-${region}`)}</h2>
+      <ul>{points.map(point => <li key={point.letters}><span>{point.name[language === "bn" ? 1 : 0]}</span><ArabicText text={point.letters} compact /></li>)}</ul>
+    </section>)}
+  </details>;
+}
+
+function RuleLesson({ settings, now, lesson, reviews, depth, nextLesson }: {
+  settings: Settings; now: Date; lesson: TajweedLesson; reviews: Reviews; depth: boolean; nextLesson?: TajweedLesson;
+}) {
   const { t } = useCopy();
   const [params] = useSearchParams();
   const route = tajweedLessonPath(lesson.id);
+  const overview = depth ? tajweedDepthIndex : tajweedIndex;
+  const overviewLabel = depth ? "tajweedDepthIndex" : "tajweedLessons";
+  const compareScripts = lesson.id === "mushaf-marks";
   const requested = lesson.samples.find(sample => tajweedSampleKey(sample) === params.get("review"));
   const practice = params.has("practice") || Boolean(requested);
   const [verses, setVerses] = useState(quranText);
@@ -50,10 +69,13 @@ function RuleLesson({ settings, now, lesson, reviews }: { settings: Settings; no
   }));
   const exampleRefs = Object.keys(sources);
   const player = useAudioPlayback(exampleRefs, sources);
-  const reciter = lesson.samples.find(sample => tajweedReference(sample) === player.track);
+  const reciter = lesson.samples.find(sample => tajweedReference(sample) === (player.track ?? exampleRefs[0]));
   const pack = reciter && tajweedClip(reciter)?.pack;
   const totalCorrect = correctTajweedSamples(lesson, reviews);
-  const nextLesson = tajweedLessons[tajweedLessons.indexOf(lesson) + 1];
+  const credits = lesson.sources ?? [depth ? jazariSource : {
+    url: lesson.source ?? ruleSource,
+    title: lesson.id === "waqf" ? "Quranic Arabic Corpus · Pause marks" : "Quranic Universal Library · Tajweed",
+  }];
 
   useEffect(() => {
     let active = true;
@@ -61,11 +83,10 @@ function RuleLesson({ settings, now, lesson, reviews }: { settings: Settings; no
     return () => { active = false; };
   }, []);
 
-  function excerpt(sample: TajweedSample, showAnswer = true) {
+  function excerpt(sample: TajweedSample, showAnswer: boolean, script: Settings["script"]) {
     const verse = verses[sample.chapter]?.[sample.ayah - 1];
     if (!verse) return <p className="small muted" role="status">{t(loadError ? "hifzUnavailable" : "hifzLoading")}</p>;
-    const pauses = lesson.id === "waqf";
-    const script = pauses ? "uthmani" : settings.script;
+    const pauses = lesson.id === "waqf" || sample.rule === "script-pair";
     const { text } = verseText(verse, script);
     const shown = tajweedExcerpt(text, sample, pauses);
     const annotation = {
@@ -74,6 +95,13 @@ function RuleLesson({ settings, now, lesson, reviews }: { settings: Settings; no
     };
     const words = Array.from({ length: sample.last - sample.first + 1 }, () => ({ annotation }));
     return <ArabicText text={shown} citation={verse.ref} verse={verse.ref} mushaf={script} positionOffset={sample.first - 1} words={words} />;
+  }
+
+  function exampleText(sample: TajweedSample, showAnswer = true) {
+    if (!compareScripts) return excerpt(sample, showAnswer, lesson.id === "waqf" ? "uthmani" : settings.script);
+    return <div className="tajweed-script-compare">
+      {scripts.map(([script, label]) => <div key={script}><span className="caption muted">{t(label)}</span>{excerpt(sample, showAnswer, script)}</div>)}
+    </div>;
   }
 
   async function answer(rule: string) {
@@ -87,8 +115,8 @@ function RuleLesson({ settings, now, lesson, reviews }: { settings: Settings; no
     finally { setSaving(false); }
   }
 
-  return <div className="paths-page tajweed-page">
-    <TajweedHeading title={t(tajweedTitleKey(lesson.id))} back={practice ? route : tajweedIndex} />
+  return <div className="paths-page tajweed-page" data-compare={compareScripts || undefined}>
+    <TajweedHeading title={t(tajweedTitleKey(lesson.id))} back={practice ? route : overview} depth={depth} />
     <audio ref={player.element} preload="none" {...player.events} />
     {player.error && <p role="status">{t("surahAudioError")}</p>}
     {!practice ? <>
@@ -98,7 +126,8 @@ function RuleLesson({ settings, now, lesson, reviews }: { settings: Settings; no
         const letters = lesson.rules[rule];
         return <section className="card tajweed-rule" data-tone={tones[i % tones.length]} key={rule}>
           <div><h2>{t(`tajweedRule-${rule}`)}</h2><p className="small muted"><StudyText text={t(`tajweedHint-${rule}`)} /></p></div>
-          <div className="tajweed-example">{excerpt(sample)}<bdi className="caption muted">{tajweedReference(sample)}</bdi></div>
+          <div className="tajweed-example">{exampleText(sample)}<bdi className="caption muted">{tajweedReference(sample)}</bdi></div>
+          {sample.target && <div className="tajweed-focus"><span className="caption">{t("tajweedFocusLetter")}</span><ArabicText text={sample.target} compact /></div>}
           {letters && <div className="tajweed-letters"><span className="caption">{t("letters")}</span><ArabicText text={letters} compact /></div>}
         </section>;
       })}</div>
@@ -110,18 +139,22 @@ function RuleLesson({ settings, now, lesson, reviews }: { settings: Settings; no
       {exampleRefs.length > 0 ? <div className="chips">{exampleRefs.map(ref => <button type="button" key={ref} className="chip soft"
         aria-pressed={player.playing && player.track === ref} onClick={() => player.play(ref)}><bdi>{ref}</bdi></button>)}</div>
         : <p className="small muted">{t("tajweedPendingAudio")}</p>}
-      <Link className="action light" to={tajweedIndex}>{t("tajweedLessons")}</Link>
+      {lesson.articulation && <ArticulationPoints regions={lesson.articulation} />}
+      <Link className="action light" to={overview}>{t(overviewLabel)}</Link>
     </> : example ? <section className="card compact-stack paths-question">
       <p className="caption">{t("pathsCheckQuestion", { number: index + 1, total: samples.length })} · <bdi>{tajweedReference(example)}</bdi></p>
-      <h2>{t(lesson.id === "waqf" ? "tajweedDrillMark" : "tajweedChoose")}</h2>
-      {excerpt(example, Boolean(selection))}
-      {tajweedClip(example) && <button className="action light" type="button" onClick={() => player.play(tajweedReference(example))}>
-        {t(player.playing ? "setupPause" : "tajweedHearVerse")}</button>}
+      <h2>{t(depth ? `tajweedQuestion-${lesson.id}` : lesson.id === "waqf" ? "tajweedDrillMark" : "tajweedChoose")}</h2>
+      {example.target && <div className="tajweed-focus"><span className="caption">{t("tajweedFocusLetter")}</span><ArabicText text={example.target} compact /></div>}
+      {exampleText(example, Boolean(selection))}
+      {tajweedClip(example) ? <button className="action light" type="button" onClick={() => player.play(tajweedReference(example))}>
+        {t(player.playing ? "setupPause" : "tajweedHearVerse")}</button> :
+        depth && <p className="small muted">{t("tajweedPendingAudio")}</p>}
       <div className="tajweed-options">{rules.map(rule => <button type="button" className="action light" key={rule}
         disabled={saving || Boolean(selection) || !verses[example.chapter]} aria-pressed={selection === rule} onClick={() => void answer(rule)}>{t(`tajweedRule-${rule}`)}</button>)}</div>
       {saveError && <p role="alert">{t("saveError")}</p>}
       {selection && <div className="compact-stack" key={tajweedSampleKey(example)}>
         <p role="status">{t("tajweedFeedback", { rule: t(`tajweedRule-${example.rule}`) })}</p>
+        {depth && <p className="small muted"><StudyText text={t(`tajweedHint-${example.rule}`)} /></p>}
         <LocalRecorder />
         <button className="action" type="button" onClick={() => { player.element.current?.pause(); setSelection(undefined); setIndex(index + 1); }}>
           {t(index + 1 === samples.length ? "pathsDone" : "hifzNext")}</button>
@@ -130,28 +163,30 @@ function RuleLesson({ settings, now, lesson, reviews }: { settings: Settings; no
       <p>{t("tajweedExamplesProgress", { count: totalCorrect, total: lesson.samples.length })}</p>
       <div className="equal-row">
         <Link className="action light" to={route}>{t(totalCorrect < lesson.samples.length ? "tajweedContinueLesson" : "tajweedTryAgain")}</Link>
-        <Link className="action" to={nextLesson && totalCorrect === lesson.samples.length ? tajweedLessonPath(nextLesson.id) : tajweedIndex}>
-          {t(nextLesson && totalCorrect === lesson.samples.length ? "hifzNext" : "tajweedLessons")}</Link>
+        <Link className="action" to={nextLesson && totalCorrect === lesson.samples.length ? tajweedLessonPath(nextLesson.id) : overview}>
+          {t(nextLesson && totalCorrect === lesson.samples.length ? "hifzNext" : overviewLabel)}</Link>
       </div>
     </section>}
     {pack && <p className="small muted"><a href={pack.source} rel="noreferrer">{pack.speaker}</a> · <a href={pack.licenseUrl} rel="noreferrer">{pack.attribution.split(" · ")[1]}</a> · {t("setupAudioExcerpt")}</p>}
     <footer className="hifz-sources small muted"><p>{t("tajweedTeacher")}</p>
-      <a href={lesson.source ?? ruleSource} rel="noreferrer">{lesson.id === "waqf" ? "Quranic Arabic Corpus · Pause marks" : "Quranic Universal Library · Tajweed"}</a>
+      {credits.map(source => <a key={source.url} href={source.url} rel="noreferrer">{source.title}</a>)}
     </footer>
+    {depth && <QuranStudySources script={compareScripts ? "both" : settings.script} />}
   </div>;
 }
 
-export function Tajweed({ settings, now }: { settings: Settings; now: Date }) {
+export function Tajweed({ settings, now, depth = false }: { settings: Settings; now: Date; depth?: boolean }) {
   const { t, locale } = useCopy();
   const { unit } = useParams();
   const reviews = useLiveQuery(() => getRecord<Reviews>("reviews", {}));
-  const lesson = tajweedLessons.find(item => item.id === (unit ?? "nun"));
+  const lessons = depth ? tajweedDepthLessons : tajweedLessons;
+  const lesson = lessons.find(item => item.id === (unit ?? (depth ? undefined : "nun")));
   if (!reviews) return <p className="small muted" role="status">{t("hifzLoading")}</p>;
-  if (lesson) return <RuleLesson lesson={lesson} reviews={reviews} settings={settings} now={now} />;
+  if (lesson) return <RuleLesson lesson={lesson} reviews={reviews} settings={settings} now={now} depth={depth} nextLesson={lessons[lessons.indexOf(lesson) + 1]} />;
 
   return <div className="paths-page paths-levels tajweed-page">
-    <TajweedHeading title={t("tajweedLessons")} back={pathUrl("read")} />
-    <ol className="paths-level-list">{tajweedLessons.map((item, index) => {
+    <TajweedHeading title={t(depth ? "tajweedDepthIndex" : "tajweedLessons")} back={pathUrl("read")} depth={depth} />
+    <ol className="paths-level-list">{lessons.map((item, index) => {
       const count = correctTajweedSamples(item, reviews);
       const done = count === item.samples.length;
       return <li key={item.id}>

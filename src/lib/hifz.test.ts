@@ -10,7 +10,8 @@ import { normalizeWord, splitArabicWords } from "./wordAnatomy";
 import content from "../../docs/content/roots-and-patterns.json";
 import grammar from "../../docs/content/grammar-foundations.json";
 import sentence from "../../docs/content/sentence-structure.json";
-import { correctTajweedSamples, tajweedExcerpt, tajweedLessons, tajweedPracticeSamples, tajweedProgress, tajweedReviewId } from "./tajweed";
+import { correctTajweedSamples, tajweedClip, tajweedDepthLessons, tajweedExcerpt, tajweedLessons, tajweedPracticeSamples, tajweedPrecache,
+  tajweedProgress, tajweedReviewId, tajweedSampleKey } from "./tajweed";
 import { newReview } from "./reviews";
 import { practiceChapters, readingPortions } from "./readingPractice";
 
@@ -133,6 +134,37 @@ describe("Learning path progress", () => {
     const all = Object.fromEntries(tajweedLessons.flatMap(item => item.samples.map(sample => [tajweedReviewId(item, sample), seed])));
     expect(Object.keys(all)).toHaveLength(64);
     expect(tajweedProgress(all)).toEqual({ completed: 8, stars: 5 });
+  });
+
+  it("reads the advanced examples and their target letters in both editions, separately from Essentials", () => {
+    const all = {};
+    const seed = { ...newReview(new Date("2026-11-20")), attempts: 1, correct: 1 };
+    for (const lesson of tajweedDepthLessons) {
+      expect(lesson.samples).toHaveLength(8);
+      expect(new Set(lesson.samples.map(tajweedSampleKey)).size).toBe(lesson.samples.length);
+      for (const sample of lesson.samples) {
+        expect(Object.prototype.hasOwnProperty.call(lesson.rules, sample.rule)).toBe(true);
+        const verse = quran.surahs[sample.chapter][sample.ayah - 1];
+        for (const script of ["indopak", "uthmani"] as const) {
+          const rendered = tajweedExcerpt(verseText(verse, script).text, sample, sample.rule === "script-pair");
+          expect(splitArabicWords(rendered)).toHaveLength(sample.last - sample.first + 1);
+          if (sample.target) expect(normalizeWord(rendered)).toContain(normalizeWord(sample.target));
+          if (sample.rule === "script-pair") expect(rendered.match(/ۛ/gu)).toHaveLength(2);
+          if (sample.rule === "script-iqlab") expect(rendered).toContain("ۢ");
+          if (sample.rule === "script-maddah") expect(rendered).toContain(script === "uthmani" ? "\u0653" : "\u089c");
+          if (sample.rule === "script-wasl") expect(rendered.includes("ٱ")).toBe(script === "uthmani");
+        }
+        const clip = tajweedClip(sample);
+        if (clip) expect(tajweedPrecache).toContain(clip.item.path);
+        const reviewId = tajweedReviewId(lesson, sample);
+        all[reviewId] = seed;
+        expect(reviewDestination(reviewId)).toBe(`/learn/paths/read/4/${lesson.id}?review=${encodeURIComponent(tajweedSampleKey(sample))}`);
+      }
+    }
+    const [makharij] = tajweedDepthLessons;
+    expect(Object.values(makharij.articulation).flat()).toHaveLength(17);
+    expect(tajweedProgress(all)).toEqual({ completed: 0, stars: 0 });
+    expect(tajweedProgress(all, tajweedDepthLessons)).toEqual({ completed: 5, stars: 5 });
   });
 
   it("uses the sourced 2:2 morphology for the word family and routes pattern cards back to the drill", () => {

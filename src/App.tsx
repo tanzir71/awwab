@@ -96,6 +96,7 @@ function Main() {
         <Route path="/learn/paths/understand/2/:unit?" element={<Grammar settings={settings} now={now} />} />
         <Route path="/learn/paths/understand/5/:unit?" element={<Grammar course="sentence" settings={settings} now={now} />} />
         <Route path="/learn/paths/read/3/:unit?" element={<Tajweed key={pathname + search} settings={settings} now={now} />} />
+        <Route path="/learn/paths/read/4/:unit?" element={<Tajweed key={pathname + search} depth settings={settings} now={now} />} />
         <Route path="/learn/paths/read/2/:chapter?" element={<ReadingPractice mode="flow" settings={settings} now={now} />} />
         <Route path="/learn/paths/read/5/:chapter?" element={<ReadingPractice mode="teacher" settings={settings} now={now} />} />
         <Route path="/learn/paths/understand/4/:chapter?" element={<ReadingPractice mode="meaning" settings={settings} now={now} />} />

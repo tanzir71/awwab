@@ -181,6 +181,21 @@
 .tajweed-letters .arabic-line { gap: 0; padding: 0; }
 .tajweed-letters .word-chip { min-width: 18px; padding-inline: 2px; }
 .tajweed-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.tajweed-focus { display: flex; gap: 8px; align-items: center; }
+.tajweed-focus .arabic-text { font-size: 18px; }
+.tajweed-focus .arabic-line { padding: 0; }
+.tajweed-page[data-compare] .tajweed-rule { grid-template-columns: minmax(0, 1fr); }
+.tajweed-page[data-compare] .tajweed-example { justify-items: stretch; }
+.tajweed-script-compare { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.tajweed-script-compare > div { display: grid; gap: 4px; align-content: start; padding: 8px; background: var(--c-surface); border-radius: var(--r-control); }
+.tajweed-script-compare .arabic-text { min-width: 0; }
+.tajweed-script-compare .arabic-line { flex-wrap: wrap; }
+.tajweed-articulation summary { cursor: pointer; min-height: 44px; align-content: center; font: var(--type-body-strong); }
+.tajweed-articulation h2 { font: var(--type-body-strong); }
+.tajweed-articulation ul { padding: 0; margin: 0; list-style: none; }
+.tajweed-articulation li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 12px; padding: 4px 8px; }
+.tajweed-articulation li:nth-child(odd) { background: var(--c-surface-alt); border-radius: var(--r-control); }
+.tajweed-articulation .arabic-text { font-size: 19px; }
 
 .reading-active-grid, .reading-directory { display: grid; gap: 12px; min-width: 0; align-items: start; }
 .reading-active-grid > .reading-directory { display: none; }
