@@ -52,6 +52,7 @@
   .guide-desk-phrase-meta a { display: inline-flex; align-items: center; min-height: 17px; font-size: 10px; color: var(--c-ink-muted); }
   .guide-desk-audio-bar { display: flex; gap: 8px 16px; justify-content: space-between; align-items: center; flex-wrap: wrap; padding: 4px 14px; border-radius: var(--r-control); }
   .guide-desk-audio-button, .guide-desk-next { display: inline-flex; gap: 6px; align-items: center; text-align: start; min-height: 30px; }
+  .guide-desk-audio-button { color: var(--c-on-primary); }
   .guide-desk-next { color: var(--c-night-muted); }
   .guide-desk-audio-button:hover, .guide-desk-next:hover { text-decoration: underline; }
   .guide-desk-glance, .guide-desk-word-info { display: grid; gap: 12px; }
