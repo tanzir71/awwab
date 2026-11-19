@@ -5,6 +5,7 @@ import { addDays, dateKey } from "./dates";
 import { cities, methodNames, type AsrSchool, type City, type PrayerMethod } from "./prayerServices";
 import { guideReferences, type GuideReference } from "./prayerGuide";
 import { deskActivities } from "./studyDesk";
+import type { MosquePlan } from "./mosques";
 
 export interface Settings {
   mode: "adult" | "maktab";
@@ -136,6 +137,7 @@ const savedRecords: Record<string, z.ZodTypeAny> = {
       jumuah: z.object({ khutbah: z.union([time, z.literal("")]), prayer: z.union([time, z.literal("")]) }).optional(),
       occasional: z.array(z.object({ type: z.enum(["eid_fitr", "eid_adha", "tarawih"]), year: count.min(1900).max(2200), times: z.array(time) })),
       photo: z.string().max(2_700_000).regex(/^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/]*={0,2}$/).optional(),
+      refreshMonth: count.min(1).max(12).optional(),
       contact: z.string().regex(/^\d*$/).max(30).optional(),
       location: point.optional(),
     })),
@@ -209,23 +211,46 @@ const backupSchema = z.object({
   })).optional(),
 });
 
+async function encodeBlob(blob: Blob) {
+  const bytes = new Uint8Array(await blob.arrayBuffer());
+  let binary = "";
+  for (let start = 0; start < bytes.length; start += 8192) {
+    binary += String.fromCharCode(...bytes.subarray(start, start + 8192));
+  }
+  return btoa(binary);
+}
+
+function decodeBlob(bytes: string, type: string) {
+  return new Blob([Uint8Array.from(atob(bytes), char => char.charCodeAt(0))], { type });
+}
+
 export async function backup() {
   const [records, prayers, clips] = await db.transaction("r", db.records, db.prayers, db.audio, () =>
     Promise.all([db.records.toArray(), db.prayers.toArray(), db.audio.toArray()]));
-  const audio = await Promise.all(clips.map(async ({ blob, ...clip }) => {
-    const bytes = new Uint8Array(await blob.arrayBuffer());
-    let binary = "";
-    for (let start = 0; start < bytes.length; start += 8192) {
-      binary += String.fromCharCode(...bytes.subarray(start, start + 8192));
-    }
-    return { ...clip, type: blob.type, bytes: btoa(binary) };
+  const exported = await Promise.all(records.map(async record => {
+    if (record.key !== "mosques") return record;
+    const plan = record.value as MosquePlan;
+    const mosques = await Promise.all(plan.mosques.map(async mosque => ({
+      ...mosque, photo: mosque.photo instanceof Blob ? `data:${mosque.photo.type};base64,${await encodeBlob(mosque.photo)}` : mosque.photo,
+    })));
+    return { ...record, value: { ...plan, mosques } };
   }));
-  return JSON.stringify({ app: "awwab", version: 1, records, prayers, audio }, null, 2);
+  const audio = await Promise.all(clips.map(async ({ blob, ...clip }) => ({ ...clip, type: blob.type, bytes: await encodeBlob(blob) })));
+  return JSON.stringify({ app: "awwab", version: 1, records: exported, prayers, audio }, null, 2);
 }
 
 export async function restoreBackup(file: string, options?: { completeOnboarding?: boolean }) {
   const data = backupSchema.parse(JSON.parse(file));
   const records = data.records.map(({ key, value }) => {
+    if (key === "mosques") {
+      const plan = savedRecords.mosques.parse(value) as MosquePlan;
+      const mosques = plan.mosques.map(mosque => {
+        if (typeof mosque.photo !== "string") return mosque;
+        const [header, bytes] = mosque.photo.split(",", 2);
+        return { ...mosque, photo: decodeBlob(bytes, header.slice(5, -7)) };
+      });
+      return { key, value: { ...plan, mosques } };
+    }
     if (key === "umrah") {
       const trip = savedRecords.umrah.parse(value) as Record<string, unknown>;
       return { key, value: { ...trip, gps: false, auto: false } };
@@ -239,7 +264,7 @@ export async function restoreBackup(file: string, options?: { completeOnboarding
     ref: clip.ref,
     title: clip.title,
     attribution: clip.attribution,
-    blob: new Blob([Uint8Array.from(atob(bytes), char => char.charCodeAt(0))], { type }),
+    blob: decodeBlob(bytes, type),
   }));
   await db.transaction("rw", db.records, db.prayers, db.audio, async () => {
     await db.records.clear();

@@ -3,6 +3,7 @@ import { calculateZakat, gramsPerBhori, nisabWeight } from "./zakat";
 import { advanceSai, bearing, correctSai, distance, initialSai } from "./umrah";
 import { eventDisplayDates } from "./hijri";
 import { qadaBalances, qadaDefaults, qadaForecast } from "./qada";
+import { assignedMosque, mapMosque, mosqueDefaults, mosqueTime, mosqueWeek, timetableNotice, weeklyMosque, type Mosque } from "./mosques";
 
 describe("Today summaries", () => {
   it("shows both possible three-day White Days windows across a Gregorian month boundary", () => {
@@ -46,6 +47,36 @@ describe("zakat", () => {
     expect(bhori.nisab).toBeCloseTo(gram.nisab, 6);
     expect(calculateZakat([5000], [], "silver", 100, "g").due).toBe(0);
     expect(calculateZakat([70000], [], "silver", 0, "g").due).toBeUndefined();
+  });
+});
+
+describe("mosque timetables", () => {
+  const home: Mosque = { id: "home", name: "Home masjid", role: "home", jamaat: { dhuhr: "13:00" },
+    jumuah: { khutbah: "12:45", prayer: "13:15" }, occasional: [], source: "visited", updatedAt: "2026-10-12T12:00:00Z" };
+  const office: Mosque = { ...home, id: "office", name: "Office masjid", role: "office", jumuah: undefined };
+
+  it("supports grouped assignments and changes to a single weekday without touching the other days", () => {
+    let plan = { ...mosqueDefaults, mosques: [home, office] };
+    plan = mapMosque(plan, mosqueWeek[0], "dhuhr", office.id);
+    plan = mapMosque(plan, mosqueWeek[1], "dhuhr", home.id);
+    plan = mapMosque(plan, [3], "dhuhr", home.id);
+    expect(assignedMosque(2, "dhuhr", plan)?.id).toBe("office");
+    expect(assignedMosque(3, "dhuhr", plan)?.id).toBe("home");
+    expect(weeklyMosque(mosqueWeek[0], "dhuhr", plan)).toMatchObject({ differentMosques: true });
+    expect(weeklyMosque(mosqueWeek[1], "dhuhr", plan)).toMatchObject({ mosque: home, differentTimes: true });
+    expect(mosqueTime(assignedMosque(5, "dhuhr", plan), "dhuhr", 5)).toBe("13:15");
+    expect(mosqueTime(assignedMosque(6, "dhuhr", plan), "dhuhr", 6)).toBe("13:00");
+    expect(assignedMosque(3, "dhuhr", mapMosque(plan, [3], "dhuhr", ""))).toBeUndefined();
+    expect(mapMosque(plan, [1], "dhuhr", "unknown-mosque")).toBe(plan);
+  });
+
+  it("prompts for configured changes, age, and upcoming observances using the last checked date", () => {
+    expect(timetableNotice("2026-11-02", "2026-10-27", 11)).toBe("seasonal");
+    expect(timetableNotice("2026-11-02", "2026-11-01", 11)).toBeUndefined();
+    expect(timetableNotice("2026-11-19", "2026-02-10")).toBe("older");
+    expect(timetableNotice("2027-01-29", "2026-12-10", undefined, "ramadan")).toBe("ramadan");
+    expect(timetableNotice("2027-03-02", "2027-02-22", undefined, "eid")).toBeUndefined();
+    expect(timetableNotice("2027-03-02", "2027-01-22", undefined, "eid")).toBe("eid");
   });
 });
 

@@ -6,6 +6,7 @@ import { cities, currentPrayerSchedule, prayerDay, schedule } from "./prayerServ
 import { db, backup, defaults, getRecord, logPrayer, migrateLegacy, prayerStatistics, restoreBackup, updateSettings } from "./storageService";
 import { calendarFile, eventReminders } from "./calendarFile";
 import { estimateQada, finishQada, qadaDefaults } from "./qada";
+import { mosqueDefaults, type Mosque } from "./mosques";
 import { guideReference, prayerGuide } from "./prayerGuide";
 import { reviewCard, type Reviews } from "./reviews";
 import { countKnownQuranWords } from "./quran";
@@ -292,6 +293,29 @@ describe("device prayer records", () => {
     const clip = await db.audio.get("103:1");
     expect(clip.blob.type).toBe("audio/mpeg");
     expect(new Uint8Array(await clip.blob.arrayBuffer())).toEqual(new Uint8Array([73, 68, 51]));
+  });
+
+  it("restores new and older timetable photos as local blobs with the mappings intact", async () => {
+    const bytes = new Uint8Array([137, 80, 78, 71]);
+    const mosque: Mosque = { id: "home", name: "Home masjid", role: "home", jamaat: { maghrib: "adhan+5" },
+      source: "board photo", updatedAt: times.dhuhr.toISOString(), occasional: [], refreshMonth: 11 };
+    const mapping = { "4-maghrib": "home" };
+    await db.records.put({ key: "mosques", value: { mapping, mosques: [
+      { ...mosque, photo: new Blob([bytes], { type: "image/png" }) },
+      { ...mosque, id: "office", refreshMonth: undefined, photo: "data:image/png;base64,iVBORw==" },
+    ] } });
+    const file = await backup();
+    await db.records.clear();
+    await restoreBackup(file);
+    const plan = await getRecord("mosques", mosqueDefaults);
+    expect(plan.mapping).toEqual(mapping);
+    expect(plan.mosques[0].refreshMonth).toBe(11);
+    for (const item of plan.mosques) {
+      expect(item.photo).toBeInstanceOf(Blob);
+      const photo = item.photo as Blob;
+      expect(photo.type).toBe("image/png");
+      expect(new Uint8Array(await photo.arrayBuffer())).toEqual(bytes);
+    }
   });
 
   it("counts returning after a gap and keeps the active day total", () => {

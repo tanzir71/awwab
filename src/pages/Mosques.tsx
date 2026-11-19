@@ -1,175 +1,247 @@
-import { useState } from "react";
-import { CalendarDays, ChevronRight, MapPin, Plus } from "lucide-react";
+import { useMemo, useRef, useState, type MouseEvent } from "react";
+import { X } from "lucide-react";
 import { toast } from "sonner";
+import { DesignIcon } from "@/components/DesignIcon";
+import { MosqueTime, OccasionEditor, PhotoEditor, TimetableEditor, WeekEditor } from "@/components/MosqueEditors";
 import { SectionNav } from "@/components/Surface";
+import { Dialog, DialogClose, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useRecord } from "@/hooks/use-awwab";
-import { addDays, dateKey } from "@/lib/dates";
-import { mosqueDefaults, mosqueRoles, mosqueSources, weekdays, type Mosque, type MosquePlan } from "@/lib/mosques";
-import { updateRecord, type Settings } from "@/lib/storageService";
+import { useCopy } from "@/lib/copy";
+import { addDays, dateKey, formatDay } from "@/lib/dates";
+import { calendarDefaults, calendarEvents, hijriOn } from "@/lib/hijri";
+import { mosqueOccasionLabel, mosqueRoleLabel, mosqueSourceLabel } from "@/lib/mosque-copy";
+import { assignedMosque, mapMosque, mosqueClock, mosqueDefaults, mosqueOccasions, mosqueWeek, mosqueWeekday, timetableNotice, weeklyMosque,
+  type Mosque, type MosqueOccasion, type MosquePlan } from "@/lib/mosques";
+import { type Settings, updateRecord } from "@/lib/storageService";
 import { distance, type Coord } from "@/lib/umrah";
-import { calendarDefaults, hijriOn } from "@/lib/hijri";
-import { prayerIds, prayerNames } from "@/types/Prayer";
+import { prayerIds, type PrayerId } from "@/types/Prayer";
 
-const occasionNames = { eid_fitr: "Eid al-Fitr", eid_adha: "Eid al-Adha", tarawih: "Tarawih" };
+type MosquePanel = { kind: "timetable"; mosque: Mosque }
+  | { kind: "photo"; id: string }
+  | { kind: "mapping"; id: PrayerId }
+  | { kind: "occasion"; id?: string; occasion?: MosqueOccasion["type"] };
 
-function readPhoto(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
+const calendarTitles = { eid_fitr: "Eid al-Fitr", eid_adha: "Eid al-Adha", tarawih: "Ramadan begins" };
+const noticeMessage = { seasonal: "mosqueSeasonal", ramadan: "mosqueRamadan", eid: "mosqueBeforeEid", older: "mosqueStale" };
 
-function startMosque(): Mosque {
-  return { id: crypto.randomUUID(), name: "", role: "home", jamaat: {}, occasional: [], source: "visited", updatedAt: new Date().toISOString() };
+function newMosque(now: Date): Mosque {
+  return { id: crypto.randomUUID(), name: "", role: "home", jamaat: {}, occasional: [], source: "visited", updatedAt: now.toISOString() };
 }
 
 export function Mosques({ settings, now }: { settings: Settings; now: Date }) {
+  const { t, language } = useCopy();
   const plan = useRecord("mosques", mosqueDefaults);
-  const [editor, edit] = useState<Mosque>();
-  const [position, setPosition] = useState<Coord>();
-  const [locating, setLocating] = useState(false);
   const config = useRecord("calendar", calendarDefaults);
   const day = dateKey(now, settings.city.timeZone);
+  const [group, setGroup] = useState<0 | 1>(() => mosqueWeekday(day) < 5 ? 0 : 1);
+  const [panel, setPanel] = useState<MosquePanel>();
+  const [position, setPosition] = useState<Coord>();
+  const [locating, setLocating] = useState(false);
+  const opener = useRef<HTMLElement>();
   const hijri = hijriOn(day, settings.hijriAdjust, config.anchors);
-  const seasonal = hijri.month === 9 || (hijri.month === 8 && hijri.day >= 24);
-  const [weekday, setWeekday] = useState(() => new Date(`${dateKey(now, settings.city.timeZone)}T12:00:00Z`).getUTCDay());
-  async function save(update: (old: MosquePlan) => MosquePlan) {
-    try { await updateRecord("mosques", mosqueDefaults, update); return true; }
-    catch { toast.error("The mosque details could not be saved."); return false; }
+  const annual = useMemo(() => calendarEvents(day, addDays(day, 370), settings.hijriAdjust, config)
+    .filter(event => Object.values(calendarTitles).includes(event.title)), [day, settings.hijriAdjust, config]);
+  const soon = addDays(day, 14);
+  const season = annual.some(event => event.title.startsWith("Eid") && event.dates[0] <= soon) ? "eid"
+    : hijri.month === 9 || annual.some(event => event.title === calendarTitles.tarawih && event.dates[0] <= soon) ? "ramadan" : undefined;
+  const year = Number(day.slice(0, 4));
+  const week = mosqueWeek[group];
+  const groupLabel = t("mosqueGroup" + group);
+  const weekendSwitches = new Map<string, PrayerId[]>();
+  for (const id of prayerIds) {
+    const weekday = weeklyMosque(mosqueWeek[0], id, plan).mosque;
+    const weekend = weeklyMosque(mosqueWeek[1], id, plan).mosque;
+    if (weekday && weekend && weekday.id !== weekend.id) weekendSwitches.set(weekend.name, [...(weekendSwitches.get(weekend.name) ?? []), id]);
   }
-  if (editor) return <MosqueForm mosque={editor} cancel={() => edit(undefined)} save={async mosque => {
-    if (await save(old => ({ ...old, mosques: old.mosques.some(item => item.id === mosque.id)
-      ? old.mosques.map(item => item.id === mosque.id ? mosque : item) : [...old.mosques, mosque] }))) edit(undefined);
-  }} />;
-  const nearby = position && plan.mosques.filter(item => item.location).map(mosque => ({
-    mosque, meters: distance(position, mosque.location),
-  })).sort((a, b) => a.meters - b.meters)[0];
-  return <div className="stack">
-    <SectionNav title="My mosques" back="/plan" />
-    {plan.mosques.map(mosque => {
-      const stale = mosque.updatedAt.slice(0, 10) < addDays(day, seasonal ? -30 : -120);
-      return <section className="card stack" key={mosque.id}>
-        <button className="row-between text-left" onClick={() => edit(mosque)}>
-          <span className="icon-box"><MapPin size={20} /></span><span className="grow"><strong>{mosque.name}</strong><small className="block muted">{mosque.role} · {mosque.source}</small></span><ChevronRight size={18} />
-        </button>
-        {stale && <span className="chip soft">Time to check the timetable</span>}
-        <div className="chips">{prayerIds.filter(id => mosque.jamaat[id]).map(id => <span className="chip" key={id}>{prayerNames[id]} {mosque.jamaat[id] === "adhan+5" ? "adhan + 5 min" : mosque.jamaat[id]}</span>)}</div>
-        {mosque.jumuah?.prayer && <p>Jumuʿah · {mosque.jumuah.khutbah && `Khutbah ${mosque.jumuah.khutbah} · `}Jamaat {mosque.jumuah.prayer}</p>}
-        {mosque.occasional.length > 0 && <div className="compact-stack">{mosque.occasional.map(item => <p key={`${item.type}-${item.year}`}>{occasionNames[item.type]} {item.year} · {item.times.join(", ")}</p>)}</div>}
-        {mosque.photo && <details><summary>Timetable photo</summary><img alt={`Timetable for ${mosque.name}`} src={mosque.photo} loading="lazy" /></details>}
-        <a className="text-button" href={`https://wa.me/${mosque.contact ?? ""}?text=${encodeURIComponent(`Assalamu alaikum. Could you share the current jamaat timetable for ${mosque.name}? Thank you.`)}`}>Ask on WhatsApp</a>
-      </section>;
-    })}
-    {!plan.mosques.length && <p className="card soft">Add your first mosque to see its jamaat time on Today.</p>}
-    <button className="action" onClick={() => edit(startMosque())}><Plus size={20} /> Add mosque</button>
-    {plan.mosques.some(mosque => mosque.location) && <section className="card compact-stack">
-      <h2>Nearest saved mosque</h2>
-      {nearby && <p>{nearby.mosque.name} · {nearby.meters < 1000 ? `${Math.round(nearby.meters)} m` : `${(nearby.meters / 1000).toFixed(1)} km`} away</p>}
-      <p className="muted small">Your location is used once on this device to compare the saved coordinates.</p>
-      <button className="action soft" disabled={locating} type="button" onClick={() => {
-        if (!navigator.geolocation) { toast.error("Location is unavailable in this browser."); return; }
-        setLocating(true);
-        navigator.geolocation.getCurrentPosition(result => {
-          setPosition({ lat: result.coords.latitude, lon: result.coords.longitude });
-          setLocating(false);
-        }, () => {
-          toast.error("Your location is unavailable. You can still view all saved mosques.");
-          setLocating(false);
-        }, { timeout: 12000 });
-      }}>{locating ? "Finding your location…" : "Use my location"}</button>
-    </section>}
-    {plan.mosques.length > 0 && <section className="card stack">
-      <h2 className="with-icon"><CalendarDays size={20} /> Weekly mapping</h2>
-      <label className="field">Day<select value={weekday} onChange={event => setWeekday(Number(event.target.value))}>{weekdays.map((day, i) => <option key={day} value={i}>{day}</option>)}</select></label>
-      {prayerIds.map(id => {
-        const key = `${weekday}-${id}`;
-        return <label className="field" key={id}>{prayerNames[id]}
-          <select aria-label={prayerNames[id]} value={plan.mapping[key] ?? ""} onChange={event => {
-            const mosque = event.target.value;
-            void save(old => ({ ...old, mapping: { ...old.mapping, [key]: mosque } }));
-          }}>
-            <option value="">No mosque mapped</option>
-            {plan.mosques.map(mosque => <option key={mosque.id} value={mosque.id}>{mosque.name}</option>)}
-          </select>
-        </label>;
-      })}
-    </section>}
-  </div>;
-}
+  const friday = assignedMosque(5, "dhuhr", plan)?.jumuah;
+  const located = plan.mosques.filter(mosque => mosque.location);
+  const nearest = position ? located.map(mosque => ({ mosque, meters: distance(position, mosque.location) })).sort((a, b) => a.meters - b.meters)[0] : undefined;
+  const occasional = mosqueOccasions.flatMap(type => {
+    const target = Number(annual.find(item => item.title === calendarTitles[type])?.dates[0].slice(0, 4) ?? year);
+    return plan.mosques.flatMap(mosque => {
+      const entries = mosque.occasional.filter(item => item.type === type && item.times.length).sort((a, b) => b.year - a.year);
+      const entry = entries.find(item => item.year <= target) ?? entries[0];
+      return entry ? [{ mosque, entry, target }] : [];
+    });
+  });
+  const inquiry = occasional[0];
+  const contact = inquiry?.mosque ?? plan.mosques[0];
+  const prompt = contact && (inquiry
+    ? t("mosqueAskEid", { occasion: t(mosqueOccasionLabel[inquiry.entry.type]), mosque: contact.name })
+    : t("mosqueAskGeneral", { mosque: contact.name }));
+  const number = new Intl.NumberFormat(language, { useGrouping: false });
 
-function MosqueForm({ mosque, cancel, save }: { mosque: Mosque; cancel: () => void; save: (value: Mosque) => Promise<void> }) {
-  const [relativeMaghrib, setRelativeMaghrib] = useState(mosque.jamaat.maghrib === "adhan+5");
-  const [pending, setPending] = useState(false);
-  const [occasion, setOccasion] = useState<keyof typeof occasionNames>("eid_fitr");
-  const [year, setYear] = useState(new Date().getFullYear());
-  const [times, setTimes] = useState("");
-  const [entries, setEntries] = useState(mosque.occasional);
-  return <div className="stack">
-    <h1>{mosque.name ? "Edit mosque" : "Add mosque"}</h1>
-    <form className="card stack" onSubmit={async event => {
-      event.preventDefault();
-      if (pending) return;
-      const values = new FormData(event.currentTarget);
-      const photo = values.get("photo");
-      setPending(true);
-      try {
-        const jamaat = Object.fromEntries(prayerIds.map(id => [id, String(values.get(id) ?? "")]).filter(([, value]) => value));
-        if (relativeMaghrib) jamaat.maghrib = "adhan+5";
-        const name = String(values.get("name")).trim();
-        if (!name) throw new Error("Empty mosque name");
-        const lat = String(values.get("lat") ?? "").trim();
-        const lon = String(values.get("lon") ?? "").trim();
-        if (Boolean(lat) !== Boolean(lon)) { toast.error("Enter both latitude and longitude, or leave both blank."); return; }
-        const picture = photo instanceof File && photo.size ? photo : undefined;
-        if (picture && (!["image/jpeg", "image/png", "image/webp"].includes(picture.type) || picture.size > 2_000_000)) {
-          toast.error("Choose a JPEG, PNG or WebP photo under 2 MB.");
-          return;
-        }
-        await save({ ...mosque, name, jamaat, role: values.get("role") as Mosque["role"], source: values.get("source") as Mosque["source"],
-          updatedAt: new Date().toISOString(), photo: picture ? await readPhoto(picture) : mosque.photo,
-          contact: String(values.get("contact")).replace(/\D/g, ""), occasional: entries,
-          location: lat && lon ? { lat: Number(lat), lon: Number(lon) } : undefined,
-          jumuah: { khutbah: String(values.get("khutbah")), prayer: String(values.get("jumuah")) } });
-      } catch { toast.error("The mosque details could not be saved."); }
-      finally { setPending(false); }
-    }}>
-      <label className="field">Mosque name<input name="name" required defaultValue={mosque.name} maxLength={100} /></label>
-      <div className="equal-row">
-        <label className="field">Role<select name="role" defaultValue={mosque.role}>{mosqueRoles.map(role => <option key={role}>{role}</option>)}</select></label>
-        <label className="field">Source<select name="source" defaultValue={mosque.source}>{mosqueSources.map(source => <option key={source}>{source}</option>)}</select></label>
+  function open(event: MouseEvent<HTMLElement>, next: MosquePanel) {
+    opener.current = event.currentTarget;
+    setPanel(next);
+  }
+
+  async function save(change: (old: MosquePlan) => MosquePlan) {
+    try { await updateRecord("mosques", mosqueDefaults, change); return true; }
+    catch { toast.error(t("mosqueSaveError")); return false; }
+  }
+
+  function update(id: string, change: (mosque: Mosque) => Mosque) {
+    return save(old => ({ ...old, mosques: old.mosques.map(mosque => mosque.id === id ? change(mosque) : mosque) }));
+  }
+
+  async function saveTimetable(mosque: Mosque) {
+    const saved = await save(old => {
+      const current = old.mosques.find(item => item.id === mosque.id);
+      return { ...old, mosques: current
+        ? old.mosques.map(item => item.id === mosque.id ? { ...mosque, photo: current.photo, occasional: current.occasional } : item)
+        : [...old.mosques, mosque] };
+    });
+    if (saved) setPanel(undefined);
+    return saved;
+  }
+
+  async function savePhoto(id: string, picture: Blob) {
+    const saved = await update(id, current => ({ ...current, photo: picture }));
+    if (saved) setPanel(undefined);
+    return saved;
+  }
+
+  function findLocation() {
+    if (!navigator.geolocation) { toast.error(t("mosqueLocationError")); return; }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(result => {
+      setPosition({ lat: result.coords.latitude, lon: result.coords.longitude });
+      setLocating(false);
+    }, () => {
+      toast.error(t("mosqueLocationError"));
+      setLocating(false);
+    }, { timeout: 12000 });
+  }
+
+  const photoMosque = panel?.kind === "photo" ? plan.mosques.find(mosque => mosque.id === panel.id) : undefined;
+  const title = panel?.kind === "timetable" ? t(panel.mosque.name ? "mosqueUpdateTimes" : "mosqueAddFull")
+    : panel?.kind === "photo" ? t("mosquePhoto") : panel?.kind === "mapping" ? t("mosqueMappingTitle", { prayer: t(panel.id) }) : t("mosqueOccasional");
+
+  return <div className="mosques-page">
+    <SectionNav title={t("mosques")} back="/plan" backIcon={<DesignIcon name={settings.mode === "maktab" ? "qaida-maktab-chevl" : "surah-mobile-chevl"} size={24} />}
+      action={<button className="icon-button" type="button" aria-label={t("mosqueAddFull")} aria-haspopup="dialog"
+        onClick={event => open(event, { kind: "timetable", mosque: newMosque(now) })}><DesignIcon name="mosques-add" size={22} /></button>} />
+    <p className="muted">{t("mosqueIntro")}</p>
+
+    <section className="card mosque-week">
+      <div className="row-between">
+        <h2>{t("mosqueWeek")}</h2>
+        <div className="mosque-week-toggle" role="group" aria-label={t("mosqueWeek")}>
+          {([0, 1] as const).map(index => <button type="button" key={index} aria-pressed={group === index} onClick={() => setGroup(index)}>{t("mosqueGroup" + index)}</button>)}
+        </div>
       </div>
-      <h2>Jamaat timetable</h2>
-      <div className="form-grid">{prayerIds.map(id => <label className="field" key={id}>{prayerNames[id]}
-        <input type="time" name={id} defaultValue={mosque.jamaat[id] === "adhan+5" ? undefined : mosque.jamaat[id]} disabled={id === "maghrib" && relativeMaghrib} />
-      </label>)}</div>
-      <label className="with-icon"><input type="checkbox" checked={relativeMaghrib} onChange={event => setRelativeMaghrib(event.target.checked)} /> Maghrib is 5 minutes after adhan</label>
-      <div className="equal-row">
-        <label className="field">Jumuʿah khutbah<input type="time" name="khutbah" defaultValue={mosque.jumuah?.khutbah} /></label>
-        <label className="field">Jumuʿah jamaat<input type="time" name="jumuah" defaultValue={mosque.jumuah?.prayer} /></label>
+      <ul>
+        {prayerIds.map(id => {
+          const { mosque, time, differentMosques, differentTimes } = weeklyMosque(week, id, plan);
+          return <li key={id}><button className="mosque-week-row" aria-haspopup="dialog"
+            onClick={event => open(event, plan.mosques.length ? { kind: "mapping", id } : { kind: "timetable", mosque: newMosque(now) })}>
+            <strong>{t(id)}</strong>
+            <span className="mosque-week-place">
+              {mosque && <span className="mosque-role caption" data-role={mosque.role}>{t(mosqueRoleLabel[mosque.role])}</span>}
+              <small className="muted">{mosque?.name ?? t(differentMosques ? "mosqueVaries" : "mosqueChoose")}</small>
+            </span>
+            {differentTimes ? <small className="muted">{t("mosqueVaries")}</small> : <MosqueTime time={time} />}
+            <span className="sr-only"> · {t("mosqueMapping")}</span>
+          </button></li>;
+        })}
+      </ul>
+      <div className="mosque-week-details muted small">
+        {[...weekendSwitches].map(([name, prayers]) => <p key={name}>{t("mosqueWeekSwitch", { prayers: prayers.map(id => t(id)).join(", "), mosque: name })}</p>)}
+        {friday?.prayer && <p>{t(friday.khutbah ? "mosqueFriday" : "mosqueFridayPrayer", {
+          khutbah: friday.khutbah ? mosqueClock(friday.khutbah, language, true) : "", prayer: mosqueClock(friday.prayer, language, true),
+        })}</p>}
+        {!weekendSwitches.size && !friday?.prayer && <p>{t("mosqueWeekHint")}</p>}
       </div>
-      <h2>Eid and Tarawih</h2>
-      {entries.map(item => <div className="row-between" key={`${item.type}-${item.year}`}><span>{occasionNames[item.type]} {item.year} · {item.times.join(", ")}</span><button type="button" className="text-button" onClick={() => setEntries(entries.filter(entry => entry !== item))}>Remove</button></div>)}
-      <div className="equal-row">
-        <label className="field">Occasion<select value={occasion} onChange={event => setOccasion(event.target.value as typeof occasion)}>{Object.entries(occasionNames).map(([id, label]) => <option key={id} value={id}>{label}</option>)}</select></label>
-        <label className="field">Gregorian year<input type="number" min="1900" max="2200" value={year || ""} onChange={event => setYear(Number(event.target.value))} /></label>
+    </section>
+
+    <section className="mosque-saved">
+      <div className="row-between">
+        <h2>{t("mosqueSaved")}</h2>
+        <button className="text-button" aria-haspopup="dialog" onClick={event => open(event, { kind: "timetable", mosque: newMosque(now) })}>
+          {t("mosqueAdd")}<span className="sr-only"> · {t("mosqueAddFull")}</span>
+        </button>
       </div>
-      <div className="equal-row">
-        <label className="field">Jamaat time<input type="time" value={times} onChange={event => setTimes(event.target.value)} /></label>
-        <button className="action soft self-end" type="button" disabled={!times || year < 1900 || year > 2200} onClick={() => {
-          const matching = entries.find(item => item.year === year && item.type === occasion);
-          setEntries([...entries.filter(item => item !== matching), { type: occasion, year, times: [...new Set([...(matching?.times ?? []), times])].sort() }]);
-          setTimes("");
-        }}>Add time</button>
+      {plan.mosques.map(mosque => {
+        const checked = dateKey(new Date(mosque.updatedAt), settings.city.timeZone);
+        const notice = timetableNotice(day, checked, mosque.refreshMonth, season);
+        return <article className="card mosque-card" key={mosque.id}>
+          <div className="row-between">
+            <div><h3>{mosque.name}</h3><p className="muted small">{t(mosqueSourceLabel[mosque.source])} · {formatDay(checked, { month: "short", day: "numeric" }, language)}</p></div>
+            <span className="mosque-role caption" data-role={mosque.role}>{t(mosqueRoleLabel[mosque.role])}</span>
+          </div>
+          <dl className="mosque-times equal-row">
+            {prayerIds.map(id => <div key={id}>
+              <dt className="caption">{t(id === "maghrib" ? "mosqueMaghShort" : id)}</dt>
+              <dd>{mosque.jamaat[id] === "adhan+5"
+                ? <abbr title={t("mosqueAdhanFiveLong")}>+{number.format(5)}</abbr>
+                : <MosqueTime time={mosque.jamaat[id]} />}
+              </dd>
+            </div>)}
+          </dl>
+          {notice && <div className="mosque-nudge small"><DesignIcon name="mosques-refresh" size={18} /><p>
+            {t(noticeMessage[notice], { month: formatDay(day, { month: "long" }, language) })}
+          </p></div>}
+          <div className="equal-row mosque-card-actions">
+            <button className="action soft" aria-haspopup="dialog" onClick={event => open(event, { kind: "timetable", mosque })}>{t("mosqueUpdateTimes")}</button>
+            <button className="action light" aria-haspopup="dialog" onClick={event => open(event, { kind: "photo", id: mosque.id })}>{t("mosquePhoto")}</button>
+          </div>
+        </article>;
+      })}
+      {plan.mosques.length === 0 && <p className="card soft">{t("mosqueEmpty")}</p>}
+    </section>
+
+    {plan.mosques.length > 0 && <section className="mosque-occasional">
+      <div className="row-between">
+        <h2>{t("mosqueOccasional")}</h2>
+        <button className="text-button" onClick={event => open(event, { kind: "occasion" })} aria-haspopup="dialog">
+          {t("mosqueAdd")}<span className="sr-only"> · {t("mosqueOccasional")}</span>
+        </button>
       </div>
-      <label className="field">Timetable photo<input type="file" name="photo" accept="image/jpeg,image/png,image/webp" /></label>
-      <label className="field">WhatsApp number with country code (optional)<input type="tel" name="contact" defaultValue={mosque.contact} /></label>
-      <div className="equal-row">
-        <label className="field">Latitude (optional)<input name="lat" type="number" step="any" min="-90" max="90" defaultValue={mosque.location?.lat} /></label>
-        <label className="field">Longitude (optional)<input name="lon" type="number" step="any" min="-180" max="180" defaultValue={mosque.location?.lon} /></label>
-      </div>
-      <div className="equal-row"><button className="action light" type="button" onClick={cancel}>Cancel</button><button className="action" disabled={pending}>Save mosque</button></div>
-    </form>
+      {occasional.map(({ mosque, entry, target }) => {
+        const history = entry.year === target ? t("planEidThisYear") : entry.year === target - 1 ? t("planEidLastYear") : number.format(entry.year);
+        return <button key={mosque.id + entry.type} className="list-row mosque-occasion" aria-haspopup="dialog"
+          onClick={event => open(event, { kind: "occasion", id: mosque.id, occasion: entry.type })}>
+          <span className="icon-box"><DesignIcon name={entry.type === "tarawih" ? "qada-moon" : "mosques-star"} size={22} /></span>
+          <span><strong>{t(mosqueOccasionLabel[entry.type])} · {mosque.name}</strong>
+            <small>{t(mosqueRoleLabel[mosque.role])} · {history} · {entry.times.map(time => mosqueClock(time, language)).join(" · ")}</small></span>
+          <DesignIcon name={settings.mode === "maktab" ? "return-maktab-chevron" : "return-chevron"} />
+        </button>;
+      })}
+      {occasional.length === 0 && <p className="card small muted">{t("mosqueOccasionalEmpty")}</p>}
+    </section>}
+
+    {contact && prompt && <section className="mosque-inquiry">
+      <h2>{t("mosqueAskTitle")}</h2>
+      <p>{prompt}</p>
+      <a className="action" href={`https://wa.me/${contact.contact ?? ""}?text=${encodeURIComponent(prompt)}`} target="_blank" rel="noopener noreferrer">{t("mosqueWhatsapp")}</a>
+    </section>}
+
+    {located.length > 0 && <section className="card mosque-nearest compact-stack">
+      <h2>{t("mosqueNearest")}</h2>
+      {nearest && <p role="status">{nearest.mosque.name} · {t(nearest.meters < 1000 ? "mosqueMeters" : "mosqueKm", {
+        distance: nearest.meters < 1000 ? Math.round(nearest.meters) : Number((nearest.meters / 1000).toFixed(1)),
+      })}</p>}
+      <p className="muted small">{t("mosqueLocationHint")}</p>
+      <button className="action soft" disabled={locating} onClick={findLocation}>{t(locating ? "mosqueFinding" : "mosqueUseLocation")}</button>
+    </section>}
+
+    <Dialog open={!!panel} onOpenChange={open => { if (!open) setPanel(undefined); }}>
+      {panel && <DialogContent className="awwab-dialog mosque-dialog" showCloseButton={false} aria-describedby={undefined}
+        onCloseAutoFocus={event => { event.preventDefault(); opener.current?.focus(); }}>
+        <div className="row-between"><DialogTitle>{title}</DialogTitle>
+          <DialogClose asChild><button className="icon-button" aria-label={t("planClose")}><X size={18} aria-hidden="true" /></button></DialogClose>
+        </div>
+        {panel.kind === "timetable" && <TimetableEditor mosque={panel.mosque} save={saveTimetable} cancel={() => setPanel(undefined)} />}
+        {panel.kind === "mapping" && <WeekEditor prayer={panel.id} plan={plan} week={week} group={groupLabel} cancel={() => setPanel(undefined)}
+          save={async (days, mosqueId) => {
+            const saved = await save(old => mapMosque(old, days, panel.id, mosqueId));
+            if (saved) setPanel(undefined);
+            return saved;
+          }} />}
+        {photoMosque && <PhotoEditor mosque={photoMosque} save={photo => savePhoto(photoMosque.id, photo)} />}
+        {panel.kind === "occasion" && <OccasionEditor mosques={plan.mosques} initialMosque={panel.id} initialType={panel.occasion} yearNow={year} update={update} />}
+      </DialogContent>}
+    </Dialog>
   </div>;
 }

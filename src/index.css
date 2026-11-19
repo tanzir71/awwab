@@ -8,6 +8,7 @@
 @import "./hadith.css";
 @import "./return.css";
 @import "./plan.css";
+@import "./mosques.css";
 
 @tailwind base;
 @tailwind components;
