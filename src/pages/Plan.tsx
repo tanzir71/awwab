@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { DesignIcon } from "@/components/DesignIcon";
+import { DesktopPlan } from "@/components/DesktopPlan";
 import { EventSheet, SightingOptions } from "@/components/PlanEventSheet";
 import { Dialog, DialogClose, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useRecord } from "@/hooks/use-awwab";
@@ -12,6 +13,7 @@ import { addDays, dateKey, formatDay } from "@/lib/dates";
 import { calendarDefaults, calendarEventById, calendarEvents, dayDifference, hijriOn, monthStart,
   moonWatchDay, possibleMonthStarts, type CalendarEvent, type CalendarSettings, type MonthAnchor } from "@/lib/hijri";
 import { mosqueDefaults } from "@/lib/mosques";
+import { shiftPlanEvent } from "@/lib/plan-calendar";
 import { planAuthorities, planEventCopy, planMonth } from "@/lib/plan-copy";
 import { getRecord, updateRecord, type Settings } from "@/lib/storageService";
 import { zakatHawl, type ZakatProfile } from "@/lib/zakat";
@@ -28,7 +30,7 @@ function compactDates(dates: string[], language: Settings["language"], separator
   return dates.map(date => formatDay(date, { ...short, month: date !== last && date.slice(0, 7) === last.slice(0, 7) ? undefined : "short" }, language)).join(separator);
 }
 
-export function Plan({ settings, now }: { settings: Settings; now: Date }) {
+export function Plan({ settings, now, desktop }: { settings: Settings; now: Date; desktop: boolean }) {
   const { t, language } = useCopy();
   const number = new Intl.NumberFormat(language, { useGrouping: false });
   const [query, setQuery] = useSearchParams();
@@ -70,12 +72,12 @@ export function Plan({ settings, now }: { settings: Settings; now: Date }) {
   const district = settings.city.timeZone === "Asia/Dhaka";
   const sourceLabel = planAuthorities.find(item => item.value === source)?.label;
 
-  const events = useMemo(() => calendarEvents(day, addDays(day, expanded ? 365 : 185), adjustment, config)
+  const events = useMemo(() => desktop ? [] : calendarEvents(day, addDays(day, expanded ? 365 : 185), adjustment, config)
     .filter(event => event.kind !== "weekly" && event.hijriMonth !== 0 && (expanded || !beforeMoon.includes(event.title))),
-  [day, expanded, adjustment, config]);
-  const gridEvents = useMemo(() => calendarEvents(displayStart.date, displayEnd, adjustment, config)
+  [day, expanded, adjustment, config, desktop]);
+  const gridEvents = useMemo(() => desktop ? [] : calendarEvents(displayStart.date, displayEnd, adjustment, config)
     .filter(event => event.kind !== "weekly"),
-  [displayStart.date, displayEnd, adjustment, config]);
+  [displayStart.date, displayEnd, adjustment, config, desktop]);
   const eventId = query.get("event");
   const selected = eventId ? calendarEventById(eventId, adjustment, config) : undefined;
   const dateLabel = (date: string) => formatDay(date, { weekday: "short", day: "numeric", month: "short" }, language);
@@ -126,6 +128,9 @@ export function Plan({ settings, now }: { settings: Settings; now: Date }) {
       return { ...old, sightingSource: authority, overrides: { ...old.overrides, [event.id]: { date, source: authority, adjust: 0 } } };
     });
   }
+
+  if (desktop) return <DesktopPlan today={day} now={now} settings={settings} config={config} hawl={hawl} mosques={mosques} saved={newCalendar}
+    exportCalendar={() => { exportCalendar(config); setNewCalendar(false); }} saveCalendar={save} confirmEvent={confirmEvent} />;
 
   return <div className="plan-page">
     <header className="plan-heading row-between">
@@ -210,10 +215,8 @@ export function Plan({ settings, now }: { settings: Settings; now: Date }) {
               <small>{t("planDaysAway", { count: Math.max(0, dayDifference(event.dates[0], day)) })}</small>
               <div className="plan-adjust">
                 {([-1, 1] as const).map(step => <button key={step} aria-pressed={offset === step}
-                  onClick={() => void save(old => {
-                    const previous = old.overrides[event.id];
-                    return { ...old, overrides: { ...old.overrides, [event.id]: { ...previous, adjust: previous?.adjust === step ? 0 : step } } };
-                  })}><span>{step < 0 ? "−" : "+"}{number.format(1)}</span><span className="sr-only"> {t(step < 0 ? "planAdjustEarlier" : "planAdjustLater", { event: title })}</span></button>)}
+                  onClick={() => void save(old => shiftPlanEvent(old, event.id, step))}>
+                  <span>{step < 0 ? "−" : "+"}{number.format(1)}</span><span className="sr-only"> {t(step < 0 ? "planAdjustEarlier" : "planAdjustLater", { event: title })}</span></button>)}
               </div>
             </div>
           </article>;

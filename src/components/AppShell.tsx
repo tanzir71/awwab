@@ -5,7 +5,7 @@ import { WordPanel } from "./WordPanel";
 import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
 import { useRecord, usePrayerLogs } from "@/hooks/use-awwab";
 import { dateKey, duration, formatDay } from "@/lib/dates";
-import { calendarDefaults, hijriLabel } from "@/lib/hijri";
+import { calendarDefaults, hijriLabel, hijriOn } from "@/lib/hijri";
 import { currentPrayerSchedule } from "@/lib/prayerServices";
 import { prayerStatistics, type Settings, updateSettings } from "@/lib/storageService";
 import { useUi } from "@/lib/uiState";
@@ -17,6 +17,7 @@ import { reviewDestination, studyPlanMinutes, type DeskActivity } from "@/lib/st
 import { studyNames } from "@/lib/study-copy";
 import { qaidaRows, resolveQaidaRow } from "@/lib/qaidaPractice";
 import { planMonth } from "@/lib/plan-copy";
+import { gregorianMonthBounds, readCalendarMonth } from "@/lib/plan-calendar";
 import { zakatHawl, type ZakatProfile } from "@/lib/zakat";
 import qaida from "../../docs/content/qaida-lessons.json";
 import surahs from "../../docs/content/surahs-for-salah.json";
@@ -93,6 +94,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
   const { day, next } = currentPrayerSchedule(settings.city, settings.method, settings.school, now, logs);
   const zakat = useRecord<ZakatProfile | null>("zakat", null);
   const zakatPage = location.pathname === "/plan/zakat";
+  const planDesktop = desktop && location.pathname === "/plan";
   const hawl = zakatHawl(day, zakat, settings.hijriAdjust, calendar.anchors);
   const number = new Intl.NumberFormat(settings.language, { useGrouping: false });
   const zakatSubtitle = [
@@ -115,6 +117,17 @@ export function AppShell({ children, settings, now, desktop }: { children: React
   const heading = [...destinations].sort((a, b) => b.to.length - a.to.length).find(item => location.pathname.startsWith(item.to));
   const title = heading ? navigationLabel(settings, heading.title) : "awwab";
   const date = formatDay(day, { weekday: "short", day: "numeric", month: "short", year: "numeric" }, settings.language);
+  const planSubtitle = (() => {
+    if (!planDesktop) return;
+    const month = readCalendarMonth(new URLSearchParams(location.search).get("month"), day);
+    const { first, last } = gregorianMonthBounds(month);
+    const start = hijriOn(first, settings.hijriAdjust, calendar.anchors);
+    const end = hijriOn(last, settings.hijriAdjust, calendar.anchors);
+    const endLabel = planMonth(end.month, settings.language) + " " + number.format(end.year);
+    const startLabel = planMonth(start.month, settings.language) + (start.year !== end.year ? " " + number.format(start.year) : "");
+    const months = start.year === end.year && start.month === end.month ? endLabel : startLabel + " – " + endLabel;
+    return [formatDay(first, { month: "long", year: "numeric" }, settings.language), months, t("planDeskContext")].join(" · ");
+  })();
   const nextPrayer = Number.isFinite(next.starts.valueOf())
     ? t("nextPrayerIn", { name: t(next.id), time: duration(next.starts.valueOf() - now.valueOf(), settings.language) }) : t("prayerTimes");
   const shareSheet = location.pathname === "/share";
@@ -200,10 +213,10 @@ export function AppShell({ children, settings, now, desktop }: { children: React
         </div>
       </>}
     </nav>}
-    <main className="app-main" id="app-main" tabIndex={-1} data-page={shareSheet ? "share-sheet" : shareMoment ? "share-moment" : prayerGuide ? "prayer-guide" : salahStudy ? "salah-study" : today ? "today" : studyHome ? "learn" : chapter ? "surah-reader" : lesson ? "qaida-lesson" : wordBank ? "word-bank" : fluency ? "fluency" : location.pathname.startsWith("/learn/takhti") ? "takhti" : undefined}>
+    <main className="app-main" id="app-main" tabIndex={-1} data-page={shareSheet ? "share-sheet" : shareMoment ? "share-moment" : prayerGuide ? "prayer-guide" : salahStudy ? "salah-study" : today ? "today" : planDesktop ? "plan-desktop" : studyHome ? "learn" : chapter ? "surah-reader" : lesson ? "qaida-lesson" : wordBank ? "word-bank" : fluency ? "fluency" : location.pathname.startsWith("/learn/takhti") ? "takhti" : undefined}>
       {!fullscreen && !((today || studyHome || surahStudy) && settings.mode === "maktab") && <header className="topbar">
-        <div>{today || learnWorkspace || zakatPage ? <h1>{qaidaStudy ? t("qaidaDesktopTitle", { number: lesson.n }) : surahStudy ? t("surahsForSalah") : wordBankStudy ? t("wordBankName") : title}</h1> : <h2>{title}</h2>}
-          <p className="small muted">{zakatPage ? zakatSubtitle : qaidaStudy ? qaidaSubtitle : surahStudy ? studySubtitle : wordBankStudy ? t("wordBankSubtitle") : date + " · " + hijriLabel(day, settings.hijriAdjust, calendar.anchors)}{today && ` · ${settings.city.name}`}{studyHome && " · " + t("deskMinutesToday", { count: studyPlanMinutes(hidden) })}</p></div>
+        <div>{today || learnWorkspace || zakatPage || planDesktop ? <h1>{qaidaStudy ? t("qaidaDesktopTitle", { number: lesson.n }) : surahStudy ? t("surahsForSalah") : wordBankStudy ? t("wordBankName") : title}</h1> : <h2>{title}</h2>}
+          <p className="small muted">{planSubtitle ?? (zakatPage ? zakatSubtitle : qaidaStudy ? qaidaSubtitle : surahStudy ? studySubtitle : wordBankStudy ? t("wordBankSubtitle") : date + " · " + hijriLabel(day, settings.hijriAdjust, calendar.anchors))}{today && ` · ${settings.city.name}`}{studyHome && " · " + t("deskMinutesToday", { count: studyPlanMinutes(hidden) })}</p></div>
         <Link className="chip night" to="/today">{nextPrayer}</Link>
         {settings.mode === "adult" && <>
           <Link className="action" to={reviewDestination(nextReview ?? due[0]?.[0])}><DesignIcon name="desk-play" size={14} />{t("startReview")}{due.length ? ` · ${studyHome ? dueSurahs || due.length : due.length}` : ""}</Link>

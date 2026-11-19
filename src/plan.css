@@ -182,6 +182,79 @@ body .plan-event-overlay { background: color-mix(in srgb, var(--c-night) 83%, tr
   .awwab-dialog.plan-event-sheet { padding-inline: 14px; }
   .plan-date-choices .plan-date-choice { padding: 12px; }
 }
-@media (min-width: 1024px) {
-  .plan-page { width: min(100%, 590px); margin: 16px auto 0; }
+.plan-desktop { display: grid; gap: 16px; min-width: 0; align-items: start; }
+.plan-desktop[data-wide="true"] { grid-template-columns: minmax(0, 1fr) 340px; }
+[data-page="plan-desktop"] .topbar { position: sticky; top: 0; z-index: 3; background: var(--c-bg); }
+[data-page="plan-desktop"] .topbar p { margin-top: 2px; }
+.plan-desk-calendar, .plan-desk-side .card { min-width: 0; padding: 16px; }
+.plan-desk-calendar { display: grid; gap: 8px; }
+.plan-desk-calendar-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+.plan-desk-calendar-header h2 { font: var(--type-display-m); }
+.plan-desk-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.plan-desk-toolbar .action, .plan-desk-toolbar .icon-button { min-height: 30px; padding: 4px 10px; font: var(--type-small); box-shadow: none; }
+.plan-desk-toolbar .icon-button { width: 30px; padding: 0; }
+.plan-desk-toolbar .action.light, .plan-desk-toolbar .icon-button { background: var(--c-surface-alt); box-shadow: none; }
+.plan-desk-toolbar .icon-button:disabled { opacity: .55; }
+.plan-desk-month { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-template-rows: auto; grid-auto-rows: minmax(102px, auto); gap: 8px; }
+.plan-desk-month > .caption { padding-inline: 8px 2px; overflow-wrap: anywhere; }
+.plan-desk-cell { display: grid; align-content: start; min-width: 0; padding: 4px 6px 6px; border-radius: var(--r-control); background: var(--c-surface-alt); }
+.plan-desk-cell[data-adjacent="true"] { background: var(--c-bg); }
+.plan-desk-cell:is([data-today="true"], [data-selected="true"]) { background: var(--c-primary-soft); }
+.plan-desk-day {
+  display: flex; align-items: start; justify-content: space-between; min-height: 28px; min-width: 0; gap: 4px;
+  padding: 4px 2px; border-radius: var(--r-control); text-align: start; font: var(--type-small);
 }
+.plan-desk-day span { color: var(--c-ink-muted); text-align: end; overflow-wrap: anywhere; }
+.plan-desk-day:hover, .plan-desk-cell[data-today="true"] .plan-desk-day strong { color: var(--interactive-ink); text-decoration: underline; }
+.plan-desk-cell[data-adjacent="true"] .plan-desk-day strong { color: var(--c-ink-muted); font-weight: 500; }
+.plan-desk-grid-event {
+  display: block; min-height: 22px; max-width: 100%; margin-top: 3px; padding: 2px 5px; border-radius: var(--r-control);
+  color: var(--c-ink); background: var(--c-tint); text-align: start; overflow-wrap: anywhere; font: var(--type-caption); font-weight: 600;
+}
+.plan-desk-grid-event[data-kind="white-days"], .plan-desk-grid-event[data-kind="confirmed"] { background: var(--c-primary-soft); }
+.plan-desk-grid-event:hover, .plan-desk-row:hover strong { text-decoration: underline; text-underline-offset: .15em; }
+.plan-desk-jumuah { padding: 3px 2px 0; font: var(--type-small); overflow-wrap: anywhere; }
+.plan-desk-side { display: grid; gap: 16px; align-content: start; min-width: 0; }
+.plan-desk-side h2, .plan-desk-side h3 { font: var(--type-body-strong); }
+.plan-desk-side h2 .icon-button { min-height: 28px; }
+.plan-desk-moon h2 { font: var(--type-display-m); }
+.plan-desk-moon h2 button { text-align: start; }
+.plan-desk-moon h2 button:hover { text-decoration: underline; }
+.plan-desk-sources { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.plan-desk-sources button { min-height: 26px; padding: 4px 6px; border-radius: var(--r-pill); background: var(--c-overlay-on-night); color: var(--c-on-night); font: var(--type-caption); }
+.plan-desk-sources button:hover { text-decoration: underline; }
+.plan-desk-shift { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.plan-desk-shift .equal-row { width: auto; }
+.plan-desk-shift button { min-height: 28px; min-width: 64px; padding: 4px 8px; border-radius: var(--r-control); color: var(--c-ink); background: var(--c-surface); font: var(--type-small); }
+.plan-desk-shift button[aria-pressed="true"] { background: var(--c-primary-soft); color: var(--interactive-ink); font-weight: 700; }
+.plan-desk-moon-actions .action { min-height: 36px; padding: 6px; font: var(--type-small); }
+.plan-desk-moon-actions .plan-moon-primary { color: var(--c-on-primary); background: var(--control-accent); }
+.plan-desk-side .text-button { min-height: 28px; font: var(--type-small); }
+.plan-desk-list { display: grid; gap: 8px; padding: 0; list-style: none; }
+.plan-desk-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; width: 100%; min-height: 44px;
+  padding: 6px 10px; border-radius: var(--r-control); background: var(--c-surface-alt);
+  color: var(--c-ink); text-decoration: none; text-align: start; font: var(--type-small);
+}
+.plan-desk-row strong { font-weight: 600; }
+.plan-desk-row small { display: block; font: inherit; overflow-wrap: anywhere; }
+.plan-desk-badge { white-space: normal; padding: 2px 7px; border-radius: var(--r-pill); background: var(--c-tint); }
+.plan-desk-badge[data-confirmed="true"] { color: var(--interactive-ink); background: var(--c-primary-soft); }
+.plan-desk-saved { padding: 8px; border-radius: var(--r-control); background: var(--c-primary-soft); color: var(--interactive-ink); }
+.plan-event-panel .plan-sheet-heading h2, .plan-desk-day-panel h2 { font: var(--type-display-m); }
+.plan-event-panel .plan-announcement { background: var(--c-bg); box-shadow: none; }
+.plan-event-panel .plan-date-choice { padding: 8px; }
+.plan-event-panel .plan-date-choice strong { font: var(--type-body-strong); }
+.plan-event-panel .plan-segmented { grid-auto-flow: row; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.plan-event-panel .plan-eid-note { background: var(--c-tint); box-shadow: none; }
+.plan-desk-prayer-times { display: grid; gap: 4px; }
+.plan-desk-prayer-times > div, .plan-desk-jumuah-card {
+  padding: 6px 10px; border-radius: var(--r-control); background: var(--c-surface-alt); font: var(--type-small);
+}
+.plan-desk-prayer-times > div { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+:root .awwab-dialog.plan-desk-drawer {
+  inset-block: 0; inset-inline: auto 0; width: min(100%, 430px); max-height: 100%; padding: 16px;
+  border-radius: var(--r-card) 0 0 var(--r-card); transform: none; animation: none; align-content: start;
+  background: var(--c-bg); overflow-y: auto;
+}
+:root .plan-desk-overlay { background: color-mix(in srgb, var(--c-night) 64%, transparent); }

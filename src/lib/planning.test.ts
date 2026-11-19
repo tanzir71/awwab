@@ -3,7 +3,10 @@ import { calculateZakat, gramsPerBhori, initialZakat, nisabWeight, paymentsForHa
   zakatHawl, zakatMoney, zakatPrices, zakatProfileTotals, type ZakatProfile } from "./zakat";
 import { advanceSai, bearing, correctSai, distance, initialSai } from "./umrah";
 import { addDays } from "./dates";
-import { baselineMonthStart, dayDifference, eventDisplayDates } from "./hijri";
+import { baselineMonthStart, calendarDefaults, calendarEventById, dayDifference, eventDisplayDates, monthStartEvent } from "./hijri";
+import { eventReminders } from "./calendarFile";
+import { calendarDayEvents, calendarWeekStart, fridayMosque, gregorianMonthCells, readCalendarDay, readCalendarMonth, shiftPlanEvent } from "./plan-calendar";
+import { defaults } from "./storageService";
 import { qadaBalances, qadaDefaults, qadaForecast } from "./qada";
 import { assignedMosque, mapMosque, mosqueDefaults, mosqueTime, mosqueWeek, timetableNotice, weeklyMosque, type Mosque } from "./mosques";
 
@@ -34,6 +37,65 @@ describe("Today summaries", () => {
     expect(qadaForecast(today, balances, { dailyGoal: 3 })).toEqual({ days: 3, end: "2026-11-21" });
     expect(qadaForecast(today, balances, { dailyGoal: 3, withEachPrayer: true })).toEqual({ days: 7, end: "2026-11-25" });
     expect(qadaForecast(today, qadaBalances(qadaDefaults, []), { dailyGoal: 3, withEachPrayer: true })).toEqual({ days: 0, end: null });
+  });
+});
+
+describe("desktop Plan calendar", () => {
+  it("uses full Gregorian weeks, includes neighbouring days and honours the locale’s week start", () => {
+    expect(calendarWeekStart("en", "Asia/Dhaka", ["en-GB"])).toBe(0);
+    expect(calendarWeekStart("en", "Europe/London", ["en-GB"])).toBe(1);
+    expect(calendarWeekStart("bn", "Europe/London", ["en-GB"])).toBe(0);
+    const sunday = gregorianMonthCells("2026-12", 0, 0, calendarDefaults);
+    const monday = gregorianMonthCells("2026-12", 1, 0, calendarDefaults);
+    expect(sunday[0]).toMatchObject({ day: "2026-11-29", adjacent: true, weekday: 0 });
+    expect(sunday.at(-1)).toMatchObject({ day: "2027-01-02", adjacent: true, weekday: 6 });
+    expect(monday[0]).toMatchObject({ day: "2026-11-30", adjacent: true, weekday: 1 });
+    expect(monday.at(-1)).toMatchObject({ day: "2027-01-03", adjacent: true, weekday: 0 });
+    expect(sunday).toHaveLength(35);
+  });
+
+  it("shows both expected Rajab dates and highlights every day of the two White Days windows once", () => {
+    const grid = gregorianMonthCells("2026-12", 0, 0, calendarDefaults);
+    const rajab = grid.filter(cell => cell.events.some(item => item.title === "Rajab begins"));
+    expect(rajab.map(cell => cell.day)).toEqual(["2026-12-10", "2026-12-11"]);
+    const decemberWhiteDays = grid.filter(cell => cell.day.startsWith("2026-12-2") &&
+      cell.events.some(item => item.title.startsWith("White days")));
+    expect(decemberWhiteDays.map(cell => cell.day)).toEqual(["2026-12-22", "2026-12-23", "2026-12-24", "2026-12-25"]);
+    expect(calendarDayEvents("2026-12-23", 0, calendarDefaults).filter(item => item.title.startsWith("White days"))).toHaveLength(1);
+    const config = { ...calendarDefaults, anchors: [{ year: 1448, month: 7, date: "2026-12-11", source: "Family" }] };
+    const confirmed = gregorianMonthCells("2026-12", 0, 0, config)
+      .filter(cell => cell.events.some(item => item.title === "Rajab begins"));
+    expect(confirmed).toMatchObject([{ day: "2026-12-11", hijri: { day: 1 } }]);
+  });
+
+  it("exports a shift or confirmation even for a month without a named observance", () => {
+    const start = monthStartEvent(1448, 8, 0, calendarDefaults);
+    const shifted = shiftPlanEvent(calendarDefaults, start.id, 1);
+    const expected = calendarEventById(start.id, 0, shifted);
+    expect(expected).toMatchObject({ confirmed: false, dates: start.dates.map(day => addDays(day, 1)) });
+    expect(eventReminders("2026-12-01", defaults, shifted).filter(item => item.id.startsWith("event-" + start.id)).map(item => item.start)).toEqual(expected.dates);
+    expect(shiftPlanEvent(shifted, start.id, 1)).toEqual(calendarDefaults);
+    const confirmed = { ...calendarDefaults, anchors: [{ year: 1448, month: 8, date: start.dates[1], source: "My mosque" }] };
+    expect(eventReminders("2026-12-01", defaults, confirmed).find(item => item.id === "event-" + start.id + "-0")?.start).toBe(start.dates[1]);
+  });
+
+  it("uses the Friday assignment, and supports a single saved Jumuʿah mosque as a fallback", () => {
+    const role: Mosque = { id: "j", name: "Friday Masjid", role: "jumuah", jamaat: {}, jumuah: { khutbah: "13:00", prayer: "13:15" },
+      occasional: [], source: "imam", updatedAt: "2026-11-19T10:00:00Z" };
+    const home: Mosque = { ...role, id: "h", role: "home", jumuah: { khutbah: "12:30", prayer: "12:45" } };
+    const plan = { ...mosqueDefaults, mosques: [home, role] };
+    expect(fridayMosque(plan)).toBe(role);
+    expect(fridayMosque(mapMosque(plan, [5], "dhuhr", home.id))).toBe(home);
+    expect(fridayMosque({ ...plan, mosques: [role, { ...role, id: "j2" }] })).toBeUndefined();
+  });
+
+  it("accepts legitimate dated links and rejects invalid or out-of-range values", () => {
+    const today = "2026-11-19";
+    expect(readCalendarDay("2028-02-29", today)).toBe("2028-02-29");
+    expect(readCalendarDay("2027-02-29", today)).toBeUndefined();
+    expect(readCalendarDay("0002-01-01", today)).toBeUndefined();
+    expect(readCalendarMonth("2026-13", today)).toBe("2026-11");
+    expect(readCalendarMonth("2026-12", today)).toBe("2026-12");
   });
 });
 

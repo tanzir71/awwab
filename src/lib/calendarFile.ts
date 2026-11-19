@@ -2,7 +2,7 @@ import { addDays } from "./dates";
 import { schedule } from "./prayerServices";
 import { prayerIds, prayerNames } from "@/types/Prayer";
 import type { Settings } from "./storageService";
-import { calendarEvents, eventMoonReminder, hijriMonths, moonWatchDay, type CalendarSettings } from "./hijri";
+import { calendarEventById, calendarEvents, eventMoonReminder, hijriMonths, moonWatchDay, type CalendarEvent, type CalendarSettings } from "./hijri";
 import { downloadFile } from "./download";
 
 interface CalendarItem { id: string; title: string; start: Date | string; alarm?: number; description?: string }
@@ -51,8 +51,17 @@ export function prayerReminders(day: string, settings: Settings, days: number, a
 }
 
 export function eventReminders(day: string, settings: Settings, calendar: CalendarSettings) {
-  const events = calendarEvents(day, addDays(day, 365), settings.hijriAdjust, calendar).filter(event => event.kind !== "weekly");
-  return events.flatMap(event => {
+  const end = addDays(day, 365);
+  const events = calendarEvents(day, end, settings.hijriAdjust, calendar).filter(event => event.kind !== "weekly");
+  const customStarts = new Set([
+    ...calendar.anchors.map(anchor => `${anchor.year}-${anchor.month}-start`),
+    ...Object.keys(calendar.overrides).filter(id => id.endsWith("-start")),
+    ...Object.keys(calendar.moonReminders ?? {}).filter(id => id.endsWith("-start") && calendar.moonReminders[id]),
+  ]);
+  const additional = [...customStarts].map(id => calendarEventById(id, settings.hijriAdjust, calendar))
+    .filter((event): event is CalendarEvent => !!event && event.dates.some(date => date >= day && date <= end));
+  const distinct = new Map([...events, ...additional].map(event => [event.id, event]));
+  return [...distinct.values()].flatMap(event => {
     const entries: CalendarItem[] = event.dates.map((date, i) => ({
       id: `event-${event.id}-${i}`,
       title: event.confirmed ? event.title : `Expected: ${event.title}`,

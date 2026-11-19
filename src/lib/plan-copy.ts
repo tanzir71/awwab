@@ -1,5 +1,5 @@
 import type { MessageCatalog } from "./copy";
-import { hijriMonths } from "./hijri";
+import { hijriMonths, type CalendarEvent } from "./hijri";
 
 export const planMonthsBn = ["মুহাররম", "সফর", "রবিউল আউয়াল", "রবিউস সানি", "জমাদিউল আউয়াল", "জমাদিউস সানি", "রজব", "শাবান", "রমজান", "শাওয়াল", "জিলকদ", "জিলহজ"];
 export const planMonth = (month: number, language: "en" | "bn") => (language === "bn" ? planMonthsBn : hijriMonths)[month - 1];
@@ -25,6 +25,13 @@ export const planEventCopy: Record<string, { en: [string, string]; bn: [string, 
   "Eid al-Adha": { en: ["Eid al-Adha", "Tap to plan where you’ll pray"], bn: ["ঈদুল আজহা", "কোথায় নামাজ পড়বে ঠিক করো"] },
   "White days (Ayyām al-Bīḍ)": { en: ["White days", "13–15 of each Hijri month"], bn: ["আইয়ামে বীজ", "প্রতি হিজরি মাসের ১৩–১৫ তারিখ"] },
 };
+
+export function planEventLabels(event: CalendarEvent, language: "en" | "bn") {
+  return planEventCopy[event.title]?.[language] ?? [
+    language === "bn" ? planMonth(event.month, language) + " শুরু" : event.title,
+    language === "bn" ? "স্থানীয় চাঁদ দেখার খবর জানো" : "Check the local crescent sighting",
+  ];
+}
 
 export const planMessages = {
   planTitle: { en: "Islamic calendar", bn: "হিজরি ক্যালেন্ডার" },
@@ -52,6 +59,27 @@ export const planMessages = {
   planDependsOnMoon: { en: "Depends on moon", bn: "চাঁদ দেখার ওপর নির্ভর করে" },
   planUpcoming: { en: "Coming up", bn: "সামনে আসছে" },
   planAddCalendar: { en: "Add to phone calendar", bn: "ফোনের ক্যালেন্ডারে যোগ করো" },
+  planExportCalendar: { en: "Export to calendar (.ics)", bn: "ক্যালেন্ডারে দাও (.ics)" },
+  planPrevGregorian: { en: "Previous month", bn: "আগের মাস" },
+  planNextGregorian: { en: "Next month", bn: "পরের মাস" },
+  planDetails: { en: "Calendar details", bn: "ক্যালেন্ডারের বিবরণ" },
+  planDeskFootnote: { en: "Numbers on the right are Hijri days (Umm al-Qura, adjusted for local confirmations).", bn: "ডানের সংখ্যাগুলো হিজরি তারিখ (উম্মুল কুরা, স্থানীয় চাঁদ দেখার খবর অনুযায়ী বদলায়)।" },
+  planDeskContext: { en: "Dates marked ~ depend on the moon", bn: "~ চিহ্নিত তারিখ চাঁদ দেখার ওপর নির্ভর করে" },
+  planDeskMoonDependent: { en: "Moon-dependent", bn: "চাঁদ দেখার ওপর নির্ভর করে" },
+  planDeskConfirmFrom: { en: "Confirm when you hear it from", bn: "এই উৎসের খবর পেলে নিশ্চিত করো" },
+  planDeskShiftMonth: { en: "Shift this month", bn: "এই মাসের তারিখ বদলাও" },
+  planDeskShiftEarlier: { en: "−1 day", bn: "−১ দিন" },
+  planDeskShiftLater: { en: "+1 day", bn: "+১ দিন" },
+  planDeskWhiteDay: { en: "White day", bn: "আইয়ামে বীজ" },
+  planDeskAlternate: { en: "or {event}", bn: "অথবা {event}" },
+  planDeskAlternateStart: { en: "or {month} {day, number}", bn: "অথবা {day, number} {month}" },
+  planDeskJumuah: { en: "Jumuʿah", bn: "জুমা" },
+  planDeskJumuahPending: { en: "Add a mosque to see its jamaat time here.", bn: "জামাতের সময় দেখতে মসজিদ যোগ করো।" },
+  planDeskNoEvents: { en: "No calendar events on this day.", bn: "এই দিনে ক্যালেন্ডারের কোনো অনুষ্ঠান নেই।" },
+  planDeskAllEvents: { en: "All events", bn: "সব অনুষ্ঠান" },
+  planDeskFewerEvents: { en: "Fewer events", bn: "কম অনুষ্ঠান" },
+  planDeskEidPending: { en: "Choose a mosque and save its Eid jamaat times.", bn: "মসজিদ বেছে ঈদের জামাতের সময় লিখে রাখো।" },
+  planPersonalZakatDate: { en: "Your zakat date", bn: "তোমার যাকাতের তারিখ" },
   planFollowsMonth: { en: "Follows month", bn: "মাস অনুযায়ী" },
   planDaysAway: { en: "{count, plural, =0 {Today} one {~# day} other {~# days}}", bn: "{count, plural, =0 {আজ} other {প্রায় # দিন}}"},
   planAdjustEarlier: { en: "Move {event} one day earlier", bn: "{event} এক দিন এগিয়ে আনো" },

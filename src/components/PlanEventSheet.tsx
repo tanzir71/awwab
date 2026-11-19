@@ -6,7 +6,7 @@ import { Dialog, DialogClose, DialogContent, DialogTitle } from "@/components/ui
 import { useCopy } from "@/lib/copy";
 import { addDays, formatDay } from "@/lib/dates";
 import { eventMoonReminder, monthStart, moonWatchDay, type CalendarEvent, type CalendarSettings } from "@/lib/hijri";
-import { planAuthorities, planEventCopy, planMonth } from "@/lib/plan-copy";
+import { planAuthorities, planEventLabels, planMonth } from "@/lib/plan-copy";
 import { mosqueDefaults, type Mosque, type MosquePlan } from "@/lib/mosques";
 import { type Settings, updateRecord } from "@/lib/storageService";
 
@@ -35,7 +35,7 @@ function EidJamaat({ event, mosques, city }: { event: CalendarEvent; mosques: Mo
   const [saving, setSaving] = useState(false);
   const type = event.title === "Eid al-Fitr" ? "eid_fitr" : "eid_adha";
   const year = Number(event.dates[0].slice(0, 4));
-  const matching = mosques.mosques.filter(mosque => mosque.role === location || (location === "home" && mosque.role === "eid"));
+  const matching = mosques.mosques.filter(mosque => location === "hometown" ? mosque.role === "hometown" : mosque.role !== "hometown");
   const editingId = editor?.mosque.id;
 
   async function save(event: FormEvent<HTMLFormElement>) {
@@ -98,15 +98,16 @@ function EidJamaat({ event, mosques, city }: { event: CalendarEvent; mosques: Mo
   </section>;
 }
 
-export function EventSheet({ event, settings, config, mosques, onConfirm, onMoonReminder, onClose, onRestoreFocus }: {
+export function EventSheet({ event, settings, config, mosques, onConfirm, onMoonReminder, onClose, onRestoreFocus, presentation = "dialog", initialDate, initialSource }: {
   event: CalendarEvent; settings: Settings; config: CalendarSettings; mosques: MosquePlan;
   onConfirm: (date: string, source: string, moveAfter: boolean) => Promise<boolean>;
   onMoonReminder: (enabled: boolean) => Promise<boolean>;
   onClose: () => void; onRestoreFocus: () => void;
+  presentation?: "dialog" | "panel"; initialDate?: string; initialSource?: string;
 }) {
   const { t, language } = useCopy();
-  const [choice, setChoice] = useState(event.dates[0]);
-  const [source, setSource] = useState(config.sightingSource ?? planAuthorities[0].value);
+  const [choice, setChoice] = useState(initialDate ?? event.dates[0]);
+  const [source, setSource] = useState(initialSource ?? config.sightingSource ?? planAuthorities[0].value);
   const [moveAfter, setMoveAfter] = useState(true);
   const [saving, setSaving] = useState(false);
   const [pendingReminder, setPendingReminder] = useState<boolean>();
@@ -118,23 +119,23 @@ export function EventSheet({ event, settings, config, mosques, onConfirm, onMoon
   const previousMonth = planMonth(event.month === 1 ? 12 : event.month - 1, language);
   const selected = event.dates.includes(choice) ? choice : event.dates[0];
   const dateLabel = (date: string) => formatDay(date, { weekday: "short", day: "numeric", month: "short" }, language);
-  const [title, detail] = planEventCopy[event.title][language];
+  const [title, detail] = planEventLabels(event, language);
   const number = new Intl.NumberFormat(language, { useGrouping: false });
   const district = settings.city.timeZone === "Asia/Dhaka";
   const announcedBy = planAuthorities.find(authority => authority.value === event.source);
   const sourceText = announcedBy ? t(announcedBy === planAuthorities[0] && district ? "planNationalBd" : announcedBy.label) : event.source;
 
-  return <Dialog open onOpenChange={open => { if (!open && !saving) onClose(); }}>
-    <DialogContent className="awwab-dialog plan-event-sheet" overlayClassName="plan-event-overlay" showCloseButton={false} aria-describedby={undefined}
-      onCloseAutoFocus={event => { event.preventDefault(); onRestoreFocus(); }}>
+  const closeButton = <button type="button" className="icon-button" disabled={saving}
+    onClick={presentation === "panel" ? onClose : undefined} aria-label={t("planClose")}><X size={18} aria-hidden="true" /></button>;
+  const body = <>
       <header className="plan-sheet-heading">
         <div>
           <p className="caption">{number.format(event.hijriDay)} {planMonth(event.month, language)} {number.format(event.year)}</p>
-          <DialogTitle>{title}</DialogTitle>
+          {presentation === "panel" ? <h2 data-plan-panel-heading tabIndex={-1}>{title}</h2> : <DialogTitle>{title}</DialogTitle>}
         </div>
         <div className="plan-sheet-actions">
           <span className="plan-event-badge caption" data-kind={event.confirmed ? "confirmedDate" : "expectedDate"}>{t(event.confirmed ? "confirmedDate" : "expectedDate")}</span>
-          <DialogClose asChild><button type="button" className="icon-button" disabled={saving} aria-label={t("planClose")}><X size={18} /></button></DialogClose>
+          {presentation === "panel" ? closeButton : <DialogClose asChild>{closeButton}</DialogClose>}
         </div>
       </header>
       <section className="plan-event-dates compact-stack">
@@ -179,6 +180,11 @@ export function EventSheet({ event, settings, config, mosques, onConfirm, onMoon
         <h3>{t("planBeforeEid")}</h3><p className="muted small">{t("planBeforeFitr")}</p>
         <p className="small"><a href="https://sunnah.com/bukhari:1503">Bukhari 1503 · Sahih</a> · <a href="https://sunnah.com/bukhari:953">Bukhari 953 · Sahih</a></p>
       </section>}
-    </DialogContent>
+  </>;
+  if (presentation === "panel") return <section className="card plan-event-panel compact-stack" aria-label={title}
+    onKeyDown={key => { if (saving && key.key === "Escape") key.preventDefault(); }}>{body}</section>;
+  return <Dialog open onOpenChange={open => { if (!open && !saving) onClose(); }}>
+    <DialogContent className="awwab-dialog plan-event-sheet" overlayClassName="plan-event-overlay" showCloseButton={false} aria-describedby={undefined}
+      onCloseAutoFocus={event => { event.preventDefault(); onRestoreFocus(); }}>{body}</DialogContent>
   </Dialog>;
 }
