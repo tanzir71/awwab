@@ -13,11 +13,12 @@ import { Plan } from "@/pages/Plan";
 import { Qada, ReturnPage, Sayyid } from "@/pages/Return";
 import { SettingsPage, You } from "@/pages/You";
 import { Onboarding } from "@/pages/Onboarding";
-import { Fluency, Hadith, Qaida, SurahReader } from "@/pages/Study";
+import { Fluency, Hadith, Qaida } from "@/pages/Study";
+import { SurahReader } from "@/pages/Surahs";
 import { SalahWords } from "@/pages/SalahWords";
 import { Mosques } from "@/pages/Mosques";
 import { Zakat } from "@/pages/Zakat";
-import { PrintHub, PrintSheet } from "@/pages/Print";
+import { PrintHub, PrintSheet, WordPrintSheet } from "@/pages/Print";
 import { Takhti } from "@/pages/Takhti";
 import { Share } from "@/pages/Share";
 import { Milestone } from "@/pages/Milestone";
@@ -60,7 +61,7 @@ function Main() {
       <Route path="/today/week" element={<PrayerWeek settings={settings} now={now} />} />
       <Route path="/learn" element={<Learn settings={settings} desktop={desktop} now={now} />} />
       <Route path="/learn/qaida/:id?" element={<Qaida settings={settings} />} />
-      <Route path="/learn/surahs/:id?" element={<SurahReader settings={settings} />} />
+      <Route path="/learn/surahs/:id?" element={<SurahReader settings={settings} now={now} />} />
       <Route path="/learn/salah" element={<SalahWords />} />
       <Route path="/learn/fluency" element={<Fluency />} />
       <Route path="/learn/words" element={<WordBank settings={settings} />} />
@@ -86,6 +87,7 @@ function Main() {
         <Route path="location" element={<WalkWithMe />} />
       </Route>
       <Route path="/print" element={<PrintHub />} />
+      <Route path="/print/word-card" element={<WordPrintSheet />} />
       <Route path="/print/:sheet/:family?" element={<PrintSheet settings={settings} now={now} />} />
       <Route path="/you" element={<You settings={settings} now={now} />} />
       <Route path="/you/audio" element={<AudioPacks />} />

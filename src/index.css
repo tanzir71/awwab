@@ -1,5 +1,7 @@
 @import "./theme.css";
 @import "./learn-desktop.css";
+@import "./surah-study.css";
+@import "./word-anatomy.css";
 
 @tailwind base;
 @tailwind components;
@@ -279,11 +281,8 @@ progress::-moz-progress-bar { background: var(--control-primary); }
 .anatomy-title { font-weight: 700; }
 .awwab-dialog { background: var(--c-bg); color: var(--c-ink); border: 0; border-radius: var(--r-sheet); width: min(calc(100vw - 24px), 520px); max-height: 92svh; overflow: auto; box-shadow: var(--shadow-raised); }
 .awwab-dialog > button:last-child { width: 44px; height: 44px; display: grid; place-items: center; right: 8px; top: 8px; }
-.word-sheet { top: auto; bottom: 0; transform: translateX(-50%); width: min(100%, 520px); padding: 24px 16px; border-radius: var(--r-sheet) var(--r-sheet) 0 0; }
-.word-sheet .row-between { padding-right: 28px; }
 .word-side { position: sticky; top: 76px; flex: 0 0 clamp(280px, 29vw, 390px); height: fit-content; max-height: calc(100svh - 92px); overflow: auto; display: grid; gap: 12px; align-self: flex-start; margin: 0 18px 0 0; background: var(--c-bg); box-shadow: var(--shadow-raised); }
 .anatomy-close { position: absolute; right: 8px; top: 8px; z-index: 1; }
-.word-side .row-between { margin-top: 32px; }
 .section-nav { display: flex; align-items: center; gap: 12px; }
 .section-nav h1 { flex: 1; text-align: center; font: var(--type-title); }
 .prayer-guide, .salah-study { display: grid; gap: 16px; width: min(100%, 640px); margin-inline: auto; }
@@ -371,7 +370,6 @@ progress::-moz-progress-bar { background: var(--control-primary); }
 .count-ring div { width: 100%; height: 100%; border-radius: 50%; background: var(--c-night); display: grid; place-content: center; }
 .count-ring strong, .numeral { font: var(--type-numeral-l); }
 .study-item { display: flex; min-height: 44px; align-items: center; justify-content: space-between; gap: 5px; text-decoration: none; }
-.desktop-queue { display: none; }
 .qaida-queue, .qaida-trace { display: none; }
 .study-tabs { padding: 3px; background: var(--c-surface-alt); border-radius: var(--r-control); gap: 4px; }
 .drill-grid, .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(92px, 100%), 1fr)); gap: 8px; }
@@ -520,15 +518,11 @@ table tbody tr:nth-child(even) { background: var(--c-surface-alt); }
   .maktab-prayer-columns .hadith-quote { padding: 20px; }
   .maktab-prayer-columns .hadith-quote blockquote { margin-bottom: 0; }
   :root[data-mode="adult"] .desk-card { font-size: 13px; line-height: 18px; }
-  .study-workspace { display: grid; grid-template-columns: minmax(176px, .7fr) minmax(280px, 1.5fr); gap: 16px; }
-  .desktop-queue { display: grid; }
   .qaida-workspace { display: grid; grid-template-columns: minmax(145px,.7fr) minmax(300px,1.9fr) minmax(180px,1.15fr); gap: 14px; align-items: start; }
   .qaida-queue, .qaida-trace { display: grid; min-width: 0; }
   .qaida-queue .study-item { padding: 5px 8px; border-radius: var(--r-control); }
   .anatomy-open .qaida-workspace { grid-template-columns: minmax(0,1fr); }
   .anatomy-open .qaida-workspace > aside { display: none; }
-  .anatomy-open .study-workspace { grid-template-columns: minmax(0, 1fr); }
-  .anatomy-open .desktop-queue { display: none; }
   [data-page="share-sheet"] .workspace { min-height: 100svh; align-items: end; }
   .share-sheet { margin-top: 30px; min-height: auto; }
   .share-copy-button { display: inline-flex; margin: -8px auto; }
@@ -540,8 +534,6 @@ table tbody tr:nth-child(even) { background: var(--c-surface-alt); }
   [data-page="salah-study"] .app-content { padding-top: env(safe-area-inset-top); }
 }
 @media (min-width: 1360px) {
-  .anatomy-open .study-workspace { grid-template-columns: minmax(165px,.7fr) minmax(300px,1.5fr); }
-  .anatomy-open .desktop-queue { display: grid; }
 }
 @media (max-width: 359px) {
   .app-content { padding-inline: 12px; }

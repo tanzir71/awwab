@@ -3,9 +3,11 @@ import { splitArabicWords, splitGraphemes, wordAnatomy } from "../lib/wordAnatom
 import { useUi } from "../lib/uiState";
 import { useCopy } from "../lib/copy";
 
+type WordRecall = "read" | "hint" | "hidden";
+
 function WordChip({ children, recall, href, selected, onSelect }: {
   children: ReactNode;
-  recall: "read" | "hint" | "hidden";
+  recall: WordRecall;
   href?: string;
   selected?: boolean;
   onSelect: () => void;
@@ -26,7 +28,7 @@ export function ArabicText({ text, citation, words, recall = "read", mushaf, com
   text: string;
   citation?: string;
   words?: WordDetail[];
-  recall?: "read" | "hint" | "hidden";
+  recall?: WordRecall | ((position: number) => WordRecall);
   mushaf?: "indopak" | "uthmani";
   compact?: boolean;
   verse?: string;
@@ -45,21 +47,22 @@ export function ArabicText({ text, citation, words, recall = "read", mushaf, com
         <span className="arabic-line" key={lineIndex}>
           {splitArabicWords(line).map(word => {
             const index = wordIndex++;
+            const position = positionOffset + index + 1;
+            const chipRecall = typeof recall === "function" ? recall(position) : recall;
             const detail = words?.[index];
             const anatomyWord = detail?.anatomyWord || word;
-            const transliteration = recall === "read" ? detail?.transliteration ?? wordAnatomy(anatomyWord, index > 0).syllables.map(syllable => syllable.tr).join("") : "";
-            const shown = recall === "hidden" ? "···" : recall === "hint" ? `${splitGraphemes(word)[0]}···` : word;
-            const screenReaderText = recall === "read" ? transliteration : t("revealWord", { number: index + 1 });
-            const position = positionOffset + index + 1;
+            const transliteration = chipRecall === "read" ? detail?.transliteration ?? wordAnatomy(anatomyWord, index > 0).syllables.map(syllable => syllable.tr).join("") : "";
+            const shown = chipRecall === "hidden" ? "···" : chipRecall === "hint" ? `${splitGraphemes(word)[0]}···` : word;
+            const screenReaderText = chipRecall === "read" ? transliteration : t("revealWord", { number: index + 1 });
             return (
-              <WordChip key={index} recall={recall} href={wordLink?.(index + 1)} selected={selectedPosition === undefined ? undefined : selectedPosition === position}
+              <WordChip key={index} recall={chipRecall} href={wordLink?.(index + 1)} selected={selectedPosition === undefined ? undefined : selectedPosition === position}
                 onSelect={() => {
                   onWordSelected?.(position);
                   selectWord({ word: anatomyWord, citation, connected: index > 0, verse, position, ...detail });
                 }}>
                 <span>{shown}</span>
-                {recall === "read" && showGlosses && detail?.gloss && <small lang="en" dir="ltr">{detail.gloss}</small>}
-                {screenReaderText && <span className="sr-only" lang={recall === "read" ? "en" : language} dir="ltr">{screenReaderText}</span>}
+                {chipRecall === "read" && showGlosses && detail?.gloss && <small lang="en" dir="ltr">{detail.gloss}</small>}
+                {screenReaderText && <span className="sr-only" lang={chipRecall === "read" ? "en" : language} dir="ltr">{screenReaderText}</span>}
               </WordChip>
             );
           })}

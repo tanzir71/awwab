@@ -1,141 +1,24 @@
 import { useDeferredValue, useEffect, useState } from "react";
-import { BookOpen, ChevronRight, Headphones, Search } from "lucide-react";
-import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { ChevronRight, Search } from "lucide-react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { ArabicText } from "@/components/ArabicText";
 import { VerseAudio } from "@/components/VerseAudio";
 import { SectionNav } from "@/components/Surface";
-import { useDesktop, useRecord } from "@/hooks/use-awwab";
+import { useRecord } from "@/hooks/use-awwab";
 import { asset } from "@/lib/config";
-import { prayerGuidePath } from "@/lib/prayerGuide";
 import { qaidaRows } from "@/lib/qaidaPractice";
-import { grades, isDue, type ReviewGrade, type Reviews } from "@/lib/reviews";
 import { useCopy } from "@/lib/copy";
 import { studyNames, studySearchTerm } from "@/lib/study-copy";
 import { updateRecord, type Settings } from "@/lib/storageService";
-import { finishQaidaLesson, momentPath, rememberQaidaPlace, saveSurahReview } from "@/lib/studyMilestones";
-import { splitArabicWords, wordAnatomy } from "@/lib/wordAnatomy";
+import { finishQaidaLesson, momentPath, rememberQaidaPlace } from "@/lib/studyMilestones";
+import { wordAnatomy } from "@/lib/wordAnatomy";
 import alphabet from "../../docs/content/arabic-letters.json";
 import qaida from "../../docs/content/qaida-lessons.json";
-import surahs from "../../docs/content/surahs-for-salah.json";
 import hadith from "../../docs/content/hadith-curated.json";
 import { quranText } from "@/lib/quran";
-import { useUi } from "@/lib/uiState";
 import sample from "../../docs/content/word-anatomy.sample.json";
 import { TraceBoard } from "./Takhti";
-
-const fullChapters = surahs.surahs.slice(0, 12);
-const supportedSurah = (number: number) => quranText[number];
-const studyModes = ["listen", "read", "recall"] as const;
-
-function wrapAyah(text: string) {
-  const words = text.split(/\s+/);
-  const result: string[] = [];
-  let line = "";
-  for (const word of words) {
-    if (line && (line.length + word.length > 33 || line.split(" ").length >= 4)) {
-      result.push(line);
-      line = "";
-    }
-    line = line ? `${line} ${word}` : word;
-  }
-  return [...result, line].filter(Boolean).join("\n");
-}
-
-function SurahList({ selected }: { selected?: number }) {
-  const { language, t } = useCopy();
-  const reviews = useRecord<Reviews>("reviews", {});
-  const now = new Date();
-  return <section className="compact-stack">
-    {fullChapters.map(chapter => <Link className={`list-row ${chapter.number === selected ? "soft" : ""}`} key={chapter.number} to={`/learn/surahs/${chapter.number}`}>
-      <span className="icon-box"><BookOpen size={19} /></span><span><strong>{studyNames.surah(language, chapter.number, chapter.transliteration)}</strong><small>{t("wordCount", { count: chapter.words })} · {t(reviews[chapter.number]?.bucket ?? "sabaq")}</small></span>
-      {reviews[chapter.number] && isDue(reviews[chapter.number], now) ? <span className="chip soft">{t("due")}</span> : <ChevronRight size={18} />}
-    </Link>)}
-  </section>;
-}
-
-export function SurahReader({ settings }: { settings: Settings }) {
-  const { t } = useCopy();
-  const { id } = useParams();
-  const surah = fullChapters.find(chapter => chapter.number === Number(id));
-  if (!surah) return <div className="stack"><SectionNav title={t("surahsForSalah")} back="/learn" /><SurahList /></div>;
-  return <SurahStudy key={id} surah={surah} settings={settings} />;
-}
-
-function SurahStudy({ surah, settings }: { surah: typeof fullChapters[number]; settings: Settings }) {
-  const [params] = useSearchParams();
-  const { language, t } = useCopy();
-  const name = studyNames.surah(language, surah.number, surah.transliteration);
-  const [mode, setMode] = useState<typeof studyModes[number]>(() => studyModes.find(mode => mode === params.get("mode")) ?? "read");
-  const [hints, setHints] = useState<Record<string, boolean>>({});
-  const [saved, setSaved] = useState(false);
-  const navigate = useNavigate();
-  const [saving, setSaving] = useState(false);
-  const reviews = useRecord<Reviews>("reviews", {});
-  const rememberedLines = useRecord<string[]>("surah-lines-known", []);
-  const bucket = reviews[surah.number]?.bucket ?? "sabaq";
-  const verses = supportedSurah(surah.number);
-  const desktop = useDesktop();
-  const selectWord = useUi(state => state.selectWord);
-  useEffect(() => {
-    if (!desktop) return;
-    const first = verses[0];
-    selectWord({ word: splitArabicWords(first.uthmani)[0], citation: first.ref, verse: first.ref, position: 1, connected: false });
-  }, [desktop, selectWord, verses]);
-  async function grade(value: ReviewGrade) {
-    if (saving || saved) return;
-    setSaving(true);
-    try {
-      const moved = await saveSurahReview(surah.number, value, new Date(), settings.city.timeZone);
-      setSaved(true);
-      if (moved) navigate(momentPath("surah", surah.number));
-    } catch { toast.error(t("reviewSaveError")); }
-    finally { setSaving(false); }
-  }
-  return <div className="study-workspace">
-    <aside className="desktop-queue stack" aria-label={t("surahList")}><h2>{t("surahsForSalah")}</h2><SurahList selected={surah.number} /></aside>
-    <div className="stack">
-      <SectionNav title={t("chapterHeading", { name, number: surah.number })} back={prayerGuidePath(params.get("fromPrayer")) ?? "/learn/surahs"} />
-      <div className="equal-row study-tabs" role="group" aria-label={t("studyMode")}>
-        {studyModes.map(item => <button className={`action ${mode === item ? "light" : "plain"}`} aria-pressed={mode === item} key={item} onClick={() => { setMode(item); setSaved(false); }}>{t(item)}</button>)}
-      </div>
-      <p className="muted small"><span className="chip soft">{t(bucket)}</span> {t("chapterCounts", { verses: surah.ayahs, words: surah.words })}</p>
-      <p className="small muted">{t("spellOutHint")}</p>
-      {mode === "listen" && <section className="card stack">
-        <h2 className="with-icon"><Headphones size={20} /> {t("practiseAloud")}</h2>
-        <VerseAudio audioRef={`surah:${surah.number}`} label={name} compare />
-        <Link to={`/you/audio?surah=${surah.number}`} className="text-button">{t("downloadRecitation")}</Link>
-      </section>}
-      {verses.map((verse, i) => {
-        const reading = mode !== "recall" || i === 0;
-        const recall = reading ? "read" : hints[verse.ref] ? "hint" : "hidden";
-        return <section className={`card stack ${!reading && i > 1 ? "tint" : ""}`} key={verse.ref}>
-          <header className="row-between"><a href={`https://quran.com/${verse.ref.replace(":", "/")}`} className="chip">{verse.ref}</a>
-            {!reading && <button className="text-button" onClick={() => setHints(value => ({ ...value, [verse.ref]: !value[verse.ref] }))}>{t(hints[verse.ref] ? "hideInitials" : "showInitials")}</button>}
-          </header>
-          <div className="text-right"><ArabicText text={wrapAyah(verse[settings.script])} citation={verse.ref} verse={verse.ref} recall={recall} mushaf={settings.script}
-            words={splitArabicWords(verse.uthmani).map(anatomyWord => ({ anatomyWord }))} /></div>
-          <p className={reading ? "" : "muted"}>{!reading && `${t("cue")} · `}<span lang="en">{verse.english}</span></p>
-          {mode === "listen" && <VerseAudio audioRef={verse.ref} label={t("verseLabel", { number: i + 1 })} compare />}
-          {settings.mode === "maktab" && mode !== "read" && <button className={rememberedLines.includes(verse.ref) ? "action" : "action soft"} type="button" aria-pressed={rememberedLines.includes(verse.ref)}
-            onClick={() => void updateRecord<string[]>("surah-lines-known", [], known =>
-              known.includes(verse.ref) ? known.filter(ref => ref !== verse.ref) : [...known, verse.ref]).catch(() => toast.error(t("saveError")))}>
-            {t("deskCanSayLine", { number: i + 1 })}
-          </button>}
-        </section>;
-      })}
-      <section className="compact-stack">
-        <h2>{t("howDidItGo")}</h2>
-        <div className="equal-row">
-          {(Object.keys(grades) as ReviewGrade[]).map(value => <button className={`action ${value === "got-it" ? "" : "light"}`} key={value} disabled={saving || saved} onClick={() => void grade(value)}>{t(value)}</button>)}
-        </div>
-        {saved && <p className="muted" role="status">{t("reviewSaved")}</p>}
-      </section>
-      {surah.number !== 1 && <p className="card soft">{t("tryInMaghrib", { name })}</p>}
-      <p className="muted small"><a href={settings.script === "indopak" ? "https://digitalkhatt.org" : "https://tanzil.net/docs/text_license"}>{t(settings.script === "indopak" ? "indopakCredit" : "tanzilCredit")}</a> · {t("englishTranslationCredit")}</p>
-    </div>
-  </div>;
-}
 
 export function Qaida({ settings }: { settings: Settings }) {
   const { language, t } = useCopy();

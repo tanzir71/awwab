@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { Mic, Square } from "lucide-react";
 import { useCopy } from "@/lib/copy";
 
-export function LocalRecorder({ label }: { label?: string } = {}) {
+let currentRecorder: MediaRecorder | undefined;
+
+export function LocalRecorder({ label, compact = false }: { label?: string; compact?: boolean } = {}) {
   const { t } = useCopy();
   const active = useRef<{ input: MediaStream; recorder: MediaRecorder }>();
   const mounted = useRef(true);
@@ -39,12 +41,16 @@ export function LocalRecorder({ label }: { label?: string } = {}) {
       recorder.onstop = () => {
         window.clearTimeout(timer);
         input.getTracks().forEach(track => track.stop());
+        if (currentRecorder === recorder) currentRecorder = undefined;
         active.current = undefined;
         if (!mounted.current) return;
         setRecording(false);
         if (chunks.length) setAudio(URL.createObjectURL(new Blob(chunks, { type: recorder.mimeType })));
       };
+      if (currentRecorder?.state === "recording") currentRecorder.stop();
+      document.querySelectorAll("audio").forEach(audio => audio.pause());
       recorder.start();
+      currentRecorder = recorder;
       active.current = { input, recorder };
       setRecording(true);
       setMessage(undefined);
@@ -56,12 +62,12 @@ export function LocalRecorder({ label }: { label?: string } = {}) {
     }
   }
 
-  return <div className="compact-stack">
-    <button type="button" className="action soft" aria-label={label ? t(recording ? "stopRecordingNamed" : "recordCompareNamed", { name: label }) : undefined} onClick={() => {
+  return <div className={compact ? "surah-record-control" : "compact-stack"}>
+    <button type="button" className={compact ? "chip" : "action soft"} aria-label={label ? t(recording ? "stopRecordingNamed" : "recordCompareNamed", { name: label }) : undefined} onClick={() => {
       const recorder = active.current?.recorder;
       if (recorder?.state === "recording") recorder.stop();
       else void start();
-    }}>{recording ? <Square size={16} /> : <Mic size={17} />} {t(recording ? "stopRecording" : "recordCompare")}</button>
+    }}>{!compact && (recording ? <Square size={16} /> : <Mic size={17} />)} {t(recording ? "stopRecording" : compact ? "surahRecord" : "recordCompare")}</button>
     {message && <p role="status" className="small muted">{t(message)}</p>}
     {audio && <div className="compact-stack"><audio controls src={audio} aria-label={label ? t("yourRecordingFor", { name: label }) : t("yourRecording")} /><button className="text-button" onClick={() => setAudio("")}>{t("clearRecording")}</button></div>}
   </div>;

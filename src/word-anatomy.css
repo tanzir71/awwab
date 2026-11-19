@@ -1,0 +1,134 @@
+.awwab-dialog.word-sheet {
+  top: auto; bottom: 0; transform: translateX(-50%); width: min(100%, 520px);
+  max-height: calc(100svh - max(26px, env(safe-area-inset-top)));
+  padding: 8px 20px max(28px, env(safe-area-inset-bottom)); gap: 10px;
+  border-radius: var(--r-sheet) var(--r-sheet) 0 0;
+}
+.anatomy-grip { width: 64px; height: 26px; display: grid; align-items: start; justify-items: start; padding-top: 2px; }
+.anatomy-grip::before { content: ""; display: block; width: 40px; height: 5px; border-radius: var(--r-pill); background: var(--c-line); }
+.anatomy-content { display: grid; align-content: start; min-width: 0; gap: 16px; }
+.anatomy-content[data-layout="side"] { padding-top: 20px; }
+.anatomy-content [hidden] { display: none; }
+.anatomy-header { gap: 10px; min-width: 0; }
+.anatomy-header > div:first-child { min-width: 0; }
+.anatomy-header h2 { font: 600 26px/32px var(--font-display); overflow-wrap: anywhere; }
+.anatomy-title { max-width: 55%; }
+.anatomy-title .word-chip { font: 650 clamp(28px, 9.5vw, 52px)/1.4 var(--font-arabic); padding: 0; }
+.anatomy-content :is(.anatomy-title, .anatomy-letter-tiles, .anatomy-syllables, .anatomy-joining, .anatomy-family, .anatomy-spellings, .anatomy-modern-list, .anatomy-heading) .word-chip > span {
+  text-decoration: none;
+}
+.anatomy-content :is(.anatomy-title, .anatomy-letter-tiles, .anatomy-syllables, .anatomy-joining, .anatomy-family, .anatomy-spellings, .anatomy-modern-list, .anatomy-heading) .arabic-line {
+  gap: 1px; padding: 1px;
+}
+.anatomy-audio .action, .anatomy-actions .action { font: var(--type-body-strong); min-height: 48px; padding: 8px; }
+.anatomy-section { display: grid; align-content: start; gap: 8px; min-width: 0; }
+.anatomy-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font: var(--type-body-strong); margin: 0; }
+.anatomy-heading > span:first-child {
+  display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: var(--r-pill); background: var(--control-primary);
+  color: var(--c-on-primary); font: 650 12px/15px var(--font-body);
+}
+.anatomy-heading .word-chip, .anatomy-prefixes .word-chip { font: 400 16px/22px var(--font-arabic); min-height: 24px; min-width: 16px; padding-inline: 1px; }
+.anatomy-heading small { color: var(--c-ink-muted); }
+.anatomy-content .anatomy-letter-tiles { gap: 4px; padding: 3px 0 6px; }
+.anatomy-letter-tiles .letter-tile {
+  flex: 0 0 calc((100% - 20px) / 6); min-width: 52px; min-height: 105px; padding: 4px 3px 8px;
+  align-items: center; gap: 1px; background: var(--c-surface); box-shadow: var(--shadow-card); font: 650 10px/14px var(--font-body);
+}
+.anatomy-letter-tiles .letter-tile[data-silent="true"] { background: var(--c-surface-alt); }
+.anatomy-letter-tiles .letter-tile[data-step="true"] { background: var(--c-primary-soft); outline: 2px solid var(--interactive-ink); outline-offset: -2px; }
+.anatomy-letter-tiles .arabic-line { justify-content: center; }
+.anatomy-letter-tiles .word-chip { color: var(--mark-color); font: 400 29px/44px var(--font-arabic); width: 100%; min-width: 24px; padding: 0; }
+.anatomy-letter-tiles .word-chip:hover { color: var(--c-ink); }
+.anatomy-letter-tiles .anatomy-mark { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 2px; font: 600 10px/13px var(--font-body); }
+.anatomy-mark img { flex: 0 0 auto; }
+.anatomy-letter-tiles .anatomy-sound { color: var(--interactive-ink); font-size: 13px; line-height: 18px; }
+.anatomy-syllables, .anatomy-joining { display: flex; gap: 5px; align-items: stretch; overflow-x: auto; padding-block: 3px; }
+.anatomy-syllable, .anatomy-joining-tile { display: grid; justify-items: center; align-content: center; min-width: 37px; padding: 3px 5px; border-radius: var(--r-control); }
+.anatomy-syllable { background: var(--c-surface); box-shadow: var(--shadow-card); color: var(--interactive-ink); }
+.anatomy-joining-tile { background: var(--c-surface-alt); }
+.anatomy-joining-tile small { color: var(--c-ink); font-size: 10px; }
+.anatomy-syllables .word-chip, .anatomy-joining .word-chip { font: 400 20px/27px var(--font-arabic); min-width: 20px; min-height: 30px; padding: 0 2px; }
+.anatomy-joined-sound { padding: 8px; border-radius: var(--r-control); text-align: center; color: var(--interactive-ink); font: var(--type-body-strong); }
+.anatomy-joined-example { display: flex; justify-content: center; }
+.anatomy-family, .anatomy-modern-list { min-width: 0; display: grid; gap: 6px; }
+.anatomy-family-entry, .anatomy-modern-sentence { display: flex; justify-content: space-between; align-items: center; gap: 6px; min-width: 0; }
+.anatomy-family-entry { padding: 4px 9px; background: var(--c-surface); border-radius: var(--r-control); box-shadow: var(--shadow-card); }
+.anatomy-family-entry > div { display: grid; }
+.anatomy-family-entry .word-chip { min-height: 32px; }
+.anatomy-family-entry strong, .anatomy-modern-sentence strong { font: 650 13px/18px var(--font-body); }
+.anatomy-spellings > div { display: grid; justify-items: center; align-content: center; gap: 3px; border-radius: var(--r-control); padding: 8px 5px; }
+.anatomy-spellings > .soft { background: var(--c-surface); }
+.anatomy-spellings .caption { font-size: 10px; text-align: center; }
+.anatomy-spellings .word-chip { font: 400 25px/38px var(--font-arabic); min-height: 44px; }
+.anatomy-modern-list h4 { color: var(--c-ink); margin-block: 6px 2px; font: var(--type-body-strong); }
+.anatomy-modern-sentence { flex-direction: column; align-items: stretch; background: var(--c-surface); border-radius: var(--r-card); padding: 8px 12px; box-shadow: var(--shadow-card); }
+.anatomy-modern-sentence .word-chip { min-width: 20px; padding-inline: 2px; }
+.anatomy-modern-sentence > div { font: var(--type-small); }
+.anatomy-modern-sentence strong { color: var(--interactive-ink); }
+.paper-word-letters { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(90px, 100%), 1fr)); gap: 8px; }
+.paper-word-letters > div { display: grid; justify-items: center; text-align: center; }
+
+@media (min-width: 1024px) {
+  [data-page="surah-reader"] .anatomy-reader-panel {
+    display: block; flex: 0 0 min(34%, 380px); top: 10px; margin: 0; min-width: 0;
+    max-height: calc(100svh - 20px); padding: 14px 16px 16px; background: var(--c-surface);
+    border-radius: var(--r-card); box-shadow: var(--shadow-card);
+  }
+  .anatomy-content[data-layout="adult-reader"] { gap: 10px; font: 500 12px/16px var(--font-body); }
+  .anatomy-content[data-layout="adult-reader"] .anatomy-panel-label h2 { font: 650 14px/20px var(--font-body); }
+  .anatomy-panel-label .text-button { min-height: 26px; }
+  .anatomy-content[data-layout="adult-reader"] .anatomy-header h2 { font-size: 24px; line-height: 28px; }
+  .anatomy-content[data-layout="adult-reader"] .anatomy-title .word-chip { font-size: 35px; font-weight: 500; }
+  .anatomy-content[data-layout="adult-reader"] .anatomy-heading {
+    display: flex; gap: 4px; color: var(--c-ink-muted); text-transform: uppercase;
+    letter-spacing: .05em; font: 700 10px/14px var(--font-body);
+  }
+  .anatomy-content[data-layout="adult-reader"] .anatomy-heading > span:first-child {
+    display: inline; height: auto; width: auto; color: var(--c-ink-muted); background: transparent; font: inherit;
+  }
+  .anatomy-content[data-layout="adult-reader"] .anatomy-heading > span:first-child::after { content: " ·"; }
+  .anatomy-content[data-layout="adult-reader"] .letter-tile { min-height: 110px; }
+  .anatomy-content[data-layout="adult-reader"] .anatomy-section { gap: 4px; }
+  .anatomy-content[data-layout="adult-reader"] .anatomy-section:nth-of-type(2),
+  .anatomy-content[data-layout="adult-reader"] .anatomy-section:nth-of-type(3) { background: var(--c-surface-alt); padding: 5px 8px; border-radius: 9px; }
+  .anatomy-heading-detail { color: var(--c-ink); text-transform: none; letter-spacing: 0; font: 600 13px/18px var(--font-body); }
+  .anatomy-prefixes { display: flex; align-items: center; flex-wrap: wrap; gap: 1px 5px; }
+  .anatomy-prefixes .caption { font: 700 10px/14px var(--font-body); }
+  .anatomy-content[data-layout="adult-reader"] .anatomy-family { gap: 2px; }
+  .anatomy-content[data-layout="adult-reader"] .anatomy-family-entry { padding: 1px 0; box-shadow: none; }
+  .anatomy-content[data-layout="adult-reader"] .anatomy-spellings > .soft { background: var(--c-surface-alt); }
+  .anatomy-content[data-layout="adult-reader"] .anatomy-actions .action { min-height: 32px; font: 650 12px/16px var(--font-body); padding: 4px; }
+  .anatomy-content[data-layout="adult-reader"] .anatomy-modern-list { gap: 3px; padding: 6px 8px; background: var(--c-surface-alt); border-radius: var(--r-control); }
+  .anatomy-content[data-layout="adult-reader"] .anatomy-modern-list h4 { margin-block: 0; font: 650 10px/14px var(--font-body); letter-spacing: .06em; color: var(--c-ink-muted); text-transform: uppercase; }
+  .anatomy-content[data-layout="adult-reader"] .anatomy-modern-sentence,
+  .anatomy-content[data-layout="maktab-reader"] .anatomy-modern-sentence { flex-direction: row-reverse; align-items: center; padding: 0; gap: 3px; background: transparent; box-shadow: none; }
+  .anatomy-content[data-layout="adult-reader"] .anatomy-modern-sentence .word-chip,
+  .anatomy-content[data-layout="maktab-reader"] .anatomy-modern-sentence .word-chip { min-height: 30px; }
+  .anatomy-content[data-layout="adult-reader"] .anatomy-modern-sentence .word-chip { font-size: 14px; }
+
+  [data-mode="maktab"] [data-page="surah-reader"] .anatomy-reader-panel {
+    top: 0; flex-basis: min(39%, 440px); min-height: 100svh; max-height: 100svh;
+    padding: 36px 24px 26px; border-radius: 0; align-self: start;
+  }
+  .anatomy-content[data-layout="maktab-reader"] { gap: 14px; }
+  .anatomy-content[data-layout="maktab-reader"] .anatomy-title .word-chip { font-size: 46px; }
+  .anatomy-content[data-layout="maktab-reader"] .anatomy-heading { font: 700 16px/22px var(--font-body); }
+  .anatomy-content[data-layout="maktab-reader"] .anatomy-heading > span:first-child { display: inline; color: var(--c-ink); background: transparent; width: auto; height: auto; font: inherit; }
+  .anatomy-content[data-layout="maktab-reader"] .anatomy-heading > span:first-child::after { content: "."; }
+  .anatomy-content[data-layout="maktab-reader"] .letter-tile { min-height: 115px; }
+  .anatomy-content[data-layout="maktab-reader"] .anatomy-joining-tile { flex: 1 0 44px; }
+  .anatomy-content[data-layout="maktab-reader"] .anatomy-family { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .anatomy-content[data-layout="maktab-reader"] .anatomy-family-entry {
+    flex-direction: column-reverse; justify-content: center; text-align: center; padding: 4px 2px 8px;
+    border-radius: var(--r-control); background: var(--c-surface-alt); box-shadow: none;
+  }
+  .anatomy-content[data-layout="maktab-reader"] .anatomy-family-entry strong { display: none; }
+  .anatomy-content[data-layout="maktab-reader"] .anatomy-spellings > .soft { background: var(--c-surface-alt); }
+  .anatomy-content[data-layout="maktab-reader"] .anatomy-modern-sentence { color: var(--c-ink-muted); }
+  .anatomy-content[data-layout="maktab-reader"] .anatomy-modern-sentence .word-chip { font-size: 15px; }
+}
+
+@media (min-width: 1024px) and (max-width: 1280px) {
+  [data-page="surah-reader"] .anatomy-reader-panel { flex-basis: min(44%, 345px); padding-inline: 12px; }
+  [data-mode="maktab"] [data-page="surah-reader"] .anatomy-reader-panel { flex-basis: min(43%, 340px); padding-inline: 14px; }
+}

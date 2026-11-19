@@ -4,7 +4,7 @@ import { DesignIcon, Wordmark } from "./DesignIcon";
 import { WordPanel } from "./WordPanel";
 import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
 import { useRecord, usePrayerLogs } from "@/hooks/use-awwab";
-import { duration, formatDay } from "@/lib/dates";
+import { dateKey, duration, formatDay } from "@/lib/dates";
 import { calendarDefaults, hijriLabel } from "@/lib/hijri";
 import { currentPrayerSchedule } from "@/lib/prayerServices";
 import { prayerStatistics, type Settings, updateSettings } from "@/lib/storageService";
@@ -14,6 +14,7 @@ import { mosqueDefaults } from "@/lib/mosques";
 import { message, navigationLabel } from "@/lib/copy";
 import { countKnownQuranWords } from "@/lib/quran";
 import { reviewDestination, studyPlanMinutes, type DeskActivity } from "@/lib/studyDesk";
+import { studyNames } from "@/lib/study-copy";
 import qaida from "../../docs/content/qaida-lessons.json";
 import surahs from "../../docs/content/surahs-for-salah.json";
 
@@ -109,6 +110,17 @@ export function AppShell({ children, settings, now, desktop }: { children: React
   const fullscreen = shareSheet || shareMoment || location.pathname.startsWith("/umrah") || location.pathname.startsWith("/print/");
   const today = location.pathname === "/today";
   const studyHome = desktop && location.pathname === "/learn";
+  const chapter = location.pathname.startsWith("/learn/surahs/") ? surahs.surahs.slice(0, 12).find(item => String(item.number) === location.pathname.split("/").at(-1)) : undefined;
+  const surahStudy = desktop && Boolean(chapter);
+  const review = chapter && reviews[chapter.number];
+  const reviewDay = review && dateKey(new Date(review.card.due), settings.city.timeZone);
+  const studySubtitle = chapter ? [
+    studyNames.surah(settings.language, chapter.number, chapter.number === 103 ? "Al-ʿAsr" : chapter.transliteration),
+    new Intl.NumberFormat(settings.language).format(chapter.number),
+    t(review?.bucket ?? "sabaq"),
+    reviewDay && t("surahNextReview", { day: reviewDay <= day ? t("today").toLocaleLowerCase(settings.language) : formatDay(reviewDay, { month: "short", day: "numeric" }, settings.language) }),
+    due.length > 0 && t("itemsDue", { count: due.length }),
+  ].filter(Boolean).join(" · ") : "";
   const prayerGuide = location.pathname.startsWith("/today/guide/");
   const salahStudy = location.pathname === "/learn/salah";
   useLayoutEffect(() => {
@@ -133,21 +145,23 @@ export function AppShell({ children, settings, now, desktop }: { children: React
       event.preventDefault();
       document.getElementById("app-main")?.focus();
     }}>{t("skipToContent")}</a>
-    {!fullscreen && <nav className={`sidebar ${studyHome ? "desktop-learn-nav" : ""}`} aria-label={t("mainNavigation")}>
+    {!fullscreen && <nav className={`sidebar ${studyHome || surahStudy ? "desktop-learn-nav" : ""}`} aria-label={t("mainNavigation")}>
       <Link to="/learn" aria-label="Awwab study plan"><Wordmark /></Link>
       {settings.mode === "adult" ? <>
         <button type="button" className="search-button" onClick={() => setSearchOpen(true)}><DesignIcon name="desk-eye" size={15} /> {t("search")} <kbd className="chip">Ctrl K</kbd></button>
         {groups.map(group => <div key={group.label}>
           <p className="caption nav-group">{navigationLabel(settings, group.label)}</p>
-          {group.items.filter(item => !studyHome || item.to !== "/you").map(item => <NavLink key={item.to} to={item.to} end={item.end}>
-            <DesignIcon name={item.icon === "user" ? "tab-user1" : `desk-${item.icon}`} size={17} />
+          {group.items.filter(item => !(studyHome || surahStudy) || item.to !== "/you").map(item => <NavLink key={item.to} to={item.to} end={item.end}>
+            {surahStudy && (item.icon === "home" || item.icon === "headphones") ?
+              <DesignIcon name={"surah-adult-" + item.icon} size={16} /> :
+              <DesignIcon name={item.icon === "user" ? "tab-user1" : `desk-${item.icon}`} size={17} />}
             {navigationLabel(settings, item.title)}
             {counts[item.to] && <span className="chip ml-auto">{counts[item.to]}</span>}
           </NavLink>)}
         </div>)}
         <div className="sidebar-bottom"><Link to="/you/learning" className="card compact-stack">
-          <strong>{t(studyHome ? "deskStreakSummary" : "activity", { count: studyDays.length })}</strong>
-          <small className="muted">{t(studyHome ? "deskOfflineMode" : "adultOffline", { script: settings.script === "indopak" ? "IndoPak" : "Uthmani" })}</small>
+          <strong>{t(studyHome || surahStudy ? "deskStreakSummary" : "activity", { count: studyDays.length })}</strong>
+          <small className="muted">{t(studyHome || surahStudy ? "deskOfflineMode" : "adultOffline", { script: settings.script === "indopak" ? "IndoPak" : "Uthmani" })}</small>
         </Link></div>
       </> : <>
         {simple.map(item => <NavLink key={item.to} to={item.to}><DesignIcon name={`maktab-desk-${item.simple}`} />{navigationLabel(settings, item.title === "Today" ? "Prayers" : item.title)}</NavLink>)}
@@ -159,9 +173,10 @@ export function AppShell({ children, settings, now, desktop }: { children: React
         </div>
       </>}
     </nav>}
-    <main className="app-main" id="app-main" tabIndex={-1} data-page={shareSheet ? "share-sheet" : shareMoment ? "share-moment" : prayerGuide ? "prayer-guide" : salahStudy ? "salah-study" : today ? "today" : studyHome ? "learn" : undefined}>
-      {!fullscreen && !((today || studyHome) && settings.mode === "maktab") && <header className="topbar">
-        <div>{today || studyHome ? <h1>{title}</h1> : <h2>{title}</h2>}<p className="small muted">{date} · {hijriLabel(day, settings.hijriAdjust, calendar.anchors)}{today && ` · ${settings.city.name}`}{studyHome && " · " + t("deskMinutesToday", { count: studyPlanMinutes(hidden) })}</p></div>
+    <main className="app-main" id="app-main" tabIndex={-1} data-page={shareSheet ? "share-sheet" : shareMoment ? "share-moment" : prayerGuide ? "prayer-guide" : salahStudy ? "salah-study" : today ? "today" : studyHome ? "learn" : chapter ? "surah-reader" : undefined}>
+      {!fullscreen && !((today || studyHome || surahStudy) && settings.mode === "maktab") && <header className="topbar">
+        <div>{today || studyHome || surahStudy ? <h1>{surahStudy ? t("surahsForSalah") : title}</h1> : <h2>{title}</h2>}
+          <p className="small muted">{surahStudy ? studySubtitle : date + " · " + hijriLabel(day, settings.hijriAdjust, calendar.anchors)}{today && ` · ${settings.city.name}`}{studyHome && " · " + t("deskMinutesToday", { count: studyPlanMinutes(hidden) })}</p></div>
         <Link className="chip night" to="/today">{nextPrayer}</Link>
         {settings.mode === "adult" && <>
           <Link className="action" to={studyHome ? reviewDestination(nextReview ?? due[0]?.[0]) : nextReview ? `/learn/surahs/${nextReview}` : "/learn/surahs"}><DesignIcon name="desk-play" size={14} />{t("startReview")}{due.length ? ` · ${studyHome ? dueSurahs || due.length : due.length}` : ""}</Link>
@@ -172,7 +187,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
       </header>}
       <div className="workspace">
         <div className={`app-content ${word && desktop ? "anatomy-open" : ""}`}>{children}</div>
-        <WordPanel desktop={desktop} settings={settings} />
+        <WordPanel desktop={desktop} settings={settings} reader={surahStudy} />
       </div>
     </main>
     {!fullscreen && !prayerGuide && <Tabs settings={settings} />}

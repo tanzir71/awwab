@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { Download, Printer } from "lucide-react";
 import { ArabicText } from "@/components/ArabicText";
 import { Wordmark } from "@/components/DesignIcon";
 import { ListLink, SectionNav } from "@/components/Surface";
 import { usePrayerLogs, useRecord } from "@/hooks/use-awwab";
+import { useCopy } from "@/lib/copy";
 import { addDays, dateKey, formatDay } from "@/lib/dates";
 import { calendarDefaults, hijriMonths, hijriOn, monthStart } from "@/lib/hijri";
 import { jamaatForPrayer, mosqueDefaults } from "@/lib/mosques";
@@ -15,7 +16,7 @@ import { calculateZakat, initialZakat, zakatMoney } from "@/lib/zakat";
 import type { Settings } from "@/lib/storageService";
 import { prayerIds, prayerNames } from "@/types/Prayer";
 import { quranText } from "@/lib/quran";
-import { wordAnatomy } from "@/lib/wordAnatomy";
+import { splitArabicWords, wordAnatomy } from "@/lib/wordAnatomy";
 import surahs from "../../docs/content/surahs-for-salah.json";
 import ritual from "../../docs/content/umrah-steps.json";
 import cardTransliteration from "../../docs/content/print-surah-transliteration.json";
@@ -44,6 +45,33 @@ export function PrintHub() {
     {sheets.map(item => <ListLink key={item.to} to={`/print/${item.to}`} icon={<Printer size={19} />} title={item.title} detail={item.detail} />)}
     <ListLink to="/you/reminders" icon={<Download size={19} />} title="Calendar reminders" detail="Export to your device calendar" />
     <ListLink to="/you/data" icon={<Download size={19} />} title="Backup" detail="Export your on-device records" />
+  </div>;
+}
+
+export function WordPrintSheet() {
+  const { t } = useCopy();
+  const [params] = useSearchParams();
+  const word = splitArabicWords(params.get("word")?.slice(0, 64) ?? "")[0];
+  const back = params.get("back");
+  const returnPath = back?.startsWith("/learn/") ? back : "/learn";
+  if (!word) return <Link className="action light" to={returnPath}>{t("continueLearning")}</Link>;
+  const source = params.get("source")?.slice(0, 80);
+  const { letters, syllables, curated, modern } = wordAnatomy(word);
+  return <div className="print-page stack" data-sheet="word-card">
+    <div className="equal-row no-print"><Link className="action light" to={returnPath}>{t("back")}</Link>
+      <button className="action" type="button" onClick={() => window.print()}><Printer size={18} />{t("anatomyPrintWord")}</button></div>
+    <header className="paper-header row-between"><div><h1>{t("anatomyWordCard")}</h1><p className="paper-note">{source}</p></div><Wordmark /></header>
+    <section className="card stack">
+      <ArabicText text={word} citation={source} />
+      <p>{curated?.translit ?? syllables.map(item => item.tr).join(" · ")}</p>
+      {(curated?.meaning || params.get("meaning")) && <p className="muted">{curated?.meaning ?? params.get("meaning")?.slice(0, 120)}</p>}
+      <h2>{t("lettersRtl")}</h2>
+      <div className="paper-word-letters" dir="rtl">{letters.map((letter, index) => <div className="card soft" key={index}>
+        <ArabicText text={letter.glyph} compact /><small dir="ltr">{letter.name} · {letter.silent ? t("silent") : letter.sound || t("noMark")}</small>
+      </div>)}</div>
+      <div className="equal-row">{[word, modern].map((spelling, index) => <div className="card soft" key={index}>
+        <p className="caption">{t(index ? "modernSpelling" : "quranSpelling")}</p><ArabicText text={spelling} compact /></div>)}</div>
+    </section>
   </div>;
 }
 
