@@ -1,5 +1,6 @@
 import { addDays, dateKey } from "./dates";
 import { isDue, type Reviews } from "./reviews";
+import { parseQaidaReview } from "./qaidaPractice";
 
 export const deskActivities = ["recall", "qaida", "salah", "manzil", "takhti", "fluency"] as const;
 export type DeskActivity = typeof deskActivities[number];
@@ -37,6 +38,8 @@ export function reviewQueue(reviews: Reviews, now: Date, zone: string) {
 export function reviewDestination(id?: string) {
   if (!id) return "/learn/surahs";
   if (/^\d+$/.test(id)) return `/learn/surahs/${id}?mode=recall`;
+  const qaida = parseQaidaReview(id);
+  if (qaida) return `/learn/qaida/${qaida.lesson}?row=${qaida.row + 1}`;
   if (id.startsWith("letter:")) return "/learn/qaida";
   return "/learn/words?status=due";
 }

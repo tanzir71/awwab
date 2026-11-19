@@ -17,7 +17,10 @@ export function lettersForFamily(id: string) {
   return alphabet.letters.filter(letter => family.shapes.includes(letter.family));
 }
 
-type Point = [number, number];
+export type TracePoint = [number, number];
+type Point = TracePoint;
+export type LetterForm = "isolated" | "initial" | "medial" | "final";
+export type TakhtiLetter = ReturnType<typeof lettersForFamily>[number];
 const skeletons: Record<string, Point[][]> = {
   alif: [[[168, 35], [168, 63], [170, 96], [171, 134]]],
   lam: [[[209, 35], [209, 84], [209, 137], [202, 162], [185, 177], [159, 178], [137, 167], [128, 150], [131, 130]]],
@@ -46,7 +49,62 @@ const variants: Record<string, { path?: Point[][]; dots?: Point[] }> = {
   "ق": { path: [[[228, 106], [207, 100], [208, 78], [225, 73], [240, 90], [239, 122], [228, 150], [206, 168], [173, 171], [144, 159], [136, 139], [139, 125]]], dots: [[217, 55], [235, 55]] },
 };
 
-export function strokesForLetter(letter: typeof alphabet.letters[number]) {
+export function strokesForLetter(letter: TakhtiLetter) {
   const data = variants[letter.letter];
   return { paths: data?.path ?? skeletons[letter.family], dots: data?.dots ?? [] };
+}
+
+export function letterForms(letter: TakhtiLetter) {
+  const glyph = letter.letter;
+  return [
+    { key: "isolated" as const, text: glyph },
+    ...(letter.joinsNext ? [{ key: "initial" as const, text: glyph + "ـ" }, { key: "medial" as const, text: "ـ" + glyph + "ـ" }] : []),
+    { key: "final" as const, text: "ـ" + glyph },
+  ];
+}
+
+export function tracingModel(letter: TakhtiLetter, form: LetterForm, wideBoard: boolean) {
+  const { paths, dots } = strokesForLetter(letter);
+  if (form === "isolated" && wideBoard && letter.letter === "ب") {
+    return {
+      paths: [[[251, 75], [251, 91], [249, 106], [241, 120], [221, 127], [188, 132], [146, 132], [108, 128], [84, 124], [72, 115], [69, 104]]] as Point[][],
+      dots: [[155, 161]] as Point[],
+    };
+  }
+  if (form === "isolated") return { paths, dots };
+  const initial = form === "initial" || form === "medial";
+  const final = form === "final" || form === "medial";
+  const [main, ...extra] = paths;
+  const start = main[0];
+  const end = main.at(-1);
+  const connected = [
+    ...(final ? [[Math.min(300, start[0] + 34), start[1]]] as Point[] : []),
+    ...main,
+    ...(initial ? [[Math.max(15, end[0] - 28), end[1]]] as Point[] : []),
+  ];
+  return { paths: [connected, ...extra], dots };
+}
+
+function samples(path: TracePoint[]) {
+  return path.flatMap(([x, y], index) => {
+    const next = path[index + 1];
+    if (!next) return [[x, y]] as TracePoint[];
+    const segments = Math.max(1, Math.ceil(Math.hypot(next[0] - x, next[1] - y) / 6));
+    return Array.from({ length: segments }, (_, step): TracePoint => [
+      x + (next[0] - x) * step / segments,
+      y + (next[1] - y) * step / segments,
+    ]);
+  });
+}
+
+export function compareTakhti(strokes: TracePoint[][], model: { paths: TracePoint[][]; dots: TracePoint[] }) {
+  const ink = strokes.flatMap(samples);
+  if (!ink.length) return "empty";
+  const outline = model.paths.flatMap(samples);
+  const near = ([x, y]: TracePoint, marks: TracePoint[], tolerance: number) =>
+    marks.some(([cx, cy]) => (cx - x) ** 2 + (cy - y) ** 2 <= tolerance ** 2);
+  const coverage = outline.filter(point => near(point, ink, 16)).length / outline.length;
+  const precision = ink.filter(point => near(point, outline, 21) || near(point, model.dots, 15)).length / ink.length;
+  if (coverage < .67 || precision < .65) return "shape";
+  return model.dots.every(dot => near(dot, ink, 13)) ? "match" : "dots";
 }

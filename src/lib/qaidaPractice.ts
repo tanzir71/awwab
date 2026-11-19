@@ -13,7 +13,37 @@ const exercises: Record<number, string[]> = {
 };
 
 export function qaidaRows(lesson: number) {
-  const marks = lesson === 1 ? [""] : lesson === 4 ? ["َ", "ِ", "ُ"] : lesson === 5 ? ["ً", "ٍ", "ٌ"] : undefined;
-  if (!marks) return exercises[lesson].map(text => [[text]]);
-  return Array.from({ length: 10 }, (_, i) => alphabet.letters.slice(i * 3, i * 3 + 3).map(letter => marks.map(mark => letter.letter + mark)));
+  if (lesson === 1) return Array.from({ length: 10 }, (_, i) => alphabet.letters.slice(i * 3, i * 3 + 3).map(letter => [letter.letter]));
+  if (lesson !== 4 && lesson !== 5) return (exercises[lesson] ?? []).map(text => [[text]]);
+  const marks = lesson === 4 ? ["َ", "ِ", "ُ"] : ["ً", "ٍ", "ٌ"];
+  const letters = alphabet.letters.map(letter => letter.letter);
+  const intro = [0, 7].flatMap(start => marks.map(mark => letters.slice(start, start + 7).map(letter => [letter + mark])));
+  const acrossMarks = [14, 21].map(start => letters.slice(start, start + 7).map(letter => marks.map(mark => letter + mark)));
+  const recap = lesson === 4 ? [["بَاب", "جَبَل", "قُلْ"], ["كَتَبَ", "نَصَرَ", "رَبِّ"]] :
+    [["بَابٌ", "قَلَمٌ", "كِتَابٌ"], ["بَابًا", "قَلَمٍ", "كِتَابٍ"]];
+  return [...intro, ...acrossMarks, ...recap.map(row => row.map(word => [word]))];
+}
+
+export function qaidaExamples(lesson: number) {
+  if (lesson === 4) return ["بَ", "بِ", "بُ"];
+  if (lesson === 5) return ["بً", "بٍ", "بٌ"];
+  return qaidaRows(lesson).flat(2).slice(0, 3);
+}
+
+export function resolveQaidaRow(requested: string | null, saved: number, count: number) {
+  const row = requested && /^\d+$/.test(requested) ? Number(requested) - 1 : -1;
+  if (row >= 0 && row < count) return row;
+  return Number.isInteger(saved) ? Math.max(-1, Math.min(count - 1, saved)) : 0;
+}
+
+export function qaidaReviewId(lesson: number, row: number) {
+  return `qaida:${lesson}:${row}`;
+}
+
+export function parseQaidaReview(id: string) {
+  const match = /^qaida:(\d{1,2}):(\d{1,2})$/.exec(id);
+  if (!match) return undefined;
+  const lesson = Number(match[1]);
+  const row = Number(match[2]);
+  return row < qaidaRows(lesson).length ? { lesson, row } : undefined;
 }

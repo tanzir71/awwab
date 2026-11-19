@@ -11,6 +11,7 @@ import { useDesktop, useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { dateKey, formatDay } from "@/lib/dates";
 import { prayerGuidePath } from "@/lib/prayerGuide";
+import { parseQaidaReview } from "@/lib/qaidaPractice";
 import { quranText, type QuranVerse } from "@/lib/quran";
 import { grades, isDue, reviewCard, type ReviewGrade, type Reviews } from "@/lib/reviews";
 import { updateRecord, type Settings } from "@/lib/storageService";
@@ -79,11 +80,13 @@ function ReviewQueue({ selected, reviews, now }: { selected: number; reviews: Re
       {due.length === 0 && <p className="muted">{t("deskNoReviews")}</p>}
       {due.map(([id]) => {
         const chapter = chapters.find(item => String(item.number) === id);
-        const label = chapter ? chapterName(chapter, language) : t(id.startsWith("letter:") ? "surahQueueLetter" : "surahQueueWord");
+        const row = parseQaidaReview(id);
+        const label = chapter ? chapterName(chapter, language) : row ? t("deskQaidaRow", { number: row.lesson, row: row.row + 1 }) :
+          t(id.startsWith("letter:") ? "surahQueueLetter" : "surahQueueWord");
         return <div className="surah-due-item" data-selected={Number(id) === selected} key={id}>
           {chapter ? <>
             <Link to={reviewDestination(id)}>{label}</Link><small className="muted">{t("surahQueueItem", { count: chapter.words })}</small>
-          </> : <>
+          </> : row ? <Link to={reviewDestination(id)}>{label}</Link> : <>
             <ArabicText text={id.slice(id.indexOf(":") + 1)} compact />
             <Link className="muted" to={reviewDestination(id)}>{label}</Link>
           </>}

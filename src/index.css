@@ -2,6 +2,7 @@
 @import "./learn-desktop.css";
 @import "./surah-study.css";
 @import "./word-anatomy.css";
+@import "./qaida-takhti.css";
 
 @tailwind base;
 @tailwind components;
@@ -518,11 +519,6 @@ table tbody tr:nth-child(even) { background: var(--c-surface-alt); }
   .maktab-prayer-columns .hadith-quote { padding: 20px; }
   .maktab-prayer-columns .hadith-quote blockquote { margin-bottom: 0; }
   :root[data-mode="adult"] .desk-card { font-size: 13px; line-height: 18px; }
-  .qaida-workspace { display: grid; grid-template-columns: minmax(145px,.7fr) minmax(300px,1.9fr) minmax(180px,1.15fr); gap: 14px; align-items: start; }
-  .qaida-queue, .qaida-trace { display: grid; min-width: 0; }
-  .qaida-queue .study-item { padding: 5px 8px; border-radius: var(--r-control); }
-  .anatomy-open .qaida-workspace { grid-template-columns: minmax(0,1fr); }
-  .anatomy-open .qaida-workspace > aside { display: none; }
   [data-page="share-sheet"] .workspace { min-height: 100svh; align-items: end; }
   .share-sheet { margin-top: 30px; min-height: auto; }
   .share-copy-button { display: inline-flex; margin: -8px auto; }

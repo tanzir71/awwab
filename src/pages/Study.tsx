@@ -1,134 +1,14 @@
 import { useDeferredValue, useEffect, useState } from "react";
-import { ChevronRight, Search } from "lucide-react";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import { toast } from "sonner";
+import { Search } from "lucide-react";
+import { Link } from "react-router-dom";
 import { ArabicText } from "@/components/ArabicText";
-import { VerseAudio } from "@/components/VerseAudio";
 import { SectionNav } from "@/components/Surface";
-import { useRecord } from "@/hooks/use-awwab";
 import { asset } from "@/lib/config";
-import { qaidaRows } from "@/lib/qaidaPractice";
 import { useCopy } from "@/lib/copy";
 import { studyNames, studySearchTerm } from "@/lib/study-copy";
-import { updateRecord, type Settings } from "@/lib/storageService";
-import { finishQaidaLesson, momentPath, rememberQaidaPlace } from "@/lib/studyMilestones";
-import { wordAnatomy } from "@/lib/wordAnatomy";
-import alphabet from "../../docs/content/arabic-letters.json";
-import qaida from "../../docs/content/qaida-lessons.json";
 import hadith from "../../docs/content/hadith-curated.json";
 import { quranText } from "@/lib/quran";
 import sample from "../../docs/content/word-anatomy.sample.json";
-import { TraceBoard } from "./Takhti";
-
-export function Qaida({ settings }: { settings: Settings }) {
-  const { language, t } = useCopy();
-  const formatNumber = new Intl.NumberFormat(language);
-  const { id } = useParams();
-  const current = useRecord("qaida-current", 1);
-  const completed = useRecord<number[]>("qaida-complete", []);
-  const lesson = qaida.lessons.find(item => item.n === Number(id));
-  if (!lesson) return <div className="stack">
-    <SectionNav title={t("nooraniQaida")} back="/learn" />
-    {qaida.lessons.map(item => <Link key={item.n} className="list-row" to={`/learn/qaida/${item.n}`}>
-      <span className="icon-box">{formatNumber.format(item.n)}</span><span><strong>{studyNames.lesson(language, item.n, item.title)}</strong><small lang="en">{item.traditional}</small></span>
-      {completed.includes(item.n) ? <span className="chip soft">{t("practised")}</span> : current === item.n ? <span className="chip soft">{t("continueAction")}</span> : <ChevronRight size={18} />}
-    </Link>)}
-  </div>;
-  return <QaidaLesson key={id} lesson={lesson} settings={settings} />;
-}
-
-function QaidaLesson({ lesson, settings }: {
-  lesson: typeof qaida.lessons[number]; settings: Settings;
-}) {
-  const { language, t } = useCopy();
-  const title = studyNames.lesson(language, lesson.n, lesson.title);
-  const storedRow = useRecord(`qaida-row-${lesson.n}`, 0);
-  const [activeRow, setActiveRow] = useState<number>();
-  const [answer, setAnswer] = useState<number>();
-  const navigate = useNavigate();
-  const completed = useRecord<number[]>("qaida-complete", []);
-  const [saving, setSaving] = useState(false);
-  const finished = completed.includes(lesson.n);
-  const drill = lesson.n === 1 || lesson.n === 4 || lesson.n === 5;
-  const ampara = settings.spellStyle === "ampara-bn";
-  const options = lesson.n === 1 ? ampara ? ["বা", "তা", "ছা"] : ["Bāʾ", "Tāʾ", "Thāʾ"]
-    : lesson.n === 4 ? ampara ? ["যবর", "যের", "পেশ"] : ["Fatha", "Kasra", "Ḍamma"]
-    : lesson.n === 5 ? ["an", "in", "un"] : [1, 2, 3].map(count => t("letterCount", { count }));
-  const prompt = lesson.n === 1 ? "ب" : lesson.n === 4 ? "بِ" : lesson.n === 5 ? "بٌ" : "قُلْ";
-  const correct = lesson.n === 1 ? 0 : lesson.n === 5 ? 2 : 1;
-  const rows = qaidaRows(lesson.n);
-  const row = Math.max(0, Math.min(rows.length - 1, activeRow ?? storedRow));
-  const rowLetters = rows[row];
-  const firstGlyph = wordAnatomy(rowLetters.flat()[0]).letters[0]?.base;
-  const traceLetter = alphabet.letters.find(item => item.letter === firstGlyph) ?? alphabet.letters[0];
-  const isMaktab = settings.mode === "maktab";
-  useEffect(() => {
-    void rememberQaidaPlace(lesson.n).catch(() => toast.error(t("lessonSaveError")));
-  }, [lesson.n, t]);
-
-  function move(next: number) {
-    setActiveRow(next);
-    void rememberQaidaPlace(lesson.n, next).catch(() => toast.error(t("lessonSaveError")));
-  }
-  async function finish() {
-    if (saving || finished) return;
-    setSaving(true);
-    try {
-      const result = await finishQaidaLesson(lesson.n, new Date(), settings.city.timeZone);
-      if (result) navigate(isMaktab && result.bookComplete ? momentPath("maktab", qaida.lessons.length) : momentPath("qaida", lesson.n));
-    } catch { toast.error(t("lessonSaveError")); }
-    finally { setSaving(false); }
-  }
-
-  return <div className="qaida-workspace">
-    <aside className="qaida-queue card compact-stack" aria-label={t("qaidaLessons")}>
-      <h2>{t("nooraniQaida")}</h2>
-      {qaida.lessons.map(item => <Link key={item.n} className={`study-item ${item.n === lesson.n ? "soft" : ""}`}
-        to={`/learn/qaida/${item.n}`} aria-current={item.n === lesson.n ? "step" : undefined}>{t("qaidaLessonNumber", { number: item.n, title: studyNames.lesson(language, item.n, item.title) })}</Link>)}
-    </aside>
-    <div className="stack">
-    <SectionNav title={t("lessonTitle", { number: lesson.n, title })} back="/learn/qaida" />
-    <div className="row-between"><p className="muted">{t("lessonAbout", { name: lesson.traditional, minutes: isMaktab ? 3 : 5 })}</p><span className="chip soft">{t("rowOf", { row: row + 1, total: rows.length })}</span></div>
-    <section className="card stack">
-      <h2>{t("readAlong")}</h2>
-      <progress value={row + 1} max={rows.length} aria-label={t("lessonRows")} />
-      <div className="drill-grid" dir="rtl">{rowLetters.flat().map((text, i) => {
-        const tile = wordAnatomy(text).letters[0];
-        return <div className="card soft compact-stack text-center" key={i}>
-          <ArabicText text={text} />
-          {drill && <small lang={ampara ? "bn" : "en"}>{ampara
-            ? `${tile.nameBn ?? tile.name} ${tile.details.map(mark => mark.nameBn).join(" ")}`
-            : [tile.name, ...tile.details.map(mark => mark.name)].join(" + ")}</small>}
-          {drill && <strong>{tile.sound}</strong>}
-        </div>;
-      })}</div>
-      <div className="equal-row">
-        <button className="action light" disabled={row === 0} onClick={() => move(row - 1)}>{t("previousRow")}</button>
-        <button className="action soft" disabled={row === rows.length - 1} onClick={() => move(row + 1)}>{t("nextRow")}</button>
-      </div>
-      <VerseAudio key={row} audioRef={`qaida:${lesson.n}:${row + 1}`} label={t("rowLabel", { row: row + 1 })} compare />
-    </section>
-    <section className="card stack">
-      <h2>{t(lesson.n === 1 ? "whichLetter" : lesson.n === 4 ? "whichMark" : lesson.n === 5 ? "whichSound" : "howManyLetters")}</h2>
-      <ArabicText text={prompt} />
-      <div className="equal-row">{options.map((label, i) => <button type="button" key={label} className={`action ${answer === i ? "" : "light"}`} aria-pressed={answer === i} onClick={() => setAnswer(i)}>{label}</button>)}</div>
-      {answer !== undefined && <p role="status">{t(answer === correct ? "quizCorrect" : "quizTryAgain")}</p>}
-    </section>
-    <section className="card tint compact-stack"><h2>{t("spotInQuran")}</h2>
-      <ArabicText text={lesson.n === 3 ? rows[0][0][0] : quranText[112][0].uthmani} citation={lesson.n === 3 ? "2:1" : "112:1"} />
-      <p className="muted small">{lesson.n === 3 ? "Al-Baqara 2:1" : "Al-Ikhlāṣ 112:1"}</p>
-    </section>
-    {finished ? <div className="equal-row"><Link className="action" to={lesson.n < 17 ? `/learn/qaida/${lesson.n + 1}` : "/learn"}>{t("continueLearning")}</Link>
-      <Link className="action soft" to={momentPath("qaida", lesson.n)}>{t("shareMoment")}</Link></div> : <button className="action" disabled={saving} onClick={() => void finish()}>{t("saveLesson")}</button>}
-    </div>
-    <aside className="qaida-trace card stack" aria-label={t("takhtiWorkspace")}>
-      <h2>{t("takhti")} · {language === "bn" ? traceLetter.nameBn : traceLetter.name}</h2>
-      <ArabicText text={traceLetter.letter} />
-      <TraceBoard letter={traceLetter} />
-      <Link className="action soft" to="/print/takhti/boat">{t("printPracticeSheet")}</Link>
-    </aside>
-  </div>;
-}
 
 export function Hadith() {
   const { language, t } = useCopy();

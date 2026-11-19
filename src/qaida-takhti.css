@@ -1,0 +1,205 @@
+[data-page="qaida-lesson"] .app-content, [data-page="takhti"] .app-content { padding-top: env(safe-area-inset-top); }
+:root[data-mode="maktab"] :is(.qaida-lesson, .write-standalone) {
+  --control-primary: color-mix(in srgb, var(--c-primary) 79%, var(--c-ink));
+}
+.qaida-lesson, .qaida-phone, .qaida-bottom, .write-standalone, .write-board-stack { display: grid; gap: 16px; min-width: 0; }
+.practice-header { display: grid; grid-template-columns: 44px minmax(0,1fr) 44px; min-height: 56px; align-items: center; text-align: center; gap: 8px; margin-inline: -8px; }
+.practice-header h1 { font: var(--type-title); }
+.practice-header .icon-button { border-radius: var(--r-pill); padding: 0; width: 44px; }
+.qaida-phone-header { display: grid; gap: 16px; }
+.qaida-phone-header progress { width: 100%; height: 8px; border: 0; border-radius: var(--r-pill); appearance: none; color: var(--c-primary); background: var(--c-surface-alt); }
+.qaida-phone-header progress::-webkit-progress-bar { border-radius: var(--r-pill); background: var(--c-surface-alt); }
+.qaida-phone-header progress::-webkit-progress-value { border-radius: var(--r-pill); background: var(--c-primary); }
+.qaida-phone-header progress::-moz-progress-bar { border-radius: var(--r-pill); background: var(--c-primary); }
+.qaida-lesson .word-chip > span:first-child, .write-standalone .word-chip > span:first-child, .write-desktop-panel .word-chip > span:first-child { text-decoration: none; }
+:is(.qaida-lesson, .write-standalone) .card { padding: 16px; }
+.qaida-intro { display: grid; gap: 12px; }
+.qaida-intro h2 { font: var(--type-display-l); letter-spacing: var(--tracking-display-l); }
+.qaida-examples { gap: 10px; }
+.qaida-examples > .card { display: grid; justify-items: center; min-width: 0; min-height: 140px; align-content: center; gap: 2px; padding: 10px 3px; }
+.qaida-examples .arabic-text { font: 600 42px/56px var(--font-arabic); }
+.qaida-examples .word-chip { min-height: 54px; }
+.qaida-examples strong { font: var(--type-caption); }
+.qaida-examples .card > span:last-child:not(.arabic-text) { font: var(--type-body-strong); color: var(--control-primary); }
+.qaida-mark-name { display: inline-flex; align-items: center; justify-content: center; gap: 3px; text-align: center; font: var(--type-caption); font-size: 9px; }
+[data-mark="fatha"] { --active-mark: var(--c-harakat-fatha); }
+[data-mark="kasra"] { --active-mark: var(--c-harakat-kasra); }
+[data-mark="damma"] { --active-mark: var(--c-harakat-damma); }
+.qaida-examples [data-mark] :is(.arabic-text, .qaida-mark-name) { color: var(--active-mark); }
+.qaida-examples [data-mark] .qaida-mark-name { color: color-mix(in srgb, var(--active-mark) 72%, var(--c-ink)); }
+.qaida-ampara-phone, .qaida-quiz, .qaida-spot { display: grid; gap: 10px; }
+.qaida-ampara-phone h2, .qaida-quiz h2 { font: var(--type-title); }
+.qaida-ampara-phone .row-between { gap: 8px; }
+.qaida-language { display: flex; align-self: start; flex-shrink: 0; background: var(--c-surface); border-radius: var(--r-pill); box-shadow: var(--shadow-card); }
+.qaida-language button { flex: 1; min-width: 42px; min-height: 32px; padding: 4px 10px; border-radius: var(--r-pill); font: var(--type-small); }
+.qaida-language button[aria-pressed="true"] { background: var(--control-primary); color: var(--c-on-primary); }
+.qaida-equation-phone { background: var(--c-surface-alt); border-radius: var(--r-control); min-height: 44px; padding: 0 12px; }
+.qaida-equation-phone .arabic-text { font: var(--type-arabic-m); }
+.qaida-equation-phone .arabic-line { padding: 0; }
+.qaida-equation-phone .word-chip { padding: 0; min-width: 26px; }
+.qaida-phone-read { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; column-gap: 10px; row-gap: 10px; }
+.qaida-phone-read h2 { font: var(--type-display-m); }
+.qaida-phone-read .arabic-text { grid-column: 1/-1; }
+.qaida-phone-read .arabic-line { gap: 1px; justify-content: space-between; padding-bottom: 6px; }
+.qaida-phone-read .word-chip { flex: 1 0 40px; min-width: 40px; color: var(--c-ink); }
+.qaida-phone-read .word-chip > span:first-child { text-decoration: underline; text-decoration-color: var(--c-line); text-underline-offset: 9px; }
+.qaida-phone-read .text-button, .qaida-spot a { font: var(--type-small); color: var(--interactive-ink); }
+.qaida-audio:has(input) { min-width: 0; }
+.qaida-audio-simple:has(input) { display: contents; }
+.qaida-audio-simple:has(input) > .field { grid-column: 1/-1; }
+.qaida-audio .equal-row > .surah-record-control { min-width: 0; }
+.qaida-audio .surah-record-control > button, .qaida-audio audio, .qaida-audio input { width: 100%; min-width: 0; }
+.qaida-audio .surah-record-control audio { margin-top: 8px; }
+.qaida-audio .field { margin-top: 8px; }
+.qaida-phone .qaida-audio .action { min-height: 50px; }
+.qaida-quiz .equal-row { gap: 10px; align-items: start; }
+.qaida-quiz-tile { position: relative; display: grid; min-width: 0; justify-items: center; min-height: 66px; background: var(--c-surface-alt); border-radius: var(--r-control); }
+.qaida-quiz-tile .arabic-text { width: 100%; font: var(--type-arabic-l); }
+.qaida-quiz-tile .word-chip { min-height: 66px; flex: 1; }
+.qaida-quiz-tile[data-current="true"] { color: var(--interactive-ink); background: var(--c-primary-soft); padding-bottom: 16px; }
+.qaida-quiz-tile img { position: absolute; bottom: 8px; }
+.qaida-lesson .qaida-spot { background: var(--c-tint); gap: 8px; }
+.qaida-spot h2 { display: flex; gap: 8px; align-items: center; font: var(--type-body-strong); }
+.qaida-spot .word-chip[aria-pressed="true"] { background: var(--c-primary-soft); color: var(--interactive-ink); }
+.qaida-spot .arabic-line { gap: 4px; }
+.qaida-spot > .row-between { flex-wrap: wrap; gap: 6px; }
+.qaida-phone-extra { display: grid; gap: 12px; }
+.qaida-reading-card, .qaida-spell-card { display: grid; align-content: start; gap: 10px; }
+.qaida-reading-card h2, .qaida-spell-card h2 { font: var(--type-body-strong); }
+.qaida-grade-buttons { gap: 7px; }
+.qaida-reading-card .action { background: var(--c-surface-alt); box-shadow: none; }
+.qaida-reading-card .action:not(.light, .soft) { background: var(--control-primary); }
+.qaida-reading-card .qaida-grade-buttons .soft { background: var(--c-primary-soft); }
+.write-standalone { max-width: 430px; margin-inline: auto; }
+.write-family { display: grid; gap: 8px; }
+.write-family h2 { font: var(--type-title); }
+.write-letter-picks, .write-form-picks { gap: 6px; }
+.write-letter-picks > div, .write-form-picks > div { display: grid; justify-items: center; min-width: 0; border-radius: var(--r-control); }
+.write-letter-picks > div { background: var(--c-surface-alt); }
+.write-letter-picks > div[data-current="true"] { background: var(--control-primary); color: var(--c-on-primary); }
+.write-letter-picks .arabic-text, .write-form-picks .arabic-text { width: 100%; }
+.write-letter-picks .arabic-line, .write-form-picks .arabic-line { padding: 0; }
+.write-letter-picks .word-chip, .write-form-picks .word-chip { flex: 1 1 auto; min-width: 0; }
+.write-letter-picks .word-chip { min-height: 60px; }
+.write-form-picks { padding: 4px; background: var(--c-surface-alt); border-radius: var(--r-control); }
+.write-form-picks > div { color: var(--c-ink-muted); padding-bottom: 6px; }
+.write-form-picks > div[data-current="true"] { background: var(--c-surface); color: var(--c-ink); box-shadow: var(--shadow-card); }
+.write-form-picks .arabic-text { font: var(--type-arabic-m); }
+.write-form-picks .word-chip { min-height: 37px; }
+.write-form-picks span[dir="auto"] { font: var(--type-small); text-transform: lowercase; }
+.write-board { position: relative; isolation: isolate; border-radius: var(--r-card); }
+.write-board-phone { height: 300px; color: var(--c-on-night); background: var(--c-night); }
+.write-board-desk { height: 250px; color: var(--c-primary); background: var(--c-surface-alt); }
+.write-board canvas, .write-board .write-model, .write-rules { position: absolute; inset: 0; width: 100%; height: 100%; }
+.write-board canvas { touch-action: none; cursor: crosshair; z-index: 2; }
+.write-board .write-model { stroke: currentColor; stroke-width: 2.5; opacity: .55; fill: none; stroke-dasharray: 4 4; }
+.write-rules { pointer-events: none; }
+.write-rules i { position: absolute; inset-inline: 0; height: 1px; background: var(--c-line); }
+.write-rules i:first-child { top: 28%; }
+.write-rules i:nth-child(2) { top: 68%; background: var(--c-primary-soft); }
+.write-rules i:last-child { top: 80%; }
+.write-cue { position: absolute; inset: 18px 20px auto; z-index: 1; font: var(--type-small); color: var(--c-night-muted); }
+.write-ghost { position: absolute; inset: 0 0 auto; display: grid; justify-items: center; color: inherit; opacity: .13; pointer-events: none; }
+.write-ghost .arabic-text { font: 600 218px/200px var(--font-arabic); }
+.write-board-desk .write-ghost { opacity: .08; inset: 9% 0 auto; }
+.write-board-desk .write-ghost .arabic-text { font: 600 154px/180px var(--font-arabic); }
+.write-baseline, .write-ra-guide, .write-ra-start, .write-ba-guide, .write-ba-dot, .write-guide-dot { position: absolute; pointer-events: none; }
+.write-baseline { width: min(300px, 86%); top: 68%; left: 50%; translate: -50% 0; }
+.write-ba-guide { width: min(250px, 76%); height: 140px; top: 31%; left: 50%; translate: -50% 0; opacity: .5; }
+.write-ra-guide { top: 42.4%; left: 40.9%; }
+.write-ra-start { top: 38.4%; left: 57.1%; display: grid; place-items: center; color: var(--c-on-primary); z-index: 3; }
+.write-ra-start b { position: absolute; font: var(--type-caption); }
+.write-guide-dot, .write-ba-dot b { display: grid; place-items: center; background: var(--c-surface); color: var(--c-ink); width: 26px; height: 26px; border-radius: var(--r-pill); font: var(--type-caption); }
+.write-guide-dot { z-index: 3; translate: -50% -50%; }
+.write-board-desk .write-guide-dot { background: var(--c-primary); color: var(--c-on-primary); width: 22px; height: 22px; }
+.write-ba-dot { top: 80.5%; left: 48.4%; display: flex; align-items: center; gap: 9px; translate: -9px -50%; }
+.write-ba-dot b { width: 22px; height: 22px; background: var(--c-overlay-on-night); color: var(--c-on-night); }
+.write-actions { gap: 10px; }
+.write-actions .action { min-height: 50px; }
+.write-feedback { display: grid; gap: 5px; border-radius: var(--r-card); background: var(--c-surface-alt); padding: 16px; }
+.write-feedback[data-matched="true"] { background: var(--c-primary-soft); }
+.write-feedback strong { display: flex; gap: 8px; align-items: center; font: var(--type-body-strong); }
+.write-feedback p { font: var(--type-small); color: var(--c-ink-muted); }
+.write-word { display: grid; gap: 8px; }
+.write-word h2 { font: var(--type-body-strong); }
+.write-word > div { display: flex; flex-wrap: wrap; align-items: center; column-gap: 2px; }
+.write-word > div .arabic-text { font: var(--type-arabic-m); }
+.write-word > div strong .arabic-text { font: var(--type-arabic-l); }
+.write-word .word-chip { min-width: 28px; padding: 0; }
+.write-word > div > .arabic-text { color: var(--c-ink-muted); }
+.write-family-links summary { color: var(--interactive-ink); font: var(--type-body-strong); }
+.write-family-links .chips { padding-bottom: 10px; }
+@media (min-width: 1024px) {
+  [data-page="qaida-lesson"] .app-content { padding-top: 4px; }
+  .write-standalone { max-width: 430px; }
+  [data-page="takhti"] .app-content { padding-top: 10px; }
+  .write-standalone .practice-header { display: none; }
+  .qaida-workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(248px, 34%); align-items: start; gap: 16px; }
+  .qaida-lessons { grid-column: 1/-1; grid-row: 2; }
+  .qaida-center, .qaida-board, .write-desktop-panel { display: grid; gap: 10px; min-width: 0; align-content: start; }
+  .qaida-board-scroll { display: grid; align-content: start; gap: 10px; max-height: 622px; overflow: auto; scrollbar-width: thin; }
+  .qaida-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
+  .qaida-lesson .qaida-tools { padding: 6px 8px; }
+  .qaida-tools > .chip { font: var(--type-small); min-height: 26px; padding: 2px 8px; }
+  .qaida-tools > .chip[aria-pressed="true"] { color: var(--interactive-ink); background: var(--c-primary-soft); }
+  .qaida-modes { display: flex; flex: 1 1 190px; border-radius: var(--r-pill); align-items: center; padding: 2px; background: var(--c-surface-alt); }
+  .qaida-modes > button { flex: 1; min-height: 26px; font: var(--type-small); padding-inline: 5px; border-radius: var(--r-pill); }
+  .qaida-modes > button[aria-pressed="true"] { background: var(--c-surface); color: var(--c-ink); }
+  .qaida-lessons h2, .write-desktop-panel h2 { font: 600 14px/22px var(--font-body); }
+  .qaida-lessons .row-between strong, .write-desktop-panel a { color: var(--interactive-ink); font: var(--type-small); }
+  .qaida-lessons > a { display: flex; align-items: center; gap: 8px; border-radius: var(--r-control); min-height: 32px; padding: 5px 8px; font: 500 12px/16px var(--font-body); }
+  .qaida-lessons > a > span { display: grid; justify-items: center; align-items: center; flex: 0 0 20px; height: 20px; border-radius: var(--r-pill); background: var(--c-surface-alt); font: 700 9px/14px var(--font-body); }
+  .qaida-lessons > a:hover, .qaida-lessons > [aria-current="step"] { background: var(--c-primary-soft); color: var(--interactive-ink); }
+  .qaida-lessons > [data-complete="true"] > span, .qaida-lessons > [aria-current="step"] > span { background: var(--control-primary); color: var(--c-on-primary); }
+  .qaida-row { display: grid; grid-template-columns: 54px minmax(0,1fr); align-items: stretch; gap: 5px; min-height: 69px; padding: 4px 5px 4px 0; border-radius: var(--r-control); }
+  .qaida-row[data-current="true"] { background: var(--c-tint); }
+  .qaida-row-label { padding-left: 6px; font: var(--type-caption); text-align: left; color: var(--c-ink-muted); }
+  .qaida-row-label strong { display: block; text-transform: uppercase; }
+  .qaida-row-label span { display: flex; align-items: center; gap: 2px; font: var(--type-small); }
+  .qaida-tiles { display: grid; gap: 5px; min-width: 0; }
+  .qaida-tile { display: grid; align-content: center; justify-items: center; border-radius: var(--r-control); min-width: 0; min-height: 61px; background: var(--c-surface-alt); }
+  .qaida-row[data-current="true"] .qaida-tile { background: transparent; }
+  .qaida-row[data-current="true"] .qaida-tile[data-current="true"] { background: var(--c-surface); box-shadow: var(--shadow-card); }
+  .qaida-tile .arabic-text { font: var(--type-arabic-m); }
+  .qaida-tile .arabic-line { justify-content: center; gap: 0; padding-block: 0; }
+  .qaida-tile .word-chip { min-width: min(34px,100%); padding: 0 2px; min-height: 40px; }
+  .qaida-tile small { font: 600 11px/10px var(--font-body); overflow-wrap: anywhere; }
+  .qaida-bangla-name { display: none; }
+  .qaida-row[data-current="true"] .qaida-tile[data-current="true"] .qaida-bangla-name { display: block; }
+  .qaida-board[data-colour="true"] .qaida-tile .arabic-text { color: color-mix(in srgb, var(--active-mark, var(--c-ink)) var(--mark-strength, 81%), var(--c-ink)); }
+  :root[data-mode="maktab"] .qaida-board { --mark-strength: 67%; }
+  .qaida-row[data-future="true"] .qaida-tile { background: var(--c-bg); color: var(--c-ink-muted); }
+  .qaida-board .qaida-row[data-future="true"] .qaida-tile .arabic-text { color: var(--c-ink-muted); }
+  .qaida-aux { display: grid; align-items: start; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .qaida-spell-equation { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+  .qaida-spell-equation > div { display: grid; justify-items: center; flex: 1; min-width: 0; padding: 3px; border-radius: var(--r-control); background: var(--c-surface-alt); }
+  .qaida-spell-equation > div:last-child { background: var(--c-primary-soft); color: var(--interactive-ink); }
+  .qaida-spell-equation strong { font: var(--type-small); }
+  .qaida-spell-equation .word-chip { min-width: 26px; min-height: 38px; }
+  .qaida-spell-equation > .qaida-spell-mark { color: var(--interactive-ink); }
+  .qaida-reading-card .action, .write-desktop-panel .action { min-height: 32px; padding: 4px 6px; font: var(--type-small); gap: 5px; }
+  .qaida-reading-card .small, .qaida-spell-card .small, .write-desktop-panel .small { line-height: 1.35; }
+  .write-desktop-panel .row-between { align-items: baseline; gap: 5px; }
+  .write-desktop-panel .write-board-stack { gap: 10px; }
+  .write-steps { padding: 0; margin: 0; list-style: none; counter-reset: steps; display: grid; gap: 5px; font: var(--type-small); }
+  .write-steps li { counter-increment: steps; display: flex; gap: 8px; align-items: start; }
+  .write-steps li::before { display: inline-grid; place-items: center; flex: 0 0 18px; height: 18px; content: counter(steps); background: var(--c-primary-soft); color: var(--interactive-ink); border-radius: var(--r-pill); font: var(--type-caption); }
+  .write-form-preview { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0,1fr); gap: 8px; }
+  .write-form-preview > div { display: grid; justify-items: center; background: var(--c-surface-alt); border-radius: var(--r-control); padding: 2px 3px 7px; }
+  .write-form-preview .word-chip { min-width: 28px; }
+  .write-form-preview small { font: var(--type-caption); color: var(--c-ink-muted); text-transform: uppercase; }
+  .qaida-bottom { max-width: 566px; }
+  .anatomy-open .qaida-workspace { grid-template-columns: minmax(0,1fr); }
+  .anatomy-open .qaida-workspace .qaida-lessons { grid-row: auto; }
+}
+@media (min-width: 1280px) {
+  .app-content:not(.anatomy-open) .qaida-workspace { grid-template-columns: minmax(166px, 232px) minmax(0,1fr) minmax(252px, 340px); }
+  .app-content:not(.anatomy-open) .qaida-lessons { grid-column: auto; grid-row: auto; }
+}
+@media (min-width: 1024px) and (max-width: 1139px) {
+  .qaida-aux { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 359px) {
+  .qaida-ampara-phone .row-between { align-items: start; }
+  .write-letter-picks .arabic-text { font-size: 25px; }
+}

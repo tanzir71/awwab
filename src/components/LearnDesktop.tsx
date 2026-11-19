@@ -9,7 +9,7 @@ import { useCopy } from "@/lib/copy";
 import { addDays, dateKey, formatDay, formatTime } from "@/lib/dates";
 import { calendarDefaults, hijriOn, hijriMonths } from "@/lib/hijri";
 import { currentPrayerSchedule } from "@/lib/prayerServices";
-import { qaidaRows } from "@/lib/qaidaPractice";
+import { qaidaExamples, qaidaRows, parseQaidaReview } from "@/lib/qaidaPractice";
 import { coreWordCoverage, coreWordTotal, knownCoreQuranWords, quranText } from "@/lib/quran";
 import { isDue, type Reviews } from "@/lib/reviews";
 import { prayerStatistics, updateRecord, type Settings } from "@/lib/storageService";
@@ -55,9 +55,7 @@ function useDeskProgress(settings: Settings, now: Date) {
   const reviews = useRecord<Reviews>("reviews", {});
   const known = knownCoreQuranWords(familiar, vocabulary);
   const lessonName = studyNames.lesson(language, lesson.n, lesson.title);
-  const preview = lesson.n === 4 || lesson.n === 5
-    ? [...rows[0][1]].reverse()
-    : rows.flat(2).slice(0, 3).reverse();
+  const preview = qaidaExamples(lesson.n).reverse();
   const progress = completed.includes(lesson.n) ? 1 : savedRow ? row / rows.length : 0;
   const focus = lesson.n === 4
     ? t(settings.spellStyle === "ampara-bn" ? "deskHarakat" : "deskHarakatStandard")
@@ -137,7 +135,7 @@ function AdultLearn({ progress, settings, now }: { progress: DeskProgress; setti
   const hidden = useRecord<DeskActivity[]>("study-plan-hidden", []);
   const { due, forecast, attempts, correct } = reviewQueue(reviews, now, settings.city.timeZone);
   const dueSurahs = due.filter(([id]) => chapters.some(item => item.number === Number(id)));
-  const dueLetters = due.filter(([id]) => id.startsWith("letter:")).length;
+  const dueLetters = due.filter(([id]) => id.startsWith("letter:") || parseQaidaReview(id)).length;
   const recordedToday = (id: number) => Boolean(reviews[id]?.card.last_review &&
     dateKey(new Date(reviews[id].card.last_review), settings.city.timeZone) === date);
   const recall = chapters.find(item => recordedToday(item.number) && reviews[item.number]?.bucket !== "manzil") ??

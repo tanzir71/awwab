@@ -4,7 +4,9 @@ import { useCopy } from "@/lib/copy";
 
 let currentRecorder: MediaRecorder | undefined;
 
-export function LocalRecorder({ label, compact = false }: { label?: string; compact?: boolean } = {}) {
+export function LocalRecorder({ label, compact = false, actionClass, actionLabel, icon }: {
+  label?: string; compact?: boolean; actionClass?: string; actionLabel?: string; icon?: React.ReactNode;
+} = {}) {
   const { t } = useCopy();
   const active = useRef<{ input: MediaStream; recorder: MediaRecorder }>();
   const mounted = useRef(true);
@@ -63,11 +65,11 @@ export function LocalRecorder({ label, compact = false }: { label?: string; comp
   }
 
   return <div className={compact ? "surah-record-control" : "compact-stack"}>
-    <button type="button" className={compact ? "chip" : "action soft"} aria-label={label ? t(recording ? "stopRecordingNamed" : "recordCompareNamed", { name: label }) : undefined} onClick={() => {
+    <button type="button" className={actionClass ?? (compact ? "chip" : "action soft")} aria-label={label ? t(recording ? "stopRecordingNamed" : "recordCompareNamed", { name: label }) : undefined} onClick={() => {
       const recorder = active.current?.recorder;
       if (recorder?.state === "recording") recorder.stop();
       else void start();
-    }}>{!compact && (recording ? <Square size={16} /> : <Mic size={17} />)} {t(recording ? "stopRecording" : compact ? "surahRecord" : "recordCompare")}</button>
+    }}>{recording ? (!compact || actionClass) && <Square size={16} /> : icon ?? (!compact && !actionClass && <Mic size={17} />)} {recording ? t("stopRecording") : actionLabel ?? t(compact ? "surahRecord" : "recordCompare")}</button>
     {message && <p role="status" className="small muted">{t(message)}</p>}
     {audio && <div className="compact-stack"><audio controls src={audio} aria-label={label ? t("yourRecordingFor", { name: label }) : t("yourRecording")} /><button className="text-button" onClick={() => setAudio("")}>{t("clearRecording")}</button></div>}
   </div>;

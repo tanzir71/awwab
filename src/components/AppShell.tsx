@@ -15,6 +15,7 @@ import { message, navigationLabel } from "@/lib/copy";
 import { countKnownQuranWords } from "@/lib/quran";
 import { reviewDestination, studyPlanMinutes, type DeskActivity } from "@/lib/studyDesk";
 import { studyNames } from "@/lib/study-copy";
+import { qaidaRows, resolveQaidaRow } from "@/lib/qaidaPractice";
 import qaida from "../../docs/content/qaida-lessons.json";
 import surahs from "../../docs/content/surahs-for-salah.json";
 
@@ -112,6 +113,15 @@ export function AppShell({ children, settings, now, desktop }: { children: React
   const studyHome = desktop && location.pathname === "/learn";
   const chapter = location.pathname.startsWith("/learn/surahs/") ? surahs.surahs.slice(0, 12).find(item => String(item.number) === location.pathname.split("/").at(-1)) : undefined;
   const surahStudy = desktop && Boolean(chapter);
+  const lesson = location.pathname.startsWith("/learn/qaida/") ? qaida.lessons.find(item => String(item.n) === location.pathname.split("/").at(-1)) : undefined;
+  const qaidaStudy = desktop && Boolean(lesson);
+  const savedQaidaRow = useRecord(`qaida-row-${lesson?.n}`, 0);
+  const rowCount = lesson ? qaidaRows(lesson.n).length : 0;
+  const qaidaSubtitle = lesson ? t("qaidaDesktopSubtitle", {
+    lesson: settings.language === "en" && lesson.n === 4 ? "Harakat: zabar, zer, pesh" : studyNames.lesson(settings.language, lesson.n, lesson.title),
+    row: resolveQaidaRow(new URLSearchParams(location.search).get("row"), savedQaidaRow, rowCount) + 1, total: rowCount,
+  }) : "";
+  const learnWorkspace = studyHome || surahStudy || qaidaStudy;
   const review = chapter && reviews[chapter.number];
   const reviewDay = review && dateKey(new Date(review.card.due), settings.city.timeZone);
   const studySubtitle = chapter ? [
@@ -145,23 +155,25 @@ export function AppShell({ children, settings, now, desktop }: { children: React
       event.preventDefault();
       document.getElementById("app-main")?.focus();
     }}>{t("skipToContent")}</a>
-    {!fullscreen && <nav className={`sidebar ${studyHome || surahStudy ? "desktop-learn-nav" : ""}`} aria-label={t("mainNavigation")}>
+    {!fullscreen && <nav className={`sidebar ${learnWorkspace ? "desktop-learn-nav" : ""}`} aria-label={t("mainNavigation")}>
       <Link to="/learn" aria-label="Awwab study plan"><Wordmark /></Link>
       {settings.mode === "adult" ? <>
         <button type="button" className="search-button" onClick={() => setSearchOpen(true)}><DesignIcon name="desk-eye" size={15} /> {t("search")} <kbd className="chip">Ctrl K</kbd></button>
         {groups.map(group => <div key={group.label}>
           <p className="caption nav-group">{navigationLabel(settings, group.label)}</p>
-          {group.items.filter(item => !(studyHome || surahStudy) || item.to !== "/you").map(item => <NavLink key={item.to} to={item.to} end={item.end}>
+          {group.items.filter(item => !learnWorkspace || item.to !== "/you").map(item => <NavLink key={item.to} to={item.to} end={item.end}>
             {surahStudy && (item.icon === "home" || item.icon === "headphones") ?
               <DesignIcon name={"surah-adult-" + item.icon} size={16} /> :
+              qaidaStudy && (item.icon === "home" || item.to === "/learn/qaida") ?
+                <DesignIcon name={item.icon === "home" ? "surah-adult-home" : "qaida-desk-book"} size={16} /> :
               <DesignIcon name={item.icon === "user" ? "tab-user1" : `desk-${item.icon}`} size={17} />}
             {navigationLabel(settings, item.title)}
             {counts[item.to] && <span className="chip ml-auto">{counts[item.to]}</span>}
           </NavLink>)}
         </div>)}
         <div className="sidebar-bottom"><Link to="/you/learning" className="card compact-stack">
-          <strong>{t(studyHome || surahStudy ? "deskStreakSummary" : "activity", { count: studyDays.length })}</strong>
-          <small className="muted">{t(studyHome || surahStudy ? "deskOfflineMode" : "adultOffline", { script: settings.script === "indopak" ? "IndoPak" : "Uthmani" })}</small>
+          <strong>{t(learnWorkspace ? "deskStreakSummary" : "activity", { count: studyDays.length })}</strong>
+          <small className="muted">{t(learnWorkspace ? "deskOfflineMode" : "adultOffline", { script: settings.script === "indopak" ? "IndoPak" : "Uthmani" })}</small>
         </Link></div>
       </> : <>
         {simple.map(item => <NavLink key={item.to} to={item.to}><DesignIcon name={`maktab-desk-${item.simple}`} />{navigationLabel(settings, item.title === "Today" ? "Prayers" : item.title)}</NavLink>)}
@@ -173,13 +185,13 @@ export function AppShell({ children, settings, now, desktop }: { children: React
         </div>
       </>}
     </nav>}
-    <main className="app-main" id="app-main" tabIndex={-1} data-page={shareSheet ? "share-sheet" : shareMoment ? "share-moment" : prayerGuide ? "prayer-guide" : salahStudy ? "salah-study" : today ? "today" : studyHome ? "learn" : chapter ? "surah-reader" : undefined}>
+    <main className="app-main" id="app-main" tabIndex={-1} data-page={shareSheet ? "share-sheet" : shareMoment ? "share-moment" : prayerGuide ? "prayer-guide" : salahStudy ? "salah-study" : today ? "today" : studyHome ? "learn" : chapter ? "surah-reader" : lesson ? "qaida-lesson" : location.pathname.startsWith("/learn/takhti") ? "takhti" : undefined}>
       {!fullscreen && !((today || studyHome || surahStudy) && settings.mode === "maktab") && <header className="topbar">
-        <div>{today || studyHome || surahStudy ? <h1>{surahStudy ? t("surahsForSalah") : title}</h1> : <h2>{title}</h2>}
-          <p className="small muted">{surahStudy ? studySubtitle : date + " · " + hijriLabel(day, settings.hijriAdjust, calendar.anchors)}{today && ` · ${settings.city.name}`}{studyHome && " · " + t("deskMinutesToday", { count: studyPlanMinutes(hidden) })}</p></div>
+        <div>{today || learnWorkspace ? <h1>{qaidaStudy ? t("qaidaDesktopTitle", { number: lesson.n }) : surahStudy ? t("surahsForSalah") : title}</h1> : <h2>{title}</h2>}
+          <p className="small muted">{qaidaStudy ? qaidaSubtitle : surahStudy ? studySubtitle : date + " · " + hijriLabel(day, settings.hijriAdjust, calendar.anchors)}{today && ` · ${settings.city.name}`}{studyHome && " · " + t("deskMinutesToday", { count: studyPlanMinutes(hidden) })}</p></div>
         <Link className="chip night" to="/today">{nextPrayer}</Link>
         {settings.mode === "adult" && <>
-          <Link className="action" to={studyHome ? reviewDestination(nextReview ?? due[0]?.[0]) : nextReview ? `/learn/surahs/${nextReview}` : "/learn/surahs"}><DesignIcon name="desk-play" size={14} />{t("startReview")}{due.length ? ` · ${studyHome ? dueSurahs || due.length : due.length}` : ""}</Link>
+          <Link className="action" to={reviewDestination(nextReview ?? due[0]?.[0])}><DesignIcon name="desk-play" size={14} />{t("startReview")}{due.length ? ` · ${studyHome ? dueSurahs || due.length : due.length}` : ""}</Link>
           <Link className="action soft" to="/today?log=1"><DesignIcon name="desk-plus" size={14} />{t("logPrayer")}</Link>
           <Link className="action light" to={today ? "/share?from=today" : "/share?from=learn"}><DesignIcon name="desk-share" size={14} />{t("share")}</Link>
         </>}

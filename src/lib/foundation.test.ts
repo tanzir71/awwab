@@ -9,8 +9,8 @@ import { estimateQada, finishQada } from "./qada";
 import { guideReference, prayerGuide } from "./prayerGuide";
 import { reviewCard, type Reviews } from "./reviews";
 import { countKnownQuranWords } from "./quran";
-import { finishQaidaLesson, rememberQaidaPlace, saveSurahReview, saveWordReview, setAyahFamiliar, wordMilestones } from "./studyMilestones";
-import { reviewQueue, studyPlanMinutes } from "./studyDesk";
+import { finishQaidaLesson, rememberQaidaPlace, saveQaidaRowReview, saveSurahReview, saveTakhtiPractice, saveWordReview, setAyahFamiliar, wordMilestones } from "./studyMilestones";
+import { reviewDestination, reviewQueue, studyPlanMinutes } from "./studyDesk";
 import coreWords from "../../docs/content/core-quran-words.json";
 import qaida from "../../docs/content/qaida-lessons.json";
 
@@ -21,6 +21,30 @@ const times = schedule(day, dhaka, "Karachi", "hanafi");
 describe("saved study milestones", () => {
   beforeEach(async () => {
     await db.records.clear();
+  });
+
+  it("schedules Qaida grades and preserves each due route and practice day", async () => {
+    await Promise.all([
+      saveQaidaRowReview(4, 5, "hard", times.asr, dhaka.timeZone),
+      saveQaidaRowReview(4, 6, "okay", times.asr, dhaka.timeZone),
+      saveQaidaRowReview(4, 7, "easy", times.asr, dhaka.timeZone),
+    ]);
+    const reviews = await getRecord<Reviews>("reviews", {});
+    const { due } = reviewQueue(reviews, new Date("2027-01-19T06:00Z"), dhaka.timeZone);
+    expect(due.map(([id]) => reviewDestination(id)).sort()).toEqual(["/learn/qaida/4?row=6", "/learn/qaida/4?row=7", "/learn/qaida/4?row=8"]);
+    expect(reviews["qaida:4:5"].firstTries?.[day]).toBe(false);
+    expect(reviews["qaida:4:7"].firstTries?.[day]).toBe(true);
+    expect(reviews["qaida:4:7"].card.due.valueOf()).toBeGreaterThan(reviews["qaida:4:6"].card.due.valueOf());
+    expect(await getRecord("study-days", [])).toEqual([day]);
+  });
+
+  it("records a family once even when two traces are checked together", async () => {
+    await Promise.all([
+      saveTakhtiPractice("boat", times.asr, dhaka.timeZone),
+      saveTakhtiPractice("boat", times.asr, dhaka.timeZone),
+    ]);
+    expect(await getRecord("takhti-practised", [])).toEqual(["boat"]);
+    expect(await getRecord("study-days", [])).toEqual([day]);
   });
 
   it.each(wordMilestones)("celebrates %i core words once and preserves the record in a backup", async count => {

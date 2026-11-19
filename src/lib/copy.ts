@@ -7,6 +7,7 @@ import { studyMessages } from "./study-copy";
 import { shareMessages } from "./share-copy";
 import { deskMessages } from "./desk-copy";
 import { surahMessages } from "./surah-copy";
+import { qaidaMessages } from "./qaida-copy";
 
 type CopySettings = Pick<Settings, "mode" | "language">;
 export type MessageCatalog = Record<string, Record<Settings["language"], string | [string, string]>>;
@@ -17,6 +18,7 @@ const messages: MessageCatalog = {
   ...shareMessages,
   ...deskMessages,
   ...surahMessages,
+  ...qaidaMessages,
   today: { en: "Today", bn: "আজ" },
   learn: { en: "Learn", bn: "শিখি" },
   return: { en: "Return", bn: "ফিরে আসি" },

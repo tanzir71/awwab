@@ -19,6 +19,7 @@ function WordChip({ children, recall, href, selected, onSelect }: {
 export interface WordDetail {
   transliteration?: string;
   gloss?: string;
+  displayText?: string;
   root?: string;
   anatomyWord?: string;
 }
@@ -35,7 +36,7 @@ export function ArabicText({ text, citation, words, recall = "read", mushaf, com
   positionOffset?: number;
   wordLink?: (position: number) => string;
   selectedPosition?: number;
-  onWordSelected?: (position: number) => void;
+  onWordSelected?: (position: number) => boolean | void;
   showGlosses?: boolean;
 }) {
   const selectWord = useUi(state => state.selectWord);
@@ -52,12 +53,12 @@ export function ArabicText({ text, citation, words, recall = "read", mushaf, com
             const detail = words?.[index];
             const anatomyWord = detail?.anatomyWord || word;
             const transliteration = chipRecall === "read" ? detail?.transliteration ?? wordAnatomy(anatomyWord, index > 0).syllables.map(syllable => syllable.tr).join("") : "";
-            const shown = chipRecall === "hidden" ? "···" : chipRecall === "hint" ? `${splitGraphemes(word)[0]}···` : word;
+            const shown = chipRecall === "hidden" ? "···" : chipRecall === "hint" ? `${splitGraphemes(word)[0]}···` : detail?.displayText ?? word;
             const screenReaderText = chipRecall === "read" ? transliteration : t("revealWord", { number: index + 1 });
             return (
               <WordChip key={index} recall={chipRecall} href={wordLink?.(index + 1)} selected={selectedPosition === undefined ? undefined : selectedPosition === position}
                 onSelect={() => {
-                  onWordSelected?.(position);
+                  if (onWordSelected?.(position) === false) return;
                   selectWord({ word: anatomyWord, citation, connected: index > 0, verse, position, ...detail });
                 }}>
                 <span>{shown}</span>

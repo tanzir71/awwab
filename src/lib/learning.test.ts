@@ -10,6 +10,40 @@ import snapshot from "../../docs/content/core-quran-words.json";
 import salah from "../../docs/content/salah-words.json";
 import { message } from "./copy";
 import { studyNames, studySearchTerm } from "./study-copy";
+import { parseQaidaReview, qaidaRows, resolveQaidaRow } from "./qaidaPractice";
+import { compareTakhti, letterForms, lettersForFamily, tracingModel } from "./takhti";
+
+describe("Qaida practice", () => {
+  it("follows the vowel board order and keeps every alphabet letter with all three marks", () => {
+    const rows = qaidaRows(4);
+    expect(rows).toHaveLength(10);
+    expect(rows[5][2]).toEqual(["رُ"]);
+    expect(new Set(rows.slice(0, 8).flat(2))).toHaveLength(84);
+    expect(new Set(qaidaRows(5).slice(0, 8).flat(2))).toHaveLength(84);
+  });
+
+  it("resolves a review link without discarding the saved position on invalid input", () => {
+    expect(parseQaidaReview("qaida:4:5")).toEqual({ lesson: 4, row: 5 });
+    expect(parseQaidaReview("qaida:4:10")).toBeUndefined();
+    expect(resolveQaidaRow("6", 1, 10)).toBe(5);
+    expect(resolveQaidaRow("99", 1, 10)).toBe(1);
+  });
+});
+
+describe("Takhti practice", () => {
+  it("only offers the two valid joining forms for Rāʾ", () => {
+    const ra = lettersForFamily("dal").find(item => item.letter === "ر")!;
+    expect(letterForms(ra).map(item => item.key)).toEqual(["isolated", "final"]);
+  });
+
+  it("compares a line, bowl, and dot independently", () => {
+    const model = tracingModel(lettersForFamily("boat")[0], "isolated", true);
+    expect(compareTakhti([], model)).toBe("empty");
+    expect(compareTakhti([[[5, 5], [100, 100]]], model)).toBe("shape");
+    expect(compareTakhti(model.paths, model)).toBe("dots");
+    expect(compareTakhti([...model.paths, ...model.dots.map(point => [point])], model)).toBe("match");
+  });
+});
 
 describe("Word anatomy", () => {
   it("keeps Quranic marks on their base letter", () => {
