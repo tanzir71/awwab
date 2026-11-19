@@ -1,134 +1,251 @@
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { Search } from "lucide-react";
 import { toast } from "sonner";
 import { ArabicText } from "@/components/ArabicText";
+import { DesignIcon } from "@/components/DesignIcon";
+import { ModernReading, WordFamily } from "@/components/FluencyCards";
 import { SectionNav } from "@/components/Surface";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useRecord } from "@/hooks/use-awwab";
 import { dateKey, formatDay } from "@/lib/dates";
+import { fluencyRoots, wordBankSearch, wordGlosses } from "@/lib/fluency";
 import { coreVocabulary, loadMorphology } from "@/lib/morphology";
-import { coreWordTotal, knownCoreQuranWords } from "@/lib/quran";
+import { coreWordSource, coreWordTotal, knownCoreQuranWords } from "@/lib/quran";
 import { grades, isDue, type ReviewGrade, type Reviews } from "@/lib/reviews";
 import { useCopy } from "@/lib/copy";
-import { studyNames, studySearchTerm } from "@/lib/study-copy";
-import type { Settings } from "@/lib/storageService";
+import { studyNames } from "@/lib/study-copy";
+import { updateRecord, type Settings } from "@/lib/storageService";
 import { momentPath, saveWordReview } from "@/lib/studyMilestones";
-import { normalizeWord, wordAnatomy } from "@/lib/wordAnatomy";
-
-const meanings: Record<string, string> = {
-  "الله": "Allah", "اللهُم": "O Allah", "رب": "Lord", "كتاب": "book", "قوم": "people",
-  "يوم": "day", "قال": "say", "علم": "know", "ملك": "have authority", "رحم": "have mercy", "الرحمن": "the Most Compassionate",
-  "هذا": "this", "ذلك": "that", "من": "from / whoever", "في": "in", "على": "over / upon", "إلى": "to", "عن": "from / about",
-  "لا": "no", "ما": "what / that which", "كل": "every / all", "هو": "he", "هم": "they", "أنت": "you", "أنا": "I",
-  "كان": "was / is", "آمن": "believe", "عمل": "do / act", "جعل": "make", "جاء": "come", "أتى": "come / bring",
-  "خير": "good", "شر": "harm / evil", "سماء": "sky", "أرض": "earth", "قلب": "heart", "نفس": "self / soul",
-  "دين": "religion / judgment", "عبد": "servant / worship", "حق": "truth / right", "رحمة": "mercy", "هدى": "guidance",
-  "حمد": "praise", "نور": "light", "دنيا": "worldly life", "آخرة": "hereafter", "عذاب": "punishment", "نار": "fire",
-  "جنة": "garden", "صلاة": "prayer", "غفر": "forgive", "صبر": "be patient", "صراط": "path", "مستقيم": "straight",
-};
+import { wordAnatomy } from "@/lib/wordAnatomy";
 
 type Corpus = Awaited<ReturnType<typeof loadMorphology>>;
+const rootOfDay = "علم";
+const filters = ["all", "due", "learning", "known"] as const;
+const filterLabels = { all: "wordBankAll", due: "due", learning: "wordBankLearning", known: "known" } as const;
+const sortLabels = { frequency: "wordBankSortFreq", arabic: "wordBankSortArabic", next: "wordBankSortDue" } as const;
+const letterOrder = new Intl.Collator("ar", { sensitivity: "base" });
 
 function pronunciation(word: string) {
   return wordAnatomy(word).syllables.map(item => item.tr).join("");
 }
 
-export function WordBank({ settings }: { settings: Settings }) {
+function RootExplorer({ root, corpus, pinned }: { root: string; corpus: Corpus | undefined; pinned: string }) {
+  const { t, language } = useCopy();
+  const curated = fluencyRoots[root];
+  const family = curated?.family ?? corpus?.families.get(root)?.slice(0, 6).map(item => {
+    const ar = item.lemma || item.word;
+    const gloss = wordGlosses[ar] ?? wordGlosses[item.lemma?.replace(/\p{M}/gu, "") ?? ""];
+    return { ar, tr: gloss?.tr ?? pronunciation(ar), en: gloss?.en ?? studyNames.wordKind("en", item.type),
+      bn: gloss?.bn ?? studyNames.wordKind("bn", item.type), verse: item.verse, position: item.position };
+  }) ?? [];
+  const isPinned = pinned === root;
+
+  return <section className="card word-root-panel" aria-label={t("rootExplorer")}>
+    <header className="row-between">
+      <h2>{t("rootExplorer")}</h2>
+      <button className="text-button" type="button" aria-pressed={isPinned} onClick={() => {
+        void updateRecord("word-bank-root", "", value => value === root ? "" : root).catch(() => toast.error(t("saveError")));
+      }}>{t(isPinned ? "wordBankUnpin" : "wordBankPin")}</button>
+    </header>
+    <div className="row-between word-root-label">
+      <div>
+        <h3><span lang="en">{curated?.tr ?? Array.from(root).map(pronunciation).join("-")}</span>{curated && " · " + curated[language]}</h3>
+        <p className="small muted">{t("wordBankOneRoot")}</p>
+      </div>
+      <ArabicText text={Array.from(root).join(" ")} />
+    </div>
+    <WordFamily words={family} />
+  </section>;
+}
+
+export function WordBank({ settings, desktop, now }: { settings: Settings; desktop: boolean; now: Date }) {
   const { language, t } = useCopy();
   const navigate = useNavigate();
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const numbers = new Intl.NumberFormat(language);
+  const zone = settings.city.timeZone;
   const [corpus, setCorpus] = useState<Corpus>();
   const [error, setError] = useState(false);
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState(params.get("status") === "due" ? "due" : "all");
-  const [limit, setLimit] = useState(25);
+  const [sort, setSort] = useState<keyof typeof sortLabels>("frequency");
+  const [limit, setLimit] = useState(10);
   const [root, setRoot] = useState<string>();
+  const [rootRow, setRootRow] = useState<string>();
   const [session, review] = useState<string>();
   const [reveal, setReveal] = useState(false);
   const [saving, setSaving] = useState(false);
   const reviews = useRecord<Reviews>("reviews", {});
   const knownVocabulary = useRecord<string[]>("word-bank-known", []);
   const knownVerses = useRecord<string[]>("words-known", []);
+  const pinned = useRecord("word-bank-root", "");
   const known = knownCoreQuranWords(knownVerses, knownVocabulary);
-  const term = useDeferredValue(studySearchTerm(query));
-  const now = new Date();
+  const activeRoot = root ?? (pinned || rootOfDay);
+  const deferredQuery = useDeferredValue(query);
+  const term = wordBankSearch(deferredQuery);
+  const filter = filters.find(value => value === params.get("status")) ?? "all";
+
   useEffect(() => {
     let current = true;
     void loadMorphology().then(data => { if (current) setCorpus(data); }, () => { if (current) setError(true); });
     return () => { current = false; };
   }, []);
 
-  const vocabulary = useMemo(() => corpus ? coreVocabulary(corpus.vocabulary) : [], [corpus]);
-  const words = vocabulary.map(word => {
+  const vocabulary = useMemo(() => corpus ? coreVocabulary(corpus.vocabulary).map(word => {
     const text = word.lemma ?? word.word;
-    return { ...word, text, en: meanings[normalizeWord(text)], tr: pronunciation(text), kind: studyNames.wordKind(language, word.type), known: known.has(word.key), review: reviews[word.key] };
-  });
+    const gloss = wordGlosses[word.key.slice(5)];
+    return { ...word, text, gloss, tr: gloss?.tr ?? pronunciation(text) };
+  }) : [], [corpus]);
+  const words = vocabulary.map(word => ({
+    ...word,
+    kind: studyNames.wordKind(language, word.type),
+    state: known.has(word.key) ? "known" as const : reviews[word.key] ? "learning" as const : "new" as const,
+    review: reviews[word.key],
+    due: Boolean(reviews[word.key] && isDue(reviews[word.key], now)),
+  }));
+  const nextAt = (word: typeof words[number]) => word.review ? new Date(word.review.card.due).valueOf() : Infinity;
   const filtered = words.filter(item => {
-    if (filter === "known" && !item.known) return false;
-    if (filter === "due" && (!item.review || !isDue(item.review, now))) return false;
-    return !term || [item.text, item.key, item.en, item.tr, item.root, item.type, item.kind].some(value => value?.toLowerCase().includes(term));
+    if (filter === "due" && !item.due) return false;
+    if ((filter === "known" || filter === "learning") && item.state !== filter) return false;
+    return !term || [item.text, item.key.slice(5), item.gloss?.en, item.gloss?.bn, item.tr, item.root, item.type, item.kind]
+      .some(value => value && wordBankSearch(value).includes(term));
+  }).sort((first, second) => {
+    if (sort === "arabic") return letterOrder.compare(first.text, second.text);
+    if (sort === "next") return nextAt(first) - nextAt(second);
+    return second.count - first.count;
   });
   const active = words.find(item => item.key === session);
-  const due = words.filter(item => item.review && isDue(item.review, now));
+  const due = words.filter(item => item.due);
+  const learning = words.filter(item => item.state === "learning").length;
+  const rootsMet = new Set(words.filter(item => item.state !== "new" && item.root).map(item => item.root)).size;
   const maximum = vocabulary[0]?.count || 1;
+  const visible = filtered.slice(0, limit);
+  const selectedRow = rootRow ?? words.find(word => word.root === activeRoot)?.key;
+  const counts = { all: coreWordTotal, due: due.length, learning, known: known.size };
 
-  return <div className="stack">
-    <SectionNav title={t("quranWordBank")} back="/learn" />
-    <div className="equal-row">
-      <div className="card"><h2>{numbers.format(known.size)}/{numbers.format(coreWordTotal)}</h2><small className="muted">{t("wordsKnown")}</small></div>
-      <div className="card"><h2>{numbers.format(due.length)}</h2><small className="muted">{t("dueNow")}</small></div>
-      <div className="card"><h2>{numbers.format(words.filter(item => item.review).length)}</h2><small className="muted">{t("inMyReview")}</small></div>
+  function setFilter(value: typeof filters[number]) {
+    setLimit(10);
+    setParams(previous => {
+      const next = new URLSearchParams(previous);
+      if (value === "all") next.delete("status");
+      else next.set("status", value);
+      return next;
+    }, { replace: true });
+  }
+
+  function beginReview(key: string) {
+    review(key);
+    setReveal(false);
+  }
+
+  async function save(grade: ReviewGrade) {
+    if (saving || !active) return;
+    setSaving(true);
+    try {
+      const earned = await saveWordReview(active.key, grade, new Date(), zone);
+      review(undefined);
+      if (earned) navigate(momentPath("words", earned));
+      else toast(t("wordReviewSaved"));
+    } catch { toast.error(t("reviewSaveError")); }
+    finally { setSaving(false); }
+  }
+
+  const metrics = [
+    { title: "known", value: known.size, hint: t("wordBankOfCore", { count: coreWordTotal }) },
+    { title: "wordBankLearning", value: learning, hint: t("wordBankDueToday", { count: due.length }) },
+    { title: "wordBankRootsMet", value: rootsMet, hint: t("wordBankRootHint") },
+    { title: "newWord", value: Math.max(0, coreWordTotal - known.size - learning), hint: t("wordBankNewHint") },
+  ];
+  const columnNames = ["word", "wordBankTranslit", "meaning", "root", "studyType", "wordBankHowOften", "status", "wordBankNext"];
+  const primaryStatus = { known: "known", learning: "wordBankLearning", new: "newWord" } as const;
+
+  return <div className="word-bank">
+    {!desktop && <SectionNav title={t("quranWordBank")} back="/learn" />}
+    <div className="word-bank-metrics">
+      {metrics.map(metric => <section className="card" key={metric.title}>
+        <h2 className="caption">{t(metric.title)}</h2>
+        <strong>{numbers.format(metric.value)}</strong>
+        <p className="small muted">{metric.hint}</p>
+      </section>)}
     </div>
-    <section className="card stack">
-      <h2>{t("frequentWords")}</h2>
-      <div className="equal-row">
-        <label className="field"><span className="with-icon"><Search size={18} /> {t("findWord")}</span><input type="search" value={query} onChange={event => { setQuery(event.target.value); setLimit(25); }} /></label>
-        <label className="field">{t("status")}<select value={filter} onChange={event => { setFilter(event.target.value); setLimit(25); }}><option value="all">{t("allWords")}</option><option value="known">{t("known")}</option><option value="due">{t("dueForReview")}</option></select></label>
-      </div>
-      {error && <p role="status">{t("corpusUnavailable")} <Link className="text-button" to="/learn/salah">{t("studyFatiha")}</Link></p>}
-      {!corpus && !error && <p role="status">{t("openingCorpus")}</p>}
-      {corpus && <div className="table-scroll"><table className="vocab-table"><thead><tr>{["word", "meaning", "root", "studyType", "frequency", "status", "nextReview", "actions"].map(column => <th key={column} scope="col">{t(column)}</th>)}</tr></thead>
-        <tbody>{filtered.slice(0, limit).map(item => <tr key={`${item.key}:${item.type}`}>
-          <td><ArabicText text={item.text} citation={item.verse} words={[{ transliteration: item.tr, gloss: item.en, root: item.root }]} compact /></td>
-          <td lang="en">{item.en ?? "—"}</td>
-          <td>{item.root ? <button className="action soft" onClick={() => setRoot(item.root)} aria-description={t("exploreRootOf", { name: item.tr })}>{pronunciation(item.root) || item.kind}</button> : "—"}</td>
-          <td>{item.kind}</td>
-          <td><progress value={item.count} max={maximum} aria-label={t("occurrences", { count: item.count })} /><small>{numbers.format(item.count)}</small></td>
-          <td>{t(item.known ? "known" : item.review ? item.review.bucket : "newWord")}</td>
-          <td>{item.review ? isDue(item.review, now) ? t("dueNow") : formatDay(dateKey(new Date(item.review.card.due)), { day: "numeric", month: "short" }, language) : "—"}</td>
-          <td><button className="action light" onClick={() => { review(item.key); setReveal(false); document.getElementById("word-review")?.scrollIntoView(); }}>{t("review")}</button></td>
-        </tr>)}</tbody>
-      </table></div>}
-      {filtered.length > limit && <button className="action soft" onClick={() => setLimit(value => value + 25)}>{t("moreWords")}</button>}
-      {corpus && !filtered.length && <p className="muted" role="status">{t("noMatchingWords")}</p>}
-    </section>
-    <section className="card stack" id="word-review">
-      <h2>{t("reviewWord")}</h2>
-      {active ? <>
-        <ArabicText text={active.text} citation={active.verse} />
-        {reveal ? <p lang={active.en ? "en" : undefined}>{active.en || t("spellWordAloud")}</p> : <button className="action light" onClick={() => setReveal(true)}>{t("showCue")}</button>}
-        <div className="equal-row">{(Object.keys(grades) as ReviewGrade[]).map(grade => <button className={`action ${grade === "got-it" ? "" : "light"}`} key={grade} disabled={saving}
-          onClick={async () => {
-            if (saving) return;
-            setSaving(true);
-            try {
-              const earned = await saveWordReview(active.key, grade, new Date(), settings.city.timeZone);
-              review(undefined);
-              if (earned) navigate(momentPath("words", earned));
-              else toast(t("wordReviewSaved"));
-            } catch { toast.error(t("reviewSaveError")); }
-            finally { setSaving(false); }
-          }}>{t(grade)}</button>)}</div>
-      </> : <button className="action soft" disabled={due.length === 0} onClick={() => { review(due[0].key); setReveal(false); }}>{t("startDueReview")}</button>}
-    </section>
-    {root && <section className="card tint compact-stack">
-      <h2>{t("rootExplorer")}</h2><ArabicText text={Array.from(root).join(" ")} />
-      {corpus?.families.get(root)?.map(item => <div className="list-row" key={`${item.verse}:${item.position}`}>
-        <span>{studyNames.wordKind(language, item.type)} · {item.verse}</span><ArabicText text={item.lemma ?? item.word} citation={item.verse} />
-      </div>)}
-    </section>}
-    <Link className="action soft" to="/learn/fluency">{t("readInModernArabic")}</Link>
-    <a className="text-button" href="https://corpus.quran.com/download/">Quranic Arabic Corpus 0.4 · Kais Dukes</a>
+    <div className="word-bank-layout">
+      <section className="card word-bank-list" aria-label={t("frequentWords")}>
+        <div className="word-bank-controls">
+          <div className="word-bank-filters" role="group" aria-label={t("wordBankFilter")}>
+            {filters.map(value => <button type="button" aria-pressed={filter === value} key={value} onClick={() => setFilter(value)}>
+              {t(filterLabels[value])} {numbers.format(counts[value])}
+            </button>)}
+          </div>
+          <label className="word-bank-search">
+            <DesignIcon name="desk-eye" size={15} />
+            <span className="sr-only">{t("wordBankSearch")}</span>
+            <input type="search" placeholder={t("wordBankSearch")} value={query} onChange={event => { setQuery(event.target.value); setLimit(10); }} />
+          </label>
+          <label className="word-bank-sort">
+            <span className="sr-only">{t("wordBankSort")}</span>
+            <select value={sort} onChange={event => { setSort(event.target.value as typeof sort); setLimit(10); }}>
+              {(Object.keys(sortLabels) as (keyof typeof sortLabels)[]).map(value => <option value={value} key={value}>{t(sortLabels[value])}</option>)}
+            </select>
+          </label>
+        </div>
+        {error && <p role="status">{t("corpusUnavailable")} <Link className="text-button" to="/learn/salah">{t("studyFatiha")}</Link></p>}
+        {!corpus && !error && <p role="status">{t("openingCorpus")}</p>}
+        {corpus && visible.length > 0 && <div className="word-bank-scroll" role="region" aria-label={t("frequentWords")} tabIndex={0}>
+          <table className="word-bank-table">
+            <thead><tr>{columnNames.map(column => <th key={column} scope="col" aria-sort={
+              sort === "frequency" && column === "wordBankHowOften" ? "descending" :
+              sort === "arabic" && column === "word" || sort === "next" && column === "wordBankNext" ? "ascending" : undefined
+            }>{t(column)}</th>)}</tr></thead>
+            <tbody>{visible.map(item => <tr key={item.key} data-root-selected={selectedRow === item.key}>
+              <td><ArabicText text={item.text} citation={item.verse} verse={item.verse} positionOffset={item.position - 1}
+                words={[{ transliteration: item.tr, gloss: item.gloss?.en, root: item.root }]} showGlosses={false} /></td>
+              <td><strong lang="en">{item.tr}</strong></td>
+              <td>{item.gloss?.[language] ?? "—"}</td>
+              <td>{item.root ? <ArabicText text={Array.from(item.root).join(" ")} compact
+                onWordSelected={() => {
+                  setRoot(item.root);
+                  setRootRow(item.key);
+                  if (activeRoot !== item.root || selectedRow !== item.key) return false;
+                }} /> : "—"}</td>
+              <td>{item.kind}</td>
+              <td><progress value={item.count} max={maximum} aria-label={t("occurrences", { count: item.count })} title={numbers.format(item.count)} /></td>
+              <td><button className="word-bank-state" data-state={item.state} aria-label={t("wordBankReviewWord", { status: t(primaryStatus[item.state]), word: item.tr })}
+                onClick={() => beginReview(item.key)} type="button">{t(primaryStatus[item.state])}</button></td>
+              <td data-due={item.due}>{item.review
+                ? item.due ? t("today") : formatDay(dateKey(new Date(item.review.card.due), zone), { day: "numeric", month: "short" }, language)
+                : "—"}</td>
+            </tr>)}</tbody>
+          </table>
+        </div>}
+        {corpus && !filtered.length && <p className="small muted" role="status">{t("noMatchingWords")}</p>}
+        {filter === "due" && due.length > 0 && <button className="action" type="button" onClick={() => beginReview(due[0].key)}>{t("startDueReview")}</button>}
+        {corpus && filtered.length > 0 && <div className="row-between word-bank-list-foot">
+          <p className="small muted">{t("wordBankShowing", { visible: visible.length, count: filtered.length })}{sort === "frequency" && " · " + t("wordBankSortedByFreq")}</p>
+          {filtered.length > limit && <button className="text-button" type="button" onClick={() => setLimit(value => value + 10)}>{t("moreWords")}</button>}
+        </div>}
+      </section>
+      <aside className="word-bank-aside">
+        <RootExplorer root={activeRoot} corpus={corpus} pinned={pinned} />
+        <ModernReading known={known} zone={zone} />
+      </aside>
+    </div>
+    <footer className="row-between word-bank-footer">
+      <Link className="text-button" to="/learn/fluency">{t("quranAndModern")}</Link>
+      <a className="text-button" href={coreWordSource}>{t("fluencySources")}</a>
+    </footer>
+    <Dialog open={Boolean(active)} onOpenChange={open => { if (!open) review(undefined); }}>
+      <DialogContent className="awwab-dialog word-bank-review" aria-describedby={undefined}>
+        <DialogTitle>{t("reviewWord")}</DialogTitle>
+        {active && <>
+          <ArabicText text={active.text} citation={active.verse} verse={active.verse} positionOffset={active.position - 1}
+            words={[{ transliteration: active.tr, gloss: active.gloss?.en, root: active.root }]} showGlosses={false} onWordSelected={() => review(undefined)} />
+          <button className="action light" type="button" aria-expanded={reveal} onClick={() => setReveal(previous => !previous)}>
+            {t(reveal ? "fluencyHideMeaning" : "showCue")}
+          </button>
+          {reveal && <p role="status">{active.gloss?.[language] ?? t("spellWordAloud")}</p>}
+          <div className="equal-row">{(Object.keys(grades) as ReviewGrade[]).map(grade => <button type="button" className={`action ${grade === "got-it" ? "" : "light"}`}
+            key={grade} disabled={saving} onClick={() => void save(grade)}>{t(grade)}</button>)}</div>
+        </>}
+      </DialogContent>
+    </Dialog>
   </div>;
 }

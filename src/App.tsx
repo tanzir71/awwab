@@ -13,7 +13,8 @@ import { Plan } from "@/pages/Plan";
 import { Qada, ReturnPage, Sayyid } from "@/pages/Return";
 import { SettingsPage, You } from "@/pages/You";
 import { Onboarding } from "@/pages/Onboarding";
-import { Fluency, Hadith } from "@/pages/Study";
+import { Hadith } from "@/pages/Study";
+import { Fluency } from "@/pages/Fluency";
 import { Qaida } from "@/pages/Qaida";
 import { SurahReader } from "@/pages/Surahs";
 import { SalahWords } from "@/pages/SalahWords";
@@ -64,8 +65,8 @@ function Main() {
       <Route path="/learn/qaida/:id?" element={<Qaida settings={settings} desktop={desktop} />} />
       <Route path="/learn/surahs/:id?" element={<SurahReader settings={settings} now={now} />} />
       <Route path="/learn/salah" element={<SalahWords />} />
-      <Route path="/learn/fluency" element={<Fluency />} />
-      <Route path="/learn/words" element={<WordBank settings={settings} />} />
+      <Route path="/learn/fluency" element={<Fluency settings={settings} now={now} />} />
+      <Route path="/learn/words" element={<WordBank settings={settings} desktop={desktop} now={now} />} />
       <Route path="/learn/takhti/:family?" element={<Takhti />} />
       <Route path="/learn/hadith" element={<Hadith />} />
       <Route path="/return" element={<ReturnPage settings={settings} now={now} />} />

@@ -121,7 +121,10 @@ export function AppShell({ children, settings, now, desktop }: { children: React
     lesson: settings.language === "en" && lesson.n === 4 ? "Harakat: zabar, zer, pesh" : studyNames.lesson(settings.language, lesson.n, lesson.title),
     row: resolveQaidaRow(new URLSearchParams(location.search).get("row"), savedQaidaRow, rowCount) + 1, total: rowCount,
   }) : "";
-  const learnWorkspace = studyHome || surahStudy || qaidaStudy;
+  const wordBank = location.pathname === "/learn/words";
+  const fluency = location.pathname === "/learn/fluency";
+  const wordBankStudy = desktop && wordBank;
+  const learnWorkspace = studyHome || surahStudy || qaidaStudy || wordBankStudy;
   const review = chapter && reviews[chapter.number];
   const reviewDay = review && dateKey(new Date(review.card.due), settings.city.timeZone);
   const studySubtitle = chapter ? [
@@ -162,7 +165,8 @@ export function AppShell({ children, settings, now, desktop }: { children: React
         {groups.map(group => <div key={group.label}>
           <p className="caption nav-group">{navigationLabel(settings, group.label)}</p>
           {group.items.filter(item => !learnWorkspace || item.to !== "/you").map(item => <NavLink key={item.to} to={item.to} end={item.end}>
-            {surahStudy && (item.icon === "home" || item.icon === "headphones") ?
+            {wordBankStudy && item.to === "/learn/words" ? <DesignIcon name="word-bank-desk-list" size={16} /> :
+              (surahStudy || wordBankStudy) && (item.icon === "home" || surahStudy && item.icon === "headphones") ?
               <DesignIcon name={"surah-adult-" + item.icon} size={16} /> :
               qaidaStudy && (item.icon === "home" || item.to === "/learn/qaida") ?
                 <DesignIcon name={item.icon === "home" ? "surah-adult-home" : "qaida-desk-book"} size={16} /> :
@@ -185,10 +189,10 @@ export function AppShell({ children, settings, now, desktop }: { children: React
         </div>
       </>}
     </nav>}
-    <main className="app-main" id="app-main" tabIndex={-1} data-page={shareSheet ? "share-sheet" : shareMoment ? "share-moment" : prayerGuide ? "prayer-guide" : salahStudy ? "salah-study" : today ? "today" : studyHome ? "learn" : chapter ? "surah-reader" : lesson ? "qaida-lesson" : location.pathname.startsWith("/learn/takhti") ? "takhti" : undefined}>
+    <main className="app-main" id="app-main" tabIndex={-1} data-page={shareSheet ? "share-sheet" : shareMoment ? "share-moment" : prayerGuide ? "prayer-guide" : salahStudy ? "salah-study" : today ? "today" : studyHome ? "learn" : chapter ? "surah-reader" : lesson ? "qaida-lesson" : wordBank ? "word-bank" : fluency ? "fluency" : location.pathname.startsWith("/learn/takhti") ? "takhti" : undefined}>
       {!fullscreen && !((today || studyHome || surahStudy) && settings.mode === "maktab") && <header className="topbar">
-        <div>{today || learnWorkspace ? <h1>{qaidaStudy ? t("qaidaDesktopTitle", { number: lesson.n }) : surahStudy ? t("surahsForSalah") : title}</h1> : <h2>{title}</h2>}
-          <p className="small muted">{qaidaStudy ? qaidaSubtitle : surahStudy ? studySubtitle : date + " · " + hijriLabel(day, settings.hijriAdjust, calendar.anchors)}{today && ` · ${settings.city.name}`}{studyHome && " · " + t("deskMinutesToday", { count: studyPlanMinutes(hidden) })}</p></div>
+        <div>{today || learnWorkspace ? <h1>{qaidaStudy ? t("qaidaDesktopTitle", { number: lesson.n }) : surahStudy ? t("surahsForSalah") : wordBankStudy ? t("wordBankName") : title}</h1> : <h2>{title}</h2>}
+          <p className="small muted">{qaidaStudy ? qaidaSubtitle : surahStudy ? studySubtitle : wordBankStudy ? t("wordBankSubtitle") : date + " · " + hijriLabel(day, settings.hijriAdjust, calendar.anchors)}{today && ` · ${settings.city.name}`}{studyHome && " · " + t("deskMinutesToday", { count: studyPlanMinutes(hidden) })}</p></div>
         <Link className="chip night" to="/today">{nextPrayer}</Link>
         {settings.mode === "adult" && <>
           <Link className="action" to={reviewDestination(nextReview ?? due[0]?.[0])}><DesignIcon name="desk-play" size={14} />{t("startReview")}{due.length ? ` · ${studyHome ? dueSurahs || due.length : due.length}` : ""}</Link>

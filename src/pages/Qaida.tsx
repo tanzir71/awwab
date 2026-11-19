@@ -136,7 +136,7 @@ function SpotInQuran({ lesson, maktab }: { lesson: number; maktab: boolean }) {
       <h2><DesignIcon name={`qaida-${maktab ? "maktab" : "phone"}-sparkles`} size={18} /> {t("spotInQuran")}</h2>
       {opening ? <small>Al-Baqara 2:1</small> : <Link className="small" to="/learn/surahs/112">Al-Ikhlāṣ 112:1</Link>}
     </div>
-    <ArabicText text={quranText[opening ? 2 : 112][0].uthmani} citation={verse} verse={verse} selectedPosition={1} />
+    <ArabicText text={opening ? qaidaRows(3)[0][0][0] : quranText[112][0].uthmani} citation={verse} verse={verse} selectedPosition={1} />
     {lesson === 4 && <p className="small muted">{t("qaidaSpotQul")}</p>}
   </section>;
 }

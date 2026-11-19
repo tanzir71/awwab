@@ -77,6 +77,15 @@ export function saveTakhtiPractice(family: string, now: Date, zone: string) {
   });
 }
 
+export function saveFluencyPractice(record: "fluency-read" | "fluency-words", id: string, known: boolean, now: Date, zone: string) {
+  return db.transaction("rw", db.records, async () => {
+    const progress = await getRecord<string[]>(record, []);
+    const next = known ? [...new Set([...progress, id])] : progress.filter(entry => entry !== id);
+    await db.records.put({ key: record, value: next });
+    if (known) await saveStudyDay(now, zone);
+  });
+}
+
 export function rememberQaidaPlace(lesson: number, row?: number) {
   return db.transaction("rw", db.records, async () => {
     const completed = await getRecord<number[]>("qaida-complete", []);

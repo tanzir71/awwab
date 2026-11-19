@@ -9,7 +9,7 @@ import { estimateQada, finishQada } from "./qada";
 import { guideReference, prayerGuide } from "./prayerGuide";
 import { reviewCard, type Reviews } from "./reviews";
 import { countKnownQuranWords } from "./quran";
-import { finishQaidaLesson, rememberQaidaPlace, saveQaidaRowReview, saveSurahReview, saveTakhtiPractice, saveWordReview, setAyahFamiliar, wordMilestones } from "./studyMilestones";
+import { finishQaidaLesson, rememberQaidaPlace, saveFluencyPractice, saveQaidaRowReview, saveSurahReview, saveTakhtiPractice, saveWordReview, setAyahFamiliar, wordMilestones } from "./studyMilestones";
 import { reviewDestination, reviewQueue, studyPlanMinutes } from "./studyDesk";
 import coreWords from "../../docs/content/core-quran-words.json";
 import qaida from "../../docs/content/qaida-lessons.json";
@@ -45,6 +45,22 @@ describe("saved study milestones", () => {
     ]);
     expect(await getRecord("takhti-practised", [])).toEqual(["boat"]);
     expect(await getRecord("study-days", [])).toEqual([day]);
+  });
+
+  it("backs up modern reading and recognised signs without changing Quran word familiarity", async () => {
+    await Promise.all([
+      saveFluencyPractice("fluency-read", "teacher-mosque", true, times.asr, dhaka.timeZone),
+      saveFluencyPractice("fluency-words", "مسجد", true, times.asr, dhaka.timeZone),
+    ]);
+    const file = await backup();
+    await db.records.clear();
+    await restoreBackup(file);
+    expect(await getRecord("fluency-read", [])).toEqual(["teacher-mosque"]);
+    expect(await getRecord("fluency-words", [])).toEqual(["مسجد"]);
+    expect(await getRecord("word-bank-known", [])).toEqual([]);
+    expect(await getRecord("study-days", [])).toEqual([day]);
+    await saveFluencyPractice("fluency-words", "مسجد", false, times.asr, dhaka.timeZone);
+    expect(await getRecord("fluency-words", [])).toEqual([]);
   });
 
   it.each(wordMilestones)("celebrates %i core words once and preserves the record in a backup", async count => {

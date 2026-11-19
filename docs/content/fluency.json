@@ -1,0 +1,71 @@
+{
+  "_note": "Curated learning glosses and modern examples. Quran excerpts are attributed by verse and word position in Quranic Arabic Corpus 0.4. Modern vocabulary and sample sentences illustrate current usage.",
+  "roots": {
+    "علم": {
+      "tr": "ʿ-l-m",
+      "en": "to know",
+      "bn": "জানা",
+      "family": [
+        { "ar": "عَلِمَ", "tr": "ʿalima", "en": "he knew", "bn": "সে জানল", "verse": "2:60", "position": 15 },
+        { "ar": "عَلِيم", "tr": "ʿalīm", "en": "All-Knowing", "bn": "সর্বজ্ঞ", "verse": "2:32", "position": 11 },
+        { "ar": "ٱلْعَٰلَمِينَ", "tr": "al-ʿālamīn", "en": "the worlds", "bn": "জগৎসমূহ", "verse": "1:2", "position": 4 },
+        { "ar": "عَالِم", "tr": "ʿālim", "en": "knower · scholar, scientist", "bn": "জ্ঞাতা · পণ্ডিত, বিজ্ঞানী", "verse": "13:9", "position": 1, "modern": true },
+        { "ar": "مُعَلِّم", "tr": "muʿallim", "en": "teacher", "bn": "শিক্ষক", "modern": true },
+        { "ar": "مَعْلُومَات", "tr": "maʿlūmāt", "en": "information", "bn": "তথ্য", "modern": true }
+      ]
+    },
+    "كتب": {
+      "tr": "k-t-b",
+      "en": "to write",
+      "bn": "লেখা",
+      "family": [
+        { "ar": "كِتَاب", "tr": "kitāb", "en": "book", "bn": "বই", "verse": "2:2", "position": 2, "modern": true },
+        { "ar": "كَاتِب", "tr": "kātib", "en": "writer, scribe", "bn": "লেখক, লিপিকার", "verse": "2:282", "position": 17, "modern": true },
+        { "ar": "مَكْتَب", "tr": "maktab", "en": "office, desk", "bn": "অফিস, লেখার টেবিল", "modern": true },
+        { "ar": "مَكْتَبَة", "tr": "maktaba", "en": "library, bookshop", "bn": "গ্রন্থাগার, বইয়ের দোকান", "modern": true }
+      ]
+    }
+  },
+  "pairs": [
+    { "quran": "يَوْمِ ٱلدِّينِ", "verse": "1:4", "position": 2, "en": "Day of Judgement", "bn": "বিচারের দিন", "modern": "اليوم", "modernEn": "today", "modernBn": "আজ" },
+    { "quran": "ٱلسَّلَٰمُ", "verse": "59:23", "position": 10, "en": "The Source of Peace (a name of Allah)", "bn": "শান্তির উৎস (আল্লাহর একটি নাম)", "modern": "السلام عليكم", "modernEn": "hello · peace be upon you", "modernBn": "সালাম · আপনার ওপর শান্তি বর্ষিত হোক" },
+    { "quran": "ٱلصَّلَوٰةَ", "verse": "2:3", "position": 5, "en": "the prayer (Quranic spelling)", "bn": "নামাজ (কুরআনি বানান)", "modern": "الصلاة", "modernEn": "prayer (modern spelling)", "modernBn": "নামাজ (আধুনিক বানান)" }
+  ],
+  "signs": [
+    { "ar": "مسجد", "vowels": "مَسْجِد", "en": "mosque", "bn": "মসজিদ", "tr": "masjid" },
+    { "ar": "مكتبة", "vowels": "مَكْتَبَة", "en": "library", "bn": "গ্রন্থাগার", "tr": "maktaba" },
+    { "ar": "مخرج", "vowels": "مَخْرَج", "en": "exit", "bn": "বের হওয়ার পথ", "tr": "makhraj" },
+    { "ar": "مدخل", "vowels": "مَدْخَل", "en": "entrance", "bn": "প্রবেশপথ", "tr": "madkhal" },
+    { "ar": "محطة", "vowels": "مَحَطَّة", "en": "station", "bn": "স্টেশন", "tr": "maḥaṭṭa" },
+    { "ar": "مدرسة", "vowels": "مَدْرَسَة", "en": "school", "bn": "বিদ্যালয়", "tr": "madrasa" }
+  ],
+  "sentences": [
+    {
+      "id": "teacher-mosque",
+      "ar": "المعلم في المسجد",
+      "vowels": "الْمُعَلِّمُ فِي الْمَسْجِدِ",
+      "en": "The teacher is in the mosque.",
+      "bn": "শিক্ষক মসজিদে আছেন।",
+      "hintEn": "The same root as ʿilm, written without vowel marks, as on signs and in newspapers.",
+      "hintBn": "ইলমের একই শব্দমূল। সাইনবোর্ড ও পত্রিকার মতো হরকত ছাড়া লেখা।"
+    },
+    {
+      "id": "book-library",
+      "ar": "الكتاب في المكتبة",
+      "vowels": "الْكِتَابُ فِي الْمَكْتَبَةِ",
+      "en": "The book is in the library.",
+      "bn": "বইটি গ্রন্থাগারে আছে।",
+      "hintEn": "Look for the root shared by book and library.",
+      "hintBn": "বই ও গ্রন্থাগার শব্দ দুটির মিল থাকা শব্দমূলটি খুঁজুন।"
+    },
+    {
+      "id": "near-exit",
+      "ar": "المخرج قريب",
+      "vowels": "الْمَخْرَجُ قَرِيبٌ",
+      "en": "The exit is nearby.",
+      "bn": "বের হওয়ার পথটি কাছে।",
+      "hintEn": "Try reading the first word as you would on a sign.",
+      "hintBn": "সাইনবোর্ডে দেখার মতো করে প্রথম শব্দটি পড়ুন।"
+    }
+  ]
+}

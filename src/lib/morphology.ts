@@ -43,6 +43,9 @@ export function coreVocabulary(vocabulary: Corpus["vocabulary"]) {
 const types: Record<string, string> = {
   N: "Noun", V: "Verb", ADJ: "Adjective", PN: "Proper noun", PRON: "Pronoun", P: "Preposition",
   CONJ: "Conjunction", NEG: "Negation", REL: "Relative pronoun", DEM: "Demonstrative", LOC: "Place adverb", T: "Time adverb",
+  ACC: "Accusative particle", SUB: "Subordinating conjunction", RES: "Restriction particle",
+  CERT: "Particle of certainty", COND: "Conditional particle", AMD: "Amendment particle",
+  RET: "Retraction particle", INTG: "Interrogative particle",
 };
 let source: Promise<Corpus> | undefined;
 

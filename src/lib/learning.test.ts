@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
-import { splitGraphemes, wordAnatomy } from "./wordAnatomy";
+import { normalizeWord, splitGraphemes, wordAnatomy } from "./wordAnatomy";
 import { isDue, reviewCard } from "./reviews";
 import { coreWordCoverage, coreWordTotal, fatihaMorphology, knownCoreQuranWords, quranText } from "./quran";
 import { splitArabicWords } from "./wordAnatomy";
@@ -12,6 +12,7 @@ import { message } from "./copy";
 import { studyNames, studySearchTerm } from "./study-copy";
 import { parseQaidaReview, qaidaRows, resolveQaidaRow } from "./qaidaPractice";
 import { compareTakhti, letterForms, lettersForFamily, tracingModel } from "./takhti";
+import { fluencyPairs, fluencyRoots, matchingReadingWord, wordBankSearch, wordGlosses } from "./fluency";
 
 describe("Qaida practice", () => {
   it("follows the vowel board order and keeps every alphabet letter with all three marks", () => {
@@ -94,6 +95,32 @@ describe("Core Quran words", () => {
     expect(vocabulary.map(word => word.key)).toEqual(snapshot.words);
     const count = vocabulary.reduce((total, word) => total + word.count, 0);
     expect(coreWordCoverage).toBe(count / corpus.positions.size);
+
+    const spelling = (word: string) => normalizeWord(word.replace(/ٰ/g, "ا"));
+    for (const word of snapshot.words) expect(wordGlosses[word.slice(5)], word).toMatchObject({ en: expect.any(String), bn: expect.any(String) });
+    for (const [root, entry] of Object.entries(fluencyRoots)) {
+      for (const word of entry.family.filter(word => word.verse)) {
+        const source = corpus.positions.get(`${word.verse}:${word.position}`);
+        expect(source?.root, `${word.ar} · ${word.verse}`).toBe(root);
+        expect([spelling(source!.word), spelling(source!.lemma ?? "")], word.verse).toContain(spelling(word.ar));
+      }
+    }
+    for (const pair of fluencyPairs) {
+      splitArabicWords(pair.quran).forEach((word, index) => {
+        const source = corpus.positions.get(`${pair.verse}:${pair.position + index}`);
+        expect(normalizeWord(source?.word ?? ""), pair.verse).toBe(normalizeWord(word));
+      });
+    }
+  });
+
+  it("searches vowelled Arabic, spaced roots, Latin diacritics and Bangla glosses", () => {
+    expect(wordBankSearch("عَ لَ مَ")).toBe("علم");
+    expect(wordBankSearch("كِتَاب")).toBe("كتاب");
+    expect(wordBankSearch("ʿAlīm")).toBe("ʿalim");
+    expect(wordBankSearch("  প্রভু  ")).toBe("প্রভু");
+    expect(matchingReadingWord("الْمَسْجِدِ", new Set(["مسجد"]))).toBe(true);
+    expect(matchingReadingWord("في", new Set([wordBankSearch("فى")]))).toBe(true);
+    expect(matchingReadingWord("الكتاب", new Set(["كتب"]))).toBe(false);
   });
 
   it("counts only enrolled lemmas and merges Fātiḥa familiarity without double-counting", () => {

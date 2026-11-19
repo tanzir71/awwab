@@ -3,6 +3,7 @@
 @import "./surah-study.css";
 @import "./word-anatomy.css";
 @import "./qaida-takhti.css";
+@import "./fluency.css";
 
 @tailwind base;
 @tailwind components;

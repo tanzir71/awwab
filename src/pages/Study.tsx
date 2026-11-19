@@ -7,8 +7,6 @@ import { asset } from "@/lib/config";
 import { useCopy } from "@/lib/copy";
 import { studyNames, studySearchTerm } from "@/lib/study-copy";
 import hadith from "../../docs/content/hadith-curated.json";
-import { quranText } from "@/lib/quran";
-import sample from "../../docs/content/word-anatomy.sample.json";
 
 export function Hadith() {
   const { language, t } = useCopy();
@@ -64,23 +62,3 @@ export function Hadith() {
 
 const narrationCollections = { abudawud: "Sunan Abi Dawud", ibnmajah: "Sunan Ibn Majah", nasai: "Sunan an-Nasa’i", tirmidhi: "Jamiʿ at-Tirmidhi" };
 interface Narration { collection: keyof typeof narrationCollections; number: number; grade: string; grader: string; book: number; inBook: number; text: string }
-
-export function Fluency() {
-  const { t } = useCopy();
-  return <div className="stack">
-    <SectionNav title={t("quranAndModern")} back="/learn" />
-    <section className="card soft stack">
-      <p className="caption">{t("fluencyRoot")}</p>
-      <ArabicText text={sample.root.letters.join(" ")} />
-      <h2 lang="en">{sample.root.meaning}</h2>
-      <ArabicText text={sample.word} citation={sample.verseKey} />
-    </section>
-    <section className="compact-stack">
-      <h2>{t("withoutHarakat")}</h2>
-      {sample.modern.examples.map(example => <div className="card stack" key={example.ar}>
-        <ArabicText text={example.ar.replace(/\p{M}/gu, "").replace(/ٱ/g, "ا")} />
-        <details><summary>{t("showVowels")}</summary><ArabicText text={example.ar} /><p lang="en">{example.en}</p></details>
-      </div>)}
-    </section>
-  </div>;
-}

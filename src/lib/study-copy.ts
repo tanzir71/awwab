@@ -34,6 +34,10 @@ const wordKinds: Record<string, string> = {
   Pronoun: "সর্বনাম", Preposition: "সম্বন্ধসূচক অব্যয়", Conjunction: "সংযোজক অব্যয়",
   Negation: "নেতিবাচক অব্যয়", "Relative pronoun": "সম্বন্ধসূচক সর্বনাম", Demonstrative: "নির্দেশক শব্দ",
   "Place adverb": "স্থানবাচক ক্রিয়াবিশেষণ", "Time adverb": "কালবাচক ক্রিয়াবিশেষণ",
+  "Accusative particle": "কর্মকারকসূচক অব্যয়", "Subordinating conjunction": "অধীনতাসূচক সংযোজক",
+  "Restriction particle": "সীমাবাচক অব্যয়", "Particle of certainty": "নিশ্চয়তাসূচক অব্যয়",
+  "Conditional particle": "শর্তবাচক অব্যয়", "Amendment particle": "সংশোধনসূচক অব্যয়",
+  "Retraction particle": "প্রত্যাহারসূচক অব্যয়", "Interrogative particle": "প্রশ্নসূচক অব্যয়",
 };
 
 export const studyNames = {
