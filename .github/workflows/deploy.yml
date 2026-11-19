@@ -7,10 +7,10 @@ on:
   workflow_dispatch:
     inputs:
       release:
-        description: Select which milestone to publish
+        description: Select a working preview or the reviewed app release
         type: choice
-        options: [checks, landing, app]
-        default: checks
+        options: [checks, preview, app]
+        default: preview
       app_reviewed:
         description: Confirm the religious content review required by SPEC §12 for an app release
         type: boolean
@@ -26,7 +26,7 @@ jobs:
       - name: Check app release review
         if: github.event_name == 'workflow_dispatch' && inputs.release == 'app' && !inputs.app_reviewed
         run: |
-          echo 'Complete the religious content review in SPEC §12 before publishing the app.' >&2
+          echo 'Complete the religious content review in SPEC §12 before the full app release.' >&2
           exit 1
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -38,9 +38,9 @@ jobs:
       - run: npm run typecheck
       - run: npm run test
       - run: npm run build
-        if: github.event_name != 'workflow_dispatch' || inputs.release != 'landing'
-      - run: npm run build -- --mode landing
-        if: github.event_name == 'workflow_dispatch' && inputs.release == 'landing'
+        if: github.event_name != 'workflow_dispatch' || inputs.release != 'preview'
+      - run: npm run build -- --mode preview
+        if: github.event_name == 'workflow_dispatch' && inputs.release == 'preview'
       - uses: actions/upload-pages-artifact@v3
         if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch' && inputs.release != 'checks'
         with:

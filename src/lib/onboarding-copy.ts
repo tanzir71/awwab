@@ -1,6 +1,7 @@
 import type { MessageCatalog } from "./copy";
 
 export const onboardingMessages: MessageCatalog = {
+  previewStatus: { en: "App preview · religious content review pending", bn: "অ্যাপ প্রিভিউ · ধর্মীয় বিষয়বস্তু পর্যালোচনা বাকি" },
   welcomeOffline: { en: "No judgement. No accounts. Works fully offline, and everything stays on your phone.", bn: "কোনো বিচার নেই। অ্যাকাউন্ট লাগে না। পুরোপুরি অফলাইনে চলে, আর সব তথ্য আপনার ফোনেই থাকে।" },
   welcomeMeaning: { en: "“…He is ever forgiving to those who keep returning.”", bn: "“...যাঁরা বারবার ফিরে আসেন, তিনি তাঁদের প্রতি পরম ক্ষমাশীল।”" },
   modeChangeHint: { en: "Same lessons, two moods. Switch any time in Settings.", bn: "একই পাঠ, শেখার দুটি ধরন। সেটিংস থেকে যেকোনো সময় বদলান।" },

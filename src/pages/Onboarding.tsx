@@ -3,7 +3,7 @@ import { ArabicText } from "@/components/ArabicText";
 import { DesignIcon } from "@/components/DesignIcon";
 import { VerseAudio } from "@/components/VerseAudio";
 import { useAudioPlayback } from "@/hooks/use-audio-playback";
-import { asset } from "@/lib/config";
+import { asset, IS_PREVIEW } from "@/lib/config";
 import { useCopy } from "@/lib/copy";
 import { completeOnboarding, placement, placementAudio } from "@/lib/onboarding";
 import { quranText } from "@/lib/quran";
@@ -124,6 +124,7 @@ export function Onboarding({ settings }: { settings: Settings }) {
         <p className="small">{t("welcomeOffline")}</p>
         <button className="action onboarding-accent" type="button" disabled={saving} onClick={() => setStep(1)}>{t("begin")}</button>
         <button className="action plain" type="button" disabled={saving} onClick={() => backupFile.current?.click()}>{t("restoreFromBackup")}</button>
+        {IS_PREVIEW && <p className="small muted">{t("previewStatus")}</p>}
         <input ref={backupFile} type="file" hidden accept=".json,application/json" onChange={event => {
           const file = event.currentTarget.files?.[0];
           event.currentTarget.value = "";

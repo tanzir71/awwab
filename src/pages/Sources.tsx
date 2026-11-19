@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ArabicText } from "@/components/ArabicText";
 import { SectionNav } from "@/components/Surface";
+import { IS_PREVIEW } from "@/lib/config";
+import { useCopy } from "@/lib/copy";
 import { useUi } from "@/lib/uiState";
 import { splitArabicWords } from "@/lib/wordAnatomy";
 import returnCopy from "../../docs/content/return.json";
@@ -23,6 +25,7 @@ const sources = [
 ];
 
 export function Sources() {
+  const { t } = useCopy();
   const [search] = useSearchParams();
   const index = Number(search.get("word")) - 1;
   const selected = verseWords[index];
@@ -33,6 +36,7 @@ export function Sources() {
 
   return <div className="stack">
     <SectionNav title="Sources and licences" back="/you" />
+    {IS_PREVIEW && <p className="card soft small">{t("previewStatus")}</p>}
     {selected && <section className="card compact-stack">
       <h2>{welcome.source}</h2>
       <ArabicText text={welcome.arabic} citation={welcome.source} verse={welcomeVerse} positionOffset={omittedWords} />
