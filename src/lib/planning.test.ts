@@ -7,6 +7,8 @@ import { baselineMonthStart, calendarDefaults, calendarEventById, dayDifference,
 import { eventReminders } from "./calendarFile";
 import { calendarDayEvents, calendarWeekStart, fridayMosque, gregorianMonthCells, readCalendarDay, readCalendarMonth, shiftPlanEvent } from "./plan-calendar";
 import { defaults, exportUmrahTrip, prayerStatistics, readUmrahTripFile } from "./storageService";
+import { askPhrase, quickAsks, readGate, renderAsk, umrahPhrases } from "./umrahAsk";
+import { banglaPhrases } from "./umrah-ask-copy";
 import { adjustQadaTotals, qadaBalances, qadaCountBetween, qadaDefaults, qadaForecast, recordQada } from "./qada";
 import { assignedMosque, mapMosque, mosqueCheckedAge, mosqueDefaults, mosqueTime, mosqueWeek, timetableNotice, weeklyMosque, type Mosque } from "./mosques";
 
@@ -273,5 +275,32 @@ describe("Umrah trip transfer", () => {
     expect(readUmrahTripFile(JSON.stringify(original)).preparation).toBeUndefined();
     expect(() => readUmrahTripFile(JSON.stringify({ ...original, awwabUmrahTrip: 2 }))).toThrow();
     expect(() => readUmrahTripFile(JSON.stringify({ ...original, trip: { ...original.trip, start: "2027-02-28", end: "2027-02-02" } }))).toThrow();
+  });
+});
+
+describe("Ask in Arabic", () => {
+  it("has a Bengali search entry for every supplied phrase", () => {
+    expect(umrahPhrases).toHaveLength(63);
+    expect(umrahPhrases.every(phrase => Boolean(banglaPhrases[phrase.id]))).toBe(true);
+  });
+
+  it("uses trip context and always includes the lost phrase", () => {
+    expect(quickAsks("In the Haram").map(phrase => phrase.id)).toEqual(["toilet", "wudu", "zamzam", "women-prayer", "gate-number", "lost"]);
+    expect(quickAsks("At the hotel").map(phrase => phrase.id)).toContain("wifi");
+    expect(quickAsks("Eating out").map(phrase => phrase.id)).toContain("not-spicy");
+  });
+
+  it("parses localized gate digits and displays Arabic-Indic digits in both varieties", () => {
+    for (const input of ["79", "٧٩", "۷۹", "৭৯"]) expect(readGate(input)).toBe(79);
+    for (const input of ["0", "301", "79.5", "abc", ""]) expect(readGate(input)).toBeUndefined();
+    expect(renderAsk(askPhrase("gate-number"), "saudi", { gate: 300 }).ar).toBe("فين باب رقم ٣٠٠؟");
+    expect(renderAsk(askPhrase("gate-number"), "msa", { gate: 1 }).ar).toBe("أين الباب رقم ١؟");
+  });
+
+  it("fills family and gender forms without changing the default catalog", () => {
+    expect(renderAsk(askPhrase("lost-family"), "saudi", { relation: "mother" }).ar).toBe("ضاعت أمي");
+    expect(renderAsk(askPhrase("lost-family"), "saudi", { relation: "father" }).ar).toBe("ضاع أبوي");
+    expect(renderAsk(askPhrase("excuse-me"), "saudi", { toFemale: true }).ar).toBe("لو سمحتي");
+    expect(renderAsk(askPhrase("lost"), "msa", { speaker: "female" }).ar).toBe("أنا تائهة");
   });
 });

@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { ArabicText } from "./ArabicText";
+import { AskAudioPack } from "./AskAudio";
 import { DesignIcon } from "./DesignIcon";
 import { UmrahTripForm, UmrahTripImport } from "./UmrahTripForm";
 import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { useCopy } from "@/lib/copy";
 import { downloadFile } from "@/lib/download";
 import { exportUmrahTrip, updateRecord } from "@/lib/storageService";
-import { emptyPreparation, initialTrip, tripChecklist, tripDates, type TripCheck, type UmrahTrip } from "@/lib/umrah";
+import { emptyPreparation, initialTrip, maskedPhone, tripChecklist, tripDates, type TripCheck, type UmrahTrip } from "@/lib/umrah";
 import { cachedMapPack, mapPacks, mapRegions, saveMapPack, type MapRegion } from "@/lib/umrahMapPack";
 import phraseData from "../../handovers/H2-languages-paths-arabic-help/data/umrah-phrases.json";
 
@@ -18,11 +19,6 @@ const mapMegabytes = Object.values(mapPacks).reduce((sum, size) => sum + size, 0
 const arabicDigits = new Intl.NumberFormat("ar-u-nu-arab", { useGrouping: false });
 type Variety = "saudi" | "msa";
 type Phrase = typeof phrases[number];
-
-function previewPhone(phone: string) {
-  let digits = 0;
-  return phone.replace(/\p{Nd}/gu, digit => ++digits <= 4 ? digit : "•");
-}
 
 function PhraseText({ phrase, variety = "saudi", gate = 79, link = false }: { phrase: Phrase; variety?: Variety; gate?: number; link?: boolean }) {
   const meaning = link && phrase.id === "gate-number" ? `Where is gate ${gate}?` : phrase.en.replace("{n}", String(gate));
@@ -103,7 +99,7 @@ function OfflinePacks() {
     <div className="umrah-prep-pack-row"><div><strong>{t("umrahPrepRitualPack")}</strong><small>{t("umrahPrepRitualHint")}</small></div>
       <span className="chip">{t("umrahPrepAudioPending")}</span></div>
     <div className="umrah-prep-pack-row"><div><strong>{t("umrahPrepAskPack")}</strong><small>{t("umrahPrepAskPackHint", { count: phrases.length })}</small></div>
-      <span className="chip">{t("umrahPrepAudioPending")}</span></div>
+      <AskAudioPack desktop /></div>
     {failed && <p role="status" className="small">{t("umrahPrepDownloadError")}</p>}
   </section>;
 }
@@ -155,7 +151,7 @@ export function UmrahPreparation({ trip, gates }: { trip: UmrahTrip; gates: stri
           <div><p className="caption">{t("umrahPrepHotel")}</p><strong>{trip.hotel.name || t("umrahPrepNoHotel")}</strong>
             <small>{t(prep.hotelArabic ? "umrahPrepHotelSaved" : "umrahPrepHotelMissing")}</small></div>
           <div><p className="caption">{t("umrahPrepLeader")}</p><strong>{prep.leader || trip.group || t("umrahPrepNoLeader")}
-            {prep.phone && <bdi className="umrah-prep-phone"> · {previewPhone(prep.phone)}</bdi>}</strong><small>{t("umrahPrepLeaderHint")}</small></div>
+            {prep.phone && <bdi className="umrah-prep-phone"> · {maskedPhone(prep.phone)}</bdi>}</strong><small>{t("umrahPrepLeaderHint")}</small></div>
         </div>
       </section>
       <OfflinePacks />

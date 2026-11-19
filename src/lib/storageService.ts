@@ -8,6 +8,7 @@ import { deskActivities } from "./studyDesk";
 import type { MosquePlan } from "./mosques";
 import { zakatBalances } from "./zakat";
 import { emptyPreparation, tripChecklist, type UmrahTrip } from "./umrah";
+import { askVarieties, askVoices } from "./umrahAsk";
 import { builtInLanguages, glossaryOptions, glossaryTerms, textSizes, type AppLanguage, type GlossaryTerm, type WordChoices } from "./languagePreferences";
 
 export interface Settings {
@@ -152,6 +153,9 @@ export function readUmrahTripFile(text: string) {
 }
 
 const savedRecords: Record<string, z.ZodTypeAny> = {
+  "umrah-ask-settings": z.object({ variety: z.enum(askVarieties), voice: z.enum(askVoices), speaker: z.union([z.enum(askVoices), z.literal("")]), slow: z.boolean() }),
+  "umrah-ask-volume-hint": z.boolean(),
+  "umrah-custom-phrases": z.array(z.object({ id: z.string().uuid(), ar: z.string().trim().min(1).max(280), meaning: z.string().trim().min(1).max(280) })),
   settings: settingsSchema,
   "wording-suggestions": z.array(z.object({ language: z.enum(builtInLanguages), page: z.string().max(160), original: z.string().max(500), proposed: z.string().max(500) })).max(300),
   "qaida-current": count.min(1).max(17),

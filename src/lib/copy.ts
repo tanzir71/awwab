@@ -19,12 +19,14 @@ import { guideMessages } from "./guide-copy";
 import { applyGlossary, formatLocale } from "./languagePreferences";
 import { settingsMessages } from "./settings-copy";
 import { umrahPrepMessages } from "./umrah-prep-copy";
+import { askMessages } from "./umrah-ask-copy";
 
 type CopySettings = Pick<Settings, "mode" | "language" | "wordChoices" | "nativeDigits">;
 export type MessageCatalog = Record<string, Record<Settings["language"], string | [string, string]>>;
 export const CopyContext = createContext<CopySettings>({ mode: "adult", language: "en" });
 
 const messages: MessageCatalog = {
+  ...askMessages,
   ...umrahPrepMessages,
   ...studyMessages,
   ...shareMessages,

@@ -13,6 +13,7 @@
 @import "./zakat.css";
 @import "./settings.css";
 @import "./umrah-prep.css";
+@import "./umrah-ask.css";
 
 @tailwind base;
 @tailwind components;
@@ -515,9 +516,12 @@ progress::-moz-progress-bar { background: var(--control-primary); }
 .moment-copy .share-artwork { width: min(100%, 256px); aspect-ratio: 4 / 5; margin-top: 8px; }
 .moment-actions { display: grid; gap: 10px; }
 .umrah-shell { max-width: 680px; margin-inline: auto; }
-.umrah-tabs { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); position: fixed; z-index: 20; inset: auto 0 0; padding: 8px 12px max(15px, env(safe-area-inset-bottom)); gap: 5px; background: var(--c-surface); box-shadow: var(--shadow-bar); }
-.umrah-tabs a[aria-current] { background: var(--c-primary-soft); color: var(--interactive-ink); }
-.umrah-tabs .action { padding-inline: 4px; }
+.umrah-tabs { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); position: fixed; z-index: 20; inset: auto 0 0; padding: 8px 12px max(15px, env(safe-area-inset-bottom)); gap: 4px; background: var(--c-night); color: var(--c-night-muted); box-shadow: var(--shadow-bar); }
+.umrah-tabs a { display: grid; gap: 4px; justify-items: center; align-content: start; min-height: 46px; font: var(--type-small); color: inherit; text-decoration: none; text-align: center; }
+.umrah-tabs a > span { width: min(100%, 54px); height: 32px; display: grid; place-items: center; border-radius: var(--r-pill); }
+.umrah-tabs a[aria-current] { color: var(--c-on-night); }
+.umrah-tabs a[aria-current] > span { background: var(--c-overlay-on-night); }
+.umrah-tabs a:focus-visible { outline-color: var(--c-on-night); }
 .umrah-map { min-height: min(410px, 75vw); border-radius: var(--r-card); overflow: hidden; background: var(--c-tint); }
 .map-pin { border-radius: var(--r-pill); background: var(--c-night); color: var(--c-on-night); padding: 6px 10px; font: var(--type-small); min-height: 44px; }
 .compass-arrow { display: inline-block; justify-self: center; font-size: 3rem; line-height: 1; }

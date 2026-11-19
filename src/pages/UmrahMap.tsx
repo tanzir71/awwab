@@ -9,6 +9,7 @@ import { SectionNav } from "@/components/Surface";
 import { SHARE_URL } from "@/lib/config";
 import { bearing, distance, initialTrip, makkah, madinah, type Coord } from "@/lib/umrah";
 import { cachedMapPack, saveMapPack, type MapRegion } from "@/lib/umrahMapPack";
+import { useCopy } from "@/lib/copy";
 
 type Pin = { id: string; title: string; point: Coord };
 type Trip = typeof initialTrip;
@@ -91,6 +92,7 @@ function MapCanvas({ region, file, pins, user, onPoint }: { region: Region; file
 export default function UmrahMap({ trip, point, points, save }: {
   trip: Trip; point?: Coord; points: Pin[]; save: (update: (old: Trip) => Trip) => Promise<void>;
 }) {
+  const { t } = useCopy();
   const [region, setRegion] = useState<Region>("makkah");
   const [pack, setPack] = useState<{ region: Region; file: File }>();
   const [selection, select] = useState<Coord>();
@@ -170,6 +172,7 @@ export default function UmrahMap({ trip, point, points, save }: {
   }
   return <>
     <SectionNav title="Offline map" back="/umrah" />
+    <Link className="action soft" to="/umrah/ask?category=directions">{t("askEntry")}</Link>
     {region === "makkah" && <label className="field"><span className="with-icon"><Search size={18} /> Search saved places and gates</span>
       <input type="search" value={query} placeholder="Gate, Zamzam or wudu" onChange={event => setQuery(event.target.value)} /></label>}
     <div className="equal-row">{(["makkah", "madinah"] as const).map(item => <button key={item} className={`action ${item === region ? "" : "light"}`}

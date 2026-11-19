@@ -31,6 +31,7 @@ import { Share } from "@/pages/Share";
 import { shareReturnPath } from "@/lib/shareNavigation";
 import { Milestone } from "@/pages/Milestone";
 import { HaramFocus, UmrahDuas, UmrahMapPage, UmrahNow, UmrahPlan, UmrahRituals, UmrahShell, WalkWithMe } from "@/pages/Umrah";
+import { UmrahAskCards, UmrahAskHome, UmrahAskPhrase, UmrahAskShow } from "@/pages/UmrahAsk";
 import { Sources } from "@/pages/Sources";
 import { WordBank } from "@/pages/WordBank";
 import { AudioPacks } from "@/pages/AudioPacks";
@@ -101,6 +102,10 @@ function Main() {
           <Route path="duas" element={<UmrahDuas />} />
           <Route path="plan" element={<UmrahPlan />} />
           <Route path="location" element={<WalkWithMe />} />
+          <Route path="ask" element={<UmrahAskHome />} />
+          <Route path="ask/phrase/:id" element={<UmrahAskPhrase key={pathname} />} />
+          <Route path="ask/show/:id" element={<UmrahAskShow key={pathname} />} />
+          <Route path="ask/cards" element={<UmrahAskCards />} />
         </Route>
         <Route path="/print" element={<PrintHub />} />
         <Route path="/print/word-card" element={<WordPrintSheet />} />

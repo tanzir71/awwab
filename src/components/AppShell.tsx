@@ -143,6 +143,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
   const shareMoment = location.pathname.startsWith("/share/milestone/");
   const umrahRoute = /^\/umrah(?:\/|$)/.test(location.pathname);
   const umrahDesktop = desktop && umrahRoute;
+  const umrahAsk = !desktop && /^\/umrah\/ask(?:\/|$)/.test(location.pathname);
   const trip = useRecord("umrah", initialTrip);
   const umrahDates = umrahDesktop && tripDates(trip, locale);
   const umrahSubtitle = [umrahDates && t("umrahTripDates", { dates: umrahDates }), t("umrahPrepareHint")].filter(Boolean).join(" · ");
@@ -254,7 +255,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
         <Link className="icon-button" to="/you/reminders" aria-label={t("reminders")}><DesignIcon name="desk-bell" size={18} /></Link>
       </header>}
       <div className="workspace">
-        <div className={`app-content ${word && desktop ? "anatomy-open" : ""}`}>{children}</div>
+        <div className={`app-content${umrahAsk ? " umrah-ask-content" : ""}${word && desktop ? " anatomy-open" : ""}`}>{children}</div>
         <WordPanel desktop={desktop} settings={settings} reader={surahStudy} />
       </div>
     </main>

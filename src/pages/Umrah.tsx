@@ -1,17 +1,20 @@
 import { Suspense, lazy, useEffect, useRef, useState } from "react";
-import { Link, NavLink, Outlet, useNavigate, useOutletContext } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation, useNavigate, useOutletContext } from "react-router-dom";
 import { ArrowLeft, Compass, Download, Heart, MapPin, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { ArabicText } from "@/components/ArabicText";
+import { DesignIcon } from "@/components/DesignIcon";
 import { SectionNav } from "@/components/Surface";
 import { ShareLink } from "@/components/ShareLink";
 import { UmrahPreparation } from "@/components/UmrahPreparation";
 import { UmrahTripForm, UmrahTripImport } from "@/components/UmrahTripForm";
 import { VerseAudio } from "@/components/VerseAudio";
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu";
 import { useRecord } from "@/hooks/use-awwab";
 import { duration, formatTime } from "@/lib/dates";
 import { saveCalendar } from "@/lib/calendarFile";
 import { downloadFile } from "@/lib/download";
+import { useCopy } from "@/lib/copy";
 import { updateRecord } from "@/lib/storageService";
 import { advanceSai, correctSai, distance, initialTrip, makkah, states, umrahContext, type Coord } from "@/lib/umrah";
 import { prayerIds, prayerNames } from "@/types/Prayer";
@@ -36,6 +39,10 @@ const useTrip = () => useOutletContext<UmrahContext>();
 const localTime = (date: Date) => formatTime(date, makkah.timeZone);
 
 export function UmrahShell({ now, desktop }: { now: Date; desktop: boolean }) {
+  const { t } = useCopy();
+  const { pathname } = useLocation();
+  const ask = pathname === "/umrah/ask" || pathname.startsWith("/umrah/ask/");
+  const showTabs = !ask || pathname === "/umrah/ask";
   const trip = useRecord("umrah", initialTrip);
   const [point, setPoint] = useState<Coord>();
   const [locationError, setLocationError] = useState("");
@@ -84,24 +91,28 @@ export function UmrahShell({ now, desktop }: { now: Date; desktop: boolean }) {
   if (desktop) return <UmrahPreparation trip={trip} gates={gateNames} />;
 
   const tabs = [
-    { name: "Now", path: "/umrah" }, { name: "Rituals", path: "/umrah/rituals" }, { name: "Map", path: "/umrah/map" },
-    { name: "Duʿās", path: "/umrah/duas" }, { name: "Plan", path: "/umrah/plan" },
+    { name: "askNow", path: "/umrah", icon: "ask-icon-clock" }, { name: "askRituals", path: "/umrah/rituals", icon: "ask-icon-cube" },
+    { name: "askMap", path: "/umrah/map", icon: "ask-icon-pin" }, { name: "askTab", path: "/umrah/ask", icon: "ask-speech" },
+    { name: "askDuas", path: "/umrah/duas", icon: "ask-icon-hand" },
   ];
-  return <div className="stack umrah-shell">
-    <header className="row-between"><Link to="/plan" className="icon-button" aria-label="Back to Plan"><ArrowLeft size={20} /></Link>
+  return <div className={ask ? "umrah-shell umrah-ask-shell" : "stack umrah-shell"}>
+    {!ask && <><header className="row-between"><Link to="/plan" className="icon-button" aria-label="Back to Plan"><ArrowLeft size={20} /></Link>
       <div><p className="caption">Makkah · {localTime(now)}</p><h1>Umrah mode</h1></div>
       <Link className="icon-button" to="/umrah/location" aria-label="Location options"><Compass size={19} /></Link>
     </header>
     {!configured && <div className="card tint row-between"><p>Set your trip dates and hotel before you go.</p><Link to="/umrah/plan" className="action soft">Plan trip</Link></div>}
-    {locationError && trip.gps && <p className="card tint small" role="status">{locationError}</p>}
+    {locationError && trip.gps && <p className="card tint small" role="status">{locationError}</p>}</>}
     <Outlet context={{ trip, now, point: trip.gps ? point : undefined, save }} />
-    <nav className="umrah-tabs" aria-label="Umrah navigation">
-      {tabs.map(item => <NavLink className="action light" key={item.path} to={item.path} end={item.path === "/umrah"}>{item.name}</NavLink>)}
-    </nav>
+    {showTabs && <nav className="umrah-tabs" aria-label={t("askNav")}>
+      {tabs.map(item => <NavLink key={item.path} to={item.path} end={item.path === "/umrah"}>
+        <span><DesignIcon name={item.icon} size={22} /></span>{t(item.name)}
+      </NavLink>)}
+    </nav>}
   </div>;
 }
 
 export function UmrahNow() {
+  const { t } = useCopy();
   const { trip, now, save } = useTrip();
   const context = umrahContext(now, trip);
   const current = context.current;
@@ -110,16 +121,26 @@ export function UmrahNow() {
   const afterFajr = now >= context.duha && now < context.times.dhuhr;
   const midday = now >= context.times.dhuhr && now < context.times.asr;
   return <>
-    <section className="card night stack">
+    <ContextMenu><ContextMenuTrigger asChild><section className="card night stack">
       <p className="caption">Next · {context.tripActive ? trip.state : "Outside your trip dates"}</p>
       <h2>{trip.state === "In the Haram" && current && context.iqamah > now ? `Iqāmah in about ${duration(context.iqamah.valueOf() - now.valueOf())}`
         : context.leave > now ? `Leave by ${localTime(context.leave)}` : `${next.name} at ${localTime(next.starts)}`}</h2>
       <p className="muted">{next.name} · {localTime(next.starts)} · Makkah local time</p>
       {trip.state === "In the Haram" ? <p className="muted small">Iqāmah times are approximate. Check announcements in the masjid.</p> : <p className="muted small">Includes {trip.walk} minutes walking and time for the crowd.</p>}
       <label className="field"><span className="muted">Where are you now?</span>
-        <select value={trip.state} onChange={event => void save(old => ({ ...old, state: event.target.value as Trip["state"] }))}>{states.map(state => <option key={state}>{state}</option>)}</select>
+        <select value={trip.state} onChange={event => {
+          const state = event.currentTarget.value as Trip["state"];
+          void save(old => ({ ...old, state }));
+        }}>{states.map(state => <option key={state}>{state}</option>)}</select>
       </label>
-    </section>
+      <div className="equal-row"><Link className="action light" to="/umrah/ask">{t("askHome")}</Link>
+        <Link className="action light" to="/umrah/plan">{t("umrahPrepTrip")}</Link></div>
+    </section></ContextMenuTrigger>
+      <ContextMenuContent className="ask-now-menu">
+        <ContextMenuItem asChild><Link to="/umrah/ask">{t("askHome")}</Link></ContextMenuItem>
+        <ContextMenuItem asChild><Link to="/umrah/plan">{t("umrahPrepTrip")}</Link></ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
     <section className="card stack">
       <h2>Today in Makkah</h2>
       {prayerIds.map(id => <div className="row-between" key={id}><span>{prayerNames[id]}</span><time>{localTime(context.times[id])}</time>

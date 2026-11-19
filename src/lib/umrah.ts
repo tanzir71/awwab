@@ -28,6 +28,11 @@ export const initialTrip = {
 };
 export type UmrahTrip = typeof initialTrip;
 
+export function maskedPhone(phone: string) {
+  let digits = 0;
+  return phone.replace(/\p{Nd}/gu, digit => ++digits <= 4 ? digit : "•");
+}
+
 export function tripDates(trip: Pick<UmrahTrip, "start" | "end">, locale: string) {
   if (!trip.start || !trip.end || trip.start > trip.end) return undefined;
   const start = new Date(`${trip.start}T12:00Z`);

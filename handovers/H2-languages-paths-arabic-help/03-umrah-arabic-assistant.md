@@ -43,6 +43,8 @@ Phrases: [`data/umrah-phrases.json`](data/umrah-phrases.json) (63, Saudi Hijazi 
 - Playback through Web Audio at full gain; show a one-time "turn your volume up" hint.
 - Custom phrases: users can add a phrase by pasting Arabic text and their own meaning. Played with the device's Arabic voice (`speechSynthesis`) if one is available offline, otherwise shown only, and labelled "device voice".
 
+Publish the reviewed Opus files under `public/packs/phrases/<variety>/<voice>/`. Use the phrase ID for standard clips, `gate-number.opus` for the gate prefix and `number-1.opus` through `number-300.opus` for the numbers. The bus and family phrases use complete clips with the slot appended to the ID, such as `bus-to-madinah.opus` and `lost-family-mother.opus`. Use `-speaker-female` or `-to-woman` for the corresponding alternative forms in the phrase data. Include `docs/content/umrah-phrase-audio.json` with `version: 1`, `bytes` for the combined size, and `attribution` when the recordings are approved and available. The app installs them on request and reads the saved files for offline playback.
+
 ## Data model
 ```ts
 Phrase { id, category, en, saudi: { ar, tr }, msa: { ar, tr }, contexts: string[], slots?, gender?, sign?, urgent?, note? }
