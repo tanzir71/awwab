@@ -107,6 +107,78 @@
   .mosque-week-row { grid-template-columns: 58px minmax(0,1fr) auto; gap: 4px; }
   .mosque-week-row > strong { font: var(--type-small); }
 }
-@media (min-width:1024px) {
-  .mosques-page { max-width: 590px; margin: 16px auto 0; }
+.mosque-desktop, .mosque-desk-list, .mosque-desk-side { display: grid; align-content: start; gap: 16px; min-width: 0; }
+.mosque-desktop[data-wide="true"] { grid-template-columns: minmax(0, 1fr) 360px; align-items: start; }
+[data-page="mosques-desktop"] .topbar { position: sticky; top: 0; z-index: 3; background: var(--c-bg); }
+.mosque-desktop .card, .desktop-detail-drawer .mosque-desk-detail { min-width: 0; padding: 16px; }
+.mosque-desktop h2, .mosque-desk-detail h2 { font: var(--type-body-strong); overflow-wrap: anywhere; }
+.mosque-desktop .text-button, .mosque-desk-detail .text-button { min-height: 30px; font: var(--type-small); font-weight: 600; text-align: start; }
+.mosque-desk-saved table, .mosque-desk-week table { width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 0 8px; font: var(--type-small); }
+.mosque-desk-saved th, .mosque-desk-saved td { text-align: start; overflow-wrap: anywhere; }
+.mosque-desk-saved thead th {
+  color: var(--c-ink-muted); font: var(--type-caption); font-size: 10px; letter-spacing: var(--tracking-caption); text-transform: uppercase;
+  padding: 4px;
+}
+.mosque-desk-saved thead th:first-child { width: 30%; }
+.mosque-desk-saved thead th:nth-child(2) { width: 13%; }
+.mosque-desk-saved thead th:nth-child(6) { width: 11%; }
+.mosque-desk-saved thead th:last-child { width: 16%; }
+.mosque-desk-saved th, .mosque-desk-saved td { padding: 6px; }
+.mosque-desk-saved :is(th, td):first-child { padding-inline-start: 10px; }
+.mosque-desk-saved tbody tr { cursor: pointer; }
+.mosque-desk-saved tbody tr:nth-child(even), .mosque-desk-week tbody tr:nth-child(even) { background: transparent; }
+.mosque-desk-saved tbody tr:nth-child(odd) > * { background: var(--c-surface-alt); }
+.mosque-desk-saved tbody tr:hover .mosque-desk-select { text-decoration: underline; text-underline-offset: .15em; }
+.mosque-desk-saved tbody th:first-child { border-start-start-radius: var(--r-control); border-end-start-radius: var(--r-control); }
+.mosque-desk-saved tbody td:last-child { border-start-end-radius: var(--r-control); border-end-end-radius: var(--r-control); }
+.mosque-desk-select { min-height: 24px; width: 100%; text-align: start; overflow-wrap: anywhere; font-weight: 600; }
+.mosque-desk-saved .mosque-role { padding: 3px 7px; font-size: 11px; text-transform: none; letter-spacing: 0; }
+.mosque-desk-table-time { white-space: nowrap; }
+.mosque-desk-table-time abbr, .mosque-desk-times abbr { text-decoration: none; }
+.mosque-desk-checked { color: var(--c-ink-muted); }
+.mosque-desk-checked[data-stale="true"], .mosque-desk-alert > a, .mosque-desk-alert-icon {
+  color: color-mix(in srgb, var(--c-danger) 67%, var(--c-ink)); font-weight: 600;
+}
+.mosque-desk-alert {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px;
+  padding: 8px 12px; background: var(--c-danger-soft); border-radius: var(--r-control); font: var(--type-small);
+}
+.mosque-desk-alert a { text-underline-offset: .16em; }
+.mosque-desk-alert-icon {
+  width: 16px; height: 16px; background: currentColor;
+  mask: url("/design/mosque-desk-alert.svg") center / contain no-repeat;
+}
+.mosque-desk-week table { border-spacing: 6px 8px; width: calc(100% + 12px); margin-inline: -6px; }
+.mosque-desk-week tr > :is(th, td) { padding: 0; }
+.mosque-desk-week thead th { text-align: center; }
+.mosque-desk-week tbody th { text-align: start; font-weight: 600; }
+.mosque-desk-assignment {
+  display: grid; place-items: center; width: 100%; min-height: 30px; padding: 4px; border-radius: var(--r-control);
+  text-align: center; overflow-wrap: anywhere; background: var(--c-surface-alt); font: var(--type-small);
+}
+.mosque-desk-assignment[data-role="home"] { background: var(--c-primary-soft); }
+.mosque-desk-assignment[data-role="office"] { background: var(--c-tint); }
+.mosque-desk-assignment:hover { box-shadow: var(--shadow-card); text-decoration: underline; text-underline-offset: .15em; }
+.mosque-desk-board {
+  display: flex; flex-direction: column; justify-content: end; align-items: stretch; min-height: 120px; overflow: hidden;
+  padding: 8px 12px; gap: 3px; border-radius: var(--r-control); background: var(--c-surface-alt);
+  color: var(--c-ink-muted); text-align: start; font: var(--type-small);
+}
+.mosque-desk-board-image { width: 100%; height: 94px; object-fit: contain; }
+.mosque-desk-board:hover span, .mosque-desk-occasion:hover strong { text-decoration: underline; text-underline-offset: .16em; }
+.mosque-desk-times { display: grid; gap: 8px; margin: 0; }
+.mosque-desk-times > div {
+  display: flex; justify-content: space-between; align-items: start; gap: 8px; min-width: 0;
+  padding: 6px 10px; border-radius: var(--r-control); background: var(--c-surface-alt); font: var(--type-small);
+}
+.mosque-desk-times dt { font-weight: 600; }
+.mosque-desk-times dd { margin: 0; text-align: end; overflow-wrap: anywhere; }
+.mosque-desk-occasion { display: grid; gap: 4px; padding: 8px 10px; border-radius: var(--r-control); background: var(--c-tint); text-align: start; font: var(--type-small); }
+.mosque-desk-check.action { min-height: 36px; padding-block: 6px; font: var(--type-small); font-weight: 700; }
+.mosque-desk-detail .mosque-desk-add-occasion { justify-self: start; }
+@media (1024px <= width < 1360px) {
+  .mosque-desk-saved thead th:first-child { width: 26%; }
+  .mosque-desk-saved thead th:nth-child(2) { width: 14.5%; }
+  .mosque-desk-saved thead th:nth-child(4) { width: 9.6%; }
+  .mosque-desk-saved thead th:last-child { width: 15%; }
 }

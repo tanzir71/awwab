@@ -8,7 +8,7 @@ import { eventReminders } from "./calendarFile";
 import { calendarDayEvents, calendarWeekStart, fridayMosque, gregorianMonthCells, readCalendarDay, readCalendarMonth, shiftPlanEvent } from "./plan-calendar";
 import { defaults } from "./storageService";
 import { qadaBalances, qadaDefaults, qadaForecast } from "./qada";
-import { assignedMosque, mapMosque, mosqueDefaults, mosqueTime, mosqueWeek, timetableNotice, weeklyMosque, type Mosque } from "./mosques";
+import { assignedMosque, mapMosque, mosqueCheckedAge, mosqueDefaults, mosqueTime, mosqueWeek, timetableNotice, weeklyMosque, type Mosque } from "./mosques";
 
 describe("Today summaries", () => {
   it("shows both possible three-day White Days windows across a Gregorian month boundary", () => {
@@ -193,6 +193,14 @@ describe("mosque timetables", () => {
     expect(timetableNotice("2027-01-29", "2026-12-10", undefined, "ramadan")).toBe("ramadan");
     expect(timetableNotice("2027-03-02", "2027-02-22", undefined, "eid")).toBeUndefined();
     expect(timetableNotice("2027-03-02", "2027-01-22", undefined, "eid")).toBe("eid");
+  });
+
+  it("formats the last-check age and clears a seasonal reminder after a check today", () => {
+    expect(mosqueCheckedAge("2026-11-19", "2026-11-19", "en")).toBe("today");
+    expect(mosqueCheckedAge("2026-11-19", "2026-11-05", "en")).toBe("2 weeks ago");
+    expect(mosqueCheckedAge("2026-11-19", "2026-08-14", "en")).toBe("3 months ago");
+    expect(timetableNotice("2026-11-19", "2026-08-14", 11)).toBe("seasonal");
+    expect(timetableNotice("2026-11-19", "2026-11-19", 11)).toBeUndefined();
   });
 });
 

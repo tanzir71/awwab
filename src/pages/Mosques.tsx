@@ -2,39 +2,36 @@ import { useMemo, useRef, useState, type MouseEvent } from "react";
 import { X } from "lucide-react";
 import { toast } from "sonner";
 import { DesignIcon } from "@/components/DesignIcon";
-import { MosqueTime, OccasionEditor, PhotoEditor, TimetableEditor, WeekEditor } from "@/components/MosqueEditors";
+import { DesktopMosques } from "@/components/DesktopMosques";
+import { MosqueTime, OccasionEditor, PhotoEditor, TimetableEditor, WeekEditor, type MosquePanel } from "@/components/MosqueEditors";
 import { SectionNav } from "@/components/Surface";
 import { Dialog, DialogClose, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { addDays, dateKey, formatDay } from "@/lib/dates";
 import { calendarDefaults, calendarEvents, hijriOn } from "@/lib/hijri";
-import { mosqueOccasionLabel, mosqueRoleLabel, mosqueSourceLabel } from "@/lib/mosque-copy";
+import { mosqueNoticeLabel, mosqueOccasionLabel, mosqueRoleLabel, mosqueSourceLabel } from "@/lib/mosque-copy";
 import { assignedMosque, mapMosque, mosqueClock, mosqueDefaults, mosqueOccasions, mosqueWeek, mosqueWeekday, timetableNotice, weeklyMosque,
-  type Mosque, type MosqueOccasion, type MosquePlan } from "@/lib/mosques";
+  type Mosque, type MosquePlan } from "@/lib/mosques";
 import { type Settings, updateRecord } from "@/lib/storageService";
 import { distance, type Coord } from "@/lib/umrah";
 import { prayerIds, type PrayerId } from "@/types/Prayer";
 
-type MosquePanel = { kind: "timetable"; mosque: Mosque }
-  | { kind: "photo"; id: string }
-  | { kind: "mapping"; id: PrayerId }
-  | { kind: "occasion"; id?: string; occasion?: MosqueOccasion["type"] };
-
 const calendarTitles = { eid_fitr: "Eid al-Fitr", eid_adha: "Eid al-Adha", tarawih: "Ramadan begins" };
-const noticeMessage = { seasonal: "mosqueSeasonal", ramadan: "mosqueRamadan", eid: "mosqueBeforeEid", older: "mosqueStale" };
+const allDays = [0, 1, 2, 3, 4, 5, 6] as const;
 
 function newMosque(now: Date): Mosque {
   return { id: crypto.randomUUID(), name: "", role: "home", jamaat: {}, occasional: [], source: "visited", updatedAt: now.toISOString() };
 }
 
-export function Mosques({ settings, now }: { settings: Settings; now: Date }) {
+export function Mosques({ settings, now, desktop }: { settings: Settings; now: Date; desktop: boolean }) {
   const { t, language } = useCopy();
   const plan = useRecord("mosques", mosqueDefaults);
   const config = useRecord("calendar", calendarDefaults);
   const day = dateKey(now, settings.city.timeZone);
   const [group, setGroup] = useState<0 | 1>(() => mosqueWeekday(day) < 5 ? 0 : 1);
   const [panel, setPanel] = useState<MosquePanel>();
+  const [selectedId, selectMosque] = useState<string>();
   const [position, setPosition] = useState<Coord>();
   const [locating, setLocating] = useState(false);
   const opener = useRef<HTMLElement>();
@@ -89,15 +86,16 @@ export function Mosques({ settings, now }: { settings: Settings; now: Date }) {
     const saved = await save(old => {
       const current = old.mosques.find(item => item.id === mosque.id);
       return { ...old, mosques: current
-        ? old.mosques.map(item => item.id === mosque.id ? { ...mosque, photo: current.photo, occasional: current.occasional } : item)
+        ? old.mosques.map(item => item.id === mosque.id
+          ? { ...mosque, photo: current.photo, photoSavedAt: current.photoSavedAt, occasional: current.occasional } : item)
         : [...old.mosques, mosque] };
     });
-    if (saved) setPanel(undefined);
+    if (saved) { selectMosque(mosque.id); setPanel(undefined); }
     return saved;
   }
 
   async function savePhoto(id: string, picture: Blob) {
-    const saved = await update(id, current => ({ ...current, photo: picture }));
+    const saved = await update(id, current => ({ ...current, photo: picture, photoSavedAt: now.toISOString() }));
     if (saved) setPanel(undefined);
     return saved;
   }
@@ -116,9 +114,22 @@ export function Mosques({ settings, now }: { settings: Settings; now: Date }) {
 
   const photoMosque = panel?.kind === "photo" ? plan.mosques.find(mosque => mosque.id === panel.id) : undefined;
   const title = panel?.kind === "timetable" ? t(panel.mosque.name ? "mosqueUpdateTimes" : "mosqueAddFull")
-    : panel?.kind === "photo" ? t("mosquePhoto") : panel?.kind === "mapping" ? t("mosqueMappingTitle", { prayer: t(panel.id) }) : t("mosqueOccasional");
+    : panel?.kind === "photo" ? t("mosquePhoto") : panel?.kind === "mapping"
+      ? panel.id ? t("mosqueMappingTitle", { prayer: t(panel.id) }) : t("mosqueDeskPlanEdit") : t("mosqueOccasional");
+  const nearby = located.length > 0 && <section className="card mosque-nearest compact-stack">
+    <h2>{t("mosqueNearest")}</h2>
+    {nearest && <p role="status">{nearest.mosque.name} · {t(nearest.meters < 1000 ? "mosqueMeters" : "mosqueKm", {
+      distance: nearest.meters < 1000 ? Math.round(nearest.meters) : Number((nearest.meters / 1000).toFixed(1)),
+    })}</p>}
+    <p className="muted small">{t("mosqueLocationHint")}</p>
+    <button className="action soft" disabled={locating} onClick={findLocation}>{t(locating ? "mosqueFinding" : "mosqueUseLocation")}</button>
+  </section>;
 
   return <div className="mosques-page">
+    {desktop ? <DesktopMosques plan={plan} today={day} zone={settings.city.timeZone} season={season} occasions={occasional}
+      selectedId={selectedId} selectMosque={selectMosque} nearby={nearby} openEditor={open}
+      addMosque={event => open(event, { kind: "timetable", mosque: newMosque(now) })}
+      check={id => update(id, current => ({ ...current, updatedAt: now.toISOString() }))} /> : <>
     <SectionNav title={t("mosques")} back="/plan" backIcon={<DesignIcon name={settings.mode === "maktab" ? "qaida-maktab-chevl" : "surah-mobile-chevl"} size={24} />}
       action={<button className="icon-button" type="button" aria-label={t("mosqueAddFull")} aria-haspopup="dialog"
         onClick={event => open(event, { kind: "timetable", mosque: newMosque(now) })}><DesignIcon name="mosques-add" size={22} /></button>} />
@@ -180,7 +191,7 @@ export function Mosques({ settings, now }: { settings: Settings; now: Date }) {
             </div>)}
           </dl>
           {notice && <div className="mosque-nudge small"><DesignIcon name="mosques-refresh" size={18} /><p>
-            {t(noticeMessage[notice], { month: formatDay(day, { month: "long" }, language) })}
+            {t(mosqueNoticeLabel[notice], { month: formatDay(day, { month: "long" }, language) })}
           </p></div>}
           <div className="equal-row mosque-card-actions">
             <button className="action soft" aria-haspopup="dialog" onClick={event => open(event, { kind: "timetable", mosque })}>{t("mosqueUpdateTimes")}</button>
@@ -217,14 +228,8 @@ export function Mosques({ settings, now }: { settings: Settings; now: Date }) {
       <a className="action" href={`https://wa.me/${contact.contact ?? ""}?text=${encodeURIComponent(prompt)}`} target="_blank" rel="noopener noreferrer">{t("mosqueWhatsapp")}</a>
     </section>}
 
-    {located.length > 0 && <section className="card mosque-nearest compact-stack">
-      <h2>{t("mosqueNearest")}</h2>
-      {nearest && <p role="status">{nearest.mosque.name} · {t(nearest.meters < 1000 ? "mosqueMeters" : "mosqueKm", {
-        distance: nearest.meters < 1000 ? Math.round(nearest.meters) : Number((nearest.meters / 1000).toFixed(1)),
-      })}</p>}
-      <p className="muted small">{t("mosqueLocationHint")}</p>
-      <button className="action soft" disabled={locating} onClick={findLocation}>{t(locating ? "mosqueFinding" : "mosqueUseLocation")}</button>
-    </section>}
+    {nearby}
+    </>}
 
     <Dialog open={!!panel} onOpenChange={open => { if (!open) setPanel(undefined); }}>
       {panel && <DialogContent className="awwab-dialog mosque-dialog" showCloseButton={false} aria-describedby={undefined}
@@ -233,9 +238,10 @@ export function Mosques({ settings, now }: { settings: Settings; now: Date }) {
           <DialogClose asChild><button className="icon-button" aria-label={t("planClose")}><X size={18} aria-hidden="true" /></button></DialogClose>
         </div>
         {panel.kind === "timetable" && <TimetableEditor mosque={panel.mosque} save={saveTimetable} cancel={() => setPanel(undefined)} />}
-        {panel.kind === "mapping" && <WeekEditor prayer={panel.id} plan={plan} week={week} group={groupLabel} cancel={() => setPanel(undefined)}
-          save={async (days, mosqueId) => {
-            const saved = await save(old => mapMosque(old, days, panel.id, mosqueId));
+        {panel.kind === "mapping" && <WeekEditor prayer={panel.id} initialDay={panel.day} plan={plan} week={desktop ? allDays : week}
+          group={desktop ? undefined : groupLabel} cancel={() => setPanel(undefined)}
+          save={async (id, days, mosqueId) => {
+            const saved = await save(old => mapMosque(old, days, id, mosqueId));
             if (saved) setPanel(undefined);
             return saved;
           }} />}

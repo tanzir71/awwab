@@ -302,7 +302,7 @@ export function DesktopPlan({ today, now, settings, config, mosques, hawl, saved
     </section>
     {wide ? <aside className="plan-desk-side" ref={pane} aria-label={t("planDetails")}>{panels}</aside> :
       <Dialog open={drawer || hasDetail} onOpenChange={open => { if (!open) { setDrawer(false); closeSelection(); } }}>
-        <DialogContent className="awwab-dialog plan-desk-drawer" overlayClassName="plan-desk-overlay" showCloseButton={false} aria-describedby={undefined}
+        <DialogContent className="awwab-dialog desktop-detail-drawer plan-desk-drawer" overlayClassName="desktop-detail-overlay" showCloseButton={false} aria-describedby={undefined}
           onCloseAutoFocus={event => { event.preventDefault(); restoreFocus(); }}>
           <div className="row-between">
             <DialogTitle>{t("planDetails")}</DialogTitle>

@@ -252,9 +252,3 @@ body .plan-event-overlay { background: color-mix(in srgb, var(--c-night) 83%, tr
   padding: 6px 10px; border-radius: var(--r-control); background: var(--c-surface-alt); font: var(--type-small);
 }
 .plan-desk-prayer-times > div { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-:root .awwab-dialog.plan-desk-drawer {
-  inset-block: 0; inset-inline: auto 0; width: min(100%, 430px); max-height: 100%; padding: 16px;
-  border-radius: var(--r-card) 0 0 var(--r-card); transform: none; animation: none; align-content: start;
-  background: var(--c-bg); overflow-y: auto;
-}
-:root .plan-desk-overlay { background: color-mix(in srgb, var(--c-night) 64%, transparent); }

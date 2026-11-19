@@ -293,6 +293,13 @@ progress::-moz-progress-bar { background: var(--control-primary); }
 .tile-glyph, .anatomy-title { font: var(--type-arabic-l); }
 .anatomy-title { font-weight: 700; }
 .awwab-dialog { background: var(--c-bg); color: var(--c-ink); border: 0; border-radius: var(--r-sheet); width: min(calc(100vw - 24px), 520px); max-height: 92svh; overflow: auto; box-shadow: var(--shadow-raised); }
+:root .awwab-dialog.desktop-detail-drawer {
+  inset-block: 0; inset-inline: auto 0; width: min(100%, 430px); max-height: 100%; padding: 16px;
+  border-radius: 0; border-start-start-radius: var(--r-card); border-end-start-radius: var(--r-card);
+  transform: none; animation: none; align-content: start;
+  background: var(--c-bg); overflow-y: auto;
+}
+:root .desktop-detail-overlay { background: color-mix(in srgb, var(--c-night) 64%, transparent); }
 .awwab-dialog > button:last-child { width: 44px; height: 44px; display: grid; place-items: center; right: 8px; top: 8px; }
 .word-side { position: sticky; top: 76px; flex: 0 0 clamp(280px, 29vw, 390px); height: fit-content; max-height: calc(100svh - 92px); overflow: auto; display: grid; gap: 12px; align-self: flex-start; margin: 0 18px 0 0; background: var(--c-bg); box-shadow: var(--shadow-raised); }
 .anatomy-close { position: absolute; right: 8px; top: 8px; z-index: 1; }

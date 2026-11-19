@@ -138,6 +138,7 @@ const savedRecords: Record<string, z.ZodTypeAny> = {
       jumuah: z.object({ khutbah: z.union([time, z.literal("")]), prayer: z.union([time, z.literal("")]) }).optional(),
       occasional: z.array(z.object({ type: z.enum(["eid_fitr", "eid_adha", "tarawih"]), year: count.min(1900).max(2200), times: z.array(time) })),
       photo: z.string().max(2_700_000).regex(/^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/]*={0,2}$/).optional(),
+      photoSavedAt: instantSchema.optional(),
       refreshMonth: count.min(1).max(12).optional(),
       contact: z.string().regex(/^\d*$/).max(30).optional(),
       location: point.optional(),

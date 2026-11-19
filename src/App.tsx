@@ -74,7 +74,7 @@ function Main() {
       <Route path="/return/sayyid" element={<Sayyid settings={settings} />} />
       <Route path="/return/qada" element={<Qada settings={settings} now={now} />} />
       <Route path="/plan" element={<Plan settings={settings} now={now} desktop={desktop} />} />
-      <Route path="/plan/mosques" element={<Mosques settings={settings} now={now} />} />
+      <Route path="/plan/mosques" element={<Mosques settings={settings} now={now} desktop={desktop} />} />
       <Route path="/plan/zakat" element={<Zakat settings={settings} now={now} desktop={desktop} />} />
       <Route path="/share" element={<Share key={search} settings={settings} now={now} />} />
       <Route path="/share/milestone/:kind/:number" element={<Milestone settings={settings} now={now} />} />

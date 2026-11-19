@@ -1,4 +1,5 @@
 import { addDays, formatTime } from "./dates";
+import { dayDifference } from "./hijri";
 import { type Prayer, type PrayerId } from "@/types/Prayer";
 
 export const mosqueRoles = ["home", "office", "jumuah", "eid", "hometown", "other"] as const;
@@ -24,6 +25,7 @@ export interface Mosque {
   source: typeof mosqueSources[number];
   updatedAt: string;
   photo?: Blob | string;
+  photoSavedAt?: string;
   refreshMonth?: number;
   contact?: string;
   location?: { lat: number; lon: number };
@@ -78,6 +80,14 @@ export function timetableNotice(day: string, checked: string, refreshMonth?: num
   if (season && checked < addDays(day, -30)) return season;
   if (checked < addDays(day, -120)) return "older";
   return undefined;
+}
+
+export function mosqueCheckedAge(day: string, checked: string, language: string) {
+  const days = dayDifference(checked, day);
+  const span = Math.abs(days);
+  const [scale, unit] = span >= 365 ? [365, "year"] as const : span >= 30 ? [30, "month"] as const :
+    span >= 7 ? [7, "week"] as const : [1, "day"] as const;
+  return new Intl.RelativeTimeFormat(language, { numeric: span <= 1 ? "auto" : "always" }).format(Math.trunc(days / scale), unit);
 }
 
 export function jamaatForPrayer(prayer: Prayer, zone: string, plan: MosquePlan) {

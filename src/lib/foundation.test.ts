@@ -322,7 +322,7 @@ describe("device prayer records", () => {
       source: "board photo", updatedAt: times.dhuhr.toISOString(), occasional: [], refreshMonth: 11 };
     const mapping = { "4-maghrib": "home" };
     await db.records.put({ key: "mosques", value: { mapping, mosques: [
-      { ...mosque, photo: new Blob([bytes], { type: "image/png" }) },
+      { ...mosque, photo: new Blob([bytes], { type: "image/png" }), photoSavedAt: "2026-11-09T10:30:00.000Z" },
       { ...mosque, id: "office", refreshMonth: undefined, photo: "data:image/png;base64,iVBORw==" },
     ] } });
     const file = await backup();
@@ -331,6 +331,8 @@ describe("device prayer records", () => {
     const plan = await getRecord("mosques", mosqueDefaults);
     expect(plan.mapping).toEqual(mapping);
     expect(plan.mosques[0].refreshMonth).toBe(11);
+    expect(plan.mosques[0].photoSavedAt).toBe("2026-11-09T10:30:00.000Z");
+    expect(plan.mosques[1].photoSavedAt).toBeUndefined();
     for (const item of plan.mosques) {
       expect(item.photo).toBeInstanceOf(Blob);
       const photo = item.photo as Blob;

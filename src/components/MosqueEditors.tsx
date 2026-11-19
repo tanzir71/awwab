@@ -7,6 +7,11 @@ import { mosqueClock, mosqueOccasions, mosquePhotoLimit, mosquePhotoTypes, mosqu
 import { mosqueOccasionLabel, mosqueRoleLabel, mosqueSourceLabel } from "@/lib/mosque-copy";
 import { prayerIds, type PrayerId } from "@/types/Prayer";
 
+export type MosquePanel = { kind: "timetable"; mosque: Mosque }
+  | { kind: "photo"; id: string }
+  | { kind: "mapping"; id?: PrayerId; day?: number }
+  | { kind: "occasion"; id?: string; occasion?: MosqueOccasion["type"] };
+
 export function MosqueTime({ time }: { time?: string }) {
   const { t, language } = useCopy();
   if (!time) return <span>—</span>;
@@ -15,26 +20,31 @@ export function MosqueTime({ time }: { time?: string }) {
   return <time dateTime={time} title={spoken}><span aria-hidden="true">{mosqueClock(time, language, true)}</span><span className="sr-only">{spoken}</span></time>;
 }
 
-export function WeekEditor({ prayer, plan, week, group, save, cancel }: {
-  prayer: PrayerId; plan: MosquePlan; week: readonly number[]; group: string;
-  save: (days: readonly number[], mosqueId: string) => Promise<boolean>; cancel: () => void;
+export function WeekEditor({ prayer, initialDay, plan, week, group, save, cancel }: {
+  prayer?: PrayerId; initialDay?: number; plan: MosquePlan; week: readonly number[]; group?: string;
+  save: (prayer: PrayerId, days: readonly number[], mosqueId: string) => Promise<boolean>; cancel: () => void;
 }) {
   const { t, language } = useCopy();
-  const [scope, setScope] = useState("group");
+  const [selectedPrayer, setPrayer] = useState(prayer ?? prayerIds[0]);
+  const [scope, setScope] = useState(initialDay === undefined ? "group" : String(initialDay));
   const [choice, choose] = useState<string>();
   const [pending, setPending] = useState(false);
   const days = scope === "group" ? week : [Number(scope)];
-  const existing = weeklyMosque(days, prayer, plan);
+  const existing = weeklyMosque(days, selectedPrayer, plan);
   const mosqueId = choice ?? (existing.differentMosques ? "mixed" : existing.mosque?.id ?? "");
   return <form className="stack" onSubmit={async event => {
     event.preventDefault();
     if (pending || mosqueId === "mixed") return;
     setPending(true);
-    await save(days, mosqueId);
+    await save(selectedPrayer, days, mosqueId);
     setPending(false);
   }}>
+    {!prayer && <label className="field">{t("mosqueDeskPrayer")}<select value={selectedPrayer}
+      onChange={event => { setPrayer(event.target.value as PrayerId); choose(undefined); }}>
+      {prayerIds.map(id => <option key={id} value={id}>{t(id)}</option>)}
+    </select></label>}
     <label className="field">{t("mosqueDay")}<select name="day" value={scope} onChange={event => { setScope(event.target.value); choose(undefined); }}>
-      <option value="group">{t("mosqueGroupDays", { group })}</option>
+      <option value="group">{group ? t("mosqueGroupDays", { group }) : t("mosqueDeskEveryDay")}</option>
       {Array.from({ length: 7 }, (_, day) => <option key={day} value={day}>
         {formatDay(addDays("2026-11-15", day), { weekday: "long" }, language)}
       </option>)}
@@ -123,20 +133,27 @@ export function TimetableEditor({ mosque, save, cancel }: {
   </form>;
 }
 
-export function PhotoEditor({ mosque, save }: { mosque: Mosque; save: (photo: Blob) => Promise<boolean> }) {
+export function MosqueBoardPhoto({ mosque, image, className }: {
+  mosque: Mosque; image?: Mosque["photo"]; className: string;
+}) {
   const { t } = useCopy();
-  const [file, setFile] = useState<File>();
   const [url, setUrl] = useState<string>();
-  const [pending, setPending] = useState(false);
-  const image = file ?? mosque.photo;
+  const source = image ?? mosque.photo;
   useEffect(() => {
-    if (image instanceof Blob) {
-      const next = URL.createObjectURL(image);
+    if (source instanceof Blob) {
+      const next = URL.createObjectURL(source);
       setUrl(next);
       return () => URL.revokeObjectURL(next);
     }
-    setUrl(image);
-  }, [image]);
+    setUrl(source);
+  }, [source]);
+  return url ? <img className={className} src={url} alt={t("mosquePhotoName", { mosque: mosque.name })} /> : null;
+}
+
+export function PhotoEditor({ mosque, save }: { mosque: Mosque; save: (photo: Blob) => Promise<boolean> }) {
+  const { t } = useCopy();
+  const [file, setFile] = useState<File>();
+  const [pending, setPending] = useState(false);
   return <form className="stack" onSubmit={async event => {
     event.preventDefault();
     if (!file || pending) return;
@@ -144,7 +161,7 @@ export function PhotoEditor({ mosque, save }: { mosque: Mosque; save: (photo: Bl
     await save(file);
     setPending(false);
   }}>
-    {url && <img className="mosque-board-photo" src={url} alt={t("mosquePhotoName", { mosque: mosque.name })} />}
+    <MosqueBoardPhoto mosque={mosque} image={file} className="mosque-board-photo" />
     <p className="muted small">{t("mosquePhotoHint")}</p>
     <label className="field">{t("mosqueChoosePhoto")}<input type="file" accept={mosquePhotoTypes.join(",")}
       onChange={event => {

@@ -10,6 +10,7 @@ export const mosqueSourceLabel: Record<Mosque["source"], string> = {
 export const mosqueOccasionLabel: Record<MosqueOccasion["type"], string> = {
   eid_fitr: "mosqueFitr", eid_adha: "mosqueAdha", tarawih: "mosqueTarawih",
 };
+export const mosqueNoticeLabel = { seasonal: "mosqueSeasonal", ramadan: "mosqueRamadan", eid: "mosqueBeforeEid", older: "mosqueStale" } as const;
 
 export const mosqueMessages = {
   mosqueIntro: { en: "You pray in different places at different times. Save each mosque’s jamaat once, and Today shows the right one.", bn: "ভিন্ন সময়ে ভিন্ন জায়গায় নামাজ পড়ো। প্রতিটি মসজিদের জামাতের সময় সেভ করো। আজকের পাতায় নির্ধারিত মসজিদটি দেখাবে।" },
@@ -94,4 +95,25 @@ export const mosqueMessages = {
   mosqueSaveMapping: { en: "Save mapping", bn: "মসজিদ বাছাই সেভ করো" },
   mosqueSaveError: { en: "The mosque details could not be saved. Try again.", bn: "মসজিদের তথ্য সেভ হয়নি। আবার চেষ্টা করো।" },
   mosqueCancel: { en: "Cancel", bn: "বাদ দাও" },
+  mosqueDeskCaption: { en: "{count, plural, one {# mosque} other {# mosques}} · weekly plan · Eid jamaats · last checked dates",
+    bn: "{count, number}টি মসজিদ · সাপ্তাহিক পরিকল্পনা · ঈদের জামাত · শেষ যাচাইয়ের তারিখ" },
+  mosqueDeskList: { en: "Mosques", bn: "মসজিদ" },
+  mosqueDeskName: { en: "Mosque", bn: "মসজিদ" },
+  mosqueDeskChecked: { en: "Checked", bn: "শেষ যাচাই" },
+  mosqueDeskWhere: { en: "Where I pray, by day", bn: "দিন অনুযায়ী কোথায় নামাজ পড়ি" },
+  mosqueDeskPlanEdit: { en: "Edit plan", bn: "পরিকল্পনা বদলাও" },
+  mosqueDeskPrayer: { en: "Prayer", bn: "ওয়াক্ত" },
+  mosqueDeskEveryDay: { en: "Every day", bn: "প্রতিদিন" },
+  mosqueDeskUnassigned: { en: "Unset", bn: "বাছা হয়নি" },
+  mosqueDeskBoard: { en: "Board photo", bn: "বোর্ডের ছবি" },
+  mosqueDeskAddPhoto: { en: "Add a board photo", bn: "বোর্ডের ছবি যোগ করো" },
+  mosqueDeskDetail: { en: "Mosque details", bn: "মসজিদের বিবরণ" },
+  mosqueDeskCheckedToday: { en: "I checked today: times are right", bn: "আজ যাচাই করেছি, সময় ঠিক আছে" },
+  mosqueDeskCheckedSaved: { en: "Timetable checked today.", bn: "আজ সময়সূচি যাচাই করা হয়েছে।" },
+  mosqueDeskStaleNotice: { en: "{mosque} · {notice}", bn: "{mosque} · {notice}" },
+  mosqueDeskCheckedDate: { en: "Last checked {date}", bn: "শেষ যাচাই {date}" },
+  mosqueDeskOffset: { en: "+{count, number} min", bn: "+{count, number} মিনিট" },
+  mosqueDeskKhutbah: { en: "khutbah {time}", bn: "খুতবা {time}" },
+  mosqueDeskFridayPrayer: { en: "prayer {time}", bn: "নামাজ {time}" },
+  mosqueDeskEidTimes: { en: "Add occasion times", bn: "বিশেষ দিনের সময় যোগ করো" },
 } satisfies MessageCatalog;
