@@ -15,6 +15,7 @@ import { isDue, type Reviews } from "@/lib/reviews";
 import { prayerStatistics, updateRecord, type Settings } from "@/lib/storageService";
 import { studyNames } from "@/lib/study-copy";
 import { deskActivities, deskMinutes, reviewQueue, type DeskActivity } from "@/lib/studyDesk";
+import { patternReviewPrefix } from "@/lib/learningPaths";
 import { families, lettersForFamily } from "@/lib/takhti";
 import alphabet from "../../docs/content/arabic-letters.json";
 import qaida from "../../docs/content/qaida-lessons.json";
@@ -136,6 +137,7 @@ function AdultLearn({ progress, settings, now }: { progress: DeskProgress; setti
   const { due, forecast, attempts, correct } = reviewQueue(reviews, now, settings.city.timeZone);
   const dueSurahs = due.filter(([id]) => chapters.some(item => item.number === Number(id)));
   const dueLetters = due.filter(([id]) => id.startsWith("letter:") || parseQaidaReview(id)).length;
+  const duePatterns = due.filter(([id]) => id.startsWith(patternReviewPrefix)).length;
   const recordedToday = (id: number) => Boolean(reviews[id]?.card.last_review &&
     dateKey(new Date(reviews[id].card.last_review), settings.city.timeZone) === date);
   const recall = chapters.find(item => recordedToday(item.number) && reviews[item.number]?.bucket !== "manzil") ??
@@ -183,7 +185,8 @@ function AdultLearn({ progress, settings, now }: { progress: DeskProgress; setti
     </section>
     <section className="card desk-metric"><p className="caption">{t("dueForReview")}</p><h2>{t("studyItems", { count: due.length })}</h2>
       <p className="muted">{due.length ? t("deskReviewEstimate", { minutes: due.length + dueSurahs.length + 2 * dueLetters,
-        surahs: dueSurahs.length, letters: dueLetters, words: due.length - dueSurahs.length - dueLetters }) : t("deskNoReviews")}</p>
+        surahs: dueSurahs.length, letters: dueLetters, words: due.length - dueSurahs.length - dueLetters - duePatterns,
+        patterns: duePatterns }) : t("deskNoReviews")}</p>
       <div className="equal-row desk-buckets">{(["sabaq", "sabqi", "manzil"] as const).map(bucket =>
         <div className="counter-tile" data-bucket={bucket} key={bucket}><strong>{number.format(due.filter(([, review]) => review.bucket === bucket).length)}</strong>
           <small className="caption">{t(bucket).split(" · ")[0]}</small></div>)}</div>

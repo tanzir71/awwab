@@ -1,0 +1,14 @@
+{
+  "source": "https://corpus.quran.com/qurandictionary.jsp?q=ktb",
+  "patternSource": "https://corpus.quran.com/documentation/verbforms.jsp",
+  "root": "ك ت ب",
+  "patterns": [
+    { "id": "past", "pattern": "فَعَلَ", "word": "كَتَبَ", "latin": "kataba" },
+    { "id": "present", "pattern": "يَفْعُلُ", "word": "يَكْتُبُ", "latin": "yaktubu" },
+    { "id": "doer", "pattern": "فَاعِل", "word": "كَاتِب", "latin": "kātib" },
+    { "id": "received", "pattern": "مَفْعُول", "word": "مَكْتُوب", "latin": "maktūb" },
+    { "id": "book", "pattern": "فِعَال", "word": "كِتَاب", "latin": "kitāb" },
+    { "id": "place", "pattern": "مَفْعَل", "word": "مَكْتَب", "latin": "maktab" }
+  ],
+  "spot": { "chapter": 2, "ayah": 2, "first": 1, "last": 2 }
+}

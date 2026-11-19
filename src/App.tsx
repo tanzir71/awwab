@@ -15,6 +15,7 @@ import { Learn } from "@/pages/Learn";
 import { Paths, MaktabMap } from "@/pages/Paths";
 import { Hifz } from "@/pages/Hifz";
 import { PathCheck } from "@/pages/PathCheck";
+import { RootsPatterns } from "@/pages/RootsPatterns";
 import { Plan } from "@/pages/Plan";
 import { ReturnPage, Sayyid } from "@/pages/Return";
 import { Qada } from "@/pages/Qada";
@@ -83,6 +84,7 @@ function Main() {
         <Route path="/learn" element={<Learn settings={settings} desktop={desktop} now={now} />} />
         <Route path="/learn/tools" element={<Learn settings={settings} desktop={desktop} now={now} tools />} />
         <Route path="/learn/paths/check/:track?" element={<PathCheck settings={settings} now={now} />} />
+        <Route path="/learn/paths/understand/3" element={<RootsPatterns settings={settings} now={now} />} />
         <Route path="/learn/paths/:track?/:level?" element={<Paths desktop={desktop} />} />
         <Route path="/learn/map" element={<MaktabMap />} />
         <Route path="/learn/hifz/:id/:portion?" element={<Hifz settings={settings} now={now} />} />

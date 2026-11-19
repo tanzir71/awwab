@@ -85,6 +85,10 @@ export function saveWordReview(id: string, grade: ReviewGrade, now: Date, zone: 
   });
 }
 
+export function savePatternReview(id: string, grade: ReviewGrade, now: Date, zone: string) {
+  return db.transaction("rw", db.records, () => writeReview(id, grades[grade], grade === "got-it", now, zone));
+}
+
 export function saveQaidaRowReview(lesson: number, row: number, grade: QaidaGrade, now: Date, zone: string) {
   if (!Number.isInteger(row) || !qaidaRows(lesson)[row]) throw new RangeError("Unknown Qaida row.");
   return db.transaction("rw", db.records, () => writeReview(qaidaReviewId(lesson, row), qaidaGrades[grade], grade !== "hard", now, zone));

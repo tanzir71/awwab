@@ -3,7 +3,11 @@ import { gunzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 import { chapters, essentialPassages, getHifzPassage, groupPortions, juzs, maxPortionAyahs, maxPortionWords, nextPortion,
   passageLabel, portionBucket, portionPlan, ratePortion, studyPhrases, verseText, type StudyQuran } from "./hifz";
-import { juzAmma, learnedSurahs, levels, tracks } from "./learningPaths";
+import { juzAmma, learnedSurahs, levels, patternPracticePath, patternReviewPrefix, tracks } from "./learningPaths";
+import { parseCorpus } from "./morphology";
+import { reviewDestination } from "./studyDesk";
+import { normalizeWord, splitArabicWords } from "./wordAnatomy";
+import content from "../../docs/content/roots-and-patterns.json";
 
 const quran = JSON.parse(gunzipSync(readFileSync(new URL("../../public/data/quran-study-v1.json.gz", import.meta.url))).toString()) as StudyQuran;
 
@@ -64,6 +68,18 @@ describe("Offline Quran study edition", () => {
 });
 
 describe("Learning path progress", () => {
+  it("uses the sourced 2:2 morphology for the word family and routes pattern cards back to the drill", () => {
+    const morphology = gunzipSync(readFileSync(new URL("../../public/data/qac-morphology-0.4.txt.gz", import.meta.url))).toString();
+    const { chapter, ayah, last } = content.spot;
+    const location = `${chapter}:${ayah}:${last}`;
+    const analysis = parseCorpus(morphology).positions.get(location);
+    const verse = quran.surahs[chapter][ayah - 1];
+    expect(analysis.root).toBe(content.root.replace(/\s+/g, ""));
+    expect(normalizeWord(splitArabicWords(verse.uthmani)[last - 1])).toBe(normalizeWord(analysis.word));
+    expect(content.patterns).toHaveLength(6);
+    expect(reviewDestination(patternReviewPrefix + content.patterns[0].id)).toBe(patternPracticePath);
+  });
+
   it("leaves all five levels per path accessible and orders all 37 Juz ʿAmma surahs by length", () => {
     expect(tracks.map(track => levels[track].length)).toEqual([5, 5, 5, 5]);
     expect(juzAmma).toHaveLength(37);

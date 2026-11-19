@@ -96,6 +96,31 @@
 .hifz-sources { display: flex; gap: 10px 16px; flex-wrap: wrap; }
 .hifz-sources a { text-decoration: underline; text-underline-offset: .16em; }
 
+.roots-page { max-width: 730px; }
+.roots-intro, .roots-spot { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; }
+.roots-intro h2 { margin: 0; font: var(--type-display-m); }
+.roots-intro .compact-stack { gap: 1px; }
+.roots-intro .arabic-text { font-size: 28px; }
+.roots-patterns .arabic-text:last-child, .roots-spot .arabic-text { font-size: 25px; line-height: 1.45; }
+.roots-page .arabic-text .word-chip { min-width: 0; padding: 0 1px; }
+.roots-page .word-chip > span:first-child { text-decoration: none; }
+.roots-explanation .arabic-text { font-size: 1em; line-height: inherit; }
+.roots-explanation .arabic-text .word-chip { min-width: 16px; min-height: 24px; }
+.roots-patterns { list-style: none; margin: 0; display: grid; gap: 6px; }
+.roots-patterns li, .roots-option { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px; min-height: 48px; background: var(--c-surface-alt); border-radius: var(--r-control); padding: 4px 10px; }
+.roots-patterns .arabic-line { padding-block: 0; }
+.roots-patterns li > .arabic-text:first-child, .roots-option .arabic-text { background: var(--c-tint); border-radius: 6px; color: var(--c-ink-muted); padding-inline: 6px; }
+.roots-patterns li > .arabic-text:first-child { font-size: 15px; }
+.roots-patterns li > .arabic-text:first-child .word-chip { min-height: 26px; }
+.roots-patterns li > .arabic-text:last-child .word-chip { min-height: 38px; }
+.roots-patterns strong { font: var(--type-body-strong); }
+.card.roots-spot { background: var(--c-primary-soft); box-shadow: none; }
+.roots-spot h2 { margin-block: 0 6px; color: var(--interactive-ink); }
+.roots-spot a:hover { text-decoration: underline; }
+.roots-option { grid-template-columns: minmax(70px, auto) minmax(0, 1fr); }
+.roots-option button { width: 100%; }
+.roots-option button[aria-pressed="true"] { background: var(--c-primary-soft); color: var(--interactive-ink); }
+
 @media (min-width: 1024px) {
   [data-page="paths"] .topbar h1 { font: var(--type-display-m); }
   :root [data-page="paths"] .app-content { padding-top: 4px; }

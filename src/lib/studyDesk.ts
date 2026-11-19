@@ -1,4 +1,5 @@
 import { addDays, dateKey } from "./dates";
+import { patternPracticePath, patternReviewPrefix } from "./learningPaths";
 import { isDue, type Reviews } from "./reviews";
 import { parseQaidaReview } from "./qaidaPractice";
 
@@ -38,6 +39,7 @@ export function reviewQueue(reviews: Reviews, now: Date, zone: string) {
 export function reviewDestination(id?: string) {
   if (!id) return "/learn/surahs";
   if (/^\d+$/.test(id)) return `/learn/surahs/${id}?mode=recall`;
+  if (id.startsWith(patternReviewPrefix)) return patternPracticePath;
   const qaida = parseQaidaReview(id);
   if (qaida) return `/learn/qaida/${qaida.lesson}?row=${qaida.row + 1}`;
   if (id.startsWith("letter:")) return "/learn/qaida";
