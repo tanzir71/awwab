@@ -60,7 +60,7 @@ function Main() {
     <Routes>
       <Route path="/" element={<Navigate replace to={desktop ? "/learn" : "/today"} />} />
       <Route path="/today" element={<Today settings={settings} now={now} desktop={desktop} />} />
-      <Route path="/today/guide/:id" element={<PrayerGuide settings={settings} />} />
+      <Route path="/today/guide/:id" element={<PrayerGuide settings={settings} desktop={desktop} />} />
       <Route path="/today/week" element={<PrayerWeek settings={settings} now={now} />} />
       <Route path="/learn" element={<Learn settings={settings} desktop={desktop} now={now} />} />
       <Route path="/learn/qaida/:id?" element={<Qaida settings={settings} desktop={desktop} />} />

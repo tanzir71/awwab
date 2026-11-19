@@ -36,7 +36,7 @@ export function AudioPacks() {
   }
   const visible = packs?.slice().sort((a, b) => Number(b.id.endsWith("-" + selected)) - Number(a.id.endsWith("-" + selected)));
   return <div className="stack">
-    <SectionNav title={t("offlineAudio")} back={prayerGuidePath(params.get("fromPrayer")) ?? (selected ? `/learn/surahs/${selected}?mode=listen` : "/you")} />
+    <SectionNav title={t("offlineAudio")} back={prayerGuidePath(params.get("fromPrayer"), params.get("fromRakah")) ?? (selected ? `/learn/surahs/${selected}?mode=listen` : "/you")} />
     <p className="muted">{t("offlineAudioHint")}</p>
     {!packs && !status && <p role="status">{t("openingAudio")}</p>}
     {packs?.length === 0 && <p className="card soft">{t("audioEmpty")}</p>}

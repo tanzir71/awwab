@@ -163,7 +163,7 @@ function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; set
   const currentRef = audio.track ?? (audio.has(verses[0].ref) ? verses[0].ref : "surah:" + chapter.number);
   const activeIndex = verses.findIndex(verse => verse.ref === currentRef);
   const playerLabel = activeIndex < 0 ? name : t("surahPlayerVerse", { number: activeIndex + 1, total: verses.length });
-  const back = prayerGuidePath(params.get("fromPrayer")) ?? "/learn/surahs";
+  const back = prayerGuidePath(params.get("fromPrayer"), params.get("fromRakah")) ?? "/learn/surahs";
   const anatomyRef = params.get("anatomy");
 
   useEffect(() => {

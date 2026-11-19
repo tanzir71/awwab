@@ -71,7 +71,7 @@ export function SettingsPage({ settings, now, panel }: { settings: Settings; now
 
   if (!title) return <Link to="/you">Go to settings</Link>;
   return <div className="stack">
-    <SectionNav title={title} back={(panel === "prayer" && prayerGuidePath(search.get("fromPrayer"))) || "/you"} />
+    <SectionNav title={title} back={(panel === "prayer" && prayerGuidePath(search.get("fromPrayer"), search.get("fromRakah"))) || "/you"} />
     {panel === "learning" && <section className="card stack" id="script">
       <label className="field">{t("learningMode")}
         <select value={settings.mode} onChange={event => {

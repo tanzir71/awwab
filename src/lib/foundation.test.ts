@@ -8,7 +8,7 @@ import { initialZakat, type ZakatProfile } from "./zakat";
 import { calendarFile, eventReminders } from "./calendarFile";
 import { estimateQada, finishQada, qadaDefaults } from "./qada";
 import { mosqueDefaults, type Mosque } from "./mosques";
-import { guideReference, prayerGuide } from "./prayerGuide";
+import { guideRakahIndex, guideReference, prayerGuide, prayerGuidePath } from "./prayerGuide";
 import { reviewCard, type Reviews } from "./reviews";
 import { countKnownQuranWords } from "./quran";
 import { completeOnboarding, placementLesson } from "./onboarding";
@@ -223,6 +223,14 @@ describe("prayer guide", () => {
     expect(guide.steps.map(step => step.suggestion?.number)).toEqual([112, 106, undefined, undefined]);
     expect(guideReference({ school: "shafi" })).toBe("fard");
     expect(guideReference({ school: "shafi", prayerGuide: "hanafi" })).toBe("hanafi");
+  });
+
+  it("opens the requested rakʿah only when it exists in the selected guide", () => {
+    expect(guideRakahIndex("4", 4)).toBe(3);
+    for (const query of ["3", "0", "02", "-1", "2.5", "Infinity", null]) expect(guideRakahIndex(query, 2)).toBe(0);
+    expect(prayerGuidePath("asr", "3")).toBe("/today/guide/asr?rakah=3");
+    expect(prayerGuidePath("jumuah", "invalid")).toBe("/today/guide/jumuah");
+    expect(prayerGuide("jumuah", { school: "hanafi" }, {}).steps.map(step => step.sitting)).toEqual([undefined, "final"]);
   });
 });
 

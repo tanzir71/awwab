@@ -1,0 +1,26 @@
+{
+  "_note": "Desktop guide excerpts and handover notes. Review before the full app release. The Hanafi note describes a method when sajdah sahw is due. Follow your imam for congregational practice.",
+  "opening": {
+    "arabic": "سُبْحَانَكَ اللَّهُمَّ وَبِحَمْدِكَ",
+    "transliteration": "Subḥānaka llāhumma wa bi-ḥamdik",
+    "source": "Abu Dawud 776 · Sahih (Al-Albani)",
+    "url": "https://sunnah.com/abudawud:776"
+  },
+  "movement": { "source": "Bukhari 793 · Sahih", "url": "https://sunnah.com/bukhari:793" },
+  "dhikr": { "source": "Muslim 591 · Sahih", "url": "https://sunnah.com/muslim:591" },
+  "hanafiSahw": {
+    "en": "When sajdah sahw is due, the Hanafi method is to give one salām to the right after the final tashahhud. Make two prostrations, then repeat the tashahhud, ṣalawāt and duʿāʾ before closing with salām. Scholars differ.",
+    "bn": "সিজদায়ে সাহু প্রয়োজন হলে হানাফি পদ্ধতিতে শেষ বৈঠকের তাশাহহুদ পড়ে ডান দিকে একবার সালাম ফেরান। এরপর দুটি সিজদা করুন। আবার বসে তাশাহহুদ, দরুদ ও দোয়া পড়ে সালাম দিয়ে শেষ করুন। আলেমদের মতভেদ আছে। নিজের পরিস্থিতি নিয়ে ইমামকে জিজ্ঞেস করুন।",
+    "source": "Darul Iftaa Camperdown",
+    "url": "https://iftaa.co.za/8402/8402/"
+  },
+  "jumuah": { "source": "An-Nasa’i 1420 · Sahih (Darussalam)", "url": "https://sunnah.com/nasai:1420" },
+  "eid": { "source": "Abu Dawud 1151 · Hasan (Al-Albani)", "url": "https://sunnah.com/abudawud:1151" },
+  "janazah": { "source": "Bukhari 1333 · Sahih", "url": "https://sunnah.com/bukhari:1333" },
+  "qunut": {
+    "arabic": "اللَّهُمَّ اهْدِنِي فِيمَنْ هَدَيْتَ",
+    "transliteration": "Allāhumma hdinī fī man hadayt",
+    "source": "Abu Dawud 1425 · Sahih (Al-Albani)",
+    "url": "https://sunnah.com/abudawud:1425"
+  }
+}

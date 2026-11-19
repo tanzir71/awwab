@@ -52,7 +52,7 @@ export function SalahWords() {
   }
 
   return <div className="salah-study">
-    <SectionNav title={t("understandSalah")} back={prayerGuidePath(params.get("fromPrayer")) ?? "/learn"}
+    <SectionNav title={t("understandSalah")} back={prayerGuidePath(params.get("fromPrayer"), params.get("fromRakah")) ?? "/learn"}
       backIcon={<DesignIcon name="guide-back" size={24} />}
       action={<Link className="icon-button" to="/you/learning" aria-label={t("learningSettings")}><DesignIcon name="guide-settings" size={24} /></Link>} />
     <div className="salah-study-content">

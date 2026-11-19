@@ -7,6 +7,7 @@ import { useRecord, usePrayerLogs } from "@/hooks/use-awwab";
 import { dateKey, duration, formatDay } from "@/lib/dates";
 import { calendarDefaults, hijriLabel, hijriOn } from "@/lib/hijri";
 import { currentPrayerSchedule } from "@/lib/prayerServices";
+import { guideReference } from "@/lib/prayerGuide";
 import { prayerStatistics, type Settings, updateSettings } from "@/lib/storageService";
 import { useUi } from "@/lib/uiState";
 import { isDue, type Reviews } from "@/lib/reviews";
@@ -163,6 +164,10 @@ export function AppShell({ children, settings, now, desktop }: { children: React
     due.length > 0 && t("itemsDue", { count: due.length }),
   ].filter(Boolean).join(" · ") : "";
   const prayerGuide = location.pathname.startsWith("/today/guide/");
+  const guideDesktop = desktop && prayerGuide;
+  const guideSettingsQuery = guideDesktop ? new URLSearchParams({
+    fromPrayer: location.pathname.split("/").at(-1), fromRakah: new URLSearchParams(location.search).get("rakah") ?? "",
+  }) : undefined;
   const salahStudy = location.pathname === "/learn/salah";
   useLayoutEffect(() => {
     selectWord();
@@ -219,8 +224,10 @@ export function AppShell({ children, settings, now, desktop }: { children: React
     </nav>}
     <main className="app-main" id="app-main" tabIndex={-1} data-page={shareSheet ? "share-sheet" : shareMoment ? "share-moment" : prayerGuide ? "prayer-guide" : salahStudy ? "salah-study" : today ? "today" : planDesktop ? "plan-desktop" : mosquesDesktop ? "mosques-desktop" : returnDesktop ? "return-desktop" : studyHome ? "learn" : chapter ? "surah-reader" : lesson ? "qaida-lesson" : wordBank ? "word-bank" : fluency ? "fluency" : location.pathname.startsWith("/learn/takhti") ? "takhti" : undefined}>
       {!fullscreen && !((today || studyHome || surahStudy) && settings.mode === "maktab") && <header className="topbar">
-        <div>{today || learnWorkspace || zakatPage || planDesktop || mosquesDesktop || returnDesktop ? <h1>{qaidaStudy ? t("qaidaDesktopTitle", { number: lesson.n }) : surahStudy ? t("surahsForSalah") : wordBankStudy ? t("wordBankName") : title}</h1> : <h2>{title}</h2>}
-          <p className="small muted">{planSubtitle ?? (returnDesktop ? t("returnDeskSubtitle") : mosquesDesktop ? t("mosqueDeskCaption", { count: mosques.mosques.length }) : zakatPage ? zakatSubtitle : qaidaStudy ? qaidaSubtitle : surahStudy ? studySubtitle : wordBankStudy ? t("wordBankSubtitle") : date + " · " + hijriLabel(day, settings.hijriAdjust, calendar.anchors))}{today && ` · ${settings.city.name}`}{studyHome && " · " + t("deskMinutesToday", { count: studyPlanMinutes(hidden) })}</p></div>
+        <div>{today || learnWorkspace || zakatPage || planDesktop || mosquesDesktop || returnDesktop || guideDesktop ? <h1>{guideDesktop ? t("howToPray") : qaidaStudy ? t("qaidaDesktopTitle", { number: lesson.n }) : surahStudy ? t("surahsForSalah") : wordBankStudy ? t("wordBankName") : title}</h1> : <h2>{title}</h2>}
+          <p className="small muted">{guideDesktop ? <>
+            <Link to={`/you/prayer?${guideSettingsQuery}`}>{t(guideReference(settings) === "hanafi" ? "prayerGuideHanafi" : "prayerGuideFard")} · {t("prayerGuideSettings")}</Link> · {t("guideDesktopAnatomy")}
+          </> : <>{planSubtitle ?? (returnDesktop ? t("returnDeskSubtitle") : mosquesDesktop ? t("mosqueDeskCaption", { count: mosques.mosques.length }) : zakatPage ? zakatSubtitle : qaidaStudy ? qaidaSubtitle : surahStudy ? studySubtitle : wordBankStudy ? t("wordBankSubtitle") : date + " · " + hijriLabel(day, settings.hijriAdjust, calendar.anchors))}{today && ` · ${settings.city.name}`}{studyHome && " · " + t("deskMinutesToday", { count: studyPlanMinutes(hidden) })}</>}</p></div>
         <Link className="chip night" to="/today">{nextPrayer}</Link>
         {settings.mode === "adult" && <>
           <Link className="action" to={reviewDestination(nextReview ?? due[0]?.[0])}><DesignIcon name="desk-play" size={14} />{t("startReview")}{due.length ? ` · ${studyHome ? dueSurahs || due.length : due.length}` : ""}</Link>

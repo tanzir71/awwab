@@ -2,29 +2,33 @@ import { Link, useParams } from "react-router-dom";
 import { DesignIcon } from "@/components/DesignIcon";
 import { RakatCards } from "@/components/PrayerTimeline";
 import { SectionNav } from "@/components/Surface";
-import { VerseAudio } from "@/components/VerseAudio";
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { PrayerGuideAudio, PrayerGuideLostCount, PrayerGuideTopicCard } from "@/components/PrayerGuideSupport";
+import { DesktopPrayerGuide } from "@/components/DesktopPrayerGuide";
 import { useRecord } from "@/hooks/use-awwab";
 import { message } from "@/lib/copy";
-import { guideReference, guideSource, prayerGuide } from "@/lib/prayerGuide";
+import { guideTopics } from "@/lib/guide-copy";
+import { guidedPrayers, guideReference, guideSource, prayerGuide, prayerGuideTopics } from "@/lib/prayerGuide";
 import type { Reviews } from "@/lib/reviews";
 import type { Settings } from "@/lib/storageService";
 import { studyNames } from "@/lib/study-copy";
-import { prayerIds } from "@/types/Prayer";
-import hadith from "../../docs/content/hadith-curated.json";
+import notes from "../../docs/content/prayer-guide.json";
 
-const lostCount = hadith.items.find(item => item.collection === "muslim" && item.number === "571a");
-
-export function PrayerGuide({ settings }: { settings: Settings }) {
+export function PrayerGuide({ settings, desktop }: { settings: Settings; desktop: boolean }) {
   const { id } = useParams();
   const reviews = useRecord<Reviews>("reviews", {});
-  const prayer = prayerIds.find(item => item === id);
+  const prayer = guidedPrayers.find(item => item === id);
+  const topic = prayerGuideTopics.find(item => item === id);
   const t = message.bind(null, settings);
+  const hanafi = guideReference(settings) === "hanafi";
+  if (desktop && (prayer || topic)) return <DesktopPrayerGuide prayer={prayer} topic={topic} settings={settings} reviews={reviews} />;
+  if (topic) return <div className="prayer-guide">
+    <SectionNav title={t(guideTopics[topic].name)} back="/today" />
+    <PrayerGuideTopicCard topic={topic} hanafi={hanafi} />
+  </div>;
   if (!prayer) return <Link className="action soft" to="/today">{t("today")}</Link>;
-  const name = t(prayer);
+  const name = t(prayer === "jumuah" ? "guideJumuah" : prayer);
   const number = new Intl.NumberFormat(settings.language);
   const { groups, fardCount, total, steps } = prayerGuide(prayer, settings, reviews);
-  const hanafi = guideReference(settings) === "hanafi";
   const context = `fromPrayer=${prayer}`;
   const preferences = `/you/prayer?${context}`;
   const audioSurahs = [
@@ -47,13 +51,14 @@ export function PrayerGuide({ settings }: { settings: Settings }) {
         <span className="small muted">{t(hanafi ? "prayerGuideFollowing" : "prayerGuideShared")}</span>
       </Link>
       {groups.some(group => group.type === "witr") && <p className="small muted">{t("guideWitrDifference")}</p>}
+      {prayer === "jumuah" && <p className="small muted">{t("guideJumuahIntro")} <a href={notes.jumuah.url}>{notes.jumuah.source}</a></p>}
       <section className="guide-rakahs" aria-labelledby="guide-rakahs-heading">
         <h2 id="guide-rakahs-heading">{t("guideStepHeading", { count: fardCount })}</h2>
         <ol className="compact-stack" role="list">
           {steps.map(step => {
-            const reading = t(step.suggestion ? "guideFatihaShortSurah" : "guideFatihaOnly");
+            const reading = t(prayer === "jumuah" ? "guideJumuahRecitation" : step.suggestion ? "guideFatihaShortSurah" : "guideFatihaOnly");
             const title = step.sitting ? t(step.sitting === "final" ? "guideThenFinalSit" : "guideThenSit", { reading }) : reading;
-            const suggestion = step.suggestion;
+            const suggestion = prayer === "jumuah" ? undefined : step.suggestion;
             const surah = suggestion && studyNames.surah(settings.language, suggestion.number, suggestion.transliteration);
             return <li key={step.number} className="list-row guide-rakah" data-final={step.sitting === "final"}>
               <span className="icon-box" aria-hidden="true">{number.format(step.number)}</span>
@@ -64,34 +69,16 @@ export function PrayerGuide({ settings }: { settings: Settings }) {
                 </Link>}
                   {suggestion && step.sitting && " · "}
                   {step.sitting ? t(step.sitting === "final" ? "guideFinalSitting" : "guideFirstSitting")
-                    : !suggestion && (step.recitation === "silent" ? t("guideSilent", { name }) : t("guideSilentRakah"))}
+                    : !suggestion && prayer !== "jumuah" && (step.recitation === "silent" ? t("guideSilent", { name }) : t("guideSilentRakah"))}
                 </small>
               </div>
             </li>;
           })}
         </ol>
       </section>
-      <section className="card tint guide-lost">
-        <h2 className="with-icon"><DesignIcon name="guide-refresh" size={18} />{t("guideLostCount")}</h2>
-        <p className="small muted">{t("guideLostCountHelp")}</p>
-        <a href={lostCount.url} className="guide-citation"><span className="chip soft caption">{lostCount.grade} Muslim {lostCount.number}</span></a>
-      </section>
+      <PrayerGuideLostCount />
       <div className="equal-row guide-actions">
-        <Dialog>
-          <DialogTrigger className="action">{t("guidePracticeAudio")}</DialogTrigger>
-          <DialogContent className="awwab-dialog guide-audio">
-            <DialogTitle>{t("guidePracticeAudio")}</DialogTitle>
-            <DialogDescription className="muted small">{t("guideAudioNote")}</DialogDescription>
-            {audioSurahs.map(item => {
-              const label = studyNames.surah(settings.language, item.number, item.transliteration);
-              return <section className="card compact-stack" key={item.number}>
-                <h2>{label}</h2>
-                <VerseAudio audioRef={`surah:${item.number}`} label={label} />
-                <Link className="text-button" to={`/you/audio?surah=${item.number}&${context}`}>{t("downloadRecitation")}</Link>
-              </section>;
-            })}
-          </DialogContent>
-        </Dialog>
+        <PrayerGuideAudio surahs={audioSurahs} context={context} title={t("guidePracticeAudio")} />
         <Link className="action soft" to={`/learn/salah?${context}`}>{t("guideWordByWord")}</Link>
       </div>
       <nav className="guide-source-list small muted" aria-label={t("guideSources")}>
