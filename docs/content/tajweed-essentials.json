@@ -1,0 +1,101 @@
+[
+  {
+    "id": "mim",
+    "rules": { "mim-hide": "مْ ب", "mim-merge": "مْ م", "mim-clear": "مْ" },
+    "samples": [
+      { "rule": "mim-hide", "chapter": 105, "ayah": 4, "first": 1, "last": 2 },
+      { "rule": "mim-merge", "chapter": 106, "ayah": 4, "first": 2, "last": 3 },
+      { "rule": "mim-clear", "chapter": 105, "ayah": 2, "first": 3, "last": 4 },
+      { "rule": "mim-clear", "chapter": 112, "ayah": 3, "first": 1, "last": 2 },
+      { "rule": "mim-hide", "chapter": 100, "ayah": 11, "first": 2, "last": 3 },
+      { "rule": "mim-merge", "chapter": 106, "ayah": 4, "first": 5, "last": 6 },
+      { "rule": "mim-clear", "chapter": 105, "ayah": 3, "first": 2, "last": 3 },
+      { "rule": "mim-clear", "chapter": 109, "ayah": 6, "first": 2, "last": 3 }
+    ]
+  },
+  {
+    "id": "ghunnah",
+    "rules": { "ghunnah-nun": "نّ", "ghunnah-mim": "مّ" },
+    "samples": [
+      { "rule": "ghunnah-nun", "chapter": 108, "ayah": 3, "first": 1, "last": 1 },
+      { "rule": "ghunnah-mim", "chapter": 111, "ayah": 4, "first": 2, "last": 2 },
+      { "rule": "ghunnah-nun", "chapter": 103, "ayah": 2, "first": 1, "last": 1 },
+      { "rule": "ghunnah-nun", "chapter": 114, "ayah": 2, "first": 2, "last": 2 },
+      { "rule": "ghunnah-mim", "chapter": 101, "ayah": 9, "first": 1, "last": 1 },
+      { "rule": "ghunnah-nun", "chapter": 110, "ayah": 3, "first": 5, "last": 5 },
+      { "rule": "ghunnah-mim", "chapter": 102, "ayah": 4, "first": 1, "last": 1 },
+      { "rule": "ghunnah-mim", "chapter": 109, "ayah": 4, "first": 4, "last": 4 }
+    ]
+  },
+  {
+    "id": "qalqalah",
+    "rules": { "qalqalah-inside": "قْ طْ بْ جْ دْ", "qalqalah-stop": "ق ط ب ج د" },
+    "samples": [
+      { "rule": "qalqalah-inside", "chapter": 1, "ayah": 5, "first": 2, "last": 2 },
+      { "rule": "qalqalah-stop", "chapter": 112, "ayah": 2, "first": 2, "last": 2 },
+      { "rule": "qalqalah-inside", "chapter": 106, "ayah": 3, "first": 1, "last": 1 },
+      { "rule": "qalqalah-stop", "chapter": 113, "ayah": 2, "first": 4, "last": 4 },
+      { "rule": "qalqalah-inside", "chapter": 100, "ayah": 2, "first": 2, "last": 2 },
+      { "rule": "qalqalah-stop", "chapter": 111, "ayah": 1, "first": 5, "last": 5 },
+      { "rule": "qalqalah-inside", "chapter": 108, "ayah": 3, "first": 4, "last": 4 },
+      { "rule": "qalqalah-stop", "chapter": 113, "ayah": 3, "first": 5, "last": 5 }
+    ]
+  },
+  {
+    "id": "lam",
+    "rules": { "lam-sun": "ت ث د ذ ر ز س\nش ص ض ط ظ ل ن", "lam-moon": "ء ب ج ح خ ع غ\nف ق ك م ه و ي" },
+    "samples": [
+      { "rule": "lam-sun", "chapter": 113, "ayah": 4, "first": 3, "last": 3 },
+      { "rule": "lam-moon", "chapter": 1, "ayah": 2, "first": 1, "last": 1 },
+      { "rule": "lam-sun", "chapter": 1, "ayah": 6, "first": 2, "last": 2 },
+      { "rule": "lam-moon", "chapter": 108, "ayah": 1, "first": 3, "last": 3 },
+      { "rule": "lam-sun", "chapter": 1, "ayah": 4, "first": 3, "last": 3 },
+      { "rule": "lam-moon", "chapter": 113, "ayah": 1, "first": 4, "last": 4 },
+      { "rule": "lam-sun", "chapter": 114, "ayah": 1, "first": 4, "last": 4 },
+      { "rule": "lam-moon", "chapter": 110, "ayah": 1, "first": 5, "last": 5 }
+    ]
+  },
+  {
+    "id": "ra",
+    "rules": { "ra-heavy": "رَ رُ", "ra-light": "رِ" },
+    "samples": [
+      { "rule": "ra-heavy", "chapter": 1, "ayah": 2, "first": 3, "last": 3 },
+      { "rule": "ra-light", "chapter": 106, "ayah": 2, "first": 2, "last": 2 },
+      { "rule": "ra-heavy", "chapter": 110, "ayah": 1, "first": 3, "last": 3 },
+      { "rule": "ra-light", "chapter": 113, "ayah": 2, "first": 2, "last": 2 },
+      { "rule": "ra-heavy", "chapter": 106, "ayah": 1, "first": 2, "last": 2 },
+      { "rule": "ra-light", "chapter": 114, "ayah": 5, "first": 4, "last": 4 },
+      { "rule": "ra-heavy", "chapter": 113, "ayah": 1, "first": 3, "last": 3 },
+      { "rule": "ra-light", "chapter": 113, "ayah": 3, "first": 2, "last": 2 }
+    ]
+  },
+  {
+    "id": "madd",
+    "rules": { "madd-natural": "ا و ي", "madd-connected": "", "madd-separated": "", "madd-necessary": "", "madd-stop": "" },
+    "samples": [
+      { "rule": "madd-natural", "chapter": 1, "ayah": 4, "first": 1, "last": 1 },
+      { "rule": "madd-connected", "chapter": 106, "ayah": 2, "first": 3, "last": 3 },
+      { "rule": "madd-separated", "chapter": 109, "ayah": 2, "first": 1, "last": 2 },
+      { "rule": "madd-necessary", "chapter": 1, "ayah": 7, "first": 9, "last": 9 },
+      { "rule": "madd-stop", "chapter": 1, "ayah": 3, "first": 2, "last": 2 },
+      { "rule": "madd-connected", "chapter": 110, "ayah": 1, "first": 2, "last": 2 },
+      { "rule": "madd-separated", "chapter": 111, "ayah": 2, "first": 1, "last": 2 },
+      { "rule": "madd-stop", "chapter": 1, "ayah": 2, "first": 4, "last": 4 }
+    ]
+  },
+  {
+    "id": "waqf",
+    "source": "https://corpus.quran.com/documentation/pausemarks.jsp",
+    "rules": { "waqf-choice": "", "waqf-continue": "", "waqf-pause": "", "waqf-pair": "", "waqf-required": "", "waqf-avoid": "" },
+    "samples": [
+      { "rule": "waqf-choice", "chapter": 2, "ayah": 255, "first": 7, "last": 7 },
+      { "rule": "waqf-continue", "chapter": 2, "ayah": 255, "first": 32, "last": 32 },
+      { "rule": "waqf-pause", "chapter": 2, "ayah": 255, "first": 19, "last": 19 },
+      { "rule": "waqf-pair", "chapter": 2, "ayah": 2, "first": 4, "last": 5 },
+      { "rule": "waqf-required", "chapter": 5, "ayah": 64, "first": 10, "last": 10 },
+      { "rule": "waqf-avoid", "chapter": 6, "ayah": 51, "first": 8, "last": 8 },
+      { "rule": "waqf-continue", "chapter": 2, "ayah": 256, "first": 4, "last": 4 },
+      { "rule": "waqf-pause", "chapter": 2, "ayah": 256, "first": 21, "last": 21 }
+    ]
+  }
+]

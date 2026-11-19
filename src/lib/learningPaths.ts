@@ -47,7 +47,6 @@ export const juzAmma = chapters.slice(77).sort((a, b) => a.words - b.words || b.
 export const pathUrl = (track: Track, level?: number) => `/learn/paths/${track}${level ? `/${level}` : ""}`;
 export const patternReviewPrefix = "pattern:ktb:";
 export const patternPracticePath = pathUrl("understand", 3) + "?practice";
-export const tajweedReviewPrefix = "rule:nun:";
 export const grammarReviewPrefix = "grammar:";
 export const grammarPath = pathUrl("understand", 2);
 export const phraseReviewPrefix = "phrase:";

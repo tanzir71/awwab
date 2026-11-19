@@ -6,6 +6,7 @@ export const pathsMessages: MessageCatalog = {
   grammarCompare: { en: "Compare your choice with {word}.", bn: "আপনার বাছাইটি {word}-এর সঙ্গে মিলিয়ে দেখুন।" },
   lessonCorrect: { en: "That’s right.", bn: "ঠিক হয়েছে।" },
   pathsLessonProgress: { en: "{count, number}/{total, number} lessons complete", bn: "{total, number}টির মধ্যে {count, number}টি পাঠ শেষ" },
+  pathsExerciseReview: { en: "Review path exercises", bn: "পাঠের অনুশীলন ঝালাই করুন" },
   paths: { en: "Paths", bn: "শেখার পথ" },
   pathsSubtitle: { en: "Four paths, five levels each · pick any level", bn: "চারটি পথ, প্রতিটিতে পাঁচটি স্তর · যেকোনো স্তর বেছে নিন" },
   pathsMobileSubtitle: { en: "Four paths, from first letters to fluency", bn: "প্রথম হরফ থেকে সাবলীলতা পর্যন্ত চারটি পথ" },

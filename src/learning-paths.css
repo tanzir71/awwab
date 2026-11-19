@@ -159,11 +159,16 @@
 .tajweed-grid { display: grid; gap: 10px; }
 .tajweed-rule { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
 .tajweed-rule h2 { font: var(--type-body-strong); }
-.tajweed-rule[data-rule="idgham"] { background: var(--c-tint); }
-.tajweed-rule[data-rule="iqlab"] { background: var(--c-primary-soft); }
-.tajweed-rule[data-rule="ikhfa"] { background: var(--c-surface-alt); }
+.tajweed-rule[data-tone="tint"] { background: var(--c-tint); }
+.tajweed-rule[data-tone="soft"] { background: var(--c-primary-soft); }
+.tajweed-rule[data-tone="accent"] { background: var(--c-surface-alt); }
 .tajweed-example { display: grid; justify-items: end; }
 .tajweed-example .arabic-text { font-size: clamp(21px, 5.6vw, 30px); }
+.tajweed-page .word-chip[data-annotation] { background: var(--c-surface-alt); }
+.tajweed-page .word-chip[data-annotation="tint"] { background: color-mix(in srgb, var(--c-tint) 66%, var(--c-surface)); }
+.tajweed-page .word-chip[data-annotation="soft"] { background: color-mix(in srgb, var(--c-primary-soft) 72%, var(--c-surface)); }
+.tajweed-page .word-chip[data-annotation="accent"] { background: color-mix(in srgb, var(--c-accent) 19%, var(--c-surface)); }
+.tajweed-page .word-chip[data-annotation]:hover { background: var(--c-primary-soft); }
 .tajweed-letters { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .tajweed-letters .arabic-text { font-size: 18px; max-width: 100%; }
 .tajweed-letters .arabic-line { gap: 0; padding: 0; }

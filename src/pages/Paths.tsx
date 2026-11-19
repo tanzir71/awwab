@@ -11,6 +11,7 @@ import { grammarReviewPrefix, juzAmma, learnedSurahs, levels, pathUrl, salahChap
 import { countKnownQuranWords, quranText } from "@/lib/quran";
 import { studyNames } from "@/lib/study-copy";
 import type { Reviews } from "@/lib/reviews";
+import { tajweedIndex, tajweedLessons, tajweedProgress } from "@/lib/tajweed";
 import spoken from "../../docs/content/spoken-arabic.json";
 import grammar from "../../docs/content/grammar-foundations.json";
 
@@ -22,6 +23,7 @@ const blankPlacement: PathPlacement = {};
 const emptyStrings: string[] = [];
 const emptyNumbers: number[] = [];
 const practiceLink = (id: string) => `/learn/hifz/${id}`;
+const levelLink = (track: Track, level: number) => track === "read" && level === 3 ? tajweedIndex : pathUrl(track, level);
 
 function usePathState() {
   const completedQaida = useRecord<number[]>("qaida-complete", emptyNumbers);
@@ -38,16 +40,20 @@ function usePathState() {
   const amma = juzAmma.filter(chapter => learned.has(chapter.number)).length;
   const spokenCount = spoken.units.filter(unit => spokenLessons.includes(unit.id)).length;
   const grammarCount = grammar.lessons.filter(lesson => earlier[grammarReviewPrefix + lesson.id]?.correct > 0).length;
+  const tajweed = tajweedProgress(earlier);
   const complete = {
     read: completedQaida.length === 17 ? 1 : 0, memorise: short >= salahChapters.length ? (amma >= juzAmma.length ? 2 : 1) : 0,
     understand: known >= 125 ? (grammarCount === grammar.lessons.length ? 2 : 1) : 0,
     speak: spokenCount === spoken.units.length ? 1 : 0,
   };
   const active = Object.fromEntries(tracks.map(track => [track, Math.min(5, Math.max(complete[track] + 1, placement[track]?.level ?? 1))])) as Record<Track, number>;
-  return { active, complete, completedQaida, learned, short, amma, known, current, placement, spokenCount, grammarCount };
+  return { active, complete, completedQaida, learned, short, amma, known, current, placement, spokenCount, grammarCount, tajweed };
 }
 
 function headingLevel(track: Track, active: number) { return levels[track][active - 1]; }
+function levelDone(track: Track, level: number, state: ReturnType<typeof usePathState>) {
+  return level <= state.complete[track] || (track === "read" && level === 3 && state.tajweed.completed === tajweedLessons.length);
+}
 
 function PathsBack({ to }: { to: string }) {
   const { t } = useCopy();
@@ -60,6 +66,7 @@ function PathIcon({ track, desktop }: { track: Track; desktop: boolean }) {
 
 function contextLabel(track: Track, level: number, state: ReturnType<typeof usePathState>, t: ReturnType<typeof useCopy>["t"]) {
   if (track === "read" && level === 1) return t("pathsQaidaCount", { count: state.completedQaida.length });
+  if (track === "read" && level === 3) return t("pathsLessonProgress", { count: state.tajweed.completed, total: tajweedLessons.length });
   if (track === "memorise" && level === 1) return `${trackStatus.memorise[0]} · ${t("pathsSalahCount", { count: state.short, total: salahChapters.length })}`;
   if (track === "memorise" && level === 2) return `${trackStatus.memorise[1]} · ${t("pathsAmmaCount", { count: state.amma })}`;
   if (track === "understand" && level === 1) return t("pathsCoreCount", { count: state.known });
@@ -78,11 +85,10 @@ function LevelNumber({ level, done, active, desktop, tag }: { level: number; don
 function MobileTrackCard({ track, state }: { track: Track; state: ReturnType<typeof usePathState> }) {
   const { t } = useCopy();
   const level = state.active[track];
-  const done = state.complete[track];
   return <Link className="card paths-mobile-track" to={pathUrl(track)}>
     <div className="with-icon"><PathIcon track={track} desktop={false} /><div><h2>{t(trackKeys[track])}</h2><p className="small muted">{t(`${trackKeys[track]}Overview`)}</p></div></div>
     <div className="equal-row paths-steps" aria-hidden="true">{levels[track].map((item, index) =>
-      <span key={item.id} data-state={index < done ? "done" : index + 1 === level ? "current" : "open"} />)}</div>
+      <span key={item.id} data-state={levelDone(track, index + 1, state) ? "done" : index + 1 === level ? "current" : "open"} />)}</div>
     <p className="small">{t("pathsLevelStatus", { number: level, title: headingLevel(track, level).title })}
       {track === "memorise" && level === 2 && ` · ${t("pathsAmmaCount", { count: state.amma })}`}
       {track === "understand" && level === 1 && ` · ${t("pathsCoreCount", { count: state.known })}`}</p>
@@ -95,13 +101,13 @@ function DesktopTrackCard({ track, state }: { track: Track; state: ReturnType<ty
     <header className="with-icon"><PathIcon track={track} desktop /><Link to={pathUrl(track)}><h2>{t(trackKeys[track])}</h2></Link></header>
     {levels[track].map((item, index) => {
       const isCurrent = index + 1 === state.active[track];
-      const isDone = index < state.complete[track];
-      return <Link className="paths-level-link" data-state={isDone ? "done" : isCurrent ? "current" : "open"} key={item.id} to={pathUrl(track, index + 1)}>
+      const isDone = levelDone(track, index + 1, state);
+      return <Link className="paths-level-link" data-state={isDone ? "done" : isCurrent ? "current" : "open"} key={item.id} to={levelLink(track, index + 1)}>
         <LevelNumber level={index + 1} done={isDone} active={isCurrent} tag={item.tag} desktop />
         <div><strong>{item.title}</strong><small>{contextLabel(track, index + 1, state, t)}</small></div>
       </Link>;
     })}
-    <Link className="action" to={pathUrl(track, state.active[track])}>{t("pathsContinue", { track: t(trackKeys[track]).toLocaleLowerCase() })}</Link>
+    <Link className="action" to={levelLink(track, state.active[track])}>{t("pathsContinue", { track: t(trackKeys[track]).toLocaleLowerCase() })}</Link>
   </section>;
 }
 
@@ -149,7 +155,7 @@ export function MaktabMap() {
     { name: "pathsIslandJoining", stars: sliceStars(7, 17), arabic: "ـبـ", to: "/learn/qaida/7" },
     { name: "pathsIslandShort", stars: Math.floor(state.short * 5 / salahChapters.length), arabic: quranText[103][0].uthmani, to: pathUrl("memorise", 1) },
     { name: "pathsIslandJuz", stars: Math.floor(state.amma * 5 / 37), arabic: "عَ", to: pathUrl("memorise", 2) },
-    { name: "pathsIslandTajweed", stars: 0, arabic: "نْ", to: pathUrl("read", 3) },
+    { name: "pathsIslandTajweed", stars: state.tajweed.stars, arabic: "نْ", to: tajweedIndex },
   ];
   const current = islands.findIndex(island => island.stars < 5);
   return <div className="paths-page maktab-map">
@@ -181,10 +187,10 @@ function TrackLevels({ track }: { track: Track }) {
     <ol className="paths-level-list">{levels[track].map((item, index) => {
       const number = index + 1;
       const active = state.active[track] === number;
-      const done = index < state.complete[track];
+      const done = levelDone(track, number, state);
       return <li key={item.id}>
         <LevelNumber level={number} active={active} done={done} desktop={false} />
-        <Link className="card paths-level-mobile" data-state={done ? "done" : active ? "current" : "open"} to={pathUrl(track, number)}>
+        <Link className="card paths-level-mobile" data-state={done ? "done" : active ? "current" : "open"} to={levelLink(track, number)}>
           <div className="row-between"><strong>{item.title}</strong><span className="chip caption">{done ? t("pathsDone") : active ? t("pathsInProgress") : item.tag ?? t("pathsLevel", { number })}</span></div>
           <p className="small muted">{contextLabel(track, number, state, t)}</p>
           {active && track === "memorise" && number === 2 && <progress max={37} value={state.amma} aria-label={t("pathsAmmaCount", { count: state.amma })} />}

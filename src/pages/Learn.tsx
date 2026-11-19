@@ -5,7 +5,7 @@ import { ListLink } from "@/components/Surface";
 import { useQaidaPlace, useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { isDue, type Reviews } from "@/lib/reviews";
-import { patternPracticePath, patternReviewPrefix } from "@/lib/learningPaths";
+import { isPathReview, reviewDestination } from "@/lib/studyDesk";
 import type { Settings } from "@/lib/storageService";
 import { studyNames } from "@/lib/study-copy";
 import { MaktabMap, Paths } from "./Paths";
@@ -20,7 +20,7 @@ function LearnMobile({ settings, now }: { settings: Settings; now: Date }) {
   const reviews = useRecord<Reviews>("reviews", {});
   const due = Object.keys(reviews).filter(id => isDue(reviews[id], now));
   const dueSurahs = due.filter(id => /^\d+$/.test(id));
-  const duePatterns = due.filter(id => id.startsWith(patternReviewPrefix)).length;
+  const duePaths = due.filter(isPathReview);
   const chapter = surahs.surahs.slice(0, 12).find(item => due.includes(String(item.number))) ?? surahs.surahs[2];
   const reviewPath = "/learn/surahs/" + chapter.number;
   const reviewSurah = studyNames.surah(language, chapter.number, chapter.transliteration);
@@ -35,7 +35,7 @@ function LearnMobile({ settings, now }: { settings: Settings; now: Date }) {
     </section>
     <div className="compact-stack">
       <ListLink to={reviewPath} icon={<Headphones size={20} />} title={t("recallSurah", { name: reviewSurah })} detail={dueSurahs.length ? t("itemsDue", { count: dueSurahs.length }) : t("shortSurah")} />
-      {duePatterns > 0 && <ListLink to={patternPracticePath} icon={<Languages size={20} />} title={t("rootsPractice")} detail={t("itemsDue", { count: duePatterns })} />}
+      {duePaths.length > 0 && <ListLink to={reviewDestination(duePaths[0])} icon={<Languages size={20} />} title={t("pathsExerciseReview")} detail={t("itemsDue", { count: duePaths.length })} />}
       <ListLink to="/learn/qaida" icon={<BookOpen size={20} />} title={t("nooraniQaida")} detail={t("lessonsPractised", { count: completed.length })} />
       <ListLink to="/learn/surahs" icon={<Headphones size={20} />} title={t("surahsForSalah")} detail={t("listenReadRecall")} />
       <ListLink to="/learn/salah" icon={<Sparkles size={20} />} title={t("understandSalah")} detail={t("tapToSpell")} />

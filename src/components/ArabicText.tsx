@@ -6,16 +6,18 @@ import { useCopy } from "../lib/copy";
 type WordRecall = "read" | "hint" | "hidden";
 type WordIndicator = { state: "known" | "learning" | "new"; label: string };
 
-function WordChip({ children, recall, href, selected, indicator, onSelect }: {
+function WordChip({ children, recall, href, selected, indicator, annotation, onSelect }: {
   children: ReactNode;
   recall: WordRecall;
   href?: string;
   selected?: boolean;
   indicator?: WordIndicator;
+  annotation?: WordDetail["annotation"];
   onSelect: () => void;
 }) {
   if (href) return <a className="word-chip" href={href}>{children}</a>;
-  return <button type="button" className="word-chip" data-recall={recall} data-learning={indicator?.state} aria-pressed={selected} onClick={onSelect}>{children}</button>;
+  return <button type="button" className="word-chip" data-recall={recall} data-learning={indicator?.state} aria-pressed={selected}
+    data-annotation={annotation?.tone} aria-description={annotation?.label} onClick={onSelect}>{children}</button>;
 }
 
 export interface WordDetail {
@@ -24,6 +26,7 @@ export interface WordDetail {
   displayText?: string;
   root?: string;
   anatomyWord?: string;
+  annotation?: { tone: "accent" | "soft" | "tint" | "neutral"; label: string };
 }
 
 export function ArabicText({ text, citation, words, recall = "read", mushaf, compact = false, verse, positionOffset = 0, wordLink,
@@ -63,7 +66,7 @@ export function ArabicText({ text, citation, words, recall = "read", mushaf, com
             const shown = chipRecall === "hidden" ? "···" : chipRecall === "hint" ? `${splitGraphemes(word)[0]}···` : detail?.displayText ?? word;
             const screenReaderText = chipRecall === "read" ? transliteration : t("revealWord", { number: index + 1 });
             return (
-              <WordChip key={partIndex} recall={chipRecall} href={wordLink?.(index + 1)} selected={selectedPosition === undefined ? undefined : selectedPosition === position} indicator={indicator}
+              <WordChip key={partIndex} recall={chipRecall} href={wordLink?.(index + 1)} selected={selectedPosition === undefined ? undefined : selectedPosition === position} indicator={indicator} annotation={detail?.annotation}
                 onSelect={() => {
                   if (onWordSelected?.(position) === false) return;
                   selectWord({ word: anatomyWord, citation, connected: index > 0, verse, position, ...detail });

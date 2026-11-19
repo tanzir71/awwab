@@ -107,7 +107,8 @@ function Anatomy({ selection, settings, layout }: { selection: WordSelection; se
     <header className="row-between anatomy-header">
       <div>{layout !== "adult-reader" && <p className="caption">{t(maktab && layout === "sheet" ? "anatomySpellIt" : "wordAnatomy")}</p>}
         <h2>{pronunciation || t("spellItOut")}</h2>
-        <p className="muted small">{gloss && "“" + gloss + "”"}{gloss && selection.citation && " · "}{selection.citation}</p></div>
+        <p className="muted small">{gloss && "“" + gloss + "”"}{gloss && selection.citation && " · "}{selection.citation}</p>
+        {selection.annotation && <p className="small">{selection.annotation.label}</p>}</div>
       <div className="anatomy-title"><ArabicText text={selection.word} citation={selection.citation} verse={verseRef}
         positionOffset={(selection.position ?? 1) - 1} words={[{ transliteration: pronunciation, root, gloss }]} showGlosses={false} /></div>
     </header>

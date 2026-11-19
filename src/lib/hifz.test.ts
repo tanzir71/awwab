@@ -9,7 +9,8 @@ import { reviewDestination } from "./studyDesk";
 import { normalizeWord, splitArabicWords } from "./wordAnatomy";
 import content from "../../docs/content/roots-and-patterns.json";
 import grammar from "../../docs/content/grammar-foundations.json";
-import tajweed from "../../docs/content/tajweed-nun.json";
+import { correctTajweedSamples, tajweedExcerpt, tajweedLessons, tajweedPracticeSamples, tajweedProgress, tajweedReviewId } from "./tajweed";
+import { newReview } from "./reviews";
 
 const quran = JSON.parse(gunzipSync(readFileSync(new URL("../../public/data/quran-study-v1.json.gz", import.meta.url))).toString()) as StudyQuran;
 
@@ -74,7 +75,9 @@ describe("Learning path progress", () => {
     const excerpt = (chapter: number, ayah: number, first: number, last: number, script: "indopak" | "uthmani") =>
       splitArabicWords(verseText(quran.surahs[chapter][ayah - 1], script).text).slice(first - 1, last);
     for (const script of ["indopak", "uthmani"] as const) {
-      for (const { chapter, ayah, first, last } of tajweed.samples) expect(excerpt(chapter, ayah, first, last, script)).toHaveLength(last - first + 1);
+      for (const { chapter, ayah, first, last } of tajweedLessons.flatMap(lesson => lesson.samples)) {
+        expect(excerpt(chapter, ayah, first, last, script)).toHaveLength(last - first + 1);
+      }
       for (const { ayah: [chapter, ayah, first, last], words, answer } of grammar.lessons) {
         expect(excerpt(chapter, ayah, first, last, script)).toHaveLength(last - first + 1);
         expect(words[answer]).toBeDefined();
@@ -82,7 +85,31 @@ describe("Learning path progress", () => {
       expect(normalizeWord(excerpt(104, 4, 2, 2, script)[0])).toContain("ينبذ");
     }
     expect(reviewDestination("rule:nun:1:7:3")).toBe("/learn/paths/read/3?review=1%3A7%3A3");
+    expect(reviewDestination("rule:mim:106:4:2")).toBe("/learn/paths/read/3/mim?review=106%3A4%3A2");
     expect(reviewDestination("phrase:sim:0")).toBe("/learn/speak/sim?review=0");
+  });
+
+  it("keeps the exact Uthmani pause marks attached to their preceding words", () => {
+    const marks: Record<string, string> = { "waqf-choice": "ۚ", "waqf-continue": "ۖ", "waqf-pause": "ۗ", "waqf-pair": "ۛۛ", "waqf-required": "ۘ", "waqf-avoid": "ۙ" };
+    const lesson = tajweedLessons.find(item => item.id === "waqf")!;
+    for (const sample of lesson.samples) {
+      const verse = quran.surahs[sample.chapter][sample.ayah - 1];
+      const result = tajweedExcerpt(verse.uthmani, sample, true);
+      expect(result.match(/[\u06d6-\u06db]/gu)?.join(""), verse.ref).toBe(marks[sample.rule]);
+    }
+  });
+
+  it("resumes unfinished examples in short sessions and derives stars from distinct correct answers", () => {
+    const [lesson] = tajweedLessons;
+    const seed = { ...newReview(new Date("2026-11-20")), attempts: 2, correct: 1 };
+    const key = tajweedReviewId(lesson, lesson.samples[0]);
+    const reviews = { [key]: seed, [tajweedReviewId(lesson, lesson.samples[1])]: { ...seed, correct: 0 } };
+    expect(tajweedPracticeSamples(lesson, reviews, true)).toEqual(lesson.samples.slice(1, 5));
+    expect(tajweedPracticeSamples(lesson, reviews, false)).toEqual(lesson.samples);
+    expect(correctTajweedSamples(lesson, reviews)).toBe(1);
+    const all = Object.fromEntries(tajweedLessons.flatMap(item => item.samples.map(sample => [tajweedReviewId(item, sample), seed])));
+    expect(Object.keys(all)).toHaveLength(64);
+    expect(tajweedProgress(all)).toEqual({ completed: 8, stars: 5 });
   });
 
   it("uses the sourced 2:2 morphology for the word family and routes pattern cards back to the drill", () => {

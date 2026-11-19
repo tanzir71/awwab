@@ -10,6 +10,7 @@ export interface WordSelection {
   verse?: string;
   connected: boolean;
   automatic?: boolean;
+  annotation?: { label: string };
 }
 
 export const useUi = create<{
