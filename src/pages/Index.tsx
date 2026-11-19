@@ -1,271 +1,209 @@
-
-import { useEffect, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { CalendarDays, ChevronRight } from "lucide-react";
+import { Link, useParams } from "react-router-dom";
+import { toast } from "sonner";
+import { ArabicText } from "@/components/ArabicText";
+import { DesignIcon } from "@/components/DesignIcon";
 import PrayerTimeline from "@/components/PrayerTimeline";
-import AppInstallPrompt from "@/components/AppInstallPrompt";
-import Footer from "@/components/Footer";
-import { Prayer } from "@/types/Prayer";
-import { fetchPrayerTimes } from "@/lib/prayerServices";
-import { calculatePrayerStatistics, hasNewDayStarted, getCurrentLocalDate } from "@/lib/storageService";
-import { Award, Calendar, Flame, CalendarCheck } from "lucide-react";
+import { SectionHeading, SectionNav } from "@/components/Surface";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { useDesktop, usePrayerLogs, useRecord } from "@/hooks/use-awwab";
+import { addDays, dateKey, duration, formatDay, formatTime } from "@/lib/dates";
+import { calendarDefaults, calendarEvents, hijriLabel } from "@/lib/hijri";
+import { currentPrayerSchedule, methodNames, prayerDay, rakatNames } from "@/lib/prayerServices";
+import { jamaatForPrayer, mosqueDefaults } from "@/lib/mosques";
+import { db, logPrayer, prayerStatistics, type Settings } from "@/lib/storageService";
+import { qadaDefaults } from "@/lib/qada";
+import { isDue, type Reviews } from "@/lib/reviews";
+import { message } from "@/lib/copy";
+import { prayerIds, prayerNames, prayerStatusNames, type Prayer, type RakatGroup } from "@/types/Prayer";
+import hadith from "../../docs/content/hadith-curated.json";
+import rakat from "../../docs/content/rakat-structure.json";
+import qaida from "../../docs/content/qaida-lessons.json";
+import surahs from "../../docs/content/surahs-for-salah.json";
 
-const Index = () => {
-  const [location, setLocation] = useState({ latitude: 21.4225, longitude: 39.8262 }); // Default to Mecca
-  const [prayers, setPrayers] = useState<Prayer[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("today");
-  const [currentDate, setCurrentDate] = useState(getCurrentLocalDate());
-  const [statistics, setStatistics] = useState({
-    currentStreak: 0,
-    bestStreak: 0,
-    completionRate: 0,
-    totalPrayersCompleted: 0,
-    uniqueDays: 0
-  });
-  const { toast } = useToast();
+const prayerArabic = { fajr: "الفجر", dhuhr: "الظهر", asr: "العصر", maghrib: "المغرب", isha: "العشاء" };
+const statusSaved = ["done", "late", "qada"];
+export const istighfar = "أَسْتَغْفِرُ ٱللَّهَ";
+const collectionNames = { bukhari: "Bukhari", muslim: "Muslim", tirmidhi: "Tirmidhi" };
 
-  const getLocationFromIP = async () => {
+export function RakatCards({ groups }: { groups: RakatGroup[] }) {
+  return <div className="rakat-grid" data-count={groups.length}>
+    {groups.map((group, i) => <div data-fard={group.type === "fard"} key={i}>
+      <strong>{group.count} {rakatNames[group.type]}</strong>
+      <small>{group.type === "fard" ? "Obligatory" : group.type === "witr" ? "Wājib in Hanafi" : "Optional"}</small>
+    </div>)}
+  </div>;
+}
+
+export default function Today({ settings, now }: { settings: Settings; now: Date }) {
+  const logs = usePrayerLogs();
+  const desktop = useDesktop();
+  const calendar = useRecord("calendar", calendarDefaults);
+  const progress = useRecord<Record<string, number>>("istighfar", {});
+  const mosques = useRecord("mosques", mosqueDefaults);
+  const qada = useRecord("qada", qadaDefaults);
+  const reviews = useRecord<Reviews>("reviews", {});
+  const lesson = useRecord("qaida-current", 1);
+  const { day, current, next, prayers } = currentPrayerSchedule(settings.city, settings.method, settings.school, now, logs);
+  const [selected, select] = useState<Prayer>();
+  const selectedCurrent = selected && (prayers.find(prayer => prayer.id === selected.id && prayer.date === selected.date) ?? selected);
+  const eventRange = calendarEvents(day, addDays(day, 180), settings.hijriAdjust, calendar)
+    .filter(item => item.kind !== "weekly").slice(0, 3);
+  const daily = hadith.items[Math.floor(Date.parse(day) / 86400000) % hadith.items.length];
+  const zone = settings.city.timeZone;
+  const language = settings.language;
+  const t = message.bind(null, settings);
+  const mode = settings.mode;
+  const group = mode === "maktab" ? "maktab-today" : "today";
+  const headline = current ?? next;
+  const due = Object.entries(reviews).find(([id, review]) => /^\d+$/.test(id) && isDue(review, now));
+  const dueSurah = surahs.surahs.find(item => item.number === Number(due?.[0] ?? 103));
+  const qadaLeft = prayerIds.reduce((sum, id) => sum + Math.max(0, qada.estimated[id] - qada.madeUp[id] - logs.filter(log => log.prayer === id && log.status === "qada").length), 0);
+  const lastWeek = prayerStatistics(logs, day).recent.slice(-7);
+  const jamaat = jamaatForPrayer(headline, zone, mosques);
+  const countdown = duration((current ? current.ends : next.starts).valueOf() - now.valueOf(), language);
+  const hasTimes = Number.isFinite(headline.starts.valueOf());
+  const dateStyle = { weekday: "short", day: "numeric", month: "short" } as const;
+  async function record(prayer: Prayer, action: "log" | "late" | "undo") {
     try {
-      console.log("Attempting to get location from IP address");
-      const response = await fetch("https://ipapi.co/json/");
-      if (!response.ok) {
-        throw new Error("Failed to get location from IP");
-      }
-      
-      const data = await response.json();
-      if (data.latitude && data.longitude) {
-        console.log("Location obtained from IP:", data.latitude, data.longitude);
-        setLocation({
-          latitude: data.latitude,
-          longitude: data.longitude,
-        });
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error("Error getting location from IP:", error);
-      return false;
+      if (action === "undo") await db.prayers.delete([prayer.date, prayer.id]);
+      else if (action === "late") {
+        await db.prayers.put({ date: prayer.date, prayer: prayer.id, status: "late", at: new Date().toISOString() });
+      } else await logPrayer(prayer, new Date(), jamaatForPrayer(prayer, zone, mosques)?.id);
+      select(undefined);
+      toast(t(action === "undo" ? "prayerRemoved" : prayer.status === "missed" ? "qadaRecorded" : "prayerRecorded"));
+    } catch {
+      toast.error(t("prayerSaveError"));
     }
-  };
+  }
 
-  const loadPrayerTimes = async () => {
-    try {
-      setLoading(true);
-      console.log("Fetching prayer times for location:", location.latitude, location.longitude);
-      const prayerData = await fetchPrayerTimes(location.latitude, location.longitude);
-      setPrayers(prayerData);
-    } catch (error) {
-      console.error("Error fetching prayer times:", error);
-      toast({
-        title: "Error",
-        description: "Could not fetch prayer times. Please try again later.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    const getLocation = async () => {
-      if (navigator.geolocation) {
-        try {
-          const locationPromise = new Promise((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(
-              (position) => {
-                setLocation({
-                  latitude: position.coords.latitude,
-                  longitude: position.coords.longitude,
-                });
-                console.log("Location obtained successfully:", position.coords.latitude, position.coords.longitude);
-                resolve(true);
-              },
-              (error) => {
-                console.log("Geolocation error:", error.code, error.message);
-                reject(error);
-              },
-              { 
-                enableHighAccuracy: true, 
-                timeout: 5000, 
-                maximumAge: 0 
-              }
-            );
-          });
-          
-          await Promise.race([
-            locationPromise,
-            new Promise((_, reject) => 
-              setTimeout(() => reject(new Error("Geolocation timeout")), 5000)
-            )
-          ]);
-        } catch (error) {
-          console.log("Browser geolocation failed, trying IP geolocation");
-          
-          const ipLocationSuccess = await getLocationFromIP();
-          
-          if (!ipLocationSuccess) {
-            console.log("Using default location (Mecca)");
-            toast({
-              title: "Using Default Location",
-              description: "We're using Mecca for prayer times. Allow location access for local times.",
-              duration: 5000,
-            });
-          }
-        }
-      } else {
-        console.log("Geolocation not supported by this browser, trying IP geolocation");
-        
-        const ipLocationSuccess = await getLocationFromIP();
-        
-        if (!ipLocationSuccess) {
-          console.log("IP geolocation failed. Using default location (Mecca)");
-          toast({
-            title: "Location Not Supported",
-            description: "Your browser doesn't support location. Using Mecca for prayer times.",
-            duration: 5000,
-          });
-        }
-      }
-    };
-    
-    getLocation();
-  }, [toast]);
-
-  useEffect(() => {
-    loadPrayerTimes();
-  }, [location, toast]);
-
-  useEffect(() => {
-    setStatistics(calculatePrayerStatistics());
-  }, [prayers, activeTab]);
-  
-  // Enhanced day change detection
-  useEffect(() => {
-    // First check on mount
-    if (hasNewDayStarted()) {
-      console.log("New day detected, refreshing data");
-      const newDate = getCurrentLocalDate();
-      setCurrentDate(newDate);
-      
-      toast({
-        title: "New Day",
-        description: `Today is ${newDate}. Start a new prayer journey!`,
-        duration: 5000,
-      });
-      
-      loadPrayerTimes();
-      setStatistics(calculatePrayerStatistics());
-    }
-    
-    // Then check periodically
-    const intervalId = setInterval(() => {
-      const newDate = getCurrentLocalDate();
-      
-      // Check if date has changed since last render
-      if (newDate !== currentDate) {
-        console.log("Day changed from", currentDate, "to", newDate);
-        setCurrentDate(newDate);
-        
-        toast({
-          title: "New Day Has Begun",
-          description: "Your prayer tracking has been reset for the new day.",
-          duration: 5000,
-        });
-        
-        loadPrayerTimes();
-        setStatistics(calculatePrayerStatistics());
-      }
-    }, 60000); // Check every minute
-    
-    return () => clearInterval(intervalId);
-  }, [toast, currentDate]);
-  
-  const handlePrayerCompleted = () => {
-    setStatistics(calculatePrayerStatistics());
-  };
-
-  return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-background to-muted">
-      <div className="container mx-auto px-4 py-8 flex-grow pb-14">
-        <header className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2">PrayerTracker</h1>
-          <p className="text-muted-foreground">
-            Build your spiritual journey, one prayer at a time
-          </p>
-        </header>
-
-        <Tabs defaultValue="today" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-2 mb-4">
-            <TabsTrigger value="today">Today</TabsTrigger>
-            <TabsTrigger value="stats">Statistics</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="today" className="space-y-4">
-            {loading ? (
-              <div className="flex justify-center p-8">
-                <div className="animate-pulse text-center">
-                  <p>Loading prayer times...</p>
-                </div>
-              </div>
-            ) : (
-              <PrayerTimeline 
-                prayers={prayers} 
-                onPrayerCompleted={handlePrayerCompleted} 
-                currentDate={currentDate}
-              />
-            )}
-          </TabsContent>
-          
-          <TabsContent value="stats">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center space-y-4">
-                  <div>
-                    <h3 className="text-xl font-medium">Your Prayer Journey</h3>
-                    <p className="text-4xl font-bold">{statistics.currentStreak} days</p>
-                    <p className="text-muted-foreground">Current streak</p>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4 mt-4">
-                    <div className="bg-muted p-4 rounded-lg flex flex-col items-center">
-                      <Calendar className="h-5 w-5 mb-1 text-primary" />
-                      <p className="text-2xl font-bold">{statistics.uniqueDays}</p>
-                      <p className="text-sm text-muted-foreground">Total active days</p>
-                    </div>
-                    <div className="bg-muted p-4 rounded-lg flex flex-col items-center">
-                      <CalendarCheck className="h-5 w-5 mb-1 text-primary" />
-                      <p className="text-2xl font-bold">{statistics.totalPrayersCompleted}</p>
-                      <p className="text-sm text-muted-foreground">Total prayers</p>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4 mt-4">
-                    <div className="bg-muted p-4 rounded-lg flex flex-col items-center">
-                      <Flame className="h-5 w-5 mb-1 text-primary" />
-                      <p className="text-2xl font-bold">{statistics.completionRate}%</p>
-                      <p className="text-sm text-muted-foreground">Completion rate</p>
-                    </div>
-                    <div className="bg-muted p-4 rounded-lg flex flex-col items-center">
-                      <Award className="h-5 w-5 mb-1 text-primary" />
-                      <p className="text-2xl font-bold">{statistics.bestStreak}</p>
-                      <p className="text-sm text-muted-foreground">Best streak</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+  return <div className="prayer-layout stack">
+    <header className="prayer-intro row-between">
+      <div>
+        <p className="caption">{formatDay(day, dateStyle, language)} · {hijriLabel(day, settings.hijriAdjust, calendar.anchors)}</p>
+        <h1>{t("greeting")}</h1>
+        <Link className="small with-icon muted" to="/you/prayer">
+          <DesignIcon size={14} name={`${group}-pin`} />{settings.city.name} · {methodNames[settings.method]} method · {settings.school === "hanafi" ? "Hanafi Asr" : "Standard Asr"}
+        </Link>
       </div>
-      
-      <div className="relative pb-12 md:pb-0">
-        <Footer />
-        <AppInstallPrompt />
+      <Link className="icon-button" to="/you/reminders" aria-label={t("reminders")}><DesignIcon name={`${group}-bell`} /></Link>
+    </header>
+    <section className="card night prayer-hero stack">
+      <DesignIcon name={`${group}-motifstar8`} size={220} className="hero-motif" />
+      <p className="caption">{hasTimes ? t(current ? "currentPrayer" : "nextPrayer", { time: formatTime(current ? current.ends : next.starts, zone, language) }) : t("prayerTimes")}</p>
+      <div className="with-icon"><h2>{t(headline.id)}</h2><ArabicText text={prayerArabic[headline.id]} compact /></div>
+      <p className="muted">{hasTimes ? t(current ? "prayerRemaining" : "prayerStarts", { time: countdown }) : t("prayerUnavailable")}</p>
+      {jamaat && <Link to="/plan/mosques" className="chip jamaat"><DesignIcon size={16} name={`${group}-pin1`} /> {t("jamaat", jamaat)}</Link>}
+      <RakatCards groups={headline.rakats} />
+      <div className="equal-row">
+        {current && !statusSaved.includes(current.status)
+          ? <button className="action gold" onClick={() => void record(current, "log")}>{t("iPrayed", { name: t(current.id) })}</button>
+          : <Link className="action gold" to="/today/week">{t("weekView")}</Link>}
+        <Link className="action light" to={`/today/guide/${headline.id}`}>{t("howToPray")}</Link>
       </div>
+    </section>
+    <section className="compact-stack">
+      <SectionHeading title={t("todayPrayers")} to="/today/week" label={t("weekView")} />
+      <PrayerTimeline prayers={prayers} settings={settings} onAction={select} />
+    </section>
+    <section className="compact-stack">
+      <SectionHeading title={t("todayPractice")} to="/learn" label={t("learn")} />
+      {[{ to: `/learn/surahs/${dueSurah.number}`, title: t("recallSurah", { name: dueSurah.transliteration }), detail: `Surah · ${dueSurah.words} words${due ? " · due now" : ""}`, icon: mode === "maktab" ? "book" : "book1" },
+        { to: `/learn/qaida/${lesson}`, title: `Qaida · Lesson ${lesson}`, detail: qaida.lessons[lesson - 1]?.title, icon: "pen" }].map(item =>
+        <Link key={item.to} className="list-row" to={item.to}>
+          <span className="icon-box"><DesignIcon name={`${group}-${item.icon}`} /></span>
+          <span><strong>{item.title}</strong><small>{item.detail}</small></span>
+          <ChevronRight size={18} />
+        </Link>)}
+      <div className="card compact-stack">
+        <div className="row-between"><Link className="text-button" to="/return">Astaghfirullah · {progress[day] ?? 0} of 100</Link><ArabicText text={istighfar} compact /></div>
+        <progress value={Math.min(100, progress[day] ?? 0)} max={100} aria-label="Istighfar progress" />
+      </div>
+    </section>
+    {desktop && <section className="card compact-stack prayer-intro">
+      <SectionHeading title={t("todayWeek")} to="/today/week" label={t("openWeek")} />
+      <div className="equal-row">
+        {lastWeek.map(item => <div className="counter-tile" key={item.day}><strong>{item.count}/5</strong><small>{formatDay(item.day, { weekday: "short" }, language)}</small></div>)}
+      </div>
+      <Link className="text-button" to="/return/qada">{t("qadaBalance", { count: qadaLeft })}</Link>
+    </section>}
+    <section className="card soft hadith-quote">
+      <a className="caption" href={daily.url}>{daily.grade} · {collectionNames[daily.collection]} {daily.number}</a>
+      <blockquote>{daily.summary.replace("He ﷺ", "The Prophet")}</blockquote>
+    </section>
+    <section className="compact-stack prayer-intro">
+      <SectionHeading title={t("comingUp")} to="/plan" label={t("calendar")} />
+      <div className="chips">
+        {eventRange.map(event => <Link className="chip soft" key={event.id} to={`/plan?event=${event.id}`}>
+          {event.title} · {event.dates.map(date => formatDay(date, dateStyle, language)).join(t("dateOr"))}
+        </Link>)}
+      </div>
+    </section>
+    <Dialog open={Boolean(selectedCurrent)} onOpenChange={open => { if (!open) select(undefined); }}>
+      {selectedCurrent && <DialogContent className="awwab-dialog">
+        <DialogTitle>{t(selectedCurrent.id)}</DialogTitle>
+        <DialogDescription className="muted">{t(selectedCurrent.status)}</DialogDescription>
+        {Number.isFinite(selectedCurrent.starts.valueOf()) && <p className="muted">{formatTime(selectedCurrent.starts, zone, language)} – {formatTime(selectedCurrent.ends, zone, language)} · {settings.city.name}</p>}
+        <Link className="action soft" to={`/today/guide/${selectedCurrent.id}`} onClick={() => select(undefined)}>{t("howToPray")}</Link>
+        {selectedCurrent.status === "now" && <div className="equal-row">
+          <button className="action" onClick={() => void record(selectedCurrent, "log")}>{t("iPrayedShort")}</button>
+          <button className="action light" onClick={() => void record(selectedCurrent, "late")}>{t("logLate")}</button>
+        </div>}
+        {selectedCurrent.status === "missed" && Number.isFinite(selectedCurrent.ends.valueOf()) && <button className="action" onClick={() => void record(selectedCurrent, "log")}>{t("logQada")}</button>}
+        {statusSaved.includes(selectedCurrent.status) && <button className="action light" onClick={() => void record(selectedCurrent, "undo")}>{t("undoPrayer")}</button>}
+      </DialogContent>}
+    </Dialog>
+  </div>;
+}
+
+export function PrayerGuide() {
+  const { id } = useParams();
+  const reviews = useRecord<Reviews>("reviews", {});
+  const prayer = prayerIds.find(item => item === id);
+  if (!prayer) return <Link to="/today">Back to Today</Link>;
+  const groups = rakat.prayers[prayer];
+  const count = groups.find(group => group.type === "fard").count;
+  const solid = surahs.surahs.filter(surah => surah.number !== 1 && reviews[surah.number]?.bucket === "manzil");
+  return <div className="stack">
+    <SectionNav title={`How to pray ${prayerNames[prayer]}`} back="/today" />
+    <section className="card night compact-stack">
+      <p className="caption">{groups.reduce((total, group) => total + group.count, 0)} rakʿāt in total</p>
+      <RakatCards groups={groups} />
+      <p>Short on time? Start with the {count} Fard.</p>
+    </section>
+    <p className="muted"><span className="chip soft">Hanafi reference</span> Scholars differ on details, including Witr.</p>
+    <section className="compact-stack">
+      <h2>The {count} Fard, rakʿah by rakʿah</h2>
+      {Array.from({ length: count }, (_, i) => <div className="list-row" key={i}>
+        <span className="icon-box">{i + 1}</span>
+        <span><strong>{i < 2 ? "Al-Fātiḥa and a short surah" : "Al-Fātiḥa only"}{i + 1 === count ? ", then final sitting" : i === 1 ? ", then sit" : ""}</strong>
+          <small>{i + 1 === count ? "Tashahhud → Ṣalawāt → duʿāʾ → Salām" : i === 1 ? "First sitting: Tashahhud" : i === 0 ? `Try ${solid[0]?.transliteration ?? "Al-Kawthar"}` : "Continue to the next rakʿah"}</small></span>
+      </div>)}
+    </section>
+    <section className="card tint compact-stack">
+      <h2>Lost count mid-prayer?</h2>
+      <p>If you’re unsure whether you prayed three or four, build on what you’re sure of. The narration describes two prostrations before salām. Scholars differ on how to apply this guidance.</p>
+      <a className="small" href="https://sunnah.com/muslim:571a">Ṣaḥīḥ Muslim 571a · Sahih</a>
+    </section>
+    <div className="equal-row"><Link className="action" to="/learn/surahs/1?mode=listen">Practise with audio</Link><Link className="action soft" to="/learn/salah">Word by word</Link></div>
+  </div>;
+}
+
+export function PrayerWeek({ settings, now }: { settings: Settings; now: Date }) {
+  const logs = usePrayerLogs();
+  const today = dateKey(now, settings.city.timeZone);
+  const [offset, setOffset] = useState(0);
+  return <div className="stack">
+    <SectionNav title="Week view" back="/today" />
+    <div className="equal-row">
+      <button className="action soft" onClick={() => setOffset(value => value - 7)}>Previous week</button>
+      <button className="action soft" disabled={offset >= 0} onClick={() => setOffset(value => value + 7)}>Next week</button>
     </div>
-  );
-};
-
-export default Index;
+    {Array.from({ length: 7 }, (_, index) => addDays(today, offset + index - 6)).map(day => <section className="card compact-stack" key={day}>
+      <h2 className="with-icon"><CalendarDays size={20} />{formatDay(day)}</h2>
+      <div className="chips">{prayerDay(day, settings.city, settings.method, settings.school, now, logs).map(prayer =>
+        <span key={prayer.id} className="chip" title={prayerStatusNames[prayer.status]}>{prayer.name} · {prayerStatusNames[prayer.status]}</span>)}</div>
+    </section>)}
+  </div>;
+}

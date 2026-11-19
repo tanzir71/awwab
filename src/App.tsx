@@ -1,27 +1,83 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
+import { useEffect, useState } from "react";
+import { HashRouter, Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Toaster } from "sonner";
+import { AppShell } from "@/components/AppShell";
+import { WordPanel } from "@/components/WordPanel";
+import { useClock, useDesktop, useSettings } from "@/hooks/use-awwab";
+import { migrateLegacy } from "@/lib/storageService";
+import Today, { PrayerGuide, PrayerWeek } from "@/pages/Index";
+import { Learn } from "@/pages/Learn";
+import { Plan } from "@/pages/Plan";
+import { Qada, ReturnPage, Sayyid } from "@/pages/Return";
+import { SettingsPage, You } from "@/pages/You";
+import { Onboarding } from "@/pages/Onboarding";
+import { Fluency, Hadith, Qaida, SalahWords, SurahReader } from "@/pages/Study";
+import { Mosques } from "@/pages/Mosques";
+import { Zakat } from "@/pages/Zakat";
+import { PrintHub, PrintSheet } from "@/pages/Print";
+import { Takhti } from "@/pages/Takhti";
+import { Share } from "@/pages/Share";
+import { Sources } from "@/pages/Sources";
+import { WordBank } from "@/pages/WordBank";
+import AppInstallPrompt from "@/components/AppInstallPrompt";
 
-const queryClient = new QueryClient();
+function Main() {
+  const settings = useSettings();
+  const desktop = useDesktop();
+  const now = useClock();
+  const { pathname, search } = useLocation();
+  const [storage, setStorage] = useState<"loading" | "ready" | "error">("loading");
+  useEffect(() => {
+    let active = true;
+    void Promise.resolve().then(() => migrateLegacy(window.localStorage)).then(() => {
+      if (active) setStorage("ready");
+    }, () => {
+      if (active) setStorage("error");
+    });
+    return () => { active = false; };
+  }, []);
+  useEffect(() => {
+    if (!settings) return;
+    document.documentElement.dataset.mode = settings.mode;
+    document.documentElement.lang = settings.language;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", settings.mode === "adult" ? "#15302b" : "#25306b");
+  }, [settings]);
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+  if (storage === "error") return <main className="app-content stack"><h1>Device storage is unavailable</h1><p>Allow this site to use browser storage, then reload to open Awwab.</p></main>;
+  if (!settings || storage === "loading") return <main className="app-content"><p role="status">Opening awwab…</p></main>;
+  if (!settings.onboarded && pathname !== "/install" && pathname !== "/sources") return <><Onboarding settings={settings} /><WordPanel desktop={false} settings={settings} /></>;
+  return <AppShell settings={settings} now={now} desktop={desktop}>
+    <Routes>
+      <Route path="/" element={<Navigate replace to={desktop ? "/learn" : "/today"} />} />
+      <Route path="/today" element={<Today settings={settings} now={now} />} />
+      <Route path="/today/guide/:id" element={<PrayerGuide />} />
+      <Route path="/today/week" element={<PrayerWeek settings={settings} now={now} />} />
+      <Route path="/learn" element={<Learn settings={settings} desktop={desktop} />} />
+      <Route path="/learn/qaida/:id?" element={<Qaida settings={settings} />} />
+      <Route path="/learn/surahs/:id?" element={<SurahReader settings={settings} />} />
+      <Route path="/learn/salah" element={<SalahWords settings={settings} />} />
+      <Route path="/learn/fluency" element={<Fluency />} />
+      <Route path="/learn/words" element={<WordBank />} />
+      <Route path="/learn/takhti/:family?" element={<Takhti />} />
+      <Route path="/learn/hadith" element={<Hadith />} />
+      <Route path="/return" element={<ReturnPage settings={settings} now={now} />} />
+      <Route path="/return/sayyid" element={<Sayyid />} />
+      <Route path="/return/qada" element={<Qada settings={settings} now={now} />} />
+      <Route path="/plan" element={<Plan settings={settings} now={now} />} />
+      <Route path="/plan/mosques" element={<Mosques settings={settings} now={now} />} />
+      <Route path="/plan/zakat" element={<Zakat settings={settings} />} />
+      <Route path="/share" element={<Share key={search} settings={settings} now={now} />} />
+      <Route path="/install" element={<div className="stack"><AppInstallPrompt /><Link className="action soft" to="/">Continue to awwab</Link></div>} />
+      <Route path="/sources" element={<Sources />} />
+      <Route path="/print" element={<PrintHub />} />
+      <Route path="/print/:sheet/:family?" element={<PrintSheet settings={settings} now={now} />} />
+      <Route path="/you" element={<You settings={settings} now={now} />} />
+      {["learning", "prayer", "hijri", "reminders", "data"].map(page => <Route key={page} path={`/you/${page}`} element={<SettingsPage key={page} settings={settings} now={now} panel={page} />} />)}
+      <Route path="*" element={<section className="card stack"><h1>Find your way back</h1><p>Choose a page to continue.</p><Link className="action" to="/">Go to your home screen</Link></section>} />
+    </Routes>
+  </AppShell>;
+}
 
-export default App;
+export default function App() {
+  return <HashRouter><Toaster position="top-center" /><Main /></HashRouter>;
+}
