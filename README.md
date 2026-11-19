@@ -30,6 +30,7 @@ The repository includes versioned Quran, hadith, morphology, and map assets. Nor
 - `npm run hadith` refreshes Hadith API editions and retains explicitly graded entries without conflicting weak grades.
 - `npm run morphology` prepares the verbatim Quranic Arabic Corpus 0.4 file for offline use.
 - `npm run recitation` refreshes opt-in murattal audio packs from Aaqib Azeez’s CC0 recordings.
+- `python scripts/build-landing-font.py` refreshes the landing page’s Arabic font subset after copy changes. It uses FontTools and Brotli.
 - `node scripts/build-umrah-pins.mjs` refreshes selected Haram features from OpenStreetMap.
 - `pwsh -File scripts/build-umrah-maps.ps1` uses the Protomaps CLI to prepare and verify the Makkah and Madinah packs.
 - `AWWAB_CONTENT_DIR` can point the content refresh scripts to a directory of existing source files.
