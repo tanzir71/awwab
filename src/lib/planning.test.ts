@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { calculateZakat, gramsPerBhori, nisabWeight } from "./zakat";
+import { calculateZakat, gramsPerBhori, initialZakat, nisabWeight, paymentsForHawl,
+  zakatHawl, zakatMoney, zakatPrices, zakatProfileTotals, type ZakatProfile } from "./zakat";
 import { advanceSai, bearing, correctSai, distance, initialSai } from "./umrah";
-import { eventDisplayDates } from "./hijri";
+import { addDays } from "./dates";
+import { baselineMonthStart, dayDifference, eventDisplayDates } from "./hijri";
 import { qadaBalances, qadaDefaults, qadaForecast } from "./qada";
 import { assignedMosque, mapMosque, mosqueDefaults, mosqueTime, mosqueWeek, timetableNotice, weeklyMosque, type Mosque } from "./mosques";
 
@@ -47,6 +49,58 @@ describe("zakat", () => {
     expect(bhori.nisab).toBeCloseTo(gram.nisab, 6);
     expect(calculateZakat([5000], [], "silver", 100, "g").due).toBe(0);
     expect(calculateZakat([70000], [], "silver", 0, "g").due).toBeUndefined();
+  });
+
+  it("values weighed jewellery by purity and includes all owned assets and current debts", () => {
+    const profile: ZakatProfile = { ...initialZakat, cash: 340_000, prices: { silver: 230, gold: 18_000 }, assets: [
+      { id: "bracelet", name: "", kind: "metal", basis: "gold", unit: "bhori", weight: 2, purity: 22 / 24 * 100 },
+      { id: "owed", name: "", kind: "receivables", amount: 50_000 },
+      { id: "stock", name: "", kind: "trade", amount: 5000 },
+      { id: "debt", name: "", kind: "debt", amount: 30_000 },
+    ] };
+    const result = zakatProfileTotals(profile);
+    expect(result.totals.metals).toBeCloseTo(384_912, 4);
+    expect(result.net).toBeCloseTo(749_912, 4);
+    expect(result.due).toBe(18_747.8);
+    expect(result.nisab).toBe(136_850);
+    expect(zakatProfileTotals({ ...profile, basis: "gold" }).due).toBe(0);
+    expect(zakatProfileTotals({ ...profile, prices: { silver: 230 } })).toMatchObject({
+      complete: false, net: undefined, due: undefined, nisab: 136_850,
+    });
+    expect(zakatMoney(result.net, "BDT", "en", true)).toBe("৳ 7,49,912");
+  });
+
+  it("reads the single saved price from an older profile in its original unit", () => {
+    const legacy: ZakatProfile = { ...initialZakat, unit: "bhori", price: 100 * gramsPerBhori, cash: 100_000 };
+    expect(zakatPrices(legacy).silver).toBeCloseTo(100);
+    const result = zakatProfileTotals(legacy);
+    expect(result).toMatchObject({ complete: true, net: 100_000, due: 2500 });
+    expect(result.nisab).toBeCloseTo(59_500);
+  });
+
+  it("moves the hawl with the confirmed month and uses the last day of a shorter month", () => {
+    const year = 1448;
+    const month = Array.from({ length: 11 }, (_, i) => i + 1)
+      .find(m => dayDifference(baselineMonthStart(year, m + 1), baselineMonthStart(year, m)) === 29);
+    const start = baselineMonthStart(year, month);
+    const profile: ZakatProfile = { ...initialZakat, hawlSet: true, hawlMonth: month, hawlDay: 30 };
+    expect(zakatHawl(start, initialZakat, 0, [])).toBeUndefined();
+    const hawl = zakatHawl(start, profile, 0, []);
+    expect(hawl).toMatchObject({ date: addDays(start, 28), day: 29, year, month, daysUntil: 28, shorterMonth: true });
+    const anchor = { year, month, date: addDays(start, 1), source: "Local sighting" };
+    expect(zakatHawl(start, profile, 0, [anchor])).toMatchObject({ date: addDays(start, 29), day: 29, daysUntil: 29 });
+    expect(zakatHawl(addDays(hawl.date, 1), profile, 0, []).year).toBe(year + 1);
+  });
+
+  it("matches explicit Hijri cycles and older dated payments in the saved currency", () => {
+    const profile: ZakatProfile = { ...initialZakat, hawlMonth: 10, hawlDay: 4, hawlSet: true };
+    const hawl = zakatHawl("2026-11-19", profile, 0, []);
+    const explicit = { day: hawl.previous, hawlYear: hawl.year, currency: "BDT", amount: 8 };
+    const legacy = { day: hawl.date, currency: "BDT", amount: 5 };
+    profile.payments = [explicit, legacy, { ...legacy, currency: "USD" }, { ...legacy, day: hawl.previous },
+      { ...legacy, hawlYear: hawl.year - 1 }];
+    expect(paymentsForHawl(profile, hawl)).toEqual([explicit, legacy]);
+    expect(paymentsForHawl(profile, undefined)).toEqual(profile.payments);
   });
 });
 

@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import { useRecord } from "@/hooks/use-awwab";
 import { message, rakatLabel } from "@/lib/copy";
-import { addDays, duration, formatDay, formatTime } from "@/lib/dates";
-import { eventDisplayDates, hijriOn, monthStart, type CalendarEvent, type CalendarSettings } from "@/lib/hijri";
+import { duration, formatDay, formatTime } from "@/lib/dates";
+import { eventDisplayDates, type CalendarEvent, type CalendarSettings } from "@/lib/hijri";
 import { jamaatForPrayer, mosqueForPrayer, type MosquePlan } from "@/lib/mosques";
 import { prayerDay } from "@/lib/prayerServices";
 import { guideRakats } from "@/lib/prayerGuide";
@@ -11,7 +11,7 @@ import { coreWordTotal, countKnownQuranWords } from "@/lib/quran";
 import { isDue, type Reviews } from "@/lib/reviews";
 import { prayerStatistics, type Settings } from "@/lib/storageService";
 import { families } from "@/lib/takhti";
-import { initialZakat } from "@/lib/zakat";
+import { zakatHawl, type ZakatProfile } from "@/lib/zakat";
 import { prayerIds, type Prayer, type PrayerLog } from "@/types/Prayer";
 import { SectionHeading } from "./Surface";
 import surahs from "../../docs/content/surahs-for-salah.json";
@@ -61,7 +61,7 @@ export function TodayDashboard({ settings, now, day, prayers, current, next, log
   const knownVerses = useRecord<string[]>("words-known", []);
   const takhti = useRecord<string[]>("takhti-practised", []);
   const qada = useRecord("qada", qadaDefaults);
-  const zakat = useRecord<typeof initialZakat | null>("zakat", null);
+  const zakat = useRecord<ZakatProfile | null>("zakat", null);
   const stats = prayerStatistics(logs, day);
   const balances = qadaBalances(qada, logs);
   const { madeUp, remaining, totalLeft } = balances;
@@ -72,10 +72,7 @@ export function TodayDashboard({ settings, now, day, prayers, current, next, log
   const countdown = timeAvailable(headline.starts) ? duration((current ? current.ends : next.starts).valueOf() - now.valueOf(), locale) : undefined;
   const missed = prayers.find(prayer => prayer.status === "missed");
   const history = stats.recent.slice(-7).map(({ day: date }) => ({ day: date, prayers: date === day ? prayers : prayerDay(date, settings.city, settings.method, settings.school, now, logs) }));
-  const hijri = hijriOn(day, settings.hijriAdjust, calendar.anchors);
-  const hawlStart = (year: number) => monthStart(year, zakat.hawlMonth, settings.hijriAdjust, calendar.anchors).date;
-  const thisHawl = zakat ? addDays(hawlStart(hijri.year), zakat.hawlDay - 1) : undefined;
-  const hawl = thisHawl && (thisHawl >= day ? thisHawl : addDays(hawlStart(hijri.year + 1), zakat.hawlDay - 1));
+  const hawl = zakatHawl(day, zakat, settings.hijriAdjust, calendar.anchors)?.date;
   const progress = [
     { key: "qaidaLessons", count: new Set(qaidaComplete).size, max: 17 },
     { key: "surahsSolid", count: practiceSurahs.filter(surah => reviews[surah.number]?.bucket === "manzil").length, max: practiceSurahs.length },

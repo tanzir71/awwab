@@ -16,6 +16,8 @@ import { countKnownQuranWords } from "@/lib/quran";
 import { reviewDestination, studyPlanMinutes, type DeskActivity } from "@/lib/studyDesk";
 import { studyNames } from "@/lib/study-copy";
 import { qaidaRows, resolveQaidaRow } from "@/lib/qaidaPractice";
+import { planMonth } from "@/lib/plan-copy";
+import { zakatHawl, type ZakatProfile } from "@/lib/zakat";
 import qaida from "../../docs/content/qaida-lessons.json";
 import surahs from "../../docs/content/surahs-for-salah.json";
 
@@ -89,6 +91,14 @@ export function AppShell({ children, settings, now, desktop }: { children: React
   const nextReview = due.find(([id]) => /^\d+$/.test(id))?.[0];
   const dueSurahs = due.filter(([id]) => /^\d+$/.test(id)).length;
   const { day, next } = currentPrayerSchedule(settings.city, settings.method, settings.school, now, logs);
+  const zakat = useRecord<ZakatProfile | null>("zakat", null);
+  const zakatPage = location.pathname === "/plan/zakat";
+  const hawl = zakatHawl(day, zakat, settings.hijriAdjust, calendar.anchors);
+  const number = new Intl.NumberFormat(settings.language, { useGrouping: false });
+  const zakatSubtitle = [
+    hawl && t("zakatHawlHeader", { hijri: [number.format(hawl.day), planMonth(hawl.month, settings.language), number.format(hawl.year)].join(" "), days: hawl.daysUntil }),
+    t("zakatAmountsIn", { currency: zakat?.currency ?? "BDT" }),
+  ].filter(Boolean).join(" · ");
   const stats = prayerStatistics(logs, day);
   const counts: Record<string, string> = {
     "/learn": due.length ? t("deskDueBadge", { count: dueSurahs || due.length }) : undefined,
@@ -99,6 +109,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
     "/today": `${logs.filter(log => log.date === day).length}/5`,
     "/return": String(stats.returns),
     "/plan/mosques": String(mosques.mosques.length),
+    "/plan/zakat": hawl && t("zakatDayBadge", { days: hawl.daysUntil }),
   };
   const destinations = groups.flatMap(group => group.items);
   const heading = [...destinations].sort((a, b) => b.to.length - a.to.length).find(item => location.pathname.startsWith(item.to));
@@ -191,8 +202,8 @@ export function AppShell({ children, settings, now, desktop }: { children: React
     </nav>}
     <main className="app-main" id="app-main" tabIndex={-1} data-page={shareSheet ? "share-sheet" : shareMoment ? "share-moment" : prayerGuide ? "prayer-guide" : salahStudy ? "salah-study" : today ? "today" : studyHome ? "learn" : chapter ? "surah-reader" : lesson ? "qaida-lesson" : wordBank ? "word-bank" : fluency ? "fluency" : location.pathname.startsWith("/learn/takhti") ? "takhti" : undefined}>
       {!fullscreen && !((today || studyHome || surahStudy) && settings.mode === "maktab") && <header className="topbar">
-        <div>{today || learnWorkspace ? <h1>{qaidaStudy ? t("qaidaDesktopTitle", { number: lesson.n }) : surahStudy ? t("surahsForSalah") : wordBankStudy ? t("wordBankName") : title}</h1> : <h2>{title}</h2>}
-          <p className="small muted">{qaidaStudy ? qaidaSubtitle : surahStudy ? studySubtitle : wordBankStudy ? t("wordBankSubtitle") : date + " · " + hijriLabel(day, settings.hijriAdjust, calendar.anchors)}{today && ` · ${settings.city.name}`}{studyHome && " · " + t("deskMinutesToday", { count: studyPlanMinutes(hidden) })}</p></div>
+        <div>{today || learnWorkspace || zakatPage ? <h1>{qaidaStudy ? t("qaidaDesktopTitle", { number: lesson.n }) : surahStudy ? t("surahsForSalah") : wordBankStudy ? t("wordBankName") : title}</h1> : <h2>{title}</h2>}
+          <p className="small muted">{zakatPage ? zakatSubtitle : qaidaStudy ? qaidaSubtitle : surahStudy ? studySubtitle : wordBankStudy ? t("wordBankSubtitle") : date + " · " + hijriLabel(day, settings.hijriAdjust, calendar.anchors)}{today && ` · ${settings.city.name}`}{studyHome && " · " + t("deskMinutesToday", { count: studyPlanMinutes(hidden) })}</p></div>
         <Link className="chip night" to="/today">{nextPrayer}</Link>
         {settings.mode === "adult" && <>
           <Link className="action" to={reviewDestination(nextReview ?? due[0]?.[0])}><DesignIcon name="desk-play" size={14} />{t("startReview")}{due.length ? ` · ${studyHome ? dueSurahs || due.length : due.length}` : ""}</Link>

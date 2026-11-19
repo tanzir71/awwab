@@ -9,6 +9,7 @@
 @import "./return.css";
 @import "./plan.css";
 @import "./mosques.css";
+@import "./zakat.css";
 
 @tailwind base;
 @tailwind components;

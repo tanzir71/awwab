@@ -4,6 +4,7 @@ import { addDays } from "./dates";
 import { baselineMonthStart, calendarEventById, calendarEvents, hijriOn, monthStart, possibleMonthStarts } from "./hijri";
 import { cities, currentPrayerSchedule, prayerDay, schedule } from "./prayerServices";
 import { db, backup, defaults, getRecord, logPrayer, migrateLegacy, prayerStatistics, restoreBackup, updateSettings } from "./storageService";
+import { initialZakat, type ZakatProfile } from "./zakat";
 import { calendarFile, eventReminders } from "./calendarFile";
 import { estimateQada, finishQada, qadaDefaults } from "./qada";
 import { mosqueDefaults, type Mosque } from "./mosques";
@@ -256,6 +257,26 @@ describe("device prayer records", () => {
     await db.records.clear();
     await restoreBackup(file);
     expect((await db.records.get("settings")).value).toMatchObject({ school: "shafi", prayerGuide: "hanafi" });
+  });
+
+  it("round trips a Zakat ledger, rates and payments alongside older entries", async () => {
+    const profile: ZakatProfile = {
+      ...initialZakat, cash: 87_000, hawlSet: true, hawlMonth: 7, hawlDay: 14, receivables: 5000,
+      prices: { silver: 230, gold: 18_000 },
+      assets: [
+        { id: "bangle", name: "Bangle", kind: "metal", basis: "gold", weight: 2, unit: "bhori", purity: 91.67 },
+        { id: "bank", name: "Bank", kind: "cash", amount: 200_000 },
+      ],
+      payments: [
+        { day: "2025-01-09", currency: "BDT", amount: 1000 },
+        { day: "2026-11-19", currency: "BDT", amount: 1300, name: "Recipient", hawlYear: 1448 },
+      ],
+    };
+    await db.records.put({ key: "zakat", value: profile });
+    const file = await backup();
+    await db.records.clear();
+    await restoreBackup(file);
+    expect(await getRecord("zakat", initialZakat)).toEqual(profile);
   });
 
   it("round trips a make-up plan with one per prayer and accepts an older plan without the field", async () => {

@@ -1,0 +1,85 @@
+.zakat-page, .zakat-groups, .zakat-aside { display: grid; min-width: 0; gap: 16px; align-content: start; }
+.app-content:has(.zakat-page) { padding-top: 8px; }
+.zakat-page .card { min-width: 0; padding: 16px; }
+.zakat-page h2:not(.caption) { font: var(--type-body-strong); }
+.zakat-page .caption { color: var(--c-ink-muted); }
+.zakat-summary .caption { color: var(--c-night-muted); }
+.zakat-figure { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 10px; }
+.zakat-figure strong { font: var(--type-numeral-l); overflow-wrap: anywhere; min-width: 0; }
+.zakat-hero-actions .action { min-width: 0; min-height: 50px; padding-inline: 8px; }
+.zakat-hero-actions .zakat-payment-primary { color: var(--c-on-primary); background: var(--control-accent); }
+.zakat-hero-actions .zakat-night-action { color: var(--c-on-night); background: var(--c-overlay-on-night); }
+.zakat-nisab { gap: 12px; }
+.zakat-nisab-switch { gap: 4px; padding: 4px; border-radius: var(--r-control); background: var(--c-surface-alt); }
+.zakat-nisab-switch button {
+  min-height: 56px; padding: 7px 5px; border-radius: var(--r-control); color: var(--c-ink-muted);
+  font: var(--type-small); text-align: center; display: grid; align-content: center; justify-items: center;
+}
+.zakat-nisab-switch strong { font: var(--type-body-strong); }
+.zakat-nisab-switch button[aria-pressed="true"] { background: var(--c-surface); color: var(--c-ink); box-shadow: var(--shadow-card); }
+.zakat-page .text-button { min-height: 28px; width: fit-content; text-align: start; }
+.zakat-holdings { display: grid; gap: 8px; }
+.zakat-holdings .caption { margin-bottom: 3px; }
+.zakat-amount-row { width: 100%; min-height: 34px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; text-align: start; }
+.zakat-amount-row span { min-width: 0; overflow-wrap: anywhere; color: var(--c-ink-muted); }
+.zakat-amount-row bdi { font-weight: 600; overflow-wrap: anywhere; }
+.zakat-amount-row small, .zakat-payment-list li small { display: block; }
+.zakat-amount-row:hover span:first-child { color: var(--interactive-ink); }
+.zakat-amount-row:hover bdi { text-decoration: underline; text-underline-offset: .15em; }
+.zakat-net { padding-top: 12px; margin-top: 2px; box-shadow: inset 0 1px var(--c-line); }
+.zakat-net span { color: var(--c-ink-muted); }
+.zakat-information { display: grid; gap: 6px; font: var(--type-small); }
+.zakat-sources { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.zakat-sources a { color: var(--interactive-ink); }
+.zakat-payment-list { display: grid; gap: 8px; padding: 0; list-style: none; }
+.zakat-payment-list li {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px;
+  overflow-wrap: anywhere; padding: 8px 10px; border-radius: var(--r-control); background: var(--c-surface-alt);
+}
+.zakat-remaining { padding: 4px 0; }
+.zakat-remaining bdi { color: var(--interactive-ink); font-weight: 600; }
+.zakat-history summary { display: list-item; cursor: pointer; align-content: center; }
+:root .zakat-dialog {
+  width: min(calc(100% - 32px), 480px); max-height: min(calc(100dvh - 24px), 700px); overflow: auto;
+  border: 0; border-radius: var(--r-card); background: var(--c-surface); box-shadow: var(--shadow-raised); color: var(--c-ink); padding: 16px;
+}
+:root .zakat-overlay { background: color-mix(in srgb, var(--c-night) 62%, transparent); }
+.zakat-dialog .zakat-dialog-title { font: var(--type-display-m); letter-spacing: 0; }
+.zakat-dialog form { gap: 12px; min-width: 0; }
+.zakat-dialog .field { min-width: 0; }
+.zakat-dialog .field :is(select, input) { min-width: 0; }
+.zakat-checkbox { display: flex; align-items: center; gap: 8px; min-height: 40px; }
+.zakat-checkbox input { inline-size: 18px; block-size: 18px; accent-color: var(--control-primary); flex-shrink: 0; }
+
+@media (min-width: 1024px) {
+  .zakat-desktop { display: grid; gap: 16px; align-items: start; }
+  .zakat-desktop[data-wide="true"] { grid-template-columns: minmax(0, 1fr) clamp(340px, 26.4vw, 380px); }
+  .zakat-desktop > .zakat-aside { align-self: stretch; }
+  .zakat-desktop > .zakat-aside .zakat-summary { position: sticky; top: 12px; z-index: 2; }
+  .zakat-compact-summary summary { display: list-item; cursor: pointer; }
+  .zakat-compact-summary summary strong { float: inline-end; }
+  .zakat-compact-summary .zakat-aside { margin-top: 12px; }
+  .zakat-page, .zakat-page .action { font: var(--type-small); }
+  .zakat-page h2:not(.caption), .zakat-page h3 { font: var(--type-body-strong); }
+  .zakat-page .text-button { font-size: inherit; }
+  .zakat-amount-row { min-height: 54px; font-weight: 600; grid-template-columns: minmax(0, 1fr) minmax(116px, min(42%, 200px)); }
+  .zakat-amount-row span { color: var(--c-ink); }
+  .zakat-amount-row bdi { padding: 10px 12px; text-align: end; background: var(--c-surface-alt); border-radius: var(--r-control); }
+  .zakat-amount-row small { font-weight: 400; }
+  .zakat-metal-tiles { gap: 12px; }
+  .zakat-metal-tile { display: grid; align-content: start; gap: 4px; min-width: 0; padding: 12px; border-radius: var(--r-control); background: var(--c-surface-alt); }
+  .zakat-metal-tile .zakat-amount-row { grid-template-columns: minmax(0, 1fr) auto; min-height: 34px; }
+  .zakat-metal-tile .zakat-amount-row bdi { padding: 0; }
+  .zakat-metal-tile .row-between strong, .zakat-metal-tile bdi { overflow-wrap: anywhere; }
+  .zakat-figure strong { font: var(--type-display-xl); }
+  .zakat-summary .zakat-nisab-switch { background: var(--c-overlay-on-night); }
+  .zakat-summary .zakat-nisab-switch button { color: color-mix(in srgb, var(--c-night-muted) 70%, var(--c-on-night)); min-height: 28px; }
+  .zakat-summary .zakat-nisab-switch button strong { font: inherit; font-weight: 600; }
+  .zakat-summary .zakat-nisab-switch button[aria-pressed="true"] { color: var(--c-ink); }
+  .zakat-breakdown { display: grid; gap: 8px; margin: 0; }
+  .zakat-breakdown > div { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 8px; }
+  .zakat-breakdown dt { color: var(--c-night-muted); }
+  .zakat-breakdown dd { text-align: end; margin: 0; max-width: 17ch; overflow-wrap: anywhere; }
+  .zakat-page .zakat-hero-actions .action { min-height: 36px; }
+  .zakat-desktop-links { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+}

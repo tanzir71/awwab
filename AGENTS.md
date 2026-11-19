@@ -38,6 +38,8 @@ You are building **Awwab** (formerly Prayer Quest): an offline-first PWA for Mus
 
 Follow the phases in SPEC §10. Start with **P0**, which includes the bug fixes in SPEC §11. Keep each phase shippable.
 
+Active handover: [H1b desktop coverage](handovers/H1b-desktop-coverage/README.md).
+
 ## Definition of done (per feature)
 
 - Matches the Figma frame in **both** modes (Adult and Maktab). The desktop layout applies at ≥1024px.

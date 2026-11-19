@@ -14,7 +14,7 @@ import { calendarDefaults, calendarEventById, calendarEvents, dayDifference, hij
 import { mosqueDefaults } from "@/lib/mosques";
 import { planAuthorities, planEventCopy, planMonth } from "@/lib/plan-copy";
 import { getRecord, updateRecord, type Settings } from "@/lib/storageService";
-import { initialZakat } from "@/lib/zakat";
+import { zakatHawl, type ZakatProfile } from "@/lib/zakat";
 
 const beforeMoon = ["First ten days", "Last ten nights / Laylat al-Qadr", "Six fasts of Shawwāl window"];
 
@@ -42,9 +42,10 @@ export function Plan({ settings, now }: { settings: Settings; now: Date }) {
   const focus = useRef<HTMLElement>();
   const config = useRecord("calendar", calendarDefaults);
   const mosques = useRecord("mosques", mosqueDefaults);
-  const zakat = useRecord<typeof initialZakat | null>("zakat", null);
+  const zakat = useRecord<ZakatProfile | null>("zakat", null);
   const { hijriAdjust: adjustment } = settings;
   const day = dateKey(now, settings.city.timeZone);
+  const hawl = zakatHawl(day, zakat, adjustment, config.anchors);
   const hijri = hijriOn(day, adjustment, config.anchors);
   const displayedOrdinal = hijri.year * 12 + hijri.month - 1 + monthOffset;
   const displayYear = Math.floor(displayedOrdinal / 12);
@@ -222,7 +223,7 @@ export function Plan({ settings, now }: { settings: Settings; now: Date }) {
 
     <nav className="plan-tools equal-row" aria-label={t("tools")}>
       <Link className="card" to="/plan/mosques"><span className="icon-box"><DesignIcon name="plan-pin" /></span><strong>{t("mosques")}</strong><small className="muted">{t("planMosquesSaved", { count: mosques.mosques.length })}</small></Link>
-      <Link className="card" to="/plan/zakat"><span className="icon-box"><DesignIcon name="plan-coins" /></span><strong>{t("zakat")}</strong><small className="muted">{zakat ? `${number.format(zakat.hawlDay)} ${planMonth(zakat.hawlMonth, language)}` : t("planZakatDetail")}</small></Link>
+      <Link className="card" to="/plan/zakat"><span className="icon-box"><DesignIcon name="plan-coins" /></span><strong>{t("zakat")}</strong><small className="muted">{hawl ? `${number.format(hawl.day)} ${planMonth(hawl.month, language)}` : t("planZakatDetail")}</small></Link>
       <Link className="card" to="/umrah"><span className="icon-box"><DesignIcon name="plan-cube" /></span><strong>{t("planUmrah")}</strong><small className="muted">{t("planUmrahDetail")}</small></Link>
     </nav>
     <div className="row-between plan-more">

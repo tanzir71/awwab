@@ -12,7 +12,7 @@ import { jamaatForPrayer, mosqueDefaults } from "@/lib/mosques";
 import { methodNames, prayerDay, schedule } from "@/lib/prayerServices";
 import { qadaDefaults } from "@/lib/qada";
 import { families, lettersForFamily } from "@/lib/takhti";
-import { calculateZakat, initialZakat, zakatMoney } from "@/lib/zakat";
+import { initialZakat, metalLabels, zakatMoney, zakatProfileTotals, zakatSources } from "@/lib/zakat";
 import type { Settings } from "@/lib/storageService";
 import { prayerIds, prayerNames } from "@/types/Prayer";
 import { quranText } from "@/lib/quran";
@@ -76,6 +76,7 @@ export function WordPrintSheet() {
 }
 
 export function PrintSheet({ settings, now }: { settings: Settings; now: Date }) {
+  const { t, language } = useCopy();
   const { sheet, family } = useParams();
   const title = sheets.find(item => item.to.split("/")[0] === sheet)?.title;
   const [selected, setSelected] = useState(108);
@@ -189,12 +190,18 @@ export function PrintSheet({ settings, now }: { settings: Settings; now: Date })
       })}
     </tbody></table><p>Daily goal · {qada.dailyGoal} prayers</p><p>Fasts remaining · {Math.max(0, qada.fasts - qada.fastsMadeUp)}</p></>;
   } else {
-    const result = calculateZakat([zakat.cash, zakat.metals, zakat.trade], [zakat.debt], zakat.basis, zakat.price, zakat.unit);
-    content = <><p>Net assets · {zakatMoney(result.net, zakat.currency)}</p>
-      <p>{zakat.basis === "silver" ? "Silver" : "Gold"} nisab · {result.nisab === undefined ? "Enter a metal price in Plan" : zakatMoney(result.nisab, zakat.currency)}</p>
-      <p>Zakat estimate · {result.due === undefined ? "—" : zakatMoney(result.due, zakat.currency)}</p>
-      <h2>Payments</h2>{zakat.payments.map((item, i) => <p key={i}>{item.day} · {zakatMoney(item.amount, item.currency)}</p>)}
-      <p className="muted small">This is a calculator. Scholars differ on worn jewellery and the choice of nisab.</p></>;
+    const result = zakatProfileTotals(zakat);
+    const money = (value?: number) => value === undefined ? "—" : zakatMoney(value, zakat.currency, language, true);
+    heading = t("zakatPrintTitle");
+    content = <><p>{t("zakatNet")} · {money(result.net)}</p>
+      <p>{t("zakatNisabLabel", { metal: t(metalLabels[zakat.basis]) })} · {money(result.nisab)}</p>
+      <p>{t("zakatEstimated")} · {money(result.due)}</p>
+      <h2>{t("zakatPayments")}</h2>{zakat.payments.length ? zakat.payments.map((item, i) => <p key={i}>
+        <time dateTime={item.day}>{formatDay(item.day, { dateStyle: "medium" }, language)}</time>
+        {item.name && " · " + item.name} · {zakatMoney(item.amount, item.currency, language, true)}
+      </p>) : <p>{t("zakatNoPayments")}</p>}
+      <p className="muted small">{t("zakatWornNote")}</p>
+      <p className="small zakat-sources">{Object.entries(zakatSources).map(([key, href]) => <a key={key} href={href} rel="noreferrer">{t(key)}</a>)}</p></>;
   }
   return <div className="print-page stack" data-sheet={sheet}>
     <div className="no-print equal-row"><Link to="/print" className="action light">All print sheets</Link><button className="action" onClick={() => window.print()}><Printer size={18} /> Print A4</button></div>

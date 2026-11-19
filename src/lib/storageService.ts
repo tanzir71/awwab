@@ -6,6 +6,7 @@ import { cities, methodNames, type AsrSchool, type City, type PrayerMethod } fro
 import { guideReferences, type GuideReference } from "./prayerGuide";
 import { deskActivities } from "./studyDesk";
 import type { MosquePlan } from "./mosques";
+import { zakatBalances } from "./zakat";
 
 export interface Settings {
   mode: "adult" | "maktab";
@@ -148,7 +149,16 @@ const savedRecords: Record<string, z.ZodTypeAny> = {
     price: z.number().finite().nonnegative(), cash: z.number().finite().nonnegative(), metals: z.number().finite().nonnegative(),
     trade: z.number().finite().nonnegative(), debt: z.number().finite().nonnegative(), currency: z.string().regex(/^[A-Z]{3}$/),
     hawlMonth: count.min(1).max(12), hawlDay: count.min(1).max(30),
-    payments: z.array(z.object({ day: daySchema, amount: z.number().finite().nonnegative(), currency: z.string().regex(/^[A-Z]{3}$/) })),
+    hawlSet: z.boolean().optional(), receivables: z.number().finite().nonnegative().optional(),
+    prices: z.partialRecord(z.enum(["gold", "silver"]), z.number().finite().nonnegative()).optional(),
+    assets: z.array(z.union([
+      z.object({ id: z.string().max(128), name: z.string().max(100), kind: z.enum(zakatBalances), amount: z.number().finite().nonnegative() }),
+      z.object({ id: z.string().max(128), name: z.string().max(100), kind: z.literal("metal"),
+        basis: z.enum(["gold", "silver"]), weight: z.number().finite().positive(),
+        unit: z.enum(["g", "bhori"]), purity: z.number().finite().positive().max(100) }),
+    ])).optional(),
+    payments: z.array(z.object({ day: daySchema, amount: z.number().finite().nonnegative(), currency: z.string().regex(/^[A-Z]{3}$/),
+      hawlYear: count.min(1).optional(), name: z.string().max(100).optional() })),
   }),
   umrah: z.object({
     start: z.union([daySchema, z.literal("")]), end: z.union([daySchema, z.literal("")]),

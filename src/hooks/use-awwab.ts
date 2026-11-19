@@ -36,13 +36,15 @@ export function useClock() {
   return now;
 }
 
-export function useDesktop() {
-  const [desktop, setDesktop] = useState(() => window.matchMedia("(min-width: 1024px)").matches);
+export function useDesktop(minWidth = 1024) {
+  const query = "(min-width: " + minWidth + "px)";
+  const [desktop, setDesktop] = useState(() => window.matchMedia(query).matches);
   useEffect(() => {
-    const media = window.matchMedia("(min-width: 1024px)");
+    const media = window.matchMedia(query);
     const change = () => setDesktop(media.matches);
+    change();
     media.addEventListener("change", change);
     return () => media.removeEventListener("change", change);
-  }, []);
+  }, [query]);
   return desktop;
 }

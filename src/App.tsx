@@ -75,7 +75,7 @@ function Main() {
       <Route path="/return/qada" element={<Qada settings={settings} now={now} />} />
       <Route path="/plan" element={<Plan settings={settings} now={now} />} />
       <Route path="/plan/mosques" element={<Mosques settings={settings} now={now} />} />
-      <Route path="/plan/zakat" element={<Zakat settings={settings} />} />
+      <Route path="/plan/zakat" element={<Zakat settings={settings} now={now} desktop={desktop} />} />
       <Route path="/share" element={<Share key={search} settings={settings} now={now} />} />
       <Route path="/share/milestone/:kind/:number" element={<Milestone settings={settings} now={now} />} />
       <Route path="/install" element={<div className="stack"><AppInstallPrompt /><Link className="action soft" to="/">Continue to awwab</Link></div>} />
