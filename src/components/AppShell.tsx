@@ -42,6 +42,7 @@ const groups: { label: string; items: NavItem[] }[] = [
   { label: "Tools", items: [
     { title: "My mosques", to: "/plan/mosques", icon: "pin" },
     { title: "Zakat", to: "/plan/zakat", icon: "coins" },
+    { title: "Umrah mode", to: "/umrah", icon: "cube" },
     { title: "Print & export", to: "/print", icon: "download" },
   ] },
 ];

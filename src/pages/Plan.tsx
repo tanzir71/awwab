@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { CalendarDays, Download, MapPin, Coins, ChevronLeft, ChevronRight, Moon } from "lucide-react";
+import { CalendarDays, Download, MapPin, Coins, BookOpen, ChevronLeft, ChevronRight, Moon } from "lucide-react";
 import { toast } from "sonner";
 import { ListLink, SectionHeading } from "@/components/Surface";
 import { useRecord } from "@/hooks/use-awwab";
@@ -151,6 +151,7 @@ export function Plan({ settings, now }: { settings: Settings; now: Date }) {
     <section className="compact-stack">
       <ListLink to="/plan/mosques" icon={<MapPin size={20} />} title="My mosques" detail="Keep your local jamaat times close" />
       <ListLink to="/plan/zakat" icon={<Coins size={20} />} title="Zakat" detail="Estimate and record your zakat" />
+      <ListLink to="/umrah" icon={<BookOpen size={20} />} title="Umrah" detail="Prepare for your trip" />
     </section>
   </div>;
 }

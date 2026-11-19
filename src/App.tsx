@@ -17,6 +17,7 @@ import { Zakat } from "@/pages/Zakat";
 import { PrintHub, PrintSheet } from "@/pages/Print";
 import { Takhti } from "@/pages/Takhti";
 import { Share } from "@/pages/Share";
+import { HaramFocus, UmrahDuas, UmrahMapPage, UmrahNow, UmrahPlan, UmrahRituals, UmrahShell, WalkWithMe } from "@/pages/Umrah";
 import { Sources } from "@/pages/Sources";
 import { WordBank } from "@/pages/WordBank";
 import AppInstallPrompt from "@/components/AppInstallPrompt";
@@ -69,6 +70,15 @@ function Main() {
       <Route path="/share" element={<Share key={search} settings={settings} now={now} />} />
       <Route path="/install" element={<div className="stack"><AppInstallPrompt /><Link className="action soft" to="/">Continue to awwab</Link></div>} />
       <Route path="/sources" element={<Sources />} />
+      <Route path="/umrah" element={<UmrahShell now={now} />}>
+        <Route index element={<UmrahNow />} />
+        <Route path="rituals" element={<UmrahRituals />} />
+        <Route path="focus" element={<HaramFocus />} />
+        <Route path="map" element={<UmrahMapPage />} />
+        <Route path="duas" element={<UmrahDuas />} />
+        <Route path="plan" element={<UmrahPlan />} />
+        <Route path="location" element={<WalkWithMe />} />
+      </Route>
       <Route path="/print" element={<PrintHub />} />
       <Route path="/print/:sheet/:family?" element={<PrintSheet settings={settings} now={now} />} />
       <Route path="/you" element={<You settings={settings} now={now} />} />
