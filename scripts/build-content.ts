@@ -44,13 +44,19 @@ const [arabic, english, indopakText] = await Promise.all([source("uthmani"), sou
 const uthmani = parseVerses(arabic);
 const translation = parseVerses(english);
 const indopak = parseIndopak(indopakText);
+const basmala = uthmani.get("1:1");
+if (!basmala) throw new Error("Missing Al-Fātiḥa 1:1 in the Uthmani source.");
+const unnumberedOpening = basmala + " ";
 const supported: Record<string, { ref: string; uthmani: string; indopak: string; english: string }[]> = {};
 for (const chapter of surahs.slice(0, 12)) {
   if (indopak[chapter.number - 1]?.length !== chapter.ayahs) throw new Error(`Unexpected IndoPak verse count for ${chapter.number}`);
   supported[chapter.number] = Array.from({ length: chapter.ayahs }, (_, i) => {
     const ref = `${chapter.number}:${i + 1}`;
     if (!uthmani.has(ref) || !translation.has(ref)) throw new Error(`Missing verse ${ref}`);
-    return { ref, uthmani: uthmani.get(ref)!, indopak: indopak[chapter.number - 1][i], english: translation.get(ref)! };
+    const text = uthmani.get(ref)!;
+    const numberedText = chapter.number !== 1 && i === 0 && text.startsWith(unnumberedOpening)
+      ? text.slice(unnumberedOpening.length) : text;
+    return { ref, uthmani: numberedText, indopak: indopak[chapter.number - 1][i], english: translation.get(ref)! };
   });
 }
 const notice = arabic.split(/\r?\n/).filter(line => line.startsWith("#")).join("\n");

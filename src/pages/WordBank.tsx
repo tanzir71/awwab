@@ -84,7 +84,7 @@ export function WordBank() {
         <tbody>{filtered.slice(0, limit).map(item => <tr key={`${item.key}:${item.type}`}>
           <td><ArabicText text={item.text} citation={item.verse} words={[{ transliteration: item.tr, gloss: item.en, root: item.root }]} compact /></td>
           <td>{item.en ?? "—"}</td>
-          <td>{item.root ? <button className="action soft" onClick={() => setRoot(item.root)} aria-label={`Explore root of ${item.tr}`}>{pronunciation(item.root) || item.type}</button> : "—"}</td>
+          <td>{item.root ? <button className="action soft" onClick={() => setRoot(item.root)} aria-description={`Explore root of ${item.tr}`}>{pronunciation(item.root) || item.type}</button> : "—"}</td>
           <td>{item.type}</td>
           <td><progress value={item.count} max={maximum} aria-label={`${item.count} occurrences`} /><small>{item.count}</small></td>
           <td>{item.known ? "Known" : item.review ? bucketNames[item.review.bucket] : "New"}</td>

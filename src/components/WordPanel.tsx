@@ -33,7 +33,7 @@ function Anatomy({ selection, ampara }: { selection: WordSelection; ampara: bool
       <div className="anatomy-title"><ArabicText text={selection.word} words={[{ transliteration: pronunciation, root }]} /></div>
     </div>
     <h3>Letters · read right to left</h3>
-    <div className="letter-tiles" dir="rtl">
+    <div className="letter-tiles" dir="rtl" role="group" aria-label="Letters" tabIndex={0}>
       {letters.map((tile, i) => <div key={i} className="letter-tile">
         <span lang="ar" className="tile-glyph" style={{ color: `var(--c-${tile.color})` }}>{tile.glyph}</span>
         <strong dir="auto">{ampara ? tile.nameBn ?? tile.name : tile.name}</strong>
@@ -42,11 +42,11 @@ function Anatomy({ selection, ampara }: { selection: WordSelection; ampara: bool
       </div>)}
     </div>
     <h3>Sounds</h3>
-    <div dir="rtl" className="letter-tiles">
+    <div dir="rtl" className="letter-tiles" role="group" aria-label="Sounds" tabIndex={0}>
       {syllables.map((item, i) => <div className="letter-tile" key={i}><span className="tile-glyph" lang="ar">{item.ar}</span><strong dir="ltr">{item.tr}</strong></div>)}
     </div>
     <h3>Joining</h3>
-    <div dir="rtl" className="letter-tiles">
+    <div dir="rtl" className="letter-tiles" role="group" aria-label="Joining forms" tabIndex={0}>
       {joining.map((item, i) => <div className="letter-tile" key={i}><span className="tile-glyph" lang="ar">{item.form}</span><small>{item.position}</small></div>)}
     </div>
     {root && <section className="compact-stack">

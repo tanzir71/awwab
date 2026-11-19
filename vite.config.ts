@@ -13,6 +13,9 @@ export default defineConfig({
     rollupOptions: {
       input: { landing: resolve(__dirname, "index.html"), app: resolve(__dirname, "app/index.html") },
       output: {
+        assetFileNames: ({ name }) => name?.startsWith("maplibre-gl-worker")
+          ? "app/workers/[name]-[hash][extname]"
+          : "assets/[name]-[hash][extname]",
         manualChunks(id) {
           if (/\/node_modules\/(react|react-dom|react-router|react-router-dom|scheduler)\//.test(id)) return "react";
           if (/\/node_modules\/(dexie|dexie-react-hooks|zod)\//.test(id)) return "storage";
@@ -32,7 +35,7 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
-        globPatterns: ["app/**/*.{html,webmanifest,png,svg,otf,woff2}", "assets/**/*", "design/**/*", "data/**/*", "packs/audio/index.json"],
+        globPatterns: ["app/**/*.{html,webmanifest,png,svg,otf,woff2,mjs}", "assets/**/*", "design/**/*", "data/**/*", "packs/audio/index.json"],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         modifyURLPrefix: { "": base },
         navigateFallback: `${base}app/index.html`,

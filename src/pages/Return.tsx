@@ -125,7 +125,7 @@ export function Qada({ settings, now }: { settings: Settings; now: Date }) {
       {prayerIds.map(id => <div className="list-row" key={id}>
         <div className="grow"><strong>{prayerNames[id]}</strong><small>{madeUp[id]} made up</small></div>
         <span>{remaining[id]} left</span>
-        <button className="action" aria-label={`Record one make-up ${prayerNames[id]}`}
+        <button className="action" aria-label={`+ 1 Record one make-up ${prayerNames[id]}`}
           onClick={() => void save(old => ({ ...old, madeUp: { ...old.madeUp, [id]: old.madeUp[id] + 1 } }))}>+ 1</button>
       </div>)}
     </section>

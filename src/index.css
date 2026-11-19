@@ -11,7 +11,7 @@
   color-scheme: light;
 }
 :root[data-mode="maktab"] {
-  --control-primary: color-mix(in srgb, var(--c-primary) 68%, var(--c-night));
+  --control-primary: color-mix(in srgb, var(--c-primary) 55%, var(--c-night));
   --interactive-ink: var(--control-primary);
 }
 *, *::before, *::after { box-sizing: border-box; }
@@ -19,7 +19,8 @@ body { margin: 0; background: var(--c-bg); color: var(--c-ink); font: var(--type
 button, input, textarea, select { font: inherit; }
 button, a, summary { touch-action: manipulation; }
 a { color: var(--interactive-ink); }
-a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+p a { text-decoration: underline; text-underline-offset: .16em; }
+a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex="0"]:focus-visible {
   outline: 2px solid var(--interactive-ink);
   outline-offset: 3px;
 }
@@ -49,6 +50,7 @@ time { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; background: var(--c-surface-alt); border-radius: var(--r-pill); font: var(--type-small); }
 .chip.soft { background: var(--c-primary-soft); }
+.chip.night { background: var(--c-night); }
 .icon-button, .action { display: inline-flex; justify-content: center; align-items: center; text-align: center; gap: 8px; min-height: 44px; padding: 8px 14px; border: 0; border-radius: var(--r-control); background: var(--control-primary); color: var(--c-on-primary); font-weight: 700; text-decoration: none; }
 .action:hover, .icon-button:hover { filter: brightness(.95); }
 .action:disabled { cursor: default; opacity: .65; }

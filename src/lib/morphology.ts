@@ -32,10 +32,10 @@ const types: Record<string, string> = {
 };
 let source: Promise<Corpus> | undefined;
 
-function parseCorpus(text: string): Corpus {
+export function parseCorpus(text: string): Corpus {
   const positions = new Map<string, Morphology>();
   let prev: { key: string; tokens: string[] } | undefined;
-  for (const line of text.split("\n")) {
+  for (const line of text.split(/\r?\n/)) {
     const match = line.match(/^\((\d+:\d+):(\d+):\d+\)\t([^\t]+)\t([^\t]+)\t(.+)$/);
     if (!match) continue;
     const [, verse, pos, token, tag, info] = match;
@@ -57,6 +57,7 @@ function parseCorpus(text: string): Corpus {
       position: Number(pos),
     });
   }
+  if (positions.size === 0) throw new Error("The morphology file contains no usable rows.");
   const words = new Map<string, Morphology & { count: number }>();
   for (const word of positions.values()) {
     const lemma = normalizeWord(word.lemma ?? word.word);

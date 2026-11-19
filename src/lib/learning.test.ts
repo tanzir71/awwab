@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { splitGraphemes, wordAnatomy } from "./wordAnatomy";
 import { isDue, reviewCard } from "./reviews";
+import { quranText } from "./quran";
+import { splitArabicWords } from "./wordAnatomy";
+import { parseCorpus } from "./morphology";
 
 describe("Word anatomy", () => {
   it("keeps Quranic marks on their base letter", () => {
@@ -16,6 +19,23 @@ describe("Word anatomy", () => {
   it("assigns joining forms across non-joining letters and long vowels", () => {
     expect(wordAnatomy("وَٱلۡعَصۡرِ").joining.map(item => item.position)).toEqual(["isolated", "isolated", "initial", "medial", "medial", "final"]);
     expect(wordAnatomy("بَابٌ").syllables.map(item => item.tr)).toEqual(["bā", "bun"]);
+  });
+});
+
+describe("Bundled Quran", () => {
+  it("keeps the numbered Fātiḥa basmala and aligns opening verse positions across scripts", () => {
+    expect(quranText[1][0].ref).toBe("1:1");
+    expect(splitArabicWords(quranText[1][0].uthmani)).toHaveLength(4);
+    expect(quranText[103][0].ref).toBe("103:1");
+    expect(splitArabicWords(quranText[103][0].uthmani)).toEqual(["وَٱلْعَصْرِ"]);
+    expect(splitArabicWords(quranText[103][0].indopak)).toHaveLength(1);
+    expect(Object.keys(quranText)).toHaveLength(12);
+  });
+
+  it("reads signed CRLF morphology rows and assembles prefixed words", () => {
+    const corpus = parseCorpus("# Illustrative header\r\n(1:1:1:1)\tbi\tP\tPREFIX|bi+\r\n(1:1:1:2)\tsomi\tN\tSTEM|POS:N|LEM:{som|ROOT:smw|M|GEN\r\n");
+    expect(corpus.positions.get("1:1:1")).toMatchObject({ word: "بِسْمِ", root: "سمو", type: "Noun" });
+    expect(corpus.vocabulary[0]).toMatchObject({ count: 1 });
   });
 });
 
