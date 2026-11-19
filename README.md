@@ -20,7 +20,7 @@ The landing page is at `/awwab/`. The installable app is at `/awwab/app/`. Use t
 
 ## GitHub Pages
 
-The Pages workflow checks each main push and pull request. After the religious review in SPEC §12, run the workflow on `main` with **publish** selected to publish `dist`. The app uses hash routes inside `/awwab/app/`, and its service worker is scoped to that directory.
+The Pages workflow checks each main push and pull request. Run the workflow on `main` with **landing** to publish the landing page with a static app preview. Run it with **app** after the religious content review in SPEC §12. To preview the landing release locally, run `npm run build -- --mode landing` followed by `npm run preview`. The app uses hash routes inside `/awwab/app/`, and its service worker is scoped to that directory.
 
 ## Content and map packs
 
