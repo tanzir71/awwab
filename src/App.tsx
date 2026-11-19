@@ -47,7 +47,7 @@ function Main() {
 
   if (storage === "error") return <main className="app-content stack"><h1>Device storage is unavailable</h1><p>Allow this site to use browser storage, then reload to open Awwab.</p></main>;
   if (!settings || storage === "loading") return <main className="app-content"><p role="status">Opening awwab…</p></main>;
-  if (!settings.onboarded && pathname !== "/install" && pathname !== "/sources") return <><Onboarding settings={settings} /><WordPanel desktop={false} ampara={settings.spellStyle === "ampara-bn"} /></>;
+  if (!settings.onboarded && pathname !== "/install" && pathname !== "/sources") return <><Onboarding settings={settings} /><WordPanel desktop={false} settings={settings} /></>;
   return <AppShell settings={settings} now={now} desktop={desktop}>
     <Routes>
       <Route path="/" element={<Navigate replace to={desktop ? "/learn" : "/today"} />} />

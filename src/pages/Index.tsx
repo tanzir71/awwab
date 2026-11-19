@@ -52,6 +52,8 @@ export default function Today({ settings, now }: { settings: Settings; now: Date
     .filter(item => item.kind !== "weekly").slice(0, 3);
   const daily = hadith.items[Math.floor(Date.parse(day) / 86400000) % hadith.items.length];
   const zone = settings.city.timeZone;
+  const language = settings.language;
+  const t = message.bind(null, settings);
   const mode = settings.mode;
   const group = mode === "maktab" ? "maktab-today" : "today";
   const headline = current ?? next;
@@ -60,7 +62,7 @@ export default function Today({ settings, now }: { settings: Settings; now: Date
   const qadaLeft = prayerIds.reduce((sum, id) => sum + Math.max(0, qada.estimated[id] - qada.madeUp[id] - logs.filter(log => log.prayer === id && log.status === "qada").length), 0);
   const lastWeek = prayerStatistics(logs, day).recent.slice(-7);
   const jamaat = jamaatForPrayer(headline, zone, mosques);
-  const countdown = current ? duration(current.ends.valueOf() - now.valueOf()) : duration(next.starts.valueOf() - now.valueOf());
+  const countdown = duration((current ? current.ends : next.starts).valueOf() - now.valueOf(), language);
   const hasTimes = Number.isFinite(headline.starts.valueOf());
   const dateStyle = { weekday: "short", day: "numeric", month: "short" } as const;
   async function record(prayer: Prayer, action: "log" | "late" | "undo") {
@@ -70,47 +72,44 @@ export default function Today({ settings, now }: { settings: Settings; now: Date
         await db.prayers.put({ date: prayer.date, prayer: prayer.id, status: "late", at: new Date().toISOString() });
       } else await logPrayer(prayer, new Date(), jamaatForPrayer(prayer, zone, mosques)?.id);
       select(undefined);
-      toast(action === "undo" ? "Prayer log removed." : prayer.status === "missed" ? "Make-up prayer recorded." : "Prayer recorded.");
+      toast(t(action === "undo" ? "prayerRemoved" : prayer.status === "missed" ? "qadaRecorded" : "prayerRecorded"));
     } catch {
-      toast.error("The prayer log could not be saved. Try again.");
+      toast.error(t("prayerSaveError"));
     }
   }
 
   return <div className="prayer-layout stack">
     <header className="prayer-intro row-between">
       <div>
-        <p className="caption">{formatDay(day, dateStyle)} · {hijriLabel(day, settings.hijriAdjust, calendar.anchors)}</p>
-        <h1>{message(settings, "greeting")}</h1>
+        <p className="caption">{formatDay(day, dateStyle, language)} · {hijriLabel(day, settings.hijriAdjust, calendar.anchors)}</p>
+        <h1>{t("greeting")}</h1>
         <Link className="small with-icon muted" to="/you/prayer">
           <DesignIcon size={14} name={`${group}-pin`} />{settings.city.name} · {methodNames[settings.method]} method · {settings.school === "hanafi" ? "Hanafi Asr" : "Standard Asr"}
         </Link>
       </div>
-      <Link className="icon-button" to="/you/reminders" aria-label="Reminders"><DesignIcon name={`${group}-bell`} /></Link>
+      <Link className="icon-button" to="/you/reminders" aria-label={t("reminders")}><DesignIcon name={`${group}-bell`} /></Link>
     </header>
     <section className="card night prayer-hero stack">
       <DesignIcon name={`${group}-motifstar8`} size={220} className="hero-motif" />
-      <p className="caption">{hasTimes ? current ? `Now · until ${formatTime(current.ends, zone)}` : `Next · ${formatTime(next.starts, zone)}` : "Prayer times"}</p>
-      <div className="with-icon"><h2>{headline.name}</h2><ArabicText text={prayerArabic[headline.id]} compact /></div>
-      <p className="muted">{hasTimes ? current
-        ? `${countdown} left to pray on time. ${mode === "maktab" ? "You still have time." : "Short on time? Start with the Fard."}`
-        : `Starts in ${countdown}. You can read through the steps while you wait.`
-        : "The selected calculation could not find times for this location today."}</p>
-      {jamaat && <Link to="/plan/mosques" className="chip jamaat"><DesignIcon size={16} name={`${group}-pin1`} /> Jamaat {jamaat.time} · {jamaat.mosque}</Link>}
+      <p className="caption">{hasTimes ? t(current ? "currentPrayer" : "nextPrayer", { time: formatTime(current ? current.ends : next.starts, zone, language) }) : t("prayerTimes")}</p>
+      <div className="with-icon"><h2>{t(headline.id)}</h2><ArabicText text={prayerArabic[headline.id]} compact /></div>
+      <p className="muted">{hasTimes ? t(current ? "prayerRemaining" : "prayerStarts", { time: countdown }) : t("prayerUnavailable")}</p>
+      {jamaat && <Link to="/plan/mosques" className="chip jamaat"><DesignIcon size={16} name={`${group}-pin1`} /> {t("jamaat", jamaat)}</Link>}
       <RakatCards groups={headline.rakats} />
       <div className="equal-row">
         {current && !statusSaved.includes(current.status)
-          ? <button className="action gold" onClick={() => void record(current, "log")}>{message(settings, "iPrayed", { name: current.name })}</button>
-          : <Link className="action gold" to="/today/week">Week view</Link>}
-        <Link className="action light" to={`/today/guide/${headline.id}`}>How to pray</Link>
+          ? <button className="action gold" onClick={() => void record(current, "log")}>{t("iPrayed", { name: t(current.id) })}</button>
+          : <Link className="action gold" to="/today/week">{t("weekView")}</Link>}
+        <Link className="action light" to={`/today/guide/${headline.id}`}>{t("howToPray")}</Link>
       </div>
     </section>
     <section className="compact-stack">
-      <SectionHeading title={message(settings, "todayPrayers")} to="/today/week" label="Week view" />
-      <PrayerTimeline prayers={prayers} zone={zone} mode={mode} onAction={select} />
+      <SectionHeading title={t("todayPrayers")} to="/today/week" label={t("weekView")} />
+      <PrayerTimeline prayers={prayers} settings={settings} onAction={select} />
     </section>
     <section className="compact-stack">
-      <SectionHeading title={message(settings, "todayPractice")} to="/learn" label={message(settings, "learn")} />
-      {[{ to: `/learn/surahs/${dueSurah.number}`, title: `Recall ${dueSurah.transliteration}`, detail: `Surah · ${dueSurah.words} words${due ? " · due now" : ""}`, icon: mode === "maktab" ? "book" : "book1" },
+      <SectionHeading title={t("todayPractice")} to="/learn" label={t("learn")} />
+      {[{ to: `/learn/surahs/${dueSurah.number}`, title: t("recallSurah", { name: dueSurah.transliteration }), detail: `Surah · ${dueSurah.words} words${due ? " · due now" : ""}`, icon: mode === "maktab" ? "book" : "book1" },
         { to: `/learn/qaida/${lesson}`, title: `Qaida · Lesson ${lesson}`, detail: qaida.lessons[lesson - 1]?.title, icon: "pen" }].map(item =>
         <Link key={item.to} className="list-row" to={item.to}>
           <span className="icon-box"><DesignIcon name={`${group}-${item.icon}`} /></span>
@@ -123,36 +122,36 @@ export default function Today({ settings, now }: { settings: Settings; now: Date
       </div>
     </section>
     {desktop && <section className="card compact-stack prayer-intro">
-      <SectionHeading title="This week" to="/today/week" label="Open week view" />
+      <SectionHeading title={t("todayWeek")} to="/today/week" label={t("openWeek")} />
       <div className="equal-row">
-        {lastWeek.map(item => <div className="counter-tile" key={item.day}><strong>{item.count}/5</strong><small>{formatDay(item.day, { weekday: "short" })}</small></div>)}
+        {lastWeek.map(item => <div className="counter-tile" key={item.day}><strong>{item.count}/5</strong><small>{formatDay(item.day, { weekday: "short" }, language)}</small></div>)}
       </div>
-      <Link className="text-button" to="/return/qada">Make-up balance · {qadaLeft} prayers</Link>
+      <Link className="text-button" to="/return/qada">{t("qadaBalance", { count: qadaLeft })}</Link>
     </section>}
     <section className="card soft hadith-quote">
       <a className="caption" href={daily.url}>{daily.grade} · {collectionNames[daily.collection]} {daily.number}</a>
       <blockquote>{daily.summary.replace("He ﷺ", "The Prophet")}</blockquote>
     </section>
     <section className="compact-stack prayer-intro">
-      <SectionHeading title={message(settings, "comingUp")} to="/plan" label="Calendar" />
+      <SectionHeading title={t("comingUp")} to="/plan" label={t("calendar")} />
       <div className="chips">
         {eventRange.map(event => <Link className="chip soft" key={event.id} to={`/plan?event=${event.id}`}>
-          {event.title} · {event.dates.map(date => formatDay(date, dateStyle)).join(" or ")}
+          {event.title} · {event.dates.map(date => formatDay(date, dateStyle, language)).join(t("dateOr"))}
         </Link>)}
       </div>
     </section>
     <Dialog open={Boolean(selectedCurrent)} onOpenChange={open => { if (!open) select(undefined); }}>
       {selectedCurrent && <DialogContent className="awwab-dialog">
-        <DialogTitle>{selectedCurrent.name}</DialogTitle>
-        <DialogDescription className="muted">{prayerStatusNames[selectedCurrent.status]}</DialogDescription>
-        {Number.isFinite(selectedCurrent.starts.valueOf()) && <p className="muted">{formatTime(selectedCurrent.starts, zone)} to {formatTime(selectedCurrent.ends, zone)} · {settings.city.name}</p>}
-        <Link className="action soft" to={`/today/guide/${selectedCurrent.id}`} onClick={() => select(undefined)}>How to pray</Link>
+        <DialogTitle>{t(selectedCurrent.id)}</DialogTitle>
+        <DialogDescription className="muted">{t(selectedCurrent.status)}</DialogDescription>
+        {Number.isFinite(selectedCurrent.starts.valueOf()) && <p className="muted">{formatTime(selectedCurrent.starts, zone, language)} – {formatTime(selectedCurrent.ends, zone, language)} · {settings.city.name}</p>}
+        <Link className="action soft" to={`/today/guide/${selectedCurrent.id}`} onClick={() => select(undefined)}>{t("howToPray")}</Link>
         {selectedCurrent.status === "now" && <div className="equal-row">
-          <button className="action" onClick={() => void record(selectedCurrent, "log")}>I’ve prayed</button>
-          <button className="action light" onClick={() => void record(selectedCurrent, "late")}>Log as late</button>
+          <button className="action" onClick={() => void record(selectedCurrent, "log")}>{t("iPrayedShort")}</button>
+          <button className="action light" onClick={() => void record(selectedCurrent, "late")}>{t("logLate")}</button>
         </div>}
-        {selectedCurrent.status === "missed" && Number.isFinite(selectedCurrent.ends.valueOf()) && <button className="action" onClick={() => void record(selectedCurrent, "log")}>Record make-up prayer</button>}
-        {statusSaved.includes(selectedCurrent.status) && <button className="action light" onClick={() => void record(selectedCurrent, "undo")}>Undo prayer log</button>}
+        {selectedCurrent.status === "missed" && Number.isFinite(selectedCurrent.ends.valueOf()) && <button className="action" onClick={() => void record(selectedCurrent, "log")}>{t("logQada")}</button>}
+        {statusSaved.includes(selectedCurrent.status) && <button className="action light" onClick={() => void record(selectedCurrent, "undo")}>{t("undoPrayer")}</button>}
       </DialogContent>}
     </Dialog>
   </div>;

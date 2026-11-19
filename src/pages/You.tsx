@@ -11,13 +11,15 @@ import { dateKey } from "@/lib/dates";
 import { downloadFile } from "@/lib/download";
 import { prayerReminders, saveCalendar, eventReminders } from "@/lib/calendarFile";
 import { calendarDefaults } from "@/lib/hijri";
+import { message as copy } from "@/lib/copy";
 
 export function You({ settings, now }: { settings: Settings; now: Date }) {
+  const t = copy.bind(null, settings);
   const logs = usePrayerLogs();
   const day = dateKey(now, settings.city.timeZone);
   const stats = prayerStatistics(logs, day);
   return <div className="stack">
-    <header><p className="caption">You</p><h1>{stats.activeDays ? "Your masjid is growing" : "Build your masjid"}</h1></header>
+    <header><p className="caption">{t("you")}</p><h1>{stats.activeDays ? "Your masjid is growing" : "Build your masjid"}</h1></header>
     <MosqueProgress consistency={stats.consistency} dimmed={stats.activeDays > 0 && !stats.recent[28]?.count} />
     <div className="equal-row">
       <div className="card"><h2>{stats.consistency}%</h2><small className="muted">prayed this month</small></div>
@@ -31,12 +33,12 @@ export function You({ settings, now }: { settings: Settings; now: Date }) {
       </div>
     </section>
     <section className="compact-stack">
-      <h2>Settings</h2>
-      <ListLink to="/you/learning" icon={<Sparkles size={22} />} title="Learning mode" detail={settings.mode === "maktab" ? "Maktab · learn like you’re 12" : "Adult · calm and meaning-first"} />
-      <ListLink to="/you/learning#script" icon={<BookOpen size={22} />} title="Script" detail={settings.script === "indopak" ? "IndoPak · like the Bangla Ampara" : "Uthmani · Madani mushaf"} />
-      <ListLink to="/you/prayer" icon={<Compass size={22} />} title="Prayer times" detail={`${settings.city.name} · ${methodNames[settings.method]}`} />
+      <h2>{t("settings")}</h2>
+      <ListLink to="/you/learning" icon={<Sparkles size={22} />} title={t("learningMode")} detail={t(settings.mode === "maktab" ? "maktabMode" : "adultModeDetail")} />
+      <ListLink to="/you/learning#script" icon={<BookOpen size={22} />} title={t("script")} detail={settings.script === "indopak" ? "IndoPak · like the Bangla Ampara" : "Uthmani · Madani mushaf"} />
+      <ListLink to="/you/prayer" icon={<Compass size={22} />} title={t("prayerTimes")} detail={`${settings.city.name} · ${methodNames[settings.method]}`} />
       <ListLink to="/you/hijri" icon={<Calendar size={22} />} title="Hijri date" detail={`Umm al-Qura · ${settings.hijriAdjust} day adjustment`} />
-      <ListLink to="/you/reminders" icon={<Bell size={22} />} title="Reminders" detail="Add prayer times to your calendar" />
+      <ListLink to="/you/reminders" icon={<Bell size={22} />} title={t("reminders")} detail="Add prayer times to your calendar" />
       <ListLink to="/you/audio" icon={<Download size={22} />} title="Offline audio packs" detail="Choose recitations to save on this device" />
       <ListLink to="/you/data" icon={<Download size={22} />} title="Your data" detail="Export or restore an on-device backup" />
     </section>
@@ -47,7 +49,8 @@ export function You({ settings, now }: { settings: Settings; now: Date }) {
 }
 
 export function SettingsPage({ settings, now, panel }: { settings: Settings; now: Date; panel: string }) {
-  const title = ({ learning: "Learning settings", prayer: "Prayer times", hijri: "Hijri date", reminders: "Reminders", data: "Your data" })[panel];
+  const t = copy.bind(null, settings);
+  const title = ({ learning: t("learningSettings"), prayer: t("prayerTimes"), hijri: "Hijri date", reminders: t("reminders"), data: "Your data" })[panel];
   const [message, setMessage] = useState("");
   const calendar = useRecord("calendar", calendarDefaults);
   const [file, setFile] = useState<File>();
@@ -59,34 +62,34 @@ export function SettingsPage({ settings, now, panel }: { settings: Settings; now
         const day = dateKey(now, settings.city.timeZone);
         saveCalendar([...prayerReminders(day, updated, 30, 5), ...eventReminders(day, updated, calendar)]);
         setMessage("Saved. Open the new calendar file to update your reminders.");
-      } else setMessage("Saved on this device.");
+      } else setMessage(copy({ ...settings, ...patch }, "savedOnDevice"));
     }
-    catch { setMessage("Your changes could not be saved. Try again."); }
+    catch { setMessage(t("saveError")); }
   }
 
   if (!title) return <Link to="/you">Go to settings</Link>;
   return <div className="stack">
     <SectionNav title={title} back="/you" />
     {panel === "learning" && <section className="card stack" id="script">
-      <label className="field">Learning mode
+      <label className="field">{t("learningMode")}
         <select value={settings.mode} onChange={event => {
           const mode = event.target.value as Settings["mode"];
           void save({ mode, spellStyle: mode === "maktab" ? "ampara-bn" : "en" });
-        }}><option value="adult">Adult · meaning-first</option><option value="maktab">Maktab · learn like you’re 12</option></select>
+        }}><option value="adult">{t("adultMode")}</option><option value="maktab">{t("maktabMode")}</option></select>
       </label>
-      <label className="field">Quran script
+      <label className="field">{t("quranScript")}
         <select value={settings.script} onChange={event => void save({ script: event.target.value as Settings["script"] })}>
           <option value="indopak">IndoPak</option><option value="uthmani">Uthmani</option>
         </select>
       </label>
-      <label className="field">Spelling style
+      <label className="field">{t("spellingStyle")}
         <select value={settings.spellStyle} onChange={event => void save({ spellStyle: event.target.value as Settings["spellStyle"] })}>
-          <option value="en">English</option><option value="ampara-bn">Bangla Ampara</option>
+          <option value="en" lang="en">English</option><option value="ampara-bn">{t("banglaAmpara")}</option>
         </select>
       </label>
-      <label className="field">Interface language
-        <select value={settings.language} onChange={event => void save({ language: event.target.value as Settings["language"] })}>
-          <option value="en">English</option><option value="bn" lang="bn">বাংলা · preview</option>
+      <label className="field">{t("interfaceLanguage")}
+        <select aria-label={t("interfaceLanguage")} value={settings.language} onChange={event => void save({ language: event.target.value as Settings["language"] })}>
+          <option value="en" lang="en">English</option><option value="bn" lang="bn">{t("banglaPreview")}</option>
         </select>
       </label>
     </section>}

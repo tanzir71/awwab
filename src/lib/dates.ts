@@ -17,17 +17,21 @@ export function addDays(day: string, amount: number) {
   return date.toISOString().slice(0, 10);
 }
 
-export function formatDay(day: string, options?: Intl.DateTimeFormatOptions) {
-  return new Intl.DateTimeFormat("en-GB", { dateStyle: options ? undefined : "full", ...options, timeZone: "UTC" })
+export function formatDay(day: string, options?: Intl.DateTimeFormatOptions, language = "en-GB") {
+  return new Intl.DateTimeFormat(language === "en" ? "en-GB" : language, { dateStyle: options ? undefined : "full", ...options, timeZone: "UTC" })
     .format(new Date(`${day}T12:00:00Z`));
 }
 
-export function formatTime(date: Date, timeZone: string) {
-  return new Intl.DateTimeFormat("en", { timeZone, hour: "numeric", minute: "2-digit" }).format(date);
+export function formatTime(date: Date, timeZone: string, language = "en") {
+  return new Intl.DateTimeFormat(language, { timeZone, hour: "numeric", minute: "2-digit" }).format(date);
 }
 
-export function duration(ms: number) {
+export function duration(ms: number, language = "en") {
   const minutes = Math.max(0, Math.ceil(ms / 60000));
   const hours = Math.floor(minutes / 60);
+  if (language === "bn") {
+    const number = new Intl.NumberFormat(language);
+    return hours ? `${number.format(hours)} ঘণ্টা ${number.format(minutes % 60)} মিনিট` : `${number.format(minutes)} মিনিট`;
+  }
   return hours ? `${hours}h ${minutes % 60}m` : `${minutes}m`;
 }

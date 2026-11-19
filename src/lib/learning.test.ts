@@ -4,6 +4,7 @@ import { isDue, reviewCard } from "./reviews";
 import { quranText } from "./quran";
 import { splitArabicWords } from "./wordAnatomy";
 import { parseCorpus } from "./morphology";
+import { message } from "./copy";
 
 describe("Word anatomy", () => {
   it("keeps Quranic marks on their base letter", () => {
@@ -36,6 +37,14 @@ describe("Bundled Quran", () => {
     const corpus = parseCorpus("# Illustrative header\r\n(1:1:1:1)\tbi\tP\tPREFIX|bi+\r\n(1:1:1:2)\tsomi\tN\tSTEM|POS:N|LEM:{som|ROOT:smw|M|GEN\r\n");
     expect(corpus.positions.get("1:1:1")).toMatchObject({ word: "بِسْمِ", root: "سمو", type: "Noun" });
     expect(corpus.vocabulary[0]).toMatchObject({ count: 1 });
+  });
+});
+
+describe("Learning copy", () => {
+  it("formats mode-specific study messages and Bangla numerals", () => {
+    expect(message({ language: "en", mode: "adult" }, "studyDays", { count: 1 })).toBe("1 day");
+    expect(message({ language: "bn", mode: "adult" }, "studyDays", { count: 2 })).toBe("২ দিন");
+    expect(message({ language: "bn", mode: "maktab" }, "studyResume", { duration: 3 })).toBe("পাঠ শুরু করি · ৩ মিনিট");
   });
 });
 

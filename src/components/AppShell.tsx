@@ -54,7 +54,7 @@ const librarySearch = [
 
 function Tabs({ settings }: { settings: Settings }) {
   const { mode } = settings;
-  return <nav className="tabbar" aria-label="Main navigation">
+  return <nav className="tabbar" aria-label={message(settings, "mainNavigation")}>
     {mobile.map(item => <NavLink to={item.to} key={item.to}>{({ isActive }) => <>
       <span className="tab-icon"><DesignIcon size={22} name={mode === "adult"
         ? `tab-${item.tab}${isActive ? "" : "1"}`
@@ -65,6 +65,7 @@ function Tabs({ settings }: { settings: Settings }) {
 }
 
 export function AppShell({ children, settings, now, desktop }: { children: ReactNode; settings: Settings; now: Date; desktop: boolean }) {
+  const t = message.bind(null, settings);
   const location = useLocation();
   const word = useUi(state => state.word);
   const selectWord = useUi(state => state.selectWord);
@@ -91,8 +92,9 @@ export function AppShell({ children, settings, now, desktop }: { children: React
   const destinations = groups.flatMap(group => group.items);
   const heading = [...destinations].sort((a, b) => b.to.length - a.to.length).find(item => location.pathname.startsWith(item.to));
   const title = heading ? navigationLabel(settings, heading.title) : "awwab";
-  const date = formatDay(day, { weekday: "short", day: "numeric", month: "short", year: "numeric" });
-  const nextPrayer = Number.isFinite(next.starts.valueOf()) ? `${next.name} in ${duration(next.starts.valueOf() - now.valueOf())}` : "Prayer times";
+  const date = formatDay(day, { weekday: "short", day: "numeric", month: "short", year: "numeric" }, settings.language);
+  const nextPrayer = Number.isFinite(next.starts.valueOf())
+    ? t("nextPrayerIn", { name: t(next.id), time: duration(next.starts.valueOf() - now.valueOf(), settings.language) }) : t("prayerTimes");
   const fullscreen = location.pathname.startsWith("/umrah") || location.pathname.startsWith("/print/");
   useLayoutEffect(() => {
     selectWord();
@@ -115,25 +117,25 @@ export function AppShell({ children, settings, now, desktop }: { children: React
     <a className="skip-link action" href="#app-main" onClick={event => {
       event.preventDefault();
       document.getElementById("app-main")?.focus();
-    }}>Skip to content</a>
-    {!fullscreen && <nav className="sidebar" aria-label="Main navigation">
+    }}>{t("skipToContent")}</a>
+    {!fullscreen && <nav className="sidebar" aria-label={t("mainNavigation")}>
       <Link to="/learn" aria-label="Awwab study plan"><Wordmark /></Link>
       {settings.mode === "adult" ? <>
-        <button type="button" className="search-button" onClick={() => setSearchOpen(true)}><DesignIcon name="desk-eye" size={15} /> Search <kbd className="chip">Ctrl K</kbd></button>
+        <button type="button" className="search-button" onClick={() => setSearchOpen(true)}><DesignIcon name="desk-eye" size={15} /> {t("search")} <kbd className="chip">Ctrl K</kbd></button>
         {groups.map(group => <div key={group.label}>
-          <p className="caption nav-group">{group.label}</p>
+          <p className="caption nav-group">{navigationLabel(settings, group.label)}</p>
           {group.items.map(item => <NavLink key={item.to} to={item.to} end={item.end}>
             <DesignIcon name={item.icon === "user" ? "tab-user1" : `desk-${item.icon}`} size={17} />
             {navigationLabel(settings, item.title)}
             {counts[item.to] && <span className="chip ml-auto">{counts[item.to]}</span>}
           </NavLink>)}
         </div>)}
-        <div className="sidebar-bottom"><p className="card compact-stack"><strong>{message(settings, "activity", { count: studyDays.length })}</strong><small className="muted">Adult mode · works offline</small></p></div>
+        <div className="sidebar-bottom"><p className="card compact-stack"><strong>{t("activity", { count: studyDays.length })}</strong><small className="muted">{t("adultOffline")}</small></p></div>
       </> : <>
         {simple.map(item => <NavLink key={item.to} to={item.to}><DesignIcon name={`maktab-desk-${item.simple}`} />{navigationLabel(settings, item.title === "Today" ? "Prayers" : item.title)}</NavLink>)}
         <div className="sidebar-bottom">
-          <NavLink to="/print"><DesignIcon name="maktab-desk-download" /> Print & export</NavLink>
-          <button className="action soft w-full" onClick={() => void updateSettings({ mode: "adult", spellStyle: "en" })}>Switch to Adult</button>
+          <NavLink to="/print"><DesignIcon name="maktab-desk-download" /> {t("print")}</NavLink>
+          <button className="action soft w-full" onClick={() => void updateSettings({ mode: "adult", spellStyle: "en" })}>{t("switchToAdult")}</button>
         </div>
       </>}
     </nav>}
@@ -142,25 +144,25 @@ export function AppShell({ children, settings, now, desktop }: { children: React
         <div><h2>{title}</h2><p className="small muted">{date} · {hijriLabel(day, settings.hijriAdjust, calendar.anchors)}</p></div>
         <Link className="chip night" to="/today">{nextPrayer}</Link>
         {settings.mode === "adult" && <>
-          <Link className="action" to={nextReview ? `/learn/surahs/${nextReview}` : "/learn/surahs"}><DesignIcon name="desk-play" size={14} />Start review{due.length ? ` · ${due.length}` : ""}</Link>
-          <Link className="action soft" to="/today"><DesignIcon name="desk-plus" size={14} />Log prayer</Link>
-          <Link className="action light" to="/share"><DesignIcon name="desk-share" size={14} />Share</Link>
+          <Link className="action" to={nextReview ? `/learn/surahs/${nextReview}` : "/learn/surahs"}><DesignIcon name="desk-play" size={14} />{t("startReview")}{due.length ? ` · ${due.length}` : ""}</Link>
+          <Link className="action soft" to="/today"><DesignIcon name="desk-plus" size={14} />{t("logPrayer")}</Link>
+          <Link className="action light" to="/share"><DesignIcon name="desk-share" size={14} />{t("share")}</Link>
         </>}
-        <Link className="icon-button" to="/you/reminders" aria-label="Reminders"><DesignIcon name="desk-bell" size={18} /></Link>
+        <Link className="icon-button" to="/you/reminders" aria-label={t("reminders")}><DesignIcon name="desk-bell" size={18} /></Link>
       </header>}
       <div className="workspace">
         <div className={`app-content ${word && desktop ? "anatomy-open" : ""}`}>{children}</div>
-        <WordPanel desktop={desktop} ampara={settings.spellStyle === "ampara-bn"} />
+        <WordPanel desktop={desktop} settings={settings} />
       </div>
     </main>
     {!fullscreen && <Tabs settings={settings} />}
     <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
       <DialogContent className="awwab-dialog" aria-describedby={undefined}>
-        <DialogTitle>Search awwab</DialogTitle>
-        <input className="input" placeholder="Find a screen" aria-label="Find a screen" value={query} onChange={event => setQuery(event.target.value)} />
+        <DialogTitle>{t("searchApp")}</DialogTitle>
+        <input className="input" placeholder={t("findScreen")} aria-label={t("findScreen")} value={query} onChange={event => setQuery(event.target.value)} />
         <div className="compact-stack">
-          {destinations.filter(item => item.title.toLowerCase().includes(query.trim().toLowerCase())).map(item =>
-            <Link to={item.to} onClick={() => setSearchOpen(false)} key={item.to} className="list-row">{item.title}</Link>)}
+          {destinations.filter(item => `${item.title} ${navigationLabel(settings, item.title)}`.toLowerCase().includes(query.trim().toLowerCase())).map(item =>
+            <Link to={item.to} onClick={() => setSearchOpen(false)} key={item.to} className="list-row">{navigationLabel(settings, item.title)}</Link>)}
           {query.trim() && librarySearch.filter(item => `${item.title} ${item.terms}`.toLowerCase().includes(query.trim().toLowerCase())).slice(0, 12).map(item =>
             <Link to={item.to} onClick={() => setSearchOpen(false)} key={item.to} className="list-row">{item.title}</Link>)}
         </div>
