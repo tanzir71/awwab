@@ -20,6 +20,7 @@ import { Share } from "@/pages/Share";
 import { HaramFocus, UmrahDuas, UmrahMapPage, UmrahNow, UmrahPlan, UmrahRituals, UmrahShell, WalkWithMe } from "@/pages/Umrah";
 import { Sources } from "@/pages/Sources";
 import { WordBank } from "@/pages/WordBank";
+import { AudioPacks } from "@/pages/AudioPacks";
 import AppInstallPrompt from "@/components/AppInstallPrompt";
 
 function Main() {
@@ -82,6 +83,7 @@ function Main() {
       <Route path="/print" element={<PrintHub />} />
       <Route path="/print/:sheet/:family?" element={<PrintSheet settings={settings} now={now} />} />
       <Route path="/you" element={<You settings={settings} now={now} />} />
+      <Route path="/you/audio" element={<AudioPacks />} />
       {["learning", "prayer", "hijri", "reminders", "data"].map(page => <Route key={page} path={`/you/${page}`} element={<SettingsPage key={page} settings={settings} now={now} panel={page} />} />)}
       <Route path="*" element={<section className="card stack"><h1>Find your way back</h1><p>Choose a page to continue.</p><Link className="action" to="/">Go to your home screen</Link></section>} />
     </Routes>

@@ -39,6 +39,7 @@ export function You({ settings, now }: { settings: Settings; now: Date }) {
       <ListLink to="/you/prayer" icon={<Compass size={22} />} title={t("prayerTimes")} detail={`${settings.city.name} · ${methodNames[settings.method]}`} />
       <ListLink to="/you/hijri" icon={<Calendar size={22} />} title="Hijri date" detail={`Umm al-Qura · ${settings.hijriAdjust} day adjustment`} />
       <ListLink to="/you/reminders" icon={<Bell size={22} />} title={t("reminders")} detail="Add prayer times to your calendar" />
+      <ListLink to="/you/audio" icon={<Download size={22} />} title="Offline audio packs" detail="Choose recitations to save on this device" />
       <ListLink to="/you/data" icon={<Download size={22} />} title="Your data" detail="Export or restore an on-device backup" />
     </section>
     <ListLink to="/share" icon={<Share2 size={22} />} title="Share progress" detail="Make a card to save or share" />

@@ -1,0 +1,417 @@
+{
+  "version": 1,
+  "packs": [
+    {
+      "id": "aaqib-1",
+      "name": "Al-Fatiha",
+      "speaker": "Aaqib Azeez",
+      "source": "https://commons.wikimedia.org/wiki/File%3AChapter_1%2C_Al-Fatiha_(Murattal)_-_Recitation_of_the_Holy_Qur'an.mp3",
+      "attribution": "Aaqib Azeez · CC0 1.0 · Wikimedia Commons",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "bytes": 2967353,
+      "items": [
+        {
+          "ref": "surah:1",
+          "path": "packs/audio/aaqib-azeez/1.mp3"
+        },
+        {
+          "ref": "1:1",
+          "path": "packs/audio/aaqib-azeez/1-1.mp3"
+        },
+        {
+          "ref": "1:2",
+          "path": "packs/audio/aaqib-azeez/1-2.mp3"
+        },
+        {
+          "ref": "1:3",
+          "path": "packs/audio/aaqib-azeez/1-3.mp3"
+        },
+        {
+          "ref": "1:4",
+          "path": "packs/audio/aaqib-azeez/1-4.mp3"
+        },
+        {
+          "ref": "1:5",
+          "path": "packs/audio/aaqib-azeez/1-5.mp3"
+        },
+        {
+          "ref": "1:6",
+          "path": "packs/audio/aaqib-azeez/1-6.mp3"
+        },
+        {
+          "ref": "1:7",
+          "path": "packs/audio/aaqib-azeez/1-7.mp3"
+        }
+      ]
+    },
+    {
+      "id": "aaqib-103",
+      "name": "Al-Asr",
+      "speaker": "Aaqib Azeez",
+      "source": "https://commons.wikimedia.org/wiki/File%3AChapter_103%2C_Al-Asr_(Murattal)_-_Recitation_of_the_Holy_Qur'an.mp3",
+      "attribution": "Aaqib Azeez · CC0 1.0 · Wikimedia Commons",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "bytes": 1438492,
+      "items": [
+        {
+          "ref": "surah:103",
+          "path": "packs/audio/aaqib-azeez/103.mp3"
+        },
+        {
+          "ref": "103:1",
+          "path": "packs/audio/aaqib-azeez/103-1.mp3"
+        },
+        {
+          "ref": "103:2",
+          "path": "packs/audio/aaqib-azeez/103-2.mp3"
+        },
+        {
+          "ref": "103:3",
+          "path": "packs/audio/aaqib-azeez/103-3.mp3"
+        }
+      ]
+    },
+    {
+      "id": "aaqib-105",
+      "name": "Al-Fil",
+      "speaker": "Aaqib Azeez",
+      "source": "https://commons.wikimedia.org/wiki/File%3AChapter_105%2C_Al-Fil_(Murattal)_v2_-_Recitation_of_the_Holy_Qur'an.mp3",
+      "attribution": "Aaqib Azeez · CC0 1.0 · Wikimedia Commons",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "bytes": 2381913,
+      "items": [
+        {
+          "ref": "surah:105",
+          "path": "packs/audio/aaqib-azeez/105.mp3"
+        },
+        {
+          "ref": "105:1",
+          "path": "packs/audio/aaqib-azeez/105-1.mp3"
+        },
+        {
+          "ref": "105:2",
+          "path": "packs/audio/aaqib-azeez/105-2.mp3"
+        },
+        {
+          "ref": "105:3",
+          "path": "packs/audio/aaqib-azeez/105-3.mp3"
+        },
+        {
+          "ref": "105:4",
+          "path": "packs/audio/aaqib-azeez/105-4.mp3"
+        },
+        {
+          "ref": "105:5",
+          "path": "packs/audio/aaqib-azeez/105-5.mp3"
+        }
+      ]
+    },
+    {
+      "id": "aaqib-106",
+      "name": "Quraysh",
+      "speaker": "Aaqib Azeez",
+      "source": "https://commons.wikimedia.org/wiki/File%3AChapter_106%2C_Quraysh_(Murattal)_v2_-_Recitation_of_the_Holy_Qur'an.mp3",
+      "attribution": "Aaqib Azeez · CC0 1.0 · Wikimedia Commons",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "bytes": 2156799,
+      "items": [
+        {
+          "ref": "surah:106",
+          "path": "packs/audio/aaqib-azeez/106.mp3"
+        },
+        {
+          "ref": "106:1",
+          "path": "packs/audio/aaqib-azeez/106-1.mp3"
+        },
+        {
+          "ref": "106:2",
+          "path": "packs/audio/aaqib-azeez/106-2.mp3"
+        },
+        {
+          "ref": "106:3",
+          "path": "packs/audio/aaqib-azeez/106-3.mp3"
+        },
+        {
+          "ref": "106:4",
+          "path": "packs/audio/aaqib-azeez/106-4.mp3"
+        }
+      ]
+    },
+    {
+      "id": "aaqib-107",
+      "name": "Al-Ma'un",
+      "speaker": "Aaqib Azeez",
+      "source": "https://commons.wikimedia.org/wiki/File%3AChapter_107%2C_Al-Ma'un_(Murattal)_-_Recitation_of_the_Holy_Qur'an.mp3",
+      "attribution": "Aaqib Azeez · CC0 1.0 · Wikimedia Commons",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "bytes": 2890762,
+      "items": [
+        {
+          "ref": "surah:107",
+          "path": "packs/audio/aaqib-azeez/107.mp3"
+        },
+        {
+          "ref": "107:1",
+          "path": "packs/audio/aaqib-azeez/107-1.mp3"
+        },
+        {
+          "ref": "107:2",
+          "path": "packs/audio/aaqib-azeez/107-2.mp3"
+        },
+        {
+          "ref": "107:3",
+          "path": "packs/audio/aaqib-azeez/107-3.mp3"
+        },
+        {
+          "ref": "107:4",
+          "path": "packs/audio/aaqib-azeez/107-4.mp3"
+        },
+        {
+          "ref": "107:5",
+          "path": "packs/audio/aaqib-azeez/107-5.mp3"
+        },
+        {
+          "ref": "107:6",
+          "path": "packs/audio/aaqib-azeez/107-6.mp3"
+        },
+        {
+          "ref": "107:7",
+          "path": "packs/audio/aaqib-azeez/107-7.mp3"
+        }
+      ]
+    },
+    {
+      "id": "aaqib-108",
+      "name": "Al-Kawthar",
+      "speaker": "Aaqib Azeez",
+      "source": "https://commons.wikimedia.org/wiki/File%3AChapter_108%2C_Al-Kawthar_(Murattal)_-_Recitation_of_the_Holy_Qur'an.mp3",
+      "attribution": "Aaqib Azeez · CC0 1.0 · Wikimedia Commons",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "bytes": 1291685,
+      "items": [
+        {
+          "ref": "surah:108",
+          "path": "packs/audio/aaqib-azeez/108.mp3"
+        },
+        {
+          "ref": "108:1",
+          "path": "packs/audio/aaqib-azeez/108-1.mp3"
+        },
+        {
+          "ref": "108:2",
+          "path": "packs/audio/aaqib-azeez/108-2.mp3"
+        },
+        {
+          "ref": "108:3",
+          "path": "packs/audio/aaqib-azeez/108-3.mp3"
+        }
+      ]
+    },
+    {
+      "id": "aaqib-109",
+      "name": "Al-Kafirun",
+      "speaker": "Aaqib Azeez",
+      "source": "https://commons.wikimedia.org/wiki/File%3AChapter_109%2C_Al-Kafirun_(Murattal)_-_Recitation_of_the_Holy_Qur'an.mp3",
+      "attribution": "Aaqib Azeez · CC0 1.0 · Wikimedia Commons",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "bytes": 2785288,
+      "items": [
+        {
+          "ref": "surah:109",
+          "path": "packs/audio/aaqib-azeez/109.mp3"
+        },
+        {
+          "ref": "109:1",
+          "path": "packs/audio/aaqib-azeez/109-1.mp3"
+        },
+        {
+          "ref": "109:2",
+          "path": "packs/audio/aaqib-azeez/109-2.mp3"
+        },
+        {
+          "ref": "109:3",
+          "path": "packs/audio/aaqib-azeez/109-3.mp3"
+        },
+        {
+          "ref": "109:4",
+          "path": "packs/audio/aaqib-azeez/109-4.mp3"
+        },
+        {
+          "ref": "109:5",
+          "path": "packs/audio/aaqib-azeez/109-5.mp3"
+        },
+        {
+          "ref": "109:6",
+          "path": "packs/audio/aaqib-azeez/109-6.mp3"
+        }
+      ]
+    },
+    {
+      "id": "aaqib-110",
+      "name": "An-Nasr",
+      "speaker": "Aaqib Azeez",
+      "source": "https://commons.wikimedia.org/wiki/File%3AChapter_110%2C_An-Nasr_(Murattal)_v2_-_Recitation_of_the_Holy_Qur'an.mp3",
+      "attribution": "Aaqib Azeez · CC0 1.0 · Wikimedia Commons",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "bytes": 1803161,
+      "items": [
+        {
+          "ref": "surah:110",
+          "path": "packs/audio/aaqib-azeez/110.mp3"
+        },
+        {
+          "ref": "110:1",
+          "path": "packs/audio/aaqib-azeez/110-1.mp3"
+        },
+        {
+          "ref": "110:2",
+          "path": "packs/audio/aaqib-azeez/110-2.mp3"
+        },
+        {
+          "ref": "110:3",
+          "path": "packs/audio/aaqib-azeez/110-3.mp3"
+        }
+      ]
+    },
+    {
+      "id": "aaqib-111",
+      "name": "Al-Masad",
+      "speaker": "Aaqib Azeez",
+      "source": "https://commons.wikimedia.org/wiki/File%3AChapter_111%2C_Al-Masad_(Murattal)_-_Recitation_of_the_Holy_Qur'an.mp3",
+      "attribution": "Aaqib Azeez · CC0 1.0 · Wikimedia Commons",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "bytes": 2177217,
+      "items": [
+        {
+          "ref": "surah:111",
+          "path": "packs/audio/aaqib-azeez/111.mp3"
+        },
+        {
+          "ref": "111:1",
+          "path": "packs/audio/aaqib-azeez/111-1.mp3"
+        },
+        {
+          "ref": "111:2",
+          "path": "packs/audio/aaqib-azeez/111-2.mp3"
+        },
+        {
+          "ref": "111:3",
+          "path": "packs/audio/aaqib-azeez/111-3.mp3"
+        },
+        {
+          "ref": "111:4",
+          "path": "packs/audio/aaqib-azeez/111-4.mp3"
+        },
+        {
+          "ref": "111:5",
+          "path": "packs/audio/aaqib-azeez/111-5.mp3"
+        }
+      ]
+    },
+    {
+      "id": "aaqib-112",
+      "name": "Al-Ikhlas",
+      "speaker": "Aaqib Azeez",
+      "source": "https://commons.wikimedia.org/wiki/File%3AChapter_112%2C_Al-Ikhlas_(Murattal)_-_Recitation_of_the_Holy_Qur'an.mp3",
+      "attribution": "Aaqib Azeez · CC0 1.0 · Wikimedia Commons",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "bytes": 1232064,
+      "items": [
+        {
+          "ref": "surah:112",
+          "path": "packs/audio/aaqib-azeez/112.mp3"
+        },
+        {
+          "ref": "112:1",
+          "path": "packs/audio/aaqib-azeez/112-1.mp3"
+        },
+        {
+          "ref": "112:2",
+          "path": "packs/audio/aaqib-azeez/112-2.mp3"
+        },
+        {
+          "ref": "112:3",
+          "path": "packs/audio/aaqib-azeez/112-3.mp3"
+        },
+        {
+          "ref": "112:4",
+          "path": "packs/audio/aaqib-azeez/112-4.mp3"
+        }
+      ]
+    },
+    {
+      "id": "aaqib-113",
+      "name": "Al-Falaq",
+      "speaker": "Aaqib Azeez",
+      "source": "https://commons.wikimedia.org/wiki/File%3AChapter_113%2C_Al-Falaq_(Murattal)_v2_-_Recitation_of_the_Holy_Qur'an.mp3",
+      "attribution": "Aaqib Azeez · CC0 1.0 · Wikimedia Commons",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "bytes": 921650,
+      "items": [
+        {
+          "ref": "surah:113",
+          "path": "packs/audio/aaqib-azeez/113.mp3"
+        },
+        {
+          "ref": "113:1",
+          "path": "packs/audio/aaqib-azeez/113-1.mp3"
+        },
+        {
+          "ref": "113:2",
+          "path": "packs/audio/aaqib-azeez/113-2.mp3"
+        },
+        {
+          "ref": "113:3",
+          "path": "packs/audio/aaqib-azeez/113-3.mp3"
+        },
+        {
+          "ref": "113:4",
+          "path": "packs/audio/aaqib-azeez/113-4.mp3"
+        },
+        {
+          "ref": "113:5",
+          "path": "packs/audio/aaqib-azeez/113-5.mp3"
+        }
+      ]
+    },
+    {
+      "id": "aaqib-114",
+      "name": "Al-Nas",
+      "speaker": "Aaqib Azeez",
+      "source": "https://commons.wikimedia.org/wiki/File%3AChapter_114%2C_Al-Nas_(Murattal)_v2_-_Recitation_of_the_Holy_Qur'an.mp3",
+      "attribution": "Aaqib Azeez · CC0 1.0 · Wikimedia Commons",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "bytes": 1331208,
+      "items": [
+        {
+          "ref": "surah:114",
+          "path": "packs/audio/aaqib-azeez/114.mp3"
+        },
+        {
+          "ref": "114:1",
+          "path": "packs/audio/aaqib-azeez/114-1.mp3"
+        },
+        {
+          "ref": "114:2",
+          "path": "packs/audio/aaqib-azeez/114-2.mp3"
+        },
+        {
+          "ref": "114:3",
+          "path": "packs/audio/aaqib-azeez/114-3.mp3"
+        },
+        {
+          "ref": "114:4",
+          "path": "packs/audio/aaqib-azeez/114-4.mp3"
+        },
+        {
+          "ref": "114:5",
+          "path": "packs/audio/aaqib-azeez/114-5.mp3"
+        },
+        {
+          "ref": "114:6",
+          "path": "packs/audio/aaqib-azeez/114-6.mp3"
+        }
+      ]
+    }
+  ]
+}

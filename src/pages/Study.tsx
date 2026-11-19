@@ -115,6 +115,7 @@ function SurahStudy({ surah, settings }: { surah: typeof fullChapters[number]; s
       {mode === "Listen" && <section className="card stack">
         <h2 className="with-icon"><Headphones size={20} /> Practise aloud</h2>
         <VerseAudio audioRef={`surah:${surah.number}`} label={surah.transliteration} compare />
+        <Link to={`/you/audio?surah=${surah.number}`} className="text-button">Download recitation for offline listening</Link>
       </section>}
       {verses.map((verse, i) => {
         const reading = mode !== "Recall" || i === 0;
@@ -126,7 +127,7 @@ function SurahStudy({ surah, settings }: { surah: typeof fullChapters[number]; s
           <div className="text-right"><ArabicText text={wrapAyah(verse[settings.script])} citation={verse.ref} verse={verse.ref} recall={recall} mushaf={settings.script}
             words={splitArabicWords(verse.uthmani).map(anatomyWord => ({ anatomyWord }))} /></div>
           <p className={reading ? "" : "muted"}>{!reading && "Cue · "}{verse.english}</p>
-          {mode === "Listen" && <VerseAudio audioRef={verse.ref} label={`āyah ${i + 1}`} />}
+          {mode === "Listen" && <VerseAudio audioRef={verse.ref} label={`āyah ${i + 1}`} compare />}
         </section>;
       })}
       <section className="compact-stack">
@@ -218,7 +219,7 @@ function QaidaLesson({ lesson, settings }: {
         <button className="action light" disabled={row === 0} onClick={() => move(row - 1)}>Previous row</button>
         <button className="action soft" disabled={row === rows.length - 1} onClick={() => move(row + 1)}>Next row</button>
       </div>
-      <VerseAudio audioRef={`qaida:${lesson.n}:${row + 1}`} label={`row ${row + 1}`} compare />
+      <VerseAudio key={row} audioRef={`qaida:${lesson.n}:${row + 1}`} label={`row ${row + 1}`} compare />
     </section>
     <section className="card stack">
       <h2>{lesson.n === 1 ? "Which letter is this?" : lesson.n === 4 ? "Which haraka do you see?" : lesson.n === 5 ? "Which sound do you hear as you read?" : "How many letters do you see?"}</h2>

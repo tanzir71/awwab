@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Mic, Square } from "lucide-react";
 
-export function LocalRecorder() {
+export function LocalRecorder({ label }: { label?: string } = {}) {
   const active = useRef<{ input: MediaStream; recorder: MediaRecorder }>();
   const mounted = useRef(true);
   const requesting = useRef(false);
@@ -55,12 +55,12 @@ export function LocalRecorder() {
   }
 
   return <div className="compact-stack">
-    <button type="button" className="action soft" onClick={() => {
+    <button type="button" className="action soft" aria-label={label ? `${recording ? "Stop recording" : "Record & compare"} ${label}` : undefined} onClick={() => {
       const recorder = active.current?.recorder;
       if (recorder?.state === "recording") recorder.stop();
       else void start();
     }}>{recording ? <><Square size={16} /> Stop recording</> : <><Mic size={17} /> Record &amp; compare</>}</button>
     {message && <p role="status" className="small muted">{message}</p>}
-    {audio && <div className="compact-stack"><audio controls src={audio} aria-label="Your recording" /><button className="text-button" onClick={() => setAudio("")}>Clear recording</button></div>}
+    {audio && <div className="compact-stack"><audio controls src={audio} aria-label={label ? `Your recording for ${label}` : "Your recording"} /><button className="text-button" onClick={() => setAudio("")}>Clear recording</button></div>}
   </div>;
 }

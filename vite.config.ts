@@ -50,7 +50,7 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
-        globPatterns: ["app/**/*.{html,webmanifest,png,svg,otf,woff2,mjs}", "assets/**/*", "design/**/*", "data/**/*"],
+        globPatterns: ["app/**/*.{html,webmanifest,png,svg,otf,woff2,mjs}", "assets/**/*", "design/**/*", "data/**/*", "packs/audio/index.json"],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         modifyURLPrefix: { "": base },
         navigateFallback: `${base}app/index.html`,
