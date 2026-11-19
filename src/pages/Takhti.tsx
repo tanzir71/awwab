@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type PointerEvent } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { Download, Eraser, Eye, PenLine } from "lucide-react";
 import { toast } from "sonner";
 import { ArabicText } from "@/components/ArabicText";
@@ -126,7 +126,8 @@ export function Takhti() {
   const { family } = useParams();
   const selected = families.find(item => item.id === family) ?? families[0];
   const letters = lettersForFamily(selected.id);
-  const [pick, setPick] = useState("");
+  const [params, setParams] = useSearchParams();
+  const pick = params.get("letter");
   const letter = letters.find(item => item.letter === pick) ?? letters[0];
   return <div className="stack">
     <SectionNav title={t("takhtiWriting")} back="/learn" />
@@ -134,7 +135,7 @@ export function Takhti() {
     <div className="chips" role="group" aria-label={t("letterFamilies")}>{families.map(item => <Link key={item.id} className={`chip ${item.id === selected.id ? "soft" : ""}`} to={`/learn/takhti/${item.id}`}>{studyNames.family(language, item.id, item.title)}</Link>)}</div>
     <section className="card stack">
       <h2 className="with-icon"><PenLine size={19} /> {studyNames.family(language, selected.id, selected.title)}</h2>
-      <div className="equal-row takhti-letters" role="group" aria-label={t("chooseLetter")}>{letters.map(item => <button key={item.letter} className={`action ${item === letter ? "" : "light"}`} type="button" aria-pressed={item === letter} onClick={() => setPick(item.letter)}>{language === "bn" ? item.nameBn : item.name}</button>)}</div>
+      <div className="equal-row takhti-letters" role="group" aria-label={t("chooseLetter")}>{letters.map(item => <button key={item.letter} className={`action ${item === letter ? "" : "light"}`} type="button" aria-pressed={item === letter} onClick={() => setParams({ letter: item.letter }, { replace: true })}>{language === "bn" ? item.nameBn : item.name}</button>)}</div>
       <ArabicText text={letter.letter} />
       <TraceBoard key={letter.letter} letter={letter} />
     </section>

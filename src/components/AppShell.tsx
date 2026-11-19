@@ -12,6 +12,8 @@ import { useUi } from "@/lib/uiState";
 import { isDue, type Reviews } from "@/lib/reviews";
 import { mosqueDefaults } from "@/lib/mosques";
 import { message, navigationLabel } from "@/lib/copy";
+import { countKnownQuranWords } from "@/lib/quran";
+import { reviewDestination, studyPlanMinutes, type DeskActivity } from "@/lib/studyDesk";
 import qaida from "../../docs/content/qaida-lessons.json";
 import surahs from "../../docs/content/surahs-for-salah.json";
 
@@ -77,14 +79,21 @@ export function AppShell({ children, settings, now, desktop }: { children: React
   const lessonProgress = useRecord<number[]>("qaida-complete", []);
   const mosques = useRecord("mosques", mosqueDefaults);
   const studyDays = useRecord<string[]>("study-days", []);
+  const hidden = useRecord<DeskActivity[]>("study-plan-hidden", []);
+  const familiar = useRecord<string[]>("words-known", []);
+  const vocabulary = useRecord<string[]>("word-bank-known", []);
+  const writing = useRecord<string[]>("takhti-practised", []);
   const due = Object.entries(reviews).filter(([, review]) => isDue(review, now));
   const nextReview = due.find(([id]) => /^\d+$/.test(id))?.[0];
+  const dueSurahs = due.filter(([id]) => /^\d+$/.test(id)).length;
   const { day, next } = currentPrayerSchedule(settings.city, settings.method, settings.school, now, logs);
   const stats = prayerStatistics(logs, day);
   const counts: Record<string, string> = {
-    "/learn": `${due.length} due`,
+    "/learn": due.length ? t("deskDueBadge", { count: dueSurahs || due.length }) : undefined,
     "/learn/qaida": `${lessonProgress.length}/17`,
     "/learn/surahs": `${Object.keys(reviews).filter(id => /^\d+$/.test(id)).length}/12`,
+    "/learn/words": String(countKnownQuranWords(familiar, vocabulary)),
+    "/learn/takhti": `${writing.length}/9`,
     "/today": `${logs.filter(log => log.date === day).length}/5`,
     "/return": String(stats.returns),
     "/plan/mosques": String(mosques.mosques.length),
@@ -99,6 +108,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
   const shareMoment = location.pathname.startsWith("/share/milestone/");
   const fullscreen = shareSheet || shareMoment || location.pathname.startsWith("/umrah") || location.pathname.startsWith("/print/");
   const today = location.pathname === "/today";
+  const studyHome = desktop && location.pathname === "/learn";
   const prayerGuide = location.pathname.startsWith("/today/guide/");
   const salahStudy = location.pathname === "/learn/salah";
   useLayoutEffect(() => {
@@ -123,19 +133,22 @@ export function AppShell({ children, settings, now, desktop }: { children: React
       event.preventDefault();
       document.getElementById("app-main")?.focus();
     }}>{t("skipToContent")}</a>
-    {!fullscreen && <nav className="sidebar" aria-label={t("mainNavigation")}>
+    {!fullscreen && <nav className={`sidebar ${studyHome ? "desktop-learn-nav" : ""}`} aria-label={t("mainNavigation")}>
       <Link to="/learn" aria-label="Awwab study plan"><Wordmark /></Link>
       {settings.mode === "adult" ? <>
         <button type="button" className="search-button" onClick={() => setSearchOpen(true)}><DesignIcon name="desk-eye" size={15} /> {t("search")} <kbd className="chip">Ctrl K</kbd></button>
         {groups.map(group => <div key={group.label}>
           <p className="caption nav-group">{navigationLabel(settings, group.label)}</p>
-          {group.items.map(item => <NavLink key={item.to} to={item.to} end={item.end}>
+          {group.items.filter(item => !studyHome || item.to !== "/you").map(item => <NavLink key={item.to} to={item.to} end={item.end}>
             <DesignIcon name={item.icon === "user" ? "tab-user1" : `desk-${item.icon}`} size={17} />
             {navigationLabel(settings, item.title)}
             {counts[item.to] && <span className="chip ml-auto">{counts[item.to]}</span>}
           </NavLink>)}
         </div>)}
-        <div className="sidebar-bottom"><p className="card compact-stack"><strong>{t("activity", { count: studyDays.length })}</strong><small className="muted">{t("adultOffline")}</small></p></div>
+        <div className="sidebar-bottom"><Link to="/you/learning" className="card compact-stack">
+          <strong>{t(studyHome ? "deskStreakSummary" : "activity", { count: studyDays.length })}</strong>
+          <small className="muted">{t(studyHome ? "deskOfflineMode" : "adultOffline", { script: settings.script === "indopak" ? "IndoPak" : "Uthmani" })}</small>
+        </Link></div>
       </> : <>
         {simple.map(item => <NavLink key={item.to} to={item.to}><DesignIcon name={`maktab-desk-${item.simple}`} />{navigationLabel(settings, item.title === "Today" ? "Prayers" : item.title)}</NavLink>)}
         <div className="sidebar-bottom">
@@ -146,12 +159,12 @@ export function AppShell({ children, settings, now, desktop }: { children: React
         </div>
       </>}
     </nav>}
-    <main className="app-main" id="app-main" tabIndex={-1} data-page={shareSheet ? "share-sheet" : shareMoment ? "share-moment" : prayerGuide ? "prayer-guide" : salahStudy ? "salah-study" : today ? "today" : undefined}>
-      {!fullscreen && !(today && settings.mode === "maktab") && <header className="topbar">
-        <div>{today ? <h1>{title}</h1> : <h2>{title}</h2>}<p className="small muted">{date} · {hijriLabel(day, settings.hijriAdjust, calendar.anchors)}{today && ` · ${settings.city.name}`}</p></div>
+    <main className="app-main" id="app-main" tabIndex={-1} data-page={shareSheet ? "share-sheet" : shareMoment ? "share-moment" : prayerGuide ? "prayer-guide" : salahStudy ? "salah-study" : today ? "today" : studyHome ? "learn" : undefined}>
+      {!fullscreen && !((today || studyHome) && settings.mode === "maktab") && <header className="topbar">
+        <div>{today || studyHome ? <h1>{title}</h1> : <h2>{title}</h2>}<p className="small muted">{date} · {hijriLabel(day, settings.hijriAdjust, calendar.anchors)}{today && ` · ${settings.city.name}`}{studyHome && " · " + t("deskMinutesToday", { count: studyPlanMinutes(hidden) })}</p></div>
         <Link className="chip night" to="/today">{nextPrayer}</Link>
         {settings.mode === "adult" && <>
-          <Link className="action" to={nextReview ? `/learn/surahs/${nextReview}` : "/learn/surahs"}><DesignIcon name="desk-play" size={14} />{t("startReview")}{due.length ? ` · ${due.length}` : ""}</Link>
+          <Link className="action" to={studyHome ? reviewDestination(nextReview ?? due[0]?.[0]) : nextReview ? `/learn/surahs/${nextReview}` : "/learn/surahs"}><DesignIcon name="desk-play" size={14} />{t("startReview")}{due.length ? ` · ${studyHome ? dueSurahs || due.length : due.length}` : ""}</Link>
           <Link className="action soft" to="/today?log=1"><DesignIcon name="desk-plus" size={14} />{t("logPrayer")}</Link>
           <Link className="action light" to={today ? "/share?from=today" : "/share?from=learn"}><DesignIcon name="desk-share" size={14} />{t("share")}</Link>
         </>}

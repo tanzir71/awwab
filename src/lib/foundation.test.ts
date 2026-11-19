@@ -9,7 +9,8 @@ import { estimateQada, finishQada } from "./qada";
 import { guideReference, prayerGuide } from "./prayerGuide";
 import { reviewCard, type Reviews } from "./reviews";
 import { countKnownQuranWords } from "./quran";
-import { finishQaidaLesson, saveSurahReview, saveWordReview, setAyahFamiliar, wordMilestones } from "./studyMilestones";
+import { finishQaidaLesson, rememberQaidaPlace, saveSurahReview, saveWordReview, setAyahFamiliar, wordMilestones } from "./studyMilestones";
+import { reviewQueue, studyPlanMinutes } from "./studyDesk";
 import coreWords from "../../docs/content/core-quran-words.json";
 import qaida from "../../docs/content/qaida-lessons.json";
 
@@ -66,6 +67,40 @@ describe("saved study milestones", () => {
     await db.records.put({ key: "qaida-complete", value: otherLessons });
     expect(await finishQaidaLesson(1, times.asr, dhaka.timeZone)).toEqual({ bookComplete: true });
     expect(await finishQaidaLesson(1, times.asr, dhaka.timeZone)).toBeUndefined();
+  });
+
+  it("resumes the saved Qaida lesson and row after opening a completed lesson", async () => {
+    await db.records.put({ key: "qaida-complete", value: [1, 2, 3] });
+    await rememberQaidaPlace(4, 5);
+    await rememberQaidaPlace(2, 1);
+    expect(await getRecord("qaida-current", 1)).toBe(4);
+    expect(await getRecord("qaida-row-4", 0)).toBe(5);
+    await finishQaidaLesson(4, times.asr, dhaka.timeZone);
+    expect(await getRecord("qaida-current", 1)).toBe(5);
+  });
+
+  it("keeps the first recall result of the day across retries and backup restore", async () => {
+    await saveSurahReview(103, "forgot", times.asr, dhaka.timeZone);
+    await saveSurahReview(103, "got-it", times.asr, dhaka.timeZone);
+    await saveWordReview(coreWords.words[0], "got-it", times.asr, dhaka.timeZone);
+    const file = await backup();
+    await db.records.clear();
+    await restoreBackup(file);
+    const reviews = await getRecord<Reviews>("reviews", {});
+    expect(reviewQueue(reviews, times.asr, dhaka.timeZone)).toMatchObject({ attempts: 2, correct: 1 });
+    expect(reviewQueue(reviews, new Date("2026-12-22T12:00:00Z"), dhaka.timeZone)).toMatchObject({ attempts: 0, correct: 0 });
+  });
+
+  it("puts overdue reviews on today's bar and keeps customised plan minutes in sync", () => {
+    const previous = reviewCard(undefined, "shaky", times.asr);
+    const config: Reviews = {
+      103: { ...previous, card: { ...previous.card, due: new Date("2026-11-16T10:00:00Z") } },
+      112: { ...previous, card: { ...previous.card, due: new Date("2026-11-21T10:00:00Z") } },
+    };
+    const queue = reviewQueue(config, times.asr, dhaka.timeZone);
+    expect(queue.due.map(([id]) => id)).toEqual(["103"]);
+    expect(queue.forecast.map(point => point.count)).toEqual([1, 0, 1, 0, 0, 0, 0]);
+    expect(studyPlanMinutes(["fluency"])).toBe(studyPlanMinutes([]) - 3);
   });
 });
 

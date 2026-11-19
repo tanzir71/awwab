@@ -8,11 +8,12 @@ import { SectionNav } from "@/components/Surface";
 import { useDesktop, useRecord } from "@/hooks/use-awwab";
 import { asset } from "@/lib/config";
 import { prayerGuidePath } from "@/lib/prayerGuide";
+import { qaidaRows } from "@/lib/qaidaPractice";
 import { grades, isDue, type ReviewGrade, type Reviews } from "@/lib/reviews";
 import { useCopy } from "@/lib/copy";
 import { studyNames, studySearchTerm } from "@/lib/study-copy";
 import { updateRecord, type Settings } from "@/lib/storageService";
-import { finishQaidaLesson, momentPath, saveSurahReview } from "@/lib/studyMilestones";
+import { finishQaidaLesson, momentPath, rememberQaidaPlace, saveSurahReview } from "@/lib/studyMilestones";
 import { splitArabicWords, wordAnatomy } from "@/lib/wordAnatomy";
 import alphabet from "../../docs/content/arabic-letters.json";
 import qaida from "../../docs/content/qaida-lessons.json";
@@ -24,18 +25,6 @@ import sample from "../../docs/content/word-anatomy.sample.json";
 import { TraceBoard } from "./Takhti";
 
 const fullChapters = surahs.surahs.slice(0, 12);
-const practiceWords = ["بَابٌ", "بِسْمِ", "قُلْ", "أَحَدٌ", "يَوْمٌ", "رَبِّ", "ٱلْعَصْرِ"];
-const drillMarks = ["َ", "ِ", "ُ"];
-const exercises: Record<number, string[]> = {
-  2: ["بتث", "جحخ", "سشط", "درز", "فقي", "كتب"],
-  3: ["الٓمٓ", "يسٓ", "طسمٓ", "طه", "كهيعصٓ"],
-  6: practiceWords, 7: ["هَٰذَا", "مَٰلِكِ", "ٱلرَّحْمَٰنِ", "مُوسَىٰ"],
-  8: ["بَا", "بِي", "بُو", "بَيْ", "بَوْ"], 9: ["خَيْرٌ", "سَلَامٌ", "نُورٌ", "رَيْبٌ"],
-  10: ["أَبْ", "أَجْ", "أَدْ", "بِسْ", "قُلْ"], 11: ["ٱلْحَمْدُ", "رَبِّ", "نَعْبُدُ", "ٱهْدِنَا"],
-  12: ["رَبَّ", "إِنَّ", "أُمُّ", "حَقٌّ"], 13: ["ٱلضُّحَىٰ", "رَبِّ", "ٱلنَّاسِ", "ٱلصَّمَدُ"],
-  14: ["ٱلضَّآلِّينَ", "ٱلصَّآفَّٰتِ", "فَذَكِّرْ"], 15: ["جَآءَ", "إِنَّآ", "ٱلسَّمَآءِ"],
-  16: ["مِنْ", "أَنْعَمْتَ", "مِنْ رَبِّهِمْ", "مِنْ خَيْرٍ", "مِنْ بَعْدِ"], 17: ["قُلْ هُوَ ٱللَّهُ أَحَدٌ", "ٱللَّهُ ٱلصَّمَدُ", "لَمْ يَلِدْ"],
-};
 const supportedSurah = (number: number) => quranText[number];
 const studyModes = ["listen", "read", "recall"] as const;
 
@@ -83,6 +72,7 @@ function SurahStudy({ surah, settings }: { surah: typeof fullChapters[number]; s
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const reviews = useRecord<Reviews>("reviews", {});
+  const rememberedLines = useRecord<string[]>("surah-lines-known", []);
   const bucket = reviews[surah.number]?.bucket ?? "sabaq";
   const verses = supportedSurah(surah.number);
   const desktop = useDesktop();
@@ -127,6 +117,11 @@ function SurahStudy({ surah, settings }: { surah: typeof fullChapters[number]; s
             words={splitArabicWords(verse.uthmani).map(anatomyWord => ({ anatomyWord }))} /></div>
           <p className={reading ? "" : "muted"}>{!reading && `${t("cue")} · `}<span lang="en">{verse.english}</span></p>
           {mode === "listen" && <VerseAudio audioRef={verse.ref} label={t("verseLabel", { number: i + 1 })} compare />}
+          {settings.mode === "maktab" && mode !== "read" && <button className={rememberedLines.includes(verse.ref) ? "action" : "action soft"} type="button" aria-pressed={rememberedLines.includes(verse.ref)}
+            onClick={() => void updateRecord<string[]>("surah-lines-known", [], known =>
+              known.includes(verse.ref) ? known.filter(ref => ref !== verse.ref) : [...known, verse.ref]).catch(() => toast.error(t("saveError")))}>
+            {t("deskCanSayLine", { number: i + 1 })}
+          </button>}
         </section>;
       })}
       <section className="compact-stack">
@@ -172,24 +167,25 @@ function QaidaLesson({ lesson, settings }: {
   const [saving, setSaving] = useState(false);
   const finished = completed.includes(lesson.n);
   const drill = lesson.n === 1 || lesson.n === 4 || lesson.n === 5;
-  const marks = lesson.n === 4 ? drillMarks : lesson.n === 5 ? ["ً", "ٍ", "ٌ"] : [""];
   const ampara = settings.spellStyle === "ampara-bn";
   const options = lesson.n === 1 ? ampara ? ["বা", "তা", "ছা"] : ["Bāʾ", "Tāʾ", "Thāʾ"]
     : lesson.n === 4 ? ampara ? ["যবর", "যের", "পেশ"] : ["Fatha", "Kasra", "Ḍamma"]
     : lesson.n === 5 ? ["an", "in", "un"] : [1, 2, 3].map(count => t("letterCount", { count }));
   const prompt = lesson.n === 1 ? "ب" : lesson.n === 4 ? "بِ" : lesson.n === 5 ? "بٌ" : "قُلْ";
   const correct = lesson.n === 1 ? 0 : lesson.n === 5 ? 2 : 1;
-  const rows = drill
-    ? Array.from({ length: 10 }, (_, index) => alphabet.letters.slice(index * 3, index * 3 + 3).map(letter => marks.map(mark => letter.letter + mark)))
-    : exercises[lesson.n].map(text => [[text]]);
+  const rows = qaidaRows(lesson.n);
   const row = Math.max(0, Math.min(rows.length - 1, activeRow ?? storedRow));
   const rowLetters = rows[row];
   const firstGlyph = wordAnatomy(rowLetters.flat()[0]).letters[0]?.base;
   const traceLetter = alphabet.letters.find(item => item.letter === firstGlyph) ?? alphabet.letters[0];
   const isMaktab = settings.mode === "maktab";
+  useEffect(() => {
+    void rememberQaidaPlace(lesson.n).catch(() => toast.error(t("lessonSaveError")));
+  }, [lesson.n, t]);
+
   function move(next: number) {
     setActiveRow(next);
-    void updateRecord(`qaida-row-${lesson.n}`, 0, () => next);
+    void rememberQaidaPlace(lesson.n, next).catch(() => toast.error(t("lessonSaveError")));
   }
   async function finish() {
     if (saving || finished) return;
@@ -236,7 +232,7 @@ function QaidaLesson({ lesson, settings }: {
       {answer !== undefined && <p role="status">{t(answer === correct ? "quizCorrect" : "quizTryAgain")}</p>}
     </section>
     <section className="card tint compact-stack"><h2>{t("spotInQuran")}</h2>
-      <ArabicText text={lesson.n === 3 ? exercises[3][0] : quranText[112][0].uthmani} citation={lesson.n === 3 ? "2:1" : "112:1"} />
+      <ArabicText text={lesson.n === 3 ? rows[0][0][0] : quranText[112][0].uthmani} citation={lesson.n === 3 ? "2:1" : "112:1"} />
       <p className="muted small">{lesson.n === 3 ? "Al-Baqara 2:1" : "Al-Ikhlāṣ 112:1"}</p>
     </section>
     {finished ? <div className="equal-row"><Link className="action" to={lesson.n < 17 ? `/learn/qaida/${lesson.n + 1}` : "/learn"}>{t("continueLearning")}</Link>

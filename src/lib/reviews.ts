@@ -7,6 +7,7 @@ export interface Review {
   bucket: Bucket;
   attempts?: number;
   correct?: number;
+  firstTries?: Record<string, boolean>;
 }
 export type Reviews = Record<string, Review>;
 export const grades = { forgot: Rating.Again, shaky: Rating.Hard, "got-it": Rating.Good } satisfies Record<ReviewGrade, Grade>;

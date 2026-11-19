@@ -14,6 +14,14 @@ export function usePrayerLogs() {
   return useLiveQuery(() => db.prayers.toArray(), [], []);
 }
 
+export function useQaidaPlace() {
+  return useLiveQuery(() => db.transaction("r", db.records, async () => {
+    const lesson = await getRecord("qaida-current", 1);
+    const row = await getRecord("qaida-row-" + lesson, 0);
+    return { lesson, row };
+  }), [], { lesson: 1, row: 0 });
+}
+
 export function useClock() {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {

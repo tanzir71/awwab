@@ -1,15 +1,12 @@
-@import "./fonts-latin.css";
-
-/* Share artwork waits for these faces before painting its one-time bitmap. */
 @font-face {
-  font-family: "Awwab Share Sans";
+  font-family: "Noto Sans Variable";
   src: url("@fontsource-variable/noto-sans/files/noto-sans-latin-wght-normal.woff2") format("woff2");
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
 }
 @font-face {
-  font-family: "Awwab Share Serif";
+  font-family: "Noto Serif Variable";
   src: url("@fontsource-variable/noto-serif/files/noto-serif-latin-wght-normal.woff2") format("woff2");
   font-style: normal;
   font-weight: 100 900;

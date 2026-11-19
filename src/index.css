@@ -1,4 +1,5 @@
 @import "./theme.css";
+@import "./learn-desktop.css";
 
 @tailwind base;
 @tailwind components;
@@ -369,19 +370,7 @@ progress::-moz-progress-bar { background: var(--control-primary); }
 .count-ring { width: min(180px, 72%); aspect-ratio: 1; margin-inline: auto; display: grid; place-items: center; border-radius: 50%; padding: 10px; background: conic-gradient(var(--c-accent) var(--count), var(--c-overlay-on-night) 0); }
 .count-ring div { width: 100%; height: 100%; border-radius: 50%; background: var(--c-night); display: grid; place-content: center; }
 .count-ring strong, .numeral { font: var(--type-numeral-l); }
-.qaida-path { display: flex; gap: 6px; overflow-x: auto; padding: 4px; scrollbar-width: thin; }
-.path-number { display: grid; place-items: center; flex: 0 0 44px; min-height: 44px; border-radius: var(--r-pill); background: var(--c-surface-alt); color: var(--c-ink); text-decoration: none; }
-.path-number.current { background: var(--c-night); color: var(--c-on-night); }
-.path-number.done { background: var(--c-primary-soft); }
-.counter-tile { display: grid; text-align: center; padding: 7px 4px; border-radius: var(--r-control); background: var(--c-surface-alt); }
-.week-strip span { border-radius: 4px; background: var(--c-surface-alt); color: var(--c-ink); text-align: center; padding: 4px; }
-.week-strip [data-done="true"] { background: var(--control-primary); color: var(--c-on-primary); }
-.forecast { height: 100px; display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); gap: 5px; text-align: center; }
-.forecast > div { position: relative; display: grid; grid-template-rows: auto 1fr auto; align-items: end; }
-.forecast i { display: block; height: var(--height); background: var(--c-primary-soft); border-radius: 4px; }
-.forecast small { font-size: 10px; }
 .study-item { display: flex; min-height: 44px; align-items: center; justify-content: space-between; gap: 5px; text-decoration: none; }
-.takhti-shortcuts { display: flex; gap: 5px; flex-wrap: wrap; }
 .desktop-queue { display: none; }
 .qaida-queue, .qaida-trace { display: none; }
 .study-tabs { padding: 3px; background: var(--c-surface-alt); border-radius: var(--r-control); gap: 4px; }
@@ -485,7 +474,6 @@ progress::-moz-progress-bar { background: var(--control-primary); }
 .tawaf-diagram > i { position: absolute; left: 7px; top: 2px; font-size: 34px; color: var(--c-accent); }
 table th, table td { padding: 6px 10px; text-align: start; }
 table tbody tr:nth-child(even) { background: var(--c-surface-alt); }
-.learn-continue .word-chip { color: var(--c-on-night); }
 .app-content button[aria-expanded].text-button, summary { min-height: 44px; }
 .awwab-dialog > [data-radix-dialog-description] { color: var(--c-ink-muted); }
 
@@ -532,12 +520,6 @@ table tbody tr:nth-child(even) { background: var(--c-surface-alt); }
   .maktab-prayer-columns .hadith-quote { padding: 20px; }
   .maktab-prayer-columns .hadith-quote blockquote { margin-bottom: 0; }
   :root[data-mode="adult"] .desk-card { font-size: 13px; line-height: 18px; }
-  .learn-desk { grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: stretch; }
-  .learn-continue, .desk-span-2 { grid-column: span 2; }
-  .maktab-desk { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: stretch; }
-  .maktab-desk .path-all { grid-column: 1 / -1; }
-  .learn-desk .qaida-path { padding: 3px; }
-  .learn-desk .study-item { min-height: 44px; }
   .study-workspace { display: grid; grid-template-columns: minmax(176px, .7fr) minmax(280px, 1.5fr); gap: 16px; }
   .desktop-queue { display: grid; }
   .qaida-workspace { display: grid; grid-template-columns: minmax(145px,.7fr) minmax(300px,1.9fr) minmax(180px,1.15fr); gap: 14px; align-items: start; }

@@ -51,8 +51,7 @@ export interface ShareModel {
 export const shareUrl = (id: TemplateId) => SHARE_URL + "?ref=share-" + id;
 const footerLink = SHARE_URL.replace(/^https:\/\//, "").replace(/\/$/, "");
 const arabicFont = '"Noto Sans Arabic Variable"';
-const shareSans = '"Awwab Share Sans"';
-const shareSerif = '"Awwab Share Serif"';
+const wordmarkFont = '"Noto Sans Variable"';
 const banglaFont = '"Noto Sans Bengali Variable"';
 const bangla = /\p{Script=Bengali}/u;
 const images = new Map<string, Promise<HTMLImageElement>>();
@@ -85,8 +84,8 @@ function palette(light: boolean, maktab: boolean) {
     track: color(light ? "surface-alt" : "overlay-on-night"),
     badge: color(light ? "primary-soft" : "overlay-on-night"),
     accent: color(light ? "primary" : "on-night"),
-    display: maktab ? style.getPropertyValue("--font-display").trim() : shareSerif + ", serif",
-    body: maktab ? style.getPropertyValue("--font-body").trim() : shareSans + ", sans-serif",
+    display: style.getPropertyValue("--font-display").trim(),
+    body: style.getPropertyValue("--font-body").trim(),
     marks: {
       fatha: color("harakat-fatha"),
       kasra: color("harakat-kasra"),
@@ -112,7 +111,7 @@ function painter(ctx: CanvasRenderingContext2D, colors: Palette) {
     ctx.fill();
   }
   function font(value: string, size: number, weight: number, face: Face) {
-    const family = face === "arabic" ? arabicFont : face === "wordmark" ? shareSans : bangla.test(value) ? banglaFont : colors[face];
+    const family = face === "arabic" ? arabicFont : face === "wordmark" ? wordmarkFont : bangla.test(value) ? banglaFont : colors[face];
     ctx.font = weight + " " + size + "px " + family;
   }
   function write(value: string, x: number, top: number, size: number, weight: number, options: {
@@ -295,7 +294,7 @@ export async function drawShare(canvas: HTMLCanvasElement, model: ShareModel) {
     document.fonts.load("600 42px " + colors.display, card.title),
     document.fonts.load("600 18px " + colors.body, card.detail),
     document.fonts.load("600 42px " + banglaFont, card.title + card.detail),
-    document.fonts.load("650 26px " + shareSans),
+    document.fonts.load("650 26px " + wordmarkFont),
   ]);
   await document.fonts.ready;
   canvas.width = width;

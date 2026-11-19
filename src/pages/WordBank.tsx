@@ -1,5 +1,5 @@
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Search } from "lucide-react";
 import { toast } from "sonner";
 import { ArabicText } from "@/components/ArabicText";
@@ -36,11 +36,12 @@ function pronunciation(word: string) {
 export function WordBank({ settings }: { settings: Settings }) {
   const { language, t } = useCopy();
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   const numbers = new Intl.NumberFormat(language);
   const [corpus, setCorpus] = useState<Corpus>();
   const [error, setError] = useState(false);
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState(params.get("status") === "due" ? "due" : "all");
   const [limit, setLimit] = useState(25);
   const [root, setRoot] = useState<string>();
   const [session, review] = useState<string>();

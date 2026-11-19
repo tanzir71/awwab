@@ -1,0 +1,199 @@
+@media (min-width: 1024px) {
+  [data-page="learn"] .app-content { padding-top: 4px; }
+  [data-mode="maktab"] [data-page="learn"] .app-content { padding: 32px clamp(20px, 3vw, 40px); }
+  [data-page="learn"] .topbar { gap: 10px; }
+  [data-page="learn"] .topbar .small { font: 500 12px/16px var(--font-body); }
+  [data-mode="adult"] .desktop-learn-nav { gap: 2px; padding-top: 18px; }
+  [data-mode="adult"] .desktop-learn-nav .wordmark { font-size: 23px; }
+  [data-mode="adult"] .desktop-learn-nav .nav-group { font: 700 10px/14px var(--font-body); }
+  :root[data-mode="adult"] .desktop-learn-nav > a:first-child { min-height: 42px; }
+  :root[data-mode="adult"] .desktop-learn-nav a:not(:first-child) { min-height: 35px; }
+  [data-mode="adult"] .desktop-learn-nav .sidebar-bottom .card { display: grid; gap: 2px; padding: 10px; box-shadow: none; background: var(--c-surface-alt); }
+  [data-mode="maktab"] .desktop-learn-nav { padding-top: 28px; }
+  [data-mode="maktab"] .desktop-learn-nav .wordmark { margin-bottom: 20px; }
+  [data-mode="maktab"] .desktop-learn-nav a, [data-mode="maktab"] .desktop-learn-nav button { font: var(--type-body-strong); }
+
+  .learn-desk {
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;
+    font: 400 13px/18px var(--font-body);
+  }
+  .learn-desk > .card { display: grid; align-content: start; gap: 12px; padding: 14px 16px 16px; }
+  .learn-desk .desk-span-2 { grid-column: span 2; }
+  .learn-desk > .card > h2 { margin: 0; }
+  :is(.learn-desk, .maktab-desk) .word-chip > span { text-decoration: none; }
+  .learn-desk .desk-heading h2 { font: 650 14px/20px var(--font-body); }
+  .desk-heading > :last-child:not(h2), .desk-heading-action { flex: 0 0 auto; color: var(--interactive-ink); font: 600 12px/16px var(--font-body); }
+  .desk-heading-action { border: 0; background: transparent; padding: 4px 0 4px 6px; }
+  .desk-heading a:hover, .desk-heading-action:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .learn-desk .caption { font: 700 10px/14px var(--font-body); letter-spacing: .06em; }
+  .learn-desk small { font: 500 12px/16px var(--font-body); }
+  .learn-desk small.caption { font: 700 10px/14px var(--font-body); }
+  .learn-desk .desk-resume { padding: 18px 20px 16px; }
+  .desk-lesson-intro > div:first-child { display: grid; gap: 4px; }
+  .desk-resume .desk-lesson-intro h2 { font: 600 24px/26px var(--font-display); }
+  .desk-resume .desk-lesson-intro .muted { font: 500 12px/16px var(--font-body); }
+  .desk-resume .desk-lesson-intro { gap: 16px; min-height: 64px; }
+  .desk-resume .arabic-line { gap: 8px; padding: 0; overflow: visible; }
+  .desk-resume .word-chip { color: var(--c-on-night); font: 400 40px/64px var(--font-arabic); padding: 0 3px; }
+  .desk-lesson-meter { gap: 12px; }
+  .desk-lesson-meter progress { height: 6px; background: var(--c-overlay-on-night); }
+  .desk-lesson-meter progress::-webkit-progress-bar { background: var(--c-overlay-on-night); }
+  .desk-lesson-meter progress::-webkit-progress-value { background: var(--c-on-night); }
+  .desk-lesson-meter progress::-moz-progress-bar { background: var(--c-on-night); }
+  .learn-desk .desk-resume-action { justify-self: start; gap: 6px; color: var(--c-primary); min-height: 32px; padding: 6px 14px; font: 600 12px/16px var(--font-body); }
+
+  .learn-desk .desk-metric { gap: 4px; }
+  .desk-metric h2 { font: 600 26px/30px var(--font-display); }
+  .desk-metric > p.muted { font: 500 12px/16px var(--font-body); }
+  .week-strip, .desk-buckets { gap: 6px; }
+  .week-strip span { display: grid; gap: 2px; text-align: center; color: var(--c-ink-muted); font: 600 10px/14px var(--font-body); }
+  .week-strip span::before { content: ""; height: 18px; border-radius: 5px; background: var(--c-surface-alt); }
+  .week-strip [data-done="true"]::before { background: var(--c-primary); }
+  .counter-tile { display: grid; text-align: center; padding: 6px 2px; border-radius: 10px; background: var(--c-surface-alt); }
+  .learn-desk [data-bucket="sabqi"] { background: var(--c-tint); }
+  .learn-desk [data-bucket="manzil"] { background: var(--c-primary-soft); }
+
+  .learn-desk .desk-today-plan, .learn-desk .desk-words, .learn-desk .desk-reviews { min-height: 377px; }
+  .learn-desk .desk-today-plan { gap: 7px; }
+  .desk-today-plan table { width: 100%; border-spacing: 0 7px; border-collapse: separate; }
+  .desk-today-plan table tbody tr:nth-child(even) { background: transparent; }
+  .desk-today-plan th, .desk-today-plan td { padding: 5px 3px; text-align: start; }
+  .desk-today-plan th { padding-block: 2px; color: var(--c-ink-muted); font: 700 10px/14px var(--font-body); text-transform: uppercase; letter-spacing: .04em; }
+  .desk-today-plan td { font: 500 12px/16px var(--font-body); }
+  .desk-today-plan :is(th, td):first-child { padding-left: 8px; width: 34px; }
+  .desk-today-plan td:nth-child(2) { width: 76px; }
+  .desk-today-plan td:nth-child(4) { width: 118px; }
+  .desk-today-plan td:nth-child(5) { width: 52px; }
+  .desk-today-plan td:last-child { width: 76px; }
+  .desk-today-plan tbody tr:nth-child(odd) td { background: var(--c-surface-alt); }
+  .desk-today-plan td:first-child { border-radius: 10px 0 0 10px; }
+  .desk-today-plan td:last-child { border-radius: 0 10px 10px 0; }
+  .desk-today-plan .chip { padding: 2px 8px; color: var(--c-ink); font: 600 12px/16px var(--font-body); }
+  .desk-today-plan tbody tr:nth-child(odd) .chip:not([data-bucket="sabqi"]):not([data-bucket="manzil"]) { background: var(--c-surface); }
+  .desk-today-plan .action { min-height: 26px; padding: 4px 10px; border-radius: 8px; font: 600 12px/16px var(--font-body); }
+  .desk-plan-item { display: flex; align-items: center; flex-wrap: wrap; gap: 0 4px; }
+  .desk-plan-item .word-chip { font: 400 14px/20px var(--font-arabic); min-width: 12px; min-height: 24px; padding: 0 2px; }
+  .desk-done { color: var(--c-primary); font-weight: 600; }
+  .desk-plan-choices { display: grid; gap: 4px; }
+  .desk-plan-choices label { display: flex; align-items: center; gap: 10px; min-height: 36px; }
+  .desk-plan-choices input { accent-color: var(--control-primary); }
+
+  .desk-tally { display: flex; align-items: baseline; gap: 6px; color: var(--c-ink-muted); text-decoration: none; }
+  .desk-tally strong { color: var(--c-ink); font: 600 30px/32px var(--font-display); }
+  .learn-desk .desk-words { gap: 10px; }
+  .desk-word-samples { display: grid; gap: 8px; }
+  .desk-word-sample { display: flex; align-items: center; justify-content: space-between; gap: 6px; background: var(--c-surface-alt); padding: 2px 10px; border-radius: 10px; min-width: 0; }
+  .desk-word-sample > span:first-child { display: grid; }
+  .desk-word-sample .word-chip { font: 400 20px/28px var(--font-arabic); min-height: 32px; }
+  .forecast { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); align-items: end; gap: clamp(3px, .55vw, 8px); min-height: 132px; margin: 0; padding: 0; text-align: center; list-style: none; }
+  .forecast li { display: grid; gap: 4px; align-content: end; }
+  .forecast i { height: var(--bar-height); background: var(--c-primary-soft); border-radius: 4px; }
+  .forecast [data-today="true"] i { background: var(--c-primary); }
+  .forecast small { color: var(--c-ink-muted); font: 600 10px/14px var(--font-body); }
+  .desk-accuracy { font: 600 12px/16px var(--font-body); }
+  .desk-accuracy span { flex: 0 0 auto; color: var(--c-primary); }
+
+  .desk-lesson-path { --step: clamp(16px, 1.53vw, 22px); display: flex; gap: 0; align-items: center; margin: 0; padding: 0; list-style: none; }
+  .desk-lesson-path li { display: flex; align-items: center; gap: 2px; flex: 1; }
+  .desk-lesson-path li:last-child { flex: 0; }
+  .desk-lesson-path li:not(:last-child)::after { content: ""; flex: 1; min-width: 1px; height: 2px; border-radius: var(--r-pill); background: var(--c-surface-alt); margin-right: 2px; }
+  .desk-lesson-path a { flex: 0 0 var(--step); width: var(--step); height: var(--step); display: grid; place-items: center; border-radius: var(--r-pill); background: var(--c-surface-alt); color: var(--c-ink-muted); text-decoration: none; font: 600 10px/14px var(--font-body); }
+  .desk-lesson-path [data-done="true"] a, .desk-lesson-path li[data-done="true"]::after { background: var(--c-primary); color: var(--c-on-primary); }
+  .desk-lesson-path [data-current="true"] a { background: var(--c-night); color: var(--c-on-night); }
+  .learn-desk .desk-qaida, .learn-desk .desk-chapters, .learn-desk .desk-takhti { min-height: 202px; }
+  .desk-qaida-steps { gap: 12px; }
+  .desk-qaida-steps > a { display: grid; align-content: start; gap: 2px; padding: 10px 12px; border-radius: var(--r-control); background: var(--c-surface-alt); color: var(--c-ink); text-decoration: none; }
+  .desk-qaida-steps > .soft { background: var(--c-primary-soft); }
+  .desk-qaida-steps > .tint { background: var(--c-tint); }
+  .learn-desk .desk-chapters { gap: 6px; }
+  .desk-chapters > a { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 6px; color: var(--c-ink); text-decoration: none; min-height: 22px; }
+  .desk-chapters .chip { color: var(--c-ink); padding: 2px 7px; font: 600 11px/16px var(--font-body); white-space: nowrap; }
+  .desk-chapters [data-status="deskKept"] { background: var(--c-primary-soft); }
+  .desk-chapters [data-status="due"] { background: var(--c-tint); }
+  .desk-letter-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .desk-letter-grid > div { display: grid; place-items: center; border-radius: 10px; background: var(--c-surface-alt); }
+  .desk-letter-grid [data-done="true"] { background: var(--c-primary-soft); }
+  .desk-letter-grid [data-current="true"] { color: var(--c-on-night); background: var(--c-night); }
+  .desk-letter-grid .arabic-line { gap: 0; flex-wrap: nowrap; }
+  .desk-letter-grid .word-chip { color: inherit; font: 400 18px/28px var(--font-arabic); min-width: 0; min-height: 30px; padding: 0 1px; }
+  .desk-letter-grid [data-current="true"] .word-chip:hover { color: var(--c-ink); }
+  .desk-takhti > a:hover { text-decoration: underline; }
+
+  .maktab-desk { display: grid; gap: 20px; }
+  .desk-maktab-header { display: flex; gap: 12px; align-items: center; min-height: 42px; }
+  .desk-maktab-header > :first-child { flex: 1; }
+  .desk-maktab-header h1 { font: 600 32px/28px var(--font-display); }
+  .desk-maktab-header .action, .desk-maktab-header .chip { white-space: nowrap; font: 600 14px/22px var(--font-body); }
+  .desk-maktab-header .chip { background: var(--c-surface); padding: 8px 14px 8px 12px; color: var(--c-ink); box-shadow: var(--shadow-card); }
+  .desk-maktab-header .action { min-height: 42px; }
+  .desk-maktab-lead, .desk-maktab-cards { display: grid; gap: 20px; }
+  .desk-maktab-lead { grid-template-columns: minmax(0, 1fr) minmax(240px, 340px); }
+  .desk-maktab-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .maktab-desk .card { display: grid; align-content: start; gap: 10px; padding: 18px 20px 20px; }
+  .maktab-desk :is(.desk-lesson, .desk-surah) .action { --control-primary: color-mix(in srgb, var(--c-primary) 79%, var(--c-ink)); }
+  .maktab-desk .card h2 { margin: 0; font: 600 20px/26px var(--font-display); }
+  .maktab-desk .desk-lesson { padding: 24px 28px; min-height: 246px; gap: 14px; }
+  .maktab-desk .desk-lesson h2 { font: 600 30px/28px var(--font-display); }
+  .maktab-desk .desk-lesson-intro { gap: 16px; }
+  .desk-lesson-letters { display: flex; gap: clamp(6px, .9vw, 12px); flex: 0 0 auto; }
+  .desk-lesson-letters > div { display: grid; place-items: center; color: var(--c-ink); width: clamp(50px, 5.42vw, 78px); min-height: 86px; background: var(--c-surface); border-radius: 20px; }
+  .desk-lesson-letters .word-chip { color: inherit; padding: 0 2px; min-width: 0; font: 400 clamp(28px, 3.2vw, 46px)/1.5 var(--font-arabic); }
+  .desk-lesson-letters [data-harakat="damma"] { color: var(--c-harakat-damma); }
+  .desk-lesson-letters [data-harakat="kasra"] { color: var(--c-harakat-kasra); }
+  .desk-lesson-letters [data-harakat="fatha"] { color: var(--c-harakat-fatha); }
+  .desk-lesson-actions, .desk-stars { display: flex; align-items: center; gap: 4px; }
+  .desk-lesson-actions { gap: 14px; flex-wrap: wrap; }
+  .desk-lesson-actions .action { min-height: 46px; padding: 8px 18px; font: var(--type-body-strong); }
+  .maktab-desk .desk-stickers { padding: 20px; gap: 12px; }
+  .desk-sticker-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; list-style: none; margin: 0; padding: 0; }
+  .desk-sticker-grid li { display: grid; justify-items: center; align-content: center; gap: 4px; min-height: 63px; padding: 8px 3px; text-align: center; border-radius: var(--r-control); background: var(--c-surface-alt); color: var(--c-ink-muted); }
+  .desk-sticker-grid [data-earned="true"] { color: var(--c-ink); background: var(--c-primary-soft); }
+  .desk-sticker-grid [data-earned="false"] :is(img[src$="-sparkles.svg"],img[src$="-book1.svg"],img[src$="-star2.svg"]) { filter: grayscale(1); }
+  .desk-maktab-cards > .card { min-height: 242px; }
+  .desk-letter-detail { display: flex; align-items: center; gap: 14px; }
+  .desk-letter-detail > span { display: grid; place-items: center; width: 80px; height: 80px; flex: 0 0 auto; border-radius: 20px; }
+  .desk-letter-detail .word-chip { font: 400 42px/63px var(--font-arabic); }
+  .desk-letter-detail small { display: block; }
+  .desk-maktab-cards .action { font: 600 14px/22px var(--font-body); min-height: 42px; }
+  .maktab-desk ul { list-style: none; padding: 0; margin: 0; }
+  .desk-surah ul { display: grid; gap: 4px; }
+  .desk-surah li { display: flex; align-items: center; gap: 8px; color: var(--c-ink-muted); font: var(--type-small); }
+  .desk-surah [data-known="true"] { color: var(--c-ink); }
+  .maktab-desk .desk-word-samples { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .maktab-desk .desk-word-sample { flex-direction: column-reverse; justify-content: center; text-align: center; padding: 4px 4px 6px; gap: 0; border-radius: 14px; }
+  .maktab-desk .desk-word-sample .word-chip { min-height: 32px; color: var(--c-ink); }
+  .maktab-desk .desk-tally strong { font: 600 36px/36px var(--font-display); }
+  .maktab-desk .desk-qaida { padding: 18px 24px 20px; gap: 12px; }
+  .maktab-desk .desk-lesson-path { --step: 32px; }
+  .maktab-desk .desk-lesson-path li { gap: 4px; }
+  .maktab-desk .desk-lesson-path li::after { height: 4px; margin-right: 4px; }
+  .maktab-desk .desk-lesson-path a { font: 600 14px/18px var(--font-body); }
+  .maktab-desk .desk-lesson-path [data-current="true"] a { flex-basis: 40px; height: 40px; }
+
+  [data-page="learn"] .anatomy-open .learn-desk { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  [data-page="learn"] .anatomy-open .desk-maktab-lead { grid-template-columns: minmax(0, 1fr); }
+  [data-page="learn"] .anatomy-open .desk-maktab-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  [data-page="learn"] .anatomy-open .desk-maktab-header { flex-wrap: wrap; }
+  [data-page="learn"] .anatomy-open .maktab-desk .desk-lesson-intro { flex-wrap: wrap; }
+  [data-page="learn"] .anatomy-open .maktab-desk .desk-lesson-path { --step: 24px; overflow-x: auto; padding-bottom: 4px; }
+}
+
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .learn-desk, .maktab-desk, .desk-maktab-lead, .desk-maktab-cards { gap: 12px; }
+  .learn-desk > .card { padding-inline: 10px; }
+  .desk-today-plan :is(th,td):first-child { width: 23px; }
+  .desk-today-plan td:nth-child(2), .desk-today-plan td:last-child { width: 55px; }
+  .desk-today-plan td:nth-child(4) { width: 75px; }
+  .desk-chapters > a { gap: 3px; }
+  .desk-chapters .chip { padding-inline: 4px; }
+  .desk-letter-grid .word-chip { font-size: 14px; }
+  .desk-lesson-path { --step: 17px; }
+  .desk-lesson-path li:not(:last-child)::after { margin-right: 1px; min-width: 0; }
+  .desk-lesson-path li:not(:last-child) { gap: 1px; }
+  .desk-maktab-lead { grid-template-columns: minmax(0, 1fr) minmax(225px, 30%); }
+  .maktab-desk .desk-lesson { padding-inline: 16px; }
+  .desk-lesson-letters > div { min-height: 62px; }
+  .desk-maktab-header { flex-wrap: wrap; }
+  .maktab-desk .desk-lesson-path { --step: 24px; }
+  .maktab-desk .desk-lesson-path [data-current="true"] a { flex-basis: 30px; height: 30px; }
+}

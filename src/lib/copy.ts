@@ -5,6 +5,7 @@ import { rakatNames } from "./prayerServices";
 import type { Settings } from "./storageService";
 import { studyMessages } from "./study-copy";
 import { shareMessages } from "./share-copy";
+import { deskMessages } from "./desk-copy";
 
 type CopySettings = Pick<Settings, "mode" | "language">;
 export type MessageCatalog = Record<string, Record<Settings["language"], string | [string, string]>>;
@@ -13,6 +14,7 @@ export const CopyContext = createContext<CopySettings>({ mode: "adult", language
 const messages: MessageCatalog = {
   ...studyMessages,
   ...shareMessages,
+  ...deskMessages,
   today: { en: "Today", bn: "আজ" },
   learn: { en: "Learn", bn: "শিখি" },
   return: { en: "Return", bn: "ফিরে আসি" },
@@ -227,7 +229,7 @@ const messages: MessageCatalog = {
   startStudyItem: { en: "Start {name}", bn: "শুরু করুন {name}" },
   quranWords: { en: "Quran words", bn: "কুরআনের শব্দ" },
   quranWordsKnown: { en: "Quran words known", bn: "কুরআনের চেনা শব্দ" },
-  of125Words: { en: "of 125 words", bn: "শব্দ, মোট ১২৫টি" },
+  of125Words: { en: "of 125 core words", bn: "মূল শব্দ, মোট ১২৫টি" },
   startWithSalah: { en: "Start with the words you read in salah.", bn: "সালাতে যে শব্দগুলো পড়েন সেগুলো দিয়ে শুরু করুন।" },
   reviewsAhead: { en: "Reviews ahead", bn: "সামনের ঝালাই" },
   sevenDays: { en: "7 days", bn: "৭ দিন" },

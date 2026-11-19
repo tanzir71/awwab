@@ -1,4 +1,4 @@
-import { dateKey } from "./dates";
+import { addDays, dateKey } from "./dates";
 import { countKnownQuranWords } from "./quran";
 import { reviewCard, type ReviewGrade, type Reviews } from "./reviews";
 import { db, getRecord } from "./storageService";
@@ -43,6 +43,9 @@ async function writeReview(id: string, grade: ReviewGrade, now: Date, zone: stri
   const reviews = await getRecord<Reviews>("reviews", {});
   const previous = reviews[id];
   const next = reviewCard(previous, grade, now);
+  const today = dateKey(now, zone);
+  const firstTries = Object.fromEntries(Object.entries(previous?.firstTries ?? {}).filter(([day]) => day >= addDays(today, -29)));
+  next.firstTries = { [today]: grade === "got-it", ...firstTries };
   await db.records.put({ key: "reviews", value: { ...reviews, [id]: next } });
   await saveStudyDay(now, zone);
   return previous?.bucket !== "manzil" && next.bucket === "manzil";
@@ -59,16 +62,26 @@ export function saveWordReview(id: string, grade: ReviewGrade, now: Date, zone: 
   });
 }
 
+export function rememberQaidaPlace(lesson: number, row?: number) {
+  return db.transaction("rw", db.records, async () => {
+    const completed = await getRecord<number[]>("qaida-complete", []);
+    if (!completed.includes(lesson)) await db.records.put({ key: "qaida-current", value: lesson });
+    if (row !== undefined) await db.records.put({ key: "qaida-row-" + lesson, value: row });
+  });
+}
+
 export function finishQaidaLesson(lesson: number, now: Date, zone: string) {
   return db.transaction("rw", db.records, async () => {
     const completed = await getRecord<number[]>("qaida-complete", []);
     if (completed.includes(lesson)) return undefined;
     const all = [...completed, lesson];
+    const remaining = qaida.lessons.filter(item => !all.includes(item.n));
+    const next = remaining.find(item => item.n > lesson) ?? remaining[0];
     await db.records.bulkPut([
       { key: "qaida-complete", value: all },
-      { key: "qaida-current", value: Math.min(lesson + 1, qaida.lessons.length) },
+      { key: "qaida-current", value: next?.n ?? qaida.lessons.length },
     ]);
     await saveStudyDay(now, zone);
-    return { bookComplete: qaida.lessons.every(item => all.includes(item.n)) };
+    return { bookComplete: remaining.length === 0 };
   });
 }

@@ -4,6 +4,7 @@ import { prayerIds, type PrayerLog, type Prayer, type PrayerId } from "../types/
 import { addDays, dateKey } from "./dates";
 import { cities, methodNames, type AsrSchool, type City, type PrayerMethod } from "./prayerServices";
 import { guideReferences, type GuideReference } from "./prayerGuide";
+import { deskActivities } from "./studyDesk";
 
 export interface Settings {
   mode: "adult" | "maktab";
@@ -109,6 +110,8 @@ const savedRecords: Record<string, z.ZodTypeAny> = {
   "qaida-current": count.min(1).max(17),
   "qaida-complete": z.array(count.min(1).max(17)),
   "study-days": z.array(daySchema),
+  "study-plan-hidden": z.array(z.enum(deskActivities)),
+  "surah-lines-known": z.array(z.string().regex(/^\d{1,3}:\d{1,3}$/)),
   "sayyid-line": count.max(6),
   "words-known": labels,
   "takhti-practised": labels,
@@ -157,6 +160,7 @@ const savedRecords: Record<string, z.ZodTypeAny> = {
   reviews: z.record(z.string(), z.object({
     bucket: z.enum(["sabaq", "sabqi", "manzil"]),
     attempts: count.optional(), correct: count.optional(),
+    firstTries: z.record(daySchema, z.boolean()).optional(),
     card: z.object({ due: instantSchema, last_review: instantSchema.optional() }).passthrough(),
   })),
 };
