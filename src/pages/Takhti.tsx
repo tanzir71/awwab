@@ -12,9 +12,11 @@ import { updateRecord } from "@/lib/storageService";
 
 type Letter = ReturnType<typeof lettersForFamily>[number];
 
-export function TraceBoard({ letter, printable = false, onStroke }: { letter: Letter; printable?: boolean; onStroke?: () => void }) {
+export function TraceBoard({ letter, printable = false }: { letter: Letter; printable?: boolean }) {
   const { language, t } = useCopy();
   const name = language === "bn" ? letter.nameBn : letter.name;
+  const family = families.find(item => item.shapes.includes(letter.family));
+  const practised = useRecord<string[]>("takhti-practised", []);
   const canvas = useRef<HTMLCanvasElement>(null);
   const guide = useRef<HTMLCanvasElement>(null);
   const pointer = useRef<number>();
@@ -90,6 +92,12 @@ export function TraceBoard({ letter, printable = false, onStroke }: { letter: Le
     previous.current = current;
   }
 
+  function saveStroke(event: PointerEvent<HTMLCanvasElement>) {
+    if (pointer.current !== event.pointerId || !drewStroke.current || !family || practised.includes(family.id)) return;
+    void updateRecord<string[]>("takhti-practised", [], previous => previous.includes(family.id) ? previous : [...previous, family.id])
+      .catch(() => toast.error(t("saveError")));
+  }
+
   return <div className="compact-stack">
     <div className="trace-board">
       <canvas ref={guide} width={640} height={400} aria-label={t("tracingGuide", { name })} />
@@ -103,7 +111,7 @@ export function TraceBoard({ letter, printable = false, onStroke }: { letter: Le
           draw(event);
         }}
         onPointerMove={draw}
-        onPointerUp={event => { if (pointer.current === event.pointerId && drewStroke.current) onStroke?.(); }}
+        onPointerUp={saveStroke}
         onLostPointerCapture={() => { pointer.current = undefined; previous.current = undefined; }} />}
     </div>
     {!printable && <div className="equal-row">
@@ -116,7 +124,6 @@ export function TraceBoard({ letter, printable = false, onStroke }: { letter: Le
 export function Takhti() {
   const { language, t } = useCopy();
   const { family } = useParams();
-  const practised = useRecord<string[]>("takhti-practised", []);
   const selected = families.find(item => item.id === family) ?? families[0];
   const letters = lettersForFamily(selected.id);
   const [pick, setPick] = useState("");
@@ -129,10 +136,7 @@ export function Takhti() {
       <h2 className="with-icon"><PenLine size={19} /> {studyNames.family(language, selected.id, selected.title)}</h2>
       <div className="equal-row takhti-letters" role="group" aria-label={t("chooseLetter")}>{letters.map(item => <button key={item.letter} className={`action ${item === letter ? "" : "light"}`} type="button" aria-pressed={item === letter} onClick={() => setPick(item.letter)}>{language === "bn" ? item.nameBn : item.name}</button>)}</div>
       <ArabicText text={letter.letter} />
-      <TraceBoard key={letter.letter} letter={letter} onStroke={practised.includes(selected.id) ? undefined : () => {
-        void updateRecord<string[]>("takhti-practised", [], previous => previous.includes(selected.id) ? previous : [...previous, selected.id])
-          .catch(() => toast.error(t("saveError")));
-      }} />
+      <TraceBoard key={letter.letter} letter={letter} />
     </section>
     <Link to={`/print/takhti/${selected.id}`} className="action soft"><Download size={18} /> {t("printPracticeSheet")}</Link>
   </div>;
