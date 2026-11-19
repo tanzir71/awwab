@@ -1,0 +1,240 @@
+[
+  {
+    "id": "a2-family",
+    "title": ["Introducing yourself & family", "নিজের ও পরিবারের পরিচয়"],
+    "partner": ["Neighbour", "প্রতিবেশী"],
+    "sign": "مجلس العائلات",
+    "meaning": ["Families’ lounge", "পরিবারের বসার জায়গা"],
+    "dialogue": [
+      ["السلام عليكم، أنا ساكن جديد هنا.", "as-salāmu ʿalaykum, anā sākin jadīd hinā.", "Peace be upon you. I just moved in here.", "আসসালামু আলাইকুম। আমি এখানে নতুন এসেছি।"],
+      ["وعليكم السلام، حياك الله. أهلك معاك؟", "wa ʿalaykum as-salām, ḥayyāk Allāh. ahlak maʿāk?", "And peace be upon you. Welcome. Is your family here with you?", "ওয়া আলাইকুমুস সালাম। স্বাগতম। আপনার পরিবারও কি সঙ্গে আছে?"],
+      ["إيوه، أهلي معايا. اتشرفنا.", "aywa, ahlī maʿāya. itsharrafnā.", "Yes, my family is with me. Nice to meet you.", "হ্যাঁ, আমার পরিবারও সঙ্গে আছে। পরিচয় হয়ে ভালো লাগল।"],
+      ["الشرف لي. إذا احتجت شي، كَلِّمْني.", "ash-sharaf lī. idhā iḥtajt shay, kallimnī.", "The pleasure is mine. If you need anything, just let me know.", "আমারও ভালো লাগল। কিছু লাগলে আমাকে বলবেন।"]
+    ],
+    "words": [
+      { "ar": "أَهْل", "tr": "ahl", "meaning": ["Family", "পরিবার"], "root": "أ ه ل", "bridge": "20:10:5" },
+      { "ar": "جَار", "tr": "jār", "meaning": ["Neighbour", "প্রতিবেশী"] }
+    ]
+  },
+  {
+    "id": "a2-jobs",
+    "title": ["Work & jobs", "কাজ ও চাকরি"],
+    "partner": ["Recruiter", "নিয়োগকর্তা"],
+    "sign": "قسم التوظيف",
+    "meaning": ["Recruitment department", "নিয়োগ বিভাগ"],
+    "dialogue": [
+      ["لو سمحت، في وظيفة في خدمة العملاء؟", "law samaḥt, fī waẓīfa fī khidmat al-ʿumalāʾ?", "Excuse me, is there an opening in customer service?", "মাফ করবেন, গ্রাহকসেবায় কোনো পদ খালি আছে কি?"],
+      ["إيوه. عندك خبرة في المجال؟", "aywa. ʿindak khibra fī al-majāl?", "Yes. Do you have experience in this field?", "হ্যাঁ। এই ক্ষেত্রে আপনার অভিজ্ঞতা আছে?"],
+      ["إيوه، اشتغلت في خدمة العملاء سنتين.", "aywa, ishtaghalt fī khidmat al-ʿumalāʾ sanatēn.", "Yes, I worked in customer service for two years.", "হ্যাঁ, আমি দুই বছর গ্রাহকসেবায় কাজ করেছি।"],
+      ["تمام. أرسل لنا السيرة الذاتية.", "tamām. arsil lanā as-sīra adh-dhātiyya.", "Great. Send us your CV.", "আচ্ছা। আপনার জীবনবৃত্তান্ত আমাদের পাঠান।"]
+    ],
+    "words": [
+      { "ar": "عَمَل", "tr": "ʿamal", "meaning": ["Work", "কাজ"], "root": "ع م ل", "bridge": "103:3:4" },
+      { "ar": "خِبْرَة", "tr": "khibra", "meaning": ["Experience", "অভিজ্ঞতা"] }
+    ]
+  },
+  {
+    "id": "a2-office",
+    "title": ["At the office", "অফিসে"],
+    "partner": ["Colleague", "সহকর্মী"],
+    "sign": "غرفة الاجتماعات",
+    "meaning": ["Meeting room", "সভাকক্ষ"],
+    "dialogue": [
+      ["عندنا اجتماع اليوم؟", "ʿindanā ijtimāʿ al-yōm?", "Do we have a meeting today?", "আজ আমাদের কোনো মিটিং আছে?"],
+      ["إيوه، الساعة عشرة. تقدر تجيب التقرير؟", "aywa, as-sāʿa ʿashara. tigdar tjīb at-taqrīr?", "Yes, at ten. Can you bring the report?", "হ্যাঁ, দশটায়। রিপোর্টটা আনতে পারবেন?"],
+      ["أكيد، بأرسله لك قبل الاجتماع.", "akīd, baʾarsilu lak gabl al-ijtimāʿ.", "Sure. I'll send it to you before the meeting.", "অবশ্যই। সভার আগে আপনাকে পাঠিয়ে দেব।"],
+      ["ممتاز، شكرا.", "mumtāz, shukran.", "Great, thank you.", "দারুণ, ধন্যবাদ।"]
+    ],
+    "words": [
+      { "ar": "مَكْتَب", "tr": "maktab", "meaning": ["Office or desk", "অফিস বা ডেস্ক"], "root": "ك ت ب", "bridge": "2:2:2" },
+      { "ar": "تَقْرِير", "tr": "taqrīr", "meaning": ["Report", "প্রতিবেদন"] }
+    ]
+  },
+  {
+    "id": "a2-rent",
+    "title": ["Housing & rent", "বাসা ও ভাড়া"],
+    "partner": ["Agent", "এজেন্ট"],
+    "sign": "شقة للإيجار",
+    "meaning": ["Apartment for rent", "ফ্ল্যাট ভাড়া হবে"],
+    "dialogue": [
+      ["السلام عليكم، الشقة لسه فاضية؟", "as-salāmu ʿalaykum, ash-shagga lissa fāḍya?", "Hello, is the apartment still available?", "আসসালামু আলাইকুম। ফ্ল্যাটটি এখনও খালি আছে?"],
+      ["إيوه، فيها غرفتين. تبغى تشوفها اليوم؟", "aywa, fīhā ghurfatēn. tabgha tshūfhā al-yōm?", "Yes, it has two rooms. Do you want to see it today?", "হ্যাঁ, দুটো ঘর আছে। আজ দেখতে চান?"],
+      ["إيوه، يناسبني بعد العصر.", "aywa, yināsibnī baʿd al-ʿaṣr.", "Yes. After Asr works for me.", "হ্যাঁ। আসরের পরে আমার সুবিধা হবে।"],
+      ["تمام، أشوفك عند المدخل.", "tamām, ashūfak ʿind al-madkhal.", "Great, I'll see you at the entrance.", "ঠিক আছে, প্রবেশমুখে দেখা হবে।"]
+    ],
+    "words": [
+      { "ar": "غُرْفَة", "tr": "ghurfa", "meaning": ["Room", "ঘর"], "root": "غ ر ف", "bridge": "25:75:3" },
+      { "ar": "إِيجَار", "tr": "ījār", "meaning": ["Rent", "ভাড়া"] }
+    ]
+  },
+  {
+    "id": "a2-bank",
+    "title": ["Bank & sending money", "ব্যাংক ও টাকা পাঠানো"],
+    "partner": ["Bank clerk", "ব্যাংকের কর্মী"],
+    "sign": "الحوالات الدولية",
+    "meaning": ["International transfers", "আন্তর্জাতিক টাকা স্থানান্তর"],
+    "dialogue": [
+      ["لو سمحت، أبغى أحوّل فلوس لأهلي.", "law samaḥt, abgha aḥawwil fulūs li-ahlī.", "I'd like to send money to my family, please.", "দয়া করে আমার পরিবারের কাছে টাকা পাঠাতে চাই।"],
+      ["عندك رقم حساب المستفيد؟", "ʿindak ragam ḥisāb al-mustafīd?", "Do you have the recipient's account number?", "যিনি টাকা পাবেন তাঁর হিসাব নম্বর আছে?"],
+      ["إيوه، هذا رقم الحساب. كم رسوم التحويل؟", "aywa, hādhā ragam al-ḥisāb. kam rusūm at-taḥwīl?", "Yes, here's the account number. How much is the transfer fee?", "হ্যাঁ, এই যে হিসাব নম্বর। টাকা পাঠানোর ফি কত?"],
+      ["قبل ما تأكد، تظهر لك الرسوم على الشاشة.", "gabl mā taʾakkid, tiẓhar lak ar-rusūm ʿala ash-shāsha.", "You'll see the fee on the screen before you confirm.", "নিশ্চিত করার আগে পর্দায় ফি দেখা যাবে।"]
+    ],
+    "words": [
+      { "ar": "حِسَاب", "tr": "ḥisāb", "meaning": ["Account", "হিসাব"], "root": "ح س ب", "bridge": "84:8:3" },
+      { "ar": "تَحْوِيل", "tr": "taḥwīl", "meaning": ["Transfer", "স্থানান্তর"] }
+    ]
+  },
+  {
+    "id": "a2-clinic",
+    "title": ["Doctor & pharmacy", "ডাক্তার ও ওষুধের দোকান"],
+    "partner": ["Doctor", "ডাক্তার"],
+    "sign": "العيادة العامة",
+    "meaning": ["General clinic", "সাধারণ চিকিৎসাকেন্দ্র"],
+    "dialogue": [
+      ["دكتور، عندي أَلَم في بطني.", "duktūr, ʿindī alam fī baṭnī.", "Doctor, I have stomach pain.", "ডাক্তার, আমার পেটে ব্যথা।"],
+      ["مِن متى بدأ الألم؟", "min matā badaʾ al-alam?", "When did the pain start?", "কখন থেকে ব্যথা শুরু হয়েছে?"],
+      ["من أمس بالليل. اليوم الألم أقوى.", "min ams bil-lēl. al-yōm al-alam agwā.", "Since last night. The pain is worse today.", "গত রাত থেকে। আজ ব্যথা বেড়েছে।"],
+      ["طيب، خليني أفحصك.", "ṭayyib, khallīnī afḥaṣak.", "Okay, let me examine you.", "আচ্ছা, আপনাকে পরীক্ষা করে দেখি।"]
+    ],
+    "words": [
+      { "ar": "أَلَم", "tr": "alam", "meaning": ["Pain", "ব্যথা"], "root": "أ ل م", "bridge": "2:10:9" },
+      { "ar": "صَيْدَلِيَّة", "tr": "ṣaydaliyya", "meaning": ["Pharmacy", "ওষুধের দোকান"] }
+    ]
+  },
+  {
+    "id": "a2-documents",
+    "title": ["Government offices", "সরকারি দপ্তরে"],
+    "partner": ["Clerk", "দপ্তরের কর্মী"],
+    "sign": "خدمات المقيمين",
+    "meaning": ["Resident services", "বাসিন্দাদের সেবা"],
+    "dialogue": [
+      ["لو سمحت، فين أقدر أجدّد الإقامة؟", "law samaḥt, fēn agdar ajaddid al-iqāma?", "Excuse me, where can I renew my residence permit?", "মাফ করবেন, কোথায় আমার বসবাসের অনুমতি নবায়ন করতে পারি?"],
+      ["عند الشباك هذا. حجزت موعد؟", "ʿind ash-shubbāk hādhā. ḥajazt mawʿid?", "At this window. Have you booked an appointment?", "এই কাউন্টারে। সময় নিয়েছেন?"],
+      ["لسه. ممكن تورّيني كيف أحجز؟", "lissa. mumkin twarrīnī kēf aḥjuz?", "Not yet. Could you show me how to book?", "এখনও না। কীভাবে সময় নিতে হয় দেখাবেন?"],
+      ["طبعا، تقدر تسأل موظف الاستقبال.", "ṭabʿan, tigdar tisʾal muwaẓẓaf al-istiqbāl.", "Of course, you can ask the person at reception.", "অবশ্যই, অভ্যর্থনা ডেস্কের কর্মীকে জিজ্ঞেস করতে পারেন।"]
+    ],
+    "words": [
+      { "ar": "إِقَامَة", "tr": "iqāma", "meaning": ["Residence permit in this setting", "এখানে বসবাসের অনুমতি"], "root": "ق و م", "bridge": "2:43:1" },
+      { "ar": "تَأْشِيرَة", "tr": "taʾshīra", "meaning": ["Visa", "ভিসা"] }
+    ]
+  },
+  {
+    "id": "a2-weather",
+    "title": ["Weather", "আবহাওয়া"],
+    "partner": ["Friend", "বন্ধু"],
+    "sign": "طريق مغلق",
+    "meaning": ["Road closed", "রাস্তা বন্ধ"],
+    "dialogue": [
+      ["الجو اليوم غيم، تتوقع ينزل مطر؟", "al-jaww al-yōm ghēm, titwaqqaʿ yinzil maṭar?", "It's cloudy today. Do you think it'll rain?", "আজ মেঘলা। বৃষ্টি হবে বলে মনে হয়?"],
+      ["يمكن بعد المغرب. بتطلع برا؟", "yumkin baʿd al-maghrib. biṭlaʿ barra?", "Maybe after Maghrib. Are you going out?", "হয়তো মাগরিবের পর। বাইরে যাবেন?"],
+      ["إيوه، بس باخذ معي مظلة.", "aywa, bass bākhudh maʿī miẓalla.", "Yes, but I'll take an umbrella.", "হ্যাঁ, তবে ছাতা নিয়ে যাব।"],
+      ["فكرة كويسة.", "fikra kwayyisa.", "Good idea.", "ভালো বুদ্ধি।"]
+    ],
+    "words": [
+      { "ar": "مَطَر", "tr": "maṭar", "meaning": ["Rain", "বৃষ্টি"], "root": "م ط ر", "bridge": "7:84:3" },
+      { "ar": "مِظَلَّة", "tr": "miẓalla", "meaning": ["Umbrella", "ছাতা"] }
+    ]
+  },
+  {
+    "id": "a2-phone",
+    "title": ["Phone calls", "ফোনে কথা বলা"],
+    "partner": ["Caller", "ফোনের অন্য ব্যক্তি"],
+    "sign": "خدمة العملاء",
+    "meaning": ["Customer service", "গ্রাহকসেবা"],
+    "dialogue": [
+      ["ألو، معاك سامي. الصوت واضح؟", "alō, maʿāk Sāmī. aṣ-ṣōt wāḍiḥ?", "Hello, Sami speaking. Can you hear me clearly?", "হ্যালো, আমি সামি। আমার কথা স্পষ্ট শুনতে পাচ্ছেন?"],
+      ["الصوت يقطّع. ممكن تكلّمني بعد شوي؟", "aṣ-ṣōt yigaṭṭaʿ. mumkin tikallimnī baʿd shway?", "You're breaking up. Can you call me back in a bit?", "কথা কেটে কেটে আসছে। একটু পরে ফোন করতে পারবেন?"],
+      ["أكيد، أتصل عليك بعد عشر دقايق.", "akīd, attaṣil ʿalēk baʿd ʿashar dagāyig.", "Sure, I'll call you back in ten minutes.", "অবশ্যই, দশ মিনিট পর আবার ফোন করব।"],
+      ["تمام، يعطيك العافية.", "tamām, yaʿṭīk al-ʿāfya.", "Great, thanks.", "ঠিক আছে, ধন্যবাদ।"]
+    ],
+    "words": [
+      { "ar": "صَوْت", "tr": "ṣōt", "meaning": ["Voice or sound", "কণ্ঠ বা শব্দ"], "root": "ص و ت", "bridge": "31:19:6" },
+      { "ar": "اِتِّصَال", "tr": "ittiṣāl", "meaning": ["Call or connection", "ফোন বা সংযোগ"] }
+    ]
+  },
+  {
+    "id": "a2-restaurant",
+    "title": ["Restaurants", "রেস্তোরাঁয়"],
+    "partner": ["Server", "পরিবেশনকারী"],
+    "sign": "قائمة الطعام",
+    "meaning": ["Menu", "খাবারের তালিকা"],
+    "dialogue": [
+      ["ممكن أشوف قائمة الطعام؟", "mumkin ashūf gāʾimat aṭ-ṭaʿām?", "Can I see the menu?", "মেনুটা দেখতে পারি?"],
+      ["تفضل. تبغى تطلب دحين؟", "tfaḍḍal. tabgha tiṭlub daḥḥīn?", "Here you go. Would you like to order now?", "এই নিন। এখনই অর্ডার করবেন?"],
+      ["إيوه، أبغى رز ودجاج، بس بدون فلفل.", "aywa, abgha ruzz wa-dajāj, bass bidūn filfil.", "Yes, I'd like rice and chicken with no chilli, please.", "হ্যাঁ, ভাত আর মুরগি চাই, তবে মরিচ ছাড়া।"],
+      ["أبشر، أقول للمطبخ.", "abshir, agūl lil-maṭbakh.", "Of course, I'll tell the kitchen.", "ঠিক আছে, রান্নাঘরে বলে দেব।"]
+    ],
+    "words": [
+      { "ar": "طَعَام", "tr": "ṭaʿām", "meaning": ["Food", "খাবার"], "root": "ط ع م", "bridge": "107:3:4" },
+      { "ar": "بِدُون", "tr": "bidūn", "meaning": ["Without", "ছাড়া"] }
+    ]
+  },
+  {
+    "id": "a2-airport",
+    "title": ["Airports & travel", "বিমানবন্দর ও ভ্রমণ"],
+    "partner": ["Airport staff", "বিমানবন্দরের কর্মী"],
+    "sign": "صالة المغادرة",
+    "meaning": ["Departures hall", "প্রস্থান হল"],
+    "dialogue": [
+      ["لو سمحت، فين أسلّم الشنطة؟", "law samaḥt, fēn asallim ash-shanṭa?", "Excuse me, where can I drop off my bag?", "মাফ করবেন, ব্যাগ কোথায় জমা দেব?"],
+      ["عند الكاونتر هذا. معاك بطاقة الصعود؟", "ʿind al-kāwntar hādhā. maʿāk biṭāgat aṣ-ṣuʿūd?", "At this counter. Do you have your boarding pass?", "এই কাউন্টারে। বোর্ডিং পাস আছে?"],
+      ["إيوه، البطاقة في جوّالي. تفضل.", "aywa, al-biṭāga fī jawwālī. tfaḍḍal.", "Yes, the pass is on my phone. Here it is.", "হ্যাঁ, পাসটা ফোনে আছে। এই নিন।"],
+      ["شكرا. حطّ الشنطة على الميزان.", "shukran. ḥuṭṭ ash-shanṭa ʿala al-mīzān.", "Thank you. Put the bag on the scales.", "ধন্যবাদ। ব্যাগটা ওজনের যন্ত্রে রাখুন।"]
+    ],
+    "words": [
+      { "ar": "سَفَر", "tr": "safar", "meaning": ["Travel", "ভ্রমণ"], "root": "س ف ر", "bridge": "2:184:9" },
+      { "ar": "بِطَاقَة الصُّعُود", "tr": "biṭāgat aṣ-ṣuʿūd", "meaning": ["Boarding pass", "বোর্ডিং পাস"] }
+    ]
+  },
+  {
+    "id": "a2-appointments",
+    "title": ["Appointments", "দেখা করার সময়"],
+    "partner": ["Receptionist", "অভ্যর্থনা কর্মী"],
+    "sign": "حجز المواعيد",
+    "meaning": ["Appointment booking", "সময় নেওয়ার জায়গা"],
+    "dialogue": [
+      ["ممكن أغيّر موعدي؟", "mumkin aghayyir mawʿidī?", "Can I reschedule my appointment?", "সময়টা বদলাতে পারি?"],
+      ["طبعا. بكرة عندنا الساعة أربعة. يناسبك؟", "ṭabʿan. bukra ʿindanā as-sāʿa arbaʿa. yināsibak?", "Of course. We have four o'clock tomorrow. Does that work?", "অবশ্যই। কাল চারটায় সময় আছে। আপনার সুবিধা হবে?"],
+      ["إيوه، بكرة الساعة أربعة مناسب.", "aywa, bukra as-sāʿa arbaʿa munāsib.", "Yes, four o'clock tomorrow works.", "হ্যাঁ, কাল চারটায় সুবিধা হবে।"],
+      ["حجزت لك الموعد. نشوفك بكرة.", "ḥajazt lak al-mawʿid. nishūfak bukra.", "I've booked it for you. See you tomorrow.", "সময়টা ঠিক করে দিলাম। কাল দেখা হবে।"]
+    ],
+    "words": [
+      { "ar": "مَوْعِد", "tr": "mawʿid", "meaning": ["Appointment or appointed time", "দেখা করার নির্ধারিত সময়"], "root": "و ع د", "bridge": "11:81:25" },
+      { "ar": "حَجْز", "tr": "ḥajz", "meaning": ["Booking", "সময় বা জায়গা সংরক্ষণ"] }
+    ]
+  },
+  {
+    "id": "a2-feelings",
+    "title": ["Feelings", "অনুভূতি"],
+    "partner": ["Friend", "বন্ধু"],
+    "sign": "مكان هادئ",
+    "meaning": ["Quiet area", "শান্ত জায়গা"],
+    "dialogue": [
+      ["اليوم أنا شوي زعلان.", "al-yōm anā shway zaʿlān.", "I'm feeling a little down today.", "আজ আমার একটু মন খারাপ।"],
+      ["سلامتك. تبغى تتكلم؟", "salāmtak. tabgha titkallam?", "I'm sorry to hear that. Do you want to talk?", "শুনে খারাপ লাগল। কথা বলতে চান?"],
+      ["إيوه، إذا عندك وقت نتمشّى شوي.", "aywa, idhā ʿindak wagt nitmashshā shway.", "Yes. If you have time, let's go for a short walk.", "হ্যাঁ। সময় থাকলে একটু হাঁটতে যাই।"],
+      ["أكيد، أنا معاك.", "akīd, anā maʿāk.", "Of course, I'm here with you.", "অবশ্যই, আমি আপনার সঙ্গে আছি।"]
+    ],
+    "words": [
+      { "ar": "حُزْن", "tr": "ḥuzn", "meaning": ["Sadness", "দুঃখ"], "root": "ح ز ن", "bridge": "9:40:20" },
+      { "ar": "زَعْلَان", "tr": "zaʿlān", "meaning": ["Upset, said by a man", "মন খারাপ, পুরুষের কথায়"] }
+    ]
+  },
+  {
+    "id": "a2-invitations",
+    "title": ["Invitations & visits", "দাওয়াত ও দেখা করা"],
+    "partner": ["Host", "আমন্ত্রণকারী"],
+    "sign": "مدخل الضيوف",
+    "meaning": ["Guest entrance", "অতিথিদের প্রবেশপথ"],
+    "dialogue": [
+      ["السلام عليكم، وصلتني دعوتكم، شكرا.", "as-salāmu ʿalaykum, wiṣlatnī daʿwatkum, shukran.", "Peace be upon you. I got your invitation, thank you.", "আসসালামু আলাইকুম। আপনাদের দাওয়াত পেয়েছি, ধন্যবাদ।"],
+      ["وعليكم السلام، حياك الله. تقدر تجي الجمعة؟", "wa ʿalaykum as-salām, ḥayyāk Allāh. tigdar tijī al-jumʿa?", "And peace be upon you. Can you come on Friday?", "ওয়া আলাইকুমুস সালাম। শুক্রবার আসতে পারবেন?"],
+      ["إيوه، أجي بعد المغرب إن شاء الله.", "aywa, ajī baʿd al-maghrib in shāʾ Allāh.", "Yes, I'll come after Maghrib, God willing.", "হ্যাঁ, ইনশাআল্লাহ মাগরিবের পরে আসব।"],
+      ["أهلا وسهلا، نشوفك الجمعة.", "ahlan wa sahlan, nishūfak al-jumʿa.", "You're very welcome. See you Friday.", "স্বাগতম। শুক্রবার দেখা হবে।"]
+    ],
+    "words": [
+      { "ar": "دَعْوَة", "tr": "daʿwa", "meaning": ["Invitation in this setting", "এখানে দাওয়াত"], "root": "د ع و", "bridge": "2:186:8" },
+      { "ar": "ضَيْف", "tr": "ḍayf", "meaning": ["Guest", "অতিথি"] }
+    ]
+  }
+]

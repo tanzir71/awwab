@@ -1,49 +1,35 @@
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ArabicText } from "@/components/ArabicText";
 import { DesignIcon } from "@/components/DesignIcon";
 import { LocalRecorder } from "@/components/LocalRecorder";
-import { useRecord } from "@/hooks/use-awwab";
+import { useDesktop, useRecord } from "@/hooks/use-awwab";
 import { useAudioPlayback } from "@/hooks/use-audio-playback";
-import { asset } from "@/lib/config";
 import { useCopy } from "@/lib/copy";
+import { studyQuran, verseText } from "@/lib/hifz";
 import { phraseReviewPrefix } from "@/lib/learningPaths";
 import { newReview, type ReviewGrade, type Reviews } from "@/lib/reviews";
-import { saveLearningReview } from "@/lib/studyMilestones";
+import { finishSpeakUnit, saveLearningReview } from "@/lib/studyMilestones";
 import { updateRecord, type Settings } from "@/lib/storageService";
-import { askPhrase, renderAsk } from "@/lib/umrahAsk";
-import { banglaPhrases } from "@/lib/umrah-ask-copy";
-import curriculum from "../../docs/content/spoken-arabic.json";
+import { speakGoals, speakGoalsKey, speakLessonContent, speakLessonPath, speakLevelLabels, speakLevels, speakProgressKey, speakSetupPath,
+  speakUnit, speakUnitNumber, speakUnitsByLevel, type SpeakLevel, type SpeakUnit, type SpeakWord } from "@/lib/speakCurriculum";
+import { splitArabicWords } from "@/lib/wordAnatomy";
 
-const base = "/learn/speak";
 const steps = ["speakListen", "speakWords", "speakRepeat", "speakTurn", "speakSign"];
-const goals = ["speakUmrah", "speakWork", "speakEveryday", "speakNews"];
 const goalDefaults = ["speakUmrah"];
-const progressKey = "speak-complete";
-const speakGoalsKey = "speak-goals";
-type Unit = typeof curriculum.units[number];
-type Line = { ar: string; tr: string; meaning: string[]; clip: string };
-const studyClip = (name: string) => asset(`packs/study-speech/${name}.opus`);
 
-function linesFor(unit: Unit): Line[] {
-  if (unit.id === "sim") return curriculum.simDialogue.map((line, i) => ({ ...line, clip: studyClip(`sim-${i + 1}`) }));
-  return unit.phrases.map(id => {
-    const line = renderAsk(askPhrase(id)!, "saudi");
-    return { ...line, meaning: [line.en, banglaPhrases[id] ?? line.en], clip: asset(`packs/phrases/saudi/female/${id}.opus`) };
-  });
-}
-
-function UnitList({ active, complete }: { active?: string; complete: string[] }) {
+function UnitList({ active, complete, level }: { active?: string; complete: string[]; level: SpeakLevel }) {
   const { t, language } = useCopy();
-  return <section className="card speak-unit-list" aria-label={t("speakSurvival")}>
-    <header className="row-between"><h2>A1 · {t("speakSurvival")}</h2><span className="small muted">{t("speakUnits", { count: curriculum.units.length })}</span></header>
-    <ol>{curriculum.units.map(unit => <li key={unit.id}><Link to={`${base}/${unit.id}`} aria-current={active === unit.id ? "page" : undefined}>
+  const units = speakUnitsByLevel[level];
+  return <section className="card speak-unit-list" aria-label={t(speakLevelLabels[level])}>
+    <header className="row-between"><h2>{level} · {t(speakLevelLabels[level])}</h2><span className="small muted">{t("speakUnits", { count: units.length })}</span></header>
+    <ol>{units.map(unit => <li key={unit.id}><Link to={speakLessonPath(unit.id)} aria-current={active === unit.id ? "page" : undefined}>
       <span>{unit.title[language === "bn" ? 1 : 0]}</span>{complete.includes(unit.id) && <span aria-label={t("pathsDone")}>✓</span>}
     </Link></li>)}</ol>
   </section>;
 }
 
-function SpeakSetup({ complete }: { complete: string[] }) {
+function SpeakSetup({ complete, level }: { complete: string[]; level: SpeakLevel }) {
   const { t } = useCopy();
   const selected = useRecord(speakGoalsKey, goalDefaults);
   const [error, setError] = useState(false);
@@ -58,7 +44,7 @@ function SpeakSetup({ complete }: { complete: string[] }) {
         {name !== "speakLater" && <p className="small muted">{t(`${name}Note`)}</p>}
       </section>)}
       <h2 className="caption">{t("speakGoal")}</h2>
-      <div className="chips">{goals.map(goal => <button key={goal} type="button" className={`chip ${selected.includes(goal) ? "active" : "soft"}`}
+      <div className="chips">{speakGoals.map(goal => <button key={goal} type="button" className={`chip ${selected.includes(goal) ? "active" : "soft"}`}
         aria-pressed={selected.includes(goal)} onClick={() => {
           setError(false);
           void updateRecord(speakGoalsKey, goalDefaults, saved => saved.includes(goal) ? saved.filter(id => id !== goal) : [...saved, goal]).catch(() => setError(true));
@@ -66,15 +52,41 @@ function SpeakSetup({ complete }: { complete: string[] }) {
       {error && <p role="alert">{t("saveError")}</p>}
       <h2 className="caption">{t("speakLevels")}</h2>
       <div className="equal-row speak-levels">
-        <Link className="card night" to={`${base}/greetings`}><strong>A1</strong><small>{t("speakSurvival")} · {t("speakUnits", { count: curriculum.units.length })}</small></Link>
-        {(["A2", "B1"] as const).map((level, index) => <Link className="card soft" key={level} to={`/learn/paths/speak/${index + 2}`}><strong>{level}</strong><small>{t("speakPending")}</small></Link>)}
+        {speakLevels.map(choice => {
+          const count = speakUnitsByLevel[choice].length;
+          const to = choice === "A1" && level === "A1" ? speakLessonPath("greetings") : speakSetupPath(choice);
+          return <Link className={`card ${choice === level ? "night" : "soft"}`} key={choice}
+            to={count ? to : "/learn/paths/speak/3"} aria-current={choice === level ? "true" : undefined}>
+            <strong>{choice}</strong><small>{count ? `${t(speakLevelLabels[choice])} · ${t("speakUnits", { count })}` : t("speakPending")}</small>
+          </Link>;
+        })}
       </div>
-    </div><UnitList complete={complete} /></div>
+    </div><UnitList complete={complete} level={level} /></div>
   </div>;
 }
 
-function SpeakLesson({ unit, complete, now, settings, reviewIndex }: { unit: Unit; complete: string[]; now: Date; settings: Settings; reviewIndex?: number }) {
+function RootBridge({ word, script }: { word: SpeakWord; script: Settings["script"] }) {
+  const { t } = useCopy();
+  const [chapter, ayah, position] = word.bridge.split(":").map(Number);
+  const [excerpt, setExcerpt] = useState<string>();
+  const ref = `${chapter}:${ayah}`;
+  useEffect(() => {
+    let active = true;
+    void studyQuran().then(quran => {
+      const verse = quran.surahs[chapter]?.[ayah - 1];
+      if (active && verse) setExcerpt(splitArabicWords(verseText(verse, script).text)[position - 1]);
+    }, () => undefined);
+    return () => { active = false; };
+  }, [chapter, ayah, position, script]);
+  return <section className="card tint speak-bridge"><div><h2 className="caption">{t("rootsSpot")}</h2>
+    <p className="small">{t("speakRootFamily", { word: word.tr })}</p>
+    <a className="small" href={`https://corpus.quran.com/wordmorphology.jsp?location=(${word.bridge})`} rel="noreferrer">{ref} · {t("rootsDictionary")}</a>
+  </div>{excerpt && <ArabicText text={excerpt} compact citation={ref} verse={ref} positionOffset={position - 1} mushaf={script} words={[{ root: word.root }]} />}</section>;
+}
+
+function SpeakLesson({ unit, complete, now, settings, reviewIndex }: { unit: SpeakUnit; complete: string[]; now: Date; settings: Settings; reviewIndex?: number }) {
   const { t, language } = useCopy();
+  const desktop = useDesktop();
   const lang = language === "bn" ? 1 : 0;
   const [step, setStep] = useState(reviewIndex === undefined ? 0 : 1);
   const [slow, setSlow] = useState(false);
@@ -87,15 +99,17 @@ function SpeakLesson({ unit, complete, now, settings, reviewIndex }: { unit: Uni
   const [reviewSaved, setReviewSaved] = useState(false);
   const [queueError, setQueueError] = useState(false);
   const sequence = useRef<number>();
-  const lines = linesFor(unit);
+  const { lines, words, clips } = useMemo(() => speakLessonContent(unit), [unit]);
   const title = unit.title[lang];
   const sim = unit.id === "sim";
-  const question = sim ? 2 : 0;
-  const clips = Object.fromEntries(lines.map((line, i) => [`line-${i}`, line.clip]));
-  clips.sign = studyClip(`sign-${unit.id}`);
-  if (sim) curriculum.simWords.forEach((_, i) => { clips[`word-${i}`] = studyClip(`sim-word-${i + 1}`); });
+  const dialogue = unit.level === "A2" || sim;
+  const question = dialogue ? 2 : 0;
+  const number = speakUnitNumber(unit);
+  const partner = unit.level === "A2" ? unit.partner[lang] : t("speakShop");
+  const other = unit.level === "A2" ? 0 : lines.length - 1;
+  const replyChoices = unit.level === "A2" && number % 2 === 0 ? [question, other] : [other, question];
+  const bridge = words.find(word => word.bridge);
   const player = useAudioPlayback(Object.keys(clips), clips);
-  const words = sim ? curriculum.simWords : lines;
   const reviews = useRecord<Reviews>("reviews", {});
   const reviewId = (i: number) => `${phraseReviewPrefix}${unit.id}:${i}`;
   const reviewWord = reviewIndex === undefined ? undefined : words[reviewIndex];
@@ -141,7 +155,7 @@ function SpeakLesson({ unit, complete, now, settings, reviewIndex }: { unit: Uni
     if (saving) return;
     setSaving(true);
     setError(false);
-    try { await updateRecord<string[]>(progressKey, [], saved => [...new Set([...saved, unit.id])]); }
+    try { await finishSpeakUnit(unit.id, now, settings.city.timeZone); }
     catch { setError(true); }
     finally { setSaving(false); }
   }
@@ -151,17 +165,17 @@ function SpeakLesson({ unit, complete, now, settings, reviewIndex }: { unit: Uni
     <button className="text-button" type="button" disabled={queued} onClick={queueWords}>{t(queued ? "anatomyAdded" : "speakAddAll")}</button></header>
     {words.map((word, i) => <div className="speak-word" key={word.ar}>
       <div><strong>{word.tr}</strong><p className="small muted">{word.meaning[lang]}</p></div>
-      <ArabicText text={word.ar} preserveSeparators words={sim ? [{ root: curriculum.simWords[i].root, transliteration: word.tr, gloss: word.meaning[lang] }] : undefined} showGlosses={false} />
-      {step === 1 && <button className="icon-button" type="button" onClick={() => listen(`${sim ? "word" : "line"}-${i}`)} aria-label={t("speakHearLine", { number: i + 1 })}><DesignIcon name="speak-volume" size={14} /></button>}
+      <ArabicText text={word.ar} preserveSeparators words={sim || word.root ? [{ root: word.root, transliteration: word.tr, gloss: word.meaning[lang], glossLanguage: language }] : undefined} showGlosses={false} />
+      {step === 1 && <button className="icon-button" type="button" onClick={() => listen(`word-${i}`)} aria-label={t("speakHearLine", { number: i + 1 })}><DesignIcon name="speak-volume" size={14} /></button>}
     </div>)}
     {queueError && <p role="alert">{t("saveError")}</p>}
   </section>;
 
   return <div className="paths-page speak-page speak-lesson">
-    <header className="hifz-heading"><Link className="hifz-back" to={base} aria-label={t("back")}><DesignIcon name="ask-icon-chev-l" size={24} /></Link>
-      <div><h1>{title}</h1><p className="small muted">{t("speakUnitLabel", { number: curriculum.units.indexOf(unit) + 1 })}</p></div></header>
+    <header className="hifz-heading"><Link className="hifz-back" to={speakSetupPath(unit.level)} aria-label={t("back")}><DesignIcon name="ask-icon-chev-l" size={24} /></Link>
+      <div><h1>{title}</h1><p className="small muted">{t("speakUnitLabel", { level: unit.level, number })}</p></div></header>
     <div className="speak-workspace">
-      <div className="speak-workspace-nav"><UnitList active={unit.id} complete={complete} /></div>
+      <div className="speak-workspace-nav"><UnitList active={unit.id} complete={complete} level={unit.level} /></div>
       <div className="compact-stack speak-lesson-main">
         <div className="speak-steps" role="group" aria-label={title}>{steps.map((label, i) => <button type="button" key={label} aria-pressed={step === i} onClick={() => changeStep(i)}>{t(label)}</button>)}</div>
         <audio ref={player.element} preload="none" {...player.events} onEnded={() => {
@@ -172,8 +186,8 @@ function SpeakLesson({ unit, complete, now, settings, reviewIndex }: { unit: Uni
           if (next < lines.length) player.play(`line-${next}`, slow ? .75 : 1);
         }} />
         {step === 0 && <>
-          <div className="speak-dialogue">{lines.map((line, i) => <section className="card speak-line" data-you={!sim || i % 2 === 0} key={line.ar}>
-            <div className="row-between"><span className="caption">{t(!sim || i % 2 === 0 ? "speakYou" : "speakShop")}</span>
+          <div className="speak-dialogue">{lines.map((line, i) => <section className="card speak-line" data-you={!dialogue || i % 2 === 0} key={line.ar}>
+            <div className="row-between"><span className="caption">{!dialogue || i % 2 === 0 ? t("speakYou") : partner}</span>
               <button className="icon-button" type="button" aria-label={t("speakHearLine", { number: i + 1 })} aria-pressed={player.playing && player.track === `line-${i}`}
                 onClick={() => listen(`line-${i}`)}><DesignIcon name="speak-volume" size={14} /></button></div>
             <ArabicText text={line.ar} preserveSeparators />
@@ -181,12 +195,13 @@ function SpeakLesson({ unit, complete, now, settings, reviewIndex }: { unit: Uni
           </section>)}</div>
           {sim && <div className="card tint speak-bridge"><div><h2 className="caption">{t("speakRoot")}</h2><p className="small">{t("speakRootExplanation")}</p></div>
             <ArabicText text="نَشْرَحْ" compact citation="94:1" verse="94:1" positionOffset={1} words={[{ root: "ش ر ح" }]} /></div>}
+          {bridge && !desktop && <RootBridge word={bridge} script={settings.script} />}
         </>}
         {step === 1 && (reviewWord ? <section className="card compact-stack"><h2>{t("speakReviewMeaning")}</h2>
           <ArabicText text={reviewWord.ar} preserveSeparators />
           {!reviewRevealed ? <button className="action light" type="button" onClick={() => setReviewRevealed(true)}>{t("speakShowMeanings")}</button> : <>
             <p>{reviewWord.meaning[lang]}</p>
-            {reviewSaved ? <Link className="action" to={`${base}/${unit.id}`}>{t("pathsDone")}</Link> : <div className="equal-row">
+            {reviewSaved ? <Link className="action" to={speakLessonPath(unit.id)}>{t("pathsDone")}</Link> : <div className="equal-row">
               {(["forgot", "shaky", "got-it"] as const).map(grade => <button className="action light" type="button" key={grade}
                 disabled={saving} onClick={() => void gradeWord(grade)}>{t(grade)}</button>)}
             </div>}</>}
@@ -194,15 +209,21 @@ function SpeakLesson({ unit, complete, now, settings, reviewIndex }: { unit: Uni
         </section> : wordList)}
         {step === 2 && <section className="card compact-stack"><h2>{t("speakRepeat")}</h2><ArabicText text={lines[question].ar} preserveSeparators />
           <button className="action light" type="button" onClick={() => listen(`line-${question}`)}>{t(player.playing ? "askStop" : "speakListen")}</button><LocalRecorder /></section>}
-        {step === 3 && <section className="card compact-stack"><h2>{t("speakChoose")}</h2><p>{lines[question].meaning[lang]}</p>
-          <div className="compact-stack">{[lines.at(-1)!, lines[question]].map((line, i) => <div className="speak-answer" key={line.ar}>
-            <ArabicText text={line.ar} preserveSeparators /><button type="button" className="action light" aria-pressed={answer === i} onClick={() => setAnswer(i)}>{i + 1}</button>
-          </div>)}</div>{answer !== undefined && <p role="status">{t(answer === 1 ? "lessonCorrect" : "speakTryAgain")}</p>}</section>}
+        {step === 3 && <section className="card compact-stack"><h2>{t(dialogue ? "speakChooseReply" : "speakChoose")}</h2>
+          {dialogue ? <>
+            <div className="row-between"><p className="caption">{partner}</p>
+              <button className="icon-button" type="button" aria-label={t("speakHearLine", { number: 2 })} onClick={() => listen("line-1")}><DesignIcon name="speak-volume" size={14} /></button></div>
+            <ArabicText text={lines[1].ar} preserveSeparators /><p className="small muted">{lines[1].meaning[lang]}</p>
+          </> : <p>{lines[question].meaning[lang]}</p>}
+          <div className="compact-stack">{replyChoices.map((index, i) => <div className="speak-answer" key={index}>
+            <ArabicText text={lines[index].ar} preserveSeparators /><button type="button" className="action light" aria-label={t("speakReply", { number: i + 1 })}
+              aria-pressed={answer === index} onClick={() => setAnswer(index)}>{i + 1}</button>
+          </div>)}</div>{answer !== undefined && <p role="status">{t(answer === question ? "lessonCorrect" : "speakTryAgain")}</p>}</section>}
         {step === 4 && <section className="card tint compact-stack">{sign}
           <div className="equal-row"><button className="action light" type="button" onClick={() => listen("sign")}>{t(player.playing ? "askStop" : "speakListen")}</button>
             <button className="action light" type="button" aria-expanded={revealed} onClick={() => setRevealed(value => !value)}>{t("speakSignMeaning")}</button></div>
           {revealed && <p>{unit.meaning[lang]}</p>}
-          {complete.includes(unit.id) ? <Link className="action" to={base}>{t("pathsDone")}</Link> : <button className="action" type="button" disabled={saving} onClick={() => void finish()}>{t("speakFinish")}</button>}
+          {complete.includes(unit.id) ? <Link className="action" to={speakSetupPath(unit.level)}>{t("pathsDone")}</Link> : <button className="action" type="button" disabled={saving} onClick={() => void finish()}>{t("speakFinish")}</button>}
           {error && <p role="alert">{t("saveError")}</p>}</section>}
         {player.error && <p role="status">{t("setupPlaybackError")}</p>}
         <div className="speak-player card night">
@@ -216,7 +237,11 @@ function SpeakLesson({ unit, complete, now, settings, reviewIndex }: { unit: Uni
         </div>
         <p className="small muted">{t("generatedSpeech")}</p>
       </div>
-      <aside className="compact-stack speak-workspace-side">{step !== 1 && wordList}{step !== 4 && <section className="card tint compact-stack">{sign}<p className="small">{unit.meaning[lang]}</p></section>}</aside>
+      <aside className="compact-stack speak-workspace-side">
+        {step !== 1 && wordList}
+        {step !== 4 && <section className="card tint compact-stack">{sign}<p className="small">{unit.meaning[lang]}</p></section>}
+        {bridge && desktop && step === 0 && <RootBridge word={bridge} script={settings.script} />}
+      </aside>
     </div>
   </div>;
 }
@@ -225,8 +250,9 @@ export function Speak({ settings, now }: { settings: Settings; now: Date }) {
   const { unit: id } = useParams();
   const [params] = useSearchParams();
   const review = params.get("review");
-  const unit = curriculum.units.find(candidate => candidate.id === id);
-  const complete = useRecord<string[]>(progressKey, []);
+  const unit = speakUnit(id);
+  const level = params.get("level") === "A2" ? "A2" : "A1";
+  const complete = useRecord<string[]>(speakProgressKey, []);
   return unit ? <SpeakLesson key={`${unit.id}:${review ?? ""}`} unit={unit} complete={complete} settings={settings} now={now}
-    reviewIndex={review && /^\d+$/.test(review) ? Number(review) : undefined} /> : <SpeakSetup complete={complete} />;
+    reviewIndex={review && /^\d+$/.test(review) ? Number(review) : undefined} /> : <SpeakSetup complete={complete} level={level} />;
 }

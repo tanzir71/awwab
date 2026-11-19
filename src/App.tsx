@@ -106,6 +106,7 @@ function Main() {
         <Route path="/learn/hifz/:id/:portion?" element={<Hifz settings={settings} now={now} />} />
         <Route path="/learn/speak/:unit?" element={<Speak settings={settings} now={now} />} />
         <Route path="/learn/paths/speak/1" element={<Navigate replace to="/learn/speak" />} />
+        <Route path="/learn/paths/speak/2" element={<Navigate replace to="/learn/speak?level=A2" />} />
         <Route path="/learn/qaida/:id?" element={<Qaida settings={settings} desktop={desktop} />} />
         <Route path="/learn/surahs/:id?" element={<SurahReader settings={settings} now={now} />} />
         <Route path="/learn/salah" element={<SalahWords settings={settings} />} />

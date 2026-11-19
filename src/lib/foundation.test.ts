@@ -14,7 +14,8 @@ import { updateWordChoice } from "./storageService";
 import { reviewCard, type Reviews } from "./reviews";
 import { countKnownQuranWords } from "./quran";
 import { completeOnboarding, desktopPlacementPassed, placementLesson } from "./onboarding";
-import { finishQaidaLesson, markReadingPortion, rememberQaidaPlace, saveFluencyPractice, saveJuzRecitalRating, saveQaidaRowReview, saveSurahReview, saveTakhtiPractice, saveWordReview, setAyahFamiliar, setTeacherCheck, wordMilestones } from "./studyMilestones";
+import { finishQaidaLesson, finishSpeakUnit, markReadingPortion, rememberQaidaPlace, saveFluencyPractice, saveJuzRecitalRating, saveQaidaRowReview, saveSurahReview, saveTakhtiPractice, saveWordReview, setAyahFamiliar, setTeacherCheck, wordMilestones } from "./studyMilestones";
+import { speakGoalsKey, speakProgressKey } from "./speakCurriculum";
 import { completedReadingChapters, emptyReadingPractice, firstUnreadAyah, recitationChecks, teacherChecklistComplete } from "./readingPractice";
 import type { HifzPortion, JuzRecitals } from "./hifz";
 import { reviewDestination, reviewQueue, studyPlanMinutes } from "./studyDesk";
@@ -65,6 +66,21 @@ describe("onboarding", () => {
 describe("saved study milestones", () => {
   beforeEach(async () => {
     await db.records.clear();
+  });
+
+  it("keeps A1 and A2 Speak completion and goals through concurrent saves and a backup", async () => {
+    await db.records.bulkPut([{ key: speakProgressKey, value: ["sim"] }, { key: speakGoalsKey, value: ["speakWork"] }]);
+    await Promise.all([
+      finishSpeakUnit("a2-family", times.asr, dhaka.timeZone),
+      finishSpeakUnit("a2-family", times.asr, dhaka.timeZone),
+      finishSpeakUnit("a2-office", times.asr, dhaka.timeZone),
+    ]);
+    const file = await backup();
+    await db.records.clear();
+    await restoreBackup(file);
+    expect(await getRecord<string[]>(speakProgressKey, [])).toEqual(["sim", "a2-family", "a2-office"]);
+    expect(await getRecord<string[]>(speakGoalsKey, [])).toEqual(["speakWork"]);
+    expect(await getRecord<string[]>("study-days", [])).toEqual([day]);
   });
 
   it("merges reading progress and keeps the two paths and teacher checklist separate in a backup", async () => {

@@ -62,11 +62,27 @@ def encode(voice, path, text):
     path.write_bytes(result.stdout)
 
 
+def course_clips(units):
+    for unit in units:
+        slug = unit["id"]
+        for number, line in enumerate(unit["dialogue"], start=1):
+            yield f"{slug}-line-{number}", line[0]
+        for number, word in enumerate(unit["words"], start=1):
+            yield f"{slug}-word-{number}", word["ar"]
+        yield f"sign-{slug}", unit["sign"]
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("model", type=Path, help="Emirati female Piper model with its .onnx.json config")
+    parser.add_argument("--course", choices=["saudi-a2"], help="Only rebuild the selected Speak course")
     args = parser.parse_args()
     voice = PiperVoice.load(args.model)
+    for slug, line in course_clips(read(CONTENT / "spoken-saudi-a2.json")):
+        encode(voice, OUTPUT / "study-speech" / f"{slug}.opus", line)
+    if args.course:
+        return
+
     units = read(CONTENT / "spoken-arabic.json")
     prompts = {"ghayn": "غَيْن", "mim": "مِيم", "bi": "بِ", "bu": "بُ"}
     prompts.update({f"sim-{i}": line["ar"] for i, line in enumerate(units["simDialogue"], start=1)})

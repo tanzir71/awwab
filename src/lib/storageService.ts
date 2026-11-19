@@ -10,6 +10,7 @@ import { zakatBalances } from "./zakat";
 import { emptyPreparation, tripChecklist, type UmrahTrip } from "./umrah";
 import { askVarieties, askVoices } from "./umrahAsk";
 import { practiceChapters, recitationChecks } from "./readingPractice";
+import { speakGoals, speakGoalsKey, speakProgressKey } from "./speakCurriculum";
 import { builtInLanguages, glossaryOptions, glossaryTerms, textSizes, type AppLanguage, type GlossaryTerm, type WordChoices } from "./languagePreferences";
 
 export interface Settings {
@@ -164,6 +165,8 @@ const juzAmmaKey = z.string().refine(key => practiceChapters.flow.some(chapter =
 const readingAyahProgress = z.record(juzAmmaKey, z.array(count.min(1).max(286)).max(286));
 
 const savedRecords: Record<string, z.ZodTypeAny> = {
+  [speakGoalsKey]: z.array(z.enum(speakGoals)),
+  [speakProgressKey]: z.array(passageKey),
   "reading-practice": z.object({ flow: readingAyahProgress, meaning: readingAyahProgress,
     teacher: z.record(z.union([z.literal("1"), juzAmmaKey]), z.array(z.enum(recitationChecks)).max(recitationChecks.length)) }),
   "hifz-plans": z.record(passageKey, z.object({ minutes: count.min(1).max(90), start: daySchema })),

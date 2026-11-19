@@ -11,6 +11,7 @@ import content from "../../docs/content/roots-and-patterns.json";
 import grammar from "../../docs/content/grammar-foundations.json";
 import sentence from "../../docs/content/sentence-structure.json";
 import roots from "../../docs/content/roots-curriculum.json";
+import { speakLessonContent, speakUnitsByLevel } from "./speakCurriculum";
 import { correctTajweedSamples, tajweedClip, tajweedDepthLessons, tajweedExcerpt, tajweedLessons, tajweedPracticeSamples, tajweedPrecache,
   tajweedProgress, tajweedReviewId, tajweedSampleKey } from "./tajweed";
 import { newReview } from "./reviews";
@@ -170,14 +171,26 @@ describe("Learning path progress", () => {
 
   it("uses the sourced 2:2 morphology for the word family and routes pattern cards back to the drill", () => {
     const morphology = gunzipSync(readFileSync(new URL("../../public/data/qac-morphology-0.4.txt.gz", import.meta.url))).toString();
+    const corpus = parseCorpus(morphology);
     const { chapter, ayah, last } = content.spot;
     const location = `${chapter}:${ayah}:${last}`;
-    const analysis = parseCorpus(morphology).positions.get(location);
+    const analysis = corpus.positions.get(location);
     const verse = quran.surahs[chapter][ayah - 1];
     expect(analysis.root).toBe(content.root.replace(/\s+/g, ""));
     expect(normalizeWord(splitArabicWords(verse.uthmani)[last - 1])).toBe(normalizeWord(analysis.word));
     expect(content.patterns).toHaveLength(6);
     expect(reviewDestination(patternReviewPrefix + content.patterns[0].id)).toBe(patternPracticePath);
+    for (const unit of speakUnitsByLevel.A2) {
+      const bridge = speakLessonContent(unit).words.find(word => word.bridge);
+      expect(bridge, unit.id).toBeDefined();
+      const row = corpus.positions.get(bridge.bridge);
+      expect(row?.root, unit.id).toBe(bridge.root.replace(/\s+/g, "").replace(/^أ/u, "ا"));
+      const [chapter, ayah, position] = bridge.bridge.split(":").map(Number);
+      for (const script of ["indopak", "uthmani"] as const) {
+        expect(splitArabicWords(verseText(quran.surahs[chapter][ayah - 1], script).text)[position - 1], unit.id).toBeDefined();
+      }
+      expect(reviewDestination(`phrase:${unit.id}:0`)).toBe(`/learn/speak/${unit.id}?review=0`);
+    }
   });
 
   it("matches the roots lessons to the Quranic Arabic Corpus tags and the two bundled scripts", () => {

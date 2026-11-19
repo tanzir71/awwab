@@ -6,6 +6,7 @@ import { db, getRecord } from "./storageService";
 import { qaidaReviewId, qaidaRows } from "./qaidaPractice";
 import { juzs, ratePortion, rateRecitalPortion, type HifzPlans, type HifzPortion, type HifzReviews, type JuzRecitals } from "./hifz";
 import { emptyReadingPractice, practiceChapters, recitationChecks, teacherChecklistComplete, type ReadingMode, type RecitationCheck } from "./readingPractice";
+import { speakProgressKey, speakUnit } from "./speakCurriculum";
 import qaida from "../../docs/content/qaida-lessons.json";
 
 export const wordMilestones = [25, 50, 100, 125] as const;
@@ -41,6 +42,16 @@ async function saveStudyDay(now: Date, zone: string) {
   const days = await getRecord<string[]>("study-days", []);
   const today = dateKey(now, zone);
   if (!days.includes(today)) await db.records.put({ key: "study-days", value: [...days, today] });
+}
+
+export function finishSpeakUnit(id: string, now: Date, zone: string) {
+  if (!speakUnit(id)) throw new RangeError("Unknown Speak unit.");
+  return db.transaction("rw", db.records, async () => {
+    const complete = await getRecord<string[]>(speakProgressKey, []);
+    if (complete.includes(id)) return;
+    await db.records.put({ key: speakProgressKey, value: [...complete, id] });
+    await saveStudyDay(now, zone);
+  });
 }
 
 export function saveHifzPlan(id: string, minutes: number, today: string) {

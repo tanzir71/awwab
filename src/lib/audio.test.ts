@@ -1,10 +1,12 @@
-import { openSync, closeSync, readSync, statSync } from "node:fs";
+import { openSync, closeSync, readFileSync, readSync, statSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import catalogue from "../../public/packs/audio/index.json";
 import onboarding from "../../docs/content/onboarding.json";
 import { quranText } from "./quran";
 import { askAudioPack, askClipIds, askPackPaths, packVoices } from "./umrahAskAudio";
 import { askPhrase } from "./umrahAsk";
+import { asset } from "./config";
+import { speakLessonContent, speakUnitsByLevel, speakUnitNumber } from "./speakCurriculum";
 
 describe("Bundled recitation packs", () => {
   it("has one attributed recording for the surah and every numbered ayah", () => {
@@ -64,5 +66,28 @@ describe("Umrah phrase recordings", () => {
       } finally { closeSync(fd); }
     }
     expect(size).toBe(askAudioPack?.bytes);
+  });
+});
+
+describe("Speak lesson recordings", () => {
+  it("includes a generated Opus clip for each A2 dialogue line, word and sign", () => {
+    const files = new Set<string>();
+    expect(speakUnitsByLevel.A2).toHaveLength(14);
+    for (const [index, unit] of speakUnitsByLevel.A2.entries()) {
+      const { lines, words, clips } = speakLessonContent(unit);
+      expect(speakUnitNumber(unit)).toBe(index + 1);
+      expect(lines).toHaveLength(4);
+      expect(words).toHaveLength(2);
+      for (const href of Object.values(clips)) {
+        const path = href.slice(asset("").length);
+        expect(files.has(path), path).toBe(false);
+        files.add(path);
+        const clip = readFileSync(new URL(`../../public/${path}`, import.meta.url));
+        expect(clip.length, path).toBeGreaterThan(500);
+        expect(clip.subarray(0, 4).toString()).toBe("OggS");
+        expect(clip.subarray(0, 95).includes("OpusHead")).toBe(true);
+      }
+    }
+    expect(files.size).toBe(98);
   });
 });
