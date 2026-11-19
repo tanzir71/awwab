@@ -1,7 +1,7 @@
 import type { MessageCatalog } from "./copy";
-import { hijriMonths, type CalendarEvent } from "./hijri";
+import { hijriMonths, hijriMonthsBn, type CalendarEvent } from "./hijri";
 
-export const planMonthsBn = ["মুহাররম", "সফর", "রবিউল আউয়াল", "রবিউস সানি", "জমাদিউল আউয়াল", "জমাদিউস সানি", "রজব", "শাবান", "রমজান", "শাওয়াল", "জিলকদ", "জিলহজ"];
+export const planMonthsBn = hijriMonthsBn;
 export const planMonth = (month: number, language: "en" | "bn") => (language === "bn" ? planMonthsBn : hijriMonths)[month - 1];
 
 export const planAuthorities = [

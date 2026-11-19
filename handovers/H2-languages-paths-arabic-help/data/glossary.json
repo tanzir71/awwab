@@ -1,0 +1,429 @@
+{
+  "version": 1,
+  "status": "draft — every term needs native-speaker review; the first option is the default",
+  "howItWorks": "Catalog strings reference terms as {term.salah}, {term.fajr} … The user can pick an option per term in Settings → Language & words (A27).",
+  "terms": {
+    "salah": {
+      "en": [
+        "salah"
+      ],
+      "bn": [
+        "নামাজ",
+        "সালাত"
+      ],
+      "ur": [
+        "نماز"
+      ],
+      "id": [
+        "salat",
+        "sholat",
+        "shalat"
+      ],
+      "tr": [
+        "namaz"
+      ],
+      "fa": [
+        "نماز"
+      ],
+      "ms": [
+        "solat"
+      ],
+      "ha": [
+        "sallah"
+      ],
+      "fr": [
+        "prière (ṣalāt)"
+      ]
+    },
+    "fajr": {
+      "en": [
+        "Fajr"
+      ],
+      "bn": [
+        "ফজর"
+      ],
+      "ur": [
+        "فجر"
+      ],
+      "id": [
+        "Subuh"
+      ],
+      "tr": [
+        "Sabah"
+      ],
+      "fa": [
+        "صبح"
+      ],
+      "ms": [
+        "Subuh"
+      ],
+      "ha": [
+        "Asuba"
+      ],
+      "fr": [
+        "Fajr (aube)"
+      ]
+    },
+    "dhuhr": {
+      "en": [
+        "Dhuhr"
+      ],
+      "bn": [
+        "যোহর",
+        "জোহর"
+      ],
+      "ur": [
+        "ظہر"
+      ],
+      "id": [
+        "Zuhur",
+        "Dzuhur"
+      ],
+      "tr": [
+        "Öğle"
+      ],
+      "fa": [
+        "ظهر"
+      ],
+      "ms": [
+        "Zohor"
+      ],
+      "ha": [
+        "Azahar"
+      ],
+      "fr": [
+        "Dhuhr (midi)"
+      ]
+    },
+    "asr": {
+      "en": [
+        "Asr"
+      ],
+      "bn": [
+        "আসর"
+      ],
+      "ur": [
+        "عصر"
+      ],
+      "id": [
+        "Asar",
+        "Ashar"
+      ],
+      "tr": [
+        "İkindi"
+      ],
+      "fa": [
+        "عصر"
+      ],
+      "ms": [
+        "Asar"
+      ],
+      "ha": [
+        "La'asar"
+      ],
+      "fr": [
+        "Asr (après-midi)"
+      ]
+    },
+    "maghrib": {
+      "en": [
+        "Maghrib"
+      ],
+      "bn": [
+        "মাগরিব"
+      ],
+      "ur": [
+        "مغرب"
+      ],
+      "id": [
+        "Magrib",
+        "Maghrib"
+      ],
+      "tr": [
+        "Akşam"
+      ],
+      "fa": [
+        "مغرب"
+      ],
+      "ms": [
+        "Maghrib"
+      ],
+      "ha": [
+        "Magariba"
+      ],
+      "fr": [
+        "Maghrib (coucher)"
+      ]
+    },
+    "isha": {
+      "en": [
+        "Isha"
+      ],
+      "bn": [
+        "এশা",
+        "ইশা"
+      ],
+      "ur": [
+        "عشاء"
+      ],
+      "id": [
+        "Isya"
+      ],
+      "tr": [
+        "Yatsı"
+      ],
+      "fa": [
+        "عشا"
+      ],
+      "ms": [
+        "Isyak"
+      ],
+      "ha": [
+        "Lisha"
+      ],
+      "fr": [
+        "Isha (nuit)"
+      ]
+    },
+    "wudu": {
+      "en": [
+        "wudu"
+      ],
+      "bn": [
+        "অজু",
+        "ওজু"
+      ],
+      "ur": [
+        "وضو"
+      ],
+      "id": [
+        "wudhu",
+        "wudu"
+      ],
+      "tr": [
+        "abdest"
+      ],
+      "fa": [
+        "وضو"
+      ],
+      "ms": [
+        "wuduk"
+      ],
+      "ha": [
+        "alwala"
+      ],
+      "fr": [
+        "ablutions (wuḍūʾ)"
+      ]
+    },
+    "qada": {
+      "en": [
+        "make-up prayer (qaḍāʾ)"
+      ],
+      "bn": [
+        "কাজা",
+        "কাযা"
+      ],
+      "ur": [
+        "قضا"
+      ],
+      "id": [
+        "qadha"
+      ],
+      "tr": [
+        "kaza"
+      ],
+      "fa": [
+        "قضا"
+      ],
+      "ms": [
+        "qada"
+      ],
+      "ha": [
+        "ramuwa"
+      ],
+      "fr": [
+        "rattrapage (qaḍāʾ)"
+      ]
+    },
+    "tawbah": {
+      "en": [
+        "return (tawbah)"
+      ],
+      "bn": [
+        "তওবা",
+        "তাওবা"
+      ],
+      "ur": [
+        "توبہ"
+      ],
+      "id": [
+        "taubat"
+      ],
+      "tr": [
+        "tövbe"
+      ],
+      "fa": [
+        "توبه"
+      ],
+      "ms": [
+        "taubat"
+      ],
+      "ha": [
+        "tuba"
+      ],
+      "fr": [
+        "repentir (tawba)"
+      ]
+    },
+    "ramadan": {
+      "en": [
+        "Ramadan"
+      ],
+      "bn": [
+        "রমজান",
+        "রামাদান"
+      ],
+      "ur": [
+        "رمضان"
+      ],
+      "id": [
+        "Ramadan",
+        "Ramadhan"
+      ],
+      "tr": [
+        "Ramazan"
+      ],
+      "fa": [
+        "رمضان"
+      ],
+      "ms": [
+        "Ramadan"
+      ],
+      "ha": [
+        "Ramadan",
+        "Azumi"
+      ],
+      "fr": [
+        "Ramadan"
+      ]
+    },
+    "eid": {
+      "en": [
+        "Eid"
+      ],
+      "bn": [
+        "ঈদ"
+      ],
+      "ur": [
+        "عید"
+      ],
+      "id": [
+        "Idul Fitri / Idul Adha",
+        "Lebaran"
+      ],
+      "tr": [
+        "Bayram"
+      ],
+      "fa": [
+        "عید"
+      ],
+      "ms": [
+        "Hari Raya"
+      ],
+      "ha": [
+        "Sallah"
+      ],
+      "fr": [
+        "Aïd"
+      ]
+    },
+    "sunnah": {
+      "en": [
+        "Sunnah"
+      ],
+      "bn": [
+        "সুন্নত"
+      ],
+      "ur": [
+        "سنت"
+      ],
+      "id": [
+        "sunah"
+      ],
+      "tr": [
+        "sünnet"
+      ],
+      "fa": [
+        "سنت"
+      ],
+      "ms": [
+        "sunat"
+      ],
+      "ha": [
+        "sunna"
+      ],
+      "fr": [
+        "sunna"
+      ]
+    },
+    "fard": {
+      "en": [
+        "Fard"
+      ],
+      "bn": [
+        "ফরজ"
+      ],
+      "ur": [
+        "فرض"
+      ],
+      "id": [
+        "fardu"
+      ],
+      "tr": [
+        "farz"
+      ],
+      "fa": [
+        "واجب"
+      ],
+      "ms": [
+        "fardu"
+      ],
+      "ha": [
+        "farilla"
+      ],
+      "fr": [
+        "obligatoire (farḍ)"
+      ]
+    },
+    "witr": {
+      "en": [
+        "Witr"
+      ],
+      "bn": [
+        "বিতর"
+      ],
+      "ur": [
+        "وتر"
+      ],
+      "id": [
+        "witir"
+      ],
+      "tr": [
+        "vitir"
+      ],
+      "fa": [
+        "وتر"
+      ],
+      "ms": [
+        "witir"
+      ],
+      "ha": [
+        "wutiri"
+      ],
+      "fr": [
+        "witr"
+      ]
+    }
+  }
+}

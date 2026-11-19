@@ -1,0 +1,175 @@
+{
+  "version": 1,
+  "status": "draft — scholar review required for every 'why' and grade",
+  "rule": "Show a virtue only with a sahih or hasan source. If narrations are weak, say so plainly and show none.",
+  "passages": [
+    {
+      "id": "ayat-al-kursi",
+      "title": "Āyat al-Kursī",
+      "ref": "2:255",
+      "ayat": 1,
+      "level": 3,
+      "why": "Called the greatest āyah in the Book of Allah.",
+      "source": {
+        "ref": "Muslim 810",
+        "grade": "sahih"
+      }
+    },
+    {
+      "id": "baqarah-end",
+      "title": "Last two āyāt of Al-Baqarah",
+      "ref": "2:285-286",
+      "ayat": 2,
+      "level": 3,
+      "why": "Whoever recites them at night, they will suffice him.",
+      "source": {
+        "ref": "Bukhari 5009 · Muslim 807",
+        "grade": "sahih"
+      }
+    },
+    {
+      "id": "al-mulk",
+      "title": "Al-Mulk",
+      "ref": "67:1-30",
+      "ayat": 30,
+      "level": 3,
+      "why": "A surah of thirty āyāt that interceded for a man until he was forgiven.",
+      "source": {
+        "ref": "Abu Dawud 1400 · Tirmidhi 2891",
+        "grade": "hasan"
+      }
+    },
+    {
+      "id": "as-sajdah",
+      "title": "As-Sajdah",
+      "ref": "32:1-30",
+      "ayat": 30,
+      "level": 3,
+      "why": "The Prophet ﷺ would not sleep until he recited Alif-Lām-Mīm Tanzīl (As-Sajdah) and Tabārak (Al-Mulk).",
+      "source": {
+        "ref": "Tirmidhi 2892",
+        "grade": "sahih (al-Albani)"
+      }
+    },
+    {
+      "id": "al-kahf-first-10",
+      "title": "Al-Kahf · first ten āyāt",
+      "ref": "18:1-10",
+      "ayat": 10,
+      "level": 3,
+      "why": "Whoever memorises the first ten āyāt of Al-Kahf is protected from the Dajjāl.",
+      "source": {
+        "ref": "Muslim 809",
+        "grade": "sahih"
+      }
+    },
+    {
+      "id": "al-kahf",
+      "title": "Al-Kahf",
+      "ref": "18:1-110",
+      "ayat": 110,
+      "level": 4,
+      "why": "Commonly recited on Fridays; narrations in al-Ḥākim and al-Bayhaqī are graded authentic by some scholars.",
+      "source": {
+        "ref": "al-Hakim · al-Bayhaqi",
+        "grade": "scholars differ — show as such"
+      }
+    },
+    {
+      "id": "aal-imran-end",
+      "title": "Āl ʿImrān · last eleven āyāt",
+      "ref": "3:190-200",
+      "ayat": 11,
+      "level": 3,
+      "why": "The Prophet ﷺ recited them on waking for the night prayer.",
+      "source": {
+        "ref": "Bukhari 4569 · Muslim 763",
+        "grade": "sahih"
+      }
+    },
+    {
+      "id": "ya-sin",
+      "title": "Yā-Sīn",
+      "ref": "36:1-83",
+      "ayat": 83,
+      "level": 3,
+      "why": "Widely loved and recited. Narrations about specific virtues of this surah are weak, so the app does not show them.",
+      "source": null
+    },
+    {
+      "id": "ar-rahman",
+      "title": "Ar-Raḥmān",
+      "ref": "55:1-78",
+      "ayat": 78,
+      "level": 3,
+      "why": "A favourite for its refrain “Which of your Lord’s favours will you deny?” No virtue narration is shown.",
+      "source": null
+    },
+    {
+      "id": "al-waqiah",
+      "title": "Al-Wāqiʿah",
+      "ref": "56:1-96",
+      "ayat": 96,
+      "level": 3,
+      "why": "Widely recited. Narrations about its virtue are weak, so none is shown.",
+      "source": null
+    },
+    {
+      "id": "al-hashr-end",
+      "title": "Al-Ḥashr · last three āyāt",
+      "ref": "59:22-24",
+      "ayat": 3,
+      "level": 3,
+      "why": "Some of the most beautiful names of Allah in one passage. No virtue narration is shown.",
+      "source": null
+    },
+    {
+      "id": "friday-fajr",
+      "title": "Friday Fajr: As-Sajdah and Al-Insān",
+      "ref": "32 · 76:1-31",
+      "ayat": 61,
+      "level": 4,
+      "why": "The Prophet ﷺ recited them in Fajr on Fridays.",
+      "source": {
+        "ref": "Bukhari 891 · Muslim 879",
+        "grade": "sahih"
+      }
+    },
+    {
+      "id": "jumuah-prayer",
+      "title": "Jumuʿah: Al-Aʿlā & Al-Ghāshiyah, or Al-Jumuʿah & Al-Munāfiqūn",
+      "ref": "87 · 88 · 62 · 63",
+      "ayat": 67,
+      "level": 4,
+      "why": "Both pairs were recited by the Prophet ﷺ in the Jumuʿah prayer.",
+      "source": {
+        "ref": "Muslim 878 · Muslim 877",
+        "grade": "sahih"
+      }
+    },
+    {
+      "id": "eid-prayer",
+      "title": "Eid: Al-Aʿlā & Al-Ghāshiyah, or Qāf & Al-Qamar",
+      "ref": "87 · 88 · 50 · 54",
+      "ayat": 145,
+      "level": 4,
+      "why": "Recited by the Prophet ﷺ in the Eid prayers.",
+      "source": {
+        "ref": "Muslim 878 · Muslim 891",
+        "grade": "sahih"
+      }
+    },
+    {
+      "id": "witr",
+      "title": "Witr: Al-Aʿlā, Al-Kāfirūn, Al-Ikhlāṣ",
+      "ref": "87 · 109 · 112",
+      "ayat": 29,
+      "level": 4,
+      "why": "Recited by the Prophet ﷺ in the three rakʿāt of witr.",
+      "source": {
+        "ref": "Abu Dawud 1423",
+        "grade": "sahih (al-Albani) — verify"
+      }
+    }
+  ]
+}

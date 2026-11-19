@@ -1,0 +1,270 @@
+{
+  "version": 1,
+  "status": "draft curriculum — content authored by native speakers and teachers",
+  "tracks": {
+    "read": {
+      "title": "Read",
+      "levels": [
+        {
+          "n": 1,
+          "title": "Qaida",
+          "units": "17 Noorani Qaida lessons (docs/content/qaida-lessons.json)"
+        },
+        {
+          "n": 2,
+          "title": "Fluent reading",
+          "units": [
+            "Juz ʿAmma reading drills, shortest first",
+            "Speed & flow: read without spelling",
+            "IndoPak ↔ Uthmani script switch",
+            "Reading long words and waqf marks"
+          ]
+        },
+        {
+          "n": 3,
+          "title": "Tajweed essentials",
+          "units": [
+            "Nūn sākin & tanwīn: iẓhār, idghām, iqlāb, ikhfāʾ",
+            "Mīm sākin: ikhfāʾ, idghām, iẓhār shafawī",
+            "Ghunnah on nūn and mīm with shadda",
+            "Qalqalah: ق ط ب ج د",
+            "Lām of al-: shamsiyyah and qamariyyah",
+            "Rāʾ: heavy and light",
+            "Madd: natural, connected, separated, necessary, at a stop",
+            "Stopping signs"
+          ]
+        },
+        {
+          "n": 4,
+          "title": "Tajweed in depth",
+          "units": [
+            "Makhārij: points of articulation",
+            "Ṣifāt: letter qualities",
+            "Heavy letters خص ضغط قظ",
+            "Mushaf conventions: IndoPak vs Uthmani marks"
+          ]
+        },
+        {
+          "n": 5,
+          "title": "Recite with a teacher",
+          "units": [
+            "Record & compare full surahs",
+            "Self-check lists per rule",
+            "Prepare to recite to a local teacher (the app never grants ijāzah)"
+          ]
+        }
+      ]
+    },
+    "memorise": {
+      "title": "Memorise",
+      "levels": [
+        {
+          "n": 1,
+          "title": "Salah essentials",
+          "units": [
+            "Al-Fātiḥa + the 10 shortest surahs (surahs-for-salah.json)",
+            "Tashahhud",
+            "Ṣalawāt Ibrāhīmiyyah",
+            "Duʿā before salām",
+            "Qunūt for witr (madhab-aware)"
+          ]
+        },
+        {
+          "n": 2,
+          "title": "Juz ʿAmma",
+          "units": "Surahs 78–114 (37), shortest first"
+        },
+        {
+          "n": 3,
+          "title": "Essential passages",
+          "units": "data/essential-passages.json where level = 3"
+        },
+        {
+          "n": 4,
+          "title": "Friday & Eid",
+          "units": "data/essential-passages.json where level = 4"
+        },
+        {
+          "n": 5,
+          "title": "Hifz",
+          "units": [
+            "Choose a juz (29, 28, 27 …) or any surah",
+            "Daily sabaq, sabqi, manzil",
+            "Weekly full-juz recital check"
+          ]
+        }
+      ]
+    },
+    "understand": {
+      "title": "Understand",
+      "levels": [
+        {
+          "n": 1,
+          "title": "Core words",
+          "units": [
+            "125 core words in frequency order",
+            "Understand your salah (A13)"
+          ]
+        },
+        {
+          "n": 2,
+          "title": "Grammar foundations",
+          "units": [
+            "Ism, fiʿl, ḥarf",
+            "Gender and the tāʾ marbūṭah",
+            "Singular, dual, plural (sound and broken)",
+            "The definite article al-",
+            "Detached pronouns",
+            "Attached pronouns ـه ـها ـكم",
+            "Iḍāfah (possession)",
+            "Prepositions",
+            "Demonstratives هٰذا ذٰلِكَ",
+            "Relative pronouns ٱلَّذِي ٱلَّتِي ٱلَّذِينَ"
+          ]
+        },
+        {
+          "n": 3,
+          "title": "Roots & patterns",
+          "units": [
+            "Root + pattern (فعل)",
+            "Past tense",
+            "Present tense",
+            "Command",
+            "Verb forms I–X and their meanings",
+            "Participles فَاعِل · مَفْعُول",
+            "Verbal nouns (maṣdar)",
+            "Negation لَا مَا لَمْ لَنْ"
+          ]
+        },
+        {
+          "n": 4,
+          "title": "Read with meaning",
+          "units": [
+            "Juz ʿAmma āyah by āyah: words → phrase → meaning",
+            "Spot roots you know in new āyāt"
+          ]
+        },
+        {
+          "n": 5,
+          "title": "Sentence structure",
+          "units": [
+            "Nominal and verbal sentences",
+            "Case endings: rafʿ, naṣb, jarr",
+            "Conditional sentences",
+            "Reading a short tafsīr note"
+          ]
+        }
+      ]
+    },
+    "speak": {
+      "title": "Speak",
+      "varieties": [
+        {
+          "id": "saudi-hijazi",
+          "title": "Saudi · Hijazi",
+          "note": "Makkah, Madinah, Jeddah. Recommended for Umrah & Hajj.",
+          "ships": "H2.4"
+        },
+        {
+          "id": "gulf",
+          "title": "Gulf",
+          "note": "UAE, Qatar, Kuwait, Bahrain, Oman. Work in the Gulf.",
+          "ships": "H2.4b"
+        },
+        {
+          "id": "msa",
+          "title": "Modern Standard",
+          "note": "News, signs, books, khutbahs.",
+          "ships": "H2.4b"
+        },
+        {
+          "id": "egyptian",
+          "title": "Egyptian",
+          "ships": "later"
+        },
+        {
+          "id": "levantine",
+          "title": "Levantine",
+          "ships": "later"
+        }
+      ],
+      "levels": [
+        {
+          "n": "A1",
+          "title": "Survival",
+          "units": [
+            "Greetings & polite words",
+            "Numbers & money",
+            "Directions",
+            "Phone & SIM",
+            "Taxi & bus",
+            "Food & water",
+            "Health & help",
+            "Hotel",
+            "Shopping",
+            "Time & days",
+            "At the mosque",
+            "Asking for help"
+          ]
+        },
+        {
+          "n": "A2",
+          "title": "Everyday",
+          "units": [
+            "Introducing yourself & family",
+            "Work & jobs",
+            "At the office",
+            "Housing & rent",
+            "Bank & sending money",
+            "Doctor & pharmacy",
+            "Government offices (iqāmah, visa)",
+            "Weather",
+            "Phone calls",
+            "Restaurants",
+            "Airports & travel",
+            "Appointments",
+            "Feelings",
+            "Invitations & visits"
+          ]
+        },
+        {
+          "n": "B1",
+          "title": "Conversation",
+          "units": [
+            "Telling a story",
+            "Making plans",
+            "Giving opinions",
+            "Problems & complaints",
+            "Bargaining",
+            "Explaining the way",
+            "Talking about faith respectfully",
+            "News headlines",
+            "Khutbah phrases",
+            "Workplace conversations",
+            "Health in detail",
+            "Disagreeing politely"
+          ]
+        }
+      ],
+      "packs": [
+        {
+          "id": "umrah-hajj",
+          "title": "Umrah & Hajj",
+          "note": "Shares phrases and audio with Ask in Arabic (data/umrah-phrases.json)"
+        },
+        {
+          "id": "gulf-work",
+          "title": "Working in the Gulf",
+          "note": "Jobs, contracts, colleagues, payslips, rights"
+        }
+      ],
+      "unitSteps": [
+        "Listen (dialogue)",
+        "Words (with root bridges to Quran words)",
+        "Repeat (record & compare)",
+        "Your turn (scripted choices, no AI)",
+        "Read the sign (unvowelled)"
+      ]
+    }
+  }
+}

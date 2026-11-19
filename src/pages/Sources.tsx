@@ -35,7 +35,7 @@ export function Sources() {
   }, [index, selected, selectWord]);
 
   return <div className="stack">
-    <SectionNav title="Sources and licences" back="/you" />
+    <SectionNav title={t("settingsSources")} back="/you" />
     {IS_PREVIEW && <p className="card soft small">{t("previewStatus")}</p>}
     {selected && <section className="card compact-stack">
       <h2>{welcome.source}</h2>

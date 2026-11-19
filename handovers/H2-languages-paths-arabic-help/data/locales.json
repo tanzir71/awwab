@@ -1,0 +1,627 @@
+{
+  "version": 1,
+  "note": "Draft. Tier 1 ships in H2.2. Native names, fonts and defaults need native/scholar review.",
+  "locales": [
+    {
+      "code": "bn",
+      "english": "Bangla",
+      "native": "বাংলা",
+      "script": "Beng",
+      "dir": "ltr",
+      "uiFont": "Noto Sans Bengali (+ Noto Serif Bengali for headings)",
+      "digits": "beng (user can switch to latn)",
+      "countries": [
+        "BD",
+        "IN"
+      ],
+      "tier": 1,
+      "status": "planned",
+      "suggestedPrayerDefaults": {
+        "method": "Karachi",
+        "asr": "hanafi",
+        "note": "Suggest during onboarding; never force. Verify locally."
+      }
+    },
+    {
+      "code": "ur",
+      "english": "Urdu",
+      "native": "اردو",
+      "script": "Arab",
+      "dir": "rtl",
+      "uiFont": "Noto Sans Arabic (UI). Optional reading style: Noto Nastaliq Urdu, line-height 1.9",
+      "digits": "latn",
+      "countries": [
+        "PK",
+        "IN"
+      ],
+      "tier": 1,
+      "status": "planned",
+      "suggestedPrayerDefaults": {
+        "method": "Karachi",
+        "asr": "hanafi",
+        "note": "Suggest during onboarding; never force. Verify locally."
+      }
+    },
+    {
+      "code": "id",
+      "english": "Indonesian",
+      "native": "Bahasa Indonesia",
+      "script": "Latn",
+      "dir": "ltr",
+      "uiFont": "Noto Sans",
+      "digits": "latn (time as 15.36)",
+      "countries": [
+        "ID"
+      ],
+      "tier": 1,
+      "status": "planned",
+      "suggestedPrayerDefaults": {
+        "method": "custom: Kemenag (Fajr 20°, Isha 18°)",
+        "asr": "shafii",
+        "note": "Suggest during onboarding; never force. Verify locally."
+      }
+    },
+    {
+      "code": "tr",
+      "english": "Turkish",
+      "native": "Türkçe",
+      "script": "Latn",
+      "dir": "ltr",
+      "uiFont": "Noto Sans",
+      "digits": "latn",
+      "countries": [
+        "TR",
+        "CY"
+      ],
+      "tier": 1,
+      "status": "planned",
+      "suggestedPrayerDefaults": {
+        "method": "Turkey (Diyanet)",
+        "asr": "hanafi",
+        "note": "Suggest during onboarding; never force. Verify locally."
+      }
+    },
+    {
+      "code": "fa",
+      "english": "Persian (Farsi, Dari)",
+      "native": "فارسی",
+      "script": "Arab",
+      "dir": "rtl",
+      "uiFont": "Noto Sans Arabic or Vazirmatn",
+      "digits": "arabext (۰۱۲)",
+      "countries": [
+        "IR",
+        "AF"
+      ],
+      "tier": 1,
+      "status": "planned",
+      "suggestedPrayerDefaults": {
+        "method": "Tehran",
+        "asr": "jafari — content scope decision, see 01-languages.md",
+        "note": "Suggest during onboarding; never force. Verify locally."
+      }
+    },
+    {
+      "code": "ms",
+      "english": "Malay",
+      "native": "Bahasa Melayu",
+      "script": "Latn",
+      "dir": "ltr",
+      "uiFont": "Noto Sans",
+      "digits": "latn",
+      "countries": [
+        "MY",
+        "BN",
+        "SG"
+      ],
+      "tier": 1,
+      "status": "planned",
+      "suggestedPrayerDefaults": {
+        "method": "custom: JAKIM (Fajr 20°, Isha 18°)",
+        "asr": "shafii",
+        "note": "Suggest during onboarding; never force. Verify locally."
+      }
+    },
+    {
+      "code": "ha",
+      "english": "Hausa",
+      "native": "Hausa",
+      "script": "Latn",
+      "dir": "ltr",
+      "uiFont": "Noto Sans",
+      "digits": "latn",
+      "countries": [
+        "NG",
+        "NE"
+      ],
+      "tier": 1,
+      "status": "planned",
+      "suggestedPrayerDefaults": {
+        "method": "MuslimWorldLeague",
+        "asr": "maliki/shafii Asr (standard shadow)",
+        "note": "Suggest during onboarding; never force. Verify locally."
+      }
+    },
+    {
+      "code": "fr",
+      "english": "French",
+      "native": "Français",
+      "script": "Latn",
+      "dir": "ltr",
+      "uiFont": "Noto Sans",
+      "digits": "latn",
+      "countries": [
+        "SN",
+        "ML",
+        "NE",
+        "GN",
+        "BF",
+        "TD",
+        "CI",
+        "CM",
+        "KM",
+        "DJ",
+        "MA",
+        "DZ",
+        "TN"
+      ],
+      "tier": 1,
+      "status": "planned",
+      "suggestedPrayerDefaults": {
+        "method": "MuslimWorldLeague (per country)",
+        "asr": "maliki/shafii Asr (standard shadow)",
+        "note": "Suggest during onboarding; never force. Verify locally."
+      }
+    },
+    {
+      "code": "ps",
+      "english": "Pashto",
+      "native": "پښتو",
+      "script": "Arab",
+      "dir": "rtl",
+      "uiFont": "Noto Sans Arabic",
+      "digits": "arabext",
+      "countries": [
+        "AF",
+        "PK"
+      ],
+      "tier": 2,
+      "status": "planned",
+      "suggestedPrayerDefaults": {
+        "method": "Karachi",
+        "asr": "hanafi",
+        "note": "Suggest during onboarding; never force. Verify locally."
+      }
+    },
+    {
+      "code": "uz",
+      "english": "Uzbek",
+      "native": "Oʻzbekcha",
+      "script": "Latn",
+      "dir": "ltr",
+      "uiFont": "Noto Sans",
+      "digits": "latn",
+      "countries": [
+        "UZ"
+      ],
+      "tier": 2,
+      "status": "planned",
+      "suggestedPrayerDefaults": {
+        "method": "MuslimWorldLeague",
+        "asr": "hanafi",
+        "note": "Suggest during onboarding; never force. Verify locally."
+      }
+    },
+    {
+      "code": "sw",
+      "english": "Swahili",
+      "native": "Kiswahili",
+      "script": "Latn",
+      "dir": "ltr",
+      "uiFont": "Noto Sans",
+      "digits": "latn",
+      "countries": [
+        "TZ",
+        "KE"
+      ],
+      "tier": 2,
+      "status": "planned",
+      "suggestedPrayerDefaults": {
+        "method": "MuslimWorldLeague",
+        "asr": "shafii",
+        "note": "Suggest during onboarding; never force. Verify locally."
+      }
+    },
+    {
+      "code": "so",
+      "english": "Somali",
+      "native": "Soomaali",
+      "script": "Latn",
+      "dir": "ltr",
+      "uiFont": "Noto Sans",
+      "digits": "latn",
+      "countries": [
+        "SO",
+        "DJ",
+        "ET"
+      ],
+      "tier": 2,
+      "status": "planned",
+      "suggestedPrayerDefaults": {
+        "method": "MuslimWorldLeague",
+        "asr": "shafii",
+        "note": "Suggest during onboarding; never force. Verify locally."
+      }
+    },
+    {
+      "code": "az",
+      "english": "Azerbaijani",
+      "native": "Azərbaycanca",
+      "script": "Latn",
+      "dir": "ltr",
+      "uiFont": "Noto Sans",
+      "digits": "latn",
+      "countries": [
+        "AZ"
+      ],
+      "tier": 2,
+      "status": "planned",
+      "suggestedPrayerDefaults": {
+        "method": "MuslimWorldLeague",
+        "asr": "ask (Shia majority, Sunni minority)",
+        "note": "Suggest during onboarding; never force. Verify locally."
+      }
+    },
+    {
+      "code": "kk",
+      "english": "Kazakh",
+      "native": "Қазақша",
+      "script": "Cyrl",
+      "dir": "ltr",
+      "uiFont": "Noto Sans",
+      "digits": "latn",
+      "countries": [
+        "KZ"
+      ],
+      "tier": 2,
+      "status": "planned",
+      "suggestedPrayerDefaults": {
+        "method": "MuslimWorldLeague",
+        "asr": "hanafi",
+        "note": "Suggest during onboarding; never force. Verify locally."
+      }
+    },
+    {
+      "code": "ru",
+      "english": "Russian",
+      "native": "Русский",
+      "script": "Cyrl",
+      "dir": "ltr",
+      "uiFont": "Noto Sans",
+      "digits": "latn",
+      "countries": [
+        "RU",
+        "KZ",
+        "KG",
+        "TJ",
+        "UZ"
+      ],
+      "tier": 2,
+      "status": "planned",
+      "suggestedPrayerDefaults": {
+        "method": "MuslimWorldLeague",
+        "asr": "ask (Hanafi in Volga region, Shafii in North Caucasus)",
+        "note": "Suggest during onboarding; never force. Verify locally."
+      }
+    },
+    {
+      "code": "hi",
+      "english": "Hindi",
+      "native": "हिन्दी",
+      "script": "Deva",
+      "dir": "ltr",
+      "uiFont": "Noto Sans Devanagari",
+      "digits": "latn",
+      "countries": [
+        "IN"
+      ],
+      "tier": 2,
+      "status": "planned",
+      "suggestedPrayerDefaults": {
+        "method": "Karachi",
+        "asr": "hanafi",
+        "note": "Suggest during onboarding; never force. Verify locally."
+      }
+    },
+    {
+      "code": "sq",
+      "english": "Albanian",
+      "native": "Shqip",
+      "script": "Latn",
+      "dir": "ltr",
+      "uiFont": "Noto Sans",
+      "digits": "latn",
+      "countries": [
+        "AL",
+        "XK",
+        "MK"
+      ],
+      "tier": 2,
+      "status": "planned",
+      "suggestedPrayerDefaults": {
+        "method": "Turkey (Diyanet)",
+        "asr": "hanafi",
+        "note": "Suggest during onboarding; never force. Verify locally."
+      }
+    },
+    {
+      "code": "bs",
+      "english": "Bosnian",
+      "native": "Bosanski",
+      "script": "Latn",
+      "dir": "ltr",
+      "uiFont": "Noto Sans",
+      "digits": "latn",
+      "countries": [
+        "BA"
+      ],
+      "tier": 2,
+      "status": "planned",
+      "suggestedPrayerDefaults": {
+        "method": "Turkey (Diyanet)",
+        "asr": "hanafi",
+        "note": "Suggest during onboarding; never force. Verify locally."
+      }
+    },
+    {
+      "code": "ku",
+      "english": "Kurdish (Kurmanji)",
+      "native": "Kurdî",
+      "script": "Latn",
+      "dir": "ltr",
+      "uiFont": "Noto Sans",
+      "digits": "latn",
+      "countries": [
+        "TR",
+        "SY",
+        "IQ"
+      ],
+      "tier": 2,
+      "status": "planned"
+    },
+    {
+      "code": "ckb",
+      "english": "Kurdish (Sorani)",
+      "native": "کوردی",
+      "script": "Arab",
+      "dir": "rtl",
+      "uiFont": "Noto Sans Arabic",
+      "digits": "arab",
+      "countries": [
+        "IQ",
+        "IR"
+      ],
+      "tier": 2,
+      "status": "planned"
+    },
+    {
+      "code": "tg",
+      "english": "Tajik",
+      "native": "Тоҷикӣ",
+      "script": "Cyrl",
+      "dir": "ltr",
+      "uiFont": "Noto Sans",
+      "digits": "latn",
+      "countries": [
+        "TJ"
+      ],
+      "tier": 3,
+      "status": "planned",
+      "suggestedPrayerDefaults": {
+        "method": "MuslimWorldLeague",
+        "asr": "hanafi",
+        "note": "Suggest during onboarding; never force. Verify locally."
+      }
+    },
+    {
+      "code": "ky",
+      "english": "Kyrgyz",
+      "native": "Кыргызча",
+      "script": "Cyrl",
+      "dir": "ltr",
+      "uiFont": "Noto Sans",
+      "digits": "latn",
+      "countries": [
+        "KG"
+      ],
+      "tier": 3,
+      "status": "planned",
+      "suggestedPrayerDefaults": {
+        "method": "MuslimWorldLeague",
+        "asr": "hanafi",
+        "note": "Suggest during onboarding; never force. Verify locally."
+      }
+    },
+    {
+      "code": "tk",
+      "english": "Turkmen",
+      "native": "Türkmençe",
+      "script": "Latn",
+      "dir": "ltr",
+      "uiFont": "Noto Sans",
+      "digits": "latn",
+      "countries": [
+        "TM"
+      ],
+      "tier": 3,
+      "status": "planned",
+      "suggestedPrayerDefaults": {
+        "method": "MuslimWorldLeague",
+        "asr": "hanafi",
+        "note": "Suggest during onboarding; never force. Verify locally."
+      }
+    },
+    {
+      "code": "sd",
+      "english": "Sindhi",
+      "native": "سنڌي",
+      "script": "Arab",
+      "dir": "rtl",
+      "uiFont": "Noto Sans Arabic",
+      "digits": "latn",
+      "countries": [
+        "PK"
+      ],
+      "tier": 3,
+      "status": "planned"
+    },
+    {
+      "code": "pa-Arab",
+      "english": "Punjabi (Shahmukhi)",
+      "native": "پنجابی",
+      "script": "Arab",
+      "dir": "rtl",
+      "uiFont": "Noto Sans Arabic",
+      "digits": "latn",
+      "countries": [
+        "PK"
+      ],
+      "tier": 3,
+      "status": "planned"
+    },
+    {
+      "code": "dv",
+      "english": "Dhivehi",
+      "native": "ދިވެހި",
+      "script": "Thaa",
+      "dir": "rtl",
+      "uiFont": "Noto Sans Thaana",
+      "digits": "latn",
+      "countries": [
+        "MV"
+      ],
+      "tier": 3,
+      "status": "planned"
+    },
+    {
+      "code": "wo",
+      "english": "Wolof",
+      "native": "Wolof",
+      "script": "Latn",
+      "dir": "ltr",
+      "uiFont": "Noto Sans",
+      "digits": "latn",
+      "countries": [
+        "SN",
+        "GM"
+      ],
+      "tier": 3,
+      "status": "planned"
+    },
+    {
+      "code": "ff",
+      "english": "Fula (Fulfulde)",
+      "native": "Fulfulde",
+      "script": "Latn",
+      "dir": "ltr",
+      "uiFont": "Noto Sans (Adlam: Noto Sans Adlam, later)",
+      "digits": "latn",
+      "countries": [
+        "GN",
+        "SN",
+        "NG",
+        "ML",
+        "NE",
+        "CM"
+      ],
+      "tier": 3,
+      "status": "planned"
+    },
+    {
+      "code": "yo",
+      "english": "Yoruba",
+      "native": "Yorùbá",
+      "script": "Latn",
+      "dir": "ltr",
+      "uiFont": "Noto Sans",
+      "digits": "latn",
+      "countries": [
+        "NG"
+      ],
+      "tier": 3,
+      "status": "planned"
+    },
+    {
+      "code": "ml",
+      "english": "Malayalam",
+      "native": "മലയാളം",
+      "script": "Mlym",
+      "dir": "ltr",
+      "uiFont": "Noto Sans Malayalam",
+      "digits": "latn",
+      "countries": [
+        "IN"
+      ],
+      "tier": 3,
+      "status": "planned"
+    },
+    {
+      "code": "ta",
+      "english": "Tamil",
+      "native": "தமிழ்",
+      "script": "Taml",
+      "dir": "ltr",
+      "uiFont": "Noto Sans Tamil",
+      "digits": "latn",
+      "countries": [
+        "IN",
+        "LK"
+      ],
+      "tier": 3,
+      "status": "planned"
+    },
+    {
+      "code": "om",
+      "english": "Oromo",
+      "native": "Afaan Oromoo",
+      "script": "Latn",
+      "dir": "ltr",
+      "uiFont": "Noto Sans",
+      "digits": "latn",
+      "countries": [
+        "ET"
+      ],
+      "tier": 3,
+      "status": "planned"
+    },
+    {
+      "code": "am",
+      "english": "Amharic",
+      "native": "አማርኛ",
+      "script": "Ethi",
+      "dir": "ltr",
+      "uiFont": "Noto Sans Ethiopic",
+      "digits": "latn",
+      "countries": [
+        "ET"
+      ],
+      "tier": 3,
+      "status": "planned"
+    },
+    {
+      "code": "ug",
+      "english": "Uyghur",
+      "native": "ئۇيغۇرچە",
+      "script": "Arab",
+      "dir": "rtl",
+      "uiFont": "Noto Sans Arabic",
+      "digits": "latn",
+      "countries": [
+        "CN",
+        "KZ"
+      ],
+      "tier": 3,
+      "status": "planned"
+    }
+  ]
+}

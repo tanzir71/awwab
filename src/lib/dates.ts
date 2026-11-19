@@ -30,7 +30,7 @@ export function formatTime(date: Date, timeZone: string, language = "en", compac
 export function duration(ms: number, language = "en") {
   const minutes = Math.max(0, Math.ceil(ms / 60000));
   const hours = Math.floor(minutes / 60);
-  if (language === "bn") {
+  if (language === "bn" || language.startsWith("bn-")) {
     const number = new Intl.NumberFormat(language);
     return hours ? `${number.format(hours)} ঘণ্টা ${number.format(minutes % 60)} মিনিট` : `${number.format(minutes)} মিনিট`;
   }

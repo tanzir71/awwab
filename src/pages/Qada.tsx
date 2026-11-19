@@ -22,8 +22,8 @@ const totalOf = (values: QadaPlan["madeUp"]) => Object.values(values).reduce((to
 export function Qada({ settings, now, desktop = false, embedded = false }: {
   settings: Settings; now: Date; desktop?: boolean; embedded?: boolean;
 }) {
-  const { language, t } = useCopy();
-  const number = new Intl.NumberFormat(language);
+  const { language, locale, t } = useCopy();
+  const number = new Intl.NumberFormat(locale);
   const plan = useRecord("qada", qadaDefaults);
   const calendar = useRecord("calendar", calendarDefaults);
   const logs = usePrayerLogs();
@@ -37,7 +37,7 @@ export function Qada({ settings, now, desktop = false, embedded = false }: {
   const totalMade = totalOf(madeUp);
   const { days, end } = qadaForecast(today, balances, plan);
   const unit = days < 60 ? "day" : "month";
-  const duration = new Intl.NumberFormat(language, { style: "unit", unit, unitDisplay: "long" })
+  const duration = new Intl.NumberFormat(locale, { style: "unit", unit, unitDisplay: "long" })
     .format(unit === "day" ? days : Math.round(days / 30.4375));
   const fastsLeft = Math.max(0, plan.fasts - plan.fastsMadeUp);
   const ramadan = useMemo(() => calendarEvents(today, addDays(today, 370), settings.hijriAdjust, calendar)
@@ -118,7 +118,7 @@ export function Qada({ settings, now, desktop = false, embedded = false }: {
           <span className="caption">{t("qadaDeskWeek")}</span><strong aria-live="polite">{t("qadaDeskCount", { count: thisWeek })}</strong><small>{pace}</small>
         </button>
         <div><span className="caption">{t("qadaDeskFinish")}</span><strong>{end
-          ? <time dateTime={end}>~{formatDay(end, { month: "short", year: "numeric" }, language)}</time> : "—"}</strong>
+          ? <time dateTime={end}>~{formatDay(end, { month: "short", year: "numeric" }, locale)}</time> : "—"}</strong>
           <small>{t("qadaDeskAtPace")}</small>
         </div>
       </div>
@@ -155,7 +155,7 @@ export function Qada({ settings, now, desktop = false, embedded = false }: {
         <div className="qada-balance"><strong>{number.format(totalLeft)}</strong><span className="muted">{t("qadaUnit", { count: totalLeft })}</span></div>
         <progress value={totalMade} max={totalLeft + totalMade || 1} aria-label={t("qadaBalanceProgress")} />
         <p className="muted" aria-live="polite">{t("qadaMadeSoFar", { count: totalMade })} {end && t(plan.withEachPrayer ? "qadaProjected" : "qadaProjectedPace", { duration, count: plan.dailyGoal })}</p>
-        {end && <small><time dateTime={end}>{t("qadaProjectedDate", { date: formatDay(end, { month: "short", day: "numeric", year: "numeric" }, language) })}</time></small>}
+        {end && <small><time dateTime={end}>{t("qadaProjectedDate", { date: formatDay(end, { month: "short", day: "numeric", year: "numeric" }, locale) })}</time></small>}
       </section>
       <div className="qada-goals" role="group" aria-label={t("qadaDailyGoals")}>
         {[1, 3, 5].map(goal => <button className="qada-goal" key={goal} aria-pressed={!plan.withEachPrayer && plan.dailyGoal === goal}

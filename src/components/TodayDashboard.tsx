@@ -3,6 +3,7 @@ import { useRecord } from "@/hooks/use-awwab";
 import { message, rakatLabel } from "@/lib/copy";
 import { duration, formatDay, formatTime } from "@/lib/dates";
 import { eventDisplayDates, type CalendarEvent, type CalendarSettings } from "@/lib/hijri";
+import { formatLocale } from "@/lib/languagePreferences";
 import { jamaatForPrayer, mosqueForPrayer, type MosquePlan } from "@/lib/mosques";
 import { prayerDay } from "@/lib/prayerServices";
 import { guideRakats } from "@/lib/prayerGuide";
@@ -23,7 +24,8 @@ const timeAvailable = (stamp: Date) => Number.isFinite(stamp.valueOf());
 export type TodayPracticeItem = { to: string; title: string; detail: string; icon: string; minutes: number };
 
 function PrayerTime({ value, settings }: { value: Date; settings: Settings }) {
-  return timeAvailable(value) ? <time dateTime={value.toISOString()} aria-label={formatTime(value, settings.city.timeZone, settings.language)}>{formatTime(value, settings.city.timeZone, settings.language, true)}</time> : <span className="muted">—</span>;
+  const locale = formatLocale(settings);
+  return timeAvailable(value) ? <time dateTime={value.toISOString()} aria-label={formatTime(value, settings.city.timeZone, locale)}>{formatTime(value, settings.city.timeZone, locale, true)}</time> : <span className="muted">—</span>;
 }
 
 function ScheduleBar({ prayers, now, settings }: { prayers: Prayer[]; now: Date; settings: Settings }) {
@@ -52,7 +54,7 @@ export function TodayDashboard({ settings, now, day, prayers, current, next, log
   istighfar: number; onAction: (prayer: Prayer) => void;
 }) {
   const t = message.bind(null, settings);
-  const locale = settings.language;
+  const locale = formatLocale(settings);
   const number = new Intl.NumberFormat(locale);
   const percent = new Intl.NumberFormat(locale, { style: "percent" });
   const zone = settings.city.timeZone;

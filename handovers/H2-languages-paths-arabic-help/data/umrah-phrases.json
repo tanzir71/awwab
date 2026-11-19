@@ -1,0 +1,1131 @@
+{
+  "version": 1,
+  "status": "draft — native Saudi (Hijazi) speakers must review every line and record the audio; MSA lines reviewed by an Arabic teacher",
+  "varieties": {
+    "saudi": "Saudi · Hijazi (default)",
+    "msa": "Formal / Modern Standard"
+  },
+  "transliteration": "Same scheme as the app (ā ī ū ḥ ṣ ḍ ṭ ẓ ʿ ʾ; ē ō for dialect vowels; g for Saudi qāf)",
+  "contexts": [
+    "any",
+    "hotel",
+    "walking",
+    "haram",
+    "umrah",
+    "resting",
+    "eating",
+    "madinah"
+  ],
+  "phrases": [
+    {
+      "id": "excuse-me",
+      "category": "polite",
+      "en": "Excuse me / please",
+      "saudi": {
+        "ar": "لو سمحت",
+        "tr": "law samaḥt"
+      },
+      "msa": {
+        "ar": "من فضلك",
+        "tr": "min faḍlak"
+      },
+      "contexts": [
+        "any"
+      ],
+      "gender": {
+        "toFemale": {
+          "saudi": [
+            "لو سمحتي",
+            "law samaḥti"
+          ]
+        }
+      }
+    },
+    {
+      "id": "thank-you",
+      "category": "polite",
+      "en": "Thank you",
+      "saudi": {
+        "ar": "شكرًا، يعطيك العافية",
+        "tr": "shukran, yaʿṭīk al-ʿāfya"
+      },
+      "msa": {
+        "ar": "شكرًا",
+        "tr": "shukran"
+      },
+      "contexts": [
+        "any"
+      ]
+    },
+    {
+      "id": "jazakallah",
+      "category": "polite",
+      "en": "May Allah reward you with good",
+      "saudi": {
+        "ar": "جزاك الله خير",
+        "tr": "jazāk allāhu khēr"
+      },
+      "msa": {
+        "ar": "جزاك الله خيرًا",
+        "tr": "jazāka llāhu khayran"
+      },
+      "contexts": [
+        "any"
+      ]
+    },
+    {
+      "id": "sorry",
+      "category": "polite",
+      "en": "Sorry",
+      "saudi": {
+        "ar": "آسف",
+        "tr": "āsif"
+      },
+      "msa": {
+        "ar": "آسف",
+        "tr": "āsif"
+      },
+      "contexts": [
+        "any"
+      ],
+      "gender": {
+        "speakerFemale": {
+          "saudi": [
+            "آسفة",
+            "āsfa"
+          ],
+          "msa": [
+            "آسفة",
+            "āsifa"
+          ]
+        }
+      }
+    },
+    {
+      "id": "no-arabic",
+      "category": "polite",
+      "en": "I don't speak Arabic",
+      "saudi": {
+        "ar": "ما أتكلم عربي",
+        "tr": "mā atkallam ʿarabi"
+      },
+      "msa": {
+        "ar": "لا أتكلم العربية",
+        "tr": "lā atakallamu al-ʿarabiyya"
+      },
+      "contexts": [
+        "any"
+      ]
+    },
+    {
+      "id": "speak-english",
+      "category": "polite",
+      "en": "Do you speak English?",
+      "saudi": {
+        "ar": "تتكلم إنجليزي؟",
+        "tr": "titkallam ingilīzi?"
+      },
+      "msa": {
+        "ar": "هل تتكلم الإنجليزية؟",
+        "tr": "hal tatakallamu al-injilīziyya?"
+      },
+      "contexts": [
+        "any"
+      ]
+    },
+    {
+      "id": "speak-urdu",
+      "category": "polite",
+      "en": "Do you speak Urdu?",
+      "saudi": {
+        "ar": "تتكلم أردو؟",
+        "tr": "titkallam urdu?"
+      },
+      "msa": {
+        "ar": "هل تتكلم الأردية؟",
+        "tr": "hal tatakallamu al-urdiyya?"
+      },
+      "contexts": [
+        "any"
+      ],
+      "note": "Many shop and hotel staff in Makkah speak Urdu, Bengali or Indonesian."
+    },
+    {
+      "id": "speak-bengali",
+      "category": "polite",
+      "en": "Do you speak Bengali?",
+      "saudi": {
+        "ar": "تتكلم بنغالي؟",
+        "tr": "titkallam bangāli?"
+      },
+      "msa": {
+        "ar": "هل تتكلم البنغالية؟",
+        "tr": "hal tatakallamu al-banghāliyya?"
+      },
+      "contexts": [
+        "any"
+      ]
+    },
+    {
+      "id": "speak-indonesian",
+      "category": "polite",
+      "en": "Do you speak Indonesian?",
+      "saudi": {
+        "ar": "تتكلم إندونيسي؟",
+        "tr": "titkallam indūnīsi?"
+      },
+      "msa": {
+        "ar": "هل تتكلم الإندونيسية؟",
+        "tr": "hal tatakallamu al-indūnīsiyya?"
+      },
+      "contexts": [
+        "any"
+      ]
+    },
+    {
+      "id": "slowly",
+      "category": "polite",
+      "en": "Slowly, please",
+      "saudi": {
+        "ar": "شوي شوي لو سمحت",
+        "tr": "shwayy shwayy law samaḥt"
+      },
+      "msa": {
+        "ar": "ببطء من فضلك",
+        "tr": "bi-buṭʾ min faḍlak"
+      },
+      "contexts": [
+        "any"
+      ]
+    },
+    {
+      "id": "repeat",
+      "category": "polite",
+      "en": "Say it again, please",
+      "saudi": {
+        "ar": "عيدها لو سمحت",
+        "tr": "ʿīdha law samaḥt"
+      },
+      "msa": {
+        "ar": "أعِدْ من فضلك",
+        "tr": "aʿid min faḍlak"
+      },
+      "contexts": [
+        "any"
+      ]
+    },
+    {
+      "id": "write-it",
+      "category": "polite",
+      "en": "Please write it for me",
+      "saudi": {
+        "ar": "اكتبها لي لو سمحت",
+        "tr": "iktibha li law samaḥt"
+      },
+      "msa": {
+        "ar": "اكتبها لي من فضلك",
+        "tr": "uktubhā lī min faḍlak"
+      },
+      "contexts": [
+        "any"
+      ]
+    },
+    {
+      "id": "dont-understand",
+      "category": "polite",
+      "en": "I don't understand",
+      "saudi": {
+        "ar": "ما فهمت",
+        "tr": "mā fihimt"
+      },
+      "msa": {
+        "ar": "لم أفهم",
+        "tr": "lam afham"
+      },
+      "contexts": [
+        "any"
+      ]
+    },
+    {
+      "id": "toilet",
+      "category": "directions",
+      "en": "Where is the toilet?",
+      "saudi": {
+        "ar": "فين الحمام؟",
+        "tr": "fēn al-ḥammām?"
+      },
+      "msa": {
+        "ar": "أين دورة المياه؟",
+        "tr": "ayna dawratu al-miyāh?"
+      },
+      "contexts": [
+        "haram",
+        "walking",
+        "eating"
+      ],
+      "sign": {
+        "ar": "دورات المياه",
+        "en": "Toilets"
+      }
+    },
+    {
+      "id": "wudu",
+      "category": "directions",
+      "en": "Where is the wudu area?",
+      "saudi": {
+        "ar": "فين مكان الوضوء؟",
+        "tr": "fēn makān al-wuḍūʾ?"
+      },
+      "msa": {
+        "ar": "أين مكان الوضوء؟",
+        "tr": "ayna makānu al-wuḍūʾ?"
+      },
+      "contexts": [
+        "haram",
+        "walking"
+      ],
+      "sign": {
+        "ar": "أماكن الوضوء",
+        "en": "Wudu areas"
+      }
+    },
+    {
+      "id": "women-prayer",
+      "category": "directions",
+      "en": "Where is the women's prayer area?",
+      "saudi": {
+        "ar": "فين مصلى النساء؟",
+        "tr": "fēn muṣalla an-nisāʾ?"
+      },
+      "msa": {
+        "ar": "أين مصلى النساء؟",
+        "tr": "ayna muṣallā an-nisāʾ?"
+      },
+      "contexts": [
+        "haram",
+        "walking"
+      ],
+      "sign": {
+        "ar": "مصلى النساء",
+        "en": "Women's prayer area"
+      }
+    },
+    {
+      "id": "gate-number",
+      "category": "directions",
+      "en": "Where is gate number {n}?",
+      "saudi": {
+        "ar": "فين باب رقم {n}؟",
+        "tr": "fēn bāb raqam {n}?"
+      },
+      "msa": {
+        "ar": "أين الباب رقم {n}؟",
+        "tr": "ayna al-bābu raqm {n}?"
+      },
+      "contexts": [
+        "haram",
+        "walking"
+      ],
+      "slots": {
+        "n": "number 1–300, shown in Arabic-Indic digits (٧٩) and spoken from recorded number words"
+      }
+    },
+    {
+      "id": "king-fahd-gate",
+      "category": "directions",
+      "en": "Where is King Fahd Gate (79)?",
+      "saudi": {
+        "ar": "فين باب الملك فهد؟",
+        "tr": "fēn bāb al-malik fahd?"
+      },
+      "msa": {
+        "ar": "أين باب الملك فهد؟",
+        "tr": "ayna bābu al-maliki fahd?"
+      },
+      "contexts": [
+        "haram",
+        "walking"
+      ]
+    },
+    {
+      "id": "zamzam",
+      "category": "directions",
+      "en": "Where is the Zamzam water?",
+      "saudi": {
+        "ar": "فين موية زمزم؟",
+        "tr": "fēn mōyat zamzam?"
+      },
+      "msa": {
+        "ar": "أين ماء زمزم؟",
+        "tr": "ayna māʾu zamzam?"
+      },
+      "contexts": [
+        "haram"
+      ]
+    },
+    {
+      "id": "masa",
+      "category": "directions",
+      "en": "Where is the Masʿā (saʿy area)?",
+      "saudi": {
+        "ar": "فين المسعى؟",
+        "tr": "fēn al-masʿā?"
+      },
+      "msa": {
+        "ar": "أين المسعى؟",
+        "tr": "ayna al-masʿā?"
+      },
+      "contexts": [
+        "haram",
+        "umrah"
+      ]
+    },
+    {
+      "id": "mataf",
+      "category": "directions",
+      "en": "Where is the Maṭāf (ṭawāf area)?",
+      "saudi": {
+        "ar": "فين المطاف؟",
+        "tr": "fēn al-maṭāf?"
+      },
+      "msa": {
+        "ar": "أين المطاف؟",
+        "tr": "ayna al-maṭāf?"
+      },
+      "contexts": [
+        "haram",
+        "umrah"
+      ]
+    },
+    {
+      "id": "shoes",
+      "category": "directions",
+      "en": "Where can I leave my shoes?",
+      "saudi": {
+        "ar": "فين مكان الأحذية؟",
+        "tr": "fēn makān al-aḥdhiya?"
+      },
+      "msa": {
+        "ar": "أين مكان الأحذية؟",
+        "tr": "ayna makānu al-aḥdhiya?"
+      },
+      "contexts": [
+        "haram"
+      ]
+    },
+    {
+      "id": "to-haram",
+      "category": "directions",
+      "en": "How do I get to the Haram?",
+      "saudi": {
+        "ar": "كيف أروح الحرم؟",
+        "tr": "kēf arūḥ al-ḥaram?"
+      },
+      "msa": {
+        "ar": "كيف أصل إلى الحرم؟",
+        "tr": "kayfa aṣilu ilā al-ḥaram?"
+      },
+      "contexts": [
+        "hotel",
+        "walking"
+      ]
+    },
+    {
+      "id": "nearest-mosque",
+      "category": "directions",
+      "en": "Where is the nearest mosque?",
+      "saudi": {
+        "ar": "فين أقرب مسجد؟",
+        "tr": "fēn agrab masjid?"
+      },
+      "msa": {
+        "ar": "أين أقرب مسجد؟",
+        "tr": "ayna aqrabu masjid?"
+      },
+      "contexts": [
+        "walking",
+        "eating",
+        "resting"
+      ]
+    },
+    {
+      "id": "exit",
+      "category": "directions",
+      "en": "Where is the exit?",
+      "saudi": {
+        "ar": "فين المخرج؟",
+        "tr": "fēn al-makhraj?"
+      },
+      "msa": {
+        "ar": "أين المخرج؟",
+        "tr": "ayna al-makhraj?"
+      },
+      "contexts": [
+        "haram",
+        "walking"
+      ]
+    },
+    {
+      "id": "elevator",
+      "category": "directions",
+      "en": "Where is the lift?",
+      "saudi": {
+        "ar": "فين المصعد؟",
+        "tr": "fēn al-maṣʿad?"
+      },
+      "msa": {
+        "ar": "أين المِصعد؟",
+        "tr": "ayna al-miṣʿad?"
+      },
+      "contexts": [
+        "haram",
+        "hotel"
+      ]
+    },
+    {
+      "id": "far",
+      "category": "directions",
+      "en": "Is it far?",
+      "saudi": {
+        "ar": "بعيد؟",
+        "tr": "baʿīd?"
+      },
+      "msa": {
+        "ar": "هل هو بعيد؟",
+        "tr": "hal huwa baʿīd?"
+      },
+      "contexts": [
+        "any"
+      ]
+    },
+    {
+      "id": "show-map",
+      "category": "directions",
+      "en": "Please show me on the map",
+      "saudi": {
+        "ar": "وريني في الخريطة لو سمحت",
+        "tr": "warrīni fil-kharīṭa law samaḥt"
+      },
+      "msa": {
+        "ar": "أرِني على الخريطة من فضلك",
+        "tr": "arinī ʿalā al-kharīṭa min faḍlak"
+      },
+      "contexts": [
+        "walking"
+      ]
+    },
+    {
+      "id": "rawdah-line",
+      "category": "directions",
+      "en": "Is this the line for the Rawḍah?",
+      "saudi": {
+        "ar": "هذا الطابور حق الروضة؟",
+        "tr": "hādha aṭ-ṭābūr ḥagg ar-rawḍa?"
+      },
+      "msa": {
+        "ar": "هل هذا الطابور للروضة؟",
+        "tr": "hal hādhā aṭ-ṭābūru lir-rawḍa?"
+      },
+      "contexts": [
+        "madinah"
+      ]
+    },
+    {
+      "id": "buy-sim",
+      "category": "phone",
+      "en": "Where can I buy a SIM card?",
+      "saudi": {
+        "ar": "فين أشتري شريحة؟",
+        "tr": "fēn ashtari sharīḥa?"
+      },
+      "msa": {
+        "ar": "أين أشتري شريحة اتصال؟",
+        "tr": "ayna ashtarī sharīḥata ittiṣāl?"
+      },
+      "contexts": [
+        "walking",
+        "hotel"
+      ]
+    },
+    {
+      "id": "sim-internet",
+      "category": "phone",
+      "en": "I want a SIM with internet",
+      "saudi": {
+        "ar": "أبغى شريحة فيها إنترنت",
+        "tr": "abgha sharīḥa fīha internet"
+      },
+      "msa": {
+        "ar": "أريد شريحة مع إنترنت",
+        "tr": "urīdu sharīḥatan maʿa al-internet"
+      },
+      "contexts": [
+        "walking"
+      ]
+    },
+    {
+      "id": "recharge",
+      "category": "phone",
+      "en": "I want to top up my balance",
+      "saudi": {
+        "ar": "أبغى أشحن رصيد",
+        "tr": "abgha ashḥan raṣīd"
+      },
+      "msa": {
+        "ar": "أريد شحن الرصيد",
+        "tr": "urīdu shaḥna ar-raṣīd"
+      },
+      "contexts": [
+        "walking"
+      ]
+    },
+    {
+      "id": "wifi",
+      "category": "phone",
+      "en": "What is the Wi-Fi password?",
+      "saudi": {
+        "ar": "إيش الرقم السري للواي فاي؟",
+        "tr": "ēsh ar-raqam as-sirri lil-wāy fāy?"
+      },
+      "msa": {
+        "ar": "ما كلمة مرور الواي فاي؟",
+        "tr": "mā kalimatu murūri al-wāy fāy?"
+      },
+      "contexts": [
+        "hotel",
+        "eating"
+      ]
+    },
+    {
+      "id": "charge-phone",
+      "category": "phone",
+      "en": "Can I charge my phone here?",
+      "saudi": {
+        "ar": "أقدر أشحن جوالي هنا؟",
+        "tr": "agdar ashḥan jawwāli hina?"
+      },
+      "msa": {
+        "ar": "هل يمكنني شحن هاتفي هنا؟",
+        "tr": "hal yumkinunī shaḥnu hātifī hunā?"
+      },
+      "contexts": [
+        "hotel",
+        "eating",
+        "resting"
+      ]
+    },
+    {
+      "id": "take-me-hotel",
+      "category": "transport",
+      "en": "Take me to this hotel, please",
+      "saudi": {
+        "ar": "ودّني هذا الفندق لو سمحت",
+        "tr": "waddīni hādha al-funduq law samaḥt"
+      },
+      "msa": {
+        "ar": "خذني إلى هذا الفندق من فضلك",
+        "tr": "khudhnī ilā hādhā al-funduqi min faḍlak"
+      },
+      "contexts": [
+        "walking",
+        "haram"
+      ],
+      "pairsWith": "my-hotel-card"
+    },
+    {
+      "id": "fare-haram",
+      "category": "transport",
+      "en": "How much to the Haram?",
+      "saudi": {
+        "ar": "بكم للحرم؟",
+        "tr": "bikam lil-ḥaram?"
+      },
+      "msa": {
+        "ar": "كم الأجرة إلى الحرم؟",
+        "tr": "kam al-ujratu ilā al-ḥaram?"
+      },
+      "contexts": [
+        "hotel",
+        "walking"
+      ]
+    },
+    {
+      "id": "stop-here",
+      "category": "transport",
+      "en": "Stop here, please",
+      "saudi": {
+        "ar": "وقّف هنا لو سمحت",
+        "tr": "waggif hina law samaḥt"
+      },
+      "msa": {
+        "ar": "توقّف هنا من فضلك",
+        "tr": "tawaqqaf hunā min faḍlak"
+      },
+      "contexts": [
+        "any"
+      ]
+    },
+    {
+      "id": "taxi-stand",
+      "category": "transport",
+      "en": "Where is the taxi stand?",
+      "saudi": {
+        "ar": "فين موقف التكاسي؟",
+        "tr": "fēn mawgif at-takāsi?"
+      },
+      "msa": {
+        "ar": "أين موقف سيارات الأجرة؟",
+        "tr": "ayna mawqifu sayyārāti al-ujra?"
+      },
+      "contexts": [
+        "walking",
+        "haram"
+      ]
+    },
+    {
+      "id": "bus-to",
+      "category": "transport",
+      "en": "Where is the bus to {place}?",
+      "saudi": {
+        "ar": "فين الباص اللي يروح {place}؟",
+        "tr": "fēn al-bāṣ illi yrūḥ {place}?"
+      },
+      "msa": {
+        "ar": "أين الحافلة إلى {place}؟",
+        "tr": "ayna al-ḥāfilatu ilā {place}?"
+      },
+      "contexts": [
+        "walking"
+      ],
+      "slots": {
+        "place": "Madinah · Jeddah · airport · hotel name"
+      }
+    },
+    {
+      "id": "haramain-train",
+      "category": "transport",
+      "en": "Where is the Haramain train station?",
+      "saudi": {
+        "ar": "فين محطة قطار الحرمين؟",
+        "tr": "fēn maḥaṭṭat giṭār al-ḥaramēn?"
+      },
+      "msa": {
+        "ar": "أين محطة قطار الحرمين؟",
+        "tr": "ayna maḥaṭṭatu qiṭāri al-ḥaramayn?"
+      },
+      "contexts": [
+        "hotel",
+        "walking"
+      ]
+    },
+    {
+      "id": "water",
+      "category": "food",
+      "en": "Water, please",
+      "saudi": {
+        "ar": "موية لو سمحت",
+        "tr": "mōya law samaḥt"
+      },
+      "msa": {
+        "ar": "ماء من فضلك",
+        "tr": "māʾ min faḍlak"
+      },
+      "contexts": [
+        "any"
+      ]
+    },
+    {
+      "id": "restaurant",
+      "category": "food",
+      "en": "Where is there a restaurant?",
+      "saudi": {
+        "ar": "فين فيه مطعم؟",
+        "tr": "fēn fīh maṭʿam?"
+      },
+      "msa": {
+        "ar": "أين يوجد مطعم؟",
+        "tr": "ayna yūjadu maṭʿam?"
+      },
+      "contexts": [
+        "walking",
+        "hotel"
+      ]
+    },
+    {
+      "id": "not-spicy",
+      "category": "food",
+      "en": "Not spicy, please",
+      "saudi": {
+        "ar": "بدون حار لو سمحت",
+        "tr": "bidūn ḥārr law samaḥt"
+      },
+      "msa": {
+        "ar": "بدون فلفل حار من فضلك",
+        "tr": "bidūni filfilin ḥārr min faḍlak"
+      },
+      "contexts": [
+        "eating"
+      ]
+    },
+    {
+      "id": "allergy-nuts",
+      "category": "food",
+      "en": "I'm allergic to nuts",
+      "saudi": {
+        "ar": "عندي حساسية من المكسرات",
+        "tr": "ʿindi ḥassāsiyya min al-mukassarāt"
+      },
+      "msa": {
+        "ar": "عندي حساسية من المكسرات",
+        "tr": "ʿindī ḥassāsiyya mina al-mukassarāt"
+      },
+      "contexts": [
+        "eating"
+      ]
+    },
+    {
+      "id": "bill",
+      "category": "food",
+      "en": "The bill, please",
+      "saudi": {
+        "ar": "الحساب لو سمحت",
+        "tr": "al-ḥisāb law samaḥt"
+      },
+      "msa": {
+        "ar": "الحساب من فضلك",
+        "tr": "al-ḥisāb min faḍlak"
+      },
+      "contexts": [
+        "eating"
+      ]
+    },
+    {
+      "id": "how-much",
+      "category": "shopping",
+      "en": "How much is this?",
+      "saudi": {
+        "ar": "بكم هذا؟",
+        "tr": "bikam hādha?"
+      },
+      "msa": {
+        "ar": "بكم هذا؟",
+        "tr": "bikam hādhā?"
+      },
+      "contexts": [
+        "walking",
+        "eating"
+      ]
+    },
+    {
+      "id": "discount",
+      "category": "shopping",
+      "en": "It's expensive. Any discount?",
+      "saudi": {
+        "ar": "غالي، فيه تخفيض؟",
+        "tr": "ghāli, fīh takhfīḍ?"
+      },
+      "msa": {
+        "ar": "هذا غالٍ، هل يوجد تخفيض؟",
+        "tr": "hādhā ghālin, hal yūjadu takhfīḍ?"
+      },
+      "contexts": [
+        "walking"
+      ]
+    },
+    {
+      "id": "card-payment",
+      "category": "shopping",
+      "en": "Can I pay by card?",
+      "saudi": {
+        "ar": "فيه شبكة؟",
+        "tr": "fīh shabaka?"
+      },
+      "msa": {
+        "ar": "هل تقبلون البطاقة؟",
+        "tr": "hal taqbalūna al-biṭāqa?"
+      },
+      "contexts": [
+        "walking",
+        "eating"
+      ],
+      "note": "In Saudi shops “shabaka” means card payment (mada)."
+    },
+    {
+      "id": "key-broken",
+      "category": "hotel",
+      "en": "My room key isn't working",
+      "saudi": {
+        "ar": "المفتاح ما يشتغل",
+        "tr": "al-muftāḥ mā yishtaghil"
+      },
+      "msa": {
+        "ar": "المفتاح لا يعمل",
+        "tr": "al-miftāḥu lā yaʿmal"
+      },
+      "contexts": [
+        "hotel"
+      ]
+    },
+    {
+      "id": "ac-broken",
+      "category": "hotel",
+      "en": "The air conditioning isn't working",
+      "saudi": {
+        "ar": "المكيّف ما يشتغل",
+        "tr": "al-mukayyif mā yishtaghil"
+      },
+      "msa": {
+        "ar": "المكيّف لا يعمل",
+        "tr": "al-mukayyifu lā yaʿmal"
+      },
+      "contexts": [
+        "hotel"
+      ]
+    },
+    {
+      "id": "checkout",
+      "category": "hotel",
+      "en": "What time is checkout?",
+      "saudi": {
+        "ar": "متى وقت الخروج؟",
+        "tr": "mita wagt al-khurūj?"
+      },
+      "msa": {
+        "ar": "متى موعد تسجيل الخروج؟",
+        "tr": "matā mawʿidu tasjīli al-khurūj?"
+      },
+      "contexts": [
+        "hotel"
+      ]
+    },
+    {
+      "id": "towels-water",
+      "category": "hotel",
+      "en": "More water and towels, please",
+      "saudi": {
+        "ar": "أبغى موية وفوط زيادة لو سمحت",
+        "tr": "abgha mōya w fuwaṭ ziyāda law samaḥt"
+      },
+      "msa": {
+        "ar": "أريد ماءً ومناشف إضافية من فضلك",
+        "tr": "urīdu māʾan wa manāshifa iḍāfiyya min faḍlak"
+      },
+      "contexts": [
+        "hotel"
+      ]
+    },
+    {
+      "id": "pharmacy",
+      "category": "help",
+      "en": "Where is the pharmacy?",
+      "saudi": {
+        "ar": "فين الصيدلية؟",
+        "tr": "fēn aṣ-ṣaydaliyya?"
+      },
+      "msa": {
+        "ar": "أين الصيدلية؟",
+        "tr": "ayna aṣ-ṣaydaliyya?"
+      },
+      "contexts": [
+        "walking",
+        "hotel",
+        "haram"
+      ]
+    },
+    {
+      "id": "need-doctor",
+      "category": "help",
+      "en": "I need a doctor",
+      "saudi": {
+        "ar": "أحتاج دكتور",
+        "tr": "aḥtāj daktōr"
+      },
+      "msa": {
+        "ar": "أحتاج إلى طبيب",
+        "tr": "aḥtāju ilā ṭabīb"
+      },
+      "contexts": [
+        "any"
+      ],
+      "urgent": true
+    },
+    {
+      "id": "heat",
+      "category": "help",
+      "en": "I feel unwell from the heat",
+      "saudi": {
+        "ar": "أنا تعبان من الحر",
+        "tr": "ana taʿbān min al-ḥarr"
+      },
+      "msa": {
+        "ar": "أشعر بالتعب من الحر",
+        "tr": "ashʿuru bit-taʿabi mina al-ḥarr"
+      },
+      "contexts": [
+        "any"
+      ],
+      "gender": {
+        "speakerFemale": {
+          "saudi": [
+            "أنا تعبانة من الحر",
+            "ana taʿbāna min al-ḥarr"
+          ]
+        }
+      },
+      "urgent": true
+    },
+    {
+      "id": "wheelchair",
+      "category": "help",
+      "en": "I need a wheelchair",
+      "saudi": {
+        "ar": "أحتاج كرسي متحرك",
+        "tr": "aḥtāj kursi mutaḥarrik"
+      },
+      "msa": {
+        "ar": "أحتاج كرسيًّا متحركًا",
+        "tr": "aḥtāju kursiyyan mutaḥarrikan"
+      },
+      "contexts": [
+        "haram",
+        "umrah"
+      ]
+    },
+    {
+      "id": "lost",
+      "category": "help",
+      "en": "I'm lost",
+      "saudi": {
+        "ar": "أنا ضايع",
+        "tr": "ana ḍāyiʿ"
+      },
+      "msa": {
+        "ar": "أنا تائه",
+        "tr": "anā tāʾih"
+      },
+      "contexts": [
+        "any"
+      ],
+      "gender": {
+        "speakerFemale": {
+          "saudi": [
+            "أنا ضايعة",
+            "ana ḍāyʿa"
+          ],
+          "msa": [
+            "أنا تائهة",
+            "anā tāʾiha"
+          ]
+        }
+      },
+      "urgent": true,
+      "pairsWith": "lost-card"
+    },
+    {
+      "id": "lost-family",
+      "category": "help",
+      "en": "I lost my {relation}",
+      "saudi": {
+        "ar": "ضاع {relation}",
+        "tr": "ḍāʿ {relation}"
+      },
+      "msa": {
+        "ar": "فقدتُ {relation}",
+        "tr": "faqadtu {relation}"
+      },
+      "contexts": [
+        "any"
+      ],
+      "slots": {
+        "relation": "أمي ummi (mother, verb ضاعت) · أبوي abūy (father) · ولدي waladi (son) · بنتي binti (daughter, verb ضاعت) · زوجتي zōjti (wife, verb ضاعت) · زوجي zōji (husband)"
+      },
+      "urgent": true
+    },
+    {
+      "id": "call-number",
+      "category": "help",
+      "en": "Please call this number",
+      "saudi": {
+        "ar": "اتصل على هذا الرقم لو سمحت",
+        "tr": "ittaṣil ʿala hādha ar-raqam law samaḥt"
+      },
+      "msa": {
+        "ar": "اتصل بهذا الرقم من فضلك",
+        "tr": "ittaṣil bi-hādhā ar-raqmi min faḍlak"
+      },
+      "contexts": [
+        "any"
+      ],
+      "urgent": true,
+      "pairsWith": "lost-card"
+    },
+    {
+      "id": "lost-found",
+      "category": "help",
+      "en": "Where is lost and found?",
+      "saudi": {
+        "ar": "فين مكتب المفقودات؟",
+        "tr": "fēn maktab al-mafqūdāt?"
+      },
+      "msa": {
+        "ar": "أين مكتب المفقودات؟",
+        "tr": "ayna maktabu al-mafqūdāt?"
+      },
+      "contexts": [
+        "haram"
+      ]
+    },
+    {
+      "id": "help-me",
+      "category": "help",
+      "en": "Help me!",
+      "saudi": {
+        "ar": "ساعدني!",
+        "tr": "sāʿidni!"
+      },
+      "msa": {
+        "ar": "ساعدني!",
+        "tr": "sāʿidnī!"
+      },
+      "contexts": [
+        "any"
+      ],
+      "urgent": true
+    },
+    {
+      "id": "ambulance",
+      "category": "help",
+      "en": "Call an ambulance",
+      "saudi": {
+        "ar": "اتصل بالإسعاف",
+        "tr": "ittaṣil bil-isʿāf"
+      },
+      "msa": {
+        "ar": "اتصل بالإسعاف",
+        "tr": "ittaṣil bil-isʿāf"
+      },
+      "contexts": [
+        "any"
+      ],
+      "urgent": true,
+      "note": "Emergency in Makkah and Madinah regions: 911 (unified). Elsewhere in Saudi Arabia: 997 ambulance, 999 police."
+    },
+    {
+      "id": "police",
+      "category": "help",
+      "en": "Call the police",
+      "saudi": {
+        "ar": "اتصل بالشرطة",
+        "tr": "ittaṣil bish-shurṭa"
+      },
+      "msa": {
+        "ar": "اتصل بالشرطة",
+        "tr": "ittaṣil bish-shurṭa"
+      },
+      "contexts": [
+        "any"
+      ],
+      "urgent": true
+    }
+  ]
+}

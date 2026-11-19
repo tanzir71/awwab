@@ -7,6 +7,7 @@ import { guideReferences, type GuideReference } from "./prayerGuide";
 import { deskActivities } from "./studyDesk";
 import type { MosquePlan } from "./mosques";
 import { zakatBalances } from "./zakat";
+import { builtInLanguages, glossaryOptions, glossaryTerms, textSizes, type AppLanguage, type GlossaryTerm, type WordChoices } from "./languagePreferences";
 
 export interface Settings {
   mode: "adult" | "maktab";
@@ -17,7 +18,12 @@ export interface Settings {
   city: City;
   hijriAdjust: number;
   spellStyle: "en" | "ampara-bn";
-  language: "en" | "bn";
+  language: AppLanguage;
+  nativeDigits?: boolean;
+  quranMeanings?: boolean;
+  englishMeaning?: boolean;
+  textSize?: typeof textSizes[number];
+  wordChoices?: WordChoices;
   onboarded: boolean;
 }
 
@@ -67,6 +73,15 @@ export function updateSettings(patch: Partial<Settings>) {
   return updateRecord("settings", defaults, saved => ({ ...defaults, ...saved, ...patch }));
 }
 
+export function updateWordChoice(language: AppLanguage, term?: GlossaryTerm, choice?: string) {
+  return updateRecord("settings", defaults, saved => {
+    const wordChoices = { ...saved.wordChoices };
+    if (term && glossaryOptions(language, term).includes(choice)) wordChoices[language] = { ...wordChoices[language], [term]: choice };
+    if (!term) delete wordChoices[language];
+    return { ...defaults, ...saved, wordChoices };
+  });
+}
+
 const daySchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(day => {
   const date = new Date(`${day}T12:00:00Z`);
   return Number.isFinite(date.valueOf()) && date.toISOString().slice(0, 10) === day;
@@ -96,7 +111,12 @@ const settingsSchema = z.object({
   city: citySchema,
   hijriAdjust: z.number().int().min(-2).max(2),
   spellStyle: z.enum(["en", "ampara-bn"]),
-  language: z.enum(["en", "bn"]),
+  language: z.enum(builtInLanguages),
+  nativeDigits: z.boolean().optional(),
+  quranMeanings: z.boolean().optional(),
+  englishMeaning: z.boolean().optional(),
+  textSize: z.enum(textSizes).optional(),
+  wordChoices: z.partialRecord(z.enum(builtInLanguages), z.partialRecord(z.enum(glossaryTerms), z.string().max(80))).optional(),
   onboarded: z.boolean(),
 });
 const legacySchema = z.array(z.object({ date: daySchema, prayerName: z.string(), completedAt: instantSchema }));
@@ -109,6 +129,7 @@ const dateLists = z.record(daySchema, labels);
 const balances = z.object({ fajr: count, dhuhr: count, asr: count, maghrib: count, isha: count });
 const savedRecords: Record<string, z.ZodTypeAny> = {
   settings: settingsSchema,
+  "wording-suggestions": z.array(z.object({ language: z.enum(builtInLanguages), page: z.string().max(160), original: z.string().max(500), proposed: z.string().max(500) })).max(300),
   "qaida-current": count.min(1).max(17),
   "qaida-complete": z.array(count.min(1).max(17)),
   "study-days": z.array(daySchema),

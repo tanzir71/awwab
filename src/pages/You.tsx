@@ -1,58 +1,83 @@
 import { useState, type FormEvent } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Bell, BookOpen, Calendar, Compass, Download, Share2, Sparkles } from "lucide-react";
+import { Bell, BookOpen, Calendar, Compass, Download, Languages, Share2, Sparkles } from "lucide-react";
 import AppInstallPrompt from "@/components/AppInstallPrompt";
 import MosqueProgress from "@/components/MosqueProgress";
 import { ListLink, SectionNav } from "@/components/Surface";
 import { usePrayerLogs, useRecord } from "@/hooks/use-awwab";
-import { backup, prayerStatistics, restoreBackup, updateSettings, type Settings } from "@/lib/storageService";
+import { backup, defaults, getRecord, prayerStatistics, restoreBackup, updateSettings, type Settings } from "@/lib/storageService";
 import { cities, methodNames, type City, type PrayerMethod } from "@/lib/prayerServices";
 import { dateKey } from "@/lib/dates";
 import { downloadFile } from "@/lib/download";
 import { prayerReminders, saveCalendar, eventReminders } from "@/lib/calendarFile";
 import { calendarDefaults } from "@/lib/hijri";
-import { message as copy } from "@/lib/copy";
+import { message as copy, useCopy } from "@/lib/copy";
 import { guideReference, prayerGuidePath } from "@/lib/prayerGuide";
+import { textSizes } from "@/lib/languagePreferences";
 
-export function You({ settings, now }: { settings: Settings; now: Date }) {
-  const t = copy.bind(null, settings);
+function Profile({ settings, now, desktop = false }: { settings: Settings; now: Date; desktop?: boolean }) {
+  const { locale, t } = useCopy();
   const logs = usePrayerLogs();
   const day = dateKey(now, settings.city.timeZone);
   const stats = prayerStatistics(logs, day);
-  return <div className="stack">
-    <header><p className="caption">{t("you")}</p><h1>{stats.activeDays ? "Your masjid is growing" : "Build your masjid"}</h1></header>
+  const number = new Intl.NumberFormat(locale);
+  const percent = new Intl.NumberFormat(locale, { style: "percent" });
+  return <section className="stack settings-profile-stats">
+    <header><p className="caption">{t("you")}</p>{desktop ? <h2>{t(stats.activeDays ? "profileGrowing" : "profileBuild")}</h2>
+      : <h1>{t(stats.activeDays ? "profileGrowing" : "profileBuild")}</h1>}</header>
     <MosqueProgress consistency={stats.consistency} dimmed={stats.activeDays > 0 && !stats.recent[28]?.count} />
     <div className="equal-row">
-      <div className="card"><h2>{stats.consistency}%</h2><small className="muted">prayed this month</small></div>
-      <div className="card"><h2>{stats.returns}</h2><small className="muted">times you came back</small></div>
-      <div className="card"><h2>{stats.activeDays}</h2><small className="muted">days you prayed</small></div>
+      <div className="card"><strong>{percent.format(stats.consistency / 100)}</strong><small className="muted">{t("profilePrayedMonth")}</small></div>
+      <div className="card"><strong>{number.format(stats.returns)}</strong><small className="muted">{t("profileReturns")}</small></div>
+      <div className="card"><strong>{number.format(stats.activeDays)}</strong><small className="muted">{t("profileDays")}</small></div>
     </div>
-    <section className="card"><div className="row-between"><strong>Last 30 days</strong><small className="muted">prayers per day</small></div>
-      <div className="heat-strip" role="list" aria-label="Prayers by day">
-        {stats.recent.map(({ day, count }) => <span role="listitem" aria-label={`${day}: ${count} prayers`} title={`${day}: ${count} prayers`} key={day}
-          data-active={count > 0} style={{ "--fade": `${(5 - count) * 17}%` } as React.CSSProperties} />)}
+    <section className="card"><div className="row-between"><strong>{t("profileLastMonth")}</strong><small className="muted">{t("profilePrayersPerDay")}</small></div>
+      <div className="heat-strip" role="list" aria-label={t("profilePrayersByDay")}>
+        {stats.recent.map(({ day, count }) => {
+          const label = t("profilePrayersOnDay", { day, count });
+          return <span role="listitem" aria-label={label} title={label} key={day}
+            data-active={count > 0} style={{ "--fade": `${(5 - count) * 17}%` } as React.CSSProperties} />;
+        })}
       </div>
     </section>
+  </section>;
+}
+
+export function You({ settings, now, desktop }: { settings: Settings; now: Date; desktop: boolean }) {
+  const { t } = useCopy();
+  if (desktop) return <div className="settings-profile-workspace">
+    <SettingsPage settings={settings} now={now} panel="learning" desktop />
+    <Profile settings={settings} now={now} desktop />
+  </div>;
+  return <div className="stack">
+    <Profile settings={settings} now={now} />
     <section className="compact-stack">
       <h2>{t("settings")}</h2>
       <ListLink to="/you/learning" icon={<Sparkles size={22} />} title={t("learningMode")} detail={t(settings.mode === "maktab" ? "maktabMode" : "adultModeDetail")} />
-      <ListLink to="/you/learning#script" icon={<BookOpen size={22} />} title={t("script")} detail={settings.script === "indopak" ? "IndoPak · like the Bangla Ampara" : "Uthmani · Madani mushaf"} />
+      <ListLink to="/you/learning#script" icon={<BookOpen size={22} />} title={t("script")} detail={t(settings.script === "indopak" ? "profileIndopak" : "profileUthmani")} />
+      <ListLink to="/you/language" icon={<Languages size={22} />} title={t("settingsLanguage")} />
       <ListLink to="/you/prayer" icon={<Compass size={22} />} title={t("prayerTimes")} detail={`${settings.city.name} · ${methodNames[settings.method]}`} />
-      <ListLink to="/you/hijri" icon={<Calendar size={22} />} title="Hijri date" detail={`Umm al-Qura · ${settings.hijriAdjust} day adjustment`} />
-      <ListLink to="/you/reminders" icon={<Bell size={22} />} title={t("reminders")} detail="Add prayer times to your calendar" />
+      <ListLink to="/you/hijri" icon={<Calendar size={22} />} title={t("settingsHijri")} detail={t("profileHijriOffset", { count: settings.hijriAdjust })} />
+      <ListLink to="/you/reminders" icon={<Bell size={22} />} title={t("reminders")} detail={t("profileRemindersHint")} />
       <ListLink to="/you/audio" icon={<Download size={22} />} title={t("offlineAudio")} detail={t("chooseRecitations")} />
-      <ListLink to="/you/data" icon={<Download size={22} />} title="Your data" detail="Export or restore an on-device backup" />
+      <ListLink to="/you/data" icon={<Download size={22} />} title={t("settingsBackup")} detail={t("profileBackupHint")} />
+      <ListLink to="/you/display" icon={<BookOpen size={22} />} title={t("settingsDisplay")} />
+      <ListLink to="/you/privacy" icon={<BookOpen size={22} />} title={t("settingsPrivacy")} />
+      <ListLink to="/you/about" icon={<BookOpen size={22} />} title={t("settingsAbout")} />
     </section>
-    <ListLink to="/share" icon={<Share2 size={22} />} title="Share progress" detail="Make a card to save or share" />
-    <ListLink to="/sources" icon={<BookOpen size={22} />} title="Sources and licences" />
+    <ListLink to="/share" icon={<Share2 size={22} />} title={t("returnShare")} detail={t("profileShareHint")} />
+    <ListLink to="/sources" icon={<BookOpen size={22} />} title={t("settingsSources")} />
     <AppInstallPrompt />
   </div>;
 }
 
-export function SettingsPage({ settings, now, panel }: { settings: Settings; now: Date; panel: string }) {
-  const t = copy.bind(null, settings);
-  const title = ({ learning: t("learningSettings"), prayer: t("prayerTimes"), hijri: "Hijri date", reminders: t("reminders"), data: "Your data" })[panel];
+export function SettingsPage({ settings, now, panel, desktop }: { settings: Settings; now: Date; panel: string; desktop: boolean }) {
+  const { locale, t } = useCopy();
+  const title = ({ learning: t(desktop ? "settingsProfile" : "learningSettings"), prayer: t(desktop ? "settingsPrayer" : "prayerTimes"), hijri: t("settingsHijri"),
+    reminders: t(desktop ? "settingsReminders" : "reminders"), data: t("settingsBackup"), display: t("settingsDisplay"), privacy: t("settingsPrivacy"), about: t("settingsAbout") })[panel];
   const [search] = useSearchParams();
+  const prayerBack = panel === "prayer" && prayerGuidePath(search.get("fromPrayer"), search.get("fromRakah"));
+  const number = new Intl.NumberFormat(locale, { signDisplay: "exceptZero" });
   const [message, setMessage] = useState("");
   const calendar = useRecord("calendar", calendarDefaults);
   const [file, setFile] = useState<File>();
@@ -63,15 +88,15 @@ export function SettingsPage({ settings, now, panel }: { settings: Settings; now
         const updated = { ...settings, ...patch };
         const day = dateKey(now, settings.city.timeZone);
         saveCalendar([...prayerReminders(day, updated, 30, 5), ...eventReminders(day, updated, calendar)]);
-        setMessage("Saved. Open the new calendar file to update your reminders.");
+        setMessage(t("settingsHijriSaved"));
       } else setMessage(copy({ ...settings, ...patch }, "savedOnDevice"));
     }
     catch { setMessage(t("saveError")); }
   }
 
-  if (!title) return <Link to="/you">Go to settings</Link>;
-  return <div className="stack">
-    <SectionNav title={title} back={(panel === "prayer" && prayerGuidePath(search.get("fromPrayer"), search.get("fromRakah"))) || "/you"} />
+  if (!title) return <Link to="/you">{t("settings")}</Link>;
+  return <div className="stack settings-active-panel">
+    {desktop && !prayerBack ? <h2 className="settings-panel-heading">{title}</h2> : <SectionNav title={title} back={prayerBack || "/you"} />}
     {panel === "learning" && <section className="card stack" id="script">
       <label className="field">{t("learningMode")}
         <select value={settings.mode} onChange={event => {
@@ -89,20 +114,22 @@ export function SettingsPage({ settings, now, panel }: { settings: Settings; now
           <option value="en" lang="en">English</option><option value="ampara-bn">{t("banglaAmpara")}</option>
         </select>
       </label>
-      <label className="field">{t("interfaceLanguage")}
+      {!desktop && <label className="field">{t("interfaceLanguage")}
         <select aria-label={t("interfaceLanguage")} value={settings.language} onChange={event => void save({ language: event.target.value as Settings["language"] })}>
           <option value="en" lang="en">English</option><option value="bn" lang="bn">{t("banglaPreview")}</option>
         </select>
-      </label>
+      </label>}
     </section>}
-    {panel === "prayer" && <CityForm initial={settings} save={save} />}
+    {panel === "prayer" && <><CityForm initial={settings} save={save} />
+      <Link className="list-row" to="/you/hijri">{t("settingsHijri")}</Link>
+    </>}
     {panel === "hijri" && <section className="card stack">
-      <label className="field">Global day adjustment
+      <label className="field">{t("settingsHijriAdjust")}
         <select value={settings.hijriAdjust} onChange={event => void save({ hijriAdjust: Number(event.target.value) })}>
-          {[-2, -1, 0, 1, 2].map(value => <option key={value} value={value}>{value > 0 ? "+" : ""}{value}</option>)}
+          {[-2, -1, 0, 1, 2].map(value => <option key={value} value={value}>{number.format(value)}</option>)}
         </select>
       </label>
-      <p className="muted">The adjustment applies to Umm al-Qura estimates until a confirmed month start supplies an anchor.</p>
+      <p className="muted">{t("settingsHijriNote")}</p>
     </section>}
     {panel === "reminders" && <form className="card stack" onSubmit={event => {
       event.preventDefault();
@@ -110,27 +137,44 @@ export function SettingsPage({ settings, now, panel }: { settings: Settings; now
       const day = dateKey(now, settings.city.timeZone);
       const events = form.has("events") ? eventReminders(day, settings, calendar) : [];
       saveCalendar([...prayerReminders(day, settings, Number(form.get("days")), Number(form.get("alarm"))), ...events]);
-      setMessage("Calendar file prepared. Open it in your calendar to add the reminders.");
+      setMessage(t("settingsCalendarSaved"));
     }}>
-      <label className="field">Days to include<select name="days"><option value="7">One week</option><option value="30">30 days</option><option value="90">90 days</option></select></label>
-      <label className="field">Reminder before prayer<select name="alarm"><option value="0">At the start</option><option value="5">5 minutes</option><option value="15">15 minutes</option></select></label>
-      <label className="with-icon"><input type="checkbox" name="events" /> Include Islamic events</label>
-      <button className="action"><Download size={18} /> Export calendar file</button>
+      <label className="field">{t("settingsCalendarDays")}<select name="days"><option value="7">{t("settingsCalendar7")}</option>
+        {[30, 90].map(count => <option value={count} key={count}>{t("settingsCalendarDaysCount", { count })}</option>)}</select></label>
+      <label className="field">{t("settingsCalendarAlert")}<select name="alarm"><option value="0">{t("settingsCalendarStart")}</option>
+        {[5, 15].map(count => <option value={count} key={count}>{t("settingsCalendarMinutes", { count })}</option>)}</select></label>
+      <label className="with-icon"><input type="checkbox" name="events" />{t("settingsCalendarEvents")}</label>
+      <button className="action"><Download size={18} />{t("settingsCalendarExport")}</button>
     </form>}
     {panel === "data" && <section className="card stack">
-      <p>Prayer logs, learning progress and settings are stored on this device.</p>
+      <p>{t("settingsDataNote")}</p>
       <button className="action" onClick={async () => {
         try { downloadFile(new Blob([await backup()], { type: "application/json" }), `awwab-${dateKey(now)}.json`); }
-        catch { setMessage("The backup could not be exported. Try again."); }
-      }}>Export backup</button>
-      <label className="field">Choose an Awwab backup<input type="file" accept=".json,application/json" onChange={event => setFile(event.target.files?.[0])} /></label>
-      <p className="muted">Restoring replaces the records on this device with the records in the file.</p>
+        catch { setMessage(t("settingsDataExportError")); }
+      }}>{t("settingsDataExport")}</button>
+      <label className="field">{t("settingsDataPick")}<input type="file" accept=".json,application/json" onChange={event => setFile(event.target.files?.[0])} /></label>
+      <p className="muted">{t("settingsDataRestoreNote")}</p>
       <button className="action soft" disabled={!file} onClick={async () => {
         if (!file) return;
-        try { await restoreBackup(await file.text()); setMessage("Backup restored."); setFile(undefined); }
-        catch { setMessage("That file could not be restored. Choose a valid Awwab backup."); }
-      }}>Restore selected backup</button>
+        try {
+          await restoreBackup(await file.text());
+          setMessage(copy(await getRecord("settings", defaults), "settingsDataRestored"));
+          setFile(undefined);
+        }
+        catch { setMessage(t("settingsDataRestoreError")); }
+      }}>{t("settingsDataRestore")}</button>
     </section>}
+    {panel === "display" && <section className="card stack">
+      <label className="field">{t("settingsTextSize")}<select value={settings.textSize ?? "default"} onChange={event => void save({ textSize: event.target.value as Settings["textSize"] })}>
+        {textSizes.map(value => <option key={value} value={value}>{t(value === "large" ? "settingsTextLarge" : "settingsTextDefault")}</option>)}
+      </select></label>
+      <p className="settings-text-sample">{t("settingsTextSample")}</p>
+      <Link className="list-row" to="/you/audio">{t("offlineAudio")}</Link>
+    </section>}
+    {panel === "privacy" && <section className="card stack"><p>{t("settingsPrivacyDetails")}</p><p>{t("settingsPrivacyLocation")}</p>
+      <Link className="text-button" to="/you/data">{t("settingsBackup")}</Link></section>}
+    {panel === "about" && <><section className="card stack"><p>{t("settingsAboutDetails")}</p>
+      <a className="text-button" href="https://github.com/tanzir71/awwab">{t("settingsAboutProject")}</a></section><AppInstallPrompt /></>}
     {message && <p className="card soft" role="status">{message}</p>}
   </div>;
 }
@@ -149,31 +193,31 @@ function CityForm({ initial, save }: { initial: Settings; save: (patch: Partial<
       void save({ city: { ...city, name: city.name.trim() }, method: data.get("method") as PrayerMethod,
         school: data.get("school") as Settings["school"], prayerGuide: data.get("prayerGuide") === "hanafi" ? "hanafi" : "fard" });
     } catch {
-      setError("Enter a time zone such as Asia/Dhaka or Europe/London.");
+      setError(t("settingsTimeZoneError"));
     }
   }
   const patch = (values: Partial<City>) => setCity(current => ({ ...current, ...values }));
   return <form className="card stack" onSubmit={submit}>
-    <label className="field">City
+    <label className="field">{t("settingsCity")}
       <select value={preset} onChange={event => {
         setPreset(event.target.value);
         const selected = cities.find(item => item.name === event.target.value);
         if (selected) setCity(selected);
       }}>
-        {cities.map(item => <option key={item.name}>{item.name}</option>)}<option value="">Enter coordinates manually</option>
+        {cities.map(item => <option key={item.name}>{item.name}</option>)}<option value="">{t("settingsCityManual")}</option>
       </select>
     </label>
     {!preset && <>
-      <label className="field">City name<input value={city.name} required maxLength={100} onChange={event => patch({ name: event.target.value })} /></label>
+      <label className="field">{t("settingsCityName")}<input value={city.name} required maxLength={100} onChange={event => patch({ name: event.target.value })} /></label>
       <div className="equal-row">
-        <label className="field">Latitude<input type="number" step="any" min="-90" max="90" required value={Number.isFinite(city.latitude) ? city.latitude : ""} onChange={event => patch({ latitude: event.target.valueAsNumber })} /></label>
-        <label className="field">Longitude<input type="number" step="any" min="-180" max="180" required value={Number.isFinite(city.longitude) ? city.longitude : ""} onChange={event => patch({ longitude: event.target.valueAsNumber })} /></label>
+        <label className="field">{t("settingsLatitude")}<input type="number" step="any" min="-90" max="90" required value={Number.isFinite(city.latitude) ? city.latitude : ""} onChange={event => patch({ latitude: event.target.valueAsNumber })} /></label>
+        <label className="field">{t("settingsLongitude")}<input type="number" step="any" min="-180" max="180" required value={Number.isFinite(city.longitude) ? city.longitude : ""} onChange={event => patch({ longitude: event.target.valueAsNumber })} /></label>
       </div>
-      <label className="field">Time zone<input value={city.timeZone} required onChange={event => patch({ timeZone: event.target.value.trim() })} /></label>
+      <label className="field">{t("settingsTimeZone")}<input value={city.timeZone} required onChange={event => patch({ timeZone: event.target.value.trim() })} /></label>
     </>}
-    <label className="field">Calculation method<select name="method" defaultValue={initial.method}>{Object.entries(methodNames).map(([id, label]) => <option value={id} key={id}>{label}</option>)}</select></label>
-    <label className="field">Asr calculation<select name="school" defaultValue={initial.school}>
-      <option value="hanafi">Hanafi</option><option value="shafi">Shafiʿi, Maliki and Hanbali</option>
+    <label className="field">{t("settingsCalcMethod")}<select name="method" defaultValue={initial.method}>{Object.entries(methodNames).map(([id, label]) => <option value={id} key={id}>{label}</option>)}</select></label>
+    <label className="field">{t("settingsAsrCalc")}<select name="school" defaultValue={initial.school}>
+      <option value="hanafi">{t("prayerGuideHanafi")}</option><option value="shafi">{t("settingsCalcSchoolOther")}</option>
     </select></label>
     <label className="field">{t("prayerGuidePreference")}
       <select name="prayerGuide" defaultValue={guideReference(initial)} aria-describedby="prayer-guide-preference-note">
@@ -182,7 +226,7 @@ function CityForm({ initial, save }: { initial: Settings; save: (patch: Partial<
     </label>
     <p id="prayer-guide-preference-note" className="small muted">{t("prayerGuidePreferenceNote")}</p>
     {error && <p role="alert">{error}</p>}
-    <button className="action">Save prayer settings</button>
-    <p className="muted small">Times use the selected city and stay on your device. Local mosque timetables can differ.</p>
+    <button className="action">{t("settingsPrayerSave")}</button>
+    <p className="muted small">{t("settingsPrayerLocal")}</p>
   </form>;
 }

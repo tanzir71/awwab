@@ -1,0 +1,193 @@
+{
+  "version": 1,
+  "status": "draft — Saudi review",
+  "use": "U07 'Their answer might be' and U08 helper buttons (the helper taps the Arabic word; the user sees it in the app language)",
+  "words": [
+    {
+      "en": "right",
+      "ar": "يمين",
+      "tr": "yamīn",
+      "arrow": "→"
+    },
+    {
+      "en": "left",
+      "ar": "يسار",
+      "tr": "yasār",
+      "arrow": "←",
+      "alt": [
+        "شمال",
+        "shimāl",
+        "also means north"
+      ]
+    },
+    {
+      "en": "straight on",
+      "ar": "سيده",
+      "tr": "sēda",
+      "arrow": "↑",
+      "alt": [
+        "دغري",
+        "dughri"
+      ]
+    },
+    {
+      "en": "straight ahead",
+      "ar": "على طول",
+      "tr": "ʿala ṭūl",
+      "arrow": "↑"
+    },
+    {
+      "en": "upstairs",
+      "ar": "فوق",
+      "tr": "fōg",
+      "arrow": "⤒"
+    },
+    {
+      "en": "downstairs",
+      "ar": "تحت",
+      "tr": "taḥt",
+      "arrow": "⤓"
+    },
+    {
+      "en": "near",
+      "ar": "قريب",
+      "tr": "garīb",
+      "arrow": "·"
+    },
+    {
+      "en": "far",
+      "ar": "بعيد",
+      "tr": "baʿīd",
+      "arrow": "··"
+    },
+    {
+      "en": "here",
+      "ar": "هنا",
+      "tr": "hina",
+      "arrow": ""
+    },
+    {
+      "en": "there",
+      "ar": "هناك",
+      "tr": "hnāk",
+      "arrow": ""
+    },
+    {
+      "en": "behind",
+      "ar": "ورا",
+      "tr": "wara",
+      "arrow": "↓"
+    },
+    {
+      "en": "in front",
+      "ar": "قدّام",
+      "tr": "giddām",
+      "arrow": "↑"
+    },
+    {
+      "en": "next to",
+      "ar": "جنب",
+      "tr": "jamb",
+      "arrow": ""
+    },
+    {
+      "en": "first floor",
+      "ar": "الدور الأول",
+      "tr": "ad-dōr al-awwal",
+      "arrow": ""
+    },
+    {
+      "en": "I don't know",
+      "ar": "ما أدري",
+      "tr": "mā adri",
+      "arrow": ""
+    },
+    {
+      "en": "there isn't any",
+      "ar": "ما فيه",
+      "tr": "mā fīh",
+      "arrow": ""
+    },
+    {
+      "en": "ask over there",
+      "ar": "اسأل هناك",
+      "tr": "isʾal hnāk",
+      "arrow": ""
+    },
+    {
+      "en": "five minutes",
+      "ar": "خمس دقايق",
+      "tr": "khams dagāyig",
+      "arrow": ""
+    },
+    {
+      "en": "closed",
+      "ar": "مسكّر",
+      "tr": "msakkar",
+      "arrow": ""
+    },
+    {
+      "en": "open",
+      "ar": "مفتوح",
+      "tr": "maftūḥ",
+      "arrow": ""
+    }
+  ],
+  "digits": [
+    {
+      "n": 0,
+      "arabicIndic": "٠",
+      "saudi": "ṣifr"
+    },
+    {
+      "n": 1,
+      "arabicIndic": "١",
+      "saudi": "wāḥid"
+    },
+    {
+      "n": 2,
+      "arabicIndic": "٢",
+      "saudi": "ithnēn"
+    },
+    {
+      "n": 3,
+      "arabicIndic": "٣",
+      "saudi": "thalātha"
+    },
+    {
+      "n": 4,
+      "arabicIndic": "٤",
+      "saudi": "arbaʿa"
+    },
+    {
+      "n": 5,
+      "arabicIndic": "٥",
+      "saudi": "khamsa"
+    },
+    {
+      "n": 6,
+      "arabicIndic": "٦",
+      "saudi": "sitta"
+    },
+    {
+      "n": 7,
+      "arabicIndic": "٧",
+      "saudi": "sabʿa"
+    },
+    {
+      "n": 8,
+      "arabicIndic": "٨",
+      "saudi": "thamānya"
+    },
+    {
+      "n": 9,
+      "arabicIndic": "٩",
+      "saudi": "tisʿa"
+    },
+    {
+      "n": 10,
+      "arabicIndic": "١٠",
+      "saudi": "ʿashara"
+    }
+  ]
+}

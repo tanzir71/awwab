@@ -11,6 +11,7 @@
 @import "./plan.css";
 @import "./mosques.css";
 @import "./zakat.css";
+@import "./settings.css";
 
 @tailwind base;
 @tailwind components;

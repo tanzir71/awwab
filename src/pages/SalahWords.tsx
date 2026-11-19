@@ -9,6 +9,8 @@ import { useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { prayerGuidePath } from "@/lib/prayerGuide";
 import { coreWordCoverage, coreWordSource, coreWordTotal, countKnownQuranWords, fatihaMorphology, quranText } from "@/lib/quran";
+import { showEnglishQuranMeaning } from "@/lib/languagePreferences";
+import type { Settings } from "@/lib/storageService";
 import { momentPath, setAyahFamiliar } from "@/lib/studyMilestones";
 import { studyNames } from "@/lib/study-copy";
 import { splitArabicWords } from "@/lib/wordAnatomy";
@@ -21,8 +23,8 @@ const previews = ["salahTakbir", "salahBowing", "salahProstration", "salahRising
 const fatiha = quranText[1];
 const verseNotes: Record<string, { glosses: string[]; transliteration?: string }> = content.fatiha;
 
-export function SalahWords() {
-  const { language, t } = useCopy();
+export function SalahWords({ settings }: { settings: Settings }) {
+  const { language, locale, t } = useCopy();
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const [ayah, selectAyah] = useState(2);
@@ -36,8 +38,8 @@ export function SalahWords() {
   const notes = verseNotes[verse.ref];
   const selected = fatihaMorphology[`${verse.ref}:${position}`];
   const studied = countKnownQuranWords(knownVerses, knownVocabulary);
-  const number = new Intl.NumberFormat(language);
-  const coverage = new Intl.NumberFormat(language, { style: "percent" }).format(coreWordCoverage);
+  const number = new Intl.NumberFormat(locale);
+  const coverage = new Intl.NumberFormat(locale, { style: "percent" }).format(coreWordCoverage);
   const lineSize = words.length <= 4 ? 4 : 3;
   const lines = Array.from({ length: Math.ceil(words.length / lineSize) }, (_, index) => words.slice(index * lineSize, (index + 1) * lineSize).join(" "));
 
@@ -82,7 +84,9 @@ export function SalahWords() {
         </div>
         <ArabicText text={lines.join("\n")} citation={verse.ref} verse={verse.ref} selectedPosition={position} onWordSelected={selectPosition}
           words={words.map((_, index) => ({ gloss: notes.glosses[index], root: fatihaMorphology[`${verse.ref}:${index + 1}`]?.root }))} />
-        <p className="small muted" lang="en">{notes.transliteration && `${notes.transliteration} · `}“{verse.english}” <a href={`https://quran.com/${verse.ref.replace(":", "/")}`}>{verse.ref}</a></p>
+        <p className="small muted" lang="en">{notes.transliteration && `${notes.transliteration} · `}
+          {showEnglishQuranMeaning(settings) && `“${verse.english}” `}<a href={`https://quran.com/${verse.ref.replace(":", "/")}`}>{verse.ref}</a>
+        </p>
         <div className="salah-root small">
           <ArabicText text={words[position - 1]} compact citation={verse.ref} verse={verse.ref} positionOffset={position - 1} />
           <span lang="en">{notes.glosses[position - 1]}</span>

@@ -9,6 +9,8 @@ import { calendarFile, eventReminders } from "./calendarFile";
 import { estimateQada, finishQada, qadaDefaults } from "./qada";
 import { mosqueDefaults, type Mosque } from "./mosques";
 import { guideRakahIndex, guideReference, prayerGuide, prayerGuidePath } from "./prayerGuide";
+import { applyGlossary, formatLocale, glossaryValue, isBuiltIn, languageMatches, languages, showEnglishQuranMeaning, suggestedLanguage } from "./languagePreferences";
+import { updateWordChoice } from "./storageService";
 import { reviewCard, type Reviews } from "./reviews";
 import { countKnownQuranWords } from "./quran";
 import { completeOnboarding, placementLesson } from "./onboarding";
@@ -234,6 +236,27 @@ describe("prayer guide", () => {
   });
 });
 
+describe("language settings", () => {
+  it("matches regional language preferences and keeps planned languages out of the selectable set", () => {
+    expect(suggestedLanguage(["ja-JP", "bn-BD"])?.code).toBe("bn");
+    expect(suggestedLanguage(["pa-Arab-PK"])?.code).toBe("pa-Arab");
+    expect(languages.some(item => item.code === "ur" && languageMatches(item, "اردو") && !isBuiltIn(item.code))).toBe(true);
+    expect(isBuiltIn("bn")).toBe(true);
+  });
+
+  it("keeps word choices scoped to the interface language and preserves the meaning fallback", () => {
+    const words = { bn: { salah: "সালাত", qada: "কাযা" } };
+    expect(glossaryValue("bn", "salah", words)).toBe("সালাত");
+    expect(applyGlossary("কাজা নামাজের অগ্রগতি", "bn", words)).toBe("কাযা সালাতের অগ্রগতি");
+    expect(applyGlossary("Make-up prayers", "en", words)).toBe("Make-up prayers");
+    expect(new Intl.NumberFormat(formatLocale({ language: "bn" })).format(123)).toBe("১২৩");
+    expect(new Intl.NumberFormat(formatLocale({ language: "bn", nativeDigits: false })).format(123)).toBe("123");
+    expect(showEnglishQuranMeaning({ language: "bn" })).toBe(true);
+    expect(showEnglishQuranMeaning({ language: "bn", englishMeaning: false })).toBe(false);
+    expect(showEnglishQuranMeaning({ language: "en", quranMeanings: false, englishMeaning: true })).toBe(true);
+  });
+});
+
 describe("device prayer records", () => {
   beforeEach(async () => {
     await db.prayers.clear();
@@ -265,6 +288,21 @@ describe("device prayer records", () => {
     await db.records.clear();
     await restoreBackup(file);
     expect((await db.records.get("settings")).value).toMatchObject({ school: "shafi", prayerGuide: "hanafi" });
+  });
+
+  it("restores language preferences and suggestions together with a legacy-compatible settings record", async () => {
+    await updateSettings({ language: "bn", nativeDigits: false, englishMeaning: false, textSize: "large" });
+    await Promise.all([updateWordChoice("bn", "salah", "সালাত"), updateWordChoice("bn", "dhuhr", "জোহর")]);
+    const note = { language: "bn", page: "/today", original: "এখন", proposed: "এই সময়" };
+    await db.records.put({ key: "wording-suggestions", value: [note] });
+    const file = await backup();
+    await db.records.clear();
+    await restoreBackup(file);
+    expect((await db.records.get("settings")).value).toMatchObject({ language: "bn", nativeDigits: false, englishMeaning: false, textSize: "large",
+      wordChoices: { bn: { salah: "সালাত", dhuhr: "জোহর" } } });
+    expect((await db.records.get("wording-suggestions")).value).toEqual([note]);
+    await updateWordChoice("bn");
+    expect((await db.records.get("settings")).value).toMatchObject({ wordChoices: {}, nativeDigits: false });
   });
 
   it("round trips a Zakat ledger, rates and payments alongside older entries", async () => {

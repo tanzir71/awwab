@@ -25,8 +25,8 @@ export function ReturnPage({ settings, now, desktop }: ReturnProps & { desktop: 
 }
 
 function ReturnCounter({ settings, now, desktop = false }: ReturnProps & { desktop?: boolean }) {
-  const { language, t } = useCopy();
-  const number = new Intl.NumberFormat(language);
+  const { locale, t } = useCopy();
+  const number = new Intl.NumberFormat(locale);
   const day = dateKey(now, settings.city.timeZone);
   const counters = useRecord<Record<string, number>>("istighfar", {});
   const count = counters[day] ?? 0;
@@ -71,8 +71,8 @@ function sayyidMeaning(index: number, language: string) {
 }
 
 function MobileReturn({ settings, now }: ReturnProps) {
-  const { language, t } = useCopy();
-  const number = new Intl.NumberFormat(language);
+  const { language, locale, t } = useCopy();
+  const number = new Intl.NumberFormat(locale);
   const line = useRecord("sayyid-line", 0);
   const plan = useRecord("qada", qadaDefaults);
   const logs = usePrayerLogs();
@@ -199,10 +199,10 @@ function DesktopReturn({ settings, now }: ReturnProps) {
 const historyDate = { day: "numeric", month: "short", year: "numeric" } as const;
 
 function ReturnHistory({ returnDays }: { returnDays: string[] }) {
-  const { language, t } = useCopy();
+  const { locale, t } = useCopy();
   return <>
     {returnDays.length ? <ol className="compact-stack">{returnDays.slice().reverse().map(date => <li key={date} className="list-row">
-      <time dateTime={date}>{formatDay(date, historyDate, language)}</time>
+      <time dateTime={date}>{formatDay(date, historyDate, locale)}</time>
     </li>)}</ol> : <p className="muted">{t("returnDeskHistoryEmpty")}</p>}
     <Link to="/share?template=return&from=return" className="text-button">{t("returnShare")}</Link>
   </>;
@@ -211,8 +211,8 @@ function ReturnHistory({ returnDays }: { returnDays: string[] }) {
 function ReturnReflection({ day, stats: { returnDays, returns }, historyTrigger }: {
   day: string; stats: ReturnType<typeof prayerStatistics>; historyTrigger?: ReactNode;
 }) {
-  const { language, t } = useCopy();
-  const number = new Intl.NumberFormat(language);
+  const { locale, t } = useCopy();
+  const number = new Intl.NumberFormat(locale);
   const weeks = Array.from({ length: 10 }, (_, index) => {
     const until = addDays(day, (index - 9) * 7);
     const from = addDays(until, -6);
@@ -236,7 +236,7 @@ function ReturnReflection({ day, stats: { returnDays, returns }, historyTrigger 
       <div className="return-desk-history-total"><strong>{number.format(returns)}</strong><small>{t("returnDeskReturnedTimes", { count: returns })}</small></div>
       <ol className="return-desk-bars" aria-label={t("returnDeskWeeks")}>
         {weeks.map(({ from, count }) => {
-          const label = t("returnDeskWeek", { date: formatDay(from, historyDate, language), count });
+          const label = t("returnDeskWeek", { date: formatDay(from, historyDate, locale), count });
           return <li key={from} title={label} data-active={count > 0} style={{ "--bar-height": (100 * count / maxWeeks) + "%" } as CSSProperties}>
             <span className="sr-only">{label}</span>
           </li>;

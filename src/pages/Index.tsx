@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { usePrayerLogs, useRecord } from "@/hooks/use-awwab";
 import { addDays, dateKey, duration, formatDay, formatTime } from "@/lib/dates";
 import { calendarDefaults, calendarEvents, eventDisplayDates, hijriLabel } from "@/lib/hijri";
+import { formatLocale } from "@/lib/languagePreferences";
 import { currentPrayerSchedule, methodNames, prayerDay } from "@/lib/prayerServices";
 import { jamaatForPrayer, mosqueDefaults } from "@/lib/mosques";
 import { db, logPrayer, type Settings } from "@/lib/storageService";
@@ -47,6 +48,7 @@ export default function Today({ settings, now, desktop }: { settings: Settings; 
   const daily = hadith.items[Math.floor(Date.parse(day) / 86400000) % hadith.items.length];
   const zone = settings.city.timeZone;
   const language = settings.language;
+  const locale = formatLocale(settings);
   const t = message.bind(null, settings);
   const mode = settings.mode;
   const maktabDesktop = mode === "maktab" && desktop;
@@ -56,7 +58,7 @@ export default function Today({ settings, now, desktop }: { settings: Settings; 
   const dueSurah = surahs.surahs.find(item => item.number === Number(due?.[0])) ?? surahs.surahs.find(item => item.number === 103);
   const currentLesson = qaida.lessons.find(item => item.n === lesson) ?? qaida.lessons[0];
   const jamaat = jamaatForPrayer(headline, zone, mosques);
-  const countdown = duration((current ? current.ends : next.starts).valueOf() - now.valueOf(), language);
+  const countdown = duration((current ? current.ends : next.starts).valueOf() - now.valueOf(), locale);
   const hasTimes = Number.isFinite(headline.starts.valueOf());
   const fard = headline.rakats.find(rakat => rakat.type === "fard");
   const dateStyle = { weekday: "short", day: "numeric", month: "short" } as const;
@@ -95,7 +97,7 @@ export default function Today({ settings, now, desktop }: { settings: Settings; 
 
   const intro = <header className="prayer-intro row-between">
       <div className="today-greeting">
-        <p className="caption">{formatDay(day, dateStyle, language)} · {hijriLabel(day, settings.hijriAdjust, calendar.anchors)}{maktabDesktop && ` · ${settings.city.name}`}</p>
+        <p className="caption">{formatDay(day, dateStyle, locale)} · {hijriLabel(day, settings.hijriAdjust, calendar.anchors, locale)}{maktabDesktop && ` · ${settings.city.name}`}</p>
         <h1>{t("greeting")}</h1>
         {!maktabDesktop && <Link className="small with-icon muted today-location" to="/you/prayer">
           <DesignIcon size={14} name={`${group}-pin`} />{settings.city.name} · {methodNames[settings.method]} method · {settings.school === "hanafi" ? "Hanafi Asr" : "Standard Asr"}
@@ -108,7 +110,7 @@ export default function Today({ settings, now, desktop }: { settings: Settings; 
     </header>;
   const hero = <section className="card night prayer-hero stack">
       {!maktabDesktop && <DesignIcon name={`${group}-motifstar8`} size={220} className="hero-motif" />}
-      <p className="caption">{hasTimes ? t(current ? "currentPrayer" : "nextPrayer", { time: formatTime(current ? current.ends : next.starts, zone, language) }) : t("prayerTimes")}</p>
+      <p className="caption">{hasTimes ? t(current ? "currentPrayer" : "nextPrayer", { time: formatTime(current ? current.ends : next.starts, zone, locale) }) : t("prayerTimes")}</p>
       <div className="with-icon prayer-hero-title"><h2>{t(headline.id)}</h2><ArabicText text={prayerArabic[headline.id]} /></div>
       {(!maktabDesktop || !hasTimes) && <p className="prayer-remaining">{hasTimes ? t(current ? "prayerRemaining" : "prayerStarts", { time: countdown, count: fard?.count ?? 0 }) : t("prayerUnavailable")}</p>}
       {jamaat && <Link to="/plan/mosques" className="chip jamaat"><DesignIcon size={16} name={`${group}-pin1`} /> <span>{t("jamaat", jamaat)}</span></Link>}
@@ -173,7 +175,7 @@ export default function Today({ settings, now, desktop }: { settings: Settings; 
       {selectedCurrent && <DialogContent className="awwab-dialog">
         <DialogTitle>{t(selectedCurrent.id)}</DialogTitle>
         <DialogDescription className="muted">{t(selectedCurrent.status)}</DialogDescription>
-        {Number.isFinite(selectedCurrent.starts.valueOf()) && <p className="muted">{formatTime(selectedCurrent.starts, zone, language)} – {formatTime(selectedCurrent.ends, zone, language)} · {settings.city.name}</p>}
+        {Number.isFinite(selectedCurrent.starts.valueOf()) && <p className="muted">{formatTime(selectedCurrent.starts, zone, locale)} – {formatTime(selectedCurrent.ends, zone, locale)} · {settings.city.name}</p>}
         <Link className="action soft" to={`/today/guide/${selectedCurrent.id}`}>{t("howToPray")}</Link>
         {selectedCurrent.status === "now" && <div className="equal-row">
           <button className="action" onClick={() => void record(selectedCurrent, "log")}>{t("iPrayedShort")}</button>

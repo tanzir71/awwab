@@ -3,6 +3,8 @@ import { HashRouter, Link, Navigate, Route, Routes, useLocation } from "react-ro
 import { Toaster } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { WordPanel } from "@/components/WordPanel";
+import { SettingsWorkspace } from "@/components/SettingsWorkspace";
+import { WordingSuggestionLayer } from "@/components/WordingSuggestions";
 import { useClock, useDesktop, useSettings } from "@/hooks/use-awwab";
 import { migrateLegacy } from "@/lib/storageService";
 import { CopyContext } from "@/lib/copy";
@@ -13,6 +15,7 @@ import { Plan } from "@/pages/Plan";
 import { ReturnPage, Sayyid } from "@/pages/Return";
 import { Qada } from "@/pages/Qada";
 import { SettingsPage, You } from "@/pages/You";
+import { LanguagePicker, LanguageSettings, YourWordsSettings } from "@/pages/LanguageSettings";
 import { Onboarding } from "@/pages/Onboarding";
 import { Hadith } from "@/pages/Hadith";
 import { Fluency } from "@/pages/Fluency";
@@ -49,6 +52,7 @@ function Main() {
   useEffect(() => {
     if (!settings) return;
     document.documentElement.dataset.mode = settings.mode;
+    document.documentElement.dataset.textSize = settings.textSize ?? "default";
     document.documentElement.lang = settings.language;
     document.querySelector('meta[name="theme-color"]')?.setAttribute("content", settings.mode === "adult" ? "#15302b" : "#25306b");
   }, [settings]);
@@ -65,7 +69,7 @@ function Main() {
       <Route path="/learn" element={<Learn settings={settings} desktop={desktop} now={now} />} />
       <Route path="/learn/qaida/:id?" element={<Qaida settings={settings} desktop={desktop} />} />
       <Route path="/learn/surahs/:id?" element={<SurahReader settings={settings} now={now} />} />
-      <Route path="/learn/salah" element={<SalahWords />} />
+      <Route path="/learn/salah" element={<SalahWords settings={settings} />} />
       <Route path="/learn/fluency" element={<Fluency settings={settings} now={now} />} />
       <Route path="/learn/words" element={<WordBank settings={settings} desktop={desktop} now={now} />} />
       <Route path="/learn/takhti/:family?" element={<Takhti />} />
@@ -79,7 +83,6 @@ function Main() {
       <Route path="/share" element={<Share key={search} settings={settings} now={now} />} />
       <Route path="/share/milestone/:kind/:number" element={<Milestone settings={settings} now={now} />} />
       <Route path="/install" element={<div className="stack"><AppInstallPrompt /><Link className="action soft" to="/">Continue to awwab</Link></div>} />
-      <Route path="/sources" element={<Sources />} />
       <Route path="/umrah" element={<UmrahShell now={now} />}>
         <Route index element={<UmrahNow />} />
         <Route path="rituals" element={<UmrahRituals />} />
@@ -92,12 +95,19 @@ function Main() {
       <Route path="/print" element={<PrintHub />} />
       <Route path="/print/word-card" element={<WordPrintSheet />} />
       <Route path="/print/:sheet/:family?" element={<PrintSheet settings={settings} now={now} />} />
-      <Route path="/you" element={<You settings={settings} now={now} />} />
-      <Route path="/you/audio" element={<AudioPacks />} />
-      {["learning", "prayer", "hijri", "reminders", "data"].map(page => <Route key={page} path={`/you/${page}`} element={<SettingsPage key={page} settings={settings} now={now} panel={page} />} />)}
+      <Route element={<SettingsWorkspace desktop={desktop} />}>
+        <Route path="/sources" element={<Sources />} />
+        <Route path="/you" element={<You settings={settings} now={now} desktop={desktop} />} />
+        <Route path="/you/audio" element={<AudioPacks />} />
+        <Route path="/you/language" element={<LanguageSettings settings={settings} desktop={desktop} />} />
+        <Route path="/you/language/picker" element={<LanguagePicker settings={settings} />} />
+        <Route path="/you/words" element={<YourWordsSettings settings={settings} />} />
+        {["learning", "prayer", "hijri", "reminders", "data", "display", "privacy", "about"].map(page => <Route key={page} path={`/you/${page}`}
+          element={<SettingsPage key={page} settings={settings} now={now} panel={page} desktop={desktop} />} />)}
+      </Route>
       <Route path="*" element={<section className="card stack"><h1>Find your way back</h1><p>Choose a page to continue.</p><Link className="action" to="/">Go to your home screen</Link></section>} />
     </Routes>
-  </AppShell></CopyContext.Provider>;
+  </AppShell><WordingSuggestionLayer /></CopyContext.Provider>;
 }
 
 export default function App() {

@@ -13,6 +13,7 @@ import { dateKey, formatDay } from "@/lib/dates";
 import { prayerGuidePath } from "@/lib/prayerGuide";
 import { parseQaidaReview } from "@/lib/qaidaPractice";
 import { quranText, type QuranVerse } from "@/lib/quran";
+import { showEnglishQuranMeaning } from "@/lib/languagePreferences";
 import { grades, isDue, reviewCard, type ReviewGrade, type Reviews } from "@/lib/reviews";
 import { updateRecord, type Settings } from "@/lib/storageService";
 import { reviewDestination } from "@/lib/studyDesk";
@@ -71,8 +72,8 @@ function ReaderModes({ selected, change }: { selected: StudyMode; change: (mode:
 }
 
 function ReviewQueue({ selected, reviews, now }: { selected: number; reviews: Reviews; now: Date }) {
-  const { t, language } = useCopy();
-  const number = new Intl.NumberFormat(language);
+  const { t, language, locale } = useCopy();
+  const number = new Intl.NumberFormat(locale);
   const due = Object.entries(reviews).filter(([, review]) => isDue(review, now));
   return <aside className="surah-queue" aria-label={t("surahList")}>
     <section className="card surah-due">
@@ -134,7 +135,7 @@ export function SurahReader({ settings, now }: { settings: Settings; now: Date }
 
 function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; settings: Settings; reviews: Reviews; now: Date }) {
   const [params, setParams] = useSearchParams();
-  const { t, language } = useCopy();
+  const { t, language, locale } = useCopy();
   const navigate = useNavigate();
   const desktop = useDesktop();
   const adultDesk = desktop && settings.mode === "adult";
@@ -158,7 +159,7 @@ function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; set
   const name = chapterName(chapter, language);
   const stored = reviews[chapter.number];
   const bucket = stored?.bucket ?? "sabaq";
-  const number = new Intl.NumberFormat(language);
+  const number = new Intl.NumberFormat(locale);
   const arabicNumber = new Intl.NumberFormat("ar-u-nu-arab");
   const currentRef = audio.track ?? (audio.has(verses[0].ref) ? verses[0].ref : "surah:" + chapter.number);
   const activeIndex = verses.findIndex(verse => verse.ref === currentRef);
@@ -281,7 +282,9 @@ function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; set
           </div>
           <div className="surah-verse-foot">
             <div>{!recalling && display.translit && <p className="surah-transliteration" lang="en">{verseTransliteration(verse, index)}</p>}
-              {display.translation && <p className="muted" lang="en">{recalling ? t("cue") + " · " : ""}{verse.english}</p>}
+              {display.translation && showEnglishQuranMeaning(settings) && <p className="muted" lang="en">
+                {recalling ? t("cue") + " · " : ""}{verse.english}
+              </p>}
               {recalling && index > 1 && <button className="text-button surah-hint-control" type="button" aria-expanded={visible}
                 onClick={() => setHints(previous => ({ ...previous, [verse.ref]: !visible }))}>
                 <DesignIcon name="surah-mobile-eye" size={16} />{t(visible ? "hideInitials" : "showInitials")}</button>}

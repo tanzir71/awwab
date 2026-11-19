@@ -1,0 +1,34 @@
+# H2 · Languages, learning paths & Arabic help
+
+Three features, designed in Figma first (page **H2 · Languages, learning paths & Arabic help** [74:143](https://www.figma.com/design/cZzhFbOND8BtWNmryfFnIf/Prayer-Quest?node-id=74-143)):
+
+1. **Language switching** — every English string in the app can switch to the main languages of Muslim-majority and large-Muslim-population countries that don't speak Arabic. → [01-languages.md](01-languages.md)
+2. **Learning beyond the basics** — four paths (Read · Memorise · Understand · Speak) with five levels each: essential and advanced surahs, tajweed, Quranic grammar, and functional **spoken** Arabic. → [02-learning-paths.md](02-learning-paths.md)
+3. **Ask in Arabic (Umrah mode)** — an offline phrase assistant that plays common requests aloud to people nearby (toilet, wudu, gate, SIM card, taxi, pharmacy, "I'm lost") and helps you understand the answer. → [03-umrah-arabic-assistant.md](03-umrah-arabic-assistant.md)
+
+Seed data lives in [`data/`](data). Everything is draft content: it must pass native-speaker and scholar review before launch (see each doc).
+
+## Hard rules (unchanged)
+No backend · fully offline after first load (language packs and audio packs are downloaded once and cached by the service worker) · tokens only · no container borders · equal-width siblings · every Arabic word opens Word anatomy · mercy-first copy · sources shown.
+
+## Phases (each ends deployable)
+| Phase | Scope | Figma |
+|---|---|---|
+| H2.1 i18n foundation | ICU catalogs, `t()` everywhere, pseudo-locale, RTL shell, per-script fonts, glossary engine, language picker, settings panel | A26 [78:12](https://www.figma.com/design/cZzhFbOND8BtWNmryfFnIf/Prayer-Quest?node-id=78-12), A27 [78:117](https://www.figma.com/design/cZzhFbOND8BtWNmryfFnIf/Prayer-Quest?node-id=78-117), DC09 [89:2511](https://www.figma.com/design/cZzhFbOND8BtWNmryfFnIf/Prayer-Quest?node-id=89-2511) |
+| H2.2 Tier-1 languages | bn, ur, id, tr, fa, ms, ha, fr: catalogs reviewed, Quran/hadith translations per language, localized share cards | A04-bn [74:148](https://www.figma.com/design/cZzhFbOND8BtWNmryfFnIf/Prayer-Quest?node-id=74-148), A04-ur [74:505](https://www.figma.com/design/cZzhFbOND8BtWNmryfFnIf/Prayer-Quest?node-id=74-505), A04-id [74:862](https://www.figma.com/design/cZzhFbOND8BtWNmryfFnIf/Prayer-Quest?node-id=74-862), SC1-bn [78:201](https://www.figma.com/design/cZzhFbOND8BtWNmryfFnIf/Prayer-Quest?node-id=78-201), SC1-id [78:242](https://www.figma.com/design/cZzhFbOND8BtWNmryfFnIf/Prayer-Quest?node-id=78-242) |
+| H2.3 Learning paths | Paths hub, Memorise levels + portioning, essential passages, tajweed level 3, grammar level 2–3, Maktab map, desktop paths | A28 [79:70](https://www.figma.com/design/cZzhFbOND8BtWNmryfFnIf/Prayer-Quest?node-id=79-70), A29 [79:194](https://www.figma.com/design/cZzhFbOND8BtWNmryfFnIf/Prayer-Quest?node-id=79-194), A30 [79:265](https://www.figma.com/design/cZzhFbOND8BtWNmryfFnIf/Prayer-Quest?node-id=79-265), A31 [79:327](https://www.figma.com/design/cZzhFbOND8BtWNmryfFnIf/Prayer-Quest?node-id=79-327), A32 [80:163](https://www.figma.com/design/cZzhFbOND8BtWNmryfFnIf/Prayer-Quest?node-id=80-163), M20 [80:383](https://www.figma.com/design/cZzhFbOND8BtWNmryfFnIf/Prayer-Quest?node-id=80-383), DA6 [92:348](https://www.figma.com/design/cZzhFbOND8BtWNmryfFnIf/Prayer-Quest?node-id=92-348) |
+| H2.4 Speak | Variety + goal setup, A1 units (Saudi Hijazi first, then Gulf and Modern Standard), dialogue lessons, words with root bridges, desktop workspace | A33 [80:241](https://www.figma.com/design/cZzhFbOND8BtWNmryfFnIf/Prayer-Quest?node-id=80-241), A34 [80:305](https://www.figma.com/design/cZzhFbOND8BtWNmryfFnIf/Prayer-Quest?node-id=80-305), DA7 [92:714](https://www.figma.com/design/cZzhFbOND8BtWNmryfFnIf/Prayer-Quest?node-id=92-714) |
+| H2.5 Ask in Arabic | Umrah tab "Ask" (replaces Plan in the Umrah tab bar), phrase cards with audio, show-to-them mode, helper-taps-answer, hotel and "I'm lost" cards, offline phrase pack | U06 [83:231](https://www.figma.com/design/cZzhFbOND8BtWNmryfFnIf/Prayer-Quest?node-id=83-231), U07 [83:385](https://www.figma.com/design/cZzhFbOND8BtWNmryfFnIf/Prayer-Quest?node-id=83-385), U08 [83:492](https://www.figma.com/design/cZzhFbOND8BtWNmryfFnIf/Prayer-Quest?node-id=83-492), U09 [83:549](https://www.figma.com/design/cZzhFbOND8BtWNmryfFnIf/Prayer-Quest?node-id=83-549), DC11 [89:2789](https://www.figma.com/design/cZzhFbOND8BtWNmryfFnIf/Prayer-Quest?node-id=89-2789) |
+| H2.6 Tier-2/3 languages | Remaining locales as reviewers become available | — |
+
+## Component changes
+- `UmrahTabBar` 26:1258: tabs are now **Now · Rituals · Map · Ask · Duʿās** (Plan moved into Now). New icon `speech` 81:28.
+- `Desktop/Sidebar (Adult · dense)` 40:1410: LEARN gains **Paths** and **Speak**; language chip at the bottom.
+- `Share/Footer` 53:47: link is `tanzir71.github.io/awwab`; tagline is translated per locale.
+
+## Definition of done (whole handover)
+- Switching language changes every visible string, number, date and Hijri month without reload; RTL locales mirror the shell; Arabic content components never mirror.
+- Pseudo-locale (`en-XA`, +40% length) passes with no clipped text at 360px and 1280px.
+- Paths: progress, SRS and placement work offline; every surah/passage shows its source and āyah range.
+- Ask in Arabic: all phrases play offline from the pack; show mode stays awake (Wake Lock) at max brightness; helper answers translate into the app language.
+- Native-speaker review signed off for each shipped locale and for the Saudi phrase set; scholar review for tajweed, passages' virtues (hadith grades) and glossary terms.
