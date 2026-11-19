@@ -25,6 +25,8 @@ export type PortionReview = { review: Review; correctDays: string[]; lastDay: st
 export type HifzReviews = Record<string, PortionReview>;
 export type HifzPlans = Record<string, { minutes: number; start: string }>;
 export type StudyQuran = { version: number; notice: string; surahs: Record<number, QuranVerse[]> };
+export type JuzRecital = { rated: Partial<Record<string, ReviewGrade>>; last?: { day: string; remembered: number; total: number } };
+export type JuzRecitals = Record<number, JuzRecital>;
 
 let edition: Promise<StudyQuran> | undefined;
 export function studyQuran() {
@@ -154,4 +156,24 @@ export function nextPortion(portions: HifzPortion[], reviews: HifzReviews, now: 
     const bucket = portionBucket(record, today);
     return bucket === "manzil" ? isDue(record.review, now) : bucket === "sabqi" && record.lastDay < today;
   }) ?? portions.find(portion => !reviews[portion.id]?.learnedOn);
+}
+
+export function recitalProgress(portions: HifzPortion[], recital: JuzRecital | undefined, today: string) {
+  const nextDay = recital?.last ? addDays(recital.last.day, 7) : undefined;
+  const waiting = nextDay && today < nextDay;
+  if (waiting) return { count: portions.length, next: undefined, availableOn: nextDay };
+  return {
+    count: portions.filter(portion => recital?.rated[portion.id]).length,
+    next: portions.find(portion => !recital?.rated[portion.id]),
+    availableOn: undefined,
+  };
+}
+
+export function rateRecitalPortion(portions: HifzPortion[], recital: JuzRecital | undefined, id: string, grade: ReviewGrade, today: string): JuzRecital | undefined {
+  const progress = recitalProgress(portions, recital, today);
+  if (progress.next?.id !== id) return;
+  const rated = { ...recital?.rated, [id]: grade };
+  if (progress.count + 1 < portions.length) return { rated, last: recital?.last };
+  const remembered = portions.filter(portion => rated[portion.id] === "got-it").length;
+  return { rated: {}, last: { day: today, remembered, total: portions.length } };
 }

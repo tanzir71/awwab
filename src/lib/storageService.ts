@@ -136,6 +136,7 @@ const reviewSchema = z.object({
   card: z.object({ due: instantSchema, last_review: instantSchema.optional() }).passthrough(),
 });
 const passageKey = z.string().regex(/^[a-z0-9-]+$/).max(80);
+const portionKey = z.string().regex(/^\d{1,3}:\d{1,3}-\d{1,3}:\d{1,3}$/);
 const umrahPlanSchema = z.object({
   start: z.union([daySchema, z.literal("")]), end: z.union([daySchema, z.literal("")]),
   hotel: z.object({ name: z.string().max(120), room: z.string().max(25), point: point.optional() }),
@@ -168,8 +169,12 @@ const savedRecords: Record<string, z.ZodTypeAny> = {
   "hifz-plans": z.record(passageKey, z.object({ minutes: count.min(1).max(90), start: daySchema })),
   "hifz-current": passageKey,
   "path-placement": z.partialRecord(z.enum(["read", "memorise", "understand", "speak"]), z.object({ level: count.min(1).max(5), score: count, total: count, day: daySchema })),
-  "hifz-portions": z.record(z.string().regex(/^\d{1,3}:\d{1,3}-\d{1,3}:\d{1,3}$/), z.object({
+  "hifz-portions": z.record(portionKey, z.object({
     review: reviewSchema, correctDays: z.array(daySchema).max(3), lastDay: daySchema, learnedOn: daySchema.optional(),
+  })),
+  "hifz-juz-recitals": z.record(z.string().regex(/^(?:[1-9]|[12]\d|30)$/), z.object({
+    rated: z.record(portionKey, z.enum(["forgot", "shaky", "got-it"])),
+    last: z.object({ day: daySchema, remembered: count, total: count.min(1) }).refine(result => result.remembered <= result.total).optional(),
   })),
   "umrah-ask-settings": z.object({ variety: z.enum(askVarieties), voice: z.enum(askVoices), speaker: z.union([z.enum(askVoices), z.literal("")]), slow: z.boolean() }),
   "umrah-ask-volume-hint": z.boolean(),

@@ -14,8 +14,9 @@ import { updateWordChoice } from "./storageService";
 import { reviewCard, type Reviews } from "./reviews";
 import { countKnownQuranWords } from "./quran";
 import { completeOnboarding, desktopPlacementPassed, placementLesson } from "./onboarding";
-import { finishQaidaLesson, markReadingPortion, rememberQaidaPlace, saveFluencyPractice, saveQaidaRowReview, saveSurahReview, saveTakhtiPractice, saveWordReview, setAyahFamiliar, setTeacherCheck, wordMilestones } from "./studyMilestones";
+import { finishQaidaLesson, markReadingPortion, rememberQaidaPlace, saveFluencyPractice, saveJuzRecitalRating, saveQaidaRowReview, saveSurahReview, saveTakhtiPractice, saveWordReview, setAyahFamiliar, setTeacherCheck, wordMilestones } from "./studyMilestones";
 import { completedReadingChapters, emptyReadingPractice, firstUnreadAyah, recitationChecks, teacherChecklistComplete } from "./readingPractice";
+import type { HifzPortion, JuzRecitals } from "./hifz";
 import { reviewDestination, reviewQueue, studyPlanMinutes } from "./studyDesk";
 import coreWords from "../../docs/content/core-quran-words.json";
 import qaida from "../../docs/content/qaida-lessons.json";
@@ -86,6 +87,25 @@ describe("saved study milestones", () => {
     expect(await getRecord("word-bank-known", [])).toEqual([]);
     expect(await getRecord("study-days", [])).toEqual([day]);
     expect(() => markReadingPortion("flow", 108, [4], times.asr, dhaka.timeZone)).toThrow(RangeError);
+  });
+
+  it("round-trips a partial recital and ignores duplicate ratings across tabs", async () => {
+    const portions: HifzPortion[] = [
+      { id: "78:1-78:5", ref: "78:1–5", verses: [], words: 10 },
+      { id: "78:6-78:10", ref: "78:6–10", verses: [], words: 12 },
+    ];
+    await saveJuzRecitalRating(30, portions, portions[0].id, "got-it", times.asr, dhaka.timeZone);
+    const file = await backup();
+    await db.records.clear();
+    await restoreBackup(file);
+    expect((await getRecord<JuzRecitals>("hifz-juz-recitals", {}))[30]).toMatchObject({ rated: { [portions[0].id]: "got-it" } });
+    await Promise.all([
+      saveJuzRecitalRating(30, portions, portions[1].id, "shaky", times.asr, dhaka.timeZone),
+      saveJuzRecitalRating(30, portions, portions[1].id, "shaky", times.asr, dhaka.timeZone),
+    ]);
+    expect((await getRecord<JuzRecitals>("hifz-juz-recitals", {}))[30]).toEqual({ rated: {}, last: { day, remembered: 1, total: 2 } });
+    expect(await getRecord("study-days", [])).toEqual([day]);
+    expect(await getRecord("hifz-portions", {})).toEqual({});
   });
 
   it("schedules Qaida grades and preserves each due route and practice day", async () => {

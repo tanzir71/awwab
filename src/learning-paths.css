@@ -95,6 +95,13 @@
 .hifz-hidden { display: grid; place-items: center; gap: 8px; }
 .hifz-sources { display: flex; gap: 10px 16px; flex-wrap: wrap; }
 .hifz-sources a { text-decoration: underline; text-underline-offset: .16em; }
+.hifz-recital-prompt h2, .hifz-recital-summary h2 { margin: 0; font: var(--type-body-strong); }
+.hifz-recital-grid { display: grid; gap: 12px; align-items: start; }
+.hifz-recital-summary progress { width: 100%; height: 7px; accent-color: var(--control-primary); }
+@media (min-width: 1024px) {
+  .hifz-recital-page { width: min(100%, 1056px); }
+  .hifz-recital-grid { grid-template-columns: minmax(232px, 260px) minmax(0, 1fr); gap: 16px; }
+}
 
 .roots-page { max-width: 730px; }
 .roots-intro, .roots-spot { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; }

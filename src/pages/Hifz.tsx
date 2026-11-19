@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type Ref } from "react";
+import { useLiveQuery } from "dexie-react-hooks";
 import { Link, useParams } from "react-router-dom";
 import { ArabicText } from "@/components/ArabicText";
 import { DesignIcon } from "@/components/DesignIcon";
@@ -7,14 +8,15 @@ import { StudyText } from "@/components/StudyText";
 import { useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { dateKey, formatDay } from "@/lib/dates";
-import { essentialPassages, getHifzPassage, groupPortions, nextPortion, passageLabel, portionBucket, portionPlan, studyPhrases, studyQuran, verseText,
-  type HifzPassage, type HifzPlans, type HifzPortion, type HifzReviews, type StudyQuran } from "@/lib/hifz";
+import { essentialPassages, getHifzPassage, groupPortions, nextPortion, passageLabel, portionBucket, portionPlan, recitalProgress, studyChapters,
+  studyPhrases, studyQuran, verseText, type HifzPassage, type HifzPlans, type HifzPortion, type HifzReviews, type JuzRecital,
+  type JuzRecitals, type StudyQuran } from "@/lib/hifz";
 import { showEnglishQuranMeaning } from "@/lib/languagePreferences";
 import type { QuranVerse } from "@/lib/quran";
-import { saveHifzPlan, savePortionReview } from "@/lib/studyMilestones";
+import { saveHifzPlan, saveJuzRecitalRating, savePortionReview } from "@/lib/studyMilestones";
 import { studyNames } from "@/lib/study-copy";
 import type { ReviewGrade } from "@/lib/reviews";
-import type { Settings } from "@/lib/storageService";
+import { getRecord, type Settings } from "@/lib/storageService";
 
 const dates = { month: "short", day: "numeric", year: "numeric" } as const;
 const emptyPlans: HifzPlans = {};
@@ -85,10 +87,82 @@ function StudyPortion({ item, position, title, passage, settings, now, minutes }
   </div>;
 }
 
+function RecitalPrompt({ item, position, focus, settings, save }: {
+  item: HifzPortion; position: number; focus: Ref<HTMLHeadingElement>; settings: Settings; save: (grade: ReviewGrade) => Promise<void>;
+}) {
+  const { t, language } = useCopy();
+  const [visible, show] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(false);
+  const chapter = studyChapters.get(Number(item.verses[0].ref.split(":")[0]));
+
+  async function rate(grade: ReviewGrade) {
+    setSaving(true);
+    setError(false);
+    try { await save(grade); }
+    catch { setError(true); }
+    finally { setSaving(false); }
+  }
+
+  return <div className="compact-stack">
+    <section className="card compact-stack hifz-recital-prompt">
+      <h2 ref={focus} tabIndex={-1}>{t("hifzPortionTitle", { number: position })}</h2>
+      <p className="small muted">{studyNames.surah(language, chapter.number, chapter.title)} · <bdi>{item.ref}</bdi></p>
+      <p>{t("hifzRecitalPrompt")}</p>
+      <button className="action light" type="button" aria-expanded={visible} onClick={() => show(value => !value)}>
+        {t(visible ? "hifzRecitalHide" : "hifzRecitalReveal")}
+      </button>
+    </section>
+    {visible && item.verses.map(verse => <VerseRead key={verse.ref} verse={verse} settings={settings} />)}
+    <div className="equal-row hifz-grade-buttons" role="group" aria-label={t("hifzRecitalRating")}>
+      {recordGrades.map(grade => <button type="button" key={grade} disabled={saving}
+        className={grade === "got-it" ? "action" : "action light"} onClick={() => void rate(grade)}>{t(grade)}</button>)}
+    </div>
+    {error && <p role="alert">{t("hifzSaveError")}</p>}
+  </div>;
+}
+
+function WeeklyRecital({ juz, passage, title, portions, recital, settings, now }: {
+  juz: number; passage: HifzPassage; title: string; portions: HifzPortion[]; recital?: JuzRecital; settings: Settings; now: Date;
+}) {
+  const { t, locale } = useCopy();
+  const zone = settings.city.timeZone;
+  const state = recitalProgress(portions, recital, dateKey(now, zone));
+  const item = state.next;
+  const heading = useRef<HTMLHeadingElement>(null);
+  useEffect(() => { heading.current?.focus(); }, [item?.id]);
+  const progress = t("hifzRecitalProgress", { count: state.count, total: portions.length });
+  return <div className={`hifz-page compact-stack${item ? " hifz-recital-page" : ""}`}>
+    <PassageHeading title={t("hifzWeeklyRecital")} subtitle={`${title} · ${passageLabel(passage)}`} back={base(passage.id)} />
+    {item ? <div className="hifz-recital-grid">
+      <section className="card compact-stack hifz-recital-summary">
+        <h2>{t("hifzRecitalProgressTitle")}</h2>
+        <p>{progress}</p>
+        <progress aria-label={progress} value={state.count} max={portions.length} />
+        <p className="small muted">{t("hifzRecitalResumeHint")}</p>
+        <Link className="text-button justify-self-start" to={base(passage.id)}>{t("hifzRecitalPause")}</Link>
+      </section>
+      <RecitalPrompt key={item.id} item={item} position={portions.indexOf(item) + 1} focus={heading} settings={settings}
+        save={grade => saveJuzRecitalRating(juz, portions, item.id, grade, now, zone)} />
+    </div> : <section className="card soft compact-stack hifz-recital-summary">
+      <h2 ref={heading} tabIndex={-1}>{t("hifzRecitalComplete")}</h2>
+      {recital?.last && <>
+        <p>{t("hifzRecitalResult", { count: recital.last.remembered, total: recital.last.total })}</p>
+        <p className="small muted">{t("hifzRecitalLast", { day: formatDay(recital.last.day, dates, locale) })}</p>
+      </>}
+      {state.availableOn && <p className="small muted">{t("hifzRecitalAvailable", { day: formatDay(state.availableOn, dates, locale) })}</p>}
+      <Link className="action light" to={base(passage.id)}>{t("hifzYourPlan")}</Link>
+    </section>}
+    <QuranStudySources script={settings.script} english={showEnglishQuranMeaning(settings)} />
+  </div>;
+}
+
 function PassagePlan({ passage, portions, settings, now }: { passage: HifzPassage; portions: HifzPortion[]; settings: Settings; now: Date }) {
   const { t, language, locale } = useCopy();
   const stored = useRecord<HifzPlans>("hifz-plans", emptyPlans);
   const reviews = useRecord<HifzReviews>("hifz-portions", emptyReviews);
+  const juz = passage.id.startsWith("juz-") ? Number(passage.id.slice(4)) : undefined;
+  const recital = useLiveQuery(() => juz ? getRecord<JuzRecitals>("hifz-juz-recitals", {}) : Promise.resolve(undefined), [juz]);
   const [error, showError] = useState(false);
   const { portion } = useParams();
   const today = dateKey(now, settings.city.timeZone);
@@ -106,7 +180,7 @@ function PassagePlan({ passage, portions, settings, now }: { passage: HifzPassag
   const virtueNote = /^(ya-sin|al-waqiah)$/.test(passage.id) ? "hifzWeakNarrations"
     : essential?.source?.grade.startsWith("scholars differ") ? "hifzScholarsDiffer" : undefined;
   const number = new Intl.NumberFormat(locale, { useGrouping: false });
-  const title = passage.id.startsWith("juz-") ? t("hifzJuz", { number: Number(passage.id.slice(4)) })
+  const title = juz ? t("hifzJuz", { number: juz })
     : passage.id.startsWith("surah-") ? studyNames.surah(language, passage.ranges[0].chapter, passage.title) : passage.title;
   const subtitle = [passageLabel(passage), t("hifzAyahs", { count: passage.ayahs }),
     essential?.level === 3 && t("hifzEssentialLabel")].filter(Boolean).join(" · ");
@@ -121,6 +195,11 @@ function PassagePlan({ passage, portions, settings, now }: { passage: HifzPassag
   }
 
   if (item) return <StudyPortion key={item.id} item={item} position={position} title={title} passage={passage} settings={settings} now={now} minutes={minutes} />;
+  if (juz && portion === "recital") return recital
+    ? <WeeklyRecital juz={juz} passage={passage} title={title} portions={portions} recital={recital[juz]} settings={settings} now={now} />
+    : <p role="status">{t("hifzLoading")}</p>;
+  const weekly = juz && recital ? recitalProgress(portions, recital[juz], today) : undefined;
+
   return <div className="hifz-page compact-stack">
     <PassageHeading title={title} subtitle={subtitle} back={`/learn/paths/memorise/${legacyLevel(passage)}`} />
     <section className="card night compact-stack hifz-summary">
@@ -130,6 +209,14 @@ function PassagePlan({ passage, portions, settings, now }: { passage: HifzPassag
       </div><ArabicText text={firstWord} mushaf={settings.script} citation={firstVerse.ref} verse={firstVerse.ref} /></div>
       <progress value={done} max={portions.length} aria-label={t("hifzCovered", { count: done, total: portions.length })} />
     </section>
+    {weekly && <section className="card compact-stack hifz-recital-summary">
+      <h2>{t("hifzWeeklyRecital")}</h2>
+      <p className="small muted">{weekly.availableOn ? t("hifzRecitalAvailable", { day: formatDay(weekly.availableOn, dates, locale) })
+        : weekly.count ? t("hifzRecitalProgress", { count: weekly.count, total: portions.length }) : t("hifzRecitalHint")}</p>
+      <Link className="action light" to={`${base(passage.id)}/recital`}>
+        {t(weekly.availableOn ? "hifzRecitalView" : weekly.count ? "hifzRecitalResume" : "hifzRecitalStart")}
+      </Link>
+    </section>}
     {passage.source && <section className="card compact-stack hifz-why"><h2>{t("hifzWhy")}</h2><p><StudyText text={passage.why} /></p>
       <p className="small muted"><span className="chip soft">{t(passage.source.grade === "hasan" ? "hifzHasan" : "hifzSahih")}</span> {passage.source.ref}</p>
     </section>}

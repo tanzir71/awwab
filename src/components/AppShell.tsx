@@ -124,7 +124,9 @@ export function AppShell({ children, settings, now, desktop }: { children: React
     "/plan/zakat": hawl && t("zakatDayBadge", { days: hawl.daysUntil }),
   };
   const destinations = groups.flatMap(group => group.items);
-  const heading = [...destinations].sort((a, b) => b.to.length - a.to.length).find(item => location.pathname.startsWith(item.to));
+  const hifzRoute = location.pathname.startsWith("/learn/hifz/");
+  const sectionPath = hifzRoute ? "/learn/paths" : location.pathname;
+  const heading = [...destinations].sort((a, b) => b.to.length - a.to.length).find(item => sectionPath.startsWith(item.to));
   const spokenUnit = desktop && location.pathname.startsWith("/learn/speak/") && spoken.units.find(unit => unit.id === location.pathname.split("/").at(-1));
   const title = spokenUnit ? `${t("pathsSpeak")} · A1 · ${spokenUnit.title[settings.language === "bn" ? 1 : 0]}` : returnDesktop && location.pathname === "/return/qada" ? t("qadaTitle")
     : returnDesktop && location.pathname === "/return/sayyid" ? t("sayyidTitle")
@@ -219,16 +221,20 @@ export function AppShell({ children, settings, now, desktop }: { children: React
         <button type="button" className="search-button" onClick={() => setSearchOpen(true)}><DesignIcon name="desk-eye" size={15} /> {t("search")} <kbd className="chip">Ctrl K</kbd></button>
         {groups.map(group => <div key={group.label}>
           <p className="caption nav-group">{navigationLabel(settings, group.label)}</p>
-          {group.items.filter(item => !learnWorkspace || item.to !== "/you").map(item => <NavLink key={item.to} to={item.to} end={item.end}>
-            {wordBankStudy && item.to === "/learn/words" ? <DesignIcon name="word-bank-desk-list" size={16} /> :
-              (surahStudy || wordBankStudy) && (item.icon === "home" || surahStudy && item.icon === "headphones") ?
-              <DesignIcon name={"surah-adult-" + item.icon} size={16} /> :
-              qaidaStudy && (item.icon === "home" || item.to === "/learn/qaida") ?
-                <DesignIcon name={item.icon === "home" ? "surah-adult-home" : "qaida-desk-book"} size={16} /> :
-              <DesignIcon name={item.icon === "user" ? "tab-user1" : `desk-${item.icon}`} size={17} />}
-            {navigationLabel(settings, item.title)}
-            {counts[item.to] && <span className="chip ml-auto">{counts[item.to]}</span>}
-          </NavLink>)}
+          {group.items.filter(item => !learnWorkspace || item.to !== "/you").map(item => {
+            const currentPath = hifzRoute && item.to === sectionPath;
+            const ItemLink = currentPath ? Link : NavLink;
+            return <ItemLink key={item.to} to={item.to} end={item.end} aria-current={currentPath ? "location" : "page"}>
+              {wordBankStudy && item.to === "/learn/words" ? <DesignIcon name="word-bank-desk-list" size={16} /> :
+                (surahStudy || wordBankStudy) && (item.icon === "home" || surahStudy && item.icon === "headphones") ?
+                <DesignIcon name={"surah-adult-" + item.icon} size={16} /> :
+                qaidaStudy && (item.icon === "home" || item.to === "/learn/qaida") ?
+                  <DesignIcon name={item.icon === "home" ? "surah-adult-home" : "qaida-desk-book"} size={16} /> :
+                <DesignIcon name={item.icon === "user" ? "tab-user1" : `desk-${item.icon}`} size={17} />}
+              {navigationLabel(settings, item.title)}
+              {counts[item.to] && <span className="chip ml-auto">{counts[item.to]}</span>}
+            </ItemLink>;
+          })}
         </div>)}
         <div className="sidebar-bottom">{languageLink}<Link to="/you" className="card compact-stack">
           <strong>{t(learnWorkspace ? "deskStreakSummary" : "activity", { count: studyDays.length })}</strong>

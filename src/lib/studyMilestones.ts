@@ -4,7 +4,7 @@ import { grades, qaidaGrades, reviewWithRating, type QaidaGrade, type ReviewGrad
 import type { Grade } from "ts-fsrs";
 import { db, getRecord } from "./storageService";
 import { qaidaReviewId, qaidaRows } from "./qaidaPractice";
-import { ratePortion, type HifzPlans, type HifzReviews } from "./hifz";
+import { juzs, ratePortion, rateRecitalPortion, type HifzPlans, type HifzPortion, type HifzReviews, type JuzRecitals } from "./hifz";
 import { emptyReadingPractice, practiceChapters, recitationChecks, teacherChecklistComplete, type ReadingMode, type RecitationCheck } from "./readingPractice";
 import qaida from "../../docs/content/qaida-lessons.json";
 
@@ -60,6 +60,17 @@ export function savePortionReview(id: string, portion: string, grade: ReviewGrad
     await db.records.bulkPut([{ key: "hifz-portions", value: { ...reviews, [portion]: review } }, { key: "hifz-current", value: id }]);
     await saveStudyDay(now, zone);
     return review;
+  });
+}
+
+export function saveJuzRecitalRating(juz: number, portions: HifzPortion[], portion: string, grade: ReviewGrade, now: Date, zone: string) {
+  if (!juzs.some(entry => entry.number === juz)) throw new RangeError("Unknown juz.");
+  return db.transaction("rw", db.records, async () => {
+    const recitals = await getRecord<JuzRecitals>("hifz-juz-recitals", {});
+    const next = rateRecitalPortion(portions, recitals[juz], portion, grade, dateKey(now, zone));
+    if (!next) return;
+    await db.records.put({ key: "hifz-juz-recitals", value: { ...recitals, [juz]: next } });
+    await saveStudyDay(now, zone);
   });
 }
 

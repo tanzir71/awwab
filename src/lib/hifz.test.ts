@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 import { chapters, essentialPassages, getHifzPassage, groupPortions, juzs, maxPortionAyahs, maxPortionWords, nextPortion,
-  passageLabel, portionBucket, portionPlan, ratePortion, studyPhrases, verseText, type StudyQuran } from "./hifz";
+  passageLabel, portionBucket, portionPlan, ratePortion, rateRecitalPortion, recitalProgress, studyPhrases, verseText, type JuzRecital, type StudyQuran } from "./hifz";
 import { juzAmma, learnedSurahs, levels, patternPracticePath, patternReviewPrefix, tracks } from "./learningPaths";
 import { parseCorpus } from "./morphology";
 import { reviewDestination } from "./studyDesk";
@@ -160,5 +160,21 @@ describe("Learning path progress", () => {
     const known = { ...review, review: { ...review.review, card: { ...review.review.card, due: time("2026-12-10") } } };
     expect(nextPortion([portion], { [portion.id]: known }, time("2026-11-29"), "2026-11-29")).toBeUndefined();
     expect(nextPortion([portion], { [portion.id]: known }, time("2026-12-10"), "2026-12-10")).toBe(portion);
+  });
+
+  it("resumes a full-juz recital in order and reopens seven days after completion", () => {
+    const portions = groupPortions(getHifzPassage("juz-2"), quran);
+    const start = "2026-11-19";
+    const finish = "2026-11-20";
+    let recital: JuzRecital | undefined;
+    expect(rateRecitalPortion(portions, recital, portions[1].id, "got-it", start)).toBeUndefined();
+    for (const [index, item] of portions.entries()) {
+      expect(recitalProgress(portions, recital, start)).toMatchObject({ count: index, next: item });
+      recital = rateRecitalPortion(portions, recital, item.id, index === 1 ? "shaky" : "got-it", index === portions.length - 1 ? finish : start);
+      expect(rateRecitalPortion(portions, recital, item.id, "got-it", finish)).toBeUndefined();
+    }
+    expect(recital).toEqual({ rated: {}, last: { day: finish, remembered: portions.length - 1, total: portions.length } });
+    expect(recitalProgress(portions, recital, "2026-11-26")).toEqual({ count: portions.length, next: undefined, availableOn: "2026-11-27" });
+    expect(recitalProgress(portions, recital, "2026-11-27")).toEqual({ count: 0, next: portions[0], availableOn: undefined });
   });
 });
