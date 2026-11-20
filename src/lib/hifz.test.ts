@@ -16,6 +16,7 @@ import roots from "../../docs/content/roots-curriculum.json";
 import curriculum from "../../handovers/H2-languages-paths-arabic-help/data/learning-paths.json";
 import { speakCourses, speakLessonContent } from "./speakCurriculum";
 import { speakLessonMessages, speakUnitKey } from "./speak-lesson-messages.mjs";
+import { grammarLessonMessages, grammarLessonKey, grammarWordField, grammarExampleField } from "./grammar-lesson-messages.mjs";
 import { applyGlossary } from "./languagePreferences";
 import { askPhraseKey } from "./umrah-phrase-messages.mjs";
 import { correctTajweedSamples, tajweedClip, tajweedDepthLessons, tajweedExcerpt, tajweedLessons, tajweedPracticeSamples, tajweedPrecache,
@@ -31,6 +32,37 @@ describe("Offline Quran study edition", () => {
     expect(placementStartingLevel(0, 0)).toBe(1);
     expect(placementStartingLevel(3, 4)).toBe(1);
     expect(placementStartingLevel(4, 4)).toBe(2);
+  });
+
+  it("exports all localizable grammar fields with their source and required verse arguments", () => {
+    const keys = new Set<string>();
+    for (const [course, curriculum] of Object.entries({ foundations: grammar, roots, sentence })) {
+      for (const unit of curriculum.lessons) {
+        const translations: [string, string[]][] = [["title", unit.title], ["rule", unit.rule], ["prompt", unit.prompt]];
+        unit.words.forEach(([, label, en, bn, alternate], index) => {
+          translations.push([grammarWordField(index, "meaning"), [en, bn]]);
+          if (alternate) translations.push([grammarWordField(index, "label"), [label, alternate]]);
+        });
+        if ("examples" in unit) unit.examples.forEach((example, index) => {
+          translations.push([grammarExampleField(index, "label"), example.label], [grammarExampleField(index, "note"), example.note]);
+        });
+        if ("commentary" in unit && unit.commentary) translations.push(["commentary", unit.commentary.text]);
+        for (const [field, [en, bn]] of translations) {
+          const key = grammarLessonKey(course, unit.id, field);
+          expect(keys.has(key), key).toBe(false);
+          keys.add(key);
+          expect(grammarLessonMessages[key]).toMatchObject({ en, bn, definition: { file: expect.stringMatching(/^docs\/content\//) } });
+          const values = {
+            arabic: "rule sample",
+            reference: field === "prompt" && "promptReference" in unit ? unit.promptReference :
+              field === "rule" && "ruleReference" in unit ? unit.ruleReference : undefined,
+          };
+          expect(message({ mode: "adult", language: "en" }, key, values))
+            .toBe(en.replace("{arabic}", values.arabic).replace("{reference}", values.reference ?? ""));
+        }
+      }
+    }
+    expect(keys).toEqual(new Set(Object.keys(grammarLessonMessages)));
   });
 
   it("exports every Speak lesson meaning with its original text and reuses shared phrase translations", () => {

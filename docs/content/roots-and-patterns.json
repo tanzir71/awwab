@@ -2,6 +2,7 @@
   "source": "https://corpus.quran.com/qurandictionary.jsp?q=ktb",
   "patternSource": "https://corpus.quran.com/documentation/verbforms.jsp",
   "root": "ك ت ب",
+  "patternLetters": "ف ع ل",
   "patterns": [
     { "id": "past", "pattern": "فَعَلَ", "word": "كَتَبَ", "latin": "kataba" },
     { "id": "present", "pattern": "يَفْعُلُ", "word": "يَكْتُبُ", "latin": "yaktubu" },

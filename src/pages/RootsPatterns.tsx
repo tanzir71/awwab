@@ -3,11 +3,12 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { Link, useSearchParams } from "react-router-dom";
 import { ArabicText } from "@/components/ArabicText";
 import { DesignIcon } from "@/components/DesignIcon";
-import { StudyText } from "@/components/StudyText";
+import { StudyMessage } from "@/components/StudyText";
 import { useCopy } from "@/lib/copy";
+import { grammarLessonKey } from "@/lib/grammar-lesson-messages.mjs";
 import { studyQuran, verseText } from "@/lib/hifz";
 import { pathUrl, patternPracticePath, patternReviewPrefix, rootsPath, rootsReviewPrefix } from "@/lib/learningPaths";
-import type { QuranVerse } from "@/lib/quran";
+import { formatQuranReference, type QuranVerse } from "@/lib/quran";
 import { isDue, type ReviewGrade, type Reviews } from "@/lib/reviews";
 import { saveLearningReview } from "@/lib/studyMilestones";
 import { getRecord, type Settings } from "@/lib/storageService";
@@ -30,7 +31,7 @@ function RootsHeading({ drill }: { drill: boolean }) {
 }
 
 function QuranSpot({ settings }: { settings: Settings }) {
-  const { t } = useCopy();
+  const { t, locale } = useCopy();
   const [verse, setVerse] = useState<QuranVerse>();
   const [error, setError] = useState(false);
   useEffect(() => {
@@ -41,10 +42,11 @@ function QuranSpot({ settings }: { settings: Settings }) {
   }, []);
   const excerpt = verse && splitArabicWords(verseText(verse, settings.script).text).slice(spot.first - 1, spot.last).join(" ");
   const source = `https://corpus.quran.com/wordmorphology.jsp?location=(${spotRef}:${spot.last})`;
+  const reference = formatQuranReference(spotRef, locale);
   return <section className="card roots-spot">
     <div><h2 className="caption">{t("rootsSpot")}</h2>
-      <a className="small" href={source} rel="noreferrer">{t("rootsBookQuote")} · {spotRef}</a></div>
-    {excerpt ? <ArabicText text={excerpt} citation={spotRef} verse={spotRef} mushaf={settings.script} positionOffset={spot.first - 1} /> :
+      <a className="small" href={source} rel="noreferrer">{t("rootsBookQuote")} · <bdi dir="ltr">{reference}</bdi></a></div>
+    {excerpt ? <ArabicText text={excerpt} citation={reference} verse={spotRef} mushaf={settings.script} positionOffset={spot.first - 1} /> :
       <p className="small muted" role="status">{t(error ? "hifzUnavailable" : "hifzLoading")}</p>}
   </section>;
 }
@@ -109,7 +111,7 @@ function StartPatternDrill({ settings, now, reviews }: { settings: Settings; now
 }
 
 export function RootsPatterns({ settings, now }: { settings: Settings; now: Date }) {
-  const { t, language } = useCopy();
+  const { t } = useCopy();
   const [query] = useSearchParams();
   const reviews = useLiveQuery(() => getRecord("reviews", emptyReviews));
   const due = reviews && patterns.filter(pattern => isDue(reviews[reviewKey(pattern.id)], now)).length;
@@ -122,7 +124,7 @@ export function RootsPatterns({ settings, now }: { settings: Settings; now: Date
         <p className="small muted">{t("rootsThreeLetters")}</p></div>
       <ArabicText text={content.root} />
     </section>
-    <p className="muted roots-explanation"><StudyText text={t("rootsExplanation")} /></p>
+    <p className="muted roots-explanation"><StudyMessage id="rootsExplanation" arabic={content.patternLetters} /></p>
     <ol className="card roots-patterns" aria-label={t("rootsTitle")}>{patterns.map(item => <li key={item.id}>
       <ArabicText text={item.pattern} compact />
       <div><strong lang="en">{item.latin}</strong><p className="muted small">{t("rootsMeaning-" + item.id)}</p></div>
@@ -134,7 +136,7 @@ export function RootsPatterns({ settings, now }: { settings: Settings; now: Date
     <section className="card compact-stack roots-course">
       <h2>{t("rootsMoreLessons")}</h2>
       <ol className="compact-stack grammar-index">{curriculum.lessons.map(lesson => <li key={lesson.id}>
-        <Link className="row-between" to={`${rootsPath}/${lesson.id}`}><strong>{lesson.title[language === "bn" ? 1 : 0]}</strong>
+        <Link className="row-between" to={`${rootsPath}/${lesson.id}`}><strong>{t(grammarLessonKey("roots", lesson.id, "title"))}</strong>
           {reviews?.[rootsReviewPrefix + lesson.id]?.correct > 0 && <span aria-label={t("pathsDone")}>✓</span>}</Link>
       </li>)}</ol>
     </section>

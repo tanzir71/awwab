@@ -37,9 +37,6 @@
   "src/components/ui/sidebar.tsx": {
     "Toggle Sidebar": 3
   },
-  "src/pages/Grammar.tsx": {
-    "Quranic Arabic Corpus · Grammar": 1
-  },
   "src/pages/LanguageSettings.tsx": {
     "RTL": 1
   },

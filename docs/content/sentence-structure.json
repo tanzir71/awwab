@@ -10,7 +10,8 @@
         { "ayah": [112, 2, 1, 2], "label": ["Nominal sentence", "নামবাচক বাক্য"], "note": ["Allāhu is the topic. Al-ṣamadu tells us about Him.", "আল্লাহু উদ্দেশ্য। আস-সামাদু তাঁর সম্পর্কে বলে।"] },
         { "ayah": [108, 1, 2, 3], "label": ["Verbal clause", "ক্রিয়াবাচক বাক্যাংশ"], "note": ["Aʿṭaynāka contains the verb ‘gave’ and the attached subject nā, ‘we’.", "আ‘তাইনাকা শব্দে ‘দিয়েছি’ ক্রিয়া ও ‘আমরা’ বোঝাতে সংযুক্ত কর্তা ‘না’ রয়েছে।"] }
       ],
-      "prompt": ["What role does al-ṣamadu have in 112:2?", "১১২:২ আয়াতে আস-সামাদু কোন ভূমিকায় রয়েছে?"],
+      "prompt": ["What role does al-ṣamadu have in {reference}?", "{reference} আয়াতে আস-সামাদু কোন ভূমিকায় রয়েছে?"],
+      "promptReference": "112:2",
       "answer": 1
     },
     {
@@ -23,7 +24,8 @@
         { "ayah": [108, 1, 3, 3], "label": ["Naṣb", "নাসব"], "note": ["Al-kawthara is what was given. Notice the final a vowel.", "আল-কাওসারা হলো যা দেওয়া হয়েছে। শেষের ‘আ’ ধ্বনি লক্ষ করুন।"] },
         { "ayah": [113, 1, 3, 3], "label": ["Jarr", "জার"], "note": ["The preposition bi- makes rabbi genitive. Notice the final i vowel.", "‘বি’ অব্যয়ের কারণে রব্বি মাজরূর হয়েছে। শেষের ‘ই’ ধ্বনি লক্ষ করুন।"] }
       ],
-      "prompt": ["Which case does al-kawthara have in 108:1?", "১০৮:১ আয়াতে আল-কাওসারা কোন অবস্থায় রয়েছে?"],
+      "prompt": ["Which case does al-kawthara have in {reference}?", "{reference} আয়াতে আল-কাওসারা কোন অবস্থায় রয়েছে?"],
+      "promptReference": "108:1",
       "answer": 1
     },
     {
@@ -35,13 +37,15 @@
         { "ayah": [99, 7, 1, 5], "label": ["Condition", "শর্ত"], "note": ["The condition describes doing even an atom’s weight of good.", "অণু পরিমাণ ভালো কাজ করাও এই শর্তের মধ্যে পড়ে।"] },
         { "ayah": [99, 7, 6, 6], "label": ["Result", "ফল"], "note": ["The person will see that good. The attached hu points back to it.", "যিনি ভালো কাজ করবেন তিনি তা দেখতে পাবেন। যুক্ত ‘হু’ সেই কাজটিকেই বোঝায়।"] }
       ],
-      "prompt": ["Which word introduces the condition in 99:7?", "৯৯:৭ আয়াতে কোন শব্দ দিয়ে শর্ত শুরু হয়েছে?"],
+      "prompt": ["Which word introduces the condition in {reference}?", "{reference} আয়াতে কোন শব্দ দিয়ে শর্ত শুরু হয়েছে?"],
+      "promptReference": "99:7",
       "answer": 0
     },
     {
       "id": "read-tafsir",
       "title": ["Read a tafsīr note", "তাফসিরের একটি টীকা পড়ুন"],
-      "rule": ["Find what was given in 108:1. Then read how Ibn Kathīr explains that gift.", "১০৮:১ আয়াতে কী দেওয়া হয়েছে খুঁজে দেখুন। তারপর ইবন কাসির সেই দান সম্পর্কে কী ব্যাখ্যা দিয়েছেন তা পড়ুন।"],
+      "rule": ["Find what was given in {reference}. Then read how Ibn Kathīr explains that gift.", "{reference} আয়াতে কী দেওয়া হয়েছে খুঁজে দেখুন। তারপর ইবন কাসির সেই দান সম্পর্কে কী ব্যাখ্যা দিয়েছেন তা পড়ুন।"],
+      "ruleReference": "108:1",
       "words": [["إِنَّا", "innā", "Indeed, we", "নিশ্চয়ই আমরা"], ["أَعْطَيْنَاكَ", "aʿṭaynāka", "We gave you", "আমরা আপনাকে দিয়েছি"], ["ٱلْكَوْثَرَ", "al-kawthara", "Al-Kawthar", "আল-কাওসার"]],
       "examples": [
         { "ayah": [108, 1, 1, 3], "label": ["The gift in the āyah", "আয়াতে যে দানের কথা বলা হয়েছে"], "note": ["Aʿṭaynāka names the act of giving and who received it. Al-kawthara names the gift.", "আ‘তাইনাকা দান করা ও কাকে দেওয়া হয়েছে তা জানায়। আল-কাওসারা হলো দানটির নাম।"] }

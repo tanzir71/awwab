@@ -3,6 +3,7 @@ import type { MessageCatalog } from "./copy";
 export const pathsMessages: MessageCatalog = {
   grammarTitle: { en: "Grammar foundations", bn: "ব্যাকরণের ভিত্তি" },
   grammarSubtitle: { en: "Understand · Level 2", bn: "অর্থ বুঝি · দ্বিতীয় ধাপ" },
+  grammarSource: { en: "Quranic Arabic Corpus · Grammar", bn: "কুরআনিক আরবি করপাস · ব্যাকরণ" },
   sentenceTitle: { en: "Sentence structure", bn: "বাক্যের গঠন" },
   sentenceSubtitle: { en: "Understand · Level 5", bn: "অর্থ বুঝি · পঞ্চম ধাপ" },
   sentenceTafsirSource: { en: "Ibn Kathīr’s tafsīr · {ref}", bn: "ইবন কাসিরের তাফসির · {ref}" },
@@ -150,8 +151,8 @@ export const pathsMessages: MessageCatalog = {
   rootsLabel: { en: "Root", bn: "শব্দমূল" },
   rootsWrite: { en: "k-t-b · to write", bn: "ক-ত-ব · লেখা" },
   rootsThreeLetters: { en: "Three letters carry the meaning", bn: "তিনটি হরফ মূল অর্থ বহন করে" },
-  rootsExplanation: { en: "Put the root into a pattern and the meaning shifts. The pattern letters ف ع ل stand in for any root.",
-    bn: "শব্দমূলকে একটি ছাঁচে বসালে অর্থ বদলায়। ছাঁচের ف ع ل হরফগুলো শব্দমূলের হরফগুলোর জায়গা দেখায়।" },
+  rootsExplanation: { en: "Put the root into a pattern and the meaning shifts. The pattern letters {arabic} stand in for any root.",
+    bn: "শব্দমূলকে একটি ছাঁচে বসালে অর্থ বদলায়। ছাঁচের {arabic} হরফগুলো শব্দমূলের হরফগুলোর জায়গা দেখায়।" },
   "rootsMeaning-past": { en: "he wrote", bn: "সে লিখল" },
   "rootsMeaning-present": { en: "he writes", bn: "সে লেখে" },
   "rootsMeaning-doer": { en: "writer", bn: "লেখক" },

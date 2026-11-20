@@ -50,7 +50,8 @@
         { "ayah": [108, 1, 2, 2], "features": ["(IV)"], "label": ["Form IV", "ছাঁচ ৪"], "note": ["Aʿṭaynāka means ‘we granted you’. The initial hamzah is part of Form IV.", "আ‘তাইনাকা মানে ‘আমরা আপনাকে দিয়েছি’। প্রথম হামযা চতুর্থ ছাঁচের অংশ।"] },
         { "ayah": [2, 269, 13, 13], "features": ["(V)"], "label": ["Form V", "ছাঁচ ৫"], "note": ["Yadhdhakkaru refers to someone taking a reminder to heart. The prefix of Form V is assimilated here.", "ইয়ায্‌যাক্কারু বোঝায় কেউ উপদেশ গ্রহণ করছে। এখানে পঞ্চম ছাঁচের উপসর্গ পরের ধ্বনির সঙ্গে মিশেছে।"] }
       ],
-      "prompt": ["Which form does ʿallama use in 96:5?", "৯৬:৫ আয়াতে ‘আল্লামা কোন ছাঁচে রয়েছে?"], "answer": 1
+      "prompt": ["Which form does ʿallama use in {reference}?", "{reference} আয়াতে ‘আল্লামা কোন ছাঁচে রয়েছে?"],
+      "promptReference": "96:5", "answer": 1
     },
     {
       "id": "forms-6-10",
@@ -103,7 +104,8 @@
         { "ayah": [112, 3, 1, 2], "features": ["POS:NEG"], "label": ["Lam", "লাম"], "note": ["Lam negates yalid. The imperfect ends in sukūn here.", "‘লাম’ ইয়ালিদকে নাকচ করে। মুদারি ক্রিয়াটির শেষে এখানে সুকুন আছে।"] },
         { "ayah": [3, 92, 1, 3], "features": ["POS:NEG"], "label": ["Lan", "লান"], "note": ["Lan denies attaining righteousness. The plural verb tanālū shows the subjunctive by dropping the final n of tanālūna.", "‘লান’ নেকি লাভকে নাকচ করে। বহুবচন ক্রিয়া তানালুনার শেষের নুন বাদ গিয়ে মানসূব তানালু হয়েছে।"] }
       ],
-      "prompt": ["Which particle introduces the future negation in 3:92?", "৩:৯২ আয়াতে ভবিষ্যৎ নাকচ করতে কোন অব্যয়টি এসেছে?"], "answer": 3
+      "prompt": ["Which particle introduces the future negation in {reference}?", "{reference} আয়াতে ভবিষ্যৎ নাকচ করতে কোন অব্যয়টি এসেছে?"],
+      "promptReference": "3:92", "answer": 3
     }
   ]
 }

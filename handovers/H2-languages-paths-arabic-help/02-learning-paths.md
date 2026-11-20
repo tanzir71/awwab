@@ -34,6 +34,8 @@ Placement checks show the selected Quran script and cite each displayed āyah. T
 - Level 5 never claims to certify. It prepares the user to recite to a local teacher.
 
 ## Understand
+
+- Locale review exports include Grammar Foundations, Roots & Patterns, and Sentence Structure lesson text, examples, and drill questions. Keep `{arabic}` and `{reference}` in the translated messages that use them. Awwab inserts the original Arabic and formats the cited āyah using the reader’s digit preference.
 - Builds on Word anatomy: every lesson example is tappable.
 - Roots & patterns (A32): root card + pattern table (فَعَلَ يَفْعُلُ فَاعِل مَفْعُول فِعَال مَفْعَل) + "Spot it in the Quran".
 - Morphology: QUL morphology or the Quranic Arabic Corpus (GPL: check compatibility before bundling).
