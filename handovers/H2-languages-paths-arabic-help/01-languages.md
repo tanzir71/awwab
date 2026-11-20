@@ -70,7 +70,7 @@ The export includes curated word meanings for Al-Fātiḥa, Al-ʿAsr, and Salah 
 
 The Bangla export fills the remaining study glosses from `drafts/bn.json`. Reviewers can find the new entries under `supplementalDraftKeys`. Each entry is paired with its English source so the export can omit it when that source changes.
 
-The Urdu draft starts with the landing page, onboarding, the language picker, and Today, including the shared navigation and prayer setup. Review these on a phone and desktop in the right-to-left layout. Check the prayer labels, date and time order, and the wording in both Adult and Maktab modes.
+The Urdu draft covers all 4,042 messages in the current UI catalogue. Review the landing page, onboarding, language picker, Today, and prayer setup on phone and desktop in the right-to-left layout. Check the prayer labels, date and time order, and the wording in both Adult and Maktab modes. Publication requires two native reviewer sign-offs.
 
 The Urdu prayer draft also covers How to Pray, Return, the seven Sayyid al-Istighfār lines, and the make-up prayer and fasting planner. Compare the lost-count and Hanafi notes with their linked references, and check the direction of the prayer tabs, numbers, and counters.
 
@@ -95,6 +95,8 @@ The Urdu Speak draft covers the variety and goal controls and all 36 A1 lessons 
 The Urdu draft also covers all 14 Saudi A2 and 12 Saudi B1 lessons. Review the meanings in the context of each exchange, especially the B1 reply drills, and compare the dialogue with the generated Saudi audio.
 
 The Urdu draft includes the nine Umrah & Hajj and ten Gulf Work speaking lessons. Check the Umrah dialogue against the phrases it shares with Ask in Arabic, and review the workplace vocabulary for shift schedules, safety, contracts, and pay.
+
+The final Urdu entries cover the study desk, milestone and share cards, audio pack prompts, surah pocket cards, and startup and storage messages. Review the wording on both the share preview and exported image.
 
 The Indonesian draft covers all 4,042 messages in the current UI catalogue, including landing, onboarding, and the Adult and Maktab variants. The review export pairs them with the English source and links to screenshots for context. Publication requires two native reviewer sign-offs.
 
