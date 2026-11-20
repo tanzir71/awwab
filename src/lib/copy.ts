@@ -28,6 +28,7 @@ import { askPhraseMessages } from "./umrah-phrase-messages.mjs";
 import { umrahStepMessages } from "./umrah-step-messages.mjs";
 import { ayahGlossKey, studyGlossMessages } from "./study-gloss-messages.mjs";
 import { prayerSourceMessages } from "./prayer-source-messages.mjs";
+import { hifzVirtueMessages } from "./essentialPassages";
 import { pathsMessages } from "./paths-copy";
 import { tajweedMessages } from "./tajweed-copy";
 import { speakMessages } from "./speak-copy";
@@ -352,7 +353,8 @@ const formats = new Map<string, IntlMessageFormat<Record<string, string | number
 export function message(settings: CopySettings, id: string, values?: Record<string, string | number>) {
   const language = settings.pseudoLocale ? "en" : settings.language;
   const entry = messages[id] ?? askPhraseMessages[id] ?? umrahStepMessages[id] ?? speakLessonMessages[id]
-    ?? grammarLessonMessages[id] ?? fluencyLessonMessages[id] ?? wordGlossMessages[id] ?? studyGlossMessages[id] ?? prayerSourceMessages[id];
+    ?? grammarLessonMessages[id] ?? fluencyLessonMessages[id] ?? wordGlossMessages[id] ?? studyGlossMessages[id]
+    ?? prayerSourceMessages[id] ?? hifzVirtueMessages[id];
   const installed = localeMessage(language, id, settings.mode);
   const draft = installed ?? entry?.[language] ?? entry?.en ?? id;
   const text = typeof draft === "string" ? draft : draft[settings.mode === "maktab" ? 1 : 0];

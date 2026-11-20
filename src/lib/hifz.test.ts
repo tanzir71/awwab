@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 import { message } from "./copy";
+import { hifzVirtueKey, hifzVirtueMessages } from "./essentialPassages";
 import { chapters, essentialPassages, getHifzPassage, groupPortions, juzs, maxPortionAyahs, maxPortionWords, nextPortion,
   passageLabel, portionBucket, portionPlan, ratePortion, rateRecitalPortion, recitalProgress, studyPhrases, verseText, type JuzRecital, type StudyQuran } from "./hifz";
 import { juzAmma, learnedSurahs, levels, patternPracticePath, patternReviewPrefix, placementStartingLevel, qaidaIslandProgress, tracks } from "./learningPaths";
@@ -114,6 +115,9 @@ describe("Offline Quran study edition", () => {
     expect(essentialPassages).toHaveLength(15);
     for (const entry of essentialPassages) {
       const passage = getHifzPassage(entry.id);
+      const virtue = hifzVirtueMessages[hifzVirtueKey(entry.id)];
+      expect(virtue?.en).toBe(passage.why);
+      if (virtue) expect(message({ mode: "adult", language: "en" }, hifzVirtueKey(entry.id))).toBe(passage.why);
       const portions = groupPortions(passage, quran);
       expect(portions.flatMap(portion => portion.verses)).toHaveLength(passage.ayahs);
       for (const portion of portions) {
@@ -122,6 +126,7 @@ describe("Offline Quran study edition", () => {
       }
     }
     expect(getHifzPassage("al-mulk").source?.grade).toBe("hasan");
+    expect(Object.keys(hifzVirtueMessages)).toHaveLength(8);
     for (const id of ["ya-sin", "al-waqiah", "witr", "al-kahf"]) expect(getHifzPassage(id).source).toBeUndefined();
   });
 

@@ -9,10 +9,12 @@ import { StudyText } from "@/components/StudyText";
 import { useDesktop, useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { dateKey, formatDay } from "@/lib/dates";
+import { hifzVirtueKey } from "@/lib/essentialPassages";
 import { focusListItem } from "@/lib/focusListItem";
 import { essentialPassages, getHifzPassage, groupPortions, nextPortion, passageLabel, portionBucket, portionPlan, recitalProgress, studyChapters,
   studyPhrases, studyQuran, verseText, type HifzPassage, type HifzPlans, type HifzPortion, type HifzReviews, type JuzRecital,
   type JuzRecitals, type StudyQuran } from "@/lib/hifz";
+import { localeMessage } from "@/lib/localePacks";
 import { essentialPassageTitle } from "@/lib/paths-copy";
 import { formatQuranReference, type QuranVerse } from "@/lib/quran";
 import { saveHifzPlan, saveJuzRecitalRating, savePortionReview } from "@/lib/studyMilestones";
@@ -252,6 +254,8 @@ function PassagePlan({ passage, portions, settings, now }: { passage: HifzPassag
   </section>;
   const caveat = virtueNote && <p className="small muted">{t(virtueNote)}</p>;
   const hasNotes = Boolean(weekly || passage.source);
+  const virtue = hifzVirtueKey(passage.id);
+  const virtueLanguage = localeMessage(language, virtue, settings.mode) === undefined ? "en" : language;
   const notes = <>
     {weekly && <section className="card compact-stack hifz-recital-summary">
       <h2>{t("hifzWeeklyRecital")}</h2>
@@ -261,7 +265,8 @@ function PassagePlan({ passage, portions, settings, now }: { passage: HifzPassag
         {t(weekly.availableOn ? "hifzRecitalView" : weekly.count ? "hifzRecitalResume" : "hifzRecitalStart")}
       </Link>
     </section>}
-    {passage.source && <section className="card compact-stack hifz-why"><h2>{t("hifzWhy")}</h2><p><StudyText text={passage.why} /></p>
+    {passage.source && <section className="card compact-stack hifz-why"><h2>{t("hifzWhy")}</h2>
+      {passage.why && <p lang={virtueLanguage}><StudyText text={t(virtue)} /></p>}
       <p className="small muted"><span className="chip soft">{t(passage.source.grade === "hasan" ? "hifzHasan" : "hifzSahih")}</span> {passage.source.ref}</p>
     </section>}
   </>;
