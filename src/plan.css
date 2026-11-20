@@ -28,7 +28,12 @@
 .plan-moon-card .equal-row { margin-top: 2px; }
 .plan-moon-card .action { min-height: 50px; padding-inline: 8px; font: var(--type-body-strong); }
 .plan-moon-card .action.plan-moon-primary { color: var(--c-on-primary); background: var(--control-accent); }
-.plan-month .month-grid { gap: 4px; }
+.plan-month .month-grid {
+  /* Leave enough width for seven 44px days before adding column gutters. */
+  margin-inline: min(0px, calc((100% - 308px) / 2));
+  column-gap: clamp(0px, calc((100% - 308px) / 6), 4px);
+}
+.plan-page .text-button, .plan-event-sheet .text-button { min-width: 44px; }
 .plan-month .plan-weekday { font: var(--type-caption); padding: 2px 0 4px; }
 .plan-month .month-day { position: relative; }
 .plan-month .month-day > :is(button, span), .plan-month .month-day > span > [aria-hidden] {
@@ -182,6 +187,9 @@ body .plan-event-overlay { background: color-mix(in srgb, var(--c-night) 83%, tr
   .awwab-dialog.plan-event-sheet { padding-inline: 14px; }
   .plan-date-choices .plan-date-choice { padding: 12px; }
 }
+@media (max-width: 307px) {
+  .plan-month .month-grid { margin-inline: 0; grid-template-columns: repeat(7, 44px); overflow-x: auto; }
+}
 .plan-desktop { display: grid; gap: 16px; min-width: 0; align-items: start; }
 .plan-desktop[data-wide="true"] { grid-template-columns: minmax(0, 1fr) 340px; }
 [data-page="plan-desktop"] .topbar { position: sticky; top: 0; z-index: 3; background: var(--c-bg); }
@@ -252,3 +260,11 @@ body .plan-event-overlay { background: color-mix(in srgb, var(--c-night) 83%, tr
   padding: 6px 10px; border-radius: var(--r-control); background: var(--c-surface-alt); font: var(--type-small);
 }
 .plan-desk-prayer-times > div { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+
+@media (min-width: 1024px) and (any-pointer: coarse) {
+  :is(.plan-desktop, .plan-desk-side) :is(.action, .icon-button, .text-button, .plan-desk-day,
+    .plan-desk-grid-event, .plan-desk-moon h2 button, .plan-desk-sources button, .plan-desk-shift button) {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}

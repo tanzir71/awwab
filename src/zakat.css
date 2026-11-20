@@ -17,10 +17,10 @@
 }
 .zakat-nisab-switch strong { font: var(--type-body-strong); }
 .zakat-nisab-switch button[aria-pressed="true"] { background: var(--c-surface); color: var(--c-ink); box-shadow: var(--shadow-card); }
-.zakat-page .text-button { min-height: 28px; width: fit-content; text-align: start; }
+.zakat-page .text-button { min-width: 44px; width: fit-content; text-align: start; }
 .zakat-holdings { display: grid; gap: 8px; }
 .zakat-holdings .caption { margin-bottom: 3px; }
-.zakat-amount-row { width: 100%; min-height: 34px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; text-align: start; }
+.zakat-amount-row { width: 100%; min-height: 44px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; text-align: start; }
 .zakat-amount-row span { min-width: 0; overflow-wrap: anywhere; color: var(--c-ink-muted); }
 .zakat-amount-row bdi { font-weight: 600; overflow-wrap: anywhere; }
 .zakat-amount-row small, .zakat-payment-list li small { display: block; }
@@ -30,7 +30,7 @@
 .zakat-net span { color: var(--c-ink-muted); }
 .zakat-information { display: grid; gap: 6px; font: var(--type-small); }
 .zakat-sources { display: flex; flex-wrap: wrap; gap: 4px 14px; }
-.zakat-sources a { color: var(--interactive-ink); }
+.zakat-sources a { display: inline-flex; align-items: center; min-height: 44px; color: var(--interactive-ink); }
 .zakat-payment-list { display: grid; gap: 8px; padding: 0; list-style: none; }
 .zakat-payment-list li {
   display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px;
@@ -48,7 +48,7 @@
 .zakat-dialog form { gap: 12px; min-width: 0; }
 .zakat-dialog .field { min-width: 0; }
 .zakat-dialog .field :is(select, input) { min-width: 0; }
-.zakat-checkbox { display: flex; align-items: center; gap: 8px; min-height: 40px; }
+.zakat-checkbox { display: flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; }
 .zakat-checkbox input { inline-size: 18px; block-size: 18px; accent-color: var(--control-primary); flex-shrink: 0; }
 
 @media (min-width: 1024px) {
@@ -82,4 +82,9 @@
   .zakat-breakdown dd { text-align: end; margin: 0; max-width: 17ch; overflow-wrap: anywhere; }
   .zakat-page .zakat-hero-actions .action { min-height: 36px; }
   .zakat-desktop-links { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+}
+
+@media (min-width: 1024px) and (any-pointer: coarse) {
+  .zakat-metal-tile .zakat-amount-row, .zakat-summary .zakat-nisab-switch button,
+  .zakat-page .zakat-hero-actions .action { min-height: 44px; }
 }
