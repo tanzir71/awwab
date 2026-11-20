@@ -14,6 +14,8 @@ import { applyGlossary, formatLocale, glossaryValue, isBuiltIn, languageMatches,
 import * as localePacks from "./localePacks";
 import { planMonth } from "./plan-copy";
 import { message } from "./copy";
+import { studyNames } from "./study-copy";
+import { families } from "./takhti";
 import { prayerSourceMessages } from "./prayer-source-messages.mjs";
 import { updateWordChoice } from "./storageService";
 import { reviewCard, type Reviews } from "./reviews";
@@ -344,6 +346,20 @@ describe("prayer guide", () => {
 });
 
 describe("language settings", () => {
+  it("uses installed titles for Takhti letter families and keeps the existing defaults", () => {
+    const boat = families.find(family => family.id === "boat")!;
+    const installed = vi.spyOn(localePacks, "localeMessage").mockImplementation((code, key) =>
+      code === "id" && key === "studyTakhti-boat" ? "Bentuk perahu" : undefined);
+    try {
+      expect(studyNames.family("id", boat.id, boat.title)).toBe("Bentuk perahu");
+      expect(studyNames.family("bn", boat.id, boat.title)).toBe("নৌকার মতো হরফ");
+      expect(studyNames.family("en", boat.id, boat.title.toLowerCase())).toBe("the boat family");
+      expect(studyNames.family("ur", boat.id, boat.title)).toBe("The boat family");
+    } finally {
+      installed.mockRestore();
+    }
+  });
+
   it("keeps the English and Bangla prayer sources available to locale catalogues", () => {
     expect(Object.keys(prayerSourceMessages)).toHaveLength(9);
     for (const [key, source] of Object.entries(prayerSourceMessages)) {

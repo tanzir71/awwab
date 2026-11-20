@@ -4,11 +4,6 @@ import type { Settings } from "./storageService";
 
 type Language = Settings["language"];
 
-const familyTitles: Record<string, string> = {
-  alif: "খাড়া দাগ", boat: "নৌকার মতো হরফ", jim: "বাটির মতো হরফ", dal: "ছোট বাঁক", sin: "দাঁতের মতো হরফ",
-  sad: "বন্ধ বাটির মতো হরফ", ayn: "খোলা বাঁক", fa: "গোল মাথার হরফ", mim: "মীম",
-};
-
 const prayerSectionTitles: Record<string, string> = {
   "Opening and moving between positions": "সালাতের শুরুতে ও অবস্থান বদলানোর সময়",
   "Bowing · rukūʿ": "রুকুতে",
@@ -38,7 +33,7 @@ function studyName(language: Language, key: string, fallback: string) {
 export const studyNames = {
   surah: (language: Language, number: number, fallback: string) => studyName(language, `studySurah${number}`, fallback),
   lesson: (language: Language, number: number, fallback: string) => studyName(language, `studyQaida${number}`, fallback),
-  family: (language: Language, id: string, fallback: string) => (language === "bn" ? familyTitles[id] : undefined) ?? fallback,
+  family: (language: Language, id: string, fallback: string) => studyName(language, `studyTakhti-${id}`, fallback),
   prayerSection: (language: Language, title: string) => (language === "bn" ? prayerSectionTitles[title] : undefined) ?? title,
   wordKind: (language: Language, kind: string) => (language === "bn" ? wordKinds[kind] : undefined) ?? kind,
 };
@@ -48,7 +43,7 @@ export function studySearchTerm(text: string) {
   return text.trim().toLowerCase().replace(/[০-৯٠-٩۰-۹]/g, digit => String(localDigits.indexOf(digit) % 10));
 }
 
-export const studyMessages: MessageCatalog = {
+export const studyMessages = {
   studySurah1: { en: "Al-Fātiḥa", bn: "আল-ফাতিহা" },
   studySurah2: { en: "Al-Baqarah", bn: "আল-বাকারা" },
   studySurah17: { en: "Al-Isrāʾ", bn: "আল-ইসরা" },
@@ -80,6 +75,15 @@ export const studyMessages: MessageCatalog = {
   studyQaida15: { en: "Madd signs", bn: "মাদের চিহ্ন" },
   studyQaida16: { en: "Nūn sākin & tanwīn rules", bn: "নূন সাকিন ও তানভীনের নিয়ম" },
   studyQaida17: { en: "Mīm sākin, qalqalah & stops", bn: "মীম সাকিন, কলকলা ও ওয়াকফ" },
+  "studyTakhti-alif": { en: "Upright strokes", bn: "খাড়া দাগ" },
+  "studyTakhti-boat": { en: "The boat family", bn: "নৌকার মতো হরফ" },
+  "studyTakhti-jim": { en: "The bowl family", bn: "বাটির মতো হরফ" },
+  "studyTakhti-dal": { en: "Short curves", bn: "ছোট বাঁক" },
+  "studyTakhti-sin": { en: "Teeth", bn: "দাঁতের মতো হরফ" },
+  "studyTakhti-sad": { en: "Closed bowls", bn: "বন্ধ বাটির মতো হরফ" },
+  "studyTakhti-ayn": { en: "Open loops", bn: "খোলা বাঁক" },
+  "studyTakhti-fa": { en: "Rounded heads", bn: "গোল মাথার হরফ" },
+  "studyTakhti-mim": { en: "Mīm", bn: "মীম" },
   back: { en: "Back", bn: "ফিরে যান" },
   chapterHeading: { en: "{name} · {number}", bn: "{name} · {number, number}" },
   quranChapterCitation: { en: "{name} {reference}", bn: "{name} {reference}" },
@@ -272,4 +276,4 @@ export const studyMessages: MessageCatalog = {
   readSlowly: { en: "Slowly", bn: "ধীরে পড়তে পারি" },
   notYet: { en: "Not yet", bn: "এখনও পারি না" },
   setupSaveError: { en: "Awwab could not save your choices. Try again.", bn: "আওয়াব আপনার পছন্দগুলো রাখতে পারেনি। আবার চেষ্টা করুন।" },
-};
+} satisfies MessageCatalog;

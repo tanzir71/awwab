@@ -1,15 +1,16 @@
 import alphabet from "../../docs/content/arabic-letters.json";
+import { studyMessages } from "./study-copy";
 
 export const families = [
-  { id: "alif", title: "Upright strokes", shapes: ["alif", "lam", "kaf"] },
-  { id: "boat", title: "The boat family", shapes: ["boat"] },
-  { id: "jim", title: "The bowl family", shapes: ["jim"] },
-  { id: "dal", title: "Short curves", shapes: ["dal", "ra"] },
-  { id: "sin", title: "Teeth", shapes: ["sin"] },
-  { id: "sad", title: "Closed bowls", shapes: ["sad", "ta"] },
-  { id: "ayn", title: "Open loops", shapes: ["ayn", "ha"] },
-  { id: "fa", title: "Rounded heads", shapes: ["fa", "waw"] },
-  { id: "mim", title: "Mīm", shapes: ["mim"] },
+  { id: "alif", title: studyMessages["studyTakhti-alif"].en, shapes: ["alif", "lam", "kaf"] },
+  { id: "boat", title: studyMessages["studyTakhti-boat"].en, shapes: ["boat"] },
+  { id: "jim", title: studyMessages["studyTakhti-jim"].en, shapes: ["jim"] },
+  { id: "dal", title: studyMessages["studyTakhti-dal"].en, shapes: ["dal", "ra"] },
+  { id: "sin", title: studyMessages["studyTakhti-sin"].en, shapes: ["sin"] },
+  { id: "sad", title: studyMessages["studyTakhti-sad"].en, shapes: ["sad", "ta"] },
+  { id: "ayn", title: studyMessages["studyTakhti-ayn"].en, shapes: ["ayn", "ha"] },
+  { id: "fa", title: studyMessages["studyTakhti-fa"].en, shapes: ["fa", "waw"] },
+  { id: "mim", title: studyMessages["studyTakhti-mim"].en, shapes: ["mim"] },
 ];
 
 export function lettersForFamily(id: string) {

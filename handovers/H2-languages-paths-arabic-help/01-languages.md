@@ -78,6 +78,8 @@ The Indonesian calendar draft covers the phone and desktop views, moon-sighting 
 
 The Indonesian draft also covers My Mosques, the zakat calculator, and the printed prayer timetable and zakat summary. Review the mosque timetable and assignment wording, then check how the calculator describes nisab, haul, and the differences among scholars on jewellery.
 
+The Indonesian Qaida and Takhti draft covers all 17 lesson titles, practice and recording controls, and all nine letter-family labels in the workspace and on print sheets. Review the reading terms alongside the Arabic examples and the listening controls.
+
 After native review, record the reviewers in the catalogue’s `reviewers` array and set `_status` to `reviewed`. Use `node scripts/build-locale-pack.mjs <source-ui.json> <reviewed-catalogue.json> <output-directory>` to produce the UI catalogue. The build checks the source fingerprint, message coverage, mode variants, and ICU arguments. The review file retains the reviewer names.
 
 For a static build, set the compiler’s output directory to `public/locales`. The app installer lists the compiled files that match the current English catalogue. Selecting one in Settings or onboarding downloads it from the same origin and verifies it before saving the language preference. Installed catalogues are available offline on later visits. When a new build changes a pack, selecting that language again installs the matching revision.
