@@ -74,6 +74,8 @@ The Urdu draft starts with the landing page, onboarding, the language picker, an
 
 The Urdu prayer draft also covers How to Pray, Return, the seven Sayyid al-Istighfār lines, and the make-up prayer and fasting planner. Compare the lost-count and Hanafi notes with their linked references, and check the direction of the prayer tabs, numbers, and counters.
 
+The Urdu planning draft covers Hijri calendar and moon-sighting controls, reminder files, mosque timetables and weekly assignments, and the zakat calculator and related print sheets. Review the terms for jamaat, nisab, tola, and hawl in context. Verify the dates and labels in the calendar export after confirming a sighting.
+
 The Indonesian draft covers all 4,005 messages in the current UI catalogue, including landing, onboarding, and the Adult and Maktab variants. The review export pairs them with the English source and links to screenshots for context. Publication requires two native reviewer sign-offs.
 
 The Indonesian draft also covers How to Pray, Return, and the make-up prayer and fasting planner. The locale export includes the existing Sayyid al-Istighfār meanings, the hope verse meaning, and the Hanafi note on sujūd al-sahw. Review these against the linked source content. The reader displays the citations alongside whichever language is available.
