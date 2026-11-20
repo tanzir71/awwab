@@ -23,7 +23,7 @@ import { defaultSpeakVariety, speakCourseVariety, speakGoalsKey, speakProgressKe
 import { completedReadingChapters, emptyReadingPractice, firstUnreadAyah, readingFlowPlaceKey, recitationChecks,
   resumeFlowReading, teacherChecklistComplete } from "./readingPractice";
 import type { HifzPortion, JuzRecitals } from "./hifz";
-import { reviewDestination, reviewQueue, studyPlanMinutes } from "./studyDesk";
+import { isSurahStudyReview, reviewDestination, reviewQueue, studyPlanMinutes } from "./studyDesk";
 import coreWords from "../../docs/content/core-quran-words.json";
 import qaida from "../../docs/content/qaida-lessons.json";
 
@@ -277,6 +277,11 @@ describe("saved study milestones", () => {
     expect(queue.due.map(([id]) => id)).toEqual(["103"]);
     expect(queue.forecast.map(point => point.count)).toEqual([1, 0, 1, 0, 0, 0, 0]);
     expect(studyPlanMinutes(["fluency"])).toBe(studyPlanMinutes([]) - 3);
+  });
+
+  it("keeps surah study counts to surahs for salah, Quran words and Qaida", () => {
+    const ids = ["103", "word:ٱلْعَصْرِ", "letter:ث", "qaida:4:5", "2", "phrase:sim:0", "grammar:particles"];
+    expect(ids.filter(isSurahStudyReview)).toEqual(ids.slice(0, 4));
   });
 });
 

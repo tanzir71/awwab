@@ -124,10 +124,9 @@
 @media (1024px <= width < 1280px) {
   [data-page="surah-reader"] .workspace { padding-inline: 16px; gap: 12px; }
   .surah-workspace[data-layout="adult"] { grid-template-columns: minmax(0, 1fr); }
-  .surah-workspace[data-layout="adult"] .surah-reading { grid-row: 1; }
-  .surah-queue { grid-template-columns: repeat(2, minmax(0,1fr)); }
-  .surah-buckets { grid-column: 1 / -1; }
-  .surah-workspace[data-layout="adult"] .surah-verse-foot { grid-template-columns: minmax(0,1fr); }
+  .surah-reading-pane, .surah-queue-pane { max-inline-size: 900px; }
+  .surah-queue-pane .surah-queue { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .surah-queue-pane .surah-due { grid-row: span 2; align-self: start; }
   .surah-maktab-header { flex-direction: column; }
   .surah-maktab-header .study-tabs { width: min(100%, 244px); flex-basis: auto; }
 }

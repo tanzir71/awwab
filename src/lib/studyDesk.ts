@@ -4,10 +4,12 @@ import { grammarPath, grammarReviewPrefix, patternPracticePath, patternReviewPre
 import { tajweedReviewDestination, tajweedReviewPrefix } from "./tajweed";
 import { isDue, type Reviews } from "./reviews";
 import { parseQaidaReview } from "./qaidaPractice";
+import surahs from "../../docs/content/surahs-for-salah.json";
 
 export const deskActivities = ["recall", "qaida", "salah", "manzil", "takhti", "fluency"] as const;
 export type DeskActivity = typeof deskActivities[number];
 export const deskMinutes: Record<DeskActivity, number> = { recall: 2, qaida: 6, salah: 1, manzil: 1, takhti: 4, fluency: 3 };
+const salahReviewIds = new Set(surahs.surahs.slice(0, 12).map(chapter => String(chapter.number)));
 
 export function studyPlanMinutes(hidden: DeskActivity[]) {
   return deskActivities.reduce((minutes, activity) => minutes + (hidden.includes(activity) ? 0 : deskMinutes[activity]), 0);
@@ -15,6 +17,10 @@ export function studyPlanMinutes(hidden: DeskActivity[]) {
 
 export function isPathReview(id: string) {
   return [patternReviewPrefix, tajweedReviewPrefix, grammarReviewPrefix, rootsReviewPrefix, sentenceReviewPrefix, phraseReviewPrefix].some(prefix => id.startsWith(prefix));
+}
+
+export function isSurahStudyReview(id: string) {
+  return salahReviewIds.has(id) || id.startsWith("letter:") || id.startsWith("word:") || Boolean(parseQaidaReview(id));
 }
 
 export function reviewQueue(reviews: Reviews, now: Date, zone: string) {

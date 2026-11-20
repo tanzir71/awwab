@@ -16,7 +16,7 @@ import { isDue, type Reviews } from "@/lib/reviews";
 import { mosqueDefaults } from "@/lib/mosques";
 import { message, navigationLabel } from "@/lib/copy";
 import { countKnownQuranWords } from "@/lib/quran";
-import { reviewDestination, studyPlanMinutes, type DeskActivity } from "@/lib/studyDesk";
+import { isSurahStudyReview, reviewDestination, studyPlanMinutes, type DeskActivity } from "@/lib/studyDesk";
 import { studyNames } from "@/lib/study-copy";
 import { qaidaRows, resolveQaidaRow } from "@/lib/qaidaPractice";
 import { planMonth } from "@/lib/plan-copy";
@@ -219,12 +219,13 @@ export function AppShell({ children, settings, now, desktop }: { children: React
   const learnWorkspace = studyHome || pathsHome || surahStudy || qaidaStudy || wordBankStudy || Boolean(spokenUnit);
   const review = chapter && reviews[chapter.number];
   const reviewDay = review && dateKey(new Date(review.card.due), settings.city.timeZone);
+  const dueInReader = chapter ? due.filter(([id]) => isSurahStudyReview(id)).length : 0;
   const studySubtitle = chapter ? [
     studyNames.surah(settings.language, chapter.number, chapter.number === 103 ? "Al-ʿAsr" : chapter.transliteration),
     new Intl.NumberFormat(locale).format(chapter.number),
     t(review?.bucket ?? "sabaq"),
     reviewDay && t("surahNextReview", { day: reviewDay <= day ? t("today").toLocaleLowerCase(settings.language) : formatDay(reviewDay, { month: "short", day: "numeric" }, locale) }),
-    due.length > 0 && t("itemsDue", { count: due.length }),
+    dueInReader > 0 && t("itemsDue", { count: dueInReader }),
   ].filter(Boolean).join(" · ") : "";
   const prayerGuide = location.pathname.startsWith("/today/guide/");
   const guideDesktop = desktop && prayerGuide;

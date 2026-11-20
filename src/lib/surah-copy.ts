@@ -1,6 +1,8 @@
 import type { MessageCatalog } from "./copy";
 
 export const surahMessages: MessageCatalog = {
+  surahReader: { en: "Reader", bn: "পাঠ" },
+  surahReviewQueue: { en: "Review queue", bn: "ঝালাইয়ের তালিকা" },
   surahDueToday: { en: "Due today", bn: "আজকের ঝালাই" },
   surahShortestFirst: { en: "Shortest first", bn: "ছোট সূরা আগে" },
   surahReviewBuckets: { en: "Review buckets", bn: "ঝালাইয়ের ভাগ" },

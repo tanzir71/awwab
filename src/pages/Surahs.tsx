@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
+import * as Tabs from "@radix-ui/react-tabs";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { ArabicText } from "@/components/ArabicText";
@@ -11,13 +12,14 @@ import { useAudioPlayback } from "@/hooks/use-audio-playback";
 import { useDesktop, useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { dateKey, formatDay } from "@/lib/dates";
+import { focusListItem } from "@/lib/focusListItem";
 import { prayerGuidePath } from "@/lib/prayerGuide";
 import { parseQaidaReview } from "@/lib/qaidaPractice";
 import { formatQuranReference, quranText, type QuranVerse } from "@/lib/quran";
 import { showEnglishQuranMeaning } from "@/lib/languagePreferences";
 import { grades, isDue, reviewCard, type ReviewGrade, type Reviews } from "@/lib/reviews";
 import { updateRecord, type Settings } from "@/lib/storageService";
-import { reviewDestination } from "@/lib/studyDesk";
+import { isSurahStudyReview, reviewDestination } from "@/lib/studyDesk";
 import { studyNames } from "@/lib/study-copy";
 import { momentPath, saveSurahReview } from "@/lib/studyMilestones";
 import { useUi } from "@/lib/uiState";
@@ -72,11 +74,17 @@ function ReaderModes({ selected, change }: { selected: StudyMode; change: (mode:
   </div>;
 }
 
-function ReviewQueue({ selected, reviews, now }: { selected: number; reviews: Reviews; now: Date }) {
+function ReviewQueue({ selected, reviews, now, openReader }: { selected: number; reviews: Reviews; now: Date; openReader?: () => void }) {
   const { t, language, locale } = useCopy();
   const number = new Intl.NumberFormat(locale);
-  const due = Object.entries(reviews).filter(([, review]) => isDue(review, now));
-  return <aside className="surah-queue" aria-label={t("surahList")}>
+  const queue = Object.entries(reviews).filter(([id]) => isSurahStudyReview(id));
+  const due = queue.filter(([, review]) => isDue(review, now));
+
+  function openCurrentChapter(event: MouseEvent<HTMLAnchorElement>, chapter: Chapter) {
+    if (chapter.number === selected && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) openReader?.();
+  }
+
+  return <aside className="surah-queue" aria-label={t("surahList")} onKeyDown={event => focusListItem(event, "a[href]")}>
     <section className="card surah-due">
       <div className="row-between"><h2>{t("surahDueToday")}</h2><strong>{number.format(due.length)}</strong></div>
       {due.length === 0 && <p className="muted">{t("deskNoReviews")}</p>}
@@ -87,7 +95,8 @@ function ReviewQueue({ selected, reviews, now }: { selected: number; reviews: Re
           t(id.startsWith("letter:") ? "surahQueueLetter" : "surahQueueWord");
         return <div className="surah-due-item" data-selected={Number(id) === selected} key={id}>
           {chapter ? <>
-            <Link to={reviewDestination(id)}>{label}</Link><small className="muted">{t("surahQueueItem", { count: chapter.words })}</small>
+            <Link to={reviewDestination(id)} onClick={event => openCurrentChapter(event, chapter)}>{label}</Link>
+            <small className="muted">{t("surahQueueItem", { count: chapter.words })}</small>
           </> : row ? <Link to={reviewDestination(id)}>{label}</Link> : <>
             <ArabicText text={id.slice(id.indexOf(":") + 1)} compact />
             <Link className="muted" to={reviewDestination(id)}>{label}</Link>
@@ -101,7 +110,7 @@ function ReviewQueue({ selected, reviews, now }: { selected: number; reviews: Re
         const review = reviews[chapter.number];
         const status = !review ? "deskNew" : isDue(review, now) ? "due" : review.bucket;
         return <Link className="surah-shortest-row" to={"/learn/surahs/" + chapter.number} key={chapter.number}
-          aria-current={chapter.number === selected ? "page" : undefined}>
+          aria-current={chapter.number === selected ? "page" : undefined} onClick={event => openCurrentChapter(event, chapter)}>
           <span className="muted">{number.format(chapter.number)}</span><strong>{chapterName(chapter, language)}</strong>
           <small className="muted">{t("surahShortWordCount", { count: chapter.words })}</small>
           <span className="chip" data-bucket={status}>{t(status).split(" · ")[0]}</span>
@@ -110,7 +119,7 @@ function ReviewQueue({ selected, reviews, now }: { selected: number; reviews: Re
     </section>
     <section className="card surah-buckets"><h2>{t("surahReviewBuckets")}</h2>
       {(["sabaq", "sabqi", "manzil"] as const).map(bucket => <div className="row-between" data-bucket={bucket} key={bucket}>
-        <span>{t(bucket === "manzil" ? "surahRetained" : bucket)}</span><strong>{number.format(Object.values(reviews).filter(review => review.bucket === bucket).length)}</strong>
+        <span>{t(bucket === "manzil" ? "surahRetained" : bucket)}</span><strong>{number.format(queue.filter(([, review]) => review.bucket === bucket).length)}</strong>
       </div>)}
     </section>
   </aside>;
@@ -138,12 +147,14 @@ export function SurahReader({ settings, now }: { settings: Settings; now: Date }
 
 function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; settings: Settings; reviews: Reviews; now: Date }) {
   const [params, setParams] = useSearchParams();
-  const { t, language, locale } = useCopy();
+  const { t, language, locale, direction } = useCopy();
   const navigate = useNavigate();
   const desktop = useDesktop();
   const inlineAnatomy = useDesktop(1280);
   const adultDesk = desktop && settings.mode === "adult";
   const maktabDesk = desktop && settings.mode === "maktab";
+  const compactReview = adultDesk && !inlineAnatomy;
+  const [tab, setTab] = useState("read");
   const mode = modes.find(value => value === params.get("mode")) ?? "read";
   const [display, setDisplay] = useState({ translit: true, translation: undefined as boolean | undefined, word: adultDesk });
   const enabled = { ...display, translation: display.translation ?? showEnglishQuranMeaning(settings) };
@@ -155,12 +166,14 @@ function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; set
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const reading = useRef<HTMLElement>(null);
+  const readerTab = useRef<HTMLButtonElement>(null);
   const [wideVerse, setWideVerse] = useState(false);
   const remembered = useRecord<string[]>("surah-lines-known", []);
   const word = useUi(state => state.word);
   const selectWord = useUi(state => state.selectWord);
   const verses = quranText[chapter.number];
   const audio = useAudioPlayback(verses.map(verse => verse.ref).concat("surah:" + chapter.number));
+  const { pause } = audio;
   const pack = "/you/audio?surah=" + chapter.number;
   const name = chapterName(chapter, language);
   const stored = reviews[chapter.number];
@@ -178,7 +191,11 @@ function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; set
     const observer = new ResizeObserver(([entry]) => setWideVerse(entry.contentRect.width >= 460));
     observer.observe(reading.current);
     return () => observer.disconnect();
-  }, []);
+  }, [compactReview]);
+
+  useEffect(() => {
+    if (compactReview && tab !== "read") pause();
+  }, [compactReview, pause, tab]);
 
   useEffect(() => {
     const selected = useUi.getState().word;
@@ -243,7 +260,8 @@ function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; set
 
   const segments = <ReaderModes selected={mode} change={changeMode} />;
   const help = <p className="surah-spell-note"><DesignIcon size={16} name={maktabDesk ? "surah-maktab-info" : "surah-mobile-info"} />
-    {t(maktabDesk ? "surahTapDesktop" : "spellOutHint")}{maktabDesk && <span className="icon-dir" aria-hidden="true">→</span>}</p>;
+    {t(maktabDesk && inlineAnatomy ? "surahTapDesktop" : "spellOutHint")}
+    {maktabDesk && inlineAnatomy && <span className="icon-dir" aria-hidden="true">→</span>}</p>;
   const preferences = <div className="surah-preferences">
     <div className="surah-reader-options" role="group" aria-label={t("surahReaderOptions")}>
       {options.map(([key, label]) => <button type="button" className="chip" key={key} aria-pressed={enabled[key]}
@@ -256,10 +274,7 @@ function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; set
     </label>
   </div>;
   const playLabel = audio.playing ? "surahPause" : "surahPlay";
-  return <div className="surah-workspace" data-layout={adultDesk ? "adult" : maktabDesk ? "maktab" : "phone"}>
-    {adultDesk && <ReviewQueue selected={chapter.number} reviews={reviews} now={now} />}
-    <article className="surah-reading" ref={reading}>
-      <audio hidden ref={audio.element} {...audio.events} />
+  const reader = <article className="surah-reading" ref={reading}>
       {!desktop && <SectionNav title={t("chapterHeading", { name, number: chapter.number })} back={back}
         backIcon={<DesignIcon size={24} name="surah-mobile-chevl" />}
         action={<Dialog><DialogTrigger asChild><button type="button" className="icon-button" aria-label={t("learningSettings")}><DesignIcon size={24} name="surah-mobile-sliders" /></button></DialogTrigger>
@@ -301,7 +316,7 @@ function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; set
                 <Link className="chip" to={pack} aria-label={t("surahPlayVerse", { name: verseLabel }) + " · " + t("downloadRecitation")}><DesignIcon name="surah-adult-play1" size={12} />{t("surahPlay")}</Link>}
               <button type="button" className="chip" aria-label={t("surahLoopVerse", { name: verseLabel })} aria-pressed={Boolean(loops[verse.ref])}
                 onClick={() => toggleLoop(verse.ref)}>{t("surahLoop")}</button>
-              <LocalRecorder label={verseLabel} compact />
+              <LocalRecorder label={verseLabel} compact suspended={compactReview && tab !== "read"} />
             </div>}
           </div>
           {settings.mode === "maktab" && mode !== "read" && <button className={"action " + (remembered.includes(verse.ref) ? "" : "soft")} type="button"
@@ -330,6 +345,21 @@ function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; set
       {chapter.number !== 1 && <p className="surah-suggestion small muted">{t("tryInMaghrib", { name })}</p>}
       <p className="surah-credit small muted"><a href={settings.script === "indopak" ? "https://digitalkhatt.org" : "https://tanzil.net/docs/text_license"}>
         {t(settings.script === "indopak" ? "indopakCredit" : "tanzilCredit")}</a></p>
-    </article>
+  </article>;
+
+  const queue = adultDesk && <ReviewQueue selected={chapter.number} reviews={reviews} now={now} openReader={compactReview ? () => {
+    setTab("read");
+    readerTab.current?.focus();
+  } : undefined} />;
+  return <div className="surah-workspace" data-layout={adultDesk ? "adult" : maktabDesk ? "maktab" : "phone"}>
+    <audio hidden ref={audio.element} {...audio.events} />
+    {compactReview ? <Tabs.Root className="workspace-tabs" dir={direction} value={tab} onValueChange={setTab}>
+      <Tabs.List className="study-tabs equal-row" aria-label={t("surahsForSalah")}>
+        <Tabs.Trigger value="read" ref={readerTab}>{t("surahReader")}</Tabs.Trigger>
+        <Tabs.Trigger value="queue">{t("surahReviewQueue")}</Tabs.Trigger>
+      </Tabs.List>
+      <Tabs.Content className="surah-reading-pane" value="read" forceMount>{reader}</Tabs.Content>
+      <Tabs.Content className="surah-queue-pane" value="queue">{queue}</Tabs.Content>
+    </Tabs.Root> : <>{queue}{reader}</>}
   </div>;
 }
