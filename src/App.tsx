@@ -7,8 +7,8 @@ import { SettingsWorkspace } from "@/components/SettingsWorkspace";
 import type { ShareRouteState } from "@/components/ShareLink";
 import { WordingSuggestionLayer } from "@/components/WordingSuggestions";
 import { useClock, useDesktop, useSettings } from "@/hooks/use-awwab";
-import { migrateLegacy } from "@/lib/storageService";
-import { CopyContext } from "@/lib/copy";
+import { defaults, migrateLegacy } from "@/lib/storageService";
+import { CopyContext, message } from "@/lib/copy";
 import { isBuiltIn, languages } from "@/lib/languagePreferences";
 import { hasLocaleMessages, loadLocalePack, localePackAsset } from "@/lib/localePacks";
 import { readPseudoLocale } from "@/lib/pseudoLocale";
@@ -93,8 +93,9 @@ function Main() {
     document.querySelector('meta[name="theme-color"]')?.setAttribute("content", settings.mode === "adult" ? "#15302b" : "#25306b");
   }, [settings, pseudoLocale]);
 
-  if (storage === "error") return <main className="app-content stack"><h1>Device storage is unavailable</h1><p>Allow this site to use browser storage, then reload to open Awwab.</p></main>;
-  if (!settings || storage === "loading" || restoringLocale) return <main className="app-content"><p role="status">Opening awwab…</p></main>;
+  const t = message.bind(null, settings ?? { ...defaults, language, pseudoLocale });
+  if (storage === "error") return <main className="app-content stack"><h1>{t("noStorage")}</h1><p>{t("allowStorage")}</p></main>;
+  if (!settings || storage === "loading" || restoringLocale) return <main className="app-content"><p role="status">{t("opening")}</p></main>;
   if (!settings.onboarded && pathname !== "/install" && pathname !== "/sources") return <CopyContext.Provider value={settings}><Onboarding settings={settings} desktop={desktop} /><WordPanel desktop={false} settings={settings} /></CopyContext.Provider>;
   const shareDialog = desktop && pathname === "/share";
   const shareBackground = (location.state as ShareRouteState | null)?.shareBackground;
@@ -144,7 +145,7 @@ function Main() {
         <Route path="/plan/umrah-guide" element={<UmrahGuide />} />
         <Route path="/share" element={<Share key={search} settings={settings} now={now} />} />
         <Route path="/share/milestone/:kind/:number" element={<Milestone settings={settings} now={now} />} />
-        <Route path="/install" element={<div className="stack"><AppInstallPrompt /><Link className="action soft" to="/">Continue to awwab</Link></div>} />
+        <Route path="/install" element={<div className="stack"><AppInstallPrompt /><Link className="action soft" to="/">{t("continueAwwab")}</Link></div>} />
         <Route path="/umrah" element={<UmrahShell now={now} desktop={desktop} />}>
           <Route index element={<UmrahNow />} />
           <Route path="rituals" element={<UmrahRituals />} />
@@ -171,7 +172,7 @@ function Main() {
           {["learning", "prayer", "hijri", "reminders", "data", "display", "privacy", "about"].map(page => <Route key={page} path={`/you/${page}`}
             element={<SettingsPage key={page} settings={settings} now={now} panel={page} desktop={desktop} />} />)}
         </Route>
-        <Route path="*" element={<section className="card stack"><h1>Find your way back</h1><p>Choose a page to continue.</p><Link className="action" to="/">Go to your home screen</Link></section>} />
+        <Route path="*" element={<section className="card stack"><h1>{t("routeMissing")}</h1><p>{t("routeMissingHint")}</p><Link className="action" to="/">{t("routeHome")}</Link></section>} />
       </Route>
     </Routes>
     {shareDialog && <Share key={search} settings={settings} now={now} closeDialog={() => {

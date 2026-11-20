@@ -1,0 +1,93 @@
+{
+  "src/components/AppShell.tsx": {
+    "Ctrl K": 1
+  },
+  "src/components/DesignIcon.tsx": {
+    "awwab": 1
+  },
+  "src/components/PlanEventSheet.tsx": {
+    "Bukhari 1503 · Sahih": 1,
+    "Bukhari 953 · Sahih": 1
+  },
+  "src/components/PrayerGuideSupport.tsx": {
+    "Muslim": 1,
+    "Muslim ${…}": 1
+  },
+  "src/components/UmrahGuideVoice.tsx": {
+    "AI4Bharat Rasa": 1
+  },
+  "src/components/UmrahPreparation.tsx": {
+    "askPlay": 1
+  },
+  "src/components/WordPanel.tsx": {
+    "Quranic Arabic Corpus 0.4": 1
+  },
+  "src/components/ui/breadcrumb.tsx": {
+    "More": 1,
+    "breadcrumb": 1
+  },
+  "src/components/ui/carousel.tsx": {
+    "Next slide": 1,
+    "Previous slide": 1
+  },
+  "src/components/ui/dialog.tsx": {
+    "Close": 1
+  },
+  "src/components/ui/pagination.tsx": {
+    "Go to next page": 1,
+    "Go to previous page": 1,
+    "More pages": 1,
+    "Next": 1,
+    "Previous": 1,
+    "pagination": 1
+  },
+  "src/components/ui/sheet.tsx": {
+    "Close": 1
+  },
+  "src/components/ui/sidebar.tsx": {
+    "Toggle Sidebar": 3
+  },
+  "src/pages/Grammar.tsx": {
+    "Quranic Arabic Corpus · Grammar": 1
+  },
+  "src/pages/LanguageSettings.tsx": {
+    "RTL": 1
+  },
+  "src/pages/Onboarding.tsx": {
+    "Aa": 1,
+    "Bāʾ + fatha = ba": 1,
+    "awwab": 1,
+    "বা যবর বা": 1
+  },
+  "src/pages/Qaida.tsx": {
+    "Al-Baqara 2:1": 1,
+    "Al-Ikhlāṣ 112:1": 1
+  },
+  "src/pages/Return.tsx": {
+    "Bukhari 6306": 1,
+    "· Sahih": 1
+  },
+  "src/pages/SalahWords.tsx": {
+    "Quranic Arabic Corpus 0.4": 1
+  },
+  "src/pages/Sources.tsx": {
+    "Awwab is a learning and tracking aid. Ask a qualified scholar about religious rulings for your situation.": 1,
+    "Read the full verse": 1,
+    "Visit": 1
+  },
+  "src/pages/UmrahAsk.tsx": {
+    "askPlay": 1,
+    "askPlayAgain": 1,
+    "askPlayHotel": 1,
+    "askPlayShort": 1
+  },
+  "src/pages/UmrahMap.tsx": {
+    "Protomaps": 1,
+    "© OpenStreetMap": 1
+  },
+  "src/pages/You.tsx": {
+    "English": 1,
+    "IndoPak": 1,
+    "Uthmani": 1
+  }
+}

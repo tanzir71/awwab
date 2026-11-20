@@ -219,7 +219,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
       document.getElementById("app-main")?.focus();
     }}>{t("skipToContent")}</a>
     {!fullscreen && <nav className={`sidebar ${learnWorkspace ? "desktop-learn-nav" : ""}`} aria-label={t("mainNavigation")}>
-      <Link to="/learn" aria-label="Awwab study plan"><Wordmark /></Link>
+      <Link to="/learn" aria-label={t("studyHomeLink")}><Wordmark /></Link>
       {settings.mode === "adult" ? <>
         <button type="button" className="search-button" onClick={() => setSearchOpen(true)}><DesignIcon name="desk-eye" size={15} /> {t("search")} <kbd className="chip">Ctrl K</kbd></button>
         {groups.map(group => <div key={group.label}>
