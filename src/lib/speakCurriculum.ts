@@ -1,14 +1,14 @@
-import starter from "../../docs/content/spoken-arabic.json";
-import everyday from "../../docs/content/spoken-saudi-a2.json";
-import conversation from "../../docs/content/spoken-saudi-b1.json";
-import gulf from "../../docs/content/spoken-gulf-a1.json";
-import modernStandard from "../../docs/content/spoken-msa-a1.json";
-import umrah from "../../docs/content/spoken-umrah-hajj.json";
-import gulfWork from "../../docs/content/spoken-gulf-work.json";
-import { asset } from "./config";
+import starter from "../../docs/content/spoken-arabic.json" with { type: "json" };
+import everyday from "../../docs/content/spoken-saudi-a2.json" with { type: "json" };
+import conversation from "../../docs/content/spoken-saudi-b1.json" with { type: "json" };
+import gulf from "../../docs/content/spoken-gulf-a1.json" with { type: "json" };
+import modernStandard from "../../docs/content/spoken-msa-a1.json" with { type: "json" };
+import umrah from "../../docs/content/spoken-umrah-hajj.json" with { type: "json" };
+import gulfWork from "../../docs/content/spoken-gulf-work.json" with { type: "json" };
+import { asset } from "./config.ts";
 import { speakLineKey, speakWordKey } from "./speak-lesson-messages.mjs";
 import { askPhraseKey } from "./umrah-phrase-messages.mjs";
-import { askClipPath, askPhrase, renderAsk } from "./umrahAsk";
+import { askClipPath, askPhrase, renderAsk } from "./umrahAsk.ts";
 
 export const speakBase = "/learn/speak";
 export const speakProgressKey = "speak-complete";
@@ -76,7 +76,7 @@ function sharedAskLine(id: string): SpeakLine {
   return { ...line, meaning: [line.en, phrase.bn], meaningKey: askPhraseKey(id), clip: askClipPath("saudi", "female", id), askId: id };
 }
 
-export function speakLessonContent(unit: SpeakUnit) {
+export function speakLessonContent(unit: SpeakUnit, clipUrl = asset) {
   let lines: SpeakLine[];
   let words: LessonWord[];
   let wordClips: string[];
@@ -100,9 +100,9 @@ export function speakLessonContent(unit: SpeakUnit) {
     wordClips = lines.map(line => line.clip);
   }
   const clips = Object.fromEntries<string>([
-    ...lines.map((line, index) => [`line-${index}`, asset(line.clip)] as const),
-    ...wordClips.map((clip, index) => [`word-${index}`, asset(clip)] as const),
-    ["sign", asset(signClip)],
+    ...lines.map((line, index) => [`line-${index}`, clipUrl(line.clip)] as const),
+    ...wordClips.map((clip, index) => [`word-${index}`, clipUrl(clip)] as const),
+    ["sign", clipUrl(signClip)],
   ]);
   return { lines, words, clips };
 }

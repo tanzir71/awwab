@@ -1,33 +1,16 @@
-import { createHash } from "node:crypto";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
 import { askClipPath, askRecordingScenarios, askVarieties, renderAsk } from "../src/lib/umrahAsk.ts";
+import { askRecordingIndex, pronunciationReview } from "./pronunciation-review.mjs";
 
 const [output] = process.argv.slice(2);
 if (process.argv.length !== 3) throw new Error("Usage: node scripts/export-ask-review.mjs <new-directory>");
 
-const publicRoot = new URL("../public/", import.meta.url);
-const manifest = JSON.parse(readFileSync(new URL("../docs/content/umrah-phrase-audio.json", import.meta.url), "utf8"));
-const indexBytes = readFileSync(new URL("packs/phrases/checksums.json", publicRoot));
-const digest = bytes => createHash("sha256").update(bytes).digest("hex");
-if (digest(indexBytes) !== manifest.checksumsSha256) {
-  throw new Error("The recording index must match the current Ask audio manifest.");
-}
-const index = JSON.parse(indexBytes.toString("utf8"));
-const assets = new Map();
+const { manifest, index } = askRecordingIndex();
+const review = pronunciationReview();
 
 function reviewClip(variety, voice, id) {
   const path = askClipPath(variety, voice, id);
-  if (!assets.has(path)) {
-    const bytes = readFileSync(new URL(path, publicRoot));
-    if (index[path] !== digest(bytes)) throw new Error(`The recording at ${path} must match its checksum.`);
-    assets.set(path, bytes);
-  }
-  return {
-    id,
-    path: path.replace("packs/phrases/", "audio/"),
-    sha256: index[path],
-  };
+  if (!index[path]) throw new Error(`The recording at ${path} needs a published checksum.`);
+  return { id, ...review.recording(path, path.replace("packs/phrases/", "audio/"), index[path]) };
 }
 
 const rows = askVarieties.flatMap(variety => {
@@ -41,25 +24,19 @@ const rows = askVarieties.flatMap(variety => {
     recordings: clips.map(clip => reviewClip(variety, voice, clip)),
   })));
 });
-if (assets.size !== Object.keys(index).length || assets.size === 0) {
-  throw new Error("The review set must cover all published Ask recordings.");
-}
-const source = {
+review.write(output, {
+  title: "Ask in Arabic pronunciation review",
+  reviewFormat: "awwab-ask-pronunciation-review",
+  filename: "awwab-ask-review.json",
+  instructions: "Listen to the generated speech and compare it with the Arabic shown in the app. For gate entries, listen to the prefix and the number in order. Record pronunciation, dialect or text corrections in Notes.",
+  varieties: {
+    saudi: { label: "Saudi Hijazi", assignment: "Two native Saudi Hijazi reviewers are needed, including one living in Makkah." },
+    msa: { label: "Modern Standard Arabic", assignment: "An Arabic teacher reviews the Modern Standard Arabic entries." },
+  },
+  groupLabel: "Voice",
+  groups: Object.fromEntries(Object.entries(manifest.credits).map(([id, credit]) =>
+    [id, `${id === "female" ? "Female" : "Male"} · ${credit.name}`])),
   version: manifest.version,
   checksumsSha256: manifest.checksumsSha256,
-  reviewSourceSha256: digest(JSON.stringify(rows)),
   voices: manifest.credits,
-  clipCount: assets.size,
-  rows,
-};
-const viewer = readFileSync(new URL("./ask-review.html", import.meta.url), "utf8");
-const embedded = JSON.stringify(source).replaceAll("<", "\\u003c");
-const target = resolve(output);
-mkdirSync(target);
-for (const [path, bytes] of assets) {
-  const file = resolve(target, path.replace("packs/phrases/", "audio/"));
-  mkdirSync(dirname(file), { recursive: true });
-  writeFileSync(file, bytes);
-}
-writeFileSync(resolve(target, "index.html"), viewer.replace("/* REVIEW SOURCE */", () => embedded));
-console.log(`Exported ${rows.length} review entries and ${assets.size} verified recordings to ${target}`);
+}, rows, Object.keys(index).length);

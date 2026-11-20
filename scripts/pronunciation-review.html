@@ -2,7 +2,7 @@
 <html lang="en">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ask in Arabic pronunciation review</title>
+<title>Pronunciation review</title>
 <style>
   :root { color-scheme: light; font: 16px/1.5 system-ui, sans-serif; color: #172d27; background: #f2f6f3; }
   body { max-width: 52rem; margin: auto; padding: 1.25rem; }
@@ -22,32 +22,39 @@
   audio { display: block; width: min(100%, 19rem); }
   #notice { min-height: 1.5em; color: #40574f; }
   #entry-id { overflow-wrap: anywhere; }
+  #dialogue li { margin-block: .5rem; }
+  #dialogue [aria-current="true"] { font-weight: bold; }
 </style>
 <header>
-  <h1>Ask in Arabic pronunciation review</h1>
+  <h1 id="title">Pronunciation review</h1>
   <p id="coverage"></p>
-  <p>Listen to the generated speech and compare it with the Arabic shown in the app. For gate entries, listen to the prefix and the number in order. Record pronunciation, dialect or text corrections in Notes.</p>
+  <p id="instructions"></p>
 </header>
 <main>
   <section aria-label="Review settings">
     <div class="fields">
       <label>Reviewer name <input id="reviewer" required maxlength="100"></label>
-      <label><span id="variety-label">Variety</span> <select id="variety" aria-labelledby="variety-label">
-        <option value="saudi">Saudi Hijazi</option><option value="msa">Modern Standard Arabic</option>
-      </select></label>
-      <label><span id="voice-label">Voice</span> <select id="voice" aria-labelledby="voice-label"></select></label>
+      <label><span id="variety-label">Variety</span> <select id="variety" aria-labelledby="variety-label"></select></label>
+      <label><span id="group-label"></span> <select id="group" aria-labelledby="group-label"></select></label>
     </div>
     <p id="assignment"></p>
-    <label>Find an entry <input id="search" type="search" placeholder="Arabic, English or gate number"></label>
+    <label>Find an entry <input id="search" type="search"></label>
     <p><label><span id="entry-label">Entry</span> <select id="entry" aria-labelledby="entry-label"></select></label></p>
     <div class="actions"><button id="previous" type="button">Previous</button><button id="next" type="button">Next</button></div>
     <p id="progress"></p>
   </section>
   <section id="entry-panel" aria-label="Selected recording">
     <h2 id="entry-id"></h2>
+    <p id="role"></p>
     <p lang="ar" dir="rtl" id="arabic"></p>
     <p id="transliteration"></p>
     <p id="meaning"></p>
+    <p id="bangla" lang="bn" dir="auto"></p>
+    <p id="spoken">Text used for speech <bdi lang="ar" dir="rtl" id="spoken-arabic"></bdi></p>
+    <details id="context">
+      <summary>Full lesson dialogue</summary>
+      <ol id="dialogue"></ol>
+    </details>
     <div id="audio"></div>
     <div class="fields">
       <label><span id="decision-label">Decision</span> <select id="decision" aria-labelledby="decision-label"><option value="">Pending</option><option value="approved">Approved</option>
@@ -69,7 +76,7 @@
   const byId = name => document.getElementById(name);
   const source = JSON.parse(byId("source").textContent);
   const variety = byId("variety");
-  const voice = byId("voice");
+  const group = byId("group");
   const entry = byId("entry");
   const search = byId("search");
   const decision = byId("decision");
@@ -78,16 +85,17 @@
   const notice = byId("notice");
   const rowsById = new Map(source.rows.map(row => [row.id, row]));
   const allowedDecisions = new Set(["", "approved", "needs-changes"]);
-  const assignments = {
-    saudi: "Two native Saudi Hijazi reviewers are needed, including one living in Makkah.",
-    msa: "An Arabic teacher reviews the Modern Standard Arabic entries.",
-  };
+  const groupOf = row => row.group ?? row.voice;
   let reviews = new Map();
   let filtered = [];
 
+  document.title = source.title;
+  byId("title").textContent = source.title;
+  byId("instructions").textContent = source.instructions;
+  byId("group-label").textContent = source.groupLabel;
   byId("coverage").textContent = `Draft review · ${source.rows.length} entries · ${source.clipCount} recordings`;
-  for (const [id, credit] of Object.entries(source.voices)) {
-    voice.add(new Option(`${id === "female" ? "Female" : "Male"} · ${credit.name}`, id));
+  for (const [id, item] of Object.entries(source.varieties)) {
+    variety.add(new Option(item.label, id));
   }
 
   function progress() {
@@ -106,13 +114,34 @@
     player.replaceChildren();
     if (!row) return;
     byId("entry-id").textContent = row.label;
+    byId("role").textContent = row.role ?? "";
+    byId("role").hidden = !row.role;
     byId("arabic").textContent = row.expected.ar;
     byId("transliteration").textContent = row.expected.tr;
+    byId("transliteration").hidden = !row.expected.tr;
     byId("meaning").textContent = row.expected.en;
+    byId("bangla").textContent = row.expected.bn ?? "";
+    byId("bangla").hidden = !row.expected.bn;
+    byId("spoken-arabic").textContent = row.expected.spoken ?? "";
+    byId("spoken").hidden = !row.expected.spoken;
+    const dialogue = byId("dialogue");
+    const context = source.contexts?.[row.unit] ?? [];
+    byId("context").hidden = !context.length;
+    dialogue.replaceChildren();
+    for (const line of context) {
+      const item = document.createElement("li");
+      const arabic = document.createElement("bdi");
+      arabic.lang = "ar";
+      arabic.dir = "rtl";
+      arabic.textContent = line.ar;
+      if (line.id === row.id) item.setAttribute("aria-current", "true");
+      item.append(`${line.role} · `, arabic, ` · ${line.en}`);
+      dialogue.append(item);
+    }
     for (const [index, clip] of row.recordings.entries()) {
       const group = document.createElement("div");
       const label = document.createElement("div");
-      label.textContent = row.recordings.length === 1 ? "Recording" : index === 0 ? "Gate prefix" : "Gate number";
+      label.textContent = clip.label ?? (row.recordings.length === 1 ? "Recording" : index === 0 ? "Gate prefix" : "Gate number");
       const audio = document.createElement("audio");
       audio.src = clip.path;
       audio.controls = true;
@@ -128,13 +157,21 @@
   function filterEntries() {
     const selected = entry.value;
     const query = search.value.trim().toLocaleLowerCase();
-    filtered = source.rows.filter(row => row.variety === variety.value && row.voice === voice.value &&
-      [row.label, row.expected.ar, row.expected.en, row.expected.tr].some(text => text.toLocaleLowerCase().includes(query)));
+    filtered = source.rows.filter(row => row.variety === variety.value && groupOf(row) === group.value &&
+      [row.label, ...Object.values(row.expected)].some(text => text.toLocaleLowerCase().includes(query)));
     entry.replaceChildren(...filtered.map(row => new Option(row.label, row.id)));
     if (filtered.some(row => row.id === selected)) entry.value = selected;
-    byId("assignment").textContent = assignments[variety.value];
+    byId("assignment").textContent = source.varieties[variety.value].assignment;
     showEntry();
     progress();
+  }
+
+  function chooseVariety() {
+    const previous = group.value;
+    const available = new Set(source.rows.filter(row => row.variety === variety.value).map(groupOf));
+    group.replaceChildren(...Array.from(available, id => new Option(source.groups[id], id)));
+    if (available.has(previous)) group.value = previous;
+    filterEntries();
   }
 
   function updateReview() {
@@ -144,7 +181,8 @@
     progress();
   }
 
-  for (const control of [variety, voice]) control.addEventListener("change", filterEntries);
+  variety.addEventListener("change", chooseVariety);
+  group.addEventListener("change", filterEntries);
   search.addEventListener("input", filterEntries);
   entry.addEventListener("change", showEntry);
   decision.addEventListener("change", updateReview);
@@ -162,7 +200,7 @@
       return;
     }
     const report = {
-      format: "awwab-ask-pronunciation-review",
+      format: source.reviewFormat,
       reviewer: reviewer.value.trim(),
       reviewSourceSha256: source.reviewSourceSha256,
       entries: Object.fromEntries(reviews),
@@ -170,7 +208,7 @@
     const url = URL.createObjectURL(new Blob([JSON.stringify(report, null, 2) + "\n"], { type: "application/json" }));
     const link = document.createElement("a");
     link.href = url;
-    link.download = "awwab-ask-review.json";
+    link.download = source.filename;
     link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
     notice.textContent = "Review file exported.";
@@ -182,7 +220,7 @@
     if (!file) return;
     try {
       const report = JSON.parse(await file.text());
-      if (report.format !== "awwab-ask-pronunciation-review" || report.reviewSourceSha256 !== source.reviewSourceSha256 ||
+      if (report.format !== source.reviewFormat || report.reviewSourceSha256 !== source.reviewSourceSha256 ||
         typeof report.reviewer !== "string" || !report.reviewer.trim() || report.reviewer.length > 100) throw new Error();
       const annotations = Object.entries(report.entries);
       if (annotations.some(([id, review]) => !rowsById.has(id) || !allowedDecisions.has(review?.decision) ||
@@ -197,6 +235,6 @@
       input.value = "";
     }
   });
-  filterEntries();
+  chooseVariety();
 </script>
 </html>

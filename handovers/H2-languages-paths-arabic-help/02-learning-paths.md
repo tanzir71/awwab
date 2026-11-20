@@ -48,6 +48,7 @@ Placement checks show the selected Quran script and cite each displayed āyah. T
 - **Root bridges:** link spoken words to Quran roots the user already knows (A34: شريحة *sharīḥa* "SIM card" shares the root ش ر ح with أَلَمْ نَشْرَحْ, 94:1).
 - **Content:** dialogues written and recorded by native speakers of each variety; transliteration scheme consistent with the rest of the app; English and app-language translations.
 - Locale review exports include Speak lesson titles, speaker names, dialogue meanings, vocabulary and signs from the seven course files. Shared phrases use the existing Ask in Arabic keys. Installed language packs apply these translations offline, including to word review.
+- Run `node scripts/export-speak-review.mjs <new-directory>` to package all seven courses for native review. Open the exported `index.html` offline to compare each line, word and sign with its generated recording. The package includes the full dialogue, English and Bangla meanings, and any separately vocalised sign text. Reviewers can filter by variety and course and export their own decisions and notes for the exact revision.
 - Shares audio and phrases with Ask in Arabic (03) for the Umrah & Hajj pack.
 
 ## Maktab
