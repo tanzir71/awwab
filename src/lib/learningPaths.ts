@@ -37,6 +37,17 @@ export const levels: Record<Track, PathLevel[]> = {
   ],
 };
 export const salahChapters = salah.surahs.slice(0, 11).map(item => item.number);
+export const maktabIslandStars = 5;
+
+export function qaidaIslandProgress(completed: readonly number[], first: number, last: number) {
+  const done = new Set(completed);
+  const lessons = Array.from({ length: last - first + 1 }, (_, index) => first + index);
+  const remaining = lessons.filter(lesson => !done.has(lesson));
+  return {
+    stars: Math.floor((lessons.length - remaining.length) * maktabIslandStars / lessons.length),
+    to: `/learn/qaida/${remaining[0] ?? first}`,
+  };
+}
 
 export function learnedSurahs(hifz: HifzReviews, earlier: Reviews) {
   const learned = new Set(chapters.filter(chapter => earlier[chapter.number]?.bucket === "manzil").map(chapter => chapter.number));

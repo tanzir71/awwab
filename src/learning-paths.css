@@ -46,10 +46,10 @@
 .paths-question .paths-reveal { border-radius: var(--r-control); background: var(--c-primary-soft); padding: 8px 12px; text-align: center; }
 .paths-question .paths-reveal small { display: block; }
 .paths-map-area { position: relative; width: 100%; height: 630px; overflow: hidden; }
-.paths-map-track { position: absolute; inset-block-start: 0; inset-inline-start: 50%; transform: translateX(-50%); width: 390px; height: 640px; }
+.paths-map-track { position: absolute; inset-block-start: 0; left: 50%; transform: translateX(-50%); width: 390px; height: 640px; }
 .paths-map-trail { position: absolute; inset: 0; width: 390px; height: 640px; max-width: none; pointer-events: none; }
 .paths-map-trail[data-visited="false"] { opacity: .54; }
-.paths-island { position: absolute; inset-inline-start: var(--island-x); inset-block-start: var(--island-y); transform: translateX(-50%); width: 120px; display: grid; justify-items: center; gap: 4px; text-align: center; }
+.paths-island { position: absolute; left: var(--island-x); inset-block-start: var(--island-y); transform: translateX(-50%); width: 120px; display: grid; justify-items: center; gap: 4px; text-align: center; }
 .paths-island[data-island="1"] { --island-x: 320px; --island-y: 18px; }
 .paths-island[data-island="2"] { --island-x: 146px; --island-y: 112px; }
 .paths-island[data-island="3"] { --island-x: 280px; --island-y: 207px; }
@@ -61,7 +61,8 @@
 .paths-island[data-state="current"] { --island-size: 90px; }
 .paths-island[data-state="current"] .paths-island-circle { background: var(--c-night); }
 .paths-island[data-state="current"] .paths-island-circle img { opacity: 0; }
-.paths-island[data-state="done"] .paths-island-circle { background: var(--control-primary); }
+.paths-island[data-state="done"] .paths-island-circle { background: var(--c-primary); }
+.paths-island-label { color: var(--c-ink); }
 .paths-island-label::before { content: ""; position: absolute; inset-block-start: 0; inset-inline: 0; margin-inline: auto; width: var(--island-size); height: var(--island-size); border-radius: var(--r-pill); }
 .paths-island strong { font: var(--type-small); }
 .paths-island[data-state="open"] strong { color: var(--c-ink-muted); }

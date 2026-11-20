@@ -70,7 +70,7 @@ export const pathsMessages: MessageCatalog = {
   pathsIslandShort: { en: "Short surahs", bn: "ছোট সূরা" },
   pathsIslandJuz: { en: "Juz ʿAmma", bn: "আমপারা" },
   pathsIslandTajweed: { en: "Tajweed stars", bn: "তাজবিদের তারা" },
-  pathsStars: { en: "{count, number} of 5 stars", bn: "৫টির মধ্যে {count, number}টি তারা" },
+  pathsStars: { en: "{count, number} of {total, number} stars", bn: "{total, number}টির মধ্যে {count, number}টি তারা" },
   pathsStarSticker: { en: "Island sticker earned", bn: "দ্বীপের স্টিকার পেয়েছেন" },
   pathsStudyLibrary: { en: "Study tools", bn: "শেখার সরঞ্জাম" },
   pathsOutline: { en: "Curriculum", bn: "পাঠসূচি" },

@@ -7,7 +7,7 @@ import { useCopy } from "@/lib/copy";
 import { asset } from "@/lib/config";
 import { focusListItem } from "@/lib/focusListItem";
 import { chapters, essentialPassages, getHifzPassage, juzs, kursiOpening, passageLabel, studyChapters, type HifzReviews } from "@/lib/hifz";
-import { grammarReviewPrefix, juzAmma, learnedSurahs, levels, pathUrl, patternReviewPrefix, rootsReviewPrefix, salahChapters, sentenceReviewPrefix,
+import { grammarReviewPrefix, juzAmma, learnedSurahs, levels, maktabIslandStars, pathUrl, patternReviewPrefix, qaidaIslandProgress, rootsReviewPrefix, salahChapters, sentenceReviewPrefix,
   tracks, type PathPlacement, type Track } from "@/lib/learningPaths";
 import { essentialPassageTitle } from "@/lib/paths-copy";
 import { countKnownQuranWords, quranText } from "@/lib/quran";
@@ -211,31 +211,37 @@ function PathsHome({ desktop = false }: { desktop?: boolean }) {
 export function MaktabMap() {
   const { t } = useCopy();
   const state = usePathState();
-  const sliceStars = (first: number, last: number) => Math.floor(state.completedQaida.filter(lesson => lesson >= first && lesson <= last).length * 5 / (last - first + 1));
   const islands = [
-    { name: "pathsIslandLetters", stars: sliceStars(1, 3), arabic: "ب", to: "/learn/qaida/1" },
-    { name: "pathsIslandHarakat", stars: sliceStars(4, 6), arabic: "بَ", to: "/learn/qaida/4" },
-    { name: "pathsIslandJoining", stars: sliceStars(7, 17), arabic: "ـبـ", to: "/learn/qaida/7" },
-    { name: "pathsIslandShort", stars: Math.floor(state.short * 5 / salahChapters.length), arabic: quranText[103][0].uthmani, to: pathUrl("memorise", 1) },
-    { name: "pathsIslandJuz", stars: Math.floor(state.amma * 5 / 37), arabic: "عَ", to: pathUrl("memorise", 2) },
+    { name: "pathsIslandLetters", arabic: "ب", ...qaidaIslandProgress(state.completedQaida, 1, 3) },
+    { name: "pathsIslandHarakat", arabic: "بَ", ...qaidaIslandProgress(state.completedQaida, 4, 6) },
+    { name: "pathsIslandJoining", arabic: "ـبـ", ...qaidaIslandProgress(state.completedQaida, 7, 17) },
+    { name: "pathsIslandShort", stars: Math.floor(state.short * maktabIslandStars / salahChapters.length), arabic: quranText[103][0].uthmani, to: pathUrl("memorise", 1) },
+    { name: "pathsIslandJuz", stars: Math.floor(state.amma * maktabIslandStars / juzAmma.length), arabic: "عَ", to: pathUrl("memorise", 2) },
     { name: "pathsIslandTajweed", stars: state.tajweed.stars, arabic: "نْ", to: tajweedIndex },
   ];
-  const current = islands.findIndex(island => island.stars < 5);
+  const current = islands.findIndex(island => island.stars < maktabIslandStars);
   return <div className="paths-page maktab-map">
     <header><h1>{t("pathsMap")}</h1><p className="small muted">{t("pathsMapSubtitle")}</p></header>
     <div className="paths-map-area"><div className="paths-map-track">
-      {islands.slice(0, -1).map((island, i) => <img key={island.name} className="paths-map-trail" data-visited={island.stars === 5}
+      {islands.slice(0, -1).map((island, i) => <img key={island.name} className="paths-map-trail" data-visited={island.stars === maktabIslandStars}
         src={asset(`design/paths-map-trail-${i + 1}.svg`)} width="390" height="640" alt="" />)}
-      {islands.map((island, i) => <div className="paths-island" data-island={i + 1} key={island.name} data-state={island.stars === 5 ? "done" : i === current ? "current" : "open"}>
-        <span className="paths-island-circle" aria-hidden="true">
-          <DesignIcon name={island.stars === 5 ? "paths-map-star" : "paths-map-star-dim"} size={island.stars === 5 ? 32 : 28} />
-        </span>
-        {i === current && <span className="paths-island-glyph"><ArabicText text={island.arabic} /></span>}
-        <Link to={island.to} className="paths-island-label" aria-label={`${t(island.name)} · ${t(island.stars === 5 ? "pathsStarSticker" : "pathsStars", { count: island.stars })}`}>
-          <strong>{t(island.name)}</strong>
-        </Link>
-        {i === current && <span className="chip soft caption">{t("pathsStars", { count: island.stars })}</span>}
-      </div>)}
+      {islands.map((island, i) => {
+        const done = island.stars === maktabIslandStars;
+        const active = i === current;
+        const stars = t("pathsStars", { count: island.stars, total: maktabIslandStars });
+        const name = t(island.name);
+        const label = [name, stars, ...(done ? [t("pathsStarSticker")] : [])].join(" · ");
+        return <div className="paths-island" data-island={i + 1} key={island.name} data-state={done ? "done" : active ? "current" : "open"}>
+          <span className="paths-island-circle" aria-hidden="true">
+            <DesignIcon name={done ? "paths-map-star" : "paths-map-star-dim"} size={done ? 32 : 28} />
+          </span>
+          {active && <span className="paths-island-glyph"><ArabicText text={island.arabic} /></span>}
+          <Link to={island.to} className="paths-island-label" aria-label={label} aria-current={active ? "step" : undefined}>
+            <strong>{name}</strong>
+          </Link>
+          {!done && (active || island.stars > 0) && <span className="chip soft caption">{stars}</span>}
+        </div>;
+      })}
     </div></div>
     <div className="equal-row"><Link className="action soft" to={root}>{t("paths")}</Link><Link className="action light" to="/learn/tools">{t("pathsStudyLibrary")}</Link></div>
   </div>;

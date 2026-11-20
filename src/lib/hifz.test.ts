@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { message } from "./copy";
 import { chapters, essentialPassages, getHifzPassage, groupPortions, juzs, maxPortionAyahs, maxPortionWords, nextPortion,
   passageLabel, portionBucket, portionPlan, ratePortion, rateRecitalPortion, recitalProgress, studyPhrases, verseText, type JuzRecital, type StudyQuran } from "./hifz";
-import { juzAmma, learnedSurahs, levels, patternPracticePath, patternReviewPrefix, tracks } from "./learningPaths";
+import { juzAmma, learnedSurahs, levels, patternPracticePath, patternReviewPrefix, qaidaIslandProgress, tracks } from "./learningPaths";
 import { essentialPassageTitle } from "./paths-copy";
 import { parseCorpus } from "./morphology";
 import { reviewDestination } from "./studyDesk";
@@ -245,6 +245,12 @@ describe("Learning path progress", () => {
       expect(essentialPassageTitle(passage, english)).toBe(passage.title);
       expect(essentialPassageTitle(passage, bangla)).toMatch(/\p{Script=Bengali}/u);
     }
+  });
+
+  it("resumes a Qaida island at the first unfinished lesson and awards stars for distinct lessons", () => {
+    expect(qaidaIslandProgress([1, 4, 4, 6, 7], 4, 6)).toEqual({ stars: 3, to: "/learn/qaida/5" });
+    expect(qaidaIslandProgress([4, 5, 6], 4, 6)).toEqual({ stars: 5, to: "/learn/qaida/4" });
+    expect(qaidaIslandProgress([1, 2, 3], 4, 6)).toEqual({ stars: 0, to: "/learn/qaida/4" });
   });
 
   it("requires success on three different days and keeps a separate long-term schedule", () => {
