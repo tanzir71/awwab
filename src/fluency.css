@@ -23,7 +23,7 @@
 .word-bank-search input { background: transparent; color: var(--c-ink); min-width: 0; width: 100%; min-height: 32px; padding-block: 4px; border: 0; font: var(--type-small); }
 .word-bank-search input::placeholder { color: var(--c-ink-muted); opacity: 1; }
 .word-bank-sort select { border: 0; padding: 4px 8px; max-width: 100%; min-height: 36px; font: var(--type-small); }
-.word-bank-scroll { width: 100%; overflow-x: auto; scrollbar-width: thin; }
+.word-bank-scroll { position: relative; width: 100%; overflow-x: auto; scrollbar-width: thin; }
 .word-bank-table { width: 100%; border-collapse: separate; border-spacing: 0 3px; text-align: start; min-width: 655px; }
 .word-bank-table th { white-space: nowrap; font: var(--type-caption); letter-spacing: var(--tracking-caption); text-transform: uppercase; color: var(--c-ink-muted); padding: 0 8px 3px; }
 .word-bank-table td { padding: 0 8px; height: 41px; font: 500 13px/17px var(--font-body); }
