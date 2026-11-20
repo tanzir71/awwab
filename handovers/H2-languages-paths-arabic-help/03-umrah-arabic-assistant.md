@@ -55,6 +55,8 @@ English and Bangla meanings are bundled with the phrase data. The locale review 
 
 The Indonesian draft includes all 63 phrase meanings, the sign labels, helper directions, and the controls used by the phone and desktop phrase views. Review the meanings alongside the Arabic text in the existing phrase data. The emergency-card wording follows the regional numbers in the official Saudi guide. [Saudi emergency guide](https://apd.gov.sa/web/content/84584)
 
+The Urdu draft covers the same 63 phrases, sign labels and helper directions, plus the phone and desktop phrase controls. Review the gate, destination and family fields alongside their Arabic audio. The Urdu emergency card follows the existing regional wording. [Saudi emergency guide](https://apd.gov.sa/web/content/84584)
+
 The phone phrase cards, Show mode and desktop practice use the downloaded catalogue offline. Search matches the selected translation, English, Bangla, Arabic and transliteration. Arabic text, variant selections and audio filenames continue to come from the phrase data.
 
 ## Data model
