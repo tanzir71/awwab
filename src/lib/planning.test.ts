@@ -25,6 +25,8 @@ describe("localized number entry", () => {
     expect(readLocalizedNumber("১.২৫", "bn", 2)).toBe(1.25);
     expect(readLocalizedNumber(".25", "bn", 2)).toBe(0.25);
     expect(readLocalizedNumber("١٫٢٥", "ar", 2)).toBe(1.25);
+    expect(readLocalizedNumber("۱۲٫۵۰", "fa-u-nu-latn", 2)).toBe(12.5);
+    expect(readLocalizedNumber("١٢", "ckb-u-nu-latn")).toBe(12);
     expect(readLocalizedNumber("1,25", "fr", 2)).toBe(1.25);
     expect(readLocalizedNumber("१२", "hi-u-nu-deva")).toBe(12);
   });

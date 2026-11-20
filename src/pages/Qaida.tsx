@@ -36,8 +36,8 @@ const desktopLessonNames: Record<number, string> = {
 };
 
 function LessonList({ active, completed }: { active: number; completed: number[] }) {
-  const { t, language } = useCopy();
-  const number = new Intl.NumberFormat(language);
+  const { t, language, locale } = useCopy();
+  const number = new Intl.NumberFormat(locale);
   return <aside className="card qaida-lessons" aria-label={t("qaidaLessons")}>
     <div className="row-between"><h2>{t("qaidaLessonList")}</h2><strong>{number.format(qaida.lessons.length)}</strong></div>
     {qaida.lessons.map(item => <Link key={item.n} to={`/learn/qaida/${item.n}`}
@@ -207,8 +207,8 @@ function SpellEquation({ text }: { text: string }) {
 }
 
 export function Qaida({ settings, desktop }: { settings: Settings; desktop: boolean }) {
-  const { t, language } = useCopy();
-  const number = new Intl.NumberFormat(language);
+  const { t, language, locale } = useCopy();
+  const number = new Intl.NumberFormat(locale);
   const { id } = useParams();
   const current = useRecord("qaida-current", 1);
   const completed = useRecord<number[]>("qaida-complete", []);

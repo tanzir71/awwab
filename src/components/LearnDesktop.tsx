@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } 
 import { usePrayerLogs, useQaidaPlace, useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { addDays, dateKey, formatDay, formatTime } from "@/lib/dates";
-import { calendarDefaults, hijriOn, hijriMonths } from "@/lib/hijri";
+import { calendarDefaults, hijriOn, hijriMonthName } from "@/lib/hijri";
 import { currentPrayerSchedule } from "@/lib/prayerServices";
 import { qaidaExamples, qaidaRows, parseQaidaReview } from "@/lib/qaidaPractice";
 import { coreWordCoverage, coreWordTotal, knownCoreQuranWords, quranText } from "@/lib/quran";
@@ -66,8 +66,8 @@ function useDeskProgress(settings: Settings, now: Date) {
 type DeskProgress = ReturnType<typeof useDeskProgress>;
 
 function LessonPath({ completed, current, maktab = false }: { completed: number[]; current: number; maktab?: boolean }) {
-  const { t, language } = useCopy();
-  const number = new Intl.NumberFormat(language);
+  const { t, language, locale } = useCopy();
+  const number = new Intl.NumberFormat(locale);
   return <ol className="desk-lesson-path" aria-label={t("qaidaPath")}>
     {qaida.lessons.map(lesson => {
       const name = studyNames.lesson(language, lesson.n, lesson.title);
@@ -128,9 +128,9 @@ function CustomisePlan({ hidden, items }: { hidden: DeskActivity[]; items: Recor
 }
 
 function AdultLearn({ progress, settings, now }: { progress: DeskProgress; settings: Settings; now: Date }) {
-  const { t, language } = useCopy();
-  const number = new Intl.NumberFormat(language);
-  const percentage = new Intl.NumberFormat(language, { style: "percent" });
+  const { t, language, locale } = useCopy();
+  const number = new Intl.NumberFormat(locale);
+  const percentage = new Intl.NumberFormat(locale, { style: "percent" });
   const { date, lesson, row, rows, completed, activeDays, writing, reviews, known } = progress;
   const hidden = useRecord<DeskActivity[]>("study-plan-hidden", []);
   const { due, forecast, attempts, correct } = reviewQueue(reviews, now, settings.city.timeZone);
@@ -179,8 +179,8 @@ function AdultLearn({ progress, settings, now }: { progress: DeskProgress; setti
     <section className="card desk-metric"><p className="caption">{t("deskStudyStreak")}</p><h2>{t("studyDays", { count: activeDays.length })}</h2>
       <p className="muted">{t("deskPausedStreak")}</p>
       <div className="week-strip equal-row">{Array.from({ length: 7 }, (_, index) => addDays(monday, index)).map(day =>
-        <span key={day} data-done={activeDays.includes(day)} title={formatDay(day, { weekday: "long", month: "short", day: "numeric" }, language)}>
-          {formatDay(day, { weekday: "narrow" }, language)}</span>)}</div>
+        <span key={day} data-done={activeDays.includes(day)} title={formatDay(day, { weekday: "long", month: "short", day: "numeric" }, locale)}>
+          {formatDay(day, { weekday: "narrow" }, locale)}</span>)}</div>
     </section>
     <section className="card desk-metric"><p className="caption">{t("dueForReview")}</p><h2>{t("studyItems", { count: due.length })}</h2>
       <p className="muted">{due.length ? t("deskReviewEstimate", { minutes: due.length + dueSurahs.length + 2 * dueLetters,
@@ -217,9 +217,9 @@ function AdultLearn({ progress, settings, now }: { progress: DeskProgress; setti
     <section className="card desk-reviews">
       <div className="row-between desk-heading"><h2>{t("reviewsAhead")}</h2><span>{t("sevenDays")}</span></div>
       <ol className="forecast">{forecast.map(({ day, count }, index) => <li key={day} data-today={index === 0}
-        title={t("deskChartLabel", { day: formatDay(day, { weekday: "long" }, language), count })}>
+        title={t("deskChartLabel", { day: formatDay(day, { weekday: "long" }, locale), count })}>
         <small>{number.format(count)}</small><i aria-hidden="true" style={{ "--bar-height": Math.max(2, 90 * count / maximum) + "px" } as CSSProperties} />
-        <small className="caption">{formatDay(day, { weekday: "short" }, language)}</small></li>)}</ol>
+        <small className="caption">{formatDay(day, { weekday: "short" }, locale)}</small></li>)}</ol>
       <div className="row-between desk-accuracy"><strong>{t("deskReviewAccuracy")}</strong>
         <span>{attempts ? t("deskAccuracyWindow", { rate: correct / attempts }) : "—"}</span></div>
       <p className="muted">{t("deskSpacing")}</p>
@@ -256,16 +256,16 @@ function AdultLearn({ progress, settings, now }: { progress: DeskProgress; setti
 }
 
 function MaktabLearn({ progress, settings, now }: { progress: DeskProgress; settings: Settings; now: Date }) {
-  const { t, language } = useCopy();
-  const number = new Intl.NumberFormat(language);
+  const { t, language, locale } = useCopy();
+  const number = new Intl.NumberFormat(locale);
   const { date, lesson, completed, activeDays, writing, reviews, known } = progress;
   const logs = usePrayerLogs();
   const calendar = useRecord("calendar", calendarDefaults);
   const lines = useRecord<string[]>("surah-lines-known", []);
   const { next } = currentPrayerSchedule(settings.city, settings.method, settings.school, now, logs);
   const hijri = hijriOn(date, settings.hijriAdjust, calendar.anchors);
-  const today = formatDay(date, { weekday: "short", day: "numeric", month: "short" }, language);
-  const nextPrayer = Number.isFinite(next.starts.valueOf()) && t("deskTimeAt", { name: t(next.id), time: formatTime(next.starts, settings.city.timeZone, language, true) });
+  const today = formatDay(date, { weekday: "short", day: "numeric", month: "short" }, locale);
+  const nextPrayer = Number.isFinite(next.starts.valueOf()) && t("deskTimeAt", { name: t(next.id), time: formatTime(next.starts, settings.city.timeZone, locale, true) });
   const chapter = chapters.find(item => reviews[item.number] && isDue(reviews[item.number], now)) ??
     chapters.find(item => lines.some(ref => ref.startsWith(item.number + ":"))) ?? chapters[3];
   const elapsedDays = (Date.parse(date) - alphabetCycleStart) / 86_400_000;
@@ -285,7 +285,7 @@ function MaktabLearn({ progress, settings, now }: { progress: DeskProgress; sett
   ];
   return <div className="maktab-desk">
     <header className="desk-maktab-header">
-      <div><p className="caption">{today} · {number.format(hijri.day)} {hijriMonths[hijri.month - 1]}</p><h1>{t("deskLearnToday")}</h1></div>
+      <div><p className="caption">{today} · {number.format(hijri.day)} {hijriMonthName(hijri.month, locale)}</p><h1>{t("deskLearnToday")}</h1></div>
       {nextPrayer && <Link className="chip" to="/today"><DesignIcon name="maktab-desk-clock1" size={16} />{nextPrayer}</Link>}
       <Link className="action soft" to={"/print/takhti/" + family.id}><DesignIcon name="maktab-desk-download1" size={16} />{t("printPracticeSheet")}</Link>
     </header>

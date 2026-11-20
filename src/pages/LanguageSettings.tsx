@@ -8,7 +8,7 @@ import { WordingSuggestionCard } from "@/components/WordingSuggestions";
 import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useDesktop } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
-import { glossaryOptions, glossaryValue, isAvailableLanguage, languages, languageMatches, salahVariants, suggestedLanguage,
+import { formatLocale, glossaryOptions, glossaryValue, isAvailableLanguage, languages, languageMatches, nativeNumberingSystem, salahVariants, suggestedLanguage,
   type AppLanguage, type GlossaryTerm, type LanguageItem } from "@/lib/languagePreferences";
 import { hasLocaleMessages, installedLocalePacks, localePackAsset } from "@/lib/localePacks";
 import { selectAppLanguage, updateSettings, updateWordChoice, type Settings } from "@/lib/storageService";
@@ -137,8 +137,10 @@ function ReadingToggle({ title, hint, enabled, disabled = false, onToggle }: {
 
 function ReadingHelp({ settings }: { settings: Settings }) {
   const { t } = useCopy();
-  const localEnglish = settings.language === "en";
-  const bangla = settings.language === "bn";
+  const { language, nativeDigits } = settings;
+  const localEnglish = language === "en";
+  const bangla = language === "bn";
+  const localDigits = nativeNumberingSystem(language) !== "latn";
   function save(patch: Partial<Settings>) {
     void updateSettings(patch).catch(() => toast.error(t("saveError")));
   }
@@ -148,8 +150,10 @@ function ReadingHelp({ settings }: { settings: Settings }) {
       enabled={localEnglish && settings.quranMeanings !== false} disabled={!localEnglish} onToggle={quranMeanings => save({ quranMeanings })} />
     <ReadingToggle title={t("settingsMeaningEnglish")} hint={t("settingsMeaningEnglishHint")}
       enabled={settings.englishMeaning ?? !localEnglish} onToggle={englishMeaning => save({ englishMeaning })} />
-    {bangla && <ReadingToggle title={t("settingsNativeDigits")} hint={t("settingsNativeDigitsHint")}
-      enabled={settings.nativeDigits !== false} onToggle={nativeDigits => save({ nativeDigits })} />}
+    {localDigits && <ReadingToggle title={bangla ? t("settingsNativeDigits") : t("settingsLocaleDigits", {
+      example: new Intl.NumberFormat(formatLocale({ language })).format(123),
+    })} hint={t("settingsNativeDigitsHint")}
+      enabled={nativeDigits !== false} onToggle={nativeDigits => save({ nativeDigits })} />}
   </section>;
 }
 

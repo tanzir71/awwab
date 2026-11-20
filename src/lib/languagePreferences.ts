@@ -58,6 +58,8 @@ export function glossaryValue(language: AppLanguage, term: GlossaryTerm, choices
 
 const banglaSpellings = /সালাত|নামাজ|ওজু|অজু|যোহর|জোহর|এশা|ইশা|কাযা|কাজা|তাওবা|তওবা|রামাদান|রমজান/gu;
 const termsBySpelling = new Map(glossaryTerms.flatMap(term => glossaryOptions("bn", term).map(option => [option, term] as const)));
+const localeNumberingSystems = new Map(inventory.locales.map(item => [item.code, item.digits.split(" ", 1)[0]]));
+const browserNumberingSystems = new Map<string, string>();
 
 export function applyGlossary(format: string, language: AppLanguage, choices?: WordChoices) {
   if (language !== "bn") return format;
@@ -72,8 +74,18 @@ export function glossaryArguments(format: string, language: AppLanguage, choices
   return values;
 }
 
+export function nativeNumberingSystem(language: AppLanguage) {
+  return localeNumberingSystems.get(language) ?? "latn";
+}
+
 export function formatLocale({ language, nativeDigits }: { language: AppLanguage; nativeDigits?: boolean }) {
-  return language === "bn" && nativeDigits === false ? "bn-u-nu-latn" : language;
+  const desired = nativeDigits === false ? "latn" : nativeNumberingSystem(language);
+  let browser = browserNumberingSystems.get(language);
+  if (!browser) {
+    browser = new Intl.NumberFormat(language).resolvedOptions().numberingSystem;
+    browserNumberingSystems.set(language, browser);
+  }
+  return browser === desired ? language : `${language}-u-nu-${desired}`;
 }
 
 export function showEnglishQuranMeaning(preferences: { language: AppLanguage; quranMeanings?: boolean; englishMeaning?: boolean }) {

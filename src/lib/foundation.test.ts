@@ -1,6 +1,6 @@
 import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, it } from "vitest";
-import { addDays, formatDay } from "./dates";
+import { addDays, formatDay, formatTime } from "./dates";
 import { baselineMonthStart, calendarEventById, calendarEvents, hijriOn, monthStart, possibleMonthStarts } from "./hijri";
 import { cities, currentPrayerSchedule, prayerDay, schedule } from "./prayerServices";
 import { db, backup, defaults, exportUmrahTrip, getRecord, logPrayer, migrateLegacy, prayerStatistics, readUmrahTripFile, restoreBackup, updateSettings } from "./storageService";
@@ -354,6 +354,24 @@ describe("language settings", () => {
     expect(message({ ...defaults, language: "id", wordChoices }, "dhuhr")).toBe("Dzuhur");
     expect(message({ ...defaults, language: "id", wordChoices }, "surahsForSalah")).toBe("Surahs for sholat");
     expect(message({ ...defaults, language: "id" }, "dhuhr")).toBe("Zuhur");
+  });
+
+  it("uses the handover numbering systems for counts, dates and times", () => {
+    for (const [language, sample] of [
+      ["bn", "১২৩"], ["fa", "۱۲۳"], ["ps", "۱۲۳"], ["ckb", "١٢٣"], ["ur", "123"], ["sd", "123"], ["pa-Arab", "123"],
+    ]) {
+      expect(new Intl.NumberFormat(formatLocale({ language })).format(123)).toBe(sample);
+      expect(new Intl.NumberFormat(formatLocale({ language, nativeDigits: false })).format(123)).toBe("123");
+    }
+    const native = formatLocale({ language: "fa" });
+    const latin = formatLocale({ language: "fa", nativeDigits: false });
+    const time = new Date("2026-11-20T12:34:00Z");
+    expect(formatDay("2026-11-20", { day: "numeric" }, native)).toMatch(/۲۰/u);
+    expect(formatDay("2026-11-20", { day: "numeric" }, latin)).toMatch(/20/u);
+    expect(formatTime(time, "UTC", native)).toMatch(/۱۲:۳۴/u);
+    expect(formatTime(time, "UTC", latin)).toMatch(/12:34/u);
+    expect(message({ ...defaults, language: "fa" }, "qadaRamadan", { count: 12 })).toContain("۱۲");
+    expect(message({ ...defaults, language: "fa", nativeDigits: false }, "qadaRamadan", { count: 12 })).toContain("12");
   });
 });
 

@@ -46,6 +46,7 @@ export const settingsMessages = {
   settingsMeaningEnglish: { en: "Show English under each line", bn: "প্রতি আয়াতের নিচে ইংরেজি দেখান" },
   settingsMeaningEnglishHint: { en: "Show Pickthall’s translation in Surahs and Understand your salah.", bn: "সূরা ও ‘নামাজ বুঝে পড়ি’ পাতায় পিকথলের অনুবাদ দেখান।" },
   settingsNativeDigits: { en: "Numbers in Bangla digits (১২৩)", bn: "বাংলা অঙ্কে সংখ্যা (১২৩)" },
+  settingsLocaleDigits: { en: "Numbers in local digits ({example})", bn: "স্থানীয় অঙ্কে সংখ্যা ({example})" },
   settingsNativeDigitsHint: { en: "Off: 123", bn: "বন্ধ থাকলে 123" },
   settingsYourWords: { en: "Your words", bn: "আপনার পছন্দের শব্দ" },
   settingsYourWordsSub: { en: "How Muslims around you say it", bn: "আপনার আশপাশের মুসলিমরা যেভাবে বলেন" },

@@ -59,10 +59,10 @@ function RootExplorer({ root, corpus, pinned }: { root: string; corpus: Corpus |
 }
 
 export function WordBank({ settings, desktop, now }: { settings: Settings; desktop: boolean; now: Date }) {
-  const { language, t } = useCopy();
+  const { language, locale, t } = useCopy();
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
-  const numbers = new Intl.NumberFormat(language);
+  const numbers = new Intl.NumberFormat(locale);
   const zone = settings.city.timeZone;
   const [corpus, setCorpus] = useState<Corpus>();
   const [error, setError] = useState(false);
@@ -211,7 +211,7 @@ export function WordBank({ settings, desktop, now }: { settings: Settings; deskt
               <td><button className="word-bank-state" data-state={item.state} aria-label={t("wordBankReviewWord", { status: t(primaryStatus[item.state]), word: item.tr })}
                 onClick={() => beginReview(item.key)} type="button">{t(primaryStatus[item.state])}</button></td>
               <td data-due={item.due}>{item.review
-                ? item.due ? t("today") : formatDay(dateKey(new Date(item.review.card.due), zone), { day: "numeric", month: "short" }, language)
+                ? item.due ? t("today") : formatDay(dateKey(new Date(item.review.card.due), zone), { day: "numeric", month: "short" }, locale)
                 : "—"}</td>
             </tr>)}</tbody>
           </table>
