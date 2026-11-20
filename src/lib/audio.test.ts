@@ -8,7 +8,7 @@ import { askAudioPack, askClipIds, askPackPaths, askPlaybackVoice, askVoiceInsta
 import { askClipPath, askPhrase, renderAsk } from "./umrahAsk";
 import { asset } from "./config";
 import { speakCourses, speakLessonContent, speakUnitNumber } from "./speakCurriculum";
-import { hasSharedSpeakAudio, sharedSpeakClips } from "./speakAskAudio";
+import { hasSharedSpeakAudio, placementSpeakPhraseIds, sharedSpeakClips } from "./speakAskAudio";
 import { umrahGuidePack, umrahGuidePacks } from "./umrahGuideAudio";
 
 describe("Generated Umrah narration", () => {
@@ -154,6 +154,12 @@ describe("Speak lesson recordings", () => {
   it("uses the same Saudi phrases and recordings in Speak and Ask in Arabic", () => {
     const shared = new Set(sharedSpeakClips);
     const packPaths = new Set(askPackPaths());
+    for (const id of placementSpeakPhraseIds) {
+      expect(hasSharedSpeakAudio([id], "saudi", "female")).toBe(true);
+      const path = askClipPath("saudi", "female", id);
+      expect(shared.has(path)).toBe(true);
+      expect(packPaths.has(path)).toBe(true);
+    }
     for (const unit of speakCourses["saudi-hijazi"]["umrah-hajj"]) {
       const { lines } = speakLessonContent(unit);
       const ids = [lines[0].askId, lines[2].askId];

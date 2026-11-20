@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { message } from "./copy";
 import { chapters, essentialPassages, getHifzPassage, groupPortions, juzs, maxPortionAyahs, maxPortionWords, nextPortion,
   passageLabel, portionBucket, portionPlan, ratePortion, rateRecitalPortion, recitalProgress, studyPhrases, verseText, type JuzRecital, type StudyQuran } from "./hifz";
-import { juzAmma, learnedSurahs, levels, patternPracticePath, patternReviewPrefix, qaidaIslandProgress, tracks } from "./learningPaths";
+import { juzAmma, learnedSurahs, levels, patternPracticePath, patternReviewPrefix, placementStartingLevel, qaidaIslandProgress, tracks } from "./learningPaths";
 import { essentialPassageTitle } from "./paths-copy";
 import { parseCorpus } from "./morphology";
 import { reviewDestination } from "./studyDesk";
@@ -24,6 +24,11 @@ import { formatQuranReference } from "./quran";
 const quran = JSON.parse(gunzipSync(readFileSync(new URL("../../public/data/quran-study-v1.json.gz", import.meta.url))).toString()) as StudyQuran;
 
 describe("Offline Quran study edition", () => {
+  it("suggests the second level only after all placement answers are recalled", () => {
+    expect(placementStartingLevel(0, 0)).toBe(1);
+    expect(placementStartingLevel(3, 4)).toBe(1);
+    expect(placementStartingLevel(4, 4)).toBe(2);
+  });
   it("formats chapter and āyah numbers without changing reference separators", () => {
     expect(formatQuranReference("67:1–5 · 103:2", "bn")).toBe("৬৭:১–৫ · ১০৩:২");
     expect(formatQuranReference("67:1–5", "bn-u-nu-latn")).toBe("67:1–5");

@@ -94,7 +94,7 @@ function PhraseLibrary() {
         <PhraseText phrase={phrase} variety={variety} gate={requestedGate} />
         {active === phrase.id && !(isGate && invalidGate) ?
           <AskAudioButton key={`${variety}:${isGate ? requestedGate : ""}:${audioSettings.voice}`} ids={askClipIds(phrase, { variety, gate: requestedGate })}
-            settings={{ ...askDefaults, variety, voice: audioSettings.voice }} label="askPlay" light /> :
+            settings={{ ...askDefaults, variety, voice: audioSettings.voice }} label={t("askPlay")} light /> :
           <button type="button" className="text-button" disabled={isGate && invalidGate} onClick={() => setActive(phrase.id)}>{t("practise")}</button>}
       </li>;
     })}</ul>

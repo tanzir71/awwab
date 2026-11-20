@@ -9,9 +9,6 @@
   "src/components/UmrahGuideVoice.tsx": {
     "AI4Bharat Rasa": 1
   },
-  "src/components/UmrahPreparation.tsx": {
-    "askPlay": 1
-  },
   "src/components/WordPanel.tsx": {
     "Quranic Arabic Corpus 0.4": 1
   },
@@ -54,12 +51,6 @@
   },
   "src/pages/SalahWords.tsx": {
     "Quranic Arabic Corpus 0.4": 1
-  },
-  "src/pages/UmrahAsk.tsx": {
-    "askPlay": 1,
-    "askPlayAgain": 1,
-    "askPlayHotel": 1,
-    "askPlayShort": 1
   },
   "src/pages/UmrahMap.tsx": {
     "Protomaps": 1,

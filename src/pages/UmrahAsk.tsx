@@ -252,7 +252,7 @@ function DeviceVoice({ text, slow, layout = "" }: { text: string; slow: boolean;
 function PhraseControls({ item }: { item: ReturnType<typeof usePhrase> }) {
   const { t } = useCopy();
   return <div className="ask-player">
-    <AskAudioButton ids={item.clips} settings={item.settings} label="askPlay" />
+    <AskAudioButton ids={item.clips} settings={item.settings} label={t("askPlay")} />
     <button type="button" className={`action ${item.settings.slow ? "soft" : "light"}`} aria-pressed={item.settings.slow} onClick={() => item.change({ slow: !item.settings.slow })}>{t("askSlow")}</button>
     <Dialog><DialogTrigger asChild><button type="button" className="action light">{t("askVoice")}</button></DialogTrigger>
       <DialogContent className="awwab-dialog" aria-describedby={undefined}><DialogTitle>{t("askVoice")}</DialogTitle>
@@ -378,7 +378,7 @@ export function UmrahAskShow() {
             onWordSelected={() => { setReply(replyKey[direction.en]); return false; }} />
         </div>)}</div>{reply && <p className="ask-reply" role="status">{t("askTapped", { direction: t(reply) })}</p>}
       </section>}
-      {item.custom ? <DeviceVoice text={item.custom.ar} slow={settings.slow} /> : <AskAudioButton ids={clipIds} settings={settings} label="askPlayAgain" />}
+      {item.custom ? <DeviceVoice text={item.custom.ar} slow={settings.slow} /> : <AskAudioButton ids={clipIds} settings={settings} label={t("askPlayAgain")} />}
     </div>
   </section>;
 }
@@ -434,7 +434,7 @@ export function UmrahAskCards() {
       {prep.hotelAddress && <div className="ask-hotel-address"><PhraseArabic text={prep.hotelAddress} /></div>}
       {trip.hotel.name && <p className="muted small">{trip.hotel.name}</p>}
       {!prep.hotelArabic && <p className="muted small">{t("askHotelEmpty")}</p>}
-      <div className="ask-card-actions"><AskAudioButton ids={["take-me-hotel"]} settings={settings} label="askPlayHotel" icon={false} />
+      <div className="ask-card-actions"><AskAudioButton ids={["take-me-hotel"]} settings={settings} label={t("askPlayHotel")} icon={false} />
         <Link className="action plain" to={showLink("hotel-card")}>{t("askShowShort")}</Link></div>
     </section>
     <section className="card ask-urgent compact-stack" id="if-lost">
@@ -444,7 +444,7 @@ export function UmrahAskCards() {
       {(prep.leader || prep.phone) && <div className="ask-contact row-between"><div><p className="small muted">{t("umrahPrepLeader")}{prep.leader && ` · ${prep.leader}`}</p>
         <bdi><strong>{maskedPhone(prep.phone)}</strong></bdi></div>{phoneHref(prep.phone) && <a className="text-button" href={phoneHref(prep.phone)}>{t("askCall")}</a>}</div>}
       <div className="ask-card-actions"><Link className="action" to={showLink("lost-card")}>{t("askShow")}</Link>
-        <AskAudioButton ids={[...askClipIds(askPhrase("lost"), settings), "call-number"]} settings={settings} label="askPlayShort" icon={false} light /></div>
+        <AskAudioButton ids={[...askClipIds(askPhrase("lost"), settings), "call-number"]} settings={settings} label={t("askPlayShort")} icon={false} light /></div>
     </section>
     <section className="card ask-emergency compact-stack"><div className="row-between"><div className="with-icon">
       <DesignIcon name="ask-icon-alert" size={18} /><div><h2>{t("askEmergency")}</h2><small>{t("askEmergencyRegions")}</small></div></div>

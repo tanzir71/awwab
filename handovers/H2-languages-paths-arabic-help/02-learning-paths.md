@@ -18,6 +18,8 @@ The Paths hub (A28) shows one **Recommended next** item, the four paths with a 5
 
 The Bangla preview covers all 20 level names, level summaries, placement recommendations, the Read and Understand starter outlines, and essential passage titles. The placement check uses the existing attributed English Quran edition for revealed meanings.
 
+Placement checks show the selected Quran script and cite each displayed āyah. The Speak check uses four generated Saudi Arabic answers bundled for offline playback. Recalling all four suggests A2 Everyday.
+
 ## Memorise
 - **Essential passages** (A30): Āyat al-Kursī, last two āyāt of Al-Baqarah, Al-Mulk, As-Sajdah, first ten of Al-Kahf, end of Āl ʿImrān, Yā-Sīn, Ar-Raḥmān, Al-Wāqiʿah, end of Al-Ḥashr.
 - **Virtues rule:** show a "Why this surah" card only with a ṣaḥīḥ or ḥasan source (collection, number, grade). Where narrations are weak (Yā-Sīn, Al-Wāqiʿah …) say so and show none.

@@ -5,6 +5,7 @@ import { type Reviews } from "./reviews";
 export const tracks = ["read", "memorise", "understand", "speak"] as const;
 export type Track = typeof tracks[number];
 export type PathPlacement = Partial<Record<Track, { level: number; score: number; total: number; day: string }>>;
+export const placementStartingLevel = (score: number, total: number) => total > 0 && score === total ? 2 : 1;
 type PathLevel = { titleKey: string; tag?: string };
 export const levels: Record<Track, PathLevel[]> = {
   read: [

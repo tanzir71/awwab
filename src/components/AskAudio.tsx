@@ -95,7 +95,7 @@ export function AskAudioButton({ ids, settings, label, icon = true, light = fals
 
   return <div className="ask-recording">
     <button type="button" className={light ? "action light" : "action"} disabled={pending} onClick={() => { try { play(); } catch { setStatus(t("askAudioError")); } }}
-      aria-describedby={description ? id : undefined}>{icon && <DesignIcon name="ask-icon-volume" size={18} />}{t(playing ? "askStop" : label)}</button>
+      aria-describedby={description ? id : undefined}>{icon && <DesignIcon name="ask-icon-volume" size={18} />}{playing ? t("askStop") : label}</button>
     {description && <p id={id} className="small muted" role={status ? "status" : undefined}>{description}</p>}
   </div>;
 }
