@@ -1,5 +1,5 @@
 export const present = value => typeof value === "string" && Boolean(value.trim());
-const https = value => present(value) && URL.canParse(value) && new URL(value).protocol === "https:";
+export const https = value => present(value) && URL.canParse(value) && new URL(value).protocol === "https:";
 
 export function checkTranslationAttribution(edition) {
   const { credit, source, license, licenseUrl } = edition ?? {};

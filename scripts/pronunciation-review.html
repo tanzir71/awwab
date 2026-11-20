@@ -54,6 +54,9 @@
     <p lang="ar" dir="rtl" id="arabic"></p>
     <div id="other-script" hidden>IndoPak <p lang="ar" dir="rtl" id="indopak"></p></div>
     <p id="transliteration"></p>
+    <p id="translation-credit" hidden></p>
+    <p id="translation" hidden></p>
+    <p id="english-credit" hidden></p>
     <p id="meaning"></p>
     <p id="bangla" lang="bn" dir="auto"></p>
     <p id="spoken">Text used for speech <bdi lang="ar" dir="rtl" id="spoken-arabic"></bdi></p>
@@ -104,7 +107,7 @@
   byId("group-label").textContent = source.groupLabel;
   byId("edition").hidden = !source.editionNotice;
   byId("notice-text").textContent = source.editionNotice ?? "";
-  byId("coverage").textContent = `Draft review · ${source.rows.length} entries · ${source.clipCount} recordings`;
+  byId("coverage").textContent = `Draft review · ${source.rows.length} entries${source.clipCount ? ` · ${source.clipCount} recordings` : ""}`;
   for (const [id, item] of Object.entries(source.varieties)) {
     variety.add(new Option(item.label, id));
   }
@@ -134,6 +137,14 @@
     byId("indopak").textContent = row.expected.indopak ?? "";
     byId("transliteration").textContent = row.expected.tr ?? "";
     byId("transliteration").hidden = !row.expected.tr;
+    for (const id of ["translation", "translation-credit", "english-credit"]) byId(id).hidden = !row.expected.translation;
+    if (row.expected.translation) {
+      byId("translation").textContent = row.expected.translation;
+      byId("translation").lang = source.translation.locale;
+      byId("translation").dir = source.translation.dir;
+      byId("translation-credit").textContent = source.translation.credit;
+      byId("english-credit").textContent = "English comparison · M. M. Pickthall";
+    }
     byId("meaning").textContent = row.expected.en ?? "";
     byId("meaning").hidden = !row.expected.en;
     byId("bangla").textContent = row.expected.bn ?? "";

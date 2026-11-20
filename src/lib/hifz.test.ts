@@ -25,6 +25,7 @@ import { newReview } from "./reviews";
 import { practiceChapters, readingPortions } from "./readingPractice";
 import { formatQuranReference } from "./quran";
 import { checkQuranWordEdition } from "../../scripts/quran-word-edition.mjs";
+import { parseNumberedQuranMeanings } from "../../scripts/quran-meaning-edition.mjs";
 
 const quran = JSON.parse(gunzipSync(readFileSync(new URL("../../public/data/quran-study-v1.json.gz", import.meta.url))).toString()) as StudyQuran;
 
@@ -153,6 +154,17 @@ describe("Offline Quran study edition", () => {
     expect(() => checkQuranWordEdition({ ...edition, words: { "72:16:8": "Fixture" } })).toThrow(/72:16:8/);
     expect(() => checkQuranWordEdition({ ...edition, indopak: { "37:130:4": "Fixture" } })).toThrow(/37:130:4/);
     expect(() => checkQuranWordEdition({ ...edition, indopak: { "95:1:2": "Fixture" } })).toThrow(/95:1:2/);
+  });
+
+  it("preserves numbered candidate meanings and rejects ambiguous verse coverage", () => {
+    const text = Object.values(quran.surahs).flat().map(({ ref }) =>
+      ref.replace(":", "|") + "|  Example | wording  ").join("\r\n");
+    const result = parseNumberedQuranMeanings(text + "\r\n\r\n# Edition notice\r\n");
+    expect(Object.keys(result.verses)).toHaveLength(6236);
+    expect(result.verses["1:1"]).toBe("  Example | wording  ");
+    expect(result.sourceNotice).toBe("# Edition notice");
+    expect(() => parseNumberedQuranMeanings(text + "\n1|1|Duplicate")).toThrow(/Duplicate Quran meaning at 1:1/);
+    expect(() => parseNumberedQuranMeanings(text.replace("114|6|", "114|7|"))).toThrow(/every canonical ayah/);
   });
 
   it("breaks āyat al-Kursī on waqf for practice while keeping its review as one āyah", () => {

@@ -36,7 +36,7 @@ export function pronunciationReview() {
   }
 
   function write(output, metadata, rows, expectedClipCount = assets.size) {
-    if (assets.size !== expectedClipCount || !assets.size || new Set(rows.map(row => row.id)).size !== rows.length) {
+    if (assets.size !== expectedClipCount || !rows.length || new Set(rows.map(row => row.id)).size !== rows.length) {
       throw new Error("The review must cover the expected recordings under unique entry identifiers.");
     }
     const source = {
