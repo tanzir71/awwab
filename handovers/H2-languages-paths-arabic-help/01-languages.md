@@ -70,7 +70,7 @@ The export includes curated word meanings for Al-Fātiḥa, Al-ʿAsr, and Salah 
 
 The Bangla export fills the remaining study glosses from `drafts/bn.json`. Reviewers can find the new entries under `supplementalDraftKeys`. Each entry is paired with its English source so the export can omit it when that source changes.
 
-The Indonesian draft covers all 4,005 messages in the current UI catalogue, including landing, onboarding, and the Adult and Maktab variants. The review export pairs them with the English source and links to screenshots for context. Indonesian is available in a local review build once the draft is loaded for testing. Publication requires two native reviewer sign-offs.
+The Indonesian draft covers all 4,005 messages in the current UI catalogue, including landing, onboarding, and the Adult and Maktab variants. The review export pairs them with the English source and links to screenshots for context. Publication requires two native reviewer sign-offs.
 
 The Indonesian draft also covers How to Pray, Return, and the make-up prayer and fasting planner. The locale export includes the existing Sayyid al-Istighfār meanings, the hope verse meaning, and the Hanafi note on sujūd al-sahw. Review these against the linked source content. The reader displays the citations alongside whichever language is available.
 
@@ -93,6 +93,10 @@ The Indonesian settings and sharing draft covers the profile, display and prayer
 The Indonesian Understand draft covers all 22 grammar lessons, the word-by-word Salah guide, and the Word Anatomy example for Al-ʿAsr. It also includes the curated word glosses for Al-Fātiḥa and Al-ʿAsr. Review the grammar terms alongside each cited example and compare the prayer and verse glosses with the original Arabic in reading order.
 
 The final Indonesian draft entries cover the study desk, Today, search, Surahs, Word Bank, Fluency, the Hadith interface, and print and audio controls. Review the Indonesian Hadith labels alongside the original reference and grade. The language catalogue and a translated Hadith edition go through separate review and licensing checks.
+
+To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
+
+The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
 
 After native review, record the reviewers in the catalogue’s `reviewers` array and set `_status` to `reviewed`. Use `node scripts/build-locale-pack.mjs <source-ui.json> <reviewed-catalogue.json> <output-directory>` to produce the UI catalogue. The build checks the source fingerprint, message coverage, mode variants, and ICU arguments. The review file retains the reviewer names.
 

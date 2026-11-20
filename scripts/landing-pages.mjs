@@ -8,15 +8,16 @@ const english = { code: "en", native: "English", dir: "ltr", script: "Latn", pat
 const sourceTemplate = new URL("../index.html", import.meta.url);
 const workerTemplate = new URL("../src/landing-sw.js", import.meta.url);
 
-export function landingPages({ base, publicUrl, mode, published }) {
-  const preview = mode === "preview" || mode === "development";
+export function landingPages({ base, publicUrl, mode, published, review }) {
+  const preview = mode === "preview" || mode === "development" || mode === "review";
   const locales = [english, ...inventory.locales.flatMap(locale => {
     const { code } = locale;
-    const pack = Object.hasOwn(published, code)
+    const pack = review?.code === code ? review.pack : Object.hasOwn(published, code)
       ? JSON.parse(readFileSync(new URL(`../public/locales/${code}.json`, import.meta.url), "utf8"))
       : undefined;
     if (!pack && !(preview && code === "bn")) return [];
-    return [{ ...locale, path: `lang/${code}.html`, messages: pack?.messages ?? banglaDraft, fonts: published[code]?.fonts ?? [] }];
+    const asset = review?.code === code ? review.asset : published[code];
+    return [{ ...locale, path: `lang/${code}.html`, messages: pack?.messages ?? banglaDraft, fonts: asset?.fonts ?? [] }];
   })];
   const href = locale => locale.code === "en" ? base : base + locale.path;
   const canonical = locale => new URL(locale.code === "en" ? "" : locale.path, publicUrl).href;

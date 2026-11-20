@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import { VitePWA } from "vite-plugin-pwa";
 import { resolve } from "node:path";
@@ -13,6 +13,7 @@ import { sharedSpeakClips } from "./src/lib/speakAskAudio";
 import { tajweedPrecache } from "./src/lib/tajweed";
 import { qaidaRecitations } from "./src/lib/qaidaRecitation";
 import { publishedLocales } from "./scripts/published-locales.mjs";
+import { reviewLocale } from "./scripts/review-locale.mjs";
 import { localeFontFiles } from "./scripts/locale-fonts.mjs";
 import { landingPages } from "./scripts/landing-pages.mjs";
 import { landingLetterKeys } from "./scripts/landing-copy.mjs";
@@ -22,12 +23,17 @@ const base = "/awwab/";
 
 export default defineConfig(({ mode }) => {
   const published = publishedLocales();
+  const isReview = mode === "review";
+  const preview = mode === "preview" || isReview;
+  const review = isReview ? reviewLocale(loadEnv(mode, __dirname, "AWWAB_REVIEW_").AWWAB_REVIEW_CATALOGUE, base) : undefined;
+  const available = review ? { ...published, [review.code]: review.asset } : published;
   return {
   base,
-  define: { __AWWAB_PUBLISHED_LOCALES__: JSON.stringify(published) },
+  define: { __AWWAB_PUBLISHED_LOCALES__: JSON.stringify(available) },
   server: { host: "127.0.0.1", port: 8080 },
   resolve: { alias: { "@": resolve(__dirname, "src") } },
   build: {
+    ...(isReview && { outDir: "dist-review" }),
     rollupOptions: {
       input: { landing: resolve(__dirname, "index.html"), app: resolve(__dirname, "app/index.html") },
       output: {
@@ -46,8 +52,8 @@ export default defineConfig(({ mode }) => {
       name: "awwab-html",
       transformIndexHtml(html) {
         if (html.includes("<!-- awwab-preview-meta -->")) {
-          return html.replace("<!-- awwab-preview-meta -->", mode === "preview" ? '<meta name="robots" content="noindex">' : "")
-            .replace("<title>awwab</title>", mode === "preview" ? "<title>awwab preview</title>" : "<title>awwab</title>");
+          return html.replace("<!-- awwab-preview-meta -->", preview ? '<meta name="robots" content="noindex">' : "")
+            .replace("<title>awwab</title>", preview ? "<title>awwab preview</title>" : "<title>awwab</title>");
         }
         if (!html.includes("<!-- awwab-welcome-verse -->")) return html;
         const verse = renderToStaticMarkup(createElement(ArabicText, {
@@ -65,8 +71,9 @@ export default defineConfig(({ mode }) => {
           .replace("<!-- awwab-letter-tiles -->", tiles.join("")).replace("<!-- awwab-asr-word -->", asrWord);
       },
     },
-    localeFontFiles(base, published),
-    landingPages({ base, publicUrl: SHARE_URL, mode, published }),
+    review?.plugin,
+    localeFontFiles(base, available),
+    landingPages({ base, publicUrl: SHARE_URL, mode, published, review }),
     react(),
     VitePWA({
       filename: "app/sw.js",
