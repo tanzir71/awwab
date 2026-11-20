@@ -8,7 +8,7 @@ import { usePrayerLogs, useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { addDays, dateKey, formatDay } from "@/lib/dates";
 import { calendarDefaults, hijriOn, monthStart } from "@/lib/hijri";
-import { assignedMosque, mosqueDefaults, mosqueTime, mosqueWeekday } from "@/lib/mosques";
+import { assignedMosque, mosqueAdhanOffset, mosqueDefaults, mosqueTime, mosqueWeekday } from "@/lib/mosques";
 import { mosqueRoleLabel } from "@/lib/mosque-copy";
 import { planMonth } from "@/lib/plan-copy";
 import { prayerCityLabel } from "@/lib/settings-copy";
@@ -127,7 +127,7 @@ export function PrintSheet({ settings, now }: { settings: Settings; now: Date })
     const savedTimeFormat = new Intl.DateTimeFormat(locale, { timeZone: "UTC", ...timeStyle });
     const time = (date: Date) => Number.isFinite(date.valueOf()) ? timeFormat.format(date) : "—";
     const savedTime = (value: string) => {
-      if (value === "adhan+5") return t("mosqueAdhanFive");
+      if (value === "adhan+5") return t("mosqueAdhanFive", mosqueAdhanOffset);
       const date = new Date(`2000-01-01T${value}:00Z`);
       return Number.isFinite(date.valueOf()) ? savedTimeFormat.format(date) : "—";
     };
@@ -166,7 +166,7 @@ export function PrintSheet({ settings, now }: { settings: Settings; now: Date })
             {ids.map(id => {
               const jamaat = id !== "sunrise" && mosqueTime(assignedMosque(weekday, id, mosques), id, weekday);
               const label = jamaat === "adhan+5" ? Number.isFinite(timings[id].valueOf())
-                ? time(new Date(timings[id].valueOf() + 300_000)) : t("mosqueAdhanFiveLong")
+                ? time(new Date(timings[id].valueOf() + mosqueAdhanOffset.count * 60_000)) : t("mosqueAdhanFiveLong", mosqueAdhanOffset)
                 : jamaat && savedTime(jamaat);
               return <td key={id}><bdi>{time(timings[id])}</bdi>
                 {label && <small className="block muted no-print">{t("printJamaatTime", { time: label })}</small>}</td>;

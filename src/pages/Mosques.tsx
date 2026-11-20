@@ -11,7 +11,7 @@ import { useCopy } from "@/lib/copy";
 import { addDays, dateKey, formatDay } from "@/lib/dates";
 import { calendarDefaults, calendarEvents, hijriOn } from "@/lib/hijri";
 import { mosqueNoticeLabel, mosqueOccasionLabel, mosqueRoleLabel, mosqueSourceLabel } from "@/lib/mosque-copy";
-import { assignedMosque, mapMosque, mosqueClock, mosqueDefaults, mosqueOccasions, mosqueWeek, mosqueWeekday, timetableNotice, weeklyMosque,
+import { assignedMosque, mapMosque, mosqueAdhanOffset, mosqueClock, mosqueDefaults, mosqueOccasions, mosqueWeek, mosqueWeekday, timetableNotice, weeklyMosque,
   type Mosque, type MosquePlan } from "@/lib/mosques";
 import { type Settings, updateRecord } from "@/lib/storageService";
 import { distance, type Coord } from "@/lib/umrah";
@@ -25,7 +25,7 @@ function newMosque(now: Date): Mosque {
 }
 
 export function Mosques({ settings, now, desktop }: { settings: Settings; now: Date; desktop: boolean }) {
-  const { t, language } = useCopy();
+  const { t, locale } = useCopy();
   const plan = useRecord("mosques", mosqueDefaults);
   const config = useRecord("calendar", calendarDefaults);
   const day = dateKey(now, settings.city.timeZone);
@@ -66,7 +66,7 @@ export function Mosques({ settings, now, desktop }: { settings: Settings; now: D
   const prompt = contact && (inquiry
     ? t("mosqueAskEid", { occasion: t(mosqueOccasionLabel[inquiry.entry.type]), mosque: contact.name })
     : t("mosqueAskGeneral", { mosque: contact.name }));
-  const number = new Intl.NumberFormat(language, { useGrouping: false });
+  const number = new Intl.NumberFormat(locale, { useGrouping: false });
 
   function open(event: MouseEvent<HTMLElement>, next: MosquePanel) {
     opener.current = event.currentTarget;
@@ -160,7 +160,7 @@ export function Mosques({ settings, now, desktop }: { settings: Settings; now: D
       <div className="mosque-week-details muted small">
         {[...weekendSwitches].map(([name, prayers]) => <p key={name}>{t("mosqueWeekSwitch", { prayers: prayers.map(id => t(id)).join(", "), mosque: name })}</p>)}
         {friday?.prayer && <p>{t(friday.khutbah ? "mosqueFriday" : "mosqueFridayPrayer", {
-          khutbah: friday.khutbah ? mosqueClock(friday.khutbah, language, true) : "", prayer: mosqueClock(friday.prayer, language, true),
+          khutbah: friday.khutbah ? mosqueClock(friday.khutbah, locale, true) : "", prayer: mosqueClock(friday.prayer, locale, true),
         })}</p>}
         {!weekendSwitches.size && !friday?.prayer && <p>{t("mosqueWeekHint")}</p>}
       </div>
@@ -178,20 +178,20 @@ export function Mosques({ settings, now, desktop }: { settings: Settings; now: D
         const notice = timetableNotice(day, checked, mosque.refreshMonth, season);
         return <article className="card mosque-card" key={mosque.id}>
           <div className="row-between">
-            <div><h3>{mosque.name}</h3><p className="muted small">{t(mosqueSourceLabel[mosque.source])} · {formatDay(checked, { month: "short", day: "numeric" }, language)}</p></div>
+            <div><h3><bdi>{mosque.name}</bdi></h3><p className="muted small">{t(mosqueSourceLabel[mosque.source])} · {formatDay(checked, { month: "short", day: "numeric" }, locale)}</p></div>
             <span className="mosque-role caption" data-role={mosque.role}>{t(mosqueRoleLabel[mosque.role])}</span>
           </div>
           <dl className="mosque-times equal-row">
             {prayerIds.map(id => <div key={id}>
-              <dt className="caption">{t(id === "maghrib" ? "mosqueMaghShort" : id)}</dt>
+              <dt className="caption">{id === "maghrib" ? <abbr title={t(id)}>{t("mosqueMaghShort")}</abbr> : t(id)}</dt>
               <dd>{mosque.jamaat[id] === "adhan+5"
-                ? <abbr title={t("mosqueAdhanFiveLong")}>+{number.format(5)}</abbr>
+                ? <abbr title={t("mosqueAdhanFiveLong", mosqueAdhanOffset)}><bdi>+{number.format(mosqueAdhanOffset.count)}</bdi></abbr>
                 : <MosqueTime time={mosque.jamaat[id]} />}
               </dd>
             </div>)}
           </dl>
           {notice && <div className="mosque-nudge small"><DesignIcon name="mosques-refresh" size={18} /><p>
-            {t(mosqueNoticeLabel[notice], { month: formatDay(day, { month: "long" }, language) })}
+            {t(mosqueNoticeLabel[notice], { month: formatDay(day, { month: "long" }, locale) })}
           </p></div>}
           <div className="equal-row mosque-card-actions">
             <button className="action soft" aria-haspopup="dialog" onClick={event => open(event, { kind: "timetable", mosque })}>{t("mosqueUpdateTimes")}</button>
@@ -214,9 +214,9 @@ export function Mosques({ settings, now, desktop }: { settings: Settings; now: D
         return <button key={mosque.id + entry.type} className="list-row mosque-occasion" aria-haspopup="dialog"
           onClick={event => open(event, { kind: "occasion", id: mosque.id, occasion: entry.type })}>
           <span className="icon-box"><DesignIcon name={entry.type === "tarawih" ? "qada-moon" : "mosques-star"} size={22} /></span>
-          <span><strong>{t(mosqueOccasionLabel[entry.type])} · {mosque.name}</strong>
-            <small>{t(mosqueRoleLabel[mosque.role])} · {history} · {entry.times.map(time => mosqueClock(time, language)).join(" · ")}</small></span>
-          <DesignIcon name={settings.mode === "maktab" ? "return-maktab-chevron" : "return-chevron"} />
+          <span><strong>{t(mosqueOccasionLabel[entry.type])} · <bdi>{mosque.name}</bdi></strong>
+            <small>{t(mosqueRoleLabel[mosque.role])} · {history} · {entry.times.map(time => mosqueClock(time, locale)).join(" · ")}</small></span>
+          <DesignIcon className="icon-dir" name={settings.mode === "maktab" ? "return-maktab-chevron" : "return-chevron"} />
         </button>;
       })}
       {occasional.length === 0 && <p className="card small muted">{t("mosqueOccasionalEmpty")}</p>}

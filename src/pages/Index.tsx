@@ -14,7 +14,7 @@ import { calendarDefaults, calendarEvents, eventDisplayDates, hijriLabel } from 
 import { formatLocale } from "@/lib/languagePreferences";
 import { currentPrayerSchedule, prayerDay } from "@/lib/prayerServices";
 import { hadithName, hadithNumberLabel, parseHadithId } from "@/lib/hadith";
-import { jamaatForPrayer, mosqueDefaults } from "@/lib/mosques";
+import { jamaatForPrayer, mosqueAdhanOffset, mosqueDefaults } from "@/lib/mosques";
 import { planEventLabels } from "@/lib/plan-copy";
 import { prayerCityLabel } from "@/lib/settings-copy";
 import { db, logPrayer, type Settings } from "@/lib/storageService";
@@ -60,7 +60,7 @@ export default function Today({ settings, now, desktop }: { settings: Settings; 
   const due = Object.entries(reviews).find(([id, review]) => /^\d+$/.test(id) && isDue(review, now));
   const dueSurah = surahs.surahs.find(item => item.number === Number(due?.[0])) ?? surahs.surahs.find(item => item.number === 103);
   const currentLesson = qaida.lessons.find(item => item.n === lesson) ?? qaida.lessons[0];
-  const jamaat = jamaatForPrayer(headline, zone, mosques, { locale, afterAdhan: t("mosqueAdhanFiveLong") });
+  const jamaat = jamaatForPrayer(headline, zone, mosques, { locale, afterAdhan: t("mosqueAdhanFiveLong", mosqueAdhanOffset) });
   const countdown = duration((current ? current.ends : next.starts).valueOf() - now.valueOf(), locale);
   const hasTimes = Number.isFinite(headline.starts.valueOf());
   const fard = headline.rakats.find(rakat => rakat.type === "fard");

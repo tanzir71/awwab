@@ -8,6 +8,7 @@ export const mosqueWeek = [[0, 1, 2, 3, 4], [5, 6]] as const;
 export const mosqueOccasions = ["eid_fitr", "eid_adha", "tarawih"] as const;
 export const mosquePhotoTypes = ["image/jpeg", "image/png", "image/webp"];
 export const mosquePhotoLimit = 2_000_000;
+export const mosqueAdhanOffset = { count: 5 };
 
 export interface MosqueOccasion {
   type: typeof mosqueOccasions[number];
@@ -40,6 +41,30 @@ export function mosqueWeekday(day: string) {
 
 export function mosqueClock(time: string, language: string, compact = false) {
   return formatTime(new Date(`2000-01-01T${time}:00Z`), "UTC", language, compact);
+}
+
+export function mosqueInputClock(time: string, locale: string) {
+  if (!time) return "";
+  return new Intl.DateTimeFormat(locale, { timeZone: "UTC", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
+    .format(new Date(`2000-01-01T${time}:00Z`));
+}
+
+export function mosqueInputDigits(value: string, locale: string) {
+  const number = new Intl.NumberFormat(locale, { useGrouping: false });
+  const local = Array.from({ length: 10 }, (_, digit) => number.format(digit));
+  const common = "0123456789০১২৩৪৫৬৭৮৯٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹";
+  return value.replace(/\p{Decimal_Number}/gu, digit => {
+    const index = local.indexOf(digit);
+    if (index !== -1) return String(index);
+    const fallback = common.indexOf(digit);
+    return fallback === -1 ? digit : String(fallback % 10);
+  });
+}
+
+export function parseMosqueClock(value: string, locale: string) {
+  const parts = /^(\d{1,2})[:.]?([0-5]\d)$/.exec(mosqueInputDigits(value.trim(), locale));
+  if (!parts || Number(parts[1]) > 23) return undefined;
+  return parts[1].padStart(2, "0") + ":" + parts[2];
 }
 
 export function assignedMosque(weekday: number, id: PrayerId, plan: MosquePlan) {
@@ -99,12 +124,10 @@ export function jamaatForPrayer(prayer: Prayer, zone: string, plan: MosquePlan, 
   let time = scheduled;
   if (scheduled === "adhan+5") {
     time = Number.isFinite(prayer.starts.valueOf())
-      ? formatTime(new Date(prayer.starts.valueOf() + 300_000), zone, copy?.locale) : copy?.afterAdhan ?? "5 min after adhan";
+      ? formatTime(new Date(prayer.starts.valueOf() + mosqueAdhanOffset.count * 60_000), zone, copy?.locale) : copy?.afterAdhan ?? "5 min after adhan";
   } else if (copy && copy.locale !== "en") {
-    const localTime = new Date(`2000-01-01T${scheduled}:00Z`);
-    if (Number.isFinite(localTime.valueOf())) time = new Intl.DateTimeFormat(copy.locale, {
-      timeZone: "UTC", hour: "2-digit", minute: "2-digit", hourCycle: "h23",
-    }).format(localTime);
+    const clock = parseMosqueClock(scheduled, copy.locale);
+    if (clock) time = mosqueInputClock(clock, copy.locale);
   }
   return { time, mosque: mosque.name, id: mosque.id };
 }

@@ -1,8 +1,8 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { useCopy } from "@/lib/copy";
 import { addDays, formatDay } from "@/lib/dates";
-import { mosqueClock, mosqueOccasions, mosquePhotoLimit, mosquePhotoTypes, mosqueRoles, mosqueSources, weeklyMosque,
+import { mosqueAdhanOffset, mosqueClock, mosqueInputClock, mosqueInputDigits, mosqueOccasions, mosquePhotoLimit, mosquePhotoTypes, mosqueRoles, mosqueSources, parseMosqueClock, weeklyMosque,
   type Mosque, type MosqueOccasion, type MosquePlan } from "@/lib/mosques";
 import { mosqueOccasionLabel, mosqueRoleLabel, mosqueSourceLabel } from "@/lib/mosque-copy";
 import { prayerIds, type PrayerId } from "@/types/Prayer";
@@ -13,18 +13,39 @@ export type MosquePanel = { kind: "timetable"; mosque: Mosque }
   | { kind: "occasion"; id?: string; occasion?: MosqueOccasion["type"] };
 
 export function MosqueTime({ time }: { time?: string }) {
-  const { t, language } = useCopy();
+  const { t, locale } = useCopy();
   if (!time) return <span>—</span>;
-  if (time === "adhan+5") return <abbr title={t("mosqueAdhanFiveLong")}>{t("mosqueAdhanFive")}</abbr>;
-  const spoken = mosqueClock(time, language);
-  return <time dateTime={time} title={spoken}><span aria-hidden="true">{mosqueClock(time, language, true)}</span><span className="sr-only">{spoken}</span></time>;
+  if (time === "adhan+5") return <abbr title={t("mosqueAdhanFiveLong", mosqueAdhanOffset)}>{t("mosqueAdhanFive", mosqueAdhanOffset)}</abbr>;
+  const spoken = mosqueClock(time, locale);
+  return <time dateTime={time} title={spoken}><bdi aria-hidden="true">{mosqueClock(time, locale, true)}</bdi><span className="sr-only">{spoken}</span></time>;
+}
+
+function MosqueTimeField({ name, defaultTime, value, change, disabled, required }: {
+  name: string; defaultTime?: string; value?: string; change?: (value: string) => void; disabled?: boolean; required?: boolean;
+}) {
+  const { t, language, locale } = useCopy();
+  const native = language === "en";
+  const example = mosqueInputClock("07:30", locale);
+  const hint = t("mosqueTimeFormat", { hours: 24, example });
+  function validate(input: HTMLInputElement) {
+    const valid = input.value.trim() ? Boolean(parseMosqueClock(input.value, locale)) : !required;
+    input.setCustomValidity(valid ? "" : hint);
+  }
+  return <input type={native ? "time" : "text"} dir="ltr" name={name} disabled={disabled} required={required}
+    defaultValue={defaultTime && (native ? defaultTime : mosqueInputClock(defaultTime, locale))} value={value}
+    inputMode={native ? undefined : "numeric"} placeholder={native ? undefined : example} title={native ? undefined : hint}
+    onInvalid={native ? undefined : event => validate(event.currentTarget)}
+    onChange={event => {
+      if (!native) validate(event.currentTarget);
+      change?.(event.currentTarget.value);
+    }} />;
 }
 
 export function WeekEditor({ prayer, initialDay, plan, week, group, save, cancel }: {
   prayer?: PrayerId; initialDay?: number; plan: MosquePlan; week: readonly number[]; group?: string;
   save: (prayer: PrayerId, days: readonly number[], mosqueId: string) => Promise<boolean>; cancel: () => void;
 }) {
-  const { t, language } = useCopy();
+  const { t, locale } = useCopy();
   const [selectedPrayer, setPrayer] = useState(prayer ?? prayerIds[0]);
   const [scope, setScope] = useState(initialDay === undefined ? "group" : String(initialDay));
   const [choice, choose] = useState<string>();
@@ -46,7 +67,7 @@ export function WeekEditor({ prayer, initialDay, plan, week, group, save, cancel
     <label className="field">{t("mosqueDay")}<select name="day" value={scope} onChange={event => { setScope(event.target.value); choose(undefined); }}>
       <option value="group">{group ? t("mosqueGroupDays", { group }) : t("mosqueDeskEveryDay")}</option>
       {Array.from({ length: 7 }, (_, day) => <option key={day} value={day}>
-        {formatDay(addDays("2026-11-15", day), { weekday: "long" }, language)}
+        {formatDay(addDays("2026-11-15", day), { weekday: "long" }, locale)}
       </option>)}
     </select></label>
     <label className="field">{t("mosqueChoose")}<select name="mosque" value={mosqueId} onChange={event => choose(event.target.value)}>
@@ -64,7 +85,7 @@ export function WeekEditor({ prayer, initialDay, plan, week, group, save, cancel
 export function TimetableEditor({ mosque, save, cancel }: {
   mosque: Mosque; save: (changed: Mosque) => Promise<boolean>; cancel: () => void;
 }) {
-  const { t, language } = useCopy();
+  const { t, locale } = useCopy();
   const [relativeMaghrib, setRelativeMaghrib] = useState(mosque.jamaat.maghrib === "adhan+5");
   const [pending, setPending] = useState(false);
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -76,14 +97,15 @@ export function TimetableEditor({ mosque, save, cancel }: {
     if (!name) { toast.error(t("mosqueNameError")); return; }
     const lat = read("lat"), lon = read("lon");
     if (Boolean(lat) !== Boolean(lon)) { toast.error(t("mosqueCoordError")); return; }
-    const jamaat = Object.fromEntries(prayerIds.map(id => [id, read(id)]).filter(([, value]) => value));
+    const time = (key: string) => parseMosqueClock(read(key), locale) ?? "";
+    const jamaat = Object.fromEntries(prayerIds.map(id => [id, time(id)]).filter(([, value]) => value));
     if (relativeMaghrib) jamaat.maghrib = "adhan+5";
     setPending(true);
     try {
       await save({
         ...mosque, name, jamaat, role: read("role") as Mosque["role"], source: read("source") as Mosque["source"],
-        jumuah: { khutbah: read("khutbah"), prayer: read("jumuah") },
-        contact: read("contact").replace(/[০-৯]/g, digit => String(digit.charCodeAt(0) - 0x09e6)).replace(/\D/g, "").slice(0, 30),
+        jumuah: { khutbah: time("khutbah"), prayer: time("jumuah") },
+        contact: mosqueInputDigits(read("contact"), locale).replace(/\D/g, "").slice(0, 30),
         refreshMonth: Number(read("refreshMonth")) || undefined,
         location: lat && lon ? { lat: Number(lat), lon: Number(lon) } : undefined,
         updatedAt: new Date().toISOString(),
@@ -105,12 +127,12 @@ export function TimetableEditor({ mosque, save, cancel }: {
     </div>
     <h3>{t("mosqueTimesTitle")}</h3>
     <div className="mosque-time-fields">{prayerIds.map(id => <label className="field" key={id}>{t(id)}
-      <input type="time" name={id} defaultValue={mosque.jamaat[id] === "adhan+5" ? undefined : mosque.jamaat[id]} disabled={id === "maghrib" && relativeMaghrib} />
+      <MosqueTimeField name={id} defaultTime={mosque.jamaat[id] === "adhan+5" ? undefined : mosque.jamaat[id]} disabled={id === "maghrib" && relativeMaghrib} />
     </label>)}</div>
-    <label className="mosque-check"><input type="checkbox" checked={relativeMaghrib} onChange={event => setRelativeMaghrib(event.target.checked)} />{t("mosqueAdhanFiveLong")} · {t("maghrib")}</label>
+    <label className="mosque-check"><input type="checkbox" checked={relativeMaghrib} onChange={event => setRelativeMaghrib(event.target.checked)} />{t("mosqueAdhanFiveLong", mosqueAdhanOffset)} · {t("maghrib")}</label>
     <div className="equal-row">
-      <label className="field">{t("mosqueKhutbah")}<input type="time" name="khutbah" defaultValue={mosque.jumuah?.khutbah} /></label>
-      <label className="field">{t("mosqueJumuahTime")}<input type="time" name="jumuah" defaultValue={mosque.jumuah?.prayer} /></label>
+      <label className="field">{t("mosqueKhutbah")}<MosqueTimeField name="khutbah" defaultTime={mosque.jumuah?.khutbah} /></label>
+      <label className="field">{t("mosqueJumuahTime")}<MosqueTimeField name="jumuah" defaultTime={mosque.jumuah?.prayer} /></label>
     </div>
     <details className="mosque-more-fields">
       <summary>{t("mosqueOptions")}</summary>
@@ -118,7 +140,7 @@ export function TimetableEditor({ mosque, save, cancel }: {
         <label className="field">{t("mosqueRefreshMonth")}<select name="refreshMonth" defaultValue={mosque.refreshMonth ?? ""}>
           <option value="">{t("mosqueNoRefreshMonth")}</option>
           {Array.from({ length: 12 }, (_, i) => <option value={i + 1} key={i}>
-            {formatDay(`2026-${String(i + 1).padStart(2, "0")}-01`, { month: "long" }, language)}
+            {formatDay(`2026-${String(i + 1).padStart(2, "0")}-01`, { month: "long" }, locale)}
           </option>)}
         </select></label>
         <label className="field">{t("mosqueContact")}<input type="tel" name="contact" maxLength={36} defaultValue={mosque.contact} /></label>
@@ -152,6 +174,8 @@ export function MosqueBoardPhoto({ mosque, image, className }: {
 
 export function PhotoEditor({ mosque, save }: { mosque: Mosque; save: (photo: Blob) => Promise<boolean> }) {
   const { t } = useCopy();
+  const picker = useRef<HTMLInputElement>(null);
+  const size = { count: mosquePhotoLimit / 1_000_000 };
   const [file, setFile] = useState<File>();
   const [pending, setPending] = useState(false);
   return <form className="stack" onSubmit={async event => {
@@ -162,16 +186,18 @@ export function PhotoEditor({ mosque, save }: { mosque: Mosque; save: (photo: Bl
     setPending(false);
   }}>
     <MosqueBoardPhoto mosque={mosque} image={file} className="mosque-board-photo" />
-    <p className="muted small">{t("mosquePhotoHint")}</p>
-    <label className="field">{t("mosqueChoosePhoto")}<input type="file" accept={mosquePhotoTypes.join(",")}
+    <p className="muted small">{t("mosquePhotoHint", size)}</p>
+    <button className="action light" type="button" onClick={() => picker.current?.click()} disabled={pending}>{t("mosqueChoosePhoto")}</button>
+    {file && <p className="mosque-photo-filename small" role="status" dir="auto">{file.name}</p>}
+    <input ref={picker} type="file" hidden accept={mosquePhotoTypes.join(",")}
       onChange={event => {
         const chosen = event.currentTarget.files?.[0];
         if (chosen && (!mosquePhotoTypes.includes(chosen.type) || !chosen.size || chosen.size > mosquePhotoLimit)) {
-          toast.error(t("mosquePhotoError"));
+          toast.error(t("mosquePhotoError", size));
           event.currentTarget.value = "";
           setFile(undefined);
         } else setFile(chosen);
-      }} /></label>
+      }} />
     <button className="action" disabled={!file || pending}>{t("mosquePhotoSave")}</button>
   </form>;
 }
@@ -180,23 +206,25 @@ export function OccasionEditor({ mosques, initialMosque, initialType, yearNow, u
   mosques: Mosque[]; initialMosque?: string; initialType?: MosqueOccasion["type"]; yearNow: number;
   update: (id: string, change: (mosque: Mosque) => Mosque) => Promise<boolean>;
 }) {
-  const { t, language } = useCopy();
-  const number = new Intl.NumberFormat(language, { useGrouping: false });
+  const { t, locale } = useCopy();
+  const number = new Intl.NumberFormat(locale, { useGrouping: false });
   const [id, setId] = useState(initialMosque ?? mosques[0]?.id ?? "");
   const [type, setType] = useState(initialType ?? "eid_fitr");
   const [time, setTime] = useState("");
-  const [year, setYear] = useState(yearNow);
+  const [yearText, setYearText] = useState(() => number.format(yearNow));
   const [pending, setPending] = useState(false);
+  const year = Number(mosqueInputDigits(yearText.trim(), locale));
+  const clock = parseMosqueClock(time, locale);
   const mosque = mosques.find(item => item.id === id);
   const records = mosque?.occasional.filter(item => item.type === type).sort((a, b) => b.year - a.year) ?? [];
   return <div className="stack">
     <form className="stack" onSubmit={async event => {
       event.preventDefault();
-      if (!mosque || !time || pending || year < 1900 || year > 2200) return;
+      if (!mosque || !clock || pending || !Number.isInteger(year) || year < 1900 || year > 2200) return;
       setPending(true);
       const saved = await update(id, current => {
         const previous = current.occasional.find(item => item.type === type && item.year === year);
-        const times = [...new Set([...(previous?.times ?? []), time])].sort();
+        const times = [...new Set([...(previous?.times ?? []), clock])].sort();
         return { ...current, occasional: [...current.occasional.filter(item => item !== previous), { type, year, times }] };
       });
       if (saved) setTime("");
@@ -209,10 +237,17 @@ export function OccasionEditor({ mosques, initialMosque, initialType, yearNow, u
         <label className="field">{t("mosqueOccasion")}<select value={type} onChange={event => setType(event.target.value as MosqueOccasion["type"])}>
           {mosqueOccasions.map(item => <option key={item} value={item}>{t(mosqueOccasionLabel[item])}</option>)}
         </select></label>
-        <label className="field">{t("mosqueYear")}<input type="number" min="1900" max="2200" value={year || ""} required onChange={event => setYear(Number(event.target.value))} /></label>
+        <label className="field">{t("mosqueYear")}<input type="text" inputMode="numeric" dir="ltr" value={yearText} maxLength={4} required
+          onChange={event => {
+            const value = event.currentTarget.value;
+            const valueYear = Number(mosqueInputDigits(value, locale));
+            event.currentTarget.setCustomValidity(Number.isInteger(valueYear) && valueYear >= 1900 && valueYear <= 2200
+              ? "" : t("mosqueYearRange", { from: 1900, to: 2200 }));
+            setYearText(value);
+          }} /></label>
       </div>
       <div className="equal-row">
-        <label className="field">{t("mosqueTimeInput")}<input type="time" value={time} required onChange={event => setTime(event.target.value)} /></label>
+        <label className="field">{t("mosqueTimeInput")}<MosqueTimeField name="occasionTime" value={time} change={setTime} required /></label>
         <button className="action self-end" disabled={!mosque || !time || pending}>{t("mosqueAddTime")}</button>
       </div>
     </form>
@@ -221,7 +256,7 @@ export function OccasionEditor({ mosques, initialMosque, initialType, yearNow, u
       {records.map(({ year, times }) => <div className="card mosque-occasion-edit-row" key={year}>
         <strong>{number.format(year)}</strong>
         <ul>{times.map(item => <li className="row-between" key={item}>
-          <time dateTime={item}>{mosqueClock(item, language)}</time>
+          <time dateTime={item}>{mosqueClock(item, locale)}</time>
           <button className="text-button" disabled={pending} onClick={async () => {
             setPending(true);
             await update(id, current => ({
@@ -229,7 +264,7 @@ export function OccasionEditor({ mosques, initialMosque, initialType, yearNow, u
                 ? { ...entry, times: entry.times.filter(value => value !== item) } : entry).filter(entry => entry.times.length > 0),
             }));
             setPending(false);
-          }}>{t("mosqueRemove")}<span className="sr-only"> {mosqueClock(item, language)}</span></button>
+          }}>{t("mosqueRemove")}<span className="sr-only"> {mosqueClock(item, locale)}</span></button>
         </li>)}</ul>
       </div>)}
     </section>}

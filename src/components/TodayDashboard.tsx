@@ -4,7 +4,7 @@ import { message, rakatLabel } from "@/lib/copy";
 import { duration, formatDay, formatTime } from "@/lib/dates";
 import { eventDisplayDates, type CalendarEvent, type CalendarSettings } from "@/lib/hijri";
 import { formatLocale } from "@/lib/languagePreferences";
-import { jamaatForPrayer, mosqueForPrayer, type MosquePlan } from "@/lib/mosques";
+import { jamaatForPrayer, mosqueAdhanOffset, mosqueForPrayer, type MosquePlan } from "@/lib/mosques";
 import { planEventLabels } from "@/lib/plan-copy";
 import { prayerDay } from "@/lib/prayerServices";
 import { guideRakats } from "@/lib/prayerGuide";
@@ -71,7 +71,7 @@ export function TodayDashboard({ settings, now, day, prayers, current, next, log
   const { end: finish } = qadaForecast(day, balances, qada);
   const dueCount = Object.values(reviews).filter(review => isDue(review, now)).length;
   const headline = current ?? next;
-  const jamaatCopy = { locale, afterAdhan: t("mosqueAdhanFiveLong") };
+  const jamaatCopy = { locale, afterAdhan: t("mosqueAdhanFiveLong", mosqueAdhanOffset) };
   const jamaat = jamaatForPrayer(headline, zone, mosques, jamaatCopy);
   const countdown = timeAvailable(headline.starts) ? duration((current ? current.ends : next.starts).valueOf() - now.valueOf(), locale) : undefined;
   const missed = prayers.find(prayer => prayer.status === "missed");

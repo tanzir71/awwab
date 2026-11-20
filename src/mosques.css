@@ -48,7 +48,8 @@
   text-align: start;
 }
 .mosque-week-row > strong, .mosque-week-row > time { font: var(--type-body-strong); }
-.mosque-week-row > :nth-child(3) { justify-self: end; text-align: end; }
+.mosque-week-row > :nth-child(3) { justify-self: end; text-align: end; max-width: 16ch; overflow-wrap: anywhere; }
+.mosque-week-row > strong { overflow-wrap: anywhere; }
 .mosque-week-place { display: flex; flex-wrap: wrap; gap: 2px 6px; align-items: center; }
 .mosque-week-place small { overflow-wrap: anywhere; }
 .mosque-week-details { margin-top: 3px; }
@@ -81,7 +82,7 @@
 }
 .mosque-times dt { overflow-wrap: anywhere; letter-spacing: .035em; }
 .mosque-times dd { margin: 0; font: var(--type-body-strong); }
-.mosque-times abbr, .mosque-week-row abbr { text-decoration: none; }
+.mosque-times abbr, .mosque-week-row abbr, .mosque-desk-saved thead abbr { text-decoration: none; }
 .mosque-card-actions .action { min-height: 50px; padding: 8px; font: var(--type-body-strong); }
 .mosque-nudge { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 8px; align-items: center; background: var(--c-tint); border-radius: var(--r-control); padding: 9px 10px; }
 .mosque-occasional .mosque-occasion { padding: 12px 14px; }
@@ -100,6 +101,7 @@
 .mosque-more-fields > div { padding-top: 6px; }
 .mosque-more-fields summary { display: list-item; padding-block: 10px; color: var(--interactive-ink); }
 .mosque-board-photo { width: 100%; height: auto; max-height: min(55svh, 460px); object-fit: contain; background: var(--c-surface-alt); border-radius: var(--r-control); }
+.mosque-photo-filename { overflow-wrap: anywhere; }
 .mosque-occasion-edit-row ul { margin-top: 6px; }
 .mosque-occasion-edit-row .text-button { padding-inline: 8px; }
 @media (max-width:359px) {
@@ -133,7 +135,7 @@
 .mosque-desk-saved tbody td:last-child { border-start-end-radius: var(--r-control); border-end-end-radius: var(--r-control); }
 .mosque-desk-select { min-height: 24px; width: 100%; text-align: start; overflow-wrap: anywhere; font-weight: 600; }
 .mosque-desk-saved .mosque-role { padding: 3px 7px; font-size: 11px; text-transform: none; letter-spacing: 0; }
-.mosque-desk-table-time { white-space: nowrap; }
+.mosque-desk-table-time time { white-space: nowrap; }
 .mosque-desk-table-time abbr, .mosque-desk-times abbr { text-decoration: none; }
 .mosque-desk-checked { color: var(--c-ink-muted); }
 .mosque-desk-checked[data-stale="true"], .mosque-desk-alert > a, .mosque-desk-alert-icon {
@@ -151,6 +153,7 @@
 .mosque-desk-week table { border-spacing: 6px 8px; width: calc(100% + 12px); margin-inline: -6px; }
 .mosque-desk-week tr > :is(th, td) { padding: 0; }
 .mosque-desk-week thead th { text-align: center; }
+.mosque-desk-week th { overflow-wrap: anywhere; }
 .mosque-desk-week tbody th { text-align: start; font-weight: 600; }
 .mosque-desk-assignment {
   display: grid; place-items: center; width: 100%; min-height: 30px; padding: 4px; border-radius: var(--r-control);

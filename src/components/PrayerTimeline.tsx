@@ -3,7 +3,7 @@ import type { Prayer, RakatGroup } from "@/types/Prayer";
 import type { Settings } from "@/lib/storageService";
 import { message, rakatLabel } from "@/lib/copy";
 import { duration, formatTime } from "@/lib/dates";
-import { jamaatForPrayer, type MosquePlan } from "@/lib/mosques";
+import { jamaatForPrayer, mosqueAdhanOffset, type MosquePlan } from "@/lib/mosques";
 import { guideRakats } from "@/lib/prayerGuide";
 import { formatLocale } from "@/lib/languagePreferences";
 import { DesignIcon } from "./DesignIcon";
@@ -29,7 +29,7 @@ export default function PrayerTimeline({ prayers, settings, now, mosques, onActi
   const zone = settings.city.timeZone;
   const locale = formatLocale(settings);
   const number = new Intl.NumberFormat(locale);
-  const jamaatCopy = { locale, afterAdhan: t("mosqueAdhanFiveLong") };
+  const jamaatCopy = { locale, afterAdhan: t("mosqueAdhanFiveLong", mosqueAdhanOffset) };
   return <div className="compact-stack prayer-timeline">
     {prayers.map(prayer => {
       const available = Number.isFinite(prayer.starts.valueOf());

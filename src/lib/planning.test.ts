@@ -14,7 +14,8 @@ import { defaults, exportUmrahTrip, prayerStatistics, readUmrahTripFile } from "
 import { askMeaning, askPhrase, askPhraseMatches, quickAsks, readGate, renderAsk, umrahPhrases } from "./umrahAsk";
 import { message } from "./copy";
 import { adjustQadaTotals, qadaBalances, qadaCountBetween, qadaDefaults, qadaForecast, recordQada } from "./qada";
-import { assignedMosque, jamaatForPrayer, mapMosque, mosqueCheckedAge, mosqueDefaults, mosqueTime, mosqueWeek, timetableNotice, weeklyMosque, type Mosque } from "./mosques";
+import { assignedMosque, jamaatForPrayer, mapMosque, mosqueCheckedAge, mosqueDefaults, mosqueInputClock, mosqueInputDigits, mosqueTime, mosqueWeek,
+  parseMosqueClock, timetableNotice, weeklyMosque, type Mosque } from "./mosques";
 
 describe("Today summaries", () => {
   it("honors the digit setting and formats Hijri months and countdown units for the active locale", () => {
@@ -222,6 +223,22 @@ describe("mosque timetables", () => {
   const home: Mosque = { id: "home", name: "Home masjid", role: "home", jamaat: { dhuhr: "13:00" },
     jumuah: { khutbah: "12:45", prayer: "13:15" }, occasional: [], source: "visited", updatedAt: "2026-10-12T12:00:00Z" };
   const office: Mosque = { ...home, id: "office", name: "Office masjid", role: "office", jumuah: undefined };
+
+  it("round-trips localized time fields to saved HH:mm and validates the clock", () => {
+    expect(mosqueInputClock("07:30", "bn")).toBe("০৭:৩০");
+    expect(mosqueInputClock("07:30", "bn-u-nu-latn")).toBe("07:30");
+    expect(mosqueInputClock("07:30", "id")).toBe("07.30");
+    expect(mosqueInputClock("", "bn")).toBe("");
+    expect(parseMosqueClock(" ৭:৩০ ", "bn")).toBe("07:30");
+    expect(parseMosqueClock("৭৩০", "bn-u-nu-latn")).toBe("07:30");
+    expect(parseMosqueClock("17.30", "id")).toBe("17:30");
+    expect(parseMosqueClock("٠٠:٠٠", "fa")).toBe("00:00");
+    expect(parseMosqueClock("२३५९", "hi-u-nu-deva")).toBe("23:59");
+    for (const value of ["", "24:00", "12:60", "5:1", "05:17 PM", "12:30:00", "1e30"]) {
+      expect(parseMosqueClock(value, "en")).toBeUndefined();
+    }
+    expect(mosqueInputDigits("+880 ١۲৩", "bn")).toBe("+880 123");
+  });
 
   it("formats both fixed and adhan-relative jamaat times without changing mosque assignments", () => {
     const city = defaults.city;
