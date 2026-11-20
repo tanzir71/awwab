@@ -182,6 +182,11 @@
 .tajweed-letters .arabic-line { gap: 0; padding: 0; }
 .tajweed-letters .word-chip { min-width: 18px; padding-inline: 2px; }
 .tajweed-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.tajweed-stage-heading { font: var(--type-title); }
+.tajweed-read-list { list-style: none; margin: 0; padding: 0; }
+.tajweed-read-example { min-width: 0; }
+.tajweed-read-example header { flex-wrap: wrap; gap: 4px 8px; }
+.tajweed-read-example h3 { font: var(--type-body-strong); }
 .tajweed-focus { display: flex; gap: 8px; align-items: center; }
 .tajweed-focus .arabic-text { font-size: 18px; }
 .tajweed-focus .arabic-line { padding: 0; }
