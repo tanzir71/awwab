@@ -70,12 +70,18 @@ describe("Umrah phrase recordings", () => {
 });
 
 describe("Speak lesson recordings", () => {
-  it.each([["saudi-hijazi", "A2", 14, 4, 2], ["saudi-hijazi", "B1", 12, 6, 3], ["msa", "A1", 12, 4, 2]] as const)("includes generated %s %s dialogue, vocabulary and signs", (variety, level, count, linesPerUnit, wordsPerUnit) => {
+  it.each([
+    ["saudi-hijazi", "A2", 14, 4, 2],
+    ["saudi-hijazi", "B1", 12, 6, 3],
+    ["gulf", "A1", 12, 4, 2],
+    ["msa", "A1", 12, 4, 2],
+  ] as const)("includes generated %s %s dialogue, vocabulary and signs", (variety, level, count, linesPerUnit, wordsPerUnit) => {
     const files = new Set<string>();
     const units = speakCourses[variety][level];
     expect(units).toHaveLength(count);
     for (const [index, unit] of units.entries()) {
       const { lines, words, clips } = speakLessonContent(unit);
+      expect(unit.variety).toBe(variety);
       expect(speakUnitNumber(unit)).toBe(index + 1);
       expect(lines).toHaveLength(linesPerUnit);
       expect(words).toHaveLength(wordsPerUnit);

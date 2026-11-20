@@ -1,0 +1,218 @@
+[
+  {
+    "id": "gulf-a1-greetings",
+    "title": ["Greetings & introductions", "শুভেচ্ছা ও পরিচয়"],
+    "partner": ["Neighbour", "প্রতিবেশী"],
+    "sign": "أهلا وسهلا",
+    "signSpeech": "أَهْلًا وَسَهْلًا",
+    "meaning": ["Welcome", "স্বাগতম"],
+    "dialogue": [
+      ["السَّلَام عَلَيْكُم، شْحَالَك؟", "as-salām ʿalaykum, shḥālak?", "Peace be upon you. How are you?", "আপনার ওপর শান্তি বর্ষিত হোক। কেমন আছেন?"],
+      ["وَعَلَيْكُم السَّلَام. بْخَيْر، الْحَمْدُ لِلّه. شُو اسْمَك؟", "wa ʿalaykum as-salām. bkhayr, al-ḥamdu lillāh. shū ismak?", "And peace be upon you. I'm well, praise be to Allah. What's your name?", "আপনার ওপরও শান্তি বর্ষিত হোক। আলহামদুলিল্লাহ, ভালো আছি। আপনার নাম কী?"],
+      ["اسْمِي سَامِي. تْشَرَّفْنَا.", "ismī sāmī. tsharrafnā.", "My name's Sami. Nice to meet you.", "আমার নাম সামি। পরিচিত হয়ে ভালো লাগল।"],
+      ["الشَّرَف لِي. حَيَّاك اللَّه.", "ash-sharaf lī. ḥayyāk allāh.", "The pleasure is mine. Welcome.", "আমারও ভালো লাগল। স্বাগতম।"]
+    ],
+    "words": [
+      { "ar": "سَلَام", "tr": "salām", "meaning": ["Peace", "শান্তি"], "root": "س ل م", "bridge": "36:58:1" },
+      { "ar": "شْحَالَك؟", "tr": "shḥālak?", "meaning": ["How are you? (to a man)", "কেমন আছেন? (পুরুষকে বলার সময়)"] }
+    ]
+  },
+  {
+    "id": "gulf-a1-money",
+    "title": ["Money & payment", "টাকা ও পরিশোধ"],
+    "partner": ["Cashier", "ক্যাশিয়ার"],
+    "sign": "الدفع عند الصندوق",
+    "signSpeech": "الدَّفْعُ عِنْدَ الصُّنْدُوقِ",
+    "meaning": ["Pay at the till", "ক্যাশ কাউন্টারে পরিশোধ করুন"],
+    "dialogue": [
+      ["لَوْ سَمَحْت، كَمِ الْحِسَاب؟", "law samaḥt, kam il-ḥisāb?", "Excuse me, how much is the bill?", "মাফ করবেন, বিল কত?"],
+      ["خَمْسِين دِرْهَم. بِالْبِطَاقَة وَلَّا كَاش؟", "khamsīn dirham. bil-biṭāga wallā kāsh?", "Fifty dirhams. Card or cash?", "পঞ্চাশ দিরহাম। কার্ডে নাকি নগদে?"],
+      ["بِالْبِطَاقَة، لَوْ سَمَحْت. أَبْغِي الْفَاتُورَة بَعْد.", "bil-biṭāga, law samaḥt. abghī il-fātūra baʿd.", "By card, please. I'd like the receipt too.", "কার্ডে, দয়া করে। রসিদটাও চাই।"],
+      ["هَذِي الْفَاتُورَة. مَشْكُور.", "hadhī il-fātūra. mashkūr.", "Here's the receipt. Thank you.", "এই নিন রসিদ। ধন্যবাদ।"]
+    ],
+    "words": [
+      { "ar": "حِسَاب", "tr": "ḥisāb", "meaning": ["Bill", "বিল"], "root": "ح س ب", "bridge": "84:8:3" },
+      { "ar": "فَاتُورَة", "tr": "fātūra", "meaning": ["Receipt or invoice", "রসিদ বা চালান"] }
+    ]
+  },
+  {
+    "id": "gulf-a1-directions",
+    "title": ["Finding an entrance", "প্রবেশপথ খোঁজা"],
+    "partner": ["Security guard", "নিরাপত্তাকর্মী"],
+    "sign": "مدخل الزوار",
+    "signSpeech": "مَدْخَلُ الزُّوَّارِ",
+    "meaning": ["Visitor entrance", "দর্শনার্থীদের প্রবেশপথ"],
+    "dialogue": [
+      ["لَوْ سَمَحْت، وَيْن مَدْخَل الزُّوَّار؟", "law samaḥt, wayn madkhal iz-zuwwār?", "Excuse me, where's the visitor entrance?", "মাফ করবেন, দর্শনার্থীদের প্রবেশপথ কোথায়?"],
+      ["جِدَّامَك، عَ الْيَمِين. تْشُوف الْبَاب الْأَزْرَق؟", "jiddāmak, ʿal-yamīn. tshūf il-bāb il-azrag?", "Ahead of you, on the right. See the blue door?", "সামনে, ডান দিকে। নীল দরজাটা দেখতে পাচ্ছেন?"],
+      ["هَيْه، أَشُوفَه. أَدْخُل مِنْ هَذَا الْبَاب؟", "hayh, ashūfah. adkhul min hādhā il-bāb?", "Yes, I see it. Do I go in through that door?", "হ্যাঁ, দেখতে পাচ্ছি। ওই দরজা দিয়ে ঢুকব?"],
+      ["هَيْه، ادْخُل مِنْ هِنَاك.", "hayh, idkhul min hināk.", "Yes, go in there.", "হ্যাঁ, ওখান দিয়ে ঢুকুন।"]
+    ],
+    "words": [
+      { "ar": "مَدْخَل", "tr": "madkhal", "meaning": ["Entrance", "প্রবেশপথ"], "root": "د خ ل", "bridge": "17:80:4" },
+      { "ar": "جِدَّامَك", "tr": "jiddāmak", "meaning": ["Ahead of you (to a man)", "আপনার সামনে (পুরুষকে বলার সময়)"] }
+    ]
+  },
+  {
+    "id": "gulf-a1-sim",
+    "title": ["Phone & SIM", "ফোন ও সিম"],
+    "partner": ["Phone shop attendant", "ফোনের দোকানের কর্মী"],
+    "sign": "شرائح الاتصال",
+    "signSpeech": "شَرَائِحُ الِاتِّصَالِ",
+    "meaning": ["SIM cards", "সিম কার্ড"],
+    "dialogue": [
+      ["أَبْغِي شَرِيحَة حَقّ التِّلِفُون.", "abghī sharīḥa ḥagg it-tilifōn.", "I'd like a SIM card for my phone.", "আমার ফোনের জন্য একটা সিম কার্ড চাই।"],
+      ["تَبْغِي نِتّ بَسّ وَلَّا نِتّ وَمُكَالَمَات؟", "tabghī nitt bass wallā nitt wa-mukālamāt?", "Do you want data only, or data and calls?", "শুধু ইন্টারনেট চান, নাকি ইন্টারনেট আর কল দুটোই?"],
+      ["نِتّ بَسّ. عِنْدَكُمْ بَاقَة حَقّ أُسْبُوع؟", "nitt bass. ʿindakum bāga ḥagg usbūʿ?", "Data only. Do you have a one-week plan?", "শুধু ইন্টারনেট। আপনাদের এক সপ্তাহের প্যাকেজ আছে?"],
+      ["هَيْه، عِنْدَنَا. تِشْتَغِل مِنَ الْحِين.", "hayh, ʿindanā. tishtagil min il-ḥīn.", "Yes, we do. It works from now.", "হ্যাঁ, আছে। এখন থেকেই চলবে।"]
+    ],
+    "words": [
+      { "ar": "شَرِيحَة", "tr": "sharīḥa", "meaning": ["SIM card", "সিম কার্ড"], "root": "ش ر ح", "bridge": "94:1:2" },
+      { "ar": "أَبْغِي", "tr": "abghī", "meaning": ["I want", "আমি চাই"] }
+    ]
+  },
+  {
+    "id": "gulf-a1-transport",
+    "title": ["Bus & taxi", "বাস ও ট্যাক্সি"],
+    "partner": ["Station attendant", "স্টেশনের কর্মী"],
+    "sign": "موقف الحافلات",
+    "signSpeech": "مَوْقِفُ الْحَافِلَاتِ",
+    "meaning": ["Bus stop", "বাস স্টপ"],
+    "dialogue": [
+      ["لَوْ سَمَحْت، مِنْ وَيْن أَرْكَب الْبَاص حَقّ الْمَطَار؟", "law samaḥt, min wayn arkab il-bāṣ ḥagg il-maṭār?", "Excuse me, where do I catch the bus to the airport?", "মাফ করবেন, বিমানবন্দরের বাস কোথা থেকে ধরব?"],
+      ["مِنْ هَذَا الْمَوْقِف. تِسْتَنَّى رُبْع سَاعَة تَقْرِيبًا.", "min hādhā il-mawgif. tistanna rubʿ sāʿa tagrīban.", "At this stop. It's about a fifteen-minute wait.", "এই স্টপ থেকে। প্রায় পনেরো মিনিট অপেক্ষা করতে হবে।"],
+      ["زَيْن، بِسْتَنَّى هِنِي. أَدْفَع يَوْم أَرْكَب؟", "zayn, bastanna hinī. adfaʿ yōm arkab?", "Okay, I'll wait here. Do I pay when I get on?", "ঠিক আছে, এখানেই অপেক্ষা করব। বাসে উঠে টাকা দেব?"],
+      ["هَيْه، حُطّ الْبِطَاقَة عَ الْجِهَاز عِنْدَ الْبَاب.", "hayh, ḥuṭṭ il-biṭāga ʿal-jihāz ʿind il-bāb.", "Yes, tap your card on the reader by the door.", "হ্যাঁ, দরজার পাশের যন্ত্রে কার্ডটি ছোঁয়ান।"]
+    ],
+    "words": [
+      { "ar": "أَرْكَب", "tr": "arkab", "meaning": ["I get on or ride", "আমি উঠি বা চড়ি"], "root": "ر ك ب", "bridge": "43:12:11" },
+      { "ar": "مَوْقِف", "tr": "mawgif", "meaning": ["Stop or parking area", "স্টপ বা গাড়ি রাখার জায়গা"] }
+    ]
+  },
+  {
+    "id": "gulf-a1-food",
+    "title": ["Food & water", "খাবার ও পানি"],
+    "partner": ["Server", "খাবার পরিবেশনকারী"],
+    "sign": "الطلبات الخارجية",
+    "signSpeech": "الطَّلَبَاتُ الْخَارِجِيَّةُ",
+    "meaning": ["Takeaway orders", "সঙ্গে নিয়ে যাওয়ার খাবারের অর্ডার"],
+    "dialogue": [
+      ["أَبْغِي آكُل هِنِي. عِنْدَكُمْ عَيْش وَدْيَاي؟", "abghī ākul hinī. ʿindakum ʿaysh wa-dyāy?", "I'd like to eat here. Do you have rice and chicken?", "এখানে বসে খেতে চাই। ভাত আর মুরগি আছে?"],
+      ["هَيْه، عِنْدَنَا. تَبْغِي شَيْ تِشْرَبَه؟", "hayh, ʿindanā. tabghī shay tishrabah?", "Yes, we do. Would you like something to drink?", "হ্যাঁ, আছে। কিছু পান করবেন?"],
+      ["مَاي بَارِد، لَوْ سَمَحْت.", "māy bārid, law samaḥt.", "Cold water, please.", "ঠান্ডা পানি, দয়া করে।"],
+      ["أَبْشِر. الْأَكْل بِيِيك عَقِب شْوَيّ.", "abshir. il-akl biyīk ʿagib shwayy.", "Of course. Your food will be here shortly.", "অবশ্যই। খাবারটা একটু পরেই আসবে।"]
+    ],
+    "words": [
+      { "ar": "آكُل", "tr": "ākul", "meaning": ["I eat", "আমি খাই"], "root": "أ ك ل", "bridge": "2:168:3" },
+      { "ar": "مَاي", "tr": "māy", "meaning": ["Water", "পানি"] }
+    ]
+  },
+  {
+    "id": "gulf-a1-health",
+    "title": ["Finding a clinic", "ক্লিনিক খোঁজা"],
+    "partner": ["Building receptionist", "ভবনের অভ্যর্থনাকর্মী"],
+    "sign": "العيادة الطبية",
+    "signSpeech": "الْعِيَادَةُ الطِّبِّيَّةُ",
+    "meaning": ["Medical clinic", "চিকিৎসাকেন্দ্র"],
+    "dialogue": [
+      ["لَوْ سَمَحْت، وَيْن الْعِيَادَة؟ رَاسِي يِعَوِّرْنِي.", "law samaḥt, wayn il-ʿiyāda? rāsī yiʿawwirnī.", "Excuse me, where's the clinic? My head hurts.", "মাফ করবেন, ক্লিনিক কোথায়? আমার মাথা ব্যথা করছে।"],
+      ["الْعِيَادَة فِي الدَّوْر الْأَوَّل. تَبْغِي أَدُلَّك عَ الْمَصْعَد؟", "il-ʿiyāda fid-dawr il-awwal. tabghī adullak ʿal-maṣʿad?", "The clinic is on the first floor. Shall I show you where the lift is?", "ক্লিনিক প্রথম তলায়। লিফটটা দেখিয়ে দেব?"],
+      ["هَيْه، لَوْ سَمَحْت. أَبْغِي أَشُوف الدُّكْتُور.", "hayh, law samaḥt. abghī ashūf id-duktūr.", "Yes, please. I'd like to see the doctor.", "হ্যাঁ, দয়া করে। ডাক্তার দেখাতে চাই।"],
+      ["الْمَصْعَد هِنِي، عَلَى يَسَارَك. مَا تْشُوف شَرّ.", "il-maṣʿad hinī, ʿalā yasārak. mā tshūf sharr.", "The lift's here on your left. Hope you feel better soon.", "লিফট এখানে, আপনার বাঁ দিকে। আশা করি শিগগিরই ভালো লাগবে।"]
+    ],
+    "words": [
+      { "ar": "مَصْعَد", "tr": "maṣʿad", "meaning": ["Lift or elevator", "লিফট"], "root": "ص ع د", "bridge": "35:10:9" },
+      { "ar": "رَاسِي يِعَوِّرْنِي", "tr": "rāsī yiʿawwirnī", "meaning": ["My head hurts", "আমার মাথা ব্যথা করছে"] }
+    ]
+  },
+  {
+    "id": "gulf-a1-hotel",
+    "title": ["At reception", "অভ্যর্থনা ডেস্কে"],
+    "partner": ["Hotel receptionist", "হোটেলের অভ্যর্থনাকর্মী"],
+    "sign": "الاستقبال",
+    "signSpeech": "الِاسْتِقْبَالُ",
+    "meaning": ["Reception", "অভ্যর্থনা ডেস্ক"],
+    "dialogue": [
+      ["السَّلَام عَلَيْكُم. عِنْدِي حَجْز، بِاسْم سَامِي.", "as-salām ʿalaykum. ʿindī ḥajz, bism sāmī.", "Peace be upon you. I have a booking under Sami.", "আপনার ওপর শান্তি বর্ষিত হোক। সামি নামে আমার বুকিং আছে।"],
+      ["وَعَلَيْكُم السَّلَام. غُرْفَتَك فِي الدَّوْر الثَّانِي. جَوَازَك مَعَاك؟", "wa ʿalaykum as-salām. ghurfatak fid-dawr ith-thānī. jawāzak maʿāk?", "And peace be upon you. Your room is on the second floor. Do you have your passport with you?", "আপনার ওপরও শান্তি বর্ষিত হোক। আপনার ঘর দ্বিতীয় তলায়। পাসপোর্ট সঙ্গে আছে?"],
+      ["هَيْه، هَذَا جَوَازِي. وَيْن الْمَصْعَد؟", "hayh, hādhā jawāzī. wayn il-maṣʿad?", "Yes, here's my passport. Where's the lift?", "হ্যাঁ, এই নিন পাসপোর্ট। লিফট কোথায়?"],
+      ["الْمَصْعَد عَ الْيَمِين، عِنْدَ الدَّرَج.", "il-maṣʿad ʿal-yamīn, ʿind id-daraj.", "The lift's on the right, by the stairs.", "লিফট ডান দিকে, সিঁড়ির পাশে।"]
+    ],
+    "words": [
+      { "ar": "غُرْفَة", "tr": "ghurfa", "meaning": ["Room", "ঘর"], "root": "غ ر ف", "bridge": "25:75:3" },
+      { "ar": "حَجْز", "tr": "ḥajz", "meaning": ["Booking", "বুকিং"] }
+    ]
+  },
+  {
+    "id": "gulf-a1-shopping",
+    "title": ["At the market", "বাজারে"],
+    "partner": ["Shopkeeper", "দোকানদার"],
+    "sign": "سوق التمور",
+    "signSpeech": "سُوقُ التُّمُورِ",
+    "meaning": ["Date market", "খেজুরের বাজার"],
+    "dialogue": [
+      ["هَذَا سُوق التَّمْر؟ أَبْغِي كِيلُو تَمْر.", "hādhā sūg it-tamr? abghī kīlū tamr.", "Is this the date market? I'd like a kilo of dates.", "এটা কি খেজুরের বাজার? এক কেজি খেজুর চাই।"],
+      ["هَيْه، حَيَّاك اللَّه. عِنْدَنَا هَالنَّوْع وَهَالنَّوْع. تَبْغِي تْذُوق؟", "hayh, ḥayyāk allāh. ʿindanā han-nawʿ wa-han-nawʿ. tabghī tdhūg?", "Yes, welcome. We have these two kinds. Would you like a taste?", "হ্যাঁ, স্বাগতম। এই দুই জাত আছে। চেখে দেখবেন?"],
+      ["هَذَا حِلْو وَايِد. أَبْغِي مِنْ هَالنَّوْع، لَوْ سَمَحْت.", "hādhā ḥilw wāyid. abghī min han-nawʿ, law samaḥt.", "This one's very sweet. I'd like this kind, please.", "এটা বেশ মিষ্টি। এই জাতেরটাই দিন, দয়া করে।"],
+      ["حَاضِر. بِحُطّ لَك كِيلُو فِي الْكِيس.", "ḥāḍir. baḥuṭṭ lak kīlū fil-kīs.", "Of course. I'll put a kilo in the bag for you.", "অবশ্যই। আপনার জন্য ব্যাগে এক কেজি ভরে দিচ্ছি।"]
+    ],
+    "words": [
+      { "ar": "سُوق", "tr": "sūg", "meaning": ["Market", "বাজার"], "root": "س و ق", "bridge": "25:7:9" },
+      { "ar": "وَايِد", "tr": "wāyid", "meaning": ["Very or a lot", "খুব বা অনেক"] }
+    ]
+  },
+  {
+    "id": "gulf-a1-time",
+    "title": ["Times & opening hours", "সময় ও খোলার সময়সূচি"],
+    "partner": ["Library attendant", "গ্রন্থাগারের কর্মী"],
+    "sign": "ساعات العمل",
+    "signSpeech": "سَاعَاتُ الْعَمَلِ",
+    "meaning": ["Opening hours", "খোলার সময়সূচি"],
+    "dialogue": [
+      ["السَّاعَة كَمْ تِفْتَحُون بَاجِر؟", "is-sāʿa kam tiftaḥūn bājir?", "What time do you open tomorrow?", "আগামীকাল কয়টায় খুলবেন?"],
+      ["نِفْتَح السَّاعَة تِسْع الصُّبْح. تَبْغِي تِيِي الصُّبْح؟", "niftaḥ is-sāʿa tisʿ iṣ-ṣubḥ. tabghī tīyī iṣ-ṣubḥ?", "We open at nine in the morning. Would you like to come in the morning?", "সকাল নয়টায় খুলি। সকালে আসতে চান?"],
+      ["لَا، بَيِي عَقِب الظُّهْر. مَتَى تْسَكِّرُون؟", "lā, bayī ʿagib iẓ-ẓuhr. mata tsakkirūn?", "No, I'll come in the afternoon. When do you close?", "না, দুপুরের পর আসব। কখন বন্ধ করেন?"],
+      ["نْسَكِّر السَّاعَة سِتّ الْمَسَا.", "nsakkir is-sāʿa sitt il-masā.", "We close at six in the evening.", "সন্ধ্যা ছয়টায় বন্ধ করি।"]
+    ],
+    "words": [
+      { "ar": "سَاعَة", "tr": "sāʿa", "meaning": ["Hour or time", "ঘণ্টা বা সময়"], "root": "س و ع", "bridge": "7:34:9" },
+      { "ar": "بَاجِر", "tr": "bājir", "meaning": ["Tomorrow", "আগামীকাল"] }
+    ]
+  },
+  {
+    "id": "gulf-a1-mosque",
+    "title": ["Finding the mosque", "মসজিদ খোঁজা"],
+    "partner": ["Passerby", "পথচারী"],
+    "sign": "مكان الوضوء",
+    "signSpeech": "مَكَانُ الْوُضُوءِ",
+    "meaning": ["Wudu area", "অজুর জায়গা"],
+    "dialogue": [
+      ["لَوْ سَمَحْت، فِيه مَسْيِد قَرِيب مِنْ هِنِي؟", "law samaḥt, fīh masyid garīb min hinī?", "Excuse me, is there a mosque near here?", "মাফ করবেন, এখান থেকে কাছে কোনো মসজিদ আছে?"],
+      ["هَيْه، عَقِب الْبِنَايَة الْبَيْضَا. تْشُوفْهَا؟", "hayh, ʿagib il-bināya il-bayḍā. tshūfhā?", "Yes, just past the white building. Do you see it?", "হ্যাঁ, সাদা ভবনটা পেরিয়েই। দেখতে পাচ্ছেন?"],
+      ["هَيْه، أَشُوفْهَا. وَيْن مَكَان الْوُضُوء؟", "hayh, ashūfhā. wayn makān il-wuḍūʾ?", "Yes, I see it. Where's the wudu area?", "হ্যাঁ, দেখতে পাচ্ছি। অজুর জায়গা কোথায়?"],
+      ["عَ الْيَسَار، جَنْب بَاب الْمَسْيِد.", "ʿal-yasār, janb bāb il-masyid.", "On the left, next to the mosque door.", "বাঁ দিকে, মসজিদের দরজার পাশে।"]
+    ],
+    "words": [
+      { "ar": "مَسْيِد", "tr": "masyid", "meaning": ["Mosque", "মসজিদ"], "root": "س ج د", "bridge": "17:1:7" },
+      { "ar": "قَرِيب", "tr": "garīb", "meaning": ["Nearby", "কাছাকাছি"] }
+    ]
+  },
+  {
+    "id": "gulf-a1-help",
+    "title": ["Getting help", "সাহায্য নেওয়া"],
+    "partner": ["Information desk attendant", "তথ্যকেন্দ্রের কর্মী"],
+    "sign": "مكتب الاستعلامات",
+    "signSpeech": "مَكْتَبُ الِاسْتِعْلَامَاتِ",
+    "meaning": ["Information desk", "তথ্যকেন্দ্র"],
+    "dialogue": [
+      ["لَوْ سَمَحْت، أَنَا ضَايِع. تِقْدَر تِسَاعِدْنِي؟", "law samaḥt, anā ḍāyiʿ. tigdar tisāʿidnī?", "Excuse me, I'm lost. Can you help me?", "মাফ করবেন, পথ হারিয়েছি। আমাকে সাহায্য করতে পারবেন?"],
+      ["طَبْعًا. وَيْن تَبْغِي تْرُوح؟", "ṭabʿan. wayn tabghī trūḥ?", "Of course. Where do you want to go?", "অবশ্যই। কোথায় যেতে চান?"],
+      ["أَبْغِي أَرُوح مَحَطَّة الْمِتْرُو. تِقْدَر تْوَرِّينِي عَ الْخَرِيطَة؟", "abghī arūḥ maḥaṭṭat il-mitrō. tigdar twarrīnī ʿal-kharīṭa?", "I want to go to the metro station. Can you show me on the map?", "মেট্রো স্টেশনে যেতে চাই। ম্যাপে দেখিয়ে দিতে পারবেন?"],
+      ["هَيْه، إِنْتَ هِنِي، وَالْمَحَطَّة هِنَاك، جَنْب السُّوق.", "hayh, inta hinī, wil-maḥaṭṭa hināk, janb is-sūg.", "Yes, you're here, and the station is there, next to the market.", "হ্যাঁ, আপনি এখানে, আর স্টেশন ওখানে, বাজারের পাশে।"]
+    ],
+    "words": [
+      { "ar": "ضَايِع", "tr": "ḍāyiʿ", "meaning": ["Lost (a man speaking)", "পথ হারিয়েছি (পুরুষের কথায়)"], "root": "ض ي ع", "bridge": "19:59:5" },
+      { "ar": "تِقْدَر تِسَاعِدْنِي؟", "tr": "tigdar tisāʿidnī?", "meaning": ["Can you help me? (to a man)", "আমাকে সাহায্য করতে পারবেন? (পুরুষকে বলার সময়)"] }
+    ]
+  }
+]

@@ -1,6 +1,7 @@
 import starter from "../../docs/content/spoken-arabic.json";
 import everyday from "../../docs/content/spoken-saudi-a2.json";
 import conversation from "../../docs/content/spoken-saudi-b1.json";
+import gulf from "../../docs/content/spoken-gulf-a1.json";
 import modernStandard from "../../docs/content/spoken-msa-a1.json";
 import { asset } from "./config";
 import { askPhrase, renderAsk } from "./umrahAsk";
@@ -14,13 +15,13 @@ export const speakGoals = ["speakUmrah", "speakWork", "speakEveryday", "speakNew
 export const speakLevels = ["A1", "A2", "B1"] as const;
 export type SpeakLevel = typeof speakLevels[number];
 export const speakLevelLabels = { A1: "speakSurvival", A2: "speakEverydayLevel", B1: "speakConversation" };
-export const speakVarieties = ["saudi-hijazi", "msa"] as const;
+export const speakVarieties = ["saudi-hijazi", "gulf", "msa"] as const;
 export type SpeakVariety = typeof speakVarieties[number];
 export const defaultSpeakVariety: SpeakVariety = "saudi-hijazi";
-export const speakVarietyLabels = { "saudi-hijazi": "speakSaudi", msa: "speakFormal" };
+export const speakVarietyLabels = { "saudi-hijazi": "speakSaudi", gulf: "speakGulf", msa: "speakFormal" };
 
 type StarterUnit = typeof starter.units[number] & { level: "A1"; variety: "saudi-hijazi" };
-type ConversationUnit = (typeof everyday[number] | typeof conversation[number] | typeof modernStandard[number]) & { level: SpeakLevel; variety: SpeakVariety };
+type ConversationUnit = (typeof everyday[number] | typeof conversation[number] | typeof gulf[number] | typeof modernStandard[number]) & { level: SpeakLevel; variety: SpeakVariety };
 export type SpeakUnit = StarterUnit | ConversationUnit;
 export type SpeakWord = { ar: string; tr: string; meaning: string[]; root?: string; bridge?: string };
 type SpeakLine = SpeakWord & { clip: string };
@@ -31,6 +32,7 @@ export const speakCourses: Record<SpeakVariety, Partial<Record<SpeakLevel, Speak
     A2: everyday.map(unit => ({ ...unit, level: "A2", variety: "saudi-hijazi" })),
     B1: conversation.map(unit => ({ ...unit, level: "B1", variety: "saudi-hijazi" })),
   },
+  gulf: { A1: gulf.map(unit => ({ ...unit, level: "A1", variety: "gulf" })) },
   msa: { A1: modernStandard.map(unit => ({ ...unit, level: "A1", variety: "msa" })) },
 };
 export const speakCourseVariety = (preferred: SpeakVariety, level: SpeakLevel) => speakCourses[preferred][level] ? preferred : defaultSpeakVariety;

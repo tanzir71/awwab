@@ -18,12 +18,6 @@ import { splitArabicWords } from "@/lib/wordAnatomy";
 
 const steps = ["speakListen", "speakWords", "speakRepeat", "speakTurn", "speakSign"];
 const goalDefaults = ["speakUmrah"];
-const varietyCards: { label: string; id?: SpeakVariety }[] = [
-  { label: speakVarietyLabels["saudi-hijazi"], id: "saudi-hijazi" },
-  { label: "speakGulf" },
-  { label: speakVarietyLabels.msa, id: "msa" },
-  { label: "speakLater" },
-];
 
 function UnitList({ active, complete, level, variety }: { active?: string; complete: string[]; level: SpeakLevel; variety: SpeakVariety }) {
   const { t, language } = useCopy();
@@ -58,14 +52,17 @@ function SpeakSetup({ complete, level, variety }: { complete: string[]; level: S
     <div className="speak-setup-grid"><div className="compact-stack">
       <h2 className="caption">{t("speakVariety")}</h2>
       <div className="compact-stack" role="group" aria-label={t("speakVariety")}>
-        {varietyCards.map(({ id, label }) => id ? <button type="button" key={id} disabled={changingVariety}
-          className={`card speak-variety${variety === id ? " selected" : ""}`}
-          aria-pressed={variety === id} onClick={() => void chooseVariety(id)}>
-          <strong>{t(label)}</strong><span className="small muted">{t(`${label}Note`)}</span>
-        </button> : <section className="card speak-variety" key={label}>
-          <div className="row-between"><h3>{t(label)}</h3><span className="small muted">{t("speakPending")}</span></div>
-          {label !== "speakLater" && <p className="small muted">{t(`${label}Note`)}</p>}
-        </section>)}
+        {speakVarieties.map(id => {
+          const label = speakVarietyLabels[id];
+          return <button type="button" key={id} disabled={changingVariety}
+            className={`card speak-variety${variety === id ? " selected" : ""}`}
+            aria-pressed={variety === id} onClick={() => void chooseVariety(id)}>
+            <strong>{t(label)}</strong><span className="small muted">{t(`${label}Note`)}</span>
+          </button>;
+        })}
+        <section className="card speak-variety">
+          <div className="row-between"><h3>{t("speakLater")}</h3><span className="small muted">{t("speakPending")}</span></div>
+        </section>
       </div>
       <h2 className="caption">{t("speakGoal")}</h2>
       <div className="chips">{speakGoals.map(goal => <button key={goal} type="button" className={`chip ${selected.includes(goal) ? "active" : "soft"}`}

@@ -72,7 +72,7 @@ describe("saved study milestones", () => {
     await db.records.bulkPut([
       { key: speakProgressKey, value: ["sim", "greetings"] },
       { key: speakGoalsKey, value: ["speakWork"] },
-      { key: speakVarietyKey, value: "msa" },
+      { key: speakVarietyKey, value: "gulf" },
     ]);
     await Promise.all([
       finishSpeakUnit("a2-family", times.asr, dhaka.timeZone),
@@ -80,15 +80,16 @@ describe("saved study milestones", () => {
       finishSpeakUnit("a2-office", times.asr, dhaka.timeZone),
       finishSpeakUnit("b1-story", times.asr, dhaka.timeZone),
       finishSpeakUnit("msa-a1-greetings", times.asr, dhaka.timeZone),
+      finishSpeakUnit("gulf-a1-greetings", times.asr, dhaka.timeZone),
     ]);
     const file = await backup();
     await db.records.clear();
     await restoreBackup(file);
-    expect(await getRecord<string[]>(speakProgressKey, [])).toEqual(["sim", "greetings", "a2-family", "a2-office", "b1-story", "msa-a1-greetings"]);
+    expect(await getRecord<string[]>(speakProgressKey, [])).toEqual(["sim", "greetings", "a2-family", "a2-office", "b1-story", "msa-a1-greetings", "gulf-a1-greetings"]);
     expect(await getRecord<string[]>(speakGoalsKey, [])).toEqual(["speakWork"]);
     const variety = await getRecord(speakVarietyKey, defaultSpeakVariety);
-    expect(variety).toBe("msa");
-    expect(speakCourseVariety(variety, "A1")).toBe("msa");
+    expect(variety).toBe("gulf");
+    expect(speakCourseVariety(variety, "A1")).toBe("gulf");
     expect(speakCourseVariety(variety, "A2")).toBe("saudi-hijazi");
     expect(await getRecord<string[]>("study-days", [])).toEqual([day]);
   });

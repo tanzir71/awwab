@@ -8,7 +8,7 @@ export const speakMessages: MessageCatalog = {
   speakSaudi: { en: "Saudi · Hijazi", bn: "সৌদি · হিজাজি" },
   speakSaudiNote: { en: "Makkah, Madinah, Jeddah. What you hear on Umrah and Hajj.", bn: "মক্কা, মদিনা, জেদ্দা। উমরাহ ও হজে যা শুনবেন।" },
   speakGulf: { en: "Gulf", bn: "উপসাগরীয়" },
-  speakGulfNote: { en: "Useful for work in the Gulf.", bn: "উপসাগরীয় অঞ্চলে কাজে লাগে।" },
+  speakGulfNote: { en: "Everyday Emirati Arabic for life and work in the Gulf.", bn: "উপসাগরীয় অঞ্চলে জীবনযাপন ও কাজের জন্য কথ্য আমিরাতি আরবি।" },
   speakFormal: { en: "Modern Standard", bn: "আধুনিক প্রমিত আরবি" },
   speakFormalNote: { en: "News, signs, books and khutbahs.", bn: "সংবাদ, সাইনবোর্ড, বই আর খুতবায় কাজে লাগে।" },
   speakLater: { en: "Egyptian · Levantine", bn: "মিশরীয় · লেভান্টাইন" },
