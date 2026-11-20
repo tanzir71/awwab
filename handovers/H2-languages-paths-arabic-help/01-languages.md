@@ -84,7 +84,7 @@ The Indonesian learning paths draft covers the path hub, placement prompts, Makt
 
 The Indonesian reading draft covers Fluent Reading, Read with Meaning, Recite with a Teacher, Tajweed Essentials, and Tajweed in Depth. It includes the 125 core-word glosses. Review the tajwid explanations with their cited examples and recording credits, and check the glosses in the context of each āyah.
 
-The Indonesian Speak draft covers the shared course interface and all A1 lessons in Saudi Hijazi, Gulf Arabic, and Modern Standard Arabic. The course entries reuse the existing Indonesian Ask in Arabic meanings where the Arabic phrases are shared. Review the translated dialogues, vocabulary, and signs alongside the existing recordings.
+The Indonesian Speak draft covers the shared interface and all 81 lessons across the seven courses. The pilgrimage lessons reuse the existing Indonesian Ask in Arabic meanings where the Arabic phrases are shared. Review the translated dialogues, vocabulary, and signs alongside the recordings, including the workplace scenarios in Working in the Gulf.
 
 The Indonesian Umrah draft covers desktop trip preparation and print, the phone itinerary and Haram focus, the seven ritual steps, and offline map controls and search terms. Review the ritual descriptions with the sources shown in the guide, and check that the trip file and saved counters work across app languages.
 
