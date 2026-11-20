@@ -1,11 +1,12 @@
 import { asset } from "./config";
-import { collectionIds, editionUrl, hadithArchiveVersion, hadithCollections, type HadithCollection, type HadithGrade, type HadithNarration } from "./hadith-catalogue";
+import { collectionIds, hadithArchiveVersion, hadithCollections, type HadithCollection, type HadithGrade, type HadithNarration } from "./hadith-catalogue";
 import { localeHadithEditions } from "./localePacks";
 import { studySearchTerm } from "./study-copy";
 import type { useCopy } from "./copy";
 import curated from "../../docs/content/hadith-curated.json";
 
 export type CollectionScope = HadithCollection | "all" | "riyadussalihin";
+export { hadithSource } from "./hadith-catalogue";
 export const hadithTopics = ["all", "prayer", "repentance", "character", "family", "knowledge"] as const;
 export type HadithTopic = typeof hadithTopics[number];
 export type CuratedNarration = {
@@ -79,11 +80,6 @@ export function parseHadithId(id: string) {
   if (!number || extra !== undefined || !/^[1-9]\d*(?:[a-z]|\.\d{1,2})?$/.test(number)) return undefined;
   const collection = collectionIds.find(item => item === key);
   return collection ? { collection, number } : undefined;
-}
-
-export function hadithSource(narration: HadithNarration) {
-  const { collection, number } = narration;
-  return number.includes(".") ? editionUrl(collection) : `https://sunnah.com/${collection}:${number}`;
 }
 
 const numberFormats = new Map<string, Intl.NumberFormat>();

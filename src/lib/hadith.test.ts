@@ -7,6 +7,7 @@ import { canonicalHadithNumber, collectionIds, hadithArchiveVersion, narrationGr
 import { message } from "./copy";
 import { formatLocale } from "./languagePreferences";
 import * as localePacks from "./localePacks";
+import { alignHadithTranslations, checkHadithMeaningEditions } from "../../scripts/hadith-meaning-edition.mjs";
 
 const archive = collectionIds.flatMap(collection => {
   const file = new URL(`../../public/data/hadith-${collection}-v${hadithArchiveVersion}.json.gz`, import.meta.url);
@@ -97,6 +98,31 @@ describe("hadith editions", () => {
       expect(searchHadith("عبارت قربت", [original], "bukhari", "ur").matches).toEqual([]);
       expect(searchHadith("عبارت قربت", [original], "all", "en").matches).toEqual([]);
     } finally { installed.mockRestore(); }
+  });
+
+  it("prepares drafts from exact source references without accepting ambiguous or mismatched entries", () => {
+    const row = (number: string, source: string, text: string) => {
+      const original = byId.get(`muslim:${source}`);
+      return { arabicnumber: number, reference: { book: original.book, hadith: original.inBook }, text };
+    };
+    const accepted = row("2702.01", "2702a", "  Candidate wording.  ");
+    const wrongBook = row("571.01", "571a", "Wrong book");
+    wrongBook.reference.book += 1;
+    const result = alignHadithTranslations("muslim", [accepted, wrongBook,
+      row("2702.02", "2702b", "First candidate"), row("2702.02", "2702b", "Second candidate"),
+      row("1907.01", "1907a", " "), { arabicnumber: 99999999, text: "Outside archive" },
+    ]);
+    const { narrations, alignment } = result;
+    expect(Object.keys(narrations)).toEqual(["2702a"]);
+    expect(narrations["2702a"].text).toBe(accepted.text);
+    expect(narrations["2702a"].original).toMatchObject({
+      grade: byId.get("muslim:2702a").grade, source: "https://sunnah.com/muslim:2702a",
+    });
+    expect(alignment).toMatchObject({ matched: 1, missingText: 1, outsideArchive: 1, ambiguous: ["2702b"], mismatches: [{ number: "571a" }] });
+    const attribution = { credit: "Test edition", source: "https://example.com/edition", license: "Test license", licenseUrl: "https://example.com/license" };
+    expect(checkHadithMeaningEditions({ muslim: { ...attribution, narrations } }, "ur").muslim.narrations).toEqual({
+      "2702a": { book: accepted.reference.book, inBook: accepted.reference.hadith, text: accepted.text },
+    });
   });
 
   it("keeps the desktop topics and highlighted bilingual excerpt attached to their verified references", () => {

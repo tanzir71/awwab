@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
-import { collectionIds, hadithArchiveVersion } from "../src/lib/hadith-catalogue.ts";
+import { canonicalHadithNumber, collectionIds, hadithArchiveVersion, hadithSource } from "../src/lib/hadith-catalogue.ts";
 import { checkTranslationAttribution, present } from "./translation-attribution.mjs";
 
 const archives = new Map();
@@ -12,6 +12,48 @@ function canonicalNarrations(collection) {
     archives.set(collection, new Map(items.map(item => [item.number, item])));
   }
   return archives.get(collection);
+}
+
+export function alignHadithTranslations(collection, rows) {
+  if (!collectionIds.includes(collection)) throw new Error(`Unsupported Hadith collection: ${collection}`);
+  if (!Array.isArray(rows)) throw new Error(`${collection} source must contain a hadiths array.`);
+  const canonical = canonicalNarrations(collection);
+  const matches = new Map();
+  const ambiguous = new Set();
+  const mismatches = [];
+  let outsideArchive = 0;
+  let missingText = 0;
+  for (const row of rows) {
+    const number = canonicalHadithNumber(collection, row?.arabicnumber);
+    const original = canonical.get(number);
+    if (!original) {
+      outsideArchive++;
+      continue;
+    }
+    const { book, hadith: inBook } = row.reference ?? {};
+    if (book !== original.book || inBook !== original.inBook) {
+      mismatches.push({ number, book, inBook, expectedBook: original.book, expectedInBook: original.inBook });
+      continue;
+    }
+    if (!present(row.text)) {
+      missingText++;
+      continue;
+    }
+    if (ambiguous.has(number) || matches.has(number)) {
+      matches.delete(number);
+      ambiguous.add(number);
+      continue;
+    }
+    matches.set(number, { book, inBook, text: row.text, original: {
+      arabic: original.arabic, english: original.text, grade: original.grade,
+      source: hadithSource(original),
+    } });
+  }
+  return {
+    narrations: Object.fromEntries(matches),
+    alignment: { bundled: canonical.size, sourceRows: rows.length, matched: matches.size, outsideArchive, missingText,
+      ambiguous: [...ambiguous], mismatches },
+  };
 }
 
 export function checkHadithMeaningEditions(collections, locale) {

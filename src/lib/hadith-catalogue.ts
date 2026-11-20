@@ -52,3 +52,7 @@ export const hadithArchiveVersion = 3;
 export function editionUrl(collection: HadithCollection, language: "eng" | "ara" = "eng") {
   return `${hadithEditionBase}/${language}-${collection}.min.json`;
 }
+
+export function hadithSource({ collection, number }: Pick<HadithNarration, "collection" | "number">) {
+  return number.includes(".") ? editionUrl(collection) : `https://sunnah.com/${collection}:${number}`;
+}
