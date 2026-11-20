@@ -18,6 +18,7 @@ import { families, letterForms, lettersForFamily } from "@/lib/takhti";
 import { initialZakat, metalLabels, zakatMoney, zakatProfileTotals, zakatSources } from "@/lib/zakat";
 import { studyNames } from "@/lib/study-copy";
 import { languages, quranMeaningPreferences } from "@/lib/languagePreferences";
+import { localeQuranWordGloss, type WordGloss } from "@/lib/localePacks";
 import { anatomyGlossKey } from "@/lib/study-gloss-messages.mjs";
 import type { Settings } from "@/lib/storageService";
 import { prayerIds } from "@/types/Prayer";
@@ -72,11 +73,15 @@ export function WordPrintSheet() {
   if (!word) return <Link className="action light" to={returnPath}>{t("continueLearning")}</Link>;
   const source = params.get("source")?.slice(0, 80);
   const { letters, syllables, curated, modern } = wordAnatomy(word);
-  const requestedMeaning = params.get("meaning")?.slice(0, 120);
+  const requestedMeaning = params.get("meaning");
   const requestedLanguage = params.get("meaningLanguage");
-  const meaning = requestedMeaning
-    ? { gloss: requestedMeaning, glossLanguage: languages.find(item => item.code === requestedLanguage)?.code ?? "en" }
-    : curated ? studyGloss(anatomyGlossKey("meaning")) : undefined;
+  const location = /^(\d+:\d+):(\d+)$/.exec(params.get("wordEdition") ?? "");
+  const script = params.get("meaningScript") === "indopak" ? "indopak" : "uthmani";
+  const editionMeaning = location && requestedLanguage
+    ? localeQuranWordGloss(requestedLanguage, location[1], Number(location[2]), script) : undefined;
+  const meaning: WordGloss | undefined = editionMeaning && editionMeaning.gloss === requestedMeaning ? editionMeaning :
+    requestedMeaning ? { gloss: requestedMeaning.slice(0, 120), glossLanguage: languages.find(item => item.code === requestedLanguage)?.code ?? "en" }
+      : curated ? studyGloss(anatomyGlossKey("meaning")) : undefined;
   return <div className="print-page stack" data-sheet="word-card">
     <div className="equal-row no-print"><Link className="action light" to={returnPath}>{t("back")}</Link>
       <button className="action" type="button" onClick={() => void printPaper()}><Printer size={18} />{t("anatomyPrintWord")}</button></div>
@@ -85,6 +90,7 @@ export function WordPrintSheet() {
       <ArabicText text={word} citation={source} words={[meaning]} showGlosses={false} />
       <p lang="ar-Latn" dir="ltr">{curated?.translit ?? syllables.map(item => item.tr).join(" · ")}</p>
       {meaning && <p className="muted" lang={meaning.glossLanguage} dir="auto">{meaning.gloss}</p>}
+      {meaning?.glossCredit && <a className="small" href={meaning.glossCredit.source} dir="auto" rel="noreferrer">{meaning.glossCredit.credit}</a>}
       <h2>{t("lettersRtl")}</h2>
       <div className="paper-word-letters" dir="rtl">{letters.map((letter, index) => <div className="card soft" key={index}>
         <ArabicText text={letter.glyph} compact /><small dir="auto">

@@ -24,6 +24,7 @@ import { correctTajweedSamples, tajweedClip, tajweedDepthLessons, tajweedExcerpt
 import { newReview } from "./reviews";
 import { practiceChapters, readingPortions } from "./readingPractice";
 import { formatQuranReference } from "./quran";
+import { checkQuranWordEdition } from "../../scripts/quran-word-edition.mjs";
 
 const quran = JSON.parse(gunzipSync(readFileSync(new URL("../../public/data/quran-study-v1.json.gz", import.meta.url))).toString()) as StudyQuran;
 
@@ -121,6 +122,37 @@ describe("Offline Quran study edition", () => {
     }
     expect(getHifzPassage("al-mulk").source?.grade).toBe("hasan");
     for (const id of ["ya-sin", "al-waqiah", "witr", "al-kahf"]) expect(getHifzPassage(id).source).toBeUndefined();
+  });
+
+  it("preserves the source basmala while counting only numbered words", () => {
+    const fatiha = quran.surahs[1][0];
+    expect(verseText(fatiha, "uthmani")).toEqual({ text: fatiha.uthmani, opening: undefined });
+    for (const [chapter, firstWord, count] of [[95, "وَٱلتِّينِ", 2], [97, "إِنَّآ", 5]] as const) {
+      const verse = quran.surahs[chapter][0];
+      const { text, opening } = verseText(verse, "uthmani");
+      expect(opening).toMatch(/^بِّسْمِ/u);
+      expect(opening + " " + text).toBe(verse.uthmani);
+      expect(splitArabicWords(text)[0]).toBe(firstWord);
+      expect(splitArabicWords(text)).toHaveLength(count);
+      expect(splitArabicWords(verseText(verse, "indopak").text)).toHaveLength(count);
+      const portions = groupPortions(getHifzPassage(`surah-${chapter}`), quran);
+      expect(portions.reduce((total, portion) => total + portion.words, 0))
+        .toBe(chapters.find(item => item.number === chapter)?.words);
+    }
+  });
+
+  it("checks word edition locations against the correct script and requires attribution", () => {
+    const edition = {
+      credit: "Test edition", source: "https://example.com/edition", license: "Test terms", licenseUrl: "https://example.com/terms",
+      words: { "1:1:4": "Fixture", "95:1:2": "Fixture", "97:1:5": "Fixture", "37:130:4": "Fixture" },
+      indopak: { "37:130:3": "Fixture", "72:16:8": "Fixture" },
+    };
+    expect(checkQuranWordEdition(edition)).toEqual(edition);
+    expect(() => checkQuranWordEdition({ ...edition, source: "" })).toThrow(/translator credit/);
+    expect(() => checkQuranWordEdition({ ...edition, words: { "95:1:3": "Fixture" } })).toThrow(/95:1:3/);
+    expect(() => checkQuranWordEdition({ ...edition, words: { "72:16:8": "Fixture" } })).toThrow(/72:16:8/);
+    expect(() => checkQuranWordEdition({ ...edition, indopak: { "37:130:4": "Fixture" } })).toThrow(/37:130:4/);
+    expect(() => checkQuranWordEdition({ ...edition, indopak: { "95:1:2": "Fixture" } })).toThrow(/95:1:2/);
   });
 
   it("breaks āyat al-Kursī on waqf for practice while keeping its review as one āyah", () => {

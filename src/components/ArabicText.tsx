@@ -2,6 +2,7 @@ import React, { type ReactNode } from "react";
 import { splitArabicPhrase, splitArabicWords, splitGraphemes, wordAnatomy } from "../lib/wordAnatomy";
 import { useUi, type WordSelection } from "../lib/uiState";
 import { useCopy } from "../lib/copy";
+import type { WordGloss } from "../lib/localePacks";
 
 type WordRecall = "read" | "hint" | "hidden";
 type WordIndicator = { state: "known" | "learning" | "new"; label: string };
@@ -21,10 +22,9 @@ function WordChip({ children, recall, href, selected, indicator, annotation, onS
     aria-description={annotation?.label} onClick={onSelect}>{children}</button>;
 }
 
-export interface WordDetail {
+export interface WordDetail extends Partial<WordGloss> {
+  script?: WordSelection["script"];
   transliteration?: string;
-  gloss?: string;
-  glossLanguage?: string;
   displayText?: string;
   root?: string;
   anatomyWord?: string;
@@ -71,7 +71,7 @@ export function ArabicText({ text, citation, words, recall = "read", mushaf, com
               <WordChip key={partIndex} recall={chipRecall} href={wordLink?.(index + 1)} selected={selectedPosition === undefined ? undefined : selectedPosition === position} indicator={indicator} annotation={detail?.annotation}
                 onSelect={() => {
                   if (onWordSelected?.(position) === false) return;
-                  selectWord({ word: anatomyWord, citation, connected: index > 0, verse, position, ...detail });
+                  selectWord({ word: anatomyWord, citation, connected: index > 0, verse, position, script: mushaf, ...detail });
                 }}>
                 <span>{shown}</span>
                 {chipRecall === "read" && showGlosses && detail?.gloss && <small lang={detail.glossLanguage ?? "en"} dir="auto">{detail.gloss}</small>}

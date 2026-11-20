@@ -4,7 +4,7 @@ import { ArabicText } from "@/components/ArabicText";
 import { SectionNav } from "@/components/Surface";
 import { asset, IS_PREVIEW } from "@/lib/config";
 import { useCopy } from "@/lib/copy";
-import { localeHadithEditions, localeQuranEdition } from "@/lib/localePacks";
+import { localeHadithEditions, localeQuranEdition, localeQuranWordEdition } from "@/lib/localePacks";
 import { formatQuranReference } from "@/lib/quran";
 import { useUi } from "@/lib/uiState";
 import { splitArabicWords } from "@/lib/wordAnatomy";
@@ -31,8 +31,10 @@ const sources = [
 export function Sources() {
   const { t, language, locale } = useCopy();
   const quranEdition = localeQuranEdition(language);
+  const wordEdition = localeQuranWordEdition(language);
   const editions = [
     ...(quranEdition ? [{ edition: quranEdition, label: t("settingsMeaningLocal") }] : []),
+    ...(wordEdition ? [{ edition: wordEdition, label: t("surahWordByWord") }] : []),
     ...Object.entries(localeHadithEditions(language) ?? {}).map(([collection, edition]) => ({
       edition, label: t(`hadithCollection-${collection}`),
     })),

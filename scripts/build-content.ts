@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { gzipSync } from "node:zlib";
+import { splitUthmaniOpening } from "../src/lib/quranOpening.ts";
 
 const project = new URL("../", import.meta.url);
 const sourceDir = process.env.AWWAB_CONTENT_DIR;
@@ -51,9 +52,7 @@ const uthmani = parseVerses(arabic);
 const studyUthmani = parseVerses(studyArabic);
 const translation = parseVerses(english);
 const indopak = parseIndopak(indopakText);
-const basmala = uthmani.get("1:1");
-if (!basmala) throw new Error("Missing Al-Fātiḥa 1:1 in the Uthmani source.");
-const unnumberedOpening = basmala + " ";
+if (!uthmani.has("1:1")) throw new Error("Missing Al-Fātiḥa 1:1 in the Uthmani source.");
 const chapters = [...metadata.matchAll(/<sura index="(\d+)" ayas="(\d+)" start="(\d+)" name="([^"]+)" tname="([^"]+)" ename="([^"]+)"/g)]
   .map(([, number, ayahs, start, nameArabic, title, meaning]) => ({ number: Number(number), ayahs: Number(ayahs), start: Number(start), nameArabic, title, meaning }));
 const juzs = [...metadata.matchAll(/<juz index="(\d+)" sura="(\d+)" aya="(\d+)"/g)]
@@ -69,18 +68,15 @@ for (const chapter of chapters) {
   });
 }
 const notice = arabic.split(/\r?\n/).filter(line => line.startsWith("#")).join("\n");
-const supported = Object.fromEntries(surahs.slice(0, 12).map(({ number }: { number: number }) => [number, full[number].map((verse, index) => {
-  const text = uthmani.get(verse.ref)!;
-  const numbered = number !== 1 && index === 0 && text.startsWith(unnumberedOpening) ? text.slice(unnumberedOpening.length) : text;
-  return { ...verse, uthmani: numbered };
-})]));
+const supported = Object.fromEntries(surahs.slice(0, 12).map(({ number }: { number: number }) => [number, full[number].map(verse => ({
+  ...verse, uthmani: splitUthmaniOpening(uthmani.get(verse.ref)!, verse.ref).text,
+}))]));
 const { metadata: _metadata, uthmaniStudy: _study, ...originalSources } = sources;
 const result = JSON.stringify({ version: 1, notice, sources: originalSources, surahs: supported }, null, 2) + "\n";
 await mkdir(new URL("public/data/", project), { recursive: true });
 await writeFile(new URL("public/data/quran-v1.json", project), result);
-const studyChapters = chapters.map(chapter => ({ ...chapter, words: full[chapter.number].reduce((sum, verse, index) => {
-  const text = chapter.number !== 1 && index === 0 && verse.uthmani.startsWith(unnumberedOpening)
-    ? verse.uthmani.slice(unnumberedOpening.length) : verse.uthmani;
+const studyChapters = chapters.map(chapter => ({ ...chapter, words: full[chapter.number].reduce((sum, verse) => {
+  const { text } = splitUthmaniOpening(verse.uthmani, verse.ref);
   return sum + text.split(/\s+/).filter(word => /\p{L}/u.test(word)).length;
 }, 0) }));
 await writeFile(new URL("public/data/quran-study-index-v1.json", project), JSON.stringify({ version: 1, source: sources.metadata,

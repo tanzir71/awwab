@@ -19,6 +19,7 @@ import { saveHifzPlan, saveJuzRecitalRating, savePortionReview } from "@/lib/stu
 import { studyNames } from "@/lib/study-copy";
 import type { ReviewGrade } from "@/lib/reviews";
 import { getRecord, type Settings } from "@/lib/storageService";
+import { splitArabicPhrase } from "@/lib/wordAnatomy";
 
 const dates = { month: "short", day: "numeric", year: "numeric" } as const;
 const emptyPlans: HifzPlans = {};
@@ -41,12 +42,15 @@ function PassageHeading({ title, subtitle, back }: { title: string; subtitle?: s
 }
 
 function VerseRead({ verse, settings }: { verse: QuranVerse; settings: Settings }) {
-  const { locale } = useCopy();
-  const { opening } = verseText(verse, settings.script);
+  const { locale, quranWordGloss } = useCopy();
+  const script = settings.script;
+  const { opening } = verseText(verse, script);
+  const passage = studyPhrases(verse, script);
+  const words = splitArabicPhrase(passage).filter(part => part.word).map((_, index) => quranWordGloss(verse.ref, index + 1, script));
   return <article className="card compact-stack hifz-verse">
     <strong className="small"><bdi>{formatQuranReference(verse.ref, locale)}</bdi></strong>
-    {opening && <ArabicText text={opening} citation="1:1" verse="1:1" mushaf={settings.script} />}
-    <ArabicText text={studyPhrases(verse, settings.script)} citation={verse.ref} verse={verse.ref} mushaf={settings.script} preserveSeparators />
+    {opening && <ArabicText text={opening} citation="1:1" verse="1:1" mushaf={script} />}
+    <ArabicText text={passage} citation={verse.ref} verse={verse.ref} mushaf={script} words={words} showGlosses={false} preserveSeparators />
     <QuranVerseMeaning verse={verse} settings={settings} />
   </article>;
 }

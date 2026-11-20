@@ -1,14 +1,19 @@
 import { asset } from "./config";
 import type { HadithCollection } from "./hadith-catalogue";
+import { indopakSplitVerses } from "./quranWordPositions";
 
 type CheckedAsset = { bytes: number; digest: string };
 type PackFont = CheckedAsset & { path: string; family: string; unicodeRange: string; weight: string };
 type PackAsset = CheckedAsset & { fonts: PackFont[]; readingFont?: PackFont };
 type PackMessages = Record<string, string | { adult: string; maktab: string }>;
 type TranslationAttribution = { credit: string; source: string; license: string; licenseUrl: string };
+type WordScript = "uthmani" | "indopak";
+export type WordGloss = { gloss: string; glossLanguage: string;
+  glossCredit?: Pick<TranslationAttribution, "credit" | "source"> & { location: string; script: WordScript } };
 type QuranMeaningEdition = TranslationAttribution & { verses: Record<string, string> };
+type QuranWordEdition = TranslationAttribution & { words: Record<string, string>; indopak?: Record<string, string> };
 type HadithMeaningEdition = TranslationAttribution & { narrations: Record<string, { book: number; inBook: number; text: string }> };
-type LocalePack = { messages: PackMessages; quran?: QuranMeaningEdition; hadith?: Partial<Record<HadithCollection, HadithMeaningEdition>> };
+type LocalePack = { messages: PackMessages; quran?: QuranMeaningEdition; quranWords?: QuranWordEdition; hadith?: Partial<Record<HadithCollection, HadithMeaningEdition>> };
 declare const __AWWAB_PUBLISHED_LOCALES__: Record<string, PackAsset>;
 
 const published = typeof __AWWAB_PUBLISHED_LOCALES__ === "undefined" ? {} : __AWWAB_PUBLISHED_LOCALES__;
@@ -37,6 +42,18 @@ export function localeMessage(code: string, key: string, mode: "adult" | "maktab
 
 export function localeQuranEdition(code: string) {
   return packsByLocale.get(code)?.quran;
+}
+
+export function localeQuranWordEdition(code: string) {
+  return packsByLocale.get(code)?.quranWords;
+}
+
+export function localeQuranWordGloss(code: string, verse: string, position: number, script: WordScript): WordGloss | undefined {
+  const edition = localeQuranWordEdition(code);
+  const location = `${verse}:${position}`;
+  const words = script === "indopak" && indopakSplitVerses.has(verse) ? edition?.indopak : edition?.words;
+  const gloss = words?.[location];
+  if (gloss) return { gloss, glossLanguage: code, glossCredit: { credit: edition.credit, source: edition.source, location, script } };
 }
 
 export function localeHadithEditions(code: string) {

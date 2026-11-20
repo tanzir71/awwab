@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { ArabicText } from "@/components/ArabicText";
 import { DesignIcon } from "@/components/DesignIcon";
-import { QuranVerseMeaning } from "@/components/QuranStudySources";
+import { QuranVerseMeaning, QuranWordMeaningSource } from "@/components/QuranStudySources";
 import { SectionNav } from "@/components/Surface";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useRecord } from "@/hooks/use-awwab";
@@ -13,7 +13,7 @@ import { coreWordCoverage, coreWordSource, coreWordTotal, countKnownQuranWords, 
 import type { Settings } from "@/lib/storageService";
 import { momentPath, setAyahFamiliar } from "@/lib/studyMilestones";
 import { studyNames } from "@/lib/study-copy";
-import { ayahGlossKey, salahGlossKey, salahPreviewKey } from "@/lib/study-gloss-messages.mjs";
+import { salahGlossKey, salahPreviewKey } from "@/lib/study-gloss-messages.mjs";
 import { splitArabicWords } from "@/lib/wordAnatomy";
 import content from "../../docs/content/salah-words.json";
 
@@ -25,7 +25,7 @@ const fatiha = quranText[1];
 const verseNotes: Record<string, { glosses: string[]; transliteration?: string }> = content.fatiha;
 
 export function SalahWords({ settings }: { settings: Settings }) {
-  const { language, locale, t, studyGloss } = useCopy();
+  const { language, locale, t, quranWordGloss, studyGloss } = useCopy();
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const [ayah, selectAyah] = useState(2);
@@ -39,7 +39,7 @@ export function SalahWords({ settings }: { settings: Settings }) {
   const words = splitArabicWords(verse.uthmani);
   const notes = verseNotes[verse.ref];
   const details = words.map((_, index) => ({
-    ...studyGloss(ayahGlossKey(verse.ref, index + 1)),
+    ...quranWordGloss(verse.ref, index + 1, "uthmani"),
     root: fatihaMorphology[`${verse.ref}:${index + 1}`]?.root,
   }));
   const selected = details[position - 1];
@@ -93,6 +93,7 @@ export function SalahWords({ settings }: { settings: Settings }) {
         <p className="small muted">{notes.transliteration && <><bdi lang="ar-Latn">{notes.transliteration}</bdi> · </>}
           <a href={`https://quran.com/${verse.ref.replace(":", "/")}`}><bdi>{reference}</bdi></a>
         </p>
+        {details.some(detail => detail.glossCredit) && <QuranWordMeaningSource className="small" />}
         <QuranVerseMeaning verse={verse} settings={settings} />
         <div className="salah-root small">
           <ArabicText text={words[position - 1]} compact citation={verse.ref} verse={verse.ref} positionOffset={position - 1}

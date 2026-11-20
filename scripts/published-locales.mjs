@@ -5,6 +5,7 @@ import { entries, fingerprint, root } from "./ui-catalogue.mjs";
 import { localeFonts, localeReadingFont } from "./locale-fonts.mjs";
 import { checkHadithMeaningEditions } from "./hadith-meaning-edition.mjs";
 import { checkQuranMeaningEdition } from "./quran-meaning-edition.mjs";
+import { checkQuranWordEdition } from "./quran-word-edition.mjs";
 
 export function publishedLocales() {
   const directory = resolve(root, "public/locales");
@@ -21,6 +22,7 @@ export function publishedLocales() {
       throw new Error(`${file} does not match the current UI catalogue. Compile the matching reviewed locale before publishing it.`);
     }
     if (pack.quran !== undefined) checkQuranMeaningEdition(pack.quran, locale.code);
+    if (pack.quranWords !== undefined) checkQuranWordEdition(pack.quranWords);
     if (pack.hadith !== undefined) checkHadithMeaningEditions(pack.hadith, locale.code);
     const fonts = localeFonts(locale.script);
     published.push([locale.code, { bytes: bytes.length, digest: createHash("sha256").update(bytes).digest("hex"),

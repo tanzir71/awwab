@@ -4,6 +4,7 @@ import { asset } from "./config";
 import { addDays } from "./dates";
 import { dayDifference } from "./hijri";
 import type { QuranVerse } from "./quran";
+import { splitUthmaniOpening } from "./quranOpening";
 import { isDue, reviewCard, type Bucket, type Review, type ReviewGrade } from "./reviews";
 import { splitArabicWords } from "./wordAnatomy";
 
@@ -16,7 +17,6 @@ export const essentialPassages = catalogue.passages;
 export const maxPortionAyahs = 5;
 export const maxPortionWords = 40;
 const wordsPerMinute = 2.4;
-const basmala = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ";
 type Script = "uthmani" | "indopak";
 type VerseRange = { chapter: number; from: number; to: number };
 export type HifzPassage = { id: string; title: string; ranges: VerseRange[]; ayahs: number; source?: { ref: string; grade: string }; why?: string };
@@ -42,9 +42,9 @@ export function studyQuran() {
 }
 
 export function verseText(verse: QuranVerse, script: Script) {
-  return script === "uthmani" && verse.ref !== "1:1" && verse.uthmani.startsWith(`${basmala} `)
-    ? { text: verse.uthmani.slice(basmala.length + 1), opening: basmala }
-    : { text: verse[script], opening: undefined };
+  return script === "uthmani"
+    ? splitUthmaniOpening(verse.uthmani, verse.ref)
+    : { text: verse.indopak, opening: undefined };
 }
 
 function chapterRanges(from: number, to: number) {

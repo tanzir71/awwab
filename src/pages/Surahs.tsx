@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { ArabicText } from "@/components/ArabicText";
 import { DesignIcon } from "@/components/DesignIcon";
 import { LocalRecorder } from "@/components/LocalRecorder";
-import { QuranVerseMeaning } from "@/components/QuranStudySources";
+import { QuranVerseMeaning, QuranWordMeaningSource } from "@/components/QuranStudySources";
 import { ListLink, SectionNav } from "@/components/Surface";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useAudioPlayback } from "@/hooks/use-audio-playback";
@@ -21,7 +21,6 @@ import { grades, isDue, reviewCard, type ReviewGrade, type Reviews } from "@/lib
 import { updateRecord, type Settings } from "@/lib/storageService";
 import { isSurahStudyReview, reviewDestination } from "@/lib/studyDesk";
 import { studyNames } from "@/lib/study-copy";
-import { ayahGlossKey } from "@/lib/study-gloss-messages.mjs";
 import { momentPath, saveSurahReview } from "@/lib/studyMilestones";
 import { useUi } from "@/lib/uiState";
 import { splitArabicWords, splitGraphemes, wordAnatomy } from "@/lib/wordAnatomy";
@@ -142,7 +141,7 @@ export function SurahReader({ settings, now }: { settings: Settings; now: Date }
 
 function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; settings: Settings; reviews: Reviews; now: Date }) {
   const [params, setParams] = useSearchParams();
-  const { t, language, locale, direction, studyGloss } = useCopy();
+  const { t, language, locale, direction, quranWordGloss } = useCopy();
   const navigate = useNavigate();
   const desktop = useDesktop();
   const inlineAnatomy = useDesktop(1280);
@@ -200,7 +199,8 @@ function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; set
       const verse = verses.find(item => item.ref === `${surah}:${ayah}`);
       const word = verse && splitArabicWords(verse.uthmani)[position - 1];
       if (word) {
-        selectWord({ word, citation: verse.ref, verse: verse.ref, position, connected: position > 1 });
+        selectWord({ word, citation: verse.ref, verse: verse.ref, position, connected: position > 1,
+          ...quranWordGloss(verse.ref, position, settings.script) });
         return;
       }
     }
@@ -211,8 +211,9 @@ function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; set
     if (selected) return;
     const first = verses[0];
     const [word] = splitArabicWords(first.uthmani);
-    selectWord({ word, citation: first.ref, verse: first.ref, position: 1, connected: false, automatic: true });
-  }, [anatomyRef, inlineAnatomy, selectWord, verses]);
+    selectWord({ word, citation: first.ref, verse: first.ref, position: 1, connected: false, automatic: true,
+      ...quranWordGloss(first.ref, 1, settings.script) });
+  }, [anatomyRef, inlineAnatomy, quranWordGloss, selectWord, settings.script, verses]);
 
   function changeMode(next: StudyMode) {
     if (next === mode) return;
@@ -293,7 +294,7 @@ function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; set
             {visible ? <ArabicText text={lineBreaks(verse[settings.script], wideVerse)} citation={verse.ref} verse={verse.ref} recall={optionsForVerse}
               mushaf={settings.script} showGlosses={display.word}
               words={splitArabicWords(verse.uthmani).map((anatomyWord, index) => ({
-                anatomyWord, ...studyGloss(ayahGlossKey(verse.ref, index + 1)),
+                anatomyWord, ...quranWordGloss(verse.ref, index + 1, settings.script),
               }))}
               selectedPosition={word?.verse === verse.ref ? word.position : !word && index === 0 ? 1 : undefined} /> :
               <h2>{t("surahReciteMemory", { number: index + 1 })}</h2>}
@@ -344,6 +345,7 @@ function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; set
       {chapter.number !== 1 && <p className="surah-suggestion small muted">{t("tryInMaghrib", { name })}</p>}
       <p className="surah-credit small muted"><a href={settings.script === "indopak" ? "https://digitalkhatt.org" : "https://tanzil.net/docs/text_license"}>
         {t(settings.script === "indopak" ? "indopakCredit" : "tanzilCredit")}</a></p>
+      {display.word && <QuranWordMeaningSource className="surah-credit small muted" />}
   </article>;
 
   const queue = adultDesk && <ReviewQueue selected={chapter.number} reviews={reviews} now={now} openReader={compactReview ? () => {

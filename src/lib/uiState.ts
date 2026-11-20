@@ -1,13 +1,13 @@
 import { create } from "zustand";
+import type { WordGloss } from "./localePacks";
 
-export interface WordSelection {
+export interface WordSelection extends Partial<WordGloss> {
   word: string;
   citation?: string;
   transliteration?: string;
-  gloss?: string;
-  glossLanguage?: string;
   root?: string;
   position?: number;
+  script?: "uthmani" | "indopak";
   verse?: string;
   connected: boolean;
   automatic?: boolean;

@@ -1,16 +1,25 @@
 import { useCopy } from "@/lib/copy";
 import { quranMeaningPreferences } from "@/lib/languagePreferences";
-import { localeQuranEdition } from "@/lib/localePacks";
+import { localeQuranEdition, localeQuranWordEdition } from "@/lib/localePacks";
 import { quranMeaningSource, type QuranVerse } from "@/lib/quran";
 import type { Settings } from "@/lib/storageService";
 import { StudyText } from "./StudyText";
 
-export function QuranStudySources({ script, morphology = false }: { script: Settings["script"] | "both"; morphology?: boolean }) {
+export function QuranWordMeaningSource({ className }: { className?: string }) {
+  const { language } = useCopy();
+  const edition = localeQuranWordEdition(language);
+  return edition ? <a className={className} href={edition.source} dir="auto" rel="noreferrer">{edition.credit}</a> : null;
+}
+
+export function QuranStudySources({ script, morphology = false, wordMeanings = false }: {
+  script: Settings["script"] | "both"; morphology?: boolean; wordMeanings?: boolean;
+}) {
   const { t } = useCopy();
   return <footer className="hifz-sources small muted">
     {script !== "indopak" && <a href="https://tanzil.net/" rel="noreferrer">{t("hifzTanzil")}</a>}
     {script !== "uthmani" && <a href="https://github.com/DigitalKhatt/digitalkhatt-js" rel="noreferrer">{t("hifzIndopak")}</a>}
     {morphology && <a href="https://corpus.quran.com/download/" rel="noreferrer">{t("readingRootSource")}</a>}
+    {wordMeanings && <QuranWordMeaningSource />}
   </footer>;
 }
 

@@ -17,6 +17,7 @@ import { studyNames } from "@/lib/study-copy";
 import { anatomyGlossKey, ayahGlossKey } from "@/lib/study-gloss-messages.mjs";
 import { families, lettersForFamily } from "@/lib/takhti";
 import { quranText } from "@/lib/quran";
+import { indopakSplitVerses } from "@/lib/quranWordPositions";
 
 type PanelLayout = "sheet" | "adult-reader" | "maktab-reader" | "side";
 
@@ -45,6 +46,7 @@ function Anatomy({ selection, settings, layout }: { selection: WordSelection; se
   const [spelling, setSpelling] = useState(false);
   const [adding, setAdding] = useState(false);
   const verseRef = selection.verse;
+  const morphologyPosition = selection.script === "indopak" && indopakSplitVerses.has(verseRef) ? undefined : selection.position;
   const wordRef = "word:" + normalizeWord(selection.word);
   const playback = useAudioPlayback(verseRef ? [wordRef, verseRef] : [wordRef]);
   const audioRef = playback.has(wordRef) ? wordRef : verseRef;
@@ -57,11 +59,11 @@ function Anatomy({ selection, settings, layout }: { selection: WordSelection; se
 
   useEffect(() => {
     let current = true;
-    if (verseRef && selection.position) void lookupMorphology(verseRef, selection.position).then(word => {
+    if (verseRef && morphologyPosition) void lookupMorphology(verseRef, morphologyPosition).then(word => {
       if (current) setMorphology(word);
     }).catch(() => {});
     return () => { current = false; };
-  }, [verseRef, selection.position]);
+  }, [verseRef, morphologyPosition]);
 
   useEffect(() => {
     if (!spelling || step < 0) return;
@@ -76,7 +78,7 @@ function Anatomy({ selection, settings, layout }: { selection: WordSelection; se
   const verseMeaning = verseRef && selection.position ? studyGloss(ayahGlossKey(verseRef, selection.position)) : undefined;
   const meaning = selection.gloss === undefined
     ? verseMeaning ?? (curated ? studyGloss(anatomyGlossKey("meaning")) : undefined)
-    : { gloss: selection.gloss, glossLanguage: selection.glossLanguage ?? "en" };
+    : { gloss: selection.gloss, glossLanguage: selection.glossLanguage ?? "en", glossCredit: selection.glossCredit };
   const root = curated?.root.letters.join(" ") ?? selection.root ?? (morphology?.root ? Array.from(morphology.root).join(" ") : "");
   const traceFamily = families.find(family => lettersForFamily(family.id).some(letter => letter.letter === letters[0]?.base));
   const tracePath = traceFamily ? "/learn/takhti/" + traceFamily.id + "?letter=" + encodeURIComponent(letters[0].base) : "/learn/takhti";
@@ -85,6 +87,10 @@ function Anatomy({ selection, settings, layout }: { selection: WordSelection; se
   if (meaning?.gloss) {
     print.set("meaning", meaning.gloss);
     print.set("meaningLanguage", meaning.glossLanguage);
+    if (meaning.glossCredit) {
+      print.set("wordEdition", meaning.glossCredit.location);
+      print.set("meaningScript", meaning.glossCredit.script);
+    }
   }
   const compact = layout === "adult-reader" || layout === "maktab-reader";
   const rootMeaning = curated && studyGloss(anatomyGlossKey("root"));
@@ -100,7 +106,7 @@ function Anatomy({ selection, settings, layout }: { selection: WordSelection; se
     if (adding) return;
     setAdding(true);
     try {
-      const match = morphology ?? (verseRef && selection.position ? await lookupMorphology(verseRef, selection.position).catch(() => undefined) : undefined);
+      const match = morphology ?? (verseRef && morphologyPosition ? await lookupMorphology(verseRef, morphologyPosition).catch(() => undefined) : undefined);
       const reviewId = "word:" + normalizeWord(match?.lemma ?? selection.word);
       await updateRecord<Reviews>("reviews", {}, saved => saved[reviewId] ? saved : {
         ...saved, [reviewId]: { ...reviewCard(undefined, "forgot", new Date()), bucket: "sabaq" },
@@ -119,13 +125,14 @@ function Anatomy({ selection, settings, layout }: { selection: WordSelection; se
         <h2>{pronunciation || t("spellItOut")}</h2>
         <p className="muted small">{meaning?.gloss && <bdi lang={meaning.glossLanguage}>“{meaning.gloss}”</bdi>}
           {meaning?.gloss && selection.citation && " · "}{selection.citation}</p>
+        {meaning?.glossCredit && <a className="small" href={meaning.glossCredit.source} dir="auto" rel="noreferrer">{meaning.glossCredit.credit}</a>}
         {selection.annotation?.lessons ? <ul className="compact-stack anatomy-rule-links">
           {selection.annotation.lessons.map(({ title, to }) => <li className="small" key={title}>
             <Link className="text-button" to={to}>{title}</Link>
           </li>)}
         </ul> : selection.annotation && <p className="small">{selection.annotation.label}</p>}</div>
       <div className="anatomy-title"><ArabicText text={selection.word} citation={selection.citation} verse={verseRef}
-        positionOffset={(selection.position ?? 1) - 1} words={[{ transliteration: pronunciation, root, ...meaning }]} showGlosses={false} /></div>
+        positionOffset={(selection.position ?? 1) - 1} words={[{ transliteration: pronunciation, root, script: selection.script, ...meaning }]} showGlosses={false} /></div>
     </header>
     {shouldHear && <div className="equal-row anatomy-audio">
       {canPlay ? <button className="action soft" type="button" onClick={() => playback.play(audioRef)}>
@@ -232,7 +239,7 @@ export function WordPanel({ presentation = "sheet", settings, reader = false }: 
   const selectWord = useUi(state => state.selectWord);
   const previousFocus = useRef<HTMLElement>();
   const t = message.bind(null, settings);
-  const key = word ? [word.verse, word.position, word.word].join(":") : "";
+  const key = word ? [word.verse, word.position, word.script, word.word].join(":") : "";
   if (presentation === "inline") return word ? <aside className={reader ? "word-side anatomy-reader-panel" : "word-side card"} aria-label={t("wordAnatomy")}
     onKeyDown={event => { if (event.key === "Escape") selectWord(); }}>
     {!reader && <button className="icon-button anatomy-close" aria-label={t("closeWordAnatomy")} onClick={() => selectWord()}><X size={20} /></button>}

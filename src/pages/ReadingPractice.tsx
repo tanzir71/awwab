@@ -16,6 +16,7 @@ import { studyPhrases, studyQuran, verseText, type StudyQuran } from "@/lib/hifz
 import { quranMeaningPreferences } from "@/lib/languagePreferences";
 import { coreWordKey, loadMorphology } from "@/lib/morphology";
 import { formatQuranReference, knownCoreQuranWords, type QuranVerse } from "@/lib/quran";
+import { indopakSplitVerses } from "@/lib/quranWordPositions";
 import { completedReadingChapters, emptyReadingPractice, firstUnreadAyah, practiceChapters, practicePage, readingPortions, readingPracticePaths,
   recitationChecks, rootsFromKnownWords, teacherChecklistComplete, type PracticeMode, type ReadingMode, type ReadingPracticeProgress, type RecitationCheck } from "@/lib/readingPractice";
 import { getRecord, updateSettings, type Settings } from "@/lib/storageService";
@@ -118,16 +119,18 @@ function ReadingVerse({ verse, script, settings, step, corpus, knownRoots, engli
   verse: QuranVerse; script: Settings["script"]; settings: Settings; step?: MeaningStep; corpus?: Corpus;
   knownRoots?: ReadonlySet<string>; english?: boolean; tajweed?: boolean;
 }) {
-  const { t, language, locale } = useCopy();
+  const { t, language, locale, quranWordGloss } = useCopy();
   const { opening, text } = verseText(verse, script);
   const rendered = step === "readingWordStep" ? text : studyPhrases(verse, script, true);
-  const words: WordDetail[] | undefined = step === "readingWordStep" && corpus
+  const words: WordDetail[] | undefined = step === "readingWordStep"
     ? splitArabicPhrase(rendered).filter(part => part.word).map((_part, index) => {
-      const row = corpus.positions.get(`${verse.ref}:${index + 1}`);
-      if (!row) return {};
+      const meaning = quranWordGloss(verse.ref, index + 1, script);
+      const row = script === "indopak" && indopakSplitVerses.has(verse.ref) ? undefined : corpus?.positions.get(`${verse.ref}:${index + 1}`);
+      if (!row) return meaning ?? {};
       const key = coreWordKey(row).slice(5);
       const familiar = row.root && knownRoots?.has(row.root);
-      return { root: row.root, gloss: wordGlosses[key] ? t(wordGlossKey(key)) : undefined, glossLanguage: language,
+      const fallback = wordGlosses[key] ? { gloss: t(wordGlossKey(key)), glossLanguage: language } : undefined;
+      return { root: row.root, ...(meaning ?? fallback),
         annotation: familiar ? { tone: "soft", label: t("readingKnownRoot") } : undefined };
     }) : tajweed ? tajweedReadingExamples(verse.ref)?.map(notes => {
       const lessons = notes.map(note => ({ title: t(`tajweedRule-${note.rule}`), to: tajweedLessonPath(note.lesson) }));
@@ -221,7 +224,7 @@ function GuidedRead({ chapter, title, mode, quran, progress, settings, now }: {
       <Link className="action light" state={state} to={next ? practicePage(mode, chapter.number, ayahNumber(next.verses[0])) : nextChapter ? practicePage(mode, nextChapter.number) : readingPracticePaths[mode]}>
         {t(next ? "readingNextAyahs" : nextChapter ? "readingNextSurah" : "readingChapters")}</Link>
     </div>
-    <QuranStudySources script={script} morphology={Boolean(corpus && step === "readingWordStep")} />
+    <QuranStudySources script={script} morphology={Boolean(corpus && step === "readingWordStep")} wordMeanings={mode === "meaning" && step === "readingWordStep"} />
   </section>;
 }
 

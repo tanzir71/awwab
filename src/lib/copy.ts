@@ -17,7 +17,7 @@ import { mosqueMessages } from "./mosque-copy";
 import { zakatMessages } from "./zakat-copy";
 import { guideMessages } from "./guide-copy";
 import { applyGlossary, formatLocale, glossaryArguments, languages, type BuiltInLanguage } from "./languagePreferences";
-import { localeMessage } from "./localePacks";
+import { localeMessage, localeQuranWordGloss, type WordGloss } from "./localePacks";
 import { settingsMessages } from "./settings-copy";
 import { umrahPrepMessages } from "./umrah-prep-copy";
 import { umrahNowMessages } from "./umrah-now-copy";
@@ -26,7 +26,7 @@ import { printMessages } from "./print-copy";
 import { askMessages } from "./umrah-ask-copy";
 import { askPhraseMessages } from "./umrah-phrase-messages.mjs";
 import { umrahStepMessages } from "./umrah-step-messages.mjs";
-import { studyGlossMessages } from "./study-gloss-messages.mjs";
+import { ayahGlossKey, studyGlossMessages } from "./study-gloss-messages.mjs";
 import { pathsMessages } from "./paths-copy";
 import { tajweedMessages } from "./tajweed-copy";
 import { speakMessages } from "./speak-copy";
@@ -370,14 +370,18 @@ export function useCopy() {
   const { mode, language, nativeDigits, wordChoices, pseudoLocale } = useContext(CopyContext);
   return useMemo(() => {
     const t = message.bind(null, { mode, language, nativeDigits, wordChoices, pseudoLocale });
+    function studyGloss(key: string): WordGloss | undefined {
+      if (!studyGlossMessages[key]?.en) return undefined;
+      const glossLanguage = !pseudoLocale && localeMessage(language, key, mode) !== undefined ? language : "en";
+      return { gloss: t(key), glossLanguage };
+    }
     return {
       language, locale: formatLocale({ language, nativeDigits }),
       direction: pseudoLocale === "en-XB" || languages.some(item => item.code === language && item.dir === "rtl") ? "rtl" as const : "ltr" as const,
       t,
-      studyGloss(key: string) {
-        if (!studyGlossMessages[key]?.en) return undefined;
-        const glossLanguage = !pseudoLocale && localeMessage(language, key, mode) !== undefined ? language : "en";
-        return { gloss: t(key), glossLanguage };
+      studyGloss,
+      quranWordGloss(verse: string, position: number, script: Settings["script"]) {
+        return (pseudoLocale ? undefined : localeQuranWordGloss(language, verse, position, script)) ?? studyGloss(ayahGlossKey(verse, position));
       },
     };
   }, [mode, language, nativeDigits, wordChoices, pseudoLocale]);
