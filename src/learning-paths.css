@@ -260,7 +260,6 @@ button.speak-variety { display: grid; gap: 2px; text-align: start; }
 .speak-variety.selected, .speak-line[data-you="true"] { background: var(--c-primary-soft); box-shadow: none; }
 .speak-levels .card, .speak-packs .card { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; text-decoration: none; padding: 12px; }
 .speak-page .chip.active { background: var(--c-primary); color: var(--c-on-primary); }
-.speak-workspace-nav, .speak-workspace-side { display: none; }
 .speak-unit-list ol { margin: 8px 0 0; padding-inline-start: 22px; list-style: decimal; }
 .speak-unit-list li::marker { font-size: 11px; color: var(--c-ink-muted); }
 .speak-unit-list a { display: flex; justify-content: space-between; gap: 4px; padding: 9px 8px; color: var(--c-ink); text-decoration: none; border-radius: var(--r-control); }
@@ -290,14 +289,15 @@ button.speak-variety { display: grid; gap: 2px; text-align: start; }
   .speak-page { max-width: none; }
   .speak-lesson > .hifz-heading { display: none; }
   .speak-lesson .speak-unit-list a { padding-block: 6px; font: var(--type-small); }
-  .speak-workspace { grid-template-columns: minmax(185px, .65fr) minmax(0, 1.5fr); }
   .speak-setup-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-  .speak-workspace-nav { display: block; }
-  .speak-workspace-side { display: grid; grid-column: 2; }
+  .speak-compact-practice, .speak-compact-guide { max-inline-size: 880px; }
+  .speak-compact-practice .speak-line { max-inline-size: 620px; }
+  .speak-compact-guide { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 16px; }
+  .speak-compact-guide .speak-words-list header { flex-wrap: wrap; gap: 4px 12px; }
+  .speak-compact-lessons { max-inline-size: 420px; }
 }
 @media (min-width: 1280px) {
   .speak-workspace { grid-template-columns: minmax(185px, .65fr) minmax(0, 1.5fr) minmax(235px, .92fr); }
-  .speak-workspace-side { grid-column: auto; }
   .app-shell:has(.word-side) .speak-workspace { grid-template-columns: minmax(0, 1fr); }
   .app-shell:has(.word-side) :is(.speak-workspace-nav, .speak-workspace-side) { display: none; }
 }

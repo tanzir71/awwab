@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import * as Tabs from "@radix-ui/react-tabs";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ArabicText } from "@/components/ArabicText";
 import { DesignIcon } from "@/components/DesignIcon";
@@ -134,8 +135,11 @@ function RootBridge({ word, script }: { word: SpeakWord; script: Settings["scrip
 }
 
 function SpeakLesson({ unit, complete, now, settings, reviewIndex }: { unit: SpeakUnit; complete: string[]; now: Date; settings: Settings; reviewIndex?: number }) {
-  const { t, language, locale } = useCopy();
+  const { t, language, locale, direction } = useCopy();
   const desktop = useDesktop();
+  const wide = useDesktop(1280);
+  const compactDesktop = desktop && !wide;
+  const [tab, setTab] = useState("practice");
   const [step, setStep] = useState(reviewIndex === undefined ? 0 : 1);
   const [slow, setSlow] = useState(false);
   const [meanings, setMeanings] = useState(true);
@@ -195,9 +199,13 @@ function SpeakLesson({ unit, complete, now, settings, reviewIndex }: { unit: Spe
     finally { setSaving(false); }
   }
 
-  function changeStep(next: number) {
+  function pausePlayback() {
     sequence.current = undefined;
-    player.element.current?.pause();
+    player.pause();
+  }
+
+  function changeStep(next: number) {
+    pausePlayback();
     setStep(next);
   }
 
@@ -207,7 +215,7 @@ function SpeakLesson({ unit, complete, now, settings, reviewIndex }: { unit: Spe
   }
 
   function playLesson() {
-    if (player.playing) { sequence.current = undefined; player.element.current?.pause(); return; }
+    if (player.playing) { pausePlayback(); return; }
     sequence.current = 0;
     player.play("line-0", slow ? .75 : 1);
   }
@@ -222,104 +230,126 @@ function SpeakLesson({ unit, complete, now, settings, reviewIndex }: { unit: Spe
   }
 
   const sign = <><h2>{t("speakSign")}</h2><ArabicText text={unit.sign} /></>;
-  const wordList = <section className="card speak-words-list"><header className="row-between"><h2>{t("speakWordsInLesson")}</h2>
+  const wordList = (withAudio: boolean) => <section className="card speak-words-list"><header className="row-between"><h2>{t("speakWordsInLesson")}</h2>
     <button className="text-button" type="button" disabled={queued} onClick={queueWords}>{t(queued ? "anatomyAdded" : "speakAddAll")}</button></header>
     {words.map((word, i) => {
       const gloss = meaning(word);
       return <div className="speak-word" key={word.ar}>
         <div><strong lang="en" dir="ltr">{word.tr}</strong><p className="small muted">{gloss}</p></div>
         <ArabicText text={word.ar} preserveSeparators words={sim || word.root ? [{ root: word.root, transliteration: word.tr, gloss, glossLanguage: language }] : undefined} showGlosses={false} />
-        {step === 1 && <button className="icon-button" type="button" onClick={() => listen(`word-${i}`)} aria-label={t("speakHearLine", { number: i + 1 })}><DesignIcon name="speak-volume" size={14} /></button>}
+        {withAudio && <button className="icon-button" type="button" aria-label={t("speakHearWord", { number: i + 1 })}
+          aria-pressed={player.playing && player.track === `word-${i}`} onClick={() => listen(`word-${i}`)}><DesignIcon name="speak-volume" size={14} /></button>}
       </div>;
     })}
     {queueError && <p role="alert">{t("saveError")}</p>}
   </section>;
 
+  const practice = <div className="compact-stack speak-lesson-main">
+    <div className="speak-steps" role="group" aria-label={title}>{steps.map((label, i) => <button type="button" key={label} aria-pressed={step === i} onClick={() => changeStep(i)}>{t(label)}</button>)}</div>
+    {step === 0 && <>
+      <div className="speak-dialogue">{lines.map((line, i) => <section className="card speak-line" data-you={!dialogue || i % 2 === 0} key={line.ar}>
+        <div className="row-between"><span className="caption">{!dialogue || i % 2 === 0 ? t("speakYou") : partner}</span>
+          <button className="icon-button" type="button" aria-label={t("speakHearLine", { number: i + 1 })} aria-pressed={player.playing && player.track === `line-${i}`}
+            onClick={() => listen(`line-${i}`)}><DesignIcon name="speak-volume" size={14} /></button></div>
+        <ArabicText text={line.ar} preserveSeparators />
+        <strong className="small" lang="en">{line.tr}</strong>{meanings && <p className="muted small">{meaning(line)}</p>}
+        {isUmrahPack && line.askId && <Link className="small speak-ask-link" to={askPhrasePath(line.askId, desktop)}>{t("speakOpenInAsk")}</Link>}
+      </section>)}</div>
+      {sim && <div className="card tint speak-bridge"><div><h2 className="caption">{t("speakRoot")}</h2><p className="small">{t("speakRootExplanation", { reference: simReference })}</p></div>
+        <ArabicText text="نَشْرَحْ" compact citation={simReference} verse="94:1" positionOffset={1} words={[{ root: "ش ر ح" }]} /></div>}
+      {bridge && !desktop && <RootBridge word={bridge} script={settings.script} />}
+    </>}
+    {step === 1 && (reviewWord ? <section className="card compact-stack"><h2>{t("speakReviewMeaning")}</h2>
+      <ArabicText text={reviewWord.ar} preserveSeparators />
+      {!reviewRevealed ? <button className="action light" type="button" onClick={() => setReviewRevealed(true)}>{t("speakShowMeanings")}</button> : <>
+        <p>{meaning(reviewWord)}</p>
+        {reviewSaved ? <Link className="action" to={speakLessonPath(unit.id)}>{t("pathsDone")}</Link> : <div className="equal-row">
+          {(["forgot", "shaky", "got-it"] as const).map(grade => <button className="action light" type="button" key={grade}
+            disabled={saving} onClick={() => void gradeWord(grade)}>{t(grade)}</button>)}
+        </div>}</>}
+      {queueError && <p role="alert">{t("saveError")}</p>}
+    </section> : wordList(true))}
+    {step === 2 && <section className="card compact-stack"><h2>{t("speakRepeat")}</h2><ArabicText text={lines[repeatLine].ar} preserveSeparators />
+      <button className="action light" type="button" onClick={() => listen(`line-${repeatLine}`)}>{t(player.playing ? "askStop" : "speakListen")}</button>
+      <LocalRecorder suspended={compactDesktop && tab !== "practice"} /></section>}
+    {step === 3 && <section className="card compact-stack"><h2 ref={replyHeading} tabIndex={-1}>{t(dialogue ? "speakChooseReply" : "speakChoose")}</h2>
+      {replyLines.length > 1 && <p className="small muted">{t("speakReplyProgress", { number: replyIndex + 1, total: replyLines.length })}</p>}
+      {dialogue ? <>
+        <div className="row-between"><p className="caption">{partner}</p>
+          <button className="icon-button" type="button" aria-label={t("speakHearLine", { number: promptLine + 1 })}
+            onClick={() => listen(`line-${promptLine}`)}><DesignIcon name="speak-volume" size={14} /></button></div>
+        <ArabicText text={lines[promptLine].ar} preserveSeparators /><p className="small muted">{meaning(lines[promptLine])}</p>
+      </> : <p>{meaning(lines[reply])}</p>}
+      <div className="compact-stack">{replyChoices.map((index, i) => <div className="speak-answer" key={index}>
+        <ArabicText text={lines[index].ar} preserveSeparators /><button type="button" className="action light" aria-label={t("speakReply", { number: i + 1 })}
+          aria-pressed={answer === index} onClick={() => setAnswer(index)}>{count.format(i + 1)}</button>
+      </div>)}</div>
+      {answer !== undefined && <p role="status">{t(answer === reply ? "lessonCorrect" : "speakTryAgain")}</p>}
+      {answer === reply && replyIndex + 1 < replyLines.length && <button className="action" type="button" onClick={() => {
+        pausePlayback();
+        setReplyIndex(replyIndex + 1);
+        setAnswer(undefined);
+        replyHeading.current?.focus();
+      }}>{t("speakNextReply")}</button>}
+    </section>}
+    {step === 4 && <section className="card tint compact-stack">{sign}
+      <div className="equal-row"><button className="action light" type="button" onClick={() => listen("sign")}>{t(player.playing ? "askStop" : "speakListen")}</button>
+        <button className="action light" type="button" aria-expanded={revealed} onClick={() => setRevealed(value => !value)}>{t("speakSignMeaning")}</button></div>
+      {revealed && <p>{signMeaning}</p>}
+      {complete.includes(unit.id) ? <Link className="action" to={setup}>{t("pathsDone")}</Link> : <button className="action" type="button" disabled={saving} onClick={() => void finish()}>{t("speakFinish")}</button>}
+      {error && <p role="alert">{t("saveError")}</p>}</section>}
+    {player.error && <p role="status">{t("setupPlaybackError")}</p>}
+    <div className="speak-player card night">
+      <button type="button" onClick={playLesson}>{t(player.playing ? "askStop" : "speakPlay")}</button>
+      <div className="speak-player-controls"><button type="button" aria-pressed={slow} onClick={() => {
+        setSlow(value => !value);
+        if (player.element.current) player.element.current.playbackRate = slow ? 1 : .75;
+      }}>{t("askSlow")}</button>
+        {step === 0 && <button type="button" onClick={() => setMeanings(value => !value)}>{t(meanings ? "speakHideMeanings" : "speakShowMeanings")}</button>}
+        {step < steps.length - 1 && <button type="button" onClick={() => changeStep(step + 1)}>{t(steps[step + 1])} →</button>}</div>
+    </div>
+    <p className="small muted">{unit.variety === "msa" ?
+      <a href="https://huggingface.co/oddadmix/Nabra-82M-v0.1" rel="noreferrer">{t("speakFormalSpeech")}</a> : t("generatedSpeech")}</p>
+  </div>;
+
+  const directory = desktop && <UnitList active={unit.id} complete={complete} level={unit.level} variety={unit.variety} />;
+  const notes = (compactDesktop || step !== 4) && <div className="compact-stack">
+    <section className="card tint compact-stack">{sign}<p className="small">{signMeaning}</p></section>
+    {bridge && (compactDesktop || step === 0) && <RootBridge word={bridge} script={settings.script} />}
+  </div>;
+
   return <div className="paths-page speak-page speak-lesson">
     <header className="hifz-heading"><Link className="hifz-back" to={setup} aria-label={t("back")}><DesignIcon name="ask-icon-chev-l" size={24} /></Link>
       <div><h1>{title}</h1><p className="small muted">{t("speakUnitLabel", { level: speakCourseTitle(unit.level, t), number, variety: t(speakVarietyLabels[unit.variety]) })}</p></div></header>
-    <div className="speak-workspace">
-      <div className="speak-workspace-nav"><UnitList active={unit.id} complete={complete} level={unit.level} variety={unit.variety} /></div>
-      <div className="compact-stack speak-lesson-main">
-        <div className="speak-steps" role="group" aria-label={title}>{steps.map((label, i) => <button type="button" key={label} aria-pressed={step === i} onClick={() => changeStep(i)}>{t(label)}</button>)}</div>
-        <audio ref={player.element} preload="none" {...player.events} onEnded={() => {
-          player.events.onEnded();
-          if (sequence.current === undefined) return;
-          const next = sequence.current + 1;
-          sequence.current = next < lines.length ? next : undefined;
-          if (next < lines.length) player.play(`line-${next}`, slow ? .75 : 1);
-        }} />
-        {step === 0 && <>
-          <div className="speak-dialogue">{lines.map((line, i) => <section className="card speak-line" data-you={!dialogue || i % 2 === 0} key={line.ar}>
-            <div className="row-between"><span className="caption">{!dialogue || i % 2 === 0 ? t("speakYou") : partner}</span>
-              <button className="icon-button" type="button" aria-label={t("speakHearLine", { number: i + 1 })} aria-pressed={player.playing && player.track === `line-${i}`}
-                onClick={() => listen(`line-${i}`)}><DesignIcon name="speak-volume" size={14} /></button></div>
-            <ArabicText text={line.ar} preserveSeparators />
-            <strong className="small" lang="en">{line.tr}</strong>{meanings && <p className="muted small">{meaning(line)}</p>}
-            {isUmrahPack && line.askId && <Link className="small speak-ask-link" to={askPhrasePath(line.askId, desktop)}>{t("speakOpenInAsk")}</Link>}
-          </section>)}</div>
-          {sim && <div className="card tint speak-bridge"><div><h2 className="caption">{t("speakRoot")}</h2><p className="small">{t("speakRootExplanation", { reference: simReference })}</p></div>
-            <ArabicText text="نَشْرَحْ" compact citation={simReference} verse="94:1" positionOffset={1} words={[{ root: "ش ر ح" }]} /></div>}
-          {bridge && !desktop && <RootBridge word={bridge} script={settings.script} />}
-        </>}
-        {step === 1 && (reviewWord ? <section className="card compact-stack"><h2>{t("speakReviewMeaning")}</h2>
-          <ArabicText text={reviewWord.ar} preserveSeparators />
-          {!reviewRevealed ? <button className="action light" type="button" onClick={() => setReviewRevealed(true)}>{t("speakShowMeanings")}</button> : <>
-            <p>{meaning(reviewWord)}</p>
-            {reviewSaved ? <Link className="action" to={speakLessonPath(unit.id)}>{t("pathsDone")}</Link> : <div className="equal-row">
-              {(["forgot", "shaky", "got-it"] as const).map(grade => <button className="action light" type="button" key={grade}
-                disabled={saving} onClick={() => void gradeWord(grade)}>{t(grade)}</button>)}
-            </div>}</>}
-          {queueError && <p role="alert">{t("saveError")}</p>}
-        </section> : wordList)}
-        {step === 2 && <section className="card compact-stack"><h2>{t("speakRepeat")}</h2><ArabicText text={lines[repeatLine].ar} preserveSeparators />
-          <button className="action light" type="button" onClick={() => listen(`line-${repeatLine}`)}>{t(player.playing ? "askStop" : "speakListen")}</button><LocalRecorder /></section>}
-        {step === 3 && <section className="card compact-stack"><h2 ref={replyHeading} tabIndex={-1}>{t(dialogue ? "speakChooseReply" : "speakChoose")}</h2>
-          {replyLines.length > 1 && <p className="small muted">{t("speakReplyProgress", { number: replyIndex + 1, total: replyLines.length })}</p>}
-          {dialogue ? <>
-            <div className="row-between"><p className="caption">{partner}</p>
-              <button className="icon-button" type="button" aria-label={t("speakHearLine", { number: promptLine + 1 })}
-                onClick={() => listen(`line-${promptLine}`)}><DesignIcon name="speak-volume" size={14} /></button></div>
-            <ArabicText text={lines[promptLine].ar} preserveSeparators /><p className="small muted">{meaning(lines[promptLine])}</p>
-          </> : <p>{meaning(lines[reply])}</p>}
-          <div className="compact-stack">{replyChoices.map((index, i) => <div className="speak-answer" key={index}>
-            <ArabicText text={lines[index].ar} preserveSeparators /><button type="button" className="action light" aria-label={t("speakReply", { number: i + 1 })}
-              aria-pressed={answer === index} onClick={() => setAnswer(index)}>{count.format(i + 1)}</button>
-          </div>)}</div>
-          {answer !== undefined && <p role="status">{t(answer === reply ? "lessonCorrect" : "speakTryAgain")}</p>}
-          {answer === reply && replyIndex + 1 < replyLines.length && <button className="action" type="button" onClick={() => {
-            sequence.current = undefined;
-            player.element.current?.pause();
-            setReplyIndex(replyIndex + 1);
-            setAnswer(undefined);
-            replyHeading.current?.focus();
-          }}>{t("speakNextReply")}</button>}
-        </section>}
-        {step === 4 && <section className="card tint compact-stack">{sign}
-          <div className="equal-row"><button className="action light" type="button" onClick={() => listen("sign")}>{t(player.playing ? "askStop" : "speakListen")}</button>
-            <button className="action light" type="button" aria-expanded={revealed} onClick={() => setRevealed(value => !value)}>{t("speakSignMeaning")}</button></div>
-          {revealed && <p>{signMeaning}</p>}
-          {complete.includes(unit.id) ? <Link className="action" to={setup}>{t("pathsDone")}</Link> : <button className="action" type="button" disabled={saving} onClick={() => void finish()}>{t("speakFinish")}</button>}
-          {error && <p role="alert">{t("saveError")}</p>}</section>}
+    <audio hidden ref={player.element} preload="none" {...player.events} onEnded={() => {
+      player.events.onEnded();
+      if (sequence.current === undefined) return;
+      const next = sequence.current + 1;
+      sequence.current = next < lines.length ? next : undefined;
+      if (next < lines.length) player.play(`line-${next}`, slow ? .75 : 1);
+    }} />
+    {compactDesktop ? <Tabs.Root className="workspace-tabs" dir={direction} value={tab} onValueChange={next => {
+      pausePlayback();
+      setTab(next);
+    }}>
+      <Tabs.List className="study-tabs equal-row" aria-label={title}>
+        <Tabs.Trigger value="practice">{t("practise")}</Tabs.Trigger>
+        <Tabs.Trigger value="guide">{t("speakLessonGuide")}</Tabs.Trigger>
+        <Tabs.Trigger value="lessons">{t("speakPackLessons")}</Tabs.Trigger>
+      </Tabs.List>
+      <Tabs.Content className="speak-compact-practice" value="practice" forceMount>{practice}</Tabs.Content>
+      <Tabs.Content className="speak-compact-guide" value="guide">
+        {wordList(true)}{notes}
         {player.error && <p role="status">{t("setupPlaybackError")}</p>}
-        <div className="speak-player card night">
-          <button type="button" onClick={playLesson}>{t(player.playing ? "askStop" : "speakPlay")}</button>
-          <div className="speak-player-controls"><button type="button" aria-pressed={slow} onClick={() => {
-            setSlow(value => !value);
-            if (player.element.current) player.element.current.playbackRate = slow ? 1 : .75;
-          }}>{t("askSlow")}</button>
-            {step === 0 && <button type="button" onClick={() => setMeanings(value => !value)}>{t(meanings ? "speakHideMeanings" : "speakShowMeanings")}</button>}
-            {step < steps.length - 1 && <button type="button" onClick={() => changeStep(step + 1)}>{t(steps[step + 1])} →</button>}</div>
-        </div>
-        <p className="small muted">{unit.variety === "msa" ?
-          <a href="https://huggingface.co/oddadmix/Nabra-82M-v0.1" rel="noreferrer">{t("speakFormalSpeech")}</a> : t("generatedSpeech")}</p>
-      </div>
-      <aside className="compact-stack speak-workspace-side">
-        {step !== 1 && wordList}
-        {step !== 4 && <section className="card tint compact-stack">{sign}<p className="small">{signMeaning}</p></section>}
-        {bridge && desktop && step === 0 && <RootBridge word={bridge} script={settings.script} />}
-      </aside>
-    </div>
+      </Tabs.Content>
+      <Tabs.Content className="speak-compact-lessons" value="lessons">{directory}</Tabs.Content>
+    </Tabs.Root> : <div className="speak-workspace">
+      {desktop && <div className="speak-workspace-nav">{directory}</div>}
+      {practice}
+      {desktop && <aside className="compact-stack speak-workspace-side">
+        {step !== 1 && wordList(false)}{notes}
+      </aside>}
+    </div>}
   </div>;
 }
 
