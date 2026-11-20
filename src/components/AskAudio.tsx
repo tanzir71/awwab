@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useId, useLayoutEffect, useRef, useState } from "react";
 import { DesignIcon } from "./DesignIcon";
 import { useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
@@ -62,17 +62,27 @@ export function AskAudioButton({ ids, settings, label, icon = true, light = fals
   const [status, setStatus] = useState("");
   const [playing, setPlaying] = useState(false);
   const id = useId();
+  const clips = ids.join("/");
   const voice = askPlaybackVoice(version, settings.voice);
   const shared = hasSharedSpeakAudio(ids, settings.variety, voice);
   const pending = !shared && !askVoiceInstalled(version, voice);
   const description = status || (pending ? t(askAudioPack ? "askDownloadFirst" : "askAudioPending") : askAudioPack?.generated ? t("askGeneratedSpeech") : "");
 
-  useEffect(() => () => { if (current.current) void current.current.close().catch(() => {}); }, []);
+  const stop = useCallback(() => {
+    const context = current.current;
+    current.current = undefined;
+    if (context && context.state !== "closed") void context.close().catch(() => {});
+  }, []);
+
+  useLayoutEffect(() => {
+    setStatus("");
+    setPlaying(false);
+    return stop;
+  }, [clips, settings.variety, settings.slow, voice, stop]);
 
   function play() {
     if (current.current) {
-      void current.current.close().catch(() => {});
-      current.current = undefined;
+      stop();
       setStatus("");
       setPlaying(false);
       return;
@@ -82,7 +92,9 @@ export function AskAudioButton({ ids, settings, label, icon = true, light = fals
     setPlaying(true);
     setStatus(used ? "" : t("askVolumeHint"));
     if (!used) void updateRecord(volumeKey, false, () => true).catch(() => {});
-    void context.resume().then(() => playAskAudio(context, ids, settings.variety, voice, settings.slow))
+    void context.resume().then(() => {
+      if (current.current === context) return playAskAudio(context, ids, settings.variety, voice, settings.slow);
+    })
       .catch(() => { if (current.current === context) setStatus(t("askAudioError")); })
       .finally(() => {
         if (current.current === context) {
