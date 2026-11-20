@@ -27,6 +27,7 @@ export const readingMessages: MessageCatalog = {
   readingTajweedHint: { en: "Tap a word with a double underline to see the rule. Marks show selected lesson examples and signs in the text.", bn: "নিয়ম দেখতে নিচে দুটি দাগ আছে এমন শব্দে চাপ দিন। দাগগুলো পাঠের বাছাই করা উদাহরণ আর কুরআনের লেখায় থাকা চিহ্ন দেখায়।" },
   readingTajweedNoExamples: { en: "There are no marked examples on this page.", bn: "এই পাতায় চিহ্নিত উদাহরণ নেই।" },
   readingTajweedRule: { en: "{lesson} · {rule}", bn: "{lesson} · {rule}" },
+  readingTajweedJoinedRule: { en: "{lesson} · {rule} when joining", bn: "{lesson} · মিলিয়ে পড়লে {rule}" },
   readingRootSource: { en: "Word forms and roots · Quranic Arabic Corpus", bn: "শব্দের রূপ ও মূল · কুরআনিক আরবি করপাস" },
   readingSaveAyahs: { en: "Mark these āyāt as read", bn: "এই আয়াতগুলো পড়া হয়েছে" },
   readingSavedAyahs: { en: "Reading saved on this device.", bn: "এই ডিভাইসে পড়ার অগ্রগতি সংরক্ষিত হয়েছে।" },

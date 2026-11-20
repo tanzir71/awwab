@@ -1,6 +1,11 @@
 [
   {
     "id": "mim",
+    "sources": [
+      { "title": "Quranic Universal Library · Ikhfāʾ shafawī", "url": "https://qul.tarteel.ai/tajweed_rule/ikhafa_shafawi" },
+      { "title": "Quranic Universal Library · Idghām shafawī", "url": "https://qul.tarteel.ai/tajweed_rule/idgham_shafawi" },
+      { "title": "Quranic Universal Library · Iẓhār shafawī", "url": "https://qul.tarteel.ai/tajweed_rule/izhar_shafawi" }
+    ],
     "rules": { "mim-hide": "مْ ب", "mim-merge": "مْ م", "mim-clear": "مْ" },
     "samples": [
       { "rule": "mim-hide", "chapter": 105, "ayah": 4, "first": 1, "last": 2 },

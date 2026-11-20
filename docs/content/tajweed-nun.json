@@ -15,5 +15,11 @@
     { "rule": "ikhfa", "chapter": 106, "ayah": 4, "first": 3, "last": 4, "audio": true },
     { "rule": "iqlab", "chapter": 104, "ayah": 4, "first": 2, "last": 2 }
   ],
-  "source": "https://qul.tarteel.ai/tajweed_words/85:13:3"
+  "sources": [
+    { "title": "Quranic Universal Library · Iẓhār", "url": "https://qul.tarteel.ai/tajweed_rule/izhar" },
+    { "title": "Quranic Universal Library · Idghām with ghunnah", "url": "https://qul.tarteel.ai/tajweed_rule/idgham_ghunnah" },
+    { "title": "Quranic Universal Library · Idghām without ghunnah", "url": "https://qul.tarteel.ai/tajweed_rule/idgham_wo_ghunnah" },
+    { "title": "Quranic Universal Library · Iqlāb", "url": "https://qul.tarteel.ai/tajweed_rule/iqlab" },
+    { "title": "Quranic Universal Library · Ikhfāʾ", "url": "https://qul.tarteel.ai/tajweed_rule/ikhafa" }
+  ]
 }

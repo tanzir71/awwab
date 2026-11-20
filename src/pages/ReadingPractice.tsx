@@ -22,7 +22,7 @@ import { completedReadingChapters, emptyReadingPractice, firstUnreadAyah, practi
 import { getRecord, updateSettings, type Settings } from "@/lib/storageService";
 import { studyNames } from "@/lib/study-copy";
 import { markReadingPortion, rememberFlowPlace, setTeacherCheck } from "@/lib/studyMilestones";
-import { tajweedLessonPath, tajweedTitleKey, tajweedVerseExamples } from "@/lib/tajweed";
+import { tajweedLessonPath, tajweedReadingRuleKey, tajweedTitleKey, tajweedVerseExamples } from "@/lib/tajweed";
 import { useUi } from "@/lib/uiState";
 import { splitArabicPhrase } from "@/lib/wordAnatomy";
 import audioCatalogue from "../../public/packs/audio/index.json";
@@ -139,7 +139,9 @@ function ReadingVerse({ verse, script, settings, step, corpus, knownRoots, engli
         annotation: familiar ? { tone: "soft", label: t("readingKnownRoot") } : undefined };
     }) : tajweed ? tajweedVerseExamples(verse, script)?.map(notes => {
       const lessons = notes.map(note => ({
-        title: t("readingTajweedRule", { lesson: t(tajweedTitleKey(note.lesson)), rule: t(`tajweedRule-${note.rule}`) }),
+        title: t(note.joining ? "readingTajweedJoinedRule" : "readingTajweedRule", {
+          lesson: t(tajweedTitleKey(note.lesson)), rule: t(tajweedReadingRuleKey(note)),
+        }),
         to: tajweedLessonPath(note.lesson),
       }));
       const label = lessons.map(lesson => lesson.title).join(" · ");

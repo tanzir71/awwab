@@ -5,7 +5,7 @@ import { hadithArchiveVersion, hadithCollections, hadithSource } from "../src/li
 import { splitUthmaniOpening } from "../src/lib/quranOpening.ts";
 import { tajweedMessages } from "../src/lib/tajweed-copy.ts";
 import { tajweedClip, tajweedDepthLessons, tajweedExcerpt, tajweedIntroKey, tajweedLessons, tajweedLessonSources,
-  tajweedReference, tajweedSampleKey, tajweedTitleKey, tajweedVerseExamples } from "../src/lib/tajweed.ts";
+  tajweedReadingRuleKey, tajweedReference, tajweedSampleKey, tajweedTitleKey, tajweedVerseExamples } from "../src/lib/tajweed.ts";
 import { splitArabicWords } from "../src/lib/wordAnatomy.ts";
 import { pronunciationReview } from "./pronunciation-review.mjs";
 
@@ -133,7 +133,8 @@ const readingRows = juzAmma.flatMap(verse => {
       const labels = notes.map(note => {
         const lesson = tajweedLessons.find(item => item.id === note.lesson);
         for (const source of tajweedLessonSources(lesson, false)) sources.set(source.url, source);
-        return `${tajweedMessages[tajweedTitleKey(note.lesson)].en} · ${tajweedMessages[`tajweedRule-${note.rule}`].en}`;
+        const rule = tajweedMessages[tajweedReadingRuleKey(note)].en;
+        return `${tajweedMessages[tajweedTitleKey(note.lesson)].en} · ${rule}${note.joining ? " when joining" : ""}`;
       });
       fields.push({ label: `${name} word ${index + 1} · ${labels.join(" / ")}`, value: words[index], lang: "ar" });
     });
