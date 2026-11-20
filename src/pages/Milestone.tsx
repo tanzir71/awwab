@@ -23,8 +23,8 @@ export function Milestone({ settings, now }: { settings: Settings; now: Date }) 
   const reviews = useRecord<Reviews>("reviews", {});
   const earned = useRecord<WordMilestone[]>("word-milestones", []);
   const completed = useRecord<number[]>("qaida-complete", []);
-  const model = useMemo<ShareModel>(() => template ? ({ template: template.id, format: "post", light: template.theme === "light",
-    showPrayerNumbers: false, card: cards[template.id] }) : undefined, [template, cards]);
+  const model = useMemo<ShareModel>(() => template ? ({ template: template.id, language, format: "post", light: template.theme === "light",
+    showPrayerNumbers: false, card: cards[template.id] }) : undefined, [template, language, cards]);
   const fromSalah = params.get("from") === "salah";
   const chapter = shareChapters.find(item => item.number === value);
   const lesson = qaida.lessons.find(item => item.n === value);

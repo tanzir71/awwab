@@ -3,8 +3,8 @@ import { drawShare, imageFile, shareFormats, type ShareModel } from "@/lib/share
 
 export type ShareArtifact = { model: ShareModel; file?: File; failed?: boolean };
 
-export function ShareArtwork({ model, label, language, onArtifact }: {
-  model: ShareModel; label?: string; language?: string; onArtifact?: (result: ShareArtifact) => void;
+export function ShareArtwork({ model, label, onArtifact }: {
+  model: ShareModel; label?: string; onArtifact?: (result: ShareArtifact) => void;
 }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const dimensions = shareFormats[model.format];
@@ -28,5 +28,5 @@ export function ShareArtwork({ model, label, language, onArtifact }: {
   }, [model, onArtifact]);
 
   return <canvas className="share-artwork" ref={canvas} width={dimensions.width} height={dimensions.height}
-    lang={language} role={label ? "img" : undefined} aria-label={label} aria-hidden={label ? undefined : true} />;
+    lang={model.language} role={label ? "img" : undefined} aria-label={label} aria-hidden={label ? undefined : true} />;
 }

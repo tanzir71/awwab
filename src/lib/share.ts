@@ -1,4 +1,7 @@
 import { SHARE_URL, asset } from "./config";
+import { languages, type AppLanguage } from "./languagePreferences";
+import banglaFontUrl from "@fontsource-variable/noto-sans-bengali/files/noto-sans-bengali-bengali-wght-normal.woff2?url";
+import banglaDisplayUrl from "@fontsource-variable/noto-serif-bengali/files/noto-serif-bengali-bengali-wght-normal.woff2?url";
 
 export const shareTemplates = [
   { id: "surah", label: "shareSurah", theme: "dark" },
@@ -33,16 +36,18 @@ export interface ShareCard {
   arabic?: string;
   meaning?: string;
   citation?: string;
+  reference?: string;
   note?: string;
   progress?: { value: number; total: number; label: string };
   tiles?: ShareTile[];
   activity?: number[];
   numbers?: { title: string; label: string };
-  tagline?: string;
+  tagline: string;
 }
 
 export interface ShareModel {
   template: TemplateId | "hadith";
+  language: AppLanguage;
   format: ShareFormat;
   light: boolean;
   showPrayerNumbers: boolean;
@@ -54,15 +59,53 @@ export const shareFooterLink = SHARE_URL.replace(/^https:\/\//, "").replace(/\/$
 const arabicFont = '"Noto Sans Arabic Variable"';
 const wordmarkFont = '"Noto Sans Variable"';
 const banglaFont = '"Noto Sans Bengali Variable"';
+const banglaDisplay = '"Noto Serif Bengali Variable"';
+const arabic = /\p{Script=Arabic}/u;
 const bangla = /\p{Script=Bengali}/u;
+const rtlScript = /[\p{Script=Arabic}\p{Script=Thaana}]/u;
 const images = new Map<string, Promise<HTMLImageElement>>();
+const bengaliFonts = new Map<string, Promise<string>>();
+
+function cachedAsset(url: string) {
+  return globalThis.caches?.match(new URL(url, location.href).href, { ignoreSearch: true }).catch(() => undefined);
+}
+
+function loadBengaliFont(family: string, url: string, sample: string) {
+  const existing = bengaliFonts.get(family);
+  if (existing) return existing;
+  const loading = document.fonts.load(`600 42px ${family}`, sample).then(() => family).catch(async error => {
+    // WebKit can fail a CSS font request offline even when the font is in CacheStorage.
+    const response = await cachedAsset(url);
+    if (!response) throw error;
+    const name = family.slice(1, -1) + " Offline";
+    const face = await new FontFace(name, await response.arrayBuffer(), { weight: "100 900" }).load();
+    document.fonts.add(face);
+    return `"${name}"`;
+  }).catch(error => {
+    bengaliFonts.delete(family);
+    throw error;
+  });
+  bengaliFonts.set(family, loading);
+  return loading;
+}
 
 function loadArtwork(name: string) {
   const existing = images.get(name);
   if (existing) return existing;
   const image = new Image();
-  image.src = asset("design/" + name + ".svg");
-  const decoded = image.decode().then(() => image, error => {
+  const url = asset("design/" + name + ".svg");
+  image.src = url;
+  const decoded = image.decode().catch(async error => {
+    const response = await cachedAsset(url);
+    if (!response) throw error;
+    const objectUrl = URL.createObjectURL(await response.blob());
+    try {
+      image.src = objectUrl;
+      await image.decode();
+    } finally {
+      URL.revokeObjectURL(objectUrl);
+    }
+  }).then(() => image).catch(error => {
     images.delete(name);
     throw error;
   });
@@ -102,8 +145,14 @@ type Palette = ReturnType<typeof palette>;
 type Ink = "ink" | "muted" | "accent";
 type Face = "display" | "body" | "arabic" | "wordmark";
 type Align = "left" | "center" | "right";
+type TextOptions = {
+  width?: number; line?: number; face?: Face; align?: Align; color?: Ink; fill?: string;
+  maxLines?: number; letterSpacing?: string; fit?: boolean;
+};
 
-function painter(ctx: CanvasRenderingContext2D, colors: Palette) {
+function painter(ctx: CanvasRenderingContext2D, colors: Palette, language: AppLanguage, bengali: { body: string; display: string }) {
+  const direction = languages.find(item => item.code === language)?.dir === "rtl" ? "rtl" : "ltr";
+  const caps = (value: string) => value.toLocaleUpperCase(language);
   function tile(x: number, y: number, w: number, h: number, radius: number, fill = colors.panel) {
     if (w <= 0 || h <= 0) return;
     ctx.beginPath();
@@ -111,21 +160,21 @@ function painter(ctx: CanvasRenderingContext2D, colors: Palette) {
     ctx.fillStyle = fill;
     ctx.fill();
   }
-  function font(value: string, size: number, weight: number, face: Face) {
-    const family = face === "arabic" ? arabicFont : face === "wordmark" ? wordmarkFont : bangla.test(value) ? banglaFont : colors[face];
-    ctx.font = weight + " " + size + "px " + family;
+  function type(value: string, size: number, weight: number, face: Face, spacing: string) {
+    const arabicText = face === "arabic" || arabic.test(value);
+    const banglaText = bangla.test(value);
+    const family = face === "wordmark" ? wordmarkFont
+      : face === "arabic" ? arabicFont
+        : arabicText ? `${arabicFont}, ${colors[face]}`
+          : banglaText ? `${bengali[face]}, ${colors[face]}` : colors[face];
+    const letter = value.match(/\p{L}/u)?.[0];
+    ctx.font = `${weight} ${size}px ${family}`;
+    const rtl = letter ? rtlScript.test(letter) : direction === "rtl" && !/\p{Nd}/u.test(value);
+    ctx.direction = face === "arabic" || rtl ? "rtl" : "ltr";
+    if ("letterSpacing" in ctx) ctx.letterSpacing = rtlScript.test(value) || banglaText ? "0px" : spacing;
   }
-  function write(value: string, x: number, top: number, size: number, weight: number, options: {
-    width?: number; line?: number; face?: Face; align?: Align; color?: Ink; fill?: string; maxLines?: number; letterSpacing?: string;
-  } = {}) {
-    if (!value) return top;
-    const { width = 302, line = size * 1.2, face = "body", align = "center", color = "ink", fill = colors[color], maxLines = 5, letterSpacing = "0px" } = options;
-    font(value, size, weight, face);
-    ctx.textBaseline = face === "arabic" ? "alphabetic" : "top";
-    ctx.textAlign = align;
-    ctx.direction = face === "arabic" ? "rtl" : "ltr";
-    if ("letterSpacing" in ctx) ctx.letterSpacing = letterSpacing;
-    ctx.fillStyle = fill;
+
+  function wrap(value: string, width: number) {
     const lines: string[] = [];
     for (const paragraph of value.split("\n")) {
       let current = "";
@@ -138,19 +187,50 @@ function painter(ctx: CanvasRenderingContext2D, colors: Palette) {
       }
       lines.push(current);
     }
-    for (const [index, text] of lines.slice(0, maxLines).entries()) {
-      const ascent = face === "arabic" ? ctx.measureText(text).actualBoundingBoxAscent : 0;
-      ctx.fillText(text, x, top + index * line + ascent, width);
+    return lines;
+  }
+
+  function text(value: string, size: number, weight: number, options: TextOptions) {
+    const { width = 302, line = size * 1.2, face = "body", align = "center", color = "ink", fill = colors[color],
+      maxLines = 5, letterSpacing = "0px", fit = false } = options;
+    let fontSize = size;
+    type(value, fontSize, weight, face, letterSpacing);
+    let lines = maxLines === 1 ? [value.replace(/\s*\n\s*/g, " ")] : wrap(value, width);
+    while (fit && lines.length > maxLines && fontSize > size * .75) {
+      fontSize -= .5;
+      type(value, fontSize, weight, face, letterSpacing);
+      lines = wrap(value, width);
     }
-    if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
-    return top + Math.min(lines.length, maxLines) * line;
+    const visible = lines.slice(0, maxLines);
+    return {
+      height: visible.length * line,
+      draw(x: number, top: number) {
+        type(value, fontSize, weight, face, letterSpacing);
+        ctx.textBaseline = face === "arabic" ? "alphabetic" : "top";
+        ctx.textAlign = align;
+        ctx.fillStyle = fill;
+        for (const [index, content] of visible.entries()) {
+          const ascent = face === "arabic" ? ctx.measureText(content).actualBoundingBoxAscent : 0;
+          ctx.fillText(content, x, top + index * line + ascent, width);
+        }
+      },
+    };
+  }
+
+  function write(value: string, x: number, top: number, size: number, weight: number, options: TextOptions = {}) {
+    if (!value) return top;
+    const layout = text(value, size, weight, options);
+    layout.draw(x, top);
+    return top + layout.height;
   }
   function badge(label: string, x: number, y: number, align: Align = "center") {
-    font(label, 10, 700, "body");
-    const text = label.toLocaleUpperCase();
-    const w = Math.ceil(ctx.measureText(text).width + text.length * .55) + 24;
+    const content = caps(label);
+    const weight = bangla.test(content) ? 600 : 700;
+    type(content, 10, weight, "body", ".55px");
+    const w = Math.min(304, Math.ceil(ctx.measureText(content).width) + 24);
     tile(align === "center" ? x - w / 2 : x, y, w, 24, 12, colors.badge);
-    write(text, align === "left" ? x + 12 : x, y + 5, 10, 700, { align, color: "accent", letterSpacing: ".55px", maxLines: 1 });
+    write(content, align === "left" ? x + 12 : x, y + 5, 10, weight,
+      { align, color: "accent", width: w - 24, letterSpacing: ".55px", maxLines: 1 });
   }
   function countBar(progress: ShareCard["progress"], y: number, segments = false) {
     if (!progress) return;
@@ -162,7 +242,7 @@ function painter(ctx: CanvasRenderingContext2D, colors: Palette) {
       tile(60, y, 240, 8, 4, colors.track);
       tile(60, y, 240 * progress.value / progress.total, 8, 4, colors.accent);
     }
-    write(progress.label, 180, y + 20, 13, 500, { color: "muted" });
+    write(progress.label, 180, y + 20, 13, 500, { color: "muted", line: 17, maxLines: segments ? 1 : 2, fit: true });
   }
   function grid(tiles: ShareTile[], x: number, y: number, width: number, columns: number, height: number, step: number, rtl = false) {
     const gap = columns === 7 ? 6 : 8;
@@ -173,29 +253,33 @@ function painter(ctx: CanvasRenderingContext2D, colors: Palette) {
       const top = y + Math.floor(index / columns) * step;
       tile(left, top, w, height, columns === 7 ? 8 : 12);
       write(item.arabic, left + w / 2, top + (item.label ? 5 : 1), columns === 7 ? 25 : 27, 500, { face: "arabic", width: w - 5, maxLines: 1 });
-      if (item.label) write(item.label.toLocaleUpperCase(), left + w / 2, top + (height > 62 ? 46 : 40), 9, 700, { color: "muted", width: w - 7, letterSpacing: ".6px", maxLines: 1 });
+      if (item.label) write(caps(item.label), left + w / 2, top + (height > 62 ? 46 : 40), 9, 700,
+        { color: "muted", width: w - 7, letterSpacing: ".6px", maxLines: 1 });
     });
   }
-  return { badge, countBar, grid, tile, write };
+  return { badge, caps, countBar, grid, text, tile, write };
 }
 
 type Painter = ReturnType<typeof painter>;
 
 function drawSurah(paint: Painter, card: ShareCard, compact: boolean) {
-  const { badge, write, tile, countBar } = paint;
+  const { badge, write, text, tile, countBar } = paint;
   badge(card.badge, 180, 36);
-  write(card.arabic, 180, compact ? 72 : 110, compact ? 60 : 70, 500, { face: "arabic", maxLines: 1 });
-  const titleEnd = write(card.title, 180, compact ? 166 : 231, 34, 600, { face: "display", line: 38, maxLines: 2 });
-  const detailEnd = write(card.detail, 180, titleEnd + 14, 13, 500, { color: "muted", maxLines: 2 });
+  write(card.arabic, 180, compact ? 72 : 110, compact ? 60 : 72, compact ? 500 : 400, { face: "arabic", maxLines: 1 });
+  const titleEnd = write(card.title, 180, compact ? 166 : 231, 34, 600, { face: "display", line: 40, maxLines: 1 });
+  const detailEnd = write(card.detail, 180, titleEnd + 14, 13, 500, { color: "muted", line: 18, maxLines: 2, fit: true });
+  let progressTop = compact ? Math.max(244, detailEnd + 12) : 495;
   if (!compact && card.meaning) {
     const top = Math.max(321, detailEnd + 10);
-    tile(28, top, 304, 140, 16);
-    write("“" + card.meaning + "”", 180, top + 16, 14, 400, { width: 272, line: 18, maxLines: 5 });
-    write(card.citation, 180, top + 113, 9, 700, { color: "muted", letterSpacing: ".6px", maxLines: 2 });
+    const quote = text("“" + card.meaning + "”", 15, 400, { width: 268, line: 22, maxLines: 5, fit: true });
+    const panelHeight = Math.max(140, quote.height + 52);
+    tile(28, top, 304, panelHeight, 16);
+    quote.draw(180, top + 16);
+    write(card.citation, 180, top + panelHeight - 27, 9, 700, { width: 268, color: "muted", letterSpacing: ".6px", maxLines: 1 });
+    progressTop = Math.min(517, Math.max(progressTop, top + panelHeight + 34));
   }
-  const progressTop = compact ? Math.max(244, detailEnd + 12) : 495;
   countBar(card.progress, progressTop, true);
-  if (compact) write(card.citation.split("–")[0].split(" · ")[0], 180, progressTop + 43, 11, 500, { color: "muted", maxLines: 1 });
+  if (compact) write(card.reference, 180, progressTop + 43, 11, 500, { color: "muted", maxLines: 1 });
 }
 
 function drawWords(paint: Painter, card: ShareCard, wide: boolean) {
@@ -290,7 +374,7 @@ function drawHadith({ badge, write, tile }: Painter, card: ShareCard, width: num
 }
 
 export async function drawShare(canvas: HTMLCanvasElement, model: ShareModel) {
-  const { card, template, format, light } = model;
+  const { card, template, format, light, language } = model;
   const maktab = template === "maktab";
   const colors = palette(light, maktab);
   const { width, height, scale } = shareFormats[format];
@@ -299,19 +383,24 @@ export async function drawShare(canvas: HTMLCanvasElement, model: ShareModel) {
   const motifName = format !== "story" ? "share-compact-motif" : maktab ? "share-maktab-motif" :
     template === "qaida" ? "share-qaida-motif" : template === "return" || template === "umrah" ? "share-return-motif" : "share-story-motif";
   const dotNames = template === "qaida" ? ["share-zabar-dot", "share-zer-dot", "share-pesh-dot"] : [];
-  const [motif, fatha, dots] = await Promise.all([
+  const sample = [card.badge, card.title, card.detail, card.meaning, card.citation, card.note, card.tagline,
+    card.progress?.label, card.numbers?.title, card.numbers?.label, ...(card.tiles ?? []).map(tile => tile.label)].filter(Boolean).join(" ");
+  const usesBangla = bangla.test(sample);
+  const [motif, fatha, dots, bengaliBody, bengaliDisplay] = await Promise.all([
     loadArtwork(motifName),
     loadArtwork(maktab ? "share-maktab-fatha" : "share-fatha"),
     Promise.all(dotNames.map(async name => [name, await loadArtwork(name)] as const)),
-    document.fonts.load("600 76px " + arabicFont, card.arabic ?? card.tiles?.map(tile => tile.arabic).join(" ") ?? "ب"),
+    usesBangla ? loadBengaliFont(banglaFont, banglaFontUrl, sample) : banglaFont,
+    usesBangla ? loadBengaliFont(banglaDisplay, banglaDisplayUrl, sample) : banglaDisplay,
+    document.fonts.load("600 76px " + arabicFont, card.arabic || sample + " ب"),
     document.fonts.load("600 42px " + colors.display, card.title),
     document.fonts.load("600 18px " + colors.body, card.detail),
-    document.fonts.load("600 42px " + banglaFont, card.title + card.detail),
     document.fonts.load("650 26px " + wordmarkFont),
   ]);
   await document.fonts.ready;
   canvas.width = width;
   canvas.height = height;
+  canvas.lang = language;
   const ctx = canvas.getContext("2d");
   ctx.scale(scale, scale);
   ctx.fillStyle = colors.ground;
@@ -322,14 +411,20 @@ export async function drawShare(canvas: HTMLCanvasElement, model: ShareModel) {
   }[template];
   ctx.drawImage(motif, ...motifPosition as [number, number]);
 
-  const paint = painter(ctx, colors);
+  const paint = painter(ctx, colors, language, { body: bengaliBody, display: bengaliDisplay });
+  const margin = format === "wide" ? 32 : 28;
+  const footerTop = h - (format === "wide" ? 64 : 68);
+  const tagline = paint.text(paint.caps(card.tagline), 10, bangla.test(card.tagline) ? 500 : 700,
+    { align: "right", width: 216, color: "muted", letterSpacing: ".5px", line: 14, maxLines: 2, fit: true });
+  const taglineTop = footerTop + 16 - tagline.height;
   ctx.save();
   if (format === "post" && template !== "surah" && template !== "hadith") {
     ctx.translate(57.6, 6);
     ctx.scale(.68, .68);
   } else if (format === "wide" && template !== "words") {
-    ctx.translate(362, 2);
-    ctx.scale(.45, .45);
+    const scale = tagline.height > 14 ? Math.min(.45, (taglineTop - 14) / 560) : .45;
+    ctx.translate(443 - 180 * scale, 2);
+    ctx.scale(scale, scale);
   }
   switch (template) {
     case "surah": drawSurah(paint, card, format === "post"); break;
@@ -342,17 +437,14 @@ export async function drawShare(canvas: HTMLCanvasElement, model: ShareModel) {
   }
   ctx.restore();
 
-  const margin = format === "wide" ? 32 : 28;
   if (format === "wide" && template !== "words") {
     paint.badge(card.badge, margin, 28, "left");
     const end = paint.write(card.title, margin, 66, 36, 600, { face: "display", align: "left", width: 266, line: 40, maxLines: 3 });
     paint.write(card.detail, margin, end + 12, 14, 500, { align: "left", width: 266, color: "muted", line: 18, maxLines: 3 });
   }
-  const footerTop = h - (format === "wide" ? 64 : 68);
   paint.write("awwab", margin, footerTop + 12, 26, 650, { face: "wordmark", align: "left", width: 120, maxLines: 1 });
   ctx.drawImage(fatha, margin + 2.94, footerTop + 12);
-  paint.write((card.tagline ?? "Free · Works offline · No account").toUpperCase(), w - margin, footerTop + 2, 10, 700,
-    { align: "right", width: 216, color: "muted", letterSpacing: bangla.test(card.tagline ?? "") ? "0px" : ".5px", maxLines: 1 });
+  tagline.draw(w - margin, taglineTop);
   paint.write(shareFooterLink, w - margin, footerTop + 20, 13, 600, { align: "right", width: 218, maxLines: 1 });
 }
 

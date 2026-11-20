@@ -1,18 +1,8 @@
 import type { MessageCatalog } from "./copy";
+import { localeMessage } from "./localePacks";
 import type { Settings } from "./storageService";
 
 type Language = Settings["language"];
-
-const surahNames: Record<number, string> = {
-  1: "আল-ফাতিহা", 103: "আল-আসর", 105: "আল-ফীল", 106: "কুরাইশ", 107: "আল-মাউন", 108: "আল-কাউসার",
-  109: "আল-কাফিরুন", 110: "আন-নাসর", 111: "আল-মাসাদ", 112: "আল-ইখলাস", 113: "আল-ফালাক", 114: "আন-নাস",
-};
-
-const lessonTitles = [
-  "আলাদা হরফ", "যুক্ত হরফ", "বিচ্ছিন্ন হরফ", "হরকত", "তানভীন", "অনুশীলন · হরকত ও তানভীন", "খাড়া হরকত",
-  "মাদ ও লীনের হরফ", "অনুশীলন · মাদ, লীন ও তানভীন", "সুকুন বা জযম", "অনুশীলন · সুকুন", "তাশদীদ",
-  "অনুশীলন · তাশদীদ", "মাদসহ তাশদীদ ও পরপর তাশদীদ", "মাদের চিহ্ন", "নূন সাকিন ও তানভীনের নিয়ম", "মীম সাকিন, কলকলা ও ওয়াকফ",
-];
 
 const familyTitles: Record<string, string> = {
   alif: "খাড়া দাগ", boat: "নৌকার মতো হরফ", jim: "বাটির মতো হরফ", dal: "ছোট বাঁক", sin: "দাঁতের মতো হরফ",
@@ -40,9 +30,14 @@ const wordKinds: Record<string, string> = {
   "Retraction particle": "প্রত্যাহারসূচক অব্যয়", "Interrogative particle": "প্রশ্নসূচক অব্যয়",
 };
 
+function studyName(language: Language, key: string, fallback: string) {
+  const localized = localeMessage(language, key, "adult") ?? (language === "bn" ? studyMessages[key]?.bn : undefined);
+  return typeof localized === "string" ? localized : fallback;
+}
+
 export const studyNames = {
-  surah: (language: Language, number: number, fallback: string) => (language === "bn" ? surahNames[number] : undefined) ?? fallback,
-  lesson: (language: Language, number: number, fallback: string) => (language === "bn" ? lessonTitles[number - 1] : undefined) ?? fallback,
+  surah: (language: Language, number: number, fallback: string) => studyName(language, `studySurah${number}`, fallback),
+  lesson: (language: Language, number: number, fallback: string) => studyName(language, `studyQaida${number}`, fallback),
   family: (language: Language, id: string, fallback: string) => (language === "bn" ? familyTitles[id] : undefined) ?? fallback,
   prayerSection: (language: Language, title: string) => (language === "bn" ? prayerSectionTitles[title] : undefined) ?? title,
   wordKind: (language: Language, kind: string) => (language === "bn" ? wordKinds[kind] : undefined) ?? kind,
@@ -54,6 +49,35 @@ export function studySearchTerm(text: string) {
 }
 
 export const studyMessages: MessageCatalog = {
+  studySurah1: { en: "Al-Fātiḥa", bn: "আল-ফাতিহা" },
+  studySurah103: { en: "Al-ʿAsr", bn: "আল-আসর" },
+  studySurah105: { en: "Al-Fīl", bn: "আল-ফীল" },
+  studySurah106: { en: "Quraysh", bn: "কুরাইশ" },
+  studySurah107: { en: "Al-Māʿūn", bn: "আল-মাউন" },
+  studySurah108: { en: "Al-Kawthar", bn: "আল-কাউসার" },
+  studySurah109: { en: "Al-Kāfirūn", bn: "আল-কাফিরুন" },
+  studySurah110: { en: "An-Naṣr", bn: "আন-নাসর" },
+  studySurah111: { en: "Al-Masad", bn: "আল-মাসাদ" },
+  studySurah112: { en: "Al-Ikhlāṣ", bn: "আল-ইখলাস" },
+  studySurah113: { en: "Al-Falaq", bn: "আল-ফালাক" },
+  studySurah114: { en: "An-Nās", bn: "আন-নাস" },
+  studyQaida1: { en: "Single letters", bn: "আলাদা হরফ" },
+  studyQaida2: { en: "Joined letters", bn: "যুক্ত হরফ" },
+  studyQaida3: { en: "Disjoined letters", bn: "বিচ্ছিন্ন হরফ" },
+  studyQaida4: { en: "Harakat", bn: "হরকত" },
+  studyQaida5: { en: "Tanwīn", bn: "তানভীন" },
+  studyQaida6: { en: "Practice: harakat + tanwīn", bn: "অনুশীলন · হরকত ও তানভীন" },
+  studyQaida7: { en: "Standing harakat", bn: "খাড়া হরকত" },
+  studyQaida8: { en: "Madd & līn letters", bn: "মাদ ও লীনের হরফ" },
+  studyQaida9: { en: "Practice: madd, līn, tanwīn", bn: "অনুশীলন · মাদ, লীন ও তানভীন" },
+  studyQaida10: { en: "Sukūn / jazm", bn: "সুকুন বা জযম" },
+  studyQaida11: { en: "Practice: sukūn", bn: "অনুশীলন · সুকুন" },
+  studyQaida12: { en: "Shadda", bn: "তাশদীদ" },
+  studyQaida13: { en: "Practice: shadda", bn: "অনুশীলন · তাশদীদ" },
+  studyQaida14: { en: "Shadda with madd / consecutive shaddas", bn: "মাদসহ তাশদীদ ও পরপর তাশদীদ" },
+  studyQaida15: { en: "Madd signs", bn: "মাদের চিহ্ন" },
+  studyQaida16: { en: "Nūn sākin & tanwīn rules", bn: "নূন সাকিন ও তানভীনের নিয়ম" },
+  studyQaida17: { en: "Mīm sākin, qalqalah & stops", bn: "মীম সাকিন, কলকলা ও ওয়াকফ" },
   back: { en: "Back", bn: "ফিরে যান" },
   chapterHeading: { en: "{name} · {number}", bn: "{name} · {number, number}" },
   chapterCounts: { en: "{verses} āyāt · {words} words", bn: "{verses, number} আয়াত · {words, number} শব্দ" },

@@ -19,9 +19,9 @@ import umrahCopy from "../../docs/content/umrah-duas.json";
 
 export const shareChapters = chapters.surahs.slice(0, 12);
 const examples = [
-  { arabic: "ٱللَّه", label: "Allah" }, { arabic: "رَبّ", label: "Lord" }, { arabic: "قَالَ", label: "He said" },
-  { arabic: "يَوْم", label: "Day" }, { arabic: "كِتَاب", label: "Book" }, { arabic: "عِلْم", label: "Knowledge" },
-  { arabic: "ٱلنَّاس", label: "People" }, { arabic: "أَرْض", label: "Earth" }, { arabic: "سَمَاء", label: "Sky" },
+  { arabic: "ٱللَّه", key: "cardWordAllah" }, { arabic: "رَبّ", key: "cardWordLord" }, { arabic: "قَالَ", key: "cardWordSaid" },
+  { arabic: "يَوْم", key: "cardWordDay" }, { arabic: "كِتَاب", key: "cardWordBook" }, { arabic: "عِلْم", key: "cardWordKnowledge" },
+  { arabic: "ٱلنَّاس", key: "cardWordPeople" }, { arabic: "أَرْض", key: "cardWordEarth" }, { arabic: "سَمَاء", key: "cardWordSky" },
 ];
 const dayDistance = (later: string, earlier: string) => (Date.parse(later) - Date.parse(earlier)) / 86_400_000;
 
@@ -43,11 +43,14 @@ export function useShareCards(settings: Settings, now: Date, template?: Template
     const t = message.bind(null, copy);
     const number = new Intl.NumberFormat(formatLocale(copy));
     const tagline = t("cardFooterTagline");
+    const englishCitation = (source: string) => language === "en" ? source : `${source} · ${t("cardEnglishMeaning")}`;
     const solid = shareChapters.filter(surah => reviews[surah.number]?.bucket === "manzil");
     const chapter = (template === "surah" && shareChapters.find(item => item.number === value)) || solid.at(-1) || shareChapters.find(item => item.number === 103);
     const mastered = solid.some(surah => surah.number === chapter.number);
     const verses = quranText[chapter.number].slice(0, chapter.number === 103 ? 3 : 1);
     const title = studyNames.surah(language, chapter.number, chapter.number === 103 ? "Al-ʿAsr" : chapter.transliteration);
+    const ayahNumber = (ref: string) => number.format(Number(ref.split(":")[1]));
+    const reference = `${number.format(chapter.number)}:${ayahNumber(verses[0].ref)}${verses.length > 1 ? `–${ayahNumber(verses.at(-1).ref)}` : ""}`;
     const words = template === "words" && earned.includes(value as WordMilestone) ? value : countKnownQuranWords(knownVerses, known);
     const selectedLesson = (template === "qaida" && lessons.lessons.find(item => item.n === value)) || lessons.lessons.find(item => item.n === completed.at(-1)) || lessons.lessons[3];
     const complete = lessons.lessons.filter(lesson => completed.includes(lesson.n)).length;
@@ -70,19 +73,20 @@ export function useShareCards(settings: Settings, now: Date, template?: Template
         badge: t(mastered ? "cardLearnedBadge" : "cardPracticeBadge"), title,
         detail: t(mastered ? "cardSurahDetail" : "cardSurahPractice", { number: chapter.number }), arabic: verses[0].uthmani,
         meaning: verses.map(verse => verse.english).join(" "),
-        citation: `${verses[0].ref}${verses.length > 1 ? `–${verses.at(-1).ref.split(":").at(-1)}` : ""} · M. M. Pickthall`,
+        reference, citation: englishCitation(`${reference} · M. M. Pickthall`),
         progress: { value: solid.length, total: shareChapters.length, label: t("cardSurahCount", { count: solid.length, total: shareChapters.length }) },
       },
       words: {
         tagline,
-        badge: t("cardQuranWords"), title: number.format(words), detail: t(words ? "cardWordsDetail" : "cardWordExamples"), tiles: examples,
+        badge: t("cardQuranWords"), title: number.format(words), detail: t(words ? "cardWordsDetail" : "cardWordExamples"),
+        tiles: examples.map(({ arabic, key }) => ({ arabic, label: t(key) })),
         note: t("cardWordsCoverage", { total: coreWordTotal, coverage: coreWordCoverage }),
       },
       return: {
         tagline,
         badge: t("cardReturningYear", { year: hijri.year }), title: t("cardReturnTitle"), detail: t("cardReturnDetail"),
         activity: Array.from({ length: Math.min(371, dayDistance(yearEnd, yearStart)) }, (_, i) => Number(activity.has(addDays(yearStart, i)))),
-        note: t("cardReturnHeatmap"), arabic: returnCopy.welcome.arabic, meaning: returnCopy.welcome.meaning, citation: "17:25",
+        note: t("cardReturnHeatmap"), arabic: returnCopy.welcome.arabic, meaning: returnCopy.welcome.meaning, citation: englishCitation("17:25"),
         numbers: { title: t("cardReturnNumber", { count: stats.returns }), label: t("cardPrayerCount", { count: thisYear.length }) },
       },
       qaida: {
@@ -95,7 +99,7 @@ export function useShareCards(settings: Settings, now: Date, template?: Template
         tagline,
         badge: t("umrah"), title: duringTrip ? t("cardUmrahDay", { day: dayDistance(makkahDay, trip.start) + 1, total: dayDistance(trip.end, trip.start) + 1 }) : t("shareUmrah"),
         detail: t("cardUmrahTitle"), note: t("cardUmrahNote"), arabic: umrahCopy.talbiyah.arabic.split("\n")[0],
-        meaning: "Here I am, O Allah, here I am.", citation: umrahCopy.talbiyah.source,
+        meaning: "Here I am, O Allah, here I am.", citation: englishCitation(umrahCopy.talbiyah.source),
       },
       maktab: {
         tagline,

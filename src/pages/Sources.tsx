@@ -21,7 +21,7 @@ const sources = [
   ["Hadith API", "Distributed as public-domain data under the Unlicense. Individual narrations show their specific collection, reference and grade.", "https://github.com/fawazahmed0/hadith-api"],
   ["Adhan JS", "Prayer times are computed on this device with Adhan, MIT.", "https://github.com/batoulapps/adhan-js"],
   ["OpenStreetMap and Protomaps", "Haram points come from OpenStreetMap. The Makkah and Madinah map packs are Protomaps extracts. © OpenStreetMap contributors, Open Database License.", "https://www.openstreetmap.org/copyright"],
-  ["Fontsource", "Noto Sans, Noto Serif, Noto Sans Arabic, Noto Sans Bengali, Baloo 2 and Nunito are licensed under the SIL Open Font License.", "https://fontsource.org/"],
+  ["Fontsource", "Noto Sans, Noto Serif, Noto Sans Arabic, Noto Sans Bengali, Noto Serif Bengali, Baloo 2 and Nunito are licensed under the SIL Open Font License.", "https://fontsource.org/"],
 ];
 
 export function Sources() {

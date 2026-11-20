@@ -98,7 +98,7 @@ function DesktopHadithReading({ id, inDrawer, onShare, onWord }: {
     const quote = translation?.length > 260 ? translation.slice(0, 260).replace(/\s+\S*$/, "") + "…" : translation;
     const text = useExcerpt ? seed.excerptEn : summary ?? quote;
     onShare({ title, reference: citation, source, text, arabic: useExcerpt ? excerpt : undefined,
-      summary: !useExcerpt && Boolean(summary) }, event.currentTarget);
+      textLanguage: language === "bn" && summary ? "bn" : "en", summary: !useExcerpt && Boolean(summary) }, event.currentTarget);
   }
 
   return <section className="card hadith-desk-reading" aria-label={title}>

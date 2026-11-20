@@ -10,18 +10,21 @@ export interface HadithShareData {
   reference: string;
   source: string;
   text: string;
+  textLanguage: "en" | "bn";
   arabic?: string;
   summary: boolean;
 }
 
 export function HadithShare({ data }: { data: HadithShareData }) {
-  const { t } = useCopy();
+  const { language, t } = useCopy();
   const [artifact, setArtifact] = useState<ShareArtifact>();
   const badge = t(data.summary ? "hadithShareSummary" : "hadithExcerpt");
-  const model = useMemo<ShareModel>(() => ({ template: "hadith", format: "post", light: true, showPrayerNumbers: false,
-    card: { badge, title: data.title, detail: data.text, arabic: data.arabic, citation: data.reference,
-      note: data.source.replace(/^https:\/\//, "") },
-  }), [badge, data]);
+  const tagline = t("cardFooterTagline");
+  const note = [data.source.replace(/^https:\/\//, ""), language !== "en" && data.textLanguage === "en" && t("cardEnglishMeaning")]
+    .filter(Boolean).join(" · ");
+  const model = useMemo<ShareModel>(() => ({ template: "hadith", language, format: "post", light: true, showPrayerNumbers: false,
+    card: { badge, tagline, title: data.title, detail: data.text, arabic: data.arabic, citation: data.reference, note },
+  }), [badge, tagline, language, data, note]);
   const file = artifact?.model === model ? artifact.file : undefined;
   const failed = artifact?.model === model && artifact.failed;
 

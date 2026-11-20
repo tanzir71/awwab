@@ -40,10 +40,10 @@ export function Share({ settings, now, closeDialog }: { settings: Settings; now:
   const opener = useRef<HTMLElement>();
   const dialogTitle = useRef<HTMLHeadingElement>(null);
   const value = Number(params.get("value")) || undefined;
-  const imageLanguage = sameLanguage ? settings.language : settings.language === "bn" ? "en" : "bn";
+  const imageLanguage = sameLanguage ? settings.language : settings.language === "en" ? "bn" : "en";
   const cards = useShareCards(settings, now, original.id, value, imageLanguage);
-  const model = useMemo<ShareModel>(() => ({ template: id, format, light, showPrayerNumbers: counts, card: cards[id] }),
-    [id, format, light, counts, cards]);
+  const model = useMemo<ShareModel>(() => ({ template: id, language: imageLanguage, format, light, showPrayerNumbers: counts, card: cards[id] }),
+    [id, imageLanguage, format, light, counts, cards]);
   const ready = artifact?.model === model ? artifact.file : undefined;
   const failed = artifact?.model === model && artifact.failed;
   const order = closeDialog ? desktopCarousel : carousel;
@@ -51,8 +51,8 @@ export function Share({ settings, now, closeDialog }: { settings: Settings; now:
   const prev = order[(index + order.length - 1) % order.length];
   const next = order[(index + 1) % order.length];
   const neighbors = useMemo(() => [prev, next].map(template => ({
-    template, format, showPrayerNumbers: counts, light: shareTemplates.find(item => item.id === template).theme === "light", card: cards[template],
-  })), [prev, next, format, counts, cards]);
+    template, language: imageLanguage, format, showPrayerNumbers: counts, light: shareTemplates.find(item => item.id === template).theme === "light", card: cards[template],
+  })), [prev, next, imageLanguage, format, counts, cards]);
   const url = shareUrl(id);
   const title = counts && id === "return" ? model.card.numbers.title : model.card.title;
   const description = [title, model.card.detail, counts && id === "return" ? model.card.numbers.label : "", model.card.citation].filter(Boolean).join(" · ");
@@ -96,7 +96,7 @@ export function Share({ settings, now, closeDialog }: { settings: Settings; now:
     await copy(text + " " + url, "shareCopiedText");
   }
 
-  const preview = <ShareArtwork model={model} language={imageLanguage}
+  const preview = <ShareArtwork model={model}
     label={message({ mode: settings.mode, language: imageLanguage }, "shareCardLabel", { title: description })} onArtifact={setArtifact} />;
   const switches = <>
     <ShareSwitch label={t("shareNumbers")} hint={t("shareNumbersHint")} on={counts} change={showCounts} />
@@ -128,7 +128,8 @@ export function Share({ settings, now, closeDialog }: { settings: Settings; now:
           target?.focus({ preventScroll: true });
         }}>
         <section className="share-desktop-gallery" aria-label={t("sharePreview")} onKeyDown={event => {
-          const target = event.key === "ArrowLeft" ? prev : event.key === "ArrowRight" ? next
+          const rtl = document.documentElement.dir === "rtl";
+          const target = event.key === "ArrowLeft" ? rtl ? next : prev : event.key === "ArrowRight" ? rtl ? prev : next
             : event.key === "Home" ? order[0] : event.key === "End" ? order.at(-1) : undefined;
           if (!target) return;
           event.preventDefault();
@@ -188,7 +189,7 @@ export function Share({ settings, now, closeDialog }: { settings: Settings; now:
         if (touch.current === undefined) return;
         const change = event.changedTouches[0].clientX - touch.current;
         touch.current = undefined;
-        if (Math.abs(change) > 36) choose(change < 0 ? next : prev);
+        if (Math.abs(change) > 36) choose((change < 0) !== (document.documentElement.dir === "rtl") ? next : prev);
       }}>
       <button type="button" className="share-neighbor" aria-label={t("sharePrevious")} onClick={() => choose(prev)}>
         <ShareArtwork model={neighbors[0]} />
