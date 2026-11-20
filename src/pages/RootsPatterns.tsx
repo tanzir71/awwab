@@ -3,9 +3,9 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { Link, useSearchParams } from "react-router-dom";
 import { ArabicText } from "@/components/ArabicText";
 import { DesignIcon } from "@/components/DesignIcon";
+import { GrammarLessonList, GrammarWorkspace } from "@/components/GrammarWorkspace";
 import { StudyMessage } from "@/components/StudyText";
 import { useCopy } from "@/lib/copy";
-import { grammarLessonKey } from "@/lib/grammar-lesson-messages.mjs";
 import { studyQuran, verseText } from "@/lib/hifz";
 import { pathUrl, patternPracticePath, patternReviewPrefix, rootsPath, rootsReviewPrefix } from "@/lib/learningPaths";
 import { formatQuranReference, type QuranVerse } from "@/lib/quran";
@@ -77,8 +77,7 @@ function PatternDrill({ items, settings, now, reviewMode }: { items: Pattern[]; 
     finally { setSaving(false); }
   }
 
-  return <div className="paths-page roots-page">
-    <RootsHeading drill />
+  return <div className="paths-page roots-drill">
     {!current ? <section className="card compact-stack"><h2>{t(reviewMode ? "rootsSaved" : "rootsUpToDate")}</h2>
       <Link className="action" to={rootsPath}>{t("rootsTitle")}</Link></section> :
       <section className="card compact-stack paths-question">
@@ -115,34 +114,42 @@ export function RootsPatterns({ settings, now }: { settings: Settings; now: Date
   const [query] = useSearchParams();
   const reviews = useLiveQuery(() => getRecord("reviews", emptyReviews));
   const due = reviews && patterns.filter(pattern => isDue(reviews[reviewKey(pattern.id)], now)).length;
-  if (query.has("practice")) return reviews ? <StartPatternDrill settings={settings} now={now} reviews={reviews} /> :
-    <p role="status">{t("rootsLoading")}</p>;
-  return <div className="paths-page roots-page">
-    <RootsHeading drill={false} />
+  const drill = query.has("practice");
+  if (drill && !reviews) return <p role="status">{t("rootsLoading")}</p>;
+
+  const directory = <nav className="card compact-stack roots-course grammar-directory" aria-label={t("rootsMoreLessons")}>
+    <h2>{t("rootsMoreLessons")}</h2>
+    <GrammarLessonList lessons={curriculum.lessons} course="roots" path={rootsPath} prefix={rootsReviewPrefix} reviews={reviews} />
+  </nav>;
+  const overview = <div className="paths-page">
     <section className="card night roots-intro">
       <div className="compact-stack"><p className="caption">{t("rootsLabel")}</p><h2>{t("rootsWrite")}</h2>
         <p className="small muted">{t("rootsThreeLetters")}</p></div>
       <ArabicText text={content.root} />
     </section>
     <p className="muted roots-explanation"><StudyMessage id="rootsExplanation" arabic={content.patternLetters} /></p>
-    <ol className="card roots-patterns" aria-label={t("rootsTitle")}>{patterns.map(item => <li key={item.id}>
-      <ArabicText text={item.pattern} compact />
-      <div><strong lang="en">{item.latin}</strong><p className="muted small">{t("rootsMeaning-" + item.id)}</p></div>
-      <ArabicText text={item.word} words={[{ root: content.root, transliteration: item.latin }]} />
-    </li>)}</ol>
-    <QuranSpot settings={settings} />
-    {reviews && (due ? <Link className="action" to={patternPracticePath}>{t("rootsStart", { count: settings.mode === "maktab" ? Math.min(3, due) : due })}</Link> :
-      <p className="small muted">{t("rootsUpToDate")}</p>)}
-    <section className="card compact-stack roots-course">
-      <h2>{t("rootsMoreLessons")}</h2>
-      <ol className="compact-stack grammar-index">{curriculum.lessons.map(lesson => <li key={lesson.id}>
-        <Link className="row-between" to={`${rootsPath}/${lesson.id}`}><strong>{t(grammarLessonKey("roots", lesson.id, "title"))}</strong>
-          {reviews?.[rootsReviewPrefix + lesson.id]?.correct > 0 && <span aria-label={t("pathsDone")}>✓</span>}</Link>
+    <div className="paths-page roots-study-content">
+      <ol className="card roots-patterns" aria-label={t("rootsTitle")}>{patterns.map(item => <li key={item.id}>
+        <ArabicText text={item.pattern} compact />
+        <div><strong lang="en">{item.latin}</strong><p className="muted small">{t("rootsMeaning-" + item.id)}</p></div>
+        <ArabicText text={item.word} words={[{ root: content.root, transliteration: item.latin }]} />
       </li>)}</ol>
-    </section>
-    <footer className="hifz-sources small muted">
+      <div className="paths-page">
+        <QuranSpot settings={settings} />
+        {reviews && (due ? <Link className="action" to={patternPracticePath}>{t("rootsStart", { count: settings.mode === "maktab" ? Math.min(3, due) : due })}</Link> :
+          <p className="small muted">{t("rootsUpToDate")}</p>)}
+      </div>
+    </div>
+  </div>;
+
+  return <div className="paths-page roots-page grammar-course-shell">
+    <RootsHeading drill={drill} />
+    <GrammarWorkspace key={drill ? "practice" : "roots"} title={t("rootsTitle")} directory={directory} showDirectoryOnMobile={!drill}>
+      {drill && reviews ? <StartPatternDrill settings={settings} now={now} reviews={reviews} /> : overview}
+    </GrammarWorkspace>
+    {!drill && <footer className="hifz-sources small muted">
       <a href={content.source} rel="noreferrer">{t("rootsDictionary")}</a>
       <a href={content.patternSource} rel="noreferrer">{t("rootsPatternSource")}</a>
-    </footer>
+    </footer>}
   </div>;
 }

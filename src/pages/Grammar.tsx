@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArabicText } from "@/components/ArabicText";
 import { DesignIcon } from "@/components/DesignIcon";
+import { GrammarLessonList, GrammarWorkspace } from "@/components/GrammarWorkspace";
 import { QuranStudySources } from "@/components/QuranStudySources";
 import { StudyMessage } from "@/components/StudyText";
 import { useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
-import { focusListItem } from "@/lib/focusListItem";
 import { grammarExampleField, grammarLessonKey, grammarWordField } from "@/lib/grammar-lesson-messages.mjs";
 import { studyQuran, verseText, type StudyQuran } from "@/lib/hifz";
 import { grammarPath, grammarReviewPrefix, pathUrl, rootsPath, rootsReviewPrefix, sentenceReviewPrefix, sentenceStructurePath } from "@/lib/learningPaths";
@@ -80,7 +80,7 @@ function GrammarLesson({ unit, course, settings, now }: { unit: Unit; course: Co
     finally { setSaving(false); }
   }
 
-  return <>
+  return <article className="paths-page grammar-lesson" aria-label={t(key("title"))}>
     <section className="card night compact-stack"><h2>{t(key("title"))}</h2>
       <p><StudyMessage id={key("rule")} arabic={unit.ruleArabic} values={referenceValues(unit.ruleReference)} /></p>
     </section>
@@ -96,16 +96,16 @@ function GrammarLesson({ unit, course, settings, now }: { unit: Unit; course: Co
       <h2>{t("sentenceTafsirNote")}</h2><p>{t(key("commentary"))}</p>
       <a className="text-button justify-self-start" href={unit.commentary.url} rel="noreferrer">{t("sentenceTafsirSource", { ref: formatQuranReference(unit.commentary.ref, locale) })}</a>
     </section>}
-    <section className="card compact-stack"><h2>{t(key("prompt"), referenceValues(unit.promptReference))}</h2>
-      <div className="compact-stack">{words.map(({ ar, label, labelLanguage }, i) => <div className="roots-option" key={ar}>
+    <section className="card compact-stack grammar-drill"><h2>{t(key("prompt"), referenceValues(unit.promptReference))}</h2>
+      <div className="compact-stack grammar-options">{words.map(({ ar, label, labelLanguage }, i) => <div className="roots-option" key={ar}>
         <ArabicText text={ar} compact />
         <button type="button" className="action light" lang={labelLanguage} aria-pressed={choice === i} disabled={saving || choice !== undefined} onClick={() => void submit(i)}>{label}</button>
       </div>)}</div>
       {saveError && <p role="alert">{t("saveError")}</p>}
       {choice !== undefined && <p role="status">{t(choice === unit.answer ? "lessonCorrect" : "grammarCompare", { word: words[unit.answer].label })}</p>}
     </section>
-    <Link className="action" to={next ? `${course.path}/${next.id}` : course.path}>{t(next ? "hifzNext" : "pathsDone")}</Link>
-  </>;
+    <Link className="action grammar-next" to={next ? `${course.path}/${next.id}` : course.path}>{t(next ? "hifzNext" : "pathsDone")}</Link>
+  </article>;
 }
 
 export function Grammar({ settings, now, course = "foundations" }: { settings: Settings; now: Date; course?: keyof typeof courses }) {
@@ -114,14 +114,16 @@ export function Grammar({ settings, now, course = "foundations" }: { settings: S
   const content = courses[course];
   const active = content.lessons.find(item => item.id === unit);
   const reviews = useRecord<Reviews>("reviews", {});
-  return <div className="paths-page roots-page grammar-page" data-course={course}>
+  const title = t(content.title);
+  const list = <GrammarLessonList lessons={content.lessons} course={content.id} path={content.path} prefix={content.prefix} reviews={reviews} current={active?.id} />;
+  return <div className="paths-page roots-page grammar-page grammar-course-shell" data-course={course}>
     <header className="hifz-heading"><Link className="hifz-back" to={active ? content.path : pathUrl("understand")} aria-label={t("back")}><DesignIcon name="ask-icon-chev-l" size={24} /></Link>
-      <div><h1>{t(content.title)}</h1><p className="small muted">{t(content.subtitle)}</p></div></header>
-    {active ? <GrammarLesson key={active.id} unit={active} course={content} settings={settings} now={now} /> : <ol className="card compact-stack grammar-index" onKeyDown={focusListItem}>
-      {content.lessons.map(item => <li key={item.id}><Link className="row-between" to={`${content.path}/${item.id}`}>
-        <strong>{t(grammarLessonKey(content.id, item.id, "title"))}</strong>{reviews[content.prefix + item.id]?.correct > 0 && <span aria-label={t("pathsDone")}>✓</span>}
-      </Link></li>)}
-    </ol>}
+      <div><h1>{title}</h1><p className="small muted">{t(content.subtitle)}</p></div></header>
+    {active ? <GrammarWorkspace key={`${course}/${active.id}`} title={title} directory={<nav className="card compact-stack grammar-directory" aria-label={t("grammarLessons")}>
+      <h2>{t("grammarLessons")}</h2>{list}
+    </nav>}>
+      <GrammarLesson unit={active} course={content} settings={settings} now={now} />
+    </GrammarWorkspace> : <div className="card grammar-course-index">{list}</div>}
     <footer className="hifz-sources small muted"><a href={content.source} rel="noreferrer">{t(course === "roots" ? "rootsPatternSource" : "grammarSource")}</a></footer>
     {active && course !== "foundations" && <QuranStudySources script={settings.script} />}
   </div>;

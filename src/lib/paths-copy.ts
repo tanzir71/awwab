@@ -4,6 +4,8 @@ export const pathsMessages: MessageCatalog = {
   grammarTitle: { en: "Grammar foundations", bn: "ব্যাকরণের ভিত্তি" },
   grammarSubtitle: { en: "Understand · Level 2", bn: "অর্থ বুঝি · দ্বিতীয় ধাপ" },
   grammarSource: { en: "Quranic Arabic Corpus · Grammar", bn: "কুরআনিক আরবি করপাস · ব্যাকরণ" },
+  grammarStudy: { en: "Study", bn: "পড়ুন" },
+  grammarLessons: { en: "Lessons", bn: "পাঠ" },
   sentenceTitle: { en: "Sentence structure", bn: "বাক্যের গঠন" },
   sentenceSubtitle: { en: "Understand · Level 5", bn: "অর্থ বুঝি · পঞ্চম ধাপ" },
   sentenceTafsirSource: { en: "Ibn Kathīr’s tafsīr · {ref}", bn: "ইবন কাসিরের তাফসির · {ref}" },

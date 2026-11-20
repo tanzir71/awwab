@@ -343,11 +343,30 @@ button.speak-variety { display: grid; gap: 2px; text-align: start; }
 .grammar-page:not([data-course="foundations"]) .roots-spot { align-content: start; }
 .grammar-page:not([data-course="foundations"]) .roots-spot .arabic-text { min-width: 0; }
 .grammar-page:not([data-course="foundations"]) .roots-spot .arabic-line { flex-wrap: wrap; }
-@media (min-width: 1024px) {
-  .grammar-page:not([data-course="foundations"]) { max-width: 940px; }
-  .grammar-page:not([data-course="foundations"]) .grammar-examples { grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
-}
 .roots-course h2 { font: var(--type-body-strong); }
 .roots-course .grammar-index { padding-inline-start: 24px; }
 .grammar-index { padding-inline-start: 40px; }
 .grammar-index a { min-height: 44px; color: var(--c-ink); gap: 8px; }
+.grammar-course-index .grammar-index { margin: 0; padding-inline-start: 0; }
+@media (min-width: 1024px) {
+  .roots-page.grammar-course-shell { max-width: none; }
+  .grammar-course-index, .grammar-study-tab, .grammar-lessons-tab { max-inline-size: 880px; }
+  :is(.grammar-course-index, .grammar-lessons-tab) .grammar-index { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  :is(.grammar-course-index, .grammar-directory) .grammar-index { margin: 0; padding: 0; list-style: none; }
+  .grammar-directory h2 { font: var(--type-body-strong); }
+  .grammar-index .row-between { gap: 8px; min-height: 44px; height: 100%; padding: 7px 10px; border-radius: var(--r-control); background: var(--c-surface-alt); }
+  .grammar-index :is(a:hover, [aria-current="page"]) { background: var(--c-primary-soft); color: var(--interactive-ink); }
+  .grammar-index strong { font: var(--type-body-strong); overflow-wrap: anywhere; }
+  .grammar-examples, .grammar-lesson .roots-patterns, .grammar-options.compact-stack { grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
+  .grammar-drill, .roots-drill { max-inline-size: 760px; }
+  .grammar-next { justify-self: start; }
+  .roots-study-content { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); align-items: start; }
+  .roots-study-content .roots-spot { grid-template-columns: minmax(0, 1fr); }
+  .roots-study-content .roots-spot .arabic-text { min-width: 0; }
+}
+@media (min-width: 1280px) {
+  .grammar-workspace { display: grid; grid-template-columns: minmax(192px, 245px) minmax(0, 1fr); align-items: start; gap: 16px; }
+  .grammar-workspace .grammar-directory { position: sticky; inset-block-start: 16px; }
+  .anatomy-open .grammar-workspace { grid-template-columns: minmax(0, 1fr); }
+  .anatomy-open .grammar-workspace .grammar-directory { display: none; }
+}
