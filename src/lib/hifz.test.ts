@@ -15,6 +15,9 @@ import sentence from "../../docs/content/sentence-structure.json";
 import roots from "../../docs/content/roots-curriculum.json";
 import curriculum from "../../handovers/H2-languages-paths-arabic-help/data/learning-paths.json";
 import { speakCourses, speakLessonContent } from "./speakCurriculum";
+import { speakLessonMessages, speakUnitKey } from "./speak-lesson-messages.mjs";
+import { applyGlossary } from "./languagePreferences";
+import { askPhraseKey } from "./umrah-phrase-messages.mjs";
 import { correctTajweedSamples, tajweedClip, tajweedDepthLessons, tajweedExcerpt, tajweedLessons, tajweedPracticeSamples, tajweedPrecache,
   tajweedProgress, tajweedReadingExamples, tajweedReference, tajweedReviewId, tajweedSampleKey } from "./tajweed";
 import { newReview } from "./reviews";
@@ -28,6 +31,28 @@ describe("Offline Quran study edition", () => {
     expect(placementStartingLevel(0, 0)).toBe(1);
     expect(placementStartingLevel(3, 4)).toBe(1);
     expect(placementStartingLevel(4, 4)).toBe(2);
+  });
+
+  it("exports every Speak lesson meaning with its original text and reuses shared phrase translations", () => {
+    const units = Object.values(speakCourses).flatMap(courses => Object.values(courses).flat());
+    const keys = new Set<string>();
+    for (const unit of units) {
+      const fields = [[speakUnitKey(unit.id, "title"), unit.title], [speakUnitKey(unit.id, "sign"), unit.meaning]] as [string, string[]][];
+      if ("dialogue" in unit) fields.push([speakUnitKey(unit.id, "partner"), unit.partner]);
+      const { lines, words } = speakLessonContent(unit);
+      for (const piece of [...lines, ...words]) {
+        if (piece.askId) expect(piece.meaningKey).toBe(askPhraseKey(piece.askId));
+        else fields.push([piece.meaningKey, piece.meaning]);
+      }
+      for (const [key, [en, bn]] of fields) {
+        expect(keys.has(key), key).toBe(false);
+        keys.add(key);
+        expect(speakLessonMessages[key]).toMatchObject({ en, bn, definition: { file: expect.stringMatching(/^docs\/content\/spoken-/) } });
+        expect(message({ mode: "adult", language: "en" }, key)).toBe(en);
+        expect(message({ mode: "maktab", language: "bn" }, key)).toBe(applyGlossary(bn, "bn"));
+      }
+    }
+    expect(keys).toEqual(new Set(Object.keys(speakLessonMessages)));
   });
   it("formats chapter and āyah numbers without changing reference separators", () => {
     expect(formatQuranReference("67:1–5 · 103:2", "bn")).toBe("৬৭:১–৫ · ১০৩:২");

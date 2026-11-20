@@ -6,6 +6,8 @@ import modernStandard from "../../docs/content/spoken-msa-a1.json";
 import umrah from "../../docs/content/spoken-umrah-hajj.json";
 import gulfWork from "../../docs/content/spoken-gulf-work.json";
 import { asset } from "./config";
+import { speakLineKey, speakWordKey } from "./speak-lesson-messages.mjs";
+import { askPhraseKey } from "./umrah-phrase-messages.mjs";
 import { askClipPath, askPhrase, renderAsk } from "./umrahAsk";
 
 export const speakBase = "/learn/speak";
@@ -36,7 +38,8 @@ type ConversationUnit = (typeof everyday[number] | typeof conversation[number] |
   { level: SpeakCourse; variety: SpeakVariety };
 export type SpeakUnit = StarterUnit | ConversationUnit;
 export type SpeakWord = { ar: string; tr: string; meaning: string[]; root?: string; bridge?: string };
-type SpeakLine = SpeakWord & { clip: string; askId?: string };
+type LessonWord = SpeakWord & { meaningKey: string; askId?: string };
+type SpeakLine = LessonWord & { clip: string };
 
 export const speakCourses: Record<SpeakVariety, Partial<Record<SpeakCourse, SpeakUnit[]>>> = {
   "saudi-hijazi": {
@@ -70,25 +73,26 @@ export const studyClipPath = (name: string) => `packs/study-speech/${name}.opus`
 function sharedAskLine(id: string): SpeakLine {
   const phrase = askPhrase(id);
   const line = renderAsk(phrase, "saudi");
-  return { ...line, meaning: [line.en, phrase.bn], clip: askClipPath("saudi", "female", id), askId: id };
+  return { ...line, meaning: [line.en, phrase.bn], meaningKey: askPhraseKey(id), clip: askClipPath("saudi", "female", id), askId: id };
 }
 
 export function speakLessonContent(unit: SpeakUnit) {
   let lines: SpeakLine[];
-  let words: SpeakWord[];
+  let words: LessonWord[];
   let wordClips: string[];
   const signClip = studyClipPath(`sign-${unit.id}`);
+  const withVocabularyKeys = (items: SpeakWord[]) => items.map((word, index) => ({ ...word, meaningKey: speakWordKey(unit.id, index) }));
   if ("dialogue" in unit) {
     lines = unit.dialogue.map((line, index) => {
       if (!Array.isArray(line)) return sharedAskLine(line.ask);
       const [ar, tr, en, bn] = line;
-      return { ar, tr, meaning: [en, bn], clip: studyClipPath(`${unit.id}-line-${index + 1}`) };
+      return { ar, tr, meaning: [en, bn], meaningKey: speakLineKey(unit.id, index), clip: studyClipPath(`${unit.id}-line-${index + 1}`) };
     });
-    words = unit.words;
+    words = withVocabularyKeys(unit.words);
     wordClips = words.map((_, index) => studyClipPath(`${unit.id}-word-${index + 1}`));
   } else if (unit.id === "sim") {
-    lines = starter.simDialogue.map((line, index) => ({ ...line, clip: studyClipPath(`sim-${index + 1}`) }));
-    words = starter.simWords;
+    lines = starter.simDialogue.map((line, index) => ({ ...line, meaningKey: speakLineKey(unit.id, index), clip: studyClipPath(`sim-${index + 1}`) }));
+    words = withVocabularyKeys(starter.simWords);
     wordClips = words.map((_, index) => studyClipPath(`sim-word-${index + 1}`));
   } else {
     lines = unit.phrases.map(sharedAskLine);

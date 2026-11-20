@@ -6,6 +6,7 @@ import ts from "typescript";
 import { askPhraseMessages } from "../src/lib/umrah-phrase-messages.mjs";
 import { landingCopyEntries } from "./landing-copy.mjs";
 import { umrahStepMessages } from "../src/lib/umrah-step-messages.mjs";
+import { speakLessonMessages } from "../src/lib/speak-lesson-messages.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const { terms: glossary } = JSON.parse(readFileSync(resolve(root, "handovers/H2-languages-paths-arabic-help/data/glossary.json"), "utf8"));
@@ -118,6 +119,10 @@ for (const [key, entry] of landingCopyEntries()) {
 for (const [key, translations] of Object.entries(umrahStepMessages)) {
   if (messages.has(key)) throw new Error(`Duplicate catalogue message: ${key}`);
   messages.set(key, { ...translations, definition: { file: "docs/content/umrah-steps.json" }, references: [] });
+}
+for (const [key, entry] of Object.entries(speakLessonMessages)) {
+  if (messages.has(key)) throw new Error(`Duplicate catalogue message: ${key}`);
+  messages.set(key, { ...entry, references: [{ file: "src/pages/Speak.tsx" }] });
 }
 
 const entries = [...messages.entries()].sort(([left], [right]) => left.localeCompare(right, "en"));
