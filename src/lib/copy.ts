@@ -16,7 +16,8 @@ import { planMessages } from "./plan-copy";
 import { mosqueMessages } from "./mosque-copy";
 import { zakatMessages } from "./zakat-copy";
 import { guideMessages } from "./guide-copy";
-import { applyGlossary, formatLocale } from "./languagePreferences";
+import { applyGlossary, formatLocale, type BuiltInLanguage } from "./languagePreferences";
+import { localeMessage } from "./localePacks";
 import { settingsMessages } from "./settings-copy";
 import { umrahPrepMessages } from "./umrah-prep-copy";
 import { askMessages } from "./umrah-ask-copy";
@@ -27,7 +28,7 @@ import { readingMessages } from "./reading-copy";
 import { pseudoLiteral, type PseudoLocale } from "./pseudoLocale";
 
 type CopySettings = Pick<Settings, "mode" | "language" | "wordChoices" | "nativeDigits"> & { pseudoLocale?: PseudoLocale };
-export type MessageCatalog = Record<string, Record<Settings["language"], string | [string, string]>>;
+export type MessageCatalog = Record<string, Record<BuiltInLanguage, string | [string, string]>>;
 export const CopyContext = createContext<CopySettings>({ mode: "adult", language: "en" });
 
 const messages: MessageCatalog = {
@@ -315,7 +316,7 @@ const navMessages: Record<string, string> = {
 const formats = new Map<string, IntlMessageFormat<Record<string, string | number>>>();
 export function message(settings: CopySettings, id: string, values?: Record<string, string | number>) {
   const language = settings.pseudoLocale ? "en" : settings.language;
-  const draft = messages[id]?.[language] ?? id;
+  const draft = localeMessage(language, id, settings.mode) ?? messages[id]?.[language] ?? messages[id]?.en ?? id;
   const format = applyGlossary(typeof draft === "string" ? draft : draft[settings.mode === "maktab" ? 1 : 0], language, settings.wordChoices);
   const locale = formatLocale({ ...settings, language });
   const key = locale + ":" + format;

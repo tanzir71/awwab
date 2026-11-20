@@ -1,8 +1,18 @@
 import type { MessageCatalog } from "./copy";
-import { hijriMonths, hijriMonthsBn, type CalendarEvent } from "./hijri";
+import { baselineMonthStart, hijriMonths, hijriMonthsBn, type CalendarEvent } from "./hijri";
 
 export const planMonthsBn = hijriMonthsBn;
-export const planMonth = (month: number, language: "en" | "bn") => (language === "bn" ? planMonthsBn : hijriMonths)[month - 1];
+const monthNames = new Map<string, Intl.DateTimeFormat>();
+export function planMonth(month: number, language: string) {
+  if (language === "bn") return planMonthsBn[month - 1];
+  if (language === "en") return hijriMonths[month - 1];
+  let format = monthNames.get(language);
+  if (!format) {
+    format = new Intl.DateTimeFormat(language, { month: "long", calendar: "islamic-umalqura", timeZone: "UTC" });
+    monthNames.set(language, format);
+  }
+  return format.format(new Date(baselineMonthStart(1448, month) + "T12:00:00Z"));
+}
 
 export const planAuthorities = [
   { value: "National moon-sighting committee", label: "planNational" },
@@ -26,8 +36,8 @@ export const planEventCopy: Record<string, { en: [string, string]; bn: [string, 
   "White days (Ayyām al-Bīḍ)": { en: ["White days", "13–15 of each Hijri month"], bn: ["আইয়ামে বীজ", "প্রতি হিজরি মাসের ১৩–১৫ তারিখ"] },
 };
 
-export function planEventLabels(event: CalendarEvent, language: "en" | "bn") {
-  return planEventCopy[event.title]?.[language] ?? [
+export function planEventLabels(event: CalendarEvent, language: string) {
+  return planEventCopy[event.title]?.[language === "bn" ? "bn" : "en"] ?? [
     language === "bn" ? planMonth(event.month, language) + " শুরু" : event.title,
     language === "bn" ? "স্থানীয় চাঁদ দেখার খবর জানো" : "Check the local crescent sighting",
   ];

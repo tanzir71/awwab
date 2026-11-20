@@ -20,7 +20,6 @@ export type CuratedNarration = {
   excerptAr?: string;
   excerptEn?: string;
 };
-type Language = "en" | "bn";
 
 export const featuredHadith = curated.items[0] as CuratedNarration;
 export const featuredArabic = curated.featuredArabic;
@@ -84,13 +83,20 @@ export function hadithSource(narration: HadithNarration) {
   return number.includes(".") ? editionUrl(collection) : `https://sunnah.com/${collection}:${number}`;
 }
 
-export function hadithNumberLabel(number: string | number, language: Language) {
+const numberFormats = new Map<string, Intl.NumberFormat>();
+export function hadithNumberLabel(number: string | number, language: string) {
   if (language === "en") return String(number);
-  return String(number).replace(/\d/g, digit => "০১২৩৪৫৬৭৮৯"[Number(digit)]);
+  let format = numberFormats.get(language);
+  if (!format) {
+    format = new Intl.NumberFormat(language, { useGrouping: false });
+    numberFormats.set(language, format);
+  }
+  return String(number).replace(/\d/g, digit => format.format(Number(digit)));
 }
 
-export function hadithName(collection: HadithCollection, language: Language, short = false) {
-  return short && language === "en" ? hadithCollections[collection].short : hadithCollections[collection][language];
+export function hadithName(collection: HadithCollection, language: string, short = false) {
+  const names = hadithCollections[collection];
+  return language === "bn" ? names.bn : short ? names.short : names.en;
 }
 
 export function normalizeHadithSearch(text: string) {

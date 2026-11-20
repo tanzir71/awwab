@@ -20,6 +20,10 @@
   --font-display: "Noto Sans Bengali Variable", "Baloo 2 Variable", sans-serif;
   --font-body: "Noto Sans Bengali Variable", "Nunito Variable", sans-serif;
 }
+:root[data-ui-script="Arab"] .onboarding[data-theme-preview], :root[data-ui-script="Arab"] .onboarding [data-theme-preview] {
+  --font-display: var(--font-arabic);
+  --font-body: var(--font-arabic);
+}
 .onboarding-inner {
   display: grid;
   gap: 16px;

@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
-import { curatedHadith, curatedHadithFor, desktopHadith, hadithId, hadithSource, parseHadithId, riyadSelections, searchHadith, topicMatches } from "./hadith";
+import { curatedHadith, curatedHadithFor, desktopHadith, hadithId, hadithNumberLabel, hadithSource, parseHadithId, riyadSelections, searchHadith, topicMatches } from "./hadith";
 import { canonicalHadithNumber, collectionIds, hadithArchiveVersion, narrationGrade, type HadithNarration } from "./hadith-catalogue";
 
 const archive = collectionIds.flatMap(collection => {
@@ -44,11 +44,12 @@ describe("hadith editions", () => {
     for (const reference of riyadSelections) expect(byId.has(reference.original)).toBe(true);
   });
 
-  it("finds references by canonical suffix, Bangla number, text, and selected Riyad collection", () => {
+  it("finds references by canonical suffix, local digits, text, and selected Riyad collection", () => {
     const exact = searchHadith("সহিহ মুসলিম ২৭০২a", archive, "all");
     expect(exact.matches.map(item => item.number)).toEqual(["2702a"]);
     expect(exact.matches[0].text).toMatch(/seek forgiveness/i);
     expect(searchHadith("Muslim 2702", archive, "all").matches.map(item => item.number)).toContain("2702b");
+    expect(searchHadith(`Muslim ${hadithNumberLabel("2702a", "fa")}`, archive, "all").matches.map(item => item.number)).toEqual(["2702a"]);
     expect(searchHadith("Muslim 2702", archive, "bukhari").matches).toEqual([]);
     expect(searchHadith("প্রতিবেশীর ক্ষতি", archive, "all").matches.some(item => item.number === "6018")).toBe(true);
     expect(searchHadith("Riyad 14", archive, "riyadussalihin").riyad.map(item => item.original)).toEqual(["muslim:2702b"]);

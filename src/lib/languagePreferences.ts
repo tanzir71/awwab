@@ -1,8 +1,9 @@
 import inventory from "../../handovers/H2-languages-paths-arabic-help/data/locales.json";
 import glossary from "../../handovers/H2-languages-paths-arabic-help/data/glossary.json";
+import { localePackAsset } from "./localePacks";
 
 export const builtInLanguages = ["en", "bn"] as const;
-export type AppLanguage = typeof builtInLanguages[number];
+export type BuiltInLanguage = typeof builtInLanguages[number];
 export type GlossaryTerm = keyof typeof glossary.terms;
 export type WordChoices = Partial<Record<AppLanguage, Partial<Record<GlossaryTerm, string>>>>;
 export const glossaryTerms = Object.keys(glossary.terms) as GlossaryTerm[];
@@ -13,9 +14,14 @@ export const languages = [
   ...inventory.locales,
 ];
 export type LanguageItem = typeof languages[number];
+export type AppLanguage = LanguageItem["code"];
 
-export function isBuiltIn(code: string): code is AppLanguage {
+export function isBuiltIn(code: string): code is BuiltInLanguage {
   return builtInLanguages.some(language => language === code);
+}
+
+export function isAvailableLanguage(code: string) {
+  return isBuiltIn(code) || Boolean(localePackAsset(code));
 }
 
 export function suggestedLanguage(preferences: readonly string[]) {
@@ -36,8 +42,8 @@ export function languageMatches(item: LanguageItem, query: string) {
   return simplify(query.trim()).split(/\s+/).every(value => searchable.includes(value));
 }
 
-export function glossaryOptions(language: AppLanguage, term: GlossaryTerm) {
-  return glossary.terms[term][language];
+export function glossaryOptions(language: AppLanguage, term: GlossaryTerm): string[] {
+  return glossary.terms[term][language] ?? glossary.terms[term].en;
 }
 
 export const salahVariants = Object.entries(glossary.terms.salah).filter(([code]) => code !== "en").map(([code, words]) => ({
@@ -64,5 +70,5 @@ export function formatLocale({ language, nativeDigits }: { language: AppLanguage
 
 export function showEnglishQuranMeaning(preferences: { language: AppLanguage; quranMeanings?: boolean; englishMeaning?: boolean }) {
   const localMeaning = preferences.language === "en" && preferences.quranMeanings !== false;
-  return localMeaning || (preferences.englishMeaning ?? preferences.language === "bn");
+  return localMeaning || (preferences.englishMeaning ?? preferences.language !== "en");
 }

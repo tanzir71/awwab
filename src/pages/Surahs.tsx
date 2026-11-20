@@ -31,7 +31,7 @@ const modes = ["listen", "read", "recall"] as const;
 type StudyMode = typeof modes[number];
 const ordinaryNames: Record<number, string> = { 1: "Al-Fātiḥa", 103: "Al-ʿAsr", 112: "Al-Ikhlāṣ", 110: "An-Naṣr" };
 
-function chapterName(chapter: Chapter, language: "en" | "bn") {
+function chapterName(chapter: Chapter, language: string) {
   return studyNames.surah(language, chapter.number, ordinaryNames[chapter.number] ?? chapter.transliteration);
 }
 

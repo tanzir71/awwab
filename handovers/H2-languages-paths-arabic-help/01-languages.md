@@ -64,6 +64,8 @@ Generate the Tier 1 UI review files with `node scripts/export-locale-review.mjs 
 
 After native review, record the reviewers in the catalogue’s `reviewers` array and set `_status` to `reviewed`. Use `node scripts/build-locale-pack.mjs <source-ui.json> <reviewed-catalogue.json> <output-directory>` to produce the UI catalogue. The build checks the source fingerprint, message coverage, mode variants, and ICU arguments. The review file retains the reviewer names.
 
+For a static build, set the compiler’s output directory to `public/locales`. The app installer lists the compiled files that match the current English catalogue. Selecting one in Settings or onboarding downloads it from the same origin and verifies it before saving the language preference. Installed catalogues are available offline on later visits. When a new build changes a pack, selecting that language again installs the matching revision. The generated pack covers UI copy. Licensed Quran and hadith editions have their own source and review requirements.
+
 ## 6. Acceptance
 - Every route passes `en-XA` at 360px and 1280px with no clipped text; `en-XB` and `ur` mirror correctly.
 - Language switch updates text, numbers, dates, Hijri months and share cards without reload, offline after first download.

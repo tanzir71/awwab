@@ -49,7 +49,8 @@ export const studyNames = {
 };
 
 export function studySearchTerm(text: string) {
-  return text.trim().toLowerCase().replace(/[০-৯]/g, digit => String(digit.charCodeAt(0) - "০".charCodeAt(0)));
+  const localDigits = "০১২৩৪৫৬৭৮৯٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹";
+  return text.trim().toLowerCase().replace(/[০-৯٠-٩۰-۹]/g, digit => String(localDigits.indexOf(digit) % 10));
 }
 
 export const studyMessages: MessageCatalog = {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Check, X } from "lucide-react";
 import { toast } from "sonner";
@@ -8,14 +8,47 @@ import { WordingSuggestionCard } from "@/components/WordingSuggestions";
 import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useDesktop } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
-import { glossaryOptions, glossaryValue, isBuiltIn, languages, languageMatches, salahVariants, suggestedLanguage,
+import { glossaryOptions, glossaryValue, isAvailableLanguage, languages, languageMatches, salahVariants, suggestedLanguage,
   type AppLanguage, type GlossaryTerm, type LanguageItem } from "@/lib/languagePreferences";
-import { updateSettings, updateWordChoice, type Settings } from "@/lib/storageService";
+import { hasLocaleMessages, installedLocalePacks, localePackAsset } from "@/lib/localePacks";
+import { selectAppLanguage, updateSettings, updateWordChoice, type Settings } from "@/lib/storageService";
 
 const quickLanguages = languages.filter(item => item.tier === 1 || item.code === "hi");
 
-function languageState(code: string) {
-  return code === "en" ? "settingsLanguageBuiltIn" : code === "bn" ? "settingsLanguagePreview" : "settingsLanguagePlanned";
+function useLanguageChoices() {
+  const { t } = useCopy();
+  const [busy, setBusy] = useState<string>();
+  const [installed, setInstalled] = useState<Set<string>>();
+  useEffect(() => {
+    let active = true;
+    void installedLocalePacks().then(codes => { if (active) setInstalled(codes); }).catch(() => {});
+    return () => { active = false; };
+  }, []);
+
+  function canDownload(code: string) {
+    return Boolean(localePackAsset(code) && !hasLocaleMessages(code) && !installed?.has(code));
+  }
+  function state(code: string) {
+    if (code === busy) return t("settingsLanguageDownloading");
+    const pack = localePackAsset(code);
+    if (pack) return t(canDownload(code) ? "settingsLanguageDownload" : "settingsLanguageDownloaded", {
+      size: t("fileSizeMB", { size: pack.bytes / 1_000_000 }),
+    });
+    return t(code === "en" ? "settingsLanguageBuiltIn" : code === "bn" ? "settingsLanguagePreview" : "settingsLanguagePlanned");
+  }
+  async function change(code: AppLanguage, onSaved?: () => void) {
+    if (busy) return;
+    setBusy(code);
+    try {
+      if (!(await selectAppLanguage(code))) toast.error(t("settingsLanguageDownloadError"));
+      onSaved?.();
+    } catch {
+      toast.error(t(localePackAsset(code) ? "settingsLanguageDownloadError" : "saveError"));
+    } finally {
+      setBusy(undefined);
+    }
+  }
+  return { busy, canDownload, state, change };
 }
 
 function LanguageName({ item }: { item: LanguageItem }) {
@@ -26,31 +59,21 @@ function LanguageName({ item }: { item: LanguageItem }) {
   </strong>;
 }
 
-async function selectLanguage(code: AppLanguage, onSaved: () => void, onError: () => void) {
-  try { await updateSettings({ language: code }); onSaved(); }
-  catch { onError(); }
-}
-
 export function LanguagePicker({ settings }: { settings: Settings }) {
   const { t } = useCopy();
   const [query, setQuery] = useState("");
-  const [busy, setBusy] = useState(false);
+  const { busy, canDownload, state, change } = useLanguageChoices();
   const navigate = useNavigate();
   const suggestion = suggestedLanguage(navigator.languages);
   const choices = languages.filter(item => languageMatches(item, query));
-  const showSuggestion = suggestion && isBuiltIn(suggestion.code) && !query.trim();
-  async function change(code: AppLanguage) {
-    if (busy) return;
-    setBusy(true);
-    try { await selectLanguage(code, () => navigate("/you/language", { replace: true }), () => toast.error(t("saveError"))); }
-    finally { setBusy(false); }
-  }
+  const showSuggestion = suggestion && isAvailableLanguage(suggestion.code) && !query.trim();
+  const select = (code: AppLanguage) => void change(code, () => navigate("/you/language", { replace: true }));
   function row(item: LanguageItem) {
     const active = settings.language === item.code;
-    const content = <><span><LanguageName item={item} /><small>{item.english === item.native ? t(languageState(item.code)) : `${item.english} · ${t(languageState(item.code))}`}</small></span>
-      {active && <Check size={18} aria-hidden="true" />}</>;
+    const content = <><span><LanguageName item={item} /><small>{item.english === item.native ? state(item.code) : `${item.english} · ${state(item.code)}`}</small></span>
+      {active ? <Check size={18} aria-hidden="true" /> : canDownload(item.code) && <DesignIcon name="language-download" size={18} />}</>;
     return <li key={item.code} className="settings-language-row">
-      {isBuiltIn(item.code) ? <button type="button" aria-pressed={active} disabled={busy} onClick={() => void change(item.code as AppLanguage)}>{content}</button>
+      {isAvailableLanguage(item.code) ? <button type="button" aria-pressed={active} aria-busy={busy === item.code} disabled={Boolean(busy)} onClick={() => select(item.code)}>{content}</button>
         : <div>{content}</div>}
     </li>;
   }
@@ -61,11 +84,12 @@ export function LanguagePicker({ settings }: { settings: Settings }) {
       <input type="search" value={query} onChange={event => setQuery(event.target.value)}
         aria-label={t("settingsLanguageSearch", { count: languages.length })} placeholder={t("settingsLanguageSearch", { count: languages.length })} />
     </label>
-    {showSuggestion && <button className="card settings-language-suggestion" type="button" aria-pressed={settings.language === suggestion.code} disabled={busy}
-      onClick={() => void change(suggestion.code as AppLanguage)}>
+    {showSuggestion && <button className="card settings-language-suggestion" type="button" aria-pressed={settings.language === suggestion.code}
+      aria-busy={busy === suggestion.code} disabled={Boolean(busy)} onClick={() => select(suggestion.code)}>
       <span><span className="caption">{t("settingsPhoneSuggestion")}</span><LanguageName item={suggestion} />
-        <small className="muted">{suggestion.english} · {t(languageState(suggestion.code))}</small></span>
-      {settings.language === suggestion.code && <span className="settings-language-check"><Check aria-hidden="true" size={18} /></span>}
+        <small className="muted">{suggestion.english} · {state(suggestion.code)}</small></span>
+      {settings.language === suggestion.code ? <span className="settings-language-check"><Check aria-hidden="true" size={18} /></span>
+        : canDownload(suggestion.code) && <DesignIcon name="language-download" size={18} />}
     </button>}
     {!choices.length && <p className="card" role="status">{t("settingsLanguageNoResults")}</p>}
     {[true, false].map(most => {
@@ -80,22 +104,23 @@ export function LanguagePicker({ settings }: { settings: Settings }) {
 
 function AppLanguageCard({ settings }: { settings: Settings }) {
   const { t } = useCopy();
+  const { busy, state, change } = useLanguageChoices();
   const active = languages.find(item => item.code === settings.language);
   return <section className="card settings-app-language">
     <header className="row-between"><h2>{t("settingsAppLanguage")}</h2>
       <Link className="text-button" to="/you/language/picker">{t("settingsLanguageCount", { count: languages.length })}</Link>
     </header>
     <div className="settings-active-language row-between">
-      <LanguageName item={active} /><small className="muted">{active.english} · {t(languageState(active.code))}</small>
+      <LanguageName item={active} /><small className="muted">{active.english} · {state(active.code)}</small>
       <Link className="chip" to="/you/language/picker">{t("settingsChangeLanguage")}</Link>
     </div>
     <div className="settings-language-tiles">
       {quickLanguages.filter(item => item.code !== settings.language).map(item => {
         const code = item.code;
-        const label = <><LanguageName item={item} /><small>{item.english}</small></>;
-        return isBuiltIn(code) ? <button type="button" className="settings-language-tile" key={code}
-          onClick={() => void selectLanguage(code, () => undefined, () => toast.error(t("saveError")))}>{label}</button>
-          : <div className="settings-language-tile" key={code} title={t(languageState(code))}>{label}<span className="sr-only">{t(languageState(code))}</span></div>;
+        const label = <><LanguageName item={item} /><small>{busy === code ? state(code) : item.english}</small></>;
+        return isAvailableLanguage(code) ? <button type="button" className="settings-language-tile" key={code} aria-busy={busy === code} disabled={Boolean(busy)}
+          onClick={() => void change(code)}>{label}</button>
+          : <div className="settings-language-tile" key={code} title={state(code)}>{label}<span className="sr-only">{state(code)}</span></div>;
       })}
     </div>
   </section>;
@@ -112,16 +137,17 @@ function ReadingToggle({ title, hint, enabled, disabled = false, onToggle }: {
 
 function ReadingHelp({ settings }: { settings: Settings }) {
   const { t } = useCopy();
+  const localEnglish = settings.language === "en";
   const bangla = settings.language === "bn";
   function save(patch: Partial<Settings>) {
     void updateSettings(patch).catch(() => toast.error(t("saveError")));
   }
   return <section className="card settings-reading-help">
     <h2>{t("settingsReadingHelp")}</h2>
-    <ReadingToggle title={t("settingsMeaningLocal")} hint={t(bangla ? "settingsMeaningLocalPending" : "settingsMeaningLocalEnglish")}
-      enabled={!bangla && settings.quranMeanings !== false} disabled={bangla} onToggle={quranMeanings => save({ quranMeanings })} />
+    <ReadingToggle title={t("settingsMeaningLocal")} hint={t(localEnglish ? "settingsMeaningLocalEnglish" : bangla ? "settingsMeaningLocalPending" : "settingsMeaningOtherPending")}
+      enabled={localEnglish && settings.quranMeanings !== false} disabled={!localEnglish} onToggle={quranMeanings => save({ quranMeanings })} />
     <ReadingToggle title={t("settingsMeaningEnglish")} hint={t("settingsMeaningEnglishHint")}
-      enabled={settings.englishMeaning ?? bangla} onToggle={englishMeaning => save({ englishMeaning })} />
+      enabled={settings.englishMeaning ?? !localEnglish} onToggle={englishMeaning => save({ englishMeaning })} />
     {bangla && <ReadingToggle title={t("settingsNativeDigits")} hint={t("settingsNativeDigitsHint")}
       enabled={settings.nativeDigits !== false} onToggle={nativeDigits => save({ nativeDigits })} />}
   </section>;

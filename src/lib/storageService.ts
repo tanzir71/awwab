@@ -11,7 +11,8 @@ import { emptyPreparation, tripChecklist, type UmrahTrip } from "./umrah";
 import { askVarieties, askVoices } from "./umrahAsk";
 import { practiceChapters, recitationChecks } from "./readingPractice";
 import { speakGoals, speakGoalsKey, speakProgressKey, speakVarieties, speakVarietyKey } from "./speakCurriculum";
-import { builtInLanguages, glossaryOptions, glossaryTerms, textSizes, type AppLanguage, type GlossaryTerm, type WordChoices } from "./languagePreferences";
+import { glossaryOptions, glossaryTerms, isAvailableLanguage, isBuiltIn, languages, textSizes, type AppLanguage, type GlossaryTerm, type WordChoices } from "./languagePreferences";
+import { loadLocalePack, localePackAsset } from "./localePacks";
 
 export interface Settings {
   mode: "adult" | "maktab";
@@ -77,6 +78,19 @@ export function updateSettings(patch: Partial<Settings>) {
   return updateRecord("settings", defaults, saved => ({ ...defaults, ...saved, ...patch }));
 }
 
+export async function selectAppLanguage(language: AppLanguage) {
+  if (!isAvailableLanguage(language)) throw new Error("This language is not available");
+  let available = true;
+  if (localePackAsset(language)) {
+    available = await loadLocalePack(language, true).catch(error => {
+      if (!isBuiltIn(language)) throw error;
+      return false;
+    });
+  }
+  await updateSettings({ language });
+  return available;
+}
+
 export function updateWordChoice(language: AppLanguage, term?: GlossaryTerm, choice?: string) {
   return updateRecord("settings", defaults, saved => {
     const wordChoices = { ...saved.wordChoices };
@@ -106,6 +120,7 @@ const citySchema = z.object({
     try { dateKey(new Date(), zone); return true; } catch { return false; }
   }),
 });
+const languageSchema = z.enum(languages.map(language => language.code));
 const settingsSchema = z.object({
   mode: z.enum(["adult", "maktab"]),
   script: z.enum(["indopak", "uthmani"]),
@@ -115,12 +130,12 @@ const settingsSchema = z.object({
   city: citySchema,
   hijriAdjust: z.number().int().min(-2).max(2),
   spellStyle: z.enum(["en", "ampara-bn"]),
-  language: z.enum(builtInLanguages),
+  language: languageSchema,
   nativeDigits: z.boolean().optional(),
   quranMeanings: z.boolean().optional(),
   englishMeaning: z.boolean().optional(),
   textSize: z.enum(textSizes).optional(),
-  wordChoices: z.partialRecord(z.enum(builtInLanguages), z.partialRecord(z.enum(glossaryTerms), z.string().max(80))).optional(),
+  wordChoices: z.partialRecord(languageSchema, z.partialRecord(z.enum(glossaryTerms), z.string().max(80))).optional(),
   onboarded: z.boolean(),
 });
 const legacySchema = z.array(z.object({ date: daySchema, prayerName: z.string(), completedAt: instantSchema }));
@@ -184,7 +199,7 @@ const savedRecords: Record<string, z.ZodTypeAny> = {
   "umrah-ask-volume-hint": z.boolean(),
   "umrah-custom-phrases": z.array(z.object({ id: z.string().uuid(), ar: z.string().trim().min(1).max(280), meaning: z.string().trim().min(1).max(280) })),
   settings: settingsSchema,
-  "wording-suggestions": z.array(z.object({ language: z.enum(builtInLanguages), page: z.string().max(160), original: z.string().max(500), proposed: z.string().max(500) })).max(300),
+  "wording-suggestions": z.array(z.object({ language: languageSchema, page: z.string().max(160), original: z.string().max(500), proposed: z.string().max(500) })).max(300),
   "qaida-current": count.min(1).max(17),
   "qaida-complete": z.array(count.min(1).max(17)),
   "study-days": z.array(daySchema),

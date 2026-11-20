@@ -9,6 +9,8 @@ import { WordingSuggestionLayer } from "@/components/WordingSuggestions";
 import { useClock, useDesktop, useSettings } from "@/hooks/use-awwab";
 import { migrateLegacy } from "@/lib/storageService";
 import { CopyContext } from "@/lib/copy";
+import { isBuiltIn, languages } from "@/lib/languagePreferences";
+import { hasLocaleMessages, loadLocalePack, localePackAsset } from "@/lib/localePacks";
 import { readPseudoLocale } from "@/lib/pseudoLocale";
 import { speakPacks, speakSetupPath } from "@/lib/speakCurriculum";
 import Today, { PrayerWeek } from "@/pages/Index";
@@ -50,13 +52,26 @@ import AppInstallPrompt from "@/components/AppInstallPrompt";
 function Main() {
   const saved = useSettings();
   const [pseudoLocale] = useState(() => import.meta.env.DEV || import.meta.env.MODE === "preview" ? readPseudoLocale(window.location.search) : undefined);
-  const settings = useMemo(() => saved && (pseudoLocale ? { ...saved, language: "en" as const, pseudoLocale } : saved), [saved, pseudoLocale]);
+  const [restoredLocale, setRestoredLocale] = useState("");
+  const preferredLocale = saved?.language ?? "en";
+  const hasPack = hasLocaleMessages(preferredLocale);
+  const restoringLocale = !pseudoLocale && !hasPack && restoredLocale !== preferredLocale && Boolean(localePackAsset(preferredLocale));
+  const language = !pseudoLocale && (isBuiltIn(preferredLocale) || hasPack) ? preferredLocale : "en";
+  const settings = useMemo(() => saved && { ...saved, language, pseudoLocale }, [saved, language, pseudoLocale]);
   const desktop = useDesktop();
   const now = useClock();
   const location = useLocation();
   const navigate = useNavigate();
   const { pathname, search } = location;
   const [storage, setStorage] = useState<"loading" | "ready" | "error">("loading");
+  useEffect(() => {
+    if (!restoringLocale) return;
+    let active = true;
+    void loadLocalePack(preferredLocale).catch(() => false).then(() => {
+      if (active) setRestoredLocale(preferredLocale);
+    });
+    return () => { active = false; };
+  }, [preferredLocale, restoringLocale]);
   useEffect(() => {
     let active = true;
     void Promise.resolve().then(() => migrateLegacy(window.localStorage)).then(() => {
@@ -71,12 +86,14 @@ function Main() {
     document.documentElement.dataset.mode = settings.mode;
     document.documentElement.dataset.textSize = settings.textSize ?? "default";
     document.documentElement.lang = pseudoLocale ?? settings.language;
-    document.documentElement.dir = pseudoLocale === "en-XB" ? "rtl" : "ltr";
+    const locale = languages.find(item => item.code === settings.language);
+    document.documentElement.dataset.uiScript = locale?.script ?? "Latn";
+    document.documentElement.dir = pseudoLocale === "en-XB" || locale?.dir === "rtl" ? "rtl" : "ltr";
     document.querySelector('meta[name="theme-color"]')?.setAttribute("content", settings.mode === "adult" ? "#15302b" : "#25306b");
   }, [settings, pseudoLocale]);
 
   if (storage === "error") return <main className="app-content stack"><h1>Device storage is unavailable</h1><p>Allow this site to use browser storage, then reload to open Awwab.</p></main>;
-  if (!settings || storage === "loading") return <main className="app-content"><p role="status">Opening awwab…</p></main>;
+  if (!settings || storage === "loading" || restoringLocale) return <main className="app-content"><p role="status">Opening awwab…</p></main>;
   if (!settings.onboarded && pathname !== "/install" && pathname !== "/sources") return <CopyContext.Provider value={settings}><Onboarding settings={settings} desktop={desktop} /><WordPanel desktop={false} settings={settings} /></CopyContext.Provider>;
   const shareDialog = desktop && pathname === "/share";
   const shareBackground = (location.state as ShareRouteState | null)?.shareBackground;

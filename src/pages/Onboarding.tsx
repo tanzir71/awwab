@@ -5,10 +5,11 @@ import { DesignIcon } from "@/components/DesignIcon";
 import { PlacementAudio } from "@/components/PlacementAudio";
 import { IS_PREVIEW } from "@/lib/config";
 import { useCopy } from "@/lib/copy";
-import { builtInLanguages, isBuiltIn, languages } from "@/lib/languagePreferences";
+import { isAvailableLanguage, languages } from "@/lib/languagePreferences";
+import { localePackAsset } from "@/lib/localePacks";
 import { completeOnboarding, desktopPlacement, desktopPlacementPassed, placement } from "@/lib/onboarding";
 import { quranText } from "@/lib/quran";
-import { restoreBackup, updateSettings, type Settings } from "@/lib/storageService";
+import { restoreBackup, selectAppLanguage, type Settings } from "@/lib/storageService";
 import { studyNames } from "@/lib/study-copy";
 import content from "../../docs/content/return.json";
 const modes = [
@@ -114,11 +115,15 @@ export function Onboarding({ settings, desktop }: { settings: Settings; desktop:
         <span className="sr-only">{t("interfaceLanguage")}</span>
         <select value={language} disabled={saving} onChange={async event => {
           const next = event.currentTarget.value;
-          if (!isBuiltIn(next)) return;
-          try { await updateSettings({ language: next }); setNotice(undefined); }
-          catch { setNotice("setupSaveError"); }
+          if (!isAvailableLanguage(next)) return;
+          const downloads = Boolean(localePackAsset(next));
+          setSaving(true);
+          setNotice(downloads ? "settingsLanguageDownloading" : undefined);
+          try { setNotice(await selectAppLanguage(next) ? undefined : "settingsLanguageDownloadError"); }
+          catch { setNotice(downloads ? "settingsLanguageDownloadError" : "setupSaveError"); }
+          finally { setSaving(false); }
         }}>
-          {languages.filter(item => builtInLanguages.some(code => code === item.code)).map(item => <option key={item.code} value={item.code} lang={item.code}>{item.native}</option>)}
+          {languages.filter(item => isAvailableLanguage(item.code)).map(item => <option key={item.code} value={item.code} lang={item.code} dir={item.dir}>{item.native}</option>)}
         </select>
       </label>;
   const languageStep = <>

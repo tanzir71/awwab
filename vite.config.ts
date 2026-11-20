@@ -11,11 +11,13 @@ import anatomySample from "./docs/content/word-anatomy.sample.json";
 import onboarding from "./docs/content/onboarding.json";
 import { sharedSpeakClips } from "./src/lib/speakAskAudio";
 import { tajweedPrecache } from "./src/lib/tajweed";
+import { publishedLocales } from "./scripts/published-locales.mjs";
 
 const base = "/awwab/";
 
 export default defineConfig(({ mode }) => ({
   base,
+  define: { __AWWAB_PUBLISHED_LOCALES__: JSON.stringify(publishedLocales()) },
   server: { host: "127.0.0.1", port: 8080 },
   resolve: { alias: { "@": resolve(__dirname, "src") } },
   build: {

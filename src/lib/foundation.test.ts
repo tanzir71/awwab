@@ -10,6 +10,7 @@ import { estimateQada, finishQada, qadaDefaults } from "./qada";
 import { mosqueDefaults, type Mosque } from "./mosques";
 import { guideRakahIndex, guideReference, prayerGuide, prayerGuidePath } from "./prayerGuide";
 import { applyGlossary, formatLocale, glossaryValue, isBuiltIn, languageMatches, languages, showEnglishQuranMeaning, suggestedLanguage } from "./languagePreferences";
+import { planMonth } from "./plan-copy";
 import { updateWordChoice } from "./storageService";
 import { reviewCard, type Reviews } from "./reviews";
 import { countKnownQuranWords } from "./quran";
@@ -336,6 +337,9 @@ describe("language settings", () => {
     expect(showEnglishQuranMeaning({ language: "bn" })).toBe(true);
     expect(showEnglishQuranMeaning({ language: "bn", englishMeaning: false })).toBe(false);
     expect(showEnglishQuranMeaning({ language: "en", quranMeanings: false, englishMeaning: true })).toBe(true);
+    expect(showEnglishQuranMeaning({ language: "ur" })).toBe(true);
+    expect(glossaryValue("ps", "salah")).toBe(glossaryValue("en", "salah"));
+    expect(planMonth(9, "ur")).toMatch(/\p{Script=Arabic}/u);
   });
 });
 
