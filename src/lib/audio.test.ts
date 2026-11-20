@@ -70,8 +70,8 @@ describe("Supplemental Tajweed recitations", () => {
   it("uses and precaches each attributed recitation on its cited example", () => {
     const rules = tajweedLessons.flatMap(lesson => lesson.samples.map(tajweedClip).filter(Boolean));
     const depth = tajweedDepthLessons.flatMap(lesson => lesson.samples.map(tajweedClip).filter(Boolean));
-    expect(rules).toHaveLength(57);
-    expect(depth).toHaveLength(37);
+    expect(rules).toHaveLength(64);
+    expect(depth).toHaveLength(40);
     for (const clip of tajweedAudio.clips) {
       expect([...rules, ...depth]).toContainEqual(expect.objectContaining({
         ref: clip.ref, path: clip.path, source: clip.source, licenseUrl: clip.licenseUrl, speaker: tajweedAudio.speaker,
