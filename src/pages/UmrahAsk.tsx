@@ -8,16 +8,16 @@ import { useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { dateKey, formatTime } from "@/lib/dates";
 import { dayDifference } from "@/lib/hijri";
+import { speakSetupPath } from "@/lib/speakCurriculum";
 import { updateRecord } from "@/lib/storageService";
 import { emptyPreparation, initialTrip, makkah, maskedPhone, type TripState, type UmrahTrip } from "@/lib/umrah";
-import { answerWords, arabicNumber, askCategories, askDefaults, askPhrase, askPlaces, askRelations, askVarieties, askVoices, helperDirections,
+import { answerWords, arabicNumber, askCategories, askDefaults, askPhrase, askPhrasePath as phraseLink, askPlaces, askRelations, askVarieties, askVoices, helperDirections,
   quickAsks, readGate, renderAsk, umrahPhrases, type AskPhrase, type AskVariety, type AskVoice, type CustomPhrase } from "@/lib/umrahAsk";
 import { banglaPhrases } from "@/lib/umrah-ask-copy";
 import { askClipIds, packVoices } from "@/lib/umrahAskAudio";
 
 const home = "/umrah/ask";
 const cards = `${home}/cards`;
-const phraseLink = (id: string) => `${home}/phrase/${id}`;
 const showLink = (id: string) => `${home}/show/${id}`;
 const categoryKey = (category: string) => "askCategory" + category[0].toUpperCase() + category.slice(1);
 const icons = ["icon-compass", "icon-list", "icon-footprints", "icon-droplet", "icon-heart", "icon-home", "icon-coins", "icon-hand1"];
@@ -174,6 +174,7 @@ export function UmrahAskHome() {
           <div className="compact-stack">{custom.map(item => <Link className="list-row" key={item.id} to={phraseLink(item.id)}>{item.meaning}</Link>)}</div>
         </section>
         <AskAudioPack />
+        <Link className="action soft" to={speakSetupPath("umrah-hajj")}>{t("speakPractiseForUmrah")}</Link>
       </>}
       {error && <p role="alert">{error}</p>}
     </div>

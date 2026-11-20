@@ -1,0 +1,164 @@
+[
+  {
+    "id": "umrah-hajj-haram",
+    "title": ["Finding the Haram", "হারামে যাওয়ার পথ"],
+    "partner": ["Passerby", "পথচারী"],
+    "sign": "الطريق إلى الحرم",
+    "signSpeech": "الطَّرِيقُ إِلَى الْحَرَمِ",
+    "meaning": ["Way to the Haram", "হারামে যাওয়ার পথ"],
+    "dialogue": [
+      { "ask": "to-haram" },
+      ["مِنْ هَذِي الجِهَة. مَعَاك خَرِيطَة؟", "min hādhi l-jiha. maʿāk kharīṭa?", "This way. Do you have a map?", "এই দিকে। আপনার কাছে ম্যাপ আছে?"],
+      { "ask": "show-map" },
+      ["أَبْشِر. شُوف، إِنْتَ هِنَا وَهَذَا الْحَرَم.", "abshir. shūf, inta hinā wa-hādha l-ḥaram.", "Of course. Look, you're here, and this is the Haram.", "অবশ্যই। দেখুন, আপনি এখানে, আর এটা হারাম।"]
+    ],
+    "words": [
+      { "ar": "حَرَم", "tr": "ḥaram", "meaning": ["Sacred precinct", "পবিত্র প্রাঙ্গণ"], "root": "ح ر م", "bridge": "2:144:14" },
+      { "ar": "خَرِيطَة", "tr": "kharīṭa", "meaning": ["Map", "ম্যাপ"] }
+    ]
+  },
+  {
+    "id": "umrah-hajj-gates",
+    "title": ["Gates & exits", "প্রবেশ ও বের হওয়ার পথ"],
+    "partner": ["Guide", "পথনির্দেশক"],
+    "sign": "مخرج",
+    "signSpeech": "مَخْرَج",
+    "meaning": ["Exit", "বের হওয়ার পথ"],
+    "dialogue": [
+      { "ask": "king-fahd-gate" },
+      ["تِبْغَى تِدْخُل وَلَّا تِبْغَى تِطْلَع؟", "tibghā tidkhul walla tibghā tiṭlaʿ?", "Do you want to go in or get out?", "আপনি ঢুকতে চান, নাকি বের হতে চান?"],
+      { "ask": "exit" },
+      ["شُوف اللَّوْحَة اللِّي مَكْتُوب عَلَيْهَا مَخْرَج.", "shūf il-lawḥa illi maktūb ʿalayha makhraj.", "Look for the sign that says 'exit'.", "‘বের হওয়ার পথ’ লেখা সাইনবোর্ডটা দেখুন।"]
+    ],
+    "words": [
+      { "ar": "بَاب", "tr": "bāb", "meaning": ["Gate or door", "প্রবেশদ্বার বা দরজা"], "root": "ب و ب", "bridge": "2:58:12" },
+      { "ar": "مَخْرَج", "tr": "makhraj", "meaning": ["Exit", "বের হওয়ার পথ"] }
+    ]
+  },
+  {
+    "id": "umrah-hajj-prayer",
+    "title": ["Prayer areas & wudu", "নামাজ ও অজুর জায়গা"],
+    "partner": ["Attendant", "দায়িত্বপ্রাপ্ত কর্মী"],
+    "sign": "مصلى النساء",
+    "signSpeech": "مُصَلَّى النِّسَاءِ",
+    "meaning": ["Women’s prayer area", "নারীদের নামাজের জায়গা"],
+    "dialogue": [
+      { "ask": "wudu" },
+      ["مَكَان الْوُضُوء قَرِيب. تِدَوَّرْ عَلَى الْمُصَلَّى كَمَان؟", "makān il-wuḍūʾ qarīb. tidawwar ʿala l-muṣallā kamān?", "The wudu area is nearby. Are you looking for the prayer area too?", "অজুর জায়গাটা কাছেই। নামাজের জায়গাও খুঁজছেন?"],
+      { "ask": "women-prayer" },
+      ["اللَّوْحَة هَذِي تِدُلَّك عَلَى مُصَلَّى النِّسَاء.", "il-lawḥa hādhi tidullak ʿala muṣalla n-nisāʾ.", "This sign points you to the women's prayer area.", "এই সাইনবোর্ডটি নারীদের নামাজের জায়গা দেখাবে।"]
+    ],
+    "words": [
+      { "ar": "مُصَلَّى", "tr": "muṣallā", "meaning": ["Prayer area", "নামাজের জায়গা"], "root": "ص ل و", "bridge": "2:125:11" },
+      { "ar": "وُضُوء", "tr": "wuḍūʾ", "meaning": ["Wudu or ablution", "অজু"] }
+    ]
+  },
+  {
+    "id": "umrah-hajj-wayfinding",
+    "title": ["Saʿy & ṭawāf wayfinding", "সাঈ ও তাওয়াফের জায়গা খোঁজা"],
+    "partner": ["Volunteer", "স্বেচ্ছাসেবক"],
+    "sign": "المسعى",
+    "signSpeech": "الْمَسْعَى",
+    "meaning": ["Masʿā (saʿy area)", "মাসআ (সাঈ করার স্থান)"],
+    "dialogue": [
+      { "ask": "masa" },
+      ["هَذَا طَرِيق الْمَسْعَى. تِبْغَى تِعْرَف الْمَطَاف فِين كَمَان؟", "hādha ṭarīq il-masʿā. tibghā tiʿraf il-maṭāf fēn kamān?", "This is the way to the Masʿā. Do you also want to know where the Maṭāf is?", "এটা মাসআ যাওয়ার পথ। মাতাফ কোথায়, সেটাও জানতে চান?"],
+      { "ask": "mataf" },
+      ["اتَّبِع اللَّوْحَة اللِّي تِقُول الْمَطَاف.", "ittabiʿ il-lawḥa illi tigūl il-maṭāf.", "Follow the sign marked Maṭāf.", "‘মাতাফ’ লেখা সাইনবোর্ড অনুসরণ করুন।"]
+    ],
+    "words": [
+      { "ar": "مَسْعَى", "tr": "masʿā", "meaning": ["Saʿy area", "সাঈ করার স্থান"], "root": "س ع ي", "bridge": "53:39:6" },
+      { "ar": "مَطَاف", "tr": "maṭāf", "meaning": ["Ṭawāf area", "তাওয়াফ করার স্থান"] }
+    ]
+  },
+  {
+    "id": "umrah-hajj-transport",
+    "title": ["Train & taxi", "ট্রেন ও ট্যাক্সি"],
+    "partner": ["Driver", "চালক"],
+    "sign": "موقف سيارات الأجرة",
+    "signSpeech": "مَوْقِفُ سَيَّارَاتِ الْأُجْرَةِ",
+    "meaning": ["Taxi stand", "ট্যাক্সি স্ট্যান্ড"],
+    "dialogue": [
+      { "ask": "haramain-train" },
+      ["الْمَحَطَّة بَعِيدَة شُوَي. تِبْغَى تِرْكَب تَكْسِي؟", "il-maḥaṭṭa baʿīda shwayy. tibghā tirkab taksī?", "The station is a little far. Do you want to take a taxi?", "স্টেশনটা একটু দূরে। ট্যাক্সিতে যেতে চান?"],
+      { "ask": "taxi-stand" },
+      ["تِرْكَب مِنْ عِنْد لَوْحَة التَّكَاسِي.", "tirkab min ʿind lawḥat it-takāsī.", "Get in by the taxi sign.", "ট্যাক্সির সাইনবোর্ডের পাশ থেকে উঠুন।"]
+    ],
+    "words": [
+      { "ar": "تِرْكَب", "tr": "tirkab", "meaning": ["You ride or get in", "আপনি ওঠেন বা চড়েন"], "root": "ر ك ب", "bridge": "43:12:11" },
+      { "ar": "مَحَطَّة", "tr": "maḥaṭṭa", "meaning": ["Station", "স্টেশন"] }
+    ]
+  },
+  {
+    "id": "umrah-hajj-hotel",
+    "title": ["Help at the hotel", "হোটেলে সাহায্য"],
+    "partner": ["Receptionist", "অভ্যর্থনাকর্মী"],
+    "sign": "الاستقبال",
+    "signSpeech": "الِاسْتِقْبَالُ",
+    "meaning": ["Reception", "অভ্যর্থনা ডেস্ক"],
+    "dialogue": [
+      { "ask": "key-broken" },
+      ["نِبَدِّل لَك الْمِفْتَاح. تِحْتَاج شَيْ ثَانِي؟", "nibaddil lak il-miftāḥ. tiḥtāj shay thāni?", "We'll replace your key. Do you need anything else?", "আপনার চাবিটা বদলে দেব। আর কিছু দরকার?"],
+      { "ask": "towels-water" },
+      ["حَاضِر، نِرْسِلْهَا لِغُرْفَتَك.", "ḥāḍir, nirsilha li-ghurfatak.", "Of course. We'll send them to your room.", "অবশ্যই। আপনার ঘরে পাঠিয়ে দেব।"]
+    ],
+    "words": [
+      { "ar": "مِفْتَاح", "tr": "miftāḥ", "meaning": ["Key", "চাবি"], "root": "ف ت ح", "bridge": "6:59:2" },
+      { "ar": "فُوط", "tr": "fūṭ", "meaning": ["Towels", "তোয়ালে"] }
+    ]
+  },
+  {
+    "id": "umrah-hajj-access",
+    "title": ["Wheelchairs & lifts", "হুইলচেয়ার ও লিফট"],
+    "partner": ["Attendant", "দায়িত্বপ্রাপ্ত কর্মী"],
+    "sign": "المصاعد",
+    "signSpeech": "الْمَصَاعِدُ",
+    "meaning": ["Lifts", "লিফট"],
+    "dialogue": [
+      { "ask": "wheelchair" },
+      ["أَبْشِر، أَجِيب لَك كُرْسِيّ. تِبْغَى تِطْلَع فَوْق؟", "abshir, ajīb lak kursiyy. tibghā tiṭlaʿ fōq?", "Of course, I'll bring you a wheelchair. Do you want to go up?", "অবশ্যই, হুইলচেয়ার এনে দেব। ওপরে যেতে চান?"],
+      { "ask": "elevator" },
+      ["اتَّبِع لَوْحَة الْمَصَاعِد، وَأَنَا أَجِي مَعَاك.", "ittabiʿ lawḥat il-maṣāʿid, wa-anā ajī maʿāk.", "Follow the lift sign. I'll come with you.", "লিফটের সাইনবোর্ড অনুসরণ করুন। আমি আপনার সঙ্গে আসছি।"]
+    ],
+    "words": [
+      { "ar": "كُرْسِيّ", "tr": "kursiyy", "meaning": ["Chair or seat", "চেয়ার বা আসন"], "root": "ك ر س", "bridge": "2:255:42" },
+      { "ar": "مَصْعَد", "tr": "maṣʿad", "meaning": ["Lift or elevator", "লিফট"] }
+    ]
+  },
+  {
+    "id": "umrah-hajj-water",
+    "title": ["Water & Zamzam", "পানি ও জমজম"],
+    "partner": ["Water attendant", "পানি বিতরণের কর্মী"],
+    "sign": "ماء زمزم",
+    "signSpeech": "مَاءُ زَمْزَمَ",
+    "meaning": ["Zamzam water", "জমজমের পানি"],
+    "dialogue": [
+      { "ask": "zamzam" },
+      ["هِنَا عِنْد اللَّوْحَة. تِبْغَى كُوب؟", "hinā ʿind il-lawḥa. tibghā kūb?", "Here by the sign. Would you like a cup?", "এখানে সাইনবোর্ডের পাশে। এক কাপ নেবেন?"],
+      { "ask": "water" },
+      ["تَفَضَّل، هَذَا كُوب الْمَوْيَة.", "tafaḍḍal, hādha kūb il-mōya.", "Here you go. Here's a cup of water.", "এই নিন, এক কাপ পানি।"]
+    ],
+    "words": [
+      { "ar": "مَوْيَة", "tr": "mōya", "meaning": ["Water", "পানি"], "root": "م و ه", "bridge": "21:30:13" },
+      { "ar": "كُوب", "tr": "kūb", "meaning": ["Cup", "কাপ"] }
+    ]
+  },
+  {
+    "id": "umrah-hajj-help",
+    "title": ["When you get separated", "দল থেকে আলাদা হয়ে গেলে"],
+    "partner": ["Help desk attendant", "সহায়তাকেন্দ্রের কর্মী"],
+    "sign": "مكتب المساعدة",
+    "signSpeech": "مَكْتَبُ الْمُسَاعَدَةِ",
+    "meaning": ["Help desk", "সহায়তাকেন্দ্র"],
+    "dialogue": [
+      { "ask": "lost" },
+      ["حَيَّاك الله. مَعَاك رَقْم أَحَد مِنْ مَجْمُوعَتَك؟", "ḥayyāk allāh. maʿāk raqm aḥad min majmūʿtak?", "You're welcome here. Do you have a number for someone in your group?", "স্বাগতম। আপনার দলের কারও ফোন নম্বর আছে?"],
+      { "ask": "call-number" },
+      ["أَبْشِر. اِجْلِس هِنَا وَأَنَا أَتَّصِل عَلَيْهِ.", "abshir. ijlis hinā wa-anā attaṣil ʿalayh.", "Of course. Have a seat here while I call them.", "অবশ্যই। এখানে বসুন, আমি ফোন করছি।"]
+    ],
+    "words": [
+      { "ar": "ضَايِع", "tr": "ḍāyiʿ", "meaning": ["Lost (a man speaking)", "পথ হারিয়েছি (পুরুষের কথায়)"], "root": "ض ي ع", "bridge": "19:59:5" },
+      { "ar": "مَجْمُوعَة", "tr": "majmūʿa", "meaning": ["Group", "দল"] }
+    ]
+  }
+]

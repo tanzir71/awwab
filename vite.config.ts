@@ -9,7 +9,7 @@ import { wordAnatomy } from "./src/lib/wordAnatomy";
 import returnCopy from "./docs/content/return.json";
 import anatomySample from "./docs/content/word-anatomy.sample.json";
 import onboarding from "./docs/content/onboarding.json";
-import spoken from "./docs/content/spoken-arabic.json";
+import { sharedSpeakClips } from "./src/lib/speakAskAudio";
 import { tajweedPrecache } from "./src/lib/tajweed";
 
 const base = "/awwab/";
@@ -71,7 +71,7 @@ export default defineConfig(({ mode }) => ({
           "app/**/*.{html,webmanifest,png,svg,otf,woff2,mjs}", "assets/**/*", "design/**/*", "data/**/*", "packs/audio/index.json",
           ...Object.values(onboarding.samples).map(item => item.path),
           "packs/study-speech/*.opus",
-          ...spoken.units.flatMap(unit => unit.id === "sim" ? [] : unit.phrases.map(id => `packs/phrases/saudi/female/${id}.opus`)),
+          ...sharedSpeakClips,
           ...tajweedPrecache,
         ],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,

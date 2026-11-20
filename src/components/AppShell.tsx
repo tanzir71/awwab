@@ -23,7 +23,7 @@ import { gregorianMonthBounds, readCalendarMonth } from "@/lib/plan-calendar";
 import { zakatHawl, type ZakatProfile } from "@/lib/zakat";
 import { initialTrip, tripDates } from "@/lib/umrah";
 import { formatLocale, languages } from "@/lib/languagePreferences";
-import { speakSetupPath, speakUnit, speakUnitNumber, speakVarietyLabels } from "@/lib/speakCurriculum";
+import { speakCourseTitle, speakSetupPath, speakUnit, speakUnitNumber, speakVarietyLabels } from "@/lib/speakCurriculum";
 import qaida from "../../docs/content/qaida-lessons.json";
 import surahs from "../../docs/content/surahs-for-salah.json";
 
@@ -128,7 +128,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
   const sectionPath = hifzRoute ? "/learn/paths" : location.pathname;
   const heading = [...destinations].sort((a, b) => b.to.length - a.to.length).find(item => sectionPath.startsWith(item.to));
   const spokenUnit = desktop && location.pathname.startsWith("/learn/speak/") && speakUnit(location.pathname.split("/").at(-1));
-  const title = spokenUnit ? `${t("pathsSpeak")} · ${spokenUnit.level} · ${spokenUnit.title[settings.language === "bn" ? 1 : 0]}` : returnDesktop && location.pathname === "/return/qada" ? t("qadaTitle")
+  const title = spokenUnit ? `${t("pathsSpeak")} · ${speakCourseTitle(spokenUnit.level, t)} · ${spokenUnit.title[settings.language === "bn" ? 1 : 0]}` : returnDesktop && location.pathname === "/return/qada" ? t("qadaTitle")
     : returnDesktop && location.pathname === "/return/sayyid" ? t("sayyidTitle")
       : heading ? navigationLabel(settings, heading.title) : "awwab";
   const date = formatDay(day, { weekday: "short", day: "numeric", month: "short", year: "numeric" }, locale);

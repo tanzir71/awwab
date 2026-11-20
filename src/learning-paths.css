@@ -245,7 +245,7 @@
 .speak-setup-grid, .speak-workspace, .speak-dialogue { display: grid; gap: 10px; min-width: 0; align-items: start; }
 button.speak-variety { display: grid; gap: 2px; text-align: start; }
 .speak-variety.selected, .speak-line[data-you="true"] { background: var(--c-primary-soft); box-shadow: none; }
-.speak-levels .card { display: grid; gap: 2px; text-decoration: none; padding: 12px; }
+.speak-levels .card, .speak-packs .card { display: grid; gap: 2px; text-decoration: none; padding: 12px; }
 .speak-page .chip.active { background: var(--c-primary); color: var(--c-on-primary); }
 .speak-workspace-nav, .speak-workspace-side { display: none; }
 .speak-unit-list ol { margin: 8px 0 0; padding-inline-start: 22px; list-style: decimal; }
@@ -259,6 +259,7 @@ button.speak-variety { display: grid; gap: 2px; text-align: start; }
 .speak-line[data-you="true"] { justify-self: end; }
 .speak-line .icon-button { width: 44px; height: 22px; min-width: 44px; min-height: 0; background: none; box-shadow: none; }
 .speak-line strong { color: var(--interactive-ink); }
+.speak-ask-link { justify-self: start; }
 .speak-page .arabic-phrase-line { padding: 0; text-align: right; }
 .speak-page .word-chip { padding-inline: 2px; min-width: 0; }
 .speak-page .word-chip > span:first-child { text-decoration: none; }

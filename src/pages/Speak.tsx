@@ -11,19 +11,22 @@ import { phraseReviewPrefix } from "@/lib/learningPaths";
 import { newReview, type ReviewGrade, type Reviews } from "@/lib/reviews";
 import { finishSpeakUnit, saveLearningReview } from "@/lib/studyMilestones";
 import { updateRecord, type Settings } from "@/lib/storageService";
-import { defaultSpeakVariety, speakCourses, speakCourseVariety, speakGoals, speakGoalsKey, speakLessonContent, speakLessonPath, speakLevelLabels,
-  speakLevels, speakProgressKey, speakSetupPath, speakUnit, speakUnitNumber, speakVarieties, speakVarietyKey, speakVarietyLabels,
-  type SpeakLevel, type SpeakUnit, type SpeakVariety, type SpeakWord } from "@/lib/speakCurriculum";
+import { defaultSpeakVariety, speakCourses, speakCourseTitle, speakCourseVariety, speakGoals, speakGoalsKey, speakLessonContent, speakLessonPath, speakLevelLabels,
+  speakLevels, speakPackDetails, speakPacks, speakProgressKey, speakSetupPath, speakUnit, speakUnitNumber, speakVarieties, speakVarietyKey, speakVarietyLabels,
+  type SpeakCourse, type SpeakLevel, type SpeakPack, type SpeakUnit, type SpeakVariety, type SpeakWord } from "@/lib/speakCurriculum";
+import { askHomePath, askPhrasePath } from "@/lib/umrahAsk";
 import { splitArabicWords } from "@/lib/wordAnatomy";
 
 const steps = ["speakListen", "speakWords", "speakRepeat", "speakTurn", "speakSign"];
 const goalDefaults = ["speakUmrah"];
 
-function UnitList({ active, complete, level, variety }: { active?: string; complete: string[]; level: SpeakLevel; variety: SpeakVariety }) {
+function UnitList({ active, complete, level, variety }: { active?: string; complete: string[]; level: SpeakCourse; variety: SpeakVariety }) {
   const { t, language } = useCopy();
   const units = speakCourses[variety][level];
-  return <section className="card speak-unit-list" aria-label={t(speakLevelLabels[level])}>
-    <header className="row-between"><h2>{level} · {t(speakLevelLabels[level])}</h2><span className="small muted">{t("speakUnits", { count: units.length })}</span></header>
+  const label = t(speakLevelLabels[level]);
+  return <section className="card speak-unit-list" aria-label={label}>
+    <header className="row-between"><h2>{speakPackDetails[level] ? active ? label : t("speakPackLessons") : `${level} · ${label}`}</h2>
+      <span className="small muted">{t("speakUnits", { count: units.length })}</span></header>
     <ol>{units.map(unit => <li key={unit.id}><Link to={speakLessonPath(unit.id)} aria-current={active === unit.id ? "page" : undefined}>
       <span>{unit.title[language === "bn" ? 1 : 0]}</span>{complete.includes(unit.id) && <span aria-label={t("pathsDone")}>✓</span>}
     </Link></li>)}</ol>
@@ -82,7 +85,28 @@ function SpeakSetup({ complete, level, variety }: { complete: string[]; level: S
           </Link>;
         })}
       </div>
+      <h2 className="caption">{t("speakPracticePacks")}</h2>
+      <div className="equal-row speak-packs">{speakPacks.map(pack =>
+        <Link key={pack} className="card soft" to={speakSetupPath(pack)}><strong>{t(speakLevelLabels[pack])}</strong></Link>)}</div>
     </div><UnitList complete={complete} level={level} variety={variety} /></div>
+  </div>;
+}
+
+function SpeakPackDirectory({ pack, complete }: { pack: SpeakPack; complete: string[] }) {
+  const { t } = useCopy();
+  const desktop = useDesktop();
+  const { variety, description } = speakPackDetails[pack];
+  const units = speakCourses[variety][pack];
+  const count = units.filter(unit => complete.includes(unit.id)).length;
+  return <div className="paths-page speak-page speak-setup">
+    <header className="hifz-heading"><Link className="hifz-back" to="/learn/paths/speak" aria-label={t("back")}><DesignIcon name="ask-icon-chev-l" size={24} /></Link>
+      <div><h1>{t(speakLevelLabels[pack])}</h1><p className="small muted">{t(speakVarietyLabels[variety])}</p></div></header>
+    <div className="speak-setup-grid">
+      <section className="card compact-stack"><p>{t(description)}</p><p className="small muted">{t("pathsLessonProgress", { count, total: units.length })}</p>
+        {pack === "umrah-hajj" && <Link className="action soft" to={askHomePath(desktop)}>{t("askHome")}</Link>}
+      </section>
+      <UnitList complete={complete} level={pack} variety={variety} />
+    </div>
   </div>;
 }
 
@@ -136,6 +160,7 @@ function SpeakLesson({ unit, complete, now, settings, reviewIndex }: { unit: Spe
   const other = unit.level === "B1" ? replyLines[1 - replyIndex] : scripted ? 0 : lines.length - 1;
   const correctFirst = scripted && (number + replyIndex) % 2 === 0;
   const setup = speakSetupPath(unit.level, unit.variety);
+  const isUmrahPack = unit.level === "umrah-hajj";
   const replyChoices = correctFirst ? [reply, other] : [other, reply];
   const bridge = words.find(word => word.bridge);
   const player = useAudioPlayback(Object.keys(clips), clips);
@@ -202,7 +227,7 @@ function SpeakLesson({ unit, complete, now, settings, reviewIndex }: { unit: Spe
 
   return <div className="paths-page speak-page speak-lesson">
     <header className="hifz-heading"><Link className="hifz-back" to={setup} aria-label={t("back")}><DesignIcon name="ask-icon-chev-l" size={24} /></Link>
-      <div><h1>{title}</h1><p className="small muted">{t("speakUnitLabel", { level: unit.level, number, variety: t(speakVarietyLabels[unit.variety]) })}</p></div></header>
+      <div><h1>{title}</h1><p className="small muted">{t("speakUnitLabel", { level: speakCourseTitle(unit.level, t), number, variety: t(speakVarietyLabels[unit.variety]) })}</p></div></header>
     <div className="speak-workspace">
       <div className="speak-workspace-nav"><UnitList active={unit.id} complete={complete} level={unit.level} variety={unit.variety} /></div>
       <div className="compact-stack speak-lesson-main">
@@ -221,6 +246,7 @@ function SpeakLesson({ unit, complete, now, settings, reviewIndex }: { unit: Spe
                 onClick={() => listen(`line-${i}`)}><DesignIcon name="speak-volume" size={14} /></button></div>
             <ArabicText text={line.ar} preserveSeparators />
             <strong className="small" lang="en">{line.tr}</strong>{meanings && <p className="muted small">{line.meaning[lang]}</p>}
+            {isUmrahPack && line.askId && <Link className="small speak-ask-link" to={askPhrasePath(line.askId, desktop)}>{t("speakOpenInAsk")}</Link>}
           </section>)}</div>
           {sim && <div className="card tint speak-bridge"><div><h2 className="caption">{t("speakRoot")}</h2><p className="small">{t("speakRootExplanation")}</p></div>
             <ArabicText text="نَشْرَحْ" compact citation="94:1" verse="94:1" positionOffset={1} words={[{ root: "ش ر ح" }]} /></div>}
@@ -287,7 +313,7 @@ function SpeakLesson({ unit, complete, now, settings, reviewIndex }: { unit: Spe
   </div>;
 }
 
-export function Speak({ settings, now }: { settings: Settings; now: Date }) {
+export function Speak({ settings, now, pack }: { settings: Settings; now: Date; pack?: SpeakPack }) {
   const { unit: id } = useParams();
   const [params] = useSearchParams();
   const review = params.get("review");
@@ -297,6 +323,7 @@ export function Speak({ settings, now }: { settings: Settings; now: Date }) {
   const requestedVariety = speakVarieties.find(candidate => candidate === params.get("variety"));
   const variety = speakCourseVariety(requestedVariety ?? preferred, level);
   const complete = useRecord<string[]>(speakProgressKey, []);
+  if (pack) return <SpeakPackDirectory complete={complete} pack={pack} />;
   return unit ? <SpeakLesson key={`${unit.id}:${review ?? ""}`} unit={unit} complete={complete} settings={settings} now={now}
     reviewIndex={review && /^\d+$/.test(review) ? Number(review) : undefined} /> : <SpeakSetup complete={complete} level={level} variety={variety} />;
 }

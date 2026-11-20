@@ -1,6 +1,7 @@
 import { asset } from "./config";
 import { audioCache } from "./audio";
-import { askPlaces, askRelations, askVarieties, askVoices, umrahPhrases, type AskPhrase, type AskVariety, type AskVoice } from "./umrahAsk";
+import { hasSharedSpeakAudio } from "./speakAskAudio";
+import { askClipPath, askPlaces, askRelations, askVarieties, askVoices, umrahPhrases, type AskPhrase, type AskVariety, type AskVoice } from "./umrahAsk";
 
 type AudioManifest = { version: 1; bytes: number; attribution: string; source?: string; generated?: boolean; voices?: AskVoice[] };
 const manifests = import.meta.glob<AudioManifest>("../../docs/content/umrah-phrase-audio.json", { eager: true, import: "default" });
@@ -31,8 +32,7 @@ function recordings(variety: AskVariety) {
   ])];
 }
 
-const clipPath = (variety: AskVariety, voice: AskVoice, id: string) => `packs/phrases/${variety}/${voice}/${id}.opus`;
-export const askPackPaths = () => askVarieties.flatMap(variety => packVoices.flatMap(voice => recordings(variety).map(id => clipPath(variety, voice, id))));
+export const askPackPaths = () => askVarieties.flatMap(variety => packVoices.flatMap(voice => recordings(variety).map(id => askClipPath(variety, voice, id))));
 const absolute = (path: string) => new URL(asset(path), location.origin).href;
 
 export async function downloadAskAudio(onProgress: (done: number, total: number) => void) {
@@ -63,8 +63,9 @@ export async function downloadAskAudio(onProgress: (done: number, total: number)
 export async function playAskAudio(context: AudioContext, ids: string[], variety: AskVariety, voice: AskVoice, slow: boolean) {
   const cache = await caches.open(audioCache);
   const buffers = await Promise.all(ids.map(async id => {
-    const clip = await cache.match(absolute(clipPath(variety, voice, id)));
-    if (!clip) throw new Error("The phrase recording is unavailable offline");
+    const url = absolute(askClipPath(variety, voice, id));
+    const clip = await cache.match(url) ?? (hasSharedSpeakAudio([id], variety, voice) ? await fetch(url) : undefined);
+    if (!clip?.ok) throw new Error("The phrase recording is unavailable offline");
     return context.decodeAudioData(await clip.arrayBuffer());
   }));
   const speed = slow ? .75 : 1;

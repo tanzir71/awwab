@@ -81,16 +81,20 @@ describe("saved study milestones", () => {
       finishSpeakUnit("b1-story", times.asr, dhaka.timeZone),
       finishSpeakUnit("msa-a1-greetings", times.asr, dhaka.timeZone),
       finishSpeakUnit("gulf-a1-greetings", times.asr, dhaka.timeZone),
+      finishSpeakUnit("umrah-hajj-haram", times.asr, dhaka.timeZone),
     ]);
     const file = await backup();
     await db.records.clear();
     await restoreBackup(file);
-    expect(await getRecord<string[]>(speakProgressKey, [])).toEqual(["sim", "greetings", "a2-family", "a2-office", "b1-story", "msa-a1-greetings", "gulf-a1-greetings"]);
+    expect(await getRecord<string[]>(speakProgressKey, [])).toEqual([
+      "sim", "greetings", "a2-family", "a2-office", "b1-story", "msa-a1-greetings", "gulf-a1-greetings", "umrah-hajj-haram",
+    ]);
     expect(await getRecord<string[]>(speakGoalsKey, [])).toEqual(["speakWork"]);
     const variety = await getRecord(speakVarietyKey, defaultSpeakVariety);
     expect(variety).toBe("gulf");
     expect(speakCourseVariety(variety, "A1")).toBe("gulf");
     expect(speakCourseVariety(variety, "A2")).toBe("saudi-hijazi");
+    expect(speakCourseVariety(variety, "umrah-hajj")).toBe("saudi-hijazi");
     expect(await getRecord<string[]>("study-days", [])).toEqual([day]);
   });
 

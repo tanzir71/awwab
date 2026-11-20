@@ -9,6 +9,10 @@ export type AskVariety = typeof askVarieties[number];
 export type AskVoice = typeof askVoices[number];
 export type AskPhrase = typeof source.phrases[number];
 export type CustomPhrase = { id: string; ar: string; meaning: string };
+export const askHomePath = (desktop = false) => desktop ? "/umrah?view=phrases" : "/umrah/ask";
+export const askPhrasePath = (id: string, desktop = false) =>
+  desktop ? `${askHomePath(true)}#${id}` : `${askHomePath()}/phrase/${id}`;
+export const askClipPath = (variety: AskVariety, voice: AskVoice, id: string) => `packs/phrases/${variety}/${voice}/${id}.opus`;
 export const askDefaults = { variety: "saudi" as AskVariety, voice: "male" as AskVoice, speaker: "" as AskVoice | "", slow: false };
 export const umrahPhrases = source.phrases;
 export const askPhrase = (id: string) => umrahPhrases.find(phrase => phrase.id === id);

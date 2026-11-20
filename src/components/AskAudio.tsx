@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { DesignIcon } from "./DesignIcon";
 import { useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
+import { hasSharedSpeakAudio } from "@/lib/speakAskAudio";
 import { updateRecord } from "@/lib/storageService";
 import { askAudioPack, downloadAskAudio, packVoices, playAskAudio } from "@/lib/umrahAskAudio";
 import type { askDefaults } from "@/lib/umrahAsk";
@@ -43,7 +44,9 @@ export function AskAudioButton({ ids, settings, label, icon = true, light = fals
   const [status, setStatus] = useState("");
   const [playing, setPlaying] = useState(false);
   const id = useId();
-  const pending = !askAudioPack || version !== askAudioPack.version;
+  const voice = packVoices.includes(settings.voice) ? settings.voice : packVoices[0];
+  const shared = hasSharedSpeakAudio(ids, settings.variety, voice);
+  const pending = !shared && (!askAudioPack || version !== askAudioPack.version);
   const description = status || (pending ? t(askAudioPack ? "askDownloadFirst" : "askAudioPending") : askAudioPack?.generated ? t("generatedSpeech") : "");
 
   useEffect(() => () => { if (current.current) void current.current.close().catch(() => {}); }, []);
@@ -61,7 +64,6 @@ export function AskAudioButton({ ids, settings, label, icon = true, light = fals
     setPlaying(true);
     setStatus(used ? "" : t("askVolumeHint"));
     if (!used) void updateRecord(volumeKey, false, () => true).catch(() => {});
-    const voice = packVoices.includes(settings.voice) ? settings.voice : packVoices[0];
     void context.resume().then(() => playAskAudio(context, ids, settings.variety, voice, settings.slow))
       .catch(() => { if (current.current === context) setStatus(t("askAudioError")); })
       .finally(() => {

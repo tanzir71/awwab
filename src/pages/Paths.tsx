@@ -14,7 +14,8 @@ import { studyNames } from "@/lib/study-copy";
 import type { Reviews } from "@/lib/reviews";
 import { tajweedDepthLessons, tajweedIndex, tajweedLessons, tajweedProgress } from "@/lib/tajweed";
 import { completedReadingChapters, emptyReadingPractice, practiceChapters, teacherChecklistComplete } from "@/lib/readingPractice";
-import { defaultSpeakVariety, speakCourses, speakCourseVariety, speakLevels, speakProgressKey, speakVarietyKey, speakVarietyLabels, type SpeakVariety } from "@/lib/speakCurriculum";
+import { defaultSpeakVariety, speakCourses, speakCourseVariety, speakLevelLabels, speakPackDetails, speakPathCourses,
+  speakProgressKey, speakVarietyKey, speakVarietyLabels, type SpeakVariety } from "@/lib/speakCurriculum";
 import grammar from "../../docs/content/grammar-foundations.json";
 import roots from "../../docs/content/roots-curriculum.json";
 import introPatterns from "../../docs/content/roots-and-patterns.json";
@@ -46,7 +47,7 @@ function usePathState() {
   const learned = useMemo(() => learnedSurahs(hifz, earlier), [hifz, earlier]);
   const short = salahChapters.filter(number => learned.has(number)).length;
   const amma = juzAmma.filter(chapter => learned.has(chapter.number)).length;
-  const spokenCourses = speakLevels.map(level => {
+  const spokenCourses = speakPathCourses.map(level => {
     const variety = speakCourseVariety(speakVariety, level);
     const units = speakCourses[variety][level];
     const count = units.filter(unit => spokenLessons.includes(unit.id)).length;
@@ -83,13 +84,17 @@ function usePathState() {
     read: nextRead < 0 ? readLevels.length : nextRead,
     memorise: short >= salahChapters.length ? (amma >= juzAmma.length ? 2 : 1) : 0,
     understand: nextUnderstand < 0 ? understandLevels.length : nextUnderstand,
-    speak: nextSpeak < 0 ? speakLevels.length : nextSpeak,
+    speak: nextSpeak < 0 ? speakPathCourses.length : nextSpeak,
   };
   const active = Object.fromEntries(tracks.map(track => [track, Math.min(5, Math.max(complete[track] + 1, placement[track]?.level ?? 1))])) as Record<Track, number>;
   return { active, complete, completedQaida, learned, short, amma, known, current, placement, speakVariety, spokenCourses, spokenDone, grammarCount, rootsCount, sentenceCount, tajweed, tajweedDepth, fluent, understood, prepared };
 }
 
 function headingLevel(track: Track, active: number) { return levels[track][active - 1]; }
+function pathLevelTitle(track: Track, level: number, t: ReturnType<typeof useCopy>["t"]) {
+  const course = speakPathCourses[level - 1];
+  return track === "speak" && speakPackDetails[course] ? t(speakLevelLabels[course]) : headingLevel(track, level).title;
+}
 function levelDone(track: Track, level: number, state: ReturnType<typeof usePathState>) {
   return level <= state.complete[track] ||
     (track === "read" && level === 2 && state.fluent === juzAmma.length) ||
@@ -146,7 +151,7 @@ function MobileTrackCard({ track, state }: { track: Track; state: ReturnType<typ
     <div className="with-icon"><PathIcon track={track} desktop={false} /><div><h2>{t(trackKeys[track])}</h2><p className="small muted">{t(`${trackKeys[track]}Overview`)}</p></div></div>
     <div className="equal-row paths-steps" aria-hidden="true">{levels[track].map((item, index) =>
       <span key={item.id} data-state={levelDone(track, index + 1, state) ? "done" : index + 1 === level ? "current" : "open"} />)}</div>
-    <p className="small">{t("pathsLevelStatus", { number: level, title: headingLevel(track, level).title })}
+    <p className="small">{t("pathsLevelStatus", { number: level, title: pathLevelTitle(track, level, t) })}
       {track === "memorise" && level === 2 && ` · ${t("pathsAmmaCount", { count: state.amma })}`}
       {track === "understand" && level === 1 && ` · ${t("pathsCoreCount", { count: state.known })}`}</p>
   </Link>;
@@ -161,7 +166,7 @@ function DesktopTrackCard({ track, state }: { track: Track; state: ReturnType<ty
       const isDone = levelDone(track, index + 1, state);
       return <Link className="paths-level-link" data-state={isDone ? "done" : isCurrent ? "current" : "open"} key={item.id} to={levelLink(track, index + 1)}>
         <LevelNumber level={index + 1} done={isDone} active={isCurrent} tag={item.tag} desktop />
-        <div><strong>{item.title}</strong><small>{contextLabel(track, index + 1, state, t)}</small></div>
+        <div><strong>{pathLevelTitle(track, index + 1, t)}</strong><small>{contextLabel(track, index + 1, state, t)}</small></div>
       </Link>;
     })}
     <Link className="action" to={levelLink(track, state.active[track])}>{t("pathsContinue", { track: t(trackKeys[track]).toLocaleLowerCase() })}</Link>
@@ -248,7 +253,7 @@ function TrackLevels({ track }: { track: Track }) {
       return <li key={item.id}>
         <LevelNumber level={number} active={active} done={done} desktop={false} />
         <Link className="card paths-level-mobile" data-state={done ? "done" : active ? "current" : "open"} to={levelLink(track, number)}>
-          <div className="row-between"><strong>{item.title}</strong><span className="chip caption">{done ? t("pathsDone") : active ? t("pathsInProgress") : item.tag ?? t("pathsLevel", { number })}</span></div>
+          <div className="row-between"><strong>{pathLevelTitle(track, number, t)}</strong><span className="chip caption">{done ? t("pathsDone") : active ? t("pathsInProgress") : item.tag ?? t("pathsLevel", { number })}</span></div>
           <p className="small muted">{contextLabel(track, number, state, t)}</p>
           {active && track === "memorise" && number === 2 && <progress max={37} value={state.amma} aria-label={t("pathsAmmaCount", { count: state.amma })} />}
         </Link>
@@ -299,7 +304,6 @@ function Outline({ track, item, number }: { track: Track; item: PathLevel; numbe
   const links: Record<string, { to: string; label: string }[]> = {
     read1: [{ to: "/learn/qaida", label: "nooraniQaida" }, { to: "/learn/takhti", label: "takhti" }],
     understand1: [{ to: "/learn/words", label: "wordBankName" }, { to: "/learn/salah", label: "understandSalah" }],
-    speak4: [{ to: "/umrah/ask", label: "askHome" }],
   };
   const available = links[track + number];
   const units = typeof item.units === "string" ? [trackStatus[track][number - 1]] : item.units;

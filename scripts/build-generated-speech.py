@@ -13,7 +13,7 @@ PHRASES = ROOT / "handovers/H2-languages-paths-arabic-help/data/umrah-phrases.js
 CONTENT = ROOT / "docs/content"
 OUTPUT = ROOT / "public/packs"
 MODEL = "https://huggingface.co/vadimbelsky/arabic-emirati-female-piper/tree/cfe173969620e40be65b5dd8ed4d97d55a864325"
-SPEAK_COURSES = ("saudi-a2", "saudi-b1", "gulf-a1")
+SPEAK_COURSES = ("saudi-a2", "saudi-b1", "gulf-a1", "umrah-hajj")
 
 
 def read(path):
@@ -65,7 +65,8 @@ def course_clips(units):
     for unit in units:
         slug = unit["id"]
         for number, line in enumerate(unit["dialogue"], start=1):
-            yield f"{slug}-line-{number}", line[0]
+            if isinstance(line, list):
+                yield f"{slug}-line-{number}", line[0]
         for number, word in enumerate(unit["words"], start=1):
             yield f"{slug}-word-{number}", word["ar"]
         yield f"sign-{slug}", unit.get("signSpeech", unit["sign"])

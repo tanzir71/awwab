@@ -7,10 +7,11 @@ import { UmrahTripForm, UmrahTripImport } from "./UmrahTripForm";
 import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { useCopy } from "@/lib/copy";
 import { downloadFile } from "@/lib/download";
+import { speakSetupPath } from "@/lib/speakCurriculum";
 import { exportUmrahTrip, updateRecord } from "@/lib/storageService";
 import { emptyPreparation, initialTrip, maskedPhone, tripChecklist, tripDates, type TripCheck, type UmrahTrip } from "@/lib/umrah";
 import { cachedMapPack, mapPacks, mapRegions, saveMapPack, type MapRegion } from "@/lib/umrahMapPack";
-import { askDefaults, renderAsk } from "@/lib/umrahAsk";
+import { askDefaults, askHomePath, askPhrasePath, renderAsk } from "@/lib/umrahAsk";
 import { askClipIds } from "@/lib/umrahAskAudio";
 import { banglaPhrases } from "@/lib/umrah-ask-copy";
 import phraseData from "../../handovers/H2-languages-paths-arabic-help/data/umrah-phrases.json";
@@ -25,7 +26,7 @@ type Phrase = typeof phrases[number];
 function PhraseText({ phrase, variety = "saudi", gate = 79, link = false }: { phrase: Phrase; variety?: Variety; gate?: number; link?: boolean }) {
   const words = renderAsk(phrase, variety, { gate });
   const meaning = link && phrase.id === "gate-number" ? `Where is gate ${gate}?` : words.en;
-  const start = link ? <Link to={`/umrah?view=phrases#${phrase.id}`} className="umrah-phrase-link" lang="en">{meaning}</Link> : <strong lang="en">{meaning}</strong>;
+  const start = link ? <Link to={askPhrasePath(phrase.id, true)} className="umrah-phrase-link" lang="en">{meaning}</Link> : <strong lang="en">{meaning}</strong>;
   return <div className="umrah-phrase-row" id={link ? undefined : phrase.id}>
     {link && <DesignIcon name="umrah-prep-volume" size={16} />}
     <div>{start}<small lang="en">{words.tr}</small></div>
@@ -39,17 +40,20 @@ function PhraseLibrary() {
   const [query, search] = useState("");
   const [variety, setVariety] = useState<Variety>("saudi");
   const [gate, setGate] = useState("79");
-  const [active, setActive] = useState(() => hash.slice(1));
+  const [active, setActive] = useState(hash.slice(1));
   const requestedGate = Math.max(1, Math.min(300, Math.floor(Number(gate)) || 79));
   const needle = query.trim().toLowerCase();
   const results = phrases.filter(phrase => [phrase.en, phrase[variety].ar, phrase[variety].tr, banglaPhrases[phrase.id]].some(value => value?.toLowerCase().includes(needle)));
   useEffect(() => {
-    if (hash) document.getElementById(hash.slice(1))?.scrollIntoView({ block: "center" });
+    const phrase = hash.slice(1);
+    setActive(phrase);
+    if (phrase) document.getElementById(phrase)?.scrollIntoView({ block: "center" });
   }, [hash]);
 
   return <section className="card compact-stack umrah-phrase-library">
     <header className="row-between"><h2>{t("umrahPrepPhrases")}</h2><Link className="text-button" to="/umrah">{t("back")}</Link></header>
     <p className="small muted">{t("umrahPrepPhraseReview")}</p>
+    <Link className="text-button speak-ask-link" to={speakSetupPath("umrah-hajj")}>{t("speakPractiseForUmrah")}</Link>
     <div className="form-grid">
       <label className="field">{t("search")}<input type="search" value={query} onChange={event => search(event.currentTarget.value)} /></label>
       <label className="field">{t("umrahPrepVariety")}<select aria-label={t("umrahPrepVariety")} value={variety} onChange={event => setVariety(event.currentTarget.value as Variety)}>
@@ -175,7 +179,7 @@ export function UmrahPreparation({ trip, gates }: { trip: UmrahTrip; gates: stri
     </div>
     <div className="compact-stack umrah-prep-column">
       <section className="card compact-stack"><header className="row-between"><h2>{t("umrahPrepPractise")}</h2>
-        <Link className="text-button" to="/umrah?view=phrases">{t("umrahPrepPhrases")}</Link></header>
+        <Link className="text-button" to={askHomePath(true)}>{t("umrahPrepPhrases")}</Link></header>
         {samples.map(phrase => <PhraseText key={phrase.id} phrase={phrase} link />)}
       </section>
       <section className="card night compact-stack"><h2>{t("umrahPrepTake")}</h2><p className="small muted">{t("umrahPrepTakeHint")}</p>

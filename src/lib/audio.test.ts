@@ -4,9 +4,11 @@ import catalogue from "../../public/packs/audio/index.json";
 import onboarding from "../../docs/content/onboarding.json";
 import { quranText } from "./quran";
 import { askAudioPack, askClipIds, askPackPaths, packVoices } from "./umrahAskAudio";
-import { askPhrase } from "./umrahAsk";
+import { askClipPath, askPhrase, renderAsk } from "./umrahAsk";
 import { asset } from "./config";
 import { speakCourses, speakLessonContent, speakUnitNumber } from "./speakCurriculum";
+import { hasSharedSpeakAudio, sharedSpeakClips } from "./speakAskAudio";
+import { banglaPhrases } from "./umrah-ask-copy";
 
 describe("Bundled recitation packs", () => {
   it("has one attributed recording for the surah and every numbered ayah", () => {
@@ -73,6 +75,7 @@ describe("Speak lesson recordings", () => {
   it.each([
     ["saudi-hijazi", "A2", 14, 4, 2],
     ["saudi-hijazi", "B1", 12, 6, 3],
+    ["saudi-hijazi", "umrah-hajj", 9, 4, 2],
     ["gulf", "A1", 12, 4, 2],
     ["msa", "A1", 12, 4, 2],
   ] as const)("includes generated %s %s dialogue, vocabulary and signs", (variety, level, count, linesPerUnit, wordsPerUnit) => {
@@ -96,5 +99,28 @@ describe("Speak lesson recordings", () => {
       }
     }
     expect(files.size).toBe(count * (linesPerUnit + wordsPerUnit + 1));
+  });
+
+  it("uses the same Saudi phrases and recordings in Speak and Ask in Arabic", () => {
+    const shared = new Set(sharedSpeakClips);
+    const packPaths = new Set(askPackPaths());
+    for (const unit of speakCourses["saudi-hijazi"]["umrah-hajj"]) {
+      const { lines } = speakLessonContent(unit);
+      const ids = [lines[0].askId, lines[2].askId];
+      expect(hasSharedSpeakAudio(ids, "saudi", "female")).toBe(true);
+      expect(hasSharedSpeakAudio(ids, "msa", "female")).toBe(false);
+      expect(hasSharedSpeakAudio(ids, "saudi", "male")).toBe(false);
+      expect(lines[1].askId).toBeUndefined();
+      expect(lines[3].askId).toBeUndefined();
+      for (const line of [lines[0], lines[2]]) {
+        const phrase = askPhrase(line.askId);
+        const { ar, tr, en } = renderAsk(phrase, "saudi");
+        expect([line.ar, line.tr, ...line.meaning]).toEqual([ar, tr, en, banglaPhrases[phrase.id]]);
+        expect(askClipIds(phrase, { variety: "saudi" })).toEqual([phrase.id]);
+        expect(line.clip).toBe(askClipPath("saudi", "female", phrase.id));
+        expect(shared.has(line.clip)).toBe(true);
+        expect(packPaths.has(line.clip)).toBe(true);
+      }
+    }
   });
 });
