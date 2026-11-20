@@ -218,7 +218,6 @@
 .tajweed-articulation .arabic-text { font-size: 19px; }
 
 .reading-active-grid, .reading-directory { display: grid; gap: 12px; min-width: 0; align-items: start; }
-.reading-active-grid > .reading-directory { display: none; }
 .reading-directory header { gap: 8px; flex-wrap: wrap; }
 .reading-directory h2, .reading-checklist h2 { font: var(--type-body-strong); }
 .reading-directory-list { display: grid; gap: 5px; margin: 0; padding: 0; list-style: none; }
@@ -254,14 +253,19 @@
 .reading-checkbox { display: flex; min-height: 44px; align-items: center; gap: 10px; }
 .reading-checkbox input { width: 18px; height: 18px; flex: none; accent-color: var(--control-primary); }
 @media (min-width: 1024px) {
-  .reading-workspace > .reading-directory .reading-directory-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  :is(.reading-workspace > .reading-directory, .reading-chapters-tab) .reading-directory-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .reading-practice-tab, .reading-chapters-tab { max-inline-size: 880px; }
+  .reading-teacher-tools.compact-stack { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+}
+@media (min-width: 1280px) {
   .reading-active-grid { grid-template-columns: minmax(180px, 245px) minmax(0, 1fr); }
-  .reading-active-grid > .reading-directory { display: grid; position: sticky; inset-block-start: 16px; }
+  .reading-active-grid > .reading-directory { position: sticky; inset-block-start: 16px; }
   .reading-active-grid > .reading-directory ul { max-height: 68vh; overflow: auto; scrollbar-width: thin; }
   .reading-active-grid .reading-directory-list a { grid-template-columns: auto minmax(0, 1fr); }
   .reading-active-grid .reading-directory-list a small { grid-column: 2; text-align: start; }
   .anatomy-open .reading-active-grid { grid-template-columns: minmax(0, 1fr); }
   .anatomy-open .reading-active-grid > .reading-directory { display: none; }
+  .anatomy-open .reading-teacher-tools.compact-stack { grid-template-columns: minmax(0, 1fr); }
 }
 @media (min-width: 1024px) {
   .tajweed-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }

@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import * as Tabs from "@radix-ui/react-tabs";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Link, useLocation, useParams, useSearchParams } from "react-router-dom";
 import { ArabicText, type WordDetail } from "@/components/ArabicText";
@@ -6,7 +7,7 @@ import { DesignIcon } from "@/components/DesignIcon";
 import { LocalRecorder } from "@/components/LocalRecorder";
 import { QuranStudySources, QuranVerseMeaning } from "@/components/QuranStudySources";
 import { VerseAudio } from "@/components/VerseAudio";
-import { useRecord } from "@/hooks/use-awwab";
+import { useDesktop, useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { wordGlosses } from "@/lib/fluency";
 import { wordGlossKey } from "@/lib/fluency-messages.mjs";
@@ -41,7 +42,9 @@ function ReadingHeading({ title, subtitle, back }: { title: string; subtitle?: s
   </header>;
 }
 
-function ChapterDirectory({ mode, progress, selected }: { mode: PracticeMode; progress: ReadingPracticeProgress; selected?: number }) {
+function ChapterDirectory({ mode, progress, selected, openReader }: {
+  mode: PracticeMode; progress: ReadingPracticeProgress; selected?: number; openReader?: () => void;
+}) {
   const { language, t, locale } = useCopy();
   const { state } = useLocation();
   const overview = mode === "teacher" ? t("readingPreparedCount", { count: Object.values(progress.teacher).filter(teacherChecklistComplete).length })
@@ -54,7 +57,9 @@ function ChapterDirectory({ mode, progress, selected }: { mode: PracticeMode; pr
       const complete = mode === "teacher" ? teacherChecklistComplete(progress.teacher[chapter.number]) : new Set(read).size >= chapter.ayahs;
       const resume = mode === "teacher" ? undefined : firstUnreadAyah(chapter.ayahs, read);
       return <li key={chapter.number}><Link to={practicePage(mode, chapter.number, resume)} state={state}
-        aria-current={selected === chapter.number ? "page" : undefined}>
+        aria-current={selected === chapter.number ? "page" : undefined} onClick={event => {
+          if (selected === chapter.number && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) openReader?.();
+        }}>
         <span className="caption">{number.format(chapter.number)}</span><strong>{studyNames.surah(language, chapter.number, chapter.title)}</strong>
         <small className="muted">{complete ? t("pathsDone") : mode !== "teacher" && read.length ? t("readingAyahsProgress", { count: new Set(read).size, total: chapter.ayahs }) : t("hifzAyahs", { count: chapter.ayahs })}</small>
       </Link></li>;
@@ -219,8 +224,8 @@ function GuidedRead({ chapter, title, mode, quran, progress, settings, now }: {
   </section>;
 }
 
-function TeacherPractice({ chapter, title, verses, checks, settings, now }: {
-  chapter: Chapter; title: string; verses: QuranVerse[]; checks?: RecitationCheck[]; settings: Settings; now: Date;
+function TeacherPractice({ chapter, title, verses, checks, settings, now, suspended }: {
+  chapter: Chapter; title: string; verses: QuranVerse[]; checks?: RecitationCheck[]; settings: Settings; now: Date; suspended: boolean;
 }) {
   const { t } = useCopy();
   const [script, setScript] = useState(settings.script);
@@ -238,22 +243,24 @@ function TeacherPractice({ chapter, title, verses, checks, settings, now }: {
   }
 
   return <section className="compact-stack reading-main" aria-label={title}>
-    <div className="card compact-stack reading-controls">
-      <p className="small muted">{t("readingRecorderHint")}</p>
-      <VerseAudio audioRef={reference} label={title} showAttribution />
-      {hasPack && <Link className="text-button justify-self-start" to={`/you/audio?surah=${chapter.number}&from=teacher`}>{t("offlineAudio")}</Link>}
-      <LocalRecorder label={title} maxSeconds={900} />
+    <div className="compact-stack reading-teacher-tools">
+      <div className="card compact-stack reading-controls">
+        <p className="small muted">{t("readingRecorderHint")}</p>
+        <VerseAudio audioRef={reference} label={title} showAttribution suspended={suspended} />
+        {hasPack && <Link className="text-button justify-self-start" to={`/you/audio?surah=${chapter.number}&from=teacher`}>{t("offlineAudio")}</Link>}
+        <LocalRecorder label={title} maxSeconds={900} suspended={suspended} />
+      </div>
+      <fieldset className="card reading-checklist">
+        <legend className="sr-only">{t("readingChecklist")}</legend><h2>{t("readingChecklist")}</h2>
+        {recitationChecks.map(item => <label key={item} className="reading-checkbox">
+          <input type="checkbox" checked={checks?.includes(item) ?? false} onChange={event => void check(item, event.currentTarget.checked)} />
+          <span>{t(`readingCheck-${item}`)}</span>
+        </label>)}
+        {prepared && <p className="small muted" role="status">{t("readingChecklistReady")}</p>}
+        {error && <p className="small" role="alert">{t("saveError")}</p>}
+        <Link className="text-button justify-self-start" to="/learn/paths/read/3/lessons">{t("tajweedLessons")}</Link>
+      </fieldset>
     </div>
-    <fieldset className="card reading-checklist">
-      <legend className="sr-only">{t("readingChecklist")}</legend><h2>{t("readingChecklist")}</h2>
-      {recitationChecks.map(item => <label key={item} className="reading-checkbox">
-        <input type="checkbox" checked={checks?.includes(item) ?? false} onChange={event => void check(item, event.currentTarget.checked)} />
-        <span>{t(`readingCheck-${item}`)}</span>
-      </label>)}
-      {prepared && <p className="small muted" role="status">{t("readingChecklistReady")}</p>}
-      {error && <p className="small" role="alert">{t("saveError")}</p>}
-      <Link className="text-button justify-self-start" to="/learn/paths/read/3/lessons">{t("tajweedLessons")}</Link>
-    </fieldset>
     <div className="card reading-controls compact-stack">
       <ScriptSwitch script={script} change={setScript} />
       {hasExamples && <TajweedExamplesToggle enabled={tajweed} pageHasExamples />}
@@ -266,8 +273,13 @@ function TeacherPractice({ chapter, title, verses, checks, settings, now }: {
 function ChapterWorkspace({ chapter, mode, progress, settings, now }: {
   chapter: Chapter; mode: PracticeMode; progress: ReadingPracticeProgress; settings: Settings; now: Date;
 }) {
-  const { t, language } = useCopy();
+  const { t, language, direction } = useCopy();
   const { state } = useLocation();
+  const desktop = useDesktop();
+  const wide = useDesktop(1280);
+  const compactDesktop = desktop && !wide;
+  const [tab, setTab] = useState("reader");
+  const readerTab = useRef<HTMLButtonElement>(null);
   const [quran, setQuran] = useState<StudyQuran>();
   const [loadError, setLoadError] = useState(false);
   const [attempt, setAttempt] = useState(0);
@@ -278,18 +290,28 @@ function ChapterWorkspace({ chapter, mode, progress, settings, now }: {
     return () => { active = false; };
   }, [attempt]);
   const verses = quran?.surahs[chapter.number];
+  const reader = !verses?.length ? <section className="card compact-stack"><p className="small muted" role="status">{t(loadError ? "hifzUnavailable" : "hifzLoading")}</p>
+    {loadError && <button className="action light" type="button" onClick={() => { setLoadError(false); setAttempt(value => value + 1); }}>{t("pathsCheckAgain")}</button>}
+  </section> : mode === "teacher"
+    ? <TeacherPractice chapter={chapter} title={title} verses={verses} checks={progress.teacher[chapter.number]} settings={settings}
+      now={now} suspended={compactDesktop && tab !== "reader"} />
+    : <GuidedRead chapter={chapter} title={title} mode={mode} quran={quran} progress={progress} settings={settings} now={now} />;
+  const directory = desktop && <ChapterDirectory mode={mode} progress={progress} selected={chapter.number} openReader={compactDesktop ? () => {
+    setTab("reader");
+    readerTab.current?.focus();
+  } : undefined} />;
 
   return <>
     <ReadingHeading title={title} subtitle={t(modeTitles[mode])}
       back={mode === "flow" && state?.from === "haram-focus" ? "/umrah/focus" : readingPracticePaths[mode]} />
-    <div className="reading-active-grid">
-      <ChapterDirectory mode={mode} progress={progress} selected={chapter.number} />
-      {!verses?.length ? <section className="card compact-stack"><p className="small muted" role="status">{t(loadError ? "hifzUnavailable" : "hifzLoading")}</p>
-        {loadError && <button className="action light" type="button" onClick={() => { setLoadError(false); setAttempt(value => value + 1); }}>{t("pathsCheckAgain")}</button>}
-      </section> : mode === "teacher"
-        ? <TeacherPractice chapter={chapter} title={title} verses={verses} checks={progress.teacher[chapter.number]} settings={settings} now={now} />
-        : <GuidedRead chapter={chapter} title={title} mode={mode} quran={quran} progress={progress} settings={settings} now={now} />}
-    </div>
+    {compactDesktop ? <Tabs.Root className="workspace-tabs" dir={direction} value={tab} onValueChange={setTab}>
+      <Tabs.List className="study-tabs equal-row" aria-label={title}>
+        <Tabs.Trigger value="reader" ref={readerTab}>{t(mode === "teacher" ? "practise" : "surahReader")}</Tabs.Trigger>
+        <Tabs.Trigger value="chapters">{t("readingChapters")}</Tabs.Trigger>
+      </Tabs.List>
+      <Tabs.Content className="reading-practice-tab" value="reader" forceMount>{reader}</Tabs.Content>
+      <Tabs.Content className="reading-chapters-tab" value="chapters">{directory}</Tabs.Content>
+    </Tabs.Root> : <div className="reading-active-grid">{directory}{reader}</div>}
   </>;
 }
 
