@@ -258,6 +258,7 @@ Mosque {
 - **Live guide (U04):**
   - The step advances on geofence entry.
   - **Saʿy auto-laps** come from alternating Ṣafā/Marwah geofence entries with hysteresis, and can be corrected.
+  - The guide shows seven alternating lap directions, lets you pause or correct the saved count, and uses recent, precise fixes near the OpenStreetMap endpoints for the live position and approximate distance.
   - Ṭawāf stays manual: GPS is unreliable near the Kaʿbah.
   - Optional voice uses a downloadable offline pack with generated narration for all seven steps. English and Bangla editions show their spoken text and voice credits. Personal recordings can still be imported per step.
 - **Offline map (U02):**

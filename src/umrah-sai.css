@@ -1,0 +1,160 @@
+.app-content:has(> .umrah-sai-shell) {
+  --sai-gutter: 20px;
+  padding-block-start: 0;
+  padding-block-end: calc(110px + env(safe-area-inset-bottom));
+  padding-inline: var(--sai-gutter);
+}
+
+.umrah-sai-header {
+  display: grid;
+  gap: 8px;
+  margin-inline: calc(-1 * var(--sai-gutter));
+  padding: calc(14px + env(safe-area-inset-top)) var(--sai-gutter) 16px;
+}
+
+.umrah-sai-header .caption { color: color-mix(in srgb, var(--c-accent) 85%, var(--c-on-night)); }
+.umrah-sai-header h1 { font: var(--type-title); letter-spacing: normal; }
+
+.umrah-sai-status.chip {
+  flex: 0 0 auto;
+  background: var(--c-overlay-on-night);
+  color: var(--c-on-night);
+}
+
+.umrah-sai-laps {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.umrah-sai-laps button {
+  position: relative;
+  min-height: 48px;
+  padding: 6px 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  font: var(--type-body-strong);
+  border-radius: var(--r-control);
+  background: var(--c-overlay-on-night);
+  color: var(--c-night-muted);
+}
+
+.umrah-sai-laps button::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  left: 50%;
+  width: max(100%, 44px);
+  transform: translateX(-50%);
+}
+
+.umrah-sai-laps small { font: var(--type-caption); }
+.umrah-sai-laps [data-complete="true"] { background: var(--c-accent); color: var(--c-ink); }
+.umrah-sai-laps [aria-current="step"] { background: var(--c-on-night); color: var(--c-night); }
+.umrah-sai-laps button:hover { filter: brightness(1.15); }
+.umrah-sai-body { display: grid; gap: 14px; }
+.umrah-sai-shell .umrah-tabs { padding-block: 10px max(22px, env(safe-area-inset-bottom)); gap: 0; }
+.umrah-sai-shell .umrah-tabs a > span { height: 30px; }
+
+.umrah-sai-course.card {
+  position: relative;
+  isolation: isolate;
+  height: 250px;
+  padding: 20px 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 84px minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.umrah-sai-distance {
+  grid-area: 1 / 1;
+  z-index: 1;
+  align-self: start;
+  justify-self: start;
+  margin-inline: 14px 6px;
+  padding: 8px 10px;
+  display: grid;
+  border-radius: var(--r-control);
+  background: var(--c-tint);
+  overflow-wrap: anywhere;
+}
+
+.umrah-sai-distance strong { font: var(--type-title); }
+.umrah-sai-track { grid-area: 1 / 2; position: relative; border-radius: var(--r-pill); background: var(--c-surface-alt); }
+
+.umrah-sai-end {
+  position: absolute;
+  z-index: 1;
+  inset-inline: 0;
+  font: var(--type-body-strong);
+  text-align: center;
+}
+
+.umrah-sai-marwah { inset-block-start: 8px; }
+.umrah-sai-safa { inset-block-end: 6px; }
+
+.umrah-sai-green {
+  position: absolute;
+  inset: 90px 0 auto;
+  height: 46px;
+  display: grid;
+  align-items: center;
+  background: var(--c-primary-soft);
+}
+
+.umrah-sai-green span, .umrah-sai-you {
+  position: absolute;
+  font: var(--type-caption);
+  letter-spacing: var(--tracking-caption);
+  color: var(--interactive-ink);
+}
+
+.umrah-sai-green span {
+  inset-inline-start: calc(100% + 9px);
+  width: clamp(76px, calc((100vw - 154px) / 2), 180px);
+  overflow-wrap: anywhere;
+}
+
+.umrah-sai-progress { position: absolute; inset: 20px 0; }
+.umrah-sai-marker { position: absolute; z-index: 2; inset-block-start: var(--sai-y); inset-inline: 0; display: grid; place-items: center; }
+.umrah-sai-halo, .umrah-sai-dot { position: absolute; }
+.umrah-sai-you { inset-inline-end: calc(100% + 6px); white-space: nowrap; }
+
+.umrah-sai-trace {
+  position: absolute;
+  inset: var(--sai-y) auto -20px calc(50% - 3px);
+  width: 6px;
+  border-radius: var(--r-pill);
+  background: var(--c-accent);
+}
+
+.umrah-sai-progress[data-from="marwah"] .umrah-sai-trace { inset-block: -20px calc(100% - var(--sai-y)); }
+.umrah-sai-cue.card { display: grid; gap: 4px; box-shadow: none; }
+.umrah-sai-cue h2, .umrah-sai-switch strong { margin: 0; font: var(--type-body-strong); }
+.umrah-sai-cue > details > summary { display: list-item; color: var(--interactive-ink); align-content: center; cursor: pointer; }
+.umrah-sai-automatic.card { padding-block: 12px; }
+.umrah-sai-switch { width: 100%; min-height: 44px; text-align: start; }
+.umrah-sai-switch strong, .umrah-sai-switch small { display: block; }
+.umrah-sai-switch[aria-checked="false"] .share-switch-track { background: var(--c-ink-muted); }
+.umrah-sai-switch[aria-checked="true"] .share-switch-track { justify-content: flex-end; background: var(--control-primary); }
+.umrah-sai-automatic > p { margin-top: 6px; }
+.umrah-sai-actions .action { min-height: 50px; font: var(--type-body-strong); }
+.umrah-sai-steps summary { align-content: center; cursor: pointer; color: var(--interactive-ink); font: var(--type-body-strong); }
+
+.umrah-sai-correction.card {
+  width: min(calc(100% - 32px), 420px);
+  border: 0;
+  border-radius: var(--r-card);
+}
+
+.umrah-sai-correction h2 { font: var(--type-title); }
+.umrah-sai-correction > .text-button { justify-self: start; }
+
+@media (max-width: 350px) {
+  .umrah-sai-laps { margin-inline: -14px; gap: 3px; }
+}
+
+@media (max-width: 319px) {
+  .umrah-sai-laps { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}

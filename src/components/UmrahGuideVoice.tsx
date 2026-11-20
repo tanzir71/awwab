@@ -42,15 +42,17 @@ export function UmrahGuideDownload({ pack }: { pack: UmrahGuidePack }) {
   </div>;
 }
 
-export function UmrahGuideVoice({ step, title }: { step: { id: string; narration: { en: string; bn: string } }; title: string }) {
+export function UmrahGuideVoice({ step, title, embedded = false }: {
+  step: { id: string; narration: { en: string; bn: string } }; title: string; embedded?: boolean;
+}) {
   const { t, language } = useCopy();
   const pack = umrahGuidePack(language);
   const ref = `${pack.id}:${step.id}`;
   const player = useAudioPlayback([ref]);
   const hasAudio = player.has(ref);
 
-  return <section className="card tint compact-stack umrah-guide-voice">
-    <h2 className="with-icon"><DesignIcon name="umrah-prep-volume" size={16} />{t("umrahGuideVoice")}</h2>
+  return <section className={embedded ? "compact-stack umrah-guide-voice" : "card tint compact-stack umrah-guide-voice"} aria-label={t("umrahGuideVoice")}>
+    {!embedded && <h2 className="with-icon"><DesignIcon name="umrah-prep-volume" size={16} />{t("umrahGuideVoice")}</h2>}
     <audio ref={player.element} preload="none" hidden {...player.events} />
     {hasAudio ? <>
       <VoiceCredit pack={pack} />

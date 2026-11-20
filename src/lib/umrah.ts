@@ -7,7 +7,8 @@ export const states = ["At the hotel", "Walking", "In the Haram", "Doing Umrah",
 export type TripState = typeof states[number];
 export type Coord = { lat: number; lon: number };
 export type SaiEnd = "safa" | "marwah";
-export type SaiProgress = { count: number; last?: SaiEnd; lastAt?: number; exited: boolean };
+export type SaiProgress = { count: number; last?: SaiEnd; lastAt?: number; exited: boolean; detected?: boolean };
+export type SaiCourse = Readonly<Record<SaiEnd, Coord>>;
 export const initialSai: SaiProgress = { count: 0, exited: true };
 export const tripChecklist = ["passport", "rawdah", "ihram", "toiletries", "sandals", "shoeBag",
   "talbiyah", "miqat", "phrases", "rituals", "duas", "family"] as const;
@@ -21,7 +22,7 @@ export const initialTrip = {
   start: "", end: "", hotel: { name: "", room: "", point: undefined as Coord | undefined }, group: "",
   meeting: undefined as Coord | undefined, gate: "", state: "At the hotel" as TripState,
   walk: 10, crowd: 20, iqamah: 15, gps: false, auto: false,
-  tawaf: 0, step: 0, sai: initialSai, dhikr: {} as Record<string, number>,
+  tawaf: 0, step: 0, sai: initialSai, saiPaused: false, dhikr: {} as Record<string, number>,
   juz: {} as Record<string, number>, haramPrayers: {} as Record<string, string[]>,
   requests: [] as { id: string; name: string; for: string; done: string[] }[],
   preparation: undefined as typeof emptyPreparation | undefined,
@@ -60,17 +61,34 @@ export function bearing(a: Coord, b: Coord) {
   return (angle * 180 / Math.PI + 360) % 360;
 }
 
+export function saiLapEnds(lap: number): { from: SaiEnd; to: SaiEnd } {
+  return lap % 2 === 1 ? { from: "safa", to: "marwah" } : { from: "marwah", to: "safa" };
+}
+
+export function saiGuidePosition(course: SaiCourse, point: Coord, destination: SaiEnd) {
+  const { safa, marwah } = course;
+  const length = distance(safa, marwah);
+  if (!Number.isFinite(length) || length <= 0) return undefined;
+  const angle = radians(bearing(safa, point) - bearing(safa, marwah));
+  const fromSafa = distance(safa, point);
+  const along = fromSafa * Math.cos(angle);
+  const across = fromSafa * Math.sin(angle);
+  const nearest = Math.max(0, Math.min(length, along));
+  if (!Number.isFinite(along) || Math.hypot(across, along - nearest) > 60) return undefined;
+  return { fraction: nearest / length, meters: distance(point, course[destination]) };
+}
+
 export function advanceSai(progress: SaiProgress, zone: SaiEnd | undefined, at: number, betweenZones: number): SaiProgress {
   if (progress.count >= 7) return progress;
   if (!zone) return progress.exited ? progress : { ...progress, exited: true };
   if (!progress.last) return zone === "safa" ? { ...progress, last: zone, lastAt: at, exited: false } : progress;
   if (zone === progress.last || !progress.exited || at - (progress.lastAt ?? at) < 60_000 || betweenZones < 300) return progress;
-  return { count: progress.count + 1, last: zone, lastAt: at, exited: false };
+  return { count: progress.count + 1, last: zone, lastAt: at, exited: false, detected: true };
 }
 
 export function correctSai(progress: SaiProgress, count: number, at: number): SaiProgress {
   const next = Math.max(0, Math.min(7, count));
-  return next === progress.count ? progress : { count: next, last: next % 2 ? "marwah" : "safa", lastAt: at, exited: false };
+  return next === progress.count ? progress : { count: next, last: saiLapEnds(next).to, lastAt: at, exited: false };
 }
 
 export function umrahContext(now: Date, trip: typeof initialTrip) {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { calculateZakat, gramsPerBhori, initialZakat, nisabWeight, paymentsForHawl,
   zakatHawl, zakatMoney, zakatPrices, zakatProfileTotals, type ZakatProfile } from "./zakat";
-import { advanceSai, bearing, correctSai, distance, emptyPreparation, initialSai, initialTrip, tripDates } from "./umrah";
+import { advanceSai, bearing, correctSai, distance, emptyPreparation, initialSai, initialTrip, saiGuidePosition, saiLapEnds, tripDates } from "./umrah";
 import { addDays } from "./dates";
 import { baselineMonthStart, calendarDefaults, calendarEventById, dayDifference, eventDisplayDates, monthStartEvent } from "./hijri";
 import { eventReminders } from "./calendarFile";
@@ -242,13 +242,31 @@ describe("saʿy location hysteresis", () => {
     expect(advanceSai(left, "safa", 80_000, 400)).toBe(left);
     expect(advanceSai(left, "marwah", 50_000, 400)).toBe(left);
     expect(advanceSai(left, "marwah", 80_000, 200)).toBe(left);
-    expect(advanceSai(left, "marwah", 80_000, 400)).toMatchObject({ count: 1, last: "marwah", exited: false });
+    const arrived = advanceSai(left, "marwah", 80_000, 400);
+    expect(arrived).toMatchObject({ count: 1, last: "marwah", exited: false, detected: true });
+    expect(correctSai(arrived, 0, 81_000)).not.toHaveProperty("detected");
   });
 
   it("caps manual and automatic counts and preserves the expected alternating end", () => {
     const corrected = correctSai(initialSai, 9, 1000);
     expect(corrected).toMatchObject({ count: 7, last: "marwah" });
     expect(advanceSai(corrected, "safa", 80_000, 400)).toBe(corrected);
+  });
+
+  it("alternates each lap from Ṣafā and finishes the seventh at Marwah", () => {
+    expect(Array.from({ length: 7 }, (_, index) => saiLapEnds(index + 1).to))
+      .toEqual(["marwah", "safa", "marwah", "safa", "marwah", "safa", "marwah"]);
+  });
+
+  it("shows a schematic position along the walkway and omits fixes away from either end or the corridor", () => {
+    const course = { safa: { lat: 0, lon: 0 }, marwah: { lat: .004, lon: 0 } };
+    const point = { lat: .001, lon: 0 };
+    const towardMarwah = saiGuidePosition(course, point, "marwah");
+    expect(towardMarwah?.fraction).toBeCloseTo(.25);
+    expect(towardMarwah?.meters).toBeCloseTo(333.58, 1);
+    expect(saiGuidePosition(course, point, "safa")?.meters).toBeCloseTo(111.19, 1);
+    expect(saiGuidePosition(course, { lat: .002, lon: .001 }, "marwah")).toBeUndefined();
+    expect(saiGuidePosition(course, { lat: .005, lon: 0 }, "safa")).toBeUndefined();
   });
 
   it("calculates hotel distance and bearing without a network", () => {
