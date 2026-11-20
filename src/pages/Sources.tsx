@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ArabicText } from "@/components/ArabicText";
 import { SectionNav } from "@/components/Surface";
-import { IS_PREVIEW } from "@/lib/config";
+import { asset, IS_PREVIEW } from "@/lib/config";
 import { useCopy } from "@/lib/copy";
 import { useUi } from "@/lib/uiState";
 import { splitArabicWords } from "@/lib/wordAnatomy";
@@ -21,7 +21,7 @@ const sources = [
   ["Hadith API", "Distributed as public-domain data under the Unlicense. Individual narrations show their specific collection, reference and grade.", "https://github.com/fawazahmed0/hadith-api"],
   ["Adhan JS", "Prayer times are computed on this device with Adhan, MIT.", "https://github.com/batoulapps/adhan-js"],
   ["OpenStreetMap and Protomaps", "Haram points come from OpenStreetMap. The Makkah and Madinah map packs are Protomaps extracts. © OpenStreetMap contributors, Open Database License.", "https://www.openstreetmap.org/copyright"],
-  ["Fontsource", "Noto Sans, Noto Serif, Noto Sans Arabic, Noto Sans Bengali, Noto Serif Bengali, Baloo 2 and Nunito are licensed under the SIL Open Font License.", "https://fontsource.org/"],
+  ["Fontsource", "The Noto, Baloo 2 and Nunito fonts use the SIL Open Font License. The local notices credit the Noto families used for language names and downloaded translations.", asset("assets/locale-font-notices.txt")],
 ];
 
 export function Sources() {

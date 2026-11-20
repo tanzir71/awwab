@@ -12,6 +12,7 @@ import onboarding from "./docs/content/onboarding.json";
 import { sharedSpeakClips } from "./src/lib/speakAskAudio";
 import { tajweedPrecache } from "./src/lib/tajweed";
 import { publishedLocales } from "./scripts/published-locales.mjs";
+import { localeFontFiles } from "./scripts/locale-fonts.mjs";
 import { landingPages } from "./scripts/landing-pages.mjs";
 import { landingLetterKeys } from "./scripts/landing-copy.mjs";
 import { SHARE_URL } from "./src/lib/config";
@@ -63,6 +64,7 @@ export default defineConfig(({ mode }) => {
           .replace("<!-- awwab-letter-tiles -->", tiles.join("")).replace("<!-- awwab-asr-word -->", asrWord);
       },
     },
+    localeFontFiles(base, published),
     landingPages({ base, publicUrl: SHARE_URL, mode, published }),
     react(),
     VitePWA({

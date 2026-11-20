@@ -70,6 +70,8 @@ After native review, record the reviewers in the catalogue’s `reviewers` array
 
 For a static build, set the compiler’s output directory to `public/locales`. The app installer lists the compiled files that match the current English catalogue. Selecting one in Settings or onboarding downloads it from the same origin and verifies it before saving the language preference. Installed catalogues are available offline on later visits. When a new build changes a pack, selecting that language again installs the matching revision. The generated pack covers UI copy. Licensed Quran and hadith editions have their own source and review requirements.
 
+The installer also verifies and caches any script fonts needed by a published locale. Locales that share a font reuse the cached file. The app includes small language-name fonts so the picker can show native names before installation, including offline. Regenerate those subsets with `python scripts/build-locale-name-fonts.py` using the pinned Fontsource packages and FontTools with Brotli support.
+
 The review export includes the landing page, navigation labels, metadata and image descriptions. Production emits an English page and an HTML alternate for each compiled locale. The nav lists those editions and switches between them without a reload. Each edition has a canonical URL and `hreflang` links. Opening Awwab from a localized edition sets the app language. The landing pages work offline after their worker finishes caching them. Preview builds include draft Bangla for layout review and carry a `noindex` directive.
 
 ## 6. Acceptance

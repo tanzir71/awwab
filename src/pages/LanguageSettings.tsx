@@ -10,7 +10,7 @@ import { useDesktop } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { formatLocale, glossaryOptions, glossaryValue, isAvailableLanguage, languages, languageMatches, nativeNumberingSystem, salahVariants, suggestedLanguage,
   type AppLanguage, type GlossaryTerm, type LanguageItem } from "@/lib/languagePreferences";
-import { hasLocaleMessages, installedLocalePacks, localePackAsset } from "@/lib/localePacks";
+import { hasLoadedLocalePack, installedLocalePacks, localePackAsset } from "@/lib/localePacks";
 import { selectAppLanguage, updateSettings, updateWordChoice, type Settings } from "@/lib/storageService";
 
 const quickLanguages = languages.filter(item => item.tier === 1 || item.code === "hi");
@@ -26,13 +26,13 @@ function useLanguageChoices() {
   }, []);
 
   function canDownload(code: string) {
-    return Boolean(localePackAsset(code) && !hasLocaleMessages(code) && !installed?.has(code));
+    return Boolean(localePackAsset(code) && !hasLoadedLocalePack(code) && !installed?.has(code));
   }
   function state(code: string) {
     if (code === busy) return t("settingsLanguageDownloading");
     const pack = localePackAsset(code);
     if (pack) return t(canDownload(code) ? "settingsLanguageDownload" : "settingsLanguageDownloaded", {
-      size: t("fileSizeMB", { size: pack.bytes / 1_000_000 }),
+      size: t("fileSizeMB", { size: (pack.bytes + pack.fonts.reduce((sum, font) => sum + font.bytes, 0)) / 1_000_000 }),
     });
     return t(code === "en" ? "settingsLanguageBuiltIn" : code === "bn" ? "settingsLanguagePreview" : "settingsLanguagePlanned");
   }
@@ -54,7 +54,7 @@ function useLanguageChoices() {
 function LanguageName({ item }: { item: LanguageItem }) {
   const { t } = useCopy();
   return <strong className="settings-language-name" data-script={item.script}>
-    <bdi lang={item.code} dir={item.dir === "rtl" ? "rtl" : "ltr"}>{item.native}</bdi>
+    <bdi lang={item.code} data-locale-name={item.script} dir={item.dir === "rtl" ? "rtl" : "ltr"}>{item.native}</bdi>
     {item.dir === "rtl" && <span lang="en" dir="ltr" title={t("settingsLanguageRTL")} className="chip settings-rtl">RTL</span>}
   </strong>;
 }

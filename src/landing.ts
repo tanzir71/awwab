@@ -24,12 +24,14 @@ function switchPage(page: Document, language: string) {
   });
   for (const update of updates) update();
 
+  document.getElementById("landing-locale-fonts")!.textContent = page.getElementById("landing-locale-fonts")?.textContent ?? "";
   root.lang = language;
   root.dir = page.documentElement.dir;
   root.dataset.uiScript = page.documentElement.dataset.uiScript;
   const current = picker.querySelector("bdi[data-landing-current]")!;
   current.textContent = page.querySelector("[data-landing-current]")!.textContent;
   current.setAttribute("lang", language);
+  current.setAttribute("data-locale-name", root.dataset.uiScript);
   for (const option of picker.querySelectorAll<HTMLAnchorElement>("[data-landing-language]")) {
     if (option.dataset.landingLanguage === language) option.setAttribute("aria-current", "page");
     else option.removeAttribute("aria-current");

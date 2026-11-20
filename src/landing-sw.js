@@ -24,7 +24,9 @@ self.addEventListener("fetch", event => {
 
   const cached = () => caches.open(cacheName).then(cache => cache.match(new URL(file, scope)));
   if (file.endsWith(".html")) {
-    event.respondWith(fetch(request).catch(async () => await cached() ?? Response.error()));
+    event.respondWith(fetch(request)
+      .then(async response => response.ok ? response : await cached() ?? response)
+      .catch(async () => await cached() ?? Response.error()));
   } else {
     event.respondWith(cached().then(response => response ?? fetch(request)));
   }

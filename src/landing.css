@@ -1,5 +1,6 @@
 @import "./fonts-latin.css";
 @import "./fonts-bengali.css";
+@import "./fonts-locale-names.css";
 @import "./theme.css";
 
 @font-face {

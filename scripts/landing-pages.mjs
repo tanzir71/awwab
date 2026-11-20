@@ -16,7 +16,7 @@ export function landingPages({ base, publicUrl, mode, published }) {
       ? JSON.parse(readFileSync(new URL(`../public/locales/${code}.json`, import.meta.url), "utf8"))
       : undefined;
     if (!pack && !(preview && code === "bn")) return [];
-    return [{ ...locale, path: `lang/${code}.html`, messages: pack?.messages ?? banglaDraft }];
+    return [{ ...locale, path: `lang/${code}.html`, messages: pack?.messages ?? banglaDraft, fonts: published[code]?.fonts ?? [] }];
   })];
   const href = locale => locale.code === "en" ? base : base + locale.path;
   const canonical = locale => new URL(locale.code === "en" ? "" : locale.path, publicUrl).href;
@@ -27,7 +27,10 @@ export function landingPages({ base, publicUrl, mode, published }) {
   function render(html, locale) {
     const activeUrl = canonical(locale);
     const options = locales.map(item => `<a href="${href(item)}" data-landing-language="${item.code}" hreflang="${item.code}"${item === locale ? ' aria-current="page"' : ""}>`
-      + `<bdi lang="${item.code}" dir="${item.dir}" data-script="${item.script}">${escapeHtml(item.native)}</bdi></a>`).join("");
+      + `<bdi lang="${item.code}" dir="${item.dir}" data-script="${item.script}" data-locale-name="${item.script}">${escapeHtml(item.native)}</bdi></a>`).join("");
+    const fontRules = (locale.fonts ?? []).map(font =>
+      `@font-face{font-family:"${font.family}";src:url("${base}${font.path}") format("woff2");font-weight:100 900;font-display:swap;unicode-range:${font.unicodeRange}}`,
+    ).join("");
     const messages = preview
       ? { ...locale.messages, landingOpenApp: locale.code === "bn" ? "অ্যাপের প্রিভিউ" : locale.messages.landingOpenApp ?? "App preview" }
       : locale.messages;
@@ -35,8 +38,9 @@ export function landingPages({ base, publicUrl, mode, published }) {
       .replace(/<html lang="[^"]+" dir="[^"]+" data-ui-script="[^"]+"/, `<html lang="${locale.code}" dir="${locale.dir}" data-ui-script="${locale.script}"`)
       .replace(/rel="canonical" href="[^"]+"/, `rel="canonical" href="${activeUrl}"`)
       .replace(/property="og:url" content="[^"]+"/, `property="og:url" content="${activeUrl}"`)
+      .replace(/<style id="landing-locale-fonts">[^<]*<\/style>/, `<style id="landing-locale-fonts">${fontRules}</style>`)
       .replace(/<!-- awwab-landing-options -->.*?<!-- \/awwab-landing-options -->/, `<!-- awwab-landing-options -->${options}<!-- /awwab-landing-options -->`)
-      .replace(/<bdi data-landing-current lang="[^"]+">[^<]*<\/bdi>/, `<bdi data-landing-current lang="${locale.code}">${escapeHtml(locale.native)}</bdi>`);
+      .replace(/<bdi data-landing-current lang="[^"]+"[^>]*>[^<]*<\/bdi>/, `<bdi data-landing-current lang="${locale.code}" data-locale-name="${locale.script}">${escapeHtml(locale.native)}</bdi>`);
     if (locale.code === "en") return text;
     return text.replace(/href="([^"]*)"/g, (attribute, url) => {
       const app = base + "app/";
@@ -81,7 +85,7 @@ export function landingPages({ base, publicUrl, mode, published }) {
         const hash = createHash("sha256");
         const files = new Set(markup.keys());
         for (const source of markup.values()) hash.update(source);
-        const references = new RegExp(`${base}((?:assets|landing|design|app)/[\\w./@-]+\\.(?:js|css|svg|png|webp|woff2))`, "g");
+        const references = new RegExp(`${base}((?:assets|landing|design|app|locale-fonts)/[\\w./@-]+\\.(?:js|css|svg|png|webp|woff2))`, "g");
         function collect(source) {
           for (const [, path] of source.matchAll(references)) {
             if (files.has(path)) continue;
@@ -92,7 +96,7 @@ export function landingPages({ base, publicUrl, mode, published }) {
             if (path.endsWith(".css")) collect(String(contents));
           }
         }
-        collect(index);
+        for (const source of markup.values()) collect(source);
         const worker = readFileSync(workerTemplate, "utf8");
         this.emitFile({ type: "asset", fileName: "landing-sw.js", source: worker
           .replace("__LANDING_CACHE_VERSION__", JSON.stringify(hash.update(worker).digest("hex").slice(0, 16)))

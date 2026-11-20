@@ -131,7 +131,8 @@ export function Onboarding({ settings, desktop }: { settings: Settings; desktop:
           catch { setNotice(downloads ? "settingsLanguageDownloadError" : "setupSaveError"); }
           finally { setSaving(false); }
         }}>
-          {languages.filter(item => isAvailableLanguage(item.code)).map(item => <option key={item.code} value={item.code} lang={item.code} dir={item.dir}>{item.native}</option>)}
+          {languages.filter(item => isAvailableLanguage(item.code)).map(item => <option key={item.code} value={item.code}
+            lang={item.code} data-locale-name={item.script} dir={item.dir}>{item.native}</option>)}
         </select>
       </label>;
   const languageStep = <>

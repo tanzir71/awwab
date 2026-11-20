@@ -1,0 +1,9 @@
+{
+  "Cyrl": {"package": "noto-sans", "subsets": ["cyrillic", "cyrillic-ext"]},
+  "Deva": {"package": "noto-sans-devanagari", "subsets": ["devanagari"]},
+  "Ethi": {"package": "noto-sans-ethiopic", "subsets": ["ethiopic"]},
+  "Latn": {"package": "noto-sans", "subsets": ["latin-ext"]},
+  "Mlym": {"package": "noto-sans-malayalam", "subsets": ["malayalam"]},
+  "Taml": {"package": "noto-sans-tamil", "subsets": ["tamil"]},
+  "Thaa": {"package": "noto-sans-thaana", "subsets": ["thaana"]}
+}

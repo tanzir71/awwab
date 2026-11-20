@@ -1,11 +1,14 @@
 import { asset } from "./config";
 
-type PackAsset = { bytes: number; digest: string };
+type CheckedAsset = { bytes: number; digest: string };
+type PackFont = CheckedAsset & { path: string; family: string; unicodeRange: string };
+type PackAsset = CheckedAsset & { fonts: PackFont[] };
 type PackMessages = Record<string, string | { adult: string; maktab: string }>;
 declare const __AWWAB_PUBLISHED_LOCALES__: Record<string, PackAsset>;
 
 const published = typeof __AWWAB_PUBLISHED_LOCALES__ === "undefined" ? {} : __AWWAB_PUBLISHED_LOCALES__;
 const messagesByLocale = new Map<string, PackMessages>();
+const activeFonts = new Set<string>();
 const cacheName = "awwab-locales";
 
 export function localePackAsset(code: string): PackAsset | undefined {
@@ -16,6 +19,10 @@ export function hasLocaleMessages(code: string) {
   return messagesByLocale.has(code);
 }
 
+export function hasLoadedLocalePack(code: string) {
+  return hasLocaleMessages(code) && localePackAsset(code)?.fonts.every(font => activeFonts.has(checkedUrl(font.path, font)));
+}
+
 export function localeMessage(code: string, key: string, mode: "adult" | "maktab") {
   const catalogue = messagesByLocale.get(code);
   if (!catalogue || !Object.prototype.hasOwnProperty.call(catalogue, key)) return undefined;
@@ -23,48 +30,64 @@ export function localeMessage(code: string, key: string, mode: "adult" | "maktab
   return typeof value === "string" ? value : value[mode];
 }
 
-function packUrl(code: string, info: PackAsset) {
-  return new URL(asset(`locales/${encodeURIComponent(code)}.json?v=${info.digest}`), location.origin).href;
+function checkedUrl(path: string, info: CheckedAsset) {
+  return new URL(asset(`${path}?v=${info.digest}`), location.origin).href;
 }
 
-async function readPack(response: Response, info: PackAsset) {
+function packUrl(code: string, info: PackAsset) {
+  return checkedUrl(`locales/${encodeURIComponent(code)}.json`, info);
+}
+
+async function checkedBytes(response: Response, info: CheckedAsset) {
   const bytes = await response.arrayBuffer();
   if (bytes.byteLength !== info.bytes) throw new Error("Locale pack is incomplete");
   const digest = await crypto.subtle.digest("SHA-256", bytes);
   const hash = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
   if (hash !== info.digest) throw new Error("Locale pack changed");
-  return JSON.parse(new TextDecoder().decode(bytes)).messages as PackMessages;
+  return bytes;
+}
+
+async function loadAsset(cache: Cache, url: string, info: CheckedAsset, download: boolean) {
+  const stored = await cache.match(url);
+  if (stored) {
+    try { return await checkedBytes(stored, info); }
+    catch { await cache.delete(url); }
+  }
+  if (!download) return;
+  const response = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(30_000) });
+  if (!response.ok) throw new Error("Locale pack is unavailable");
+  const bytes = await checkedBytes(response.clone(), info);
+  await cache.put(url, response);
+  return bytes;
 }
 
 export async function installedLocalePacks() {
   if (!Object.keys(published).length || !("caches" in globalThis)) return new Set<string>();
   const cache = await caches.open(cacheName);
   const downloaded = new Set((await cache.keys()).map(request => request.url));
-  return new Set(Object.keys(published).filter(code => downloaded.has(packUrl(code, published[code]))));
+  return new Set(Object.entries(published).filter(([code, info]) => downloaded.has(packUrl(code, info))
+    && info.fonts.every(font => downloaded.has(checkedUrl(font.path, font)))).map(([code]) => code));
 }
 
 export async function loadLocalePack(code: string, download = false) {
-  if (hasLocaleMessages(code)) return true;
+  if (download ? hasLoadedLocalePack(code) : hasLocaleMessages(code)) return true;
   const info = localePackAsset(code);
   if (!info) return false;
 
-  const url = packUrl(code, info);
   const cache = await caches.open(cacheName);
-  const stored = await cache.match(url);
-  if (stored) {
-    try {
-      messagesByLocale.set(code, await readPack(stored, info));
-      return true;
-    } catch {
-      await cache.delete(url);
+  const catalogue = await loadAsset(cache, packUrl(code, info), info, download);
+  if (!catalogue) return false;
+  for (const font of info.fonts) {
+    const url = checkedUrl(font.path, font);
+    if (activeFonts.has(url)) continue;
+    const bytes = await loadAsset(cache, url, font, download);
+    if (!bytes) continue;
+    const face = await new FontFace(font.family, bytes, { weight: "100 900", unicodeRange: font.unicodeRange }).load();
+    if (!activeFonts.has(url)) {
+      document.fonts.add(face);
+      activeFonts.add(url);
     }
   }
-  if (!download) return false;
-
-  const response = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(30_000) });
-  if (!response.ok) throw new Error("Locale pack is unavailable");
-  const catalogue = await readPack(response.clone(), info);
-  await cache.put(url, response);
-  messagesByLocale.set(code, catalogue);
+  messagesByLocale.set(code, JSON.parse(new TextDecoder().decode(catalogue)).messages as PackMessages);
   return true;
 }

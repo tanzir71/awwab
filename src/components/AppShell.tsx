@@ -191,7 +191,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
   const languageFlow = !desktop && ["/you/language/picker", "/you/words"].includes(location.pathname);
   const languageItem = languages.find(item => item.code === settings.language);
   const languageLink = desktop && <Link className="sidebar-language-link" to="/you/language/picker">
-    <span lang={languageItem.code}>{languageItem.native}</span><small>{t("settingsChangeLanguage")}</small>
+    <span lang={languageItem.code} data-locale-name={languageItem.script}>{languageItem.native}</span><small>{t("settingsChangeLanguage")}</small>
   </Link>;
   const guideSettingsQuery = guideDesktop ? new URLSearchParams({
     fromPrayer: location.pathname.split("/").at(-1), fromRakah: new URLSearchParams(location.search).get("rakah") ?? "",
