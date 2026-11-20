@@ -62,6 +62,8 @@ Show the translation's name and source under every translated āyah (principle: 
 
 Generate the Tier 1 UI review files with `node scripts/export-locale-review.mjs <review-directory>`. The export includes the English ICU messages, Adult and Maktab variants, source locations, references in the app, and an index of available screenshots. Every locale file is marked as a draft. Use the English source fingerprint to match translations to the same set of messages. Choose a fresh directory for each export to preserve work in earlier drafts.
 
+After native review, record the reviewers in the catalogue’s `reviewers` array and set `_status` to `reviewed`. Use `node scripts/build-locale-pack.mjs <source-ui.json> <reviewed-catalogue.json> <output-directory>` to produce the UI catalogue. The build checks the source fingerprint, message coverage, mode variants, and ICU arguments. The review file retains the reviewer names.
+
 ## 6. Acceptance
 - Every route passes `en-XA` at 360px and 1280px with no clipped text; `en-XB` and `ur` mirror correctly.
 - Language switch updates text, numbers, dates, Hijri months and share cards without reload, offline after first download.
