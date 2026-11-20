@@ -3,6 +3,7 @@ import essentials from "../../docs/content/tajweed-essentials.json" with { type:
 import depth from "../../docs/content/tajweed-in-depth.json" with { type: "json" };
 import { splitUthmaniOpening } from "./quranOpening.ts";
 import { maddForWord } from "./tajweedMadd.ts";
+import { stoppedRaRule, vowelledRaRule, writtenSukunRaRule } from "./tajweedRa.ts";
 import { splitArabicPhrase, splitArabicWords, splitGraphemes } from "./wordAnatomy.ts";
 import type { QuranVerse } from "./quran";
 import type { Reviews } from "./reviews";
@@ -62,6 +63,9 @@ function addReadingExample(words: ReadingExample[][], index: number, example: Re
 const ruleExamples = new Map(tajweedLessons.flatMap(lesson => Object.keys(lesson.rules).map((rule, index) =>
   [rule, { rule, lesson: lesson.id, tone: tajweedTones[index % tajweedTones.length] }] as const)));
 ruleExamples.set("izhar-mutlaq", { rule: "izhar-mutlaq", lesson: "nun", tone: "neutral" });
+ruleExamples.set("ra-sukun-heavy", { rule: "ra-sukun-heavy", lesson: "ra", tone: "neutral" });
+ruleExamples.set("ra-sukun-light", { rule: "ra-sukun-light", lesson: "ra", tone: "tint" });
+ruleExamples.set("ra-sukun-either", { rule: "ra-sukun-either", lesson: "ra", tone: "soft" });
 const readingExamples = new Map<string, ReadingExample[][]>();
 for (const lesson of tajweedLessons) {
   if (lesson.id === "waqf") continue;
@@ -121,12 +125,6 @@ function articleRule(letters: string[]) {
   if (moonLetters.test(next) && sukun.test(article)) return "lam-moon";
 }
 
-function vowelledRaRule(glyph: string) {
-  if (!glyph.startsWith("ر")) return;
-  if (/[ًٌَُ]/u.test(glyph)) return "ra-heavy";
-  if (/[ٍِ]/u.test(glyph)) return "ra-light";
-}
-
 function adjacentSukunRule(glyph: string, next: string, joining: boolean) {
   if (!next) return;
   if (/^ن[ْۭۡۢ\u034f]*$/u.test(glyph)) {
@@ -149,6 +147,8 @@ function markedWordRules(letters: string[]) {
   const lam = articleRule(letters);
   if (lam) rules.add(lam);
   letters.forEach((glyph, index) => {
+    const sakinRa = writtenSukunRaRule(letters, index);
+    if (sakinRa) rules.add(sakinRa);
     // A word-initial shaddah can come from joining to the previous word.
     if (index > 0 && glyph.includes("ّ")) {
       if (glyph.startsWith("ن")) rules.add("ghunnah-nun");
@@ -215,6 +215,11 @@ export function tajweedVerseExamples(verse: QuranVerse, script: "uthmani" | "ind
     const printedStop = pauses.some(mark => stopSigns.test(mark)) &&
       (script === "uthmani" || other.pauses.some(mark => stopSigns.test(mark)));
     const canStop = endOfAyah || printedStop;
+    const stoppedRa = canStop ? stoppedRaRule(letters, verse.ref, endOfAyah) : undefined;
+    if (stoppedRa && stoppedRa === stoppedRaRule(other.letters, verse.ref, endOfAyah)) {
+      const example = ruleExamples.get(stoppedRa);
+      if (example) addReadingExample(examples, index, { ...example, condition: "stopping" });
+    }
     if (canStop && final[0] === otherFinal[0] && qalqalahLetters.test(final)
       && !final.includes("ً") && !otherFinal.includes("ً")) {
       addReadingExample(examples, index, { rule: "qalqalah-stop", lesson: "qalqalah", tone: "tint" });

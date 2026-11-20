@@ -8,7 +8,7 @@ import { juzAmma, learnedSurahs, levels, patternPracticePath, patternReviewPrefi
 import { essentialPassageTitle } from "./paths-copy";
 import { parseCorpus } from "./morphology";
 import { reviewDestination } from "./studyDesk";
-import { normalizeWord, splitArabicPhrase, splitArabicWords } from "./wordAnatomy";
+import { normalizeWord, splitArabicPhrase, splitArabicWords, splitGraphemes } from "./wordAnatomy";
 import content from "../../docs/content/roots-and-patterns.json";
 import grammar from "../../docs/content/grammar-foundations.json";
 import sentence from "../../docs/content/sentence-structure.json";
@@ -337,6 +337,37 @@ describe("Learning path progress", () => {
       expect(notes(112, 1)?.[3]).toContainEqual(expect.objectContaining({ rule: "qalqalah-stop" }));
       expect(notes(78, 39)?.[2]).toContainEqual(expect.objectContaining({ rule: "qalqalah-stop" }));
       expect(notes(109, 4)?.[4] ?? []).not.toContainEqual(expect.objectContaining({ rule: "qalqalah-stop" }));
+    }
+  });
+
+  it("marks each written rāʾ with sukūn in Juz Amma and handles the stopping exception in Al-Fajr", () => {
+    const verses = Object.entries(quran.surahs).filter(([chapter]) => Number(chapter) >= 78).flatMap(([, entries]) => entries);
+    for (const script of ["uthmani", "indopak"] as const) {
+      const notes = (chapter: number, ayah: number, position: number) =>
+        tajweedVerseExamples(quran.surahs[chapter][ayah - 1], script)?.[position - 1] ?? [];
+      expect(notes(78, 21, 4)).toContainEqual(expect.objectContaining({ rule: "ra-sukun-heavy" }));
+      expect(notes(79, 17, 3)).toContainEqual(expect.objectContaining({ rule: "ra-sukun-light" }));
+      expect(notes(89, 28, 1)).toContainEqual(expect.objectContaining({ rule: "ra-sukun-heavy" }));
+      expect(notes(94, 8, 3)).toContainEqual(expect.objectContaining({ rule: "ra-sukun-heavy" }));
+      expect(notes(89, 4, 3)).toContainEqual(expect.objectContaining({ rule: "ra-light", condition: "continuing" }));
+      expect(notes(89, 4, 3)).toContainEqual(expect.objectContaining({ rule: "ra-sukun-either", condition: "stopping" }));
+      expect(notes(89, 5, 6)).toContainEqual(expect.objectContaining({ rule: "ra-sukun-light", condition: "stopping" }));
+      expect(notes(85, 11, 14)).toContainEqual(expect.objectContaining({ rule: "ra-sukun-light", condition: "stopping" }));
+      expect(notes(97, 1, 5)).toContainEqual(expect.objectContaining({ rule: "ra-sukun-heavy", condition: "stopping" }));
+      expect(notes(93, 9, 4).filter(note => note.rule.startsWith("ra-sukun")))
+        .toEqual([{ rule: "ra-sukun-heavy", lesson: "ra", tone: "neutral" }]);
+      let written = 0;
+      for (const verse of verses) {
+        const words = splitArabicWords(verseText(verse, "uthmani").text);
+        const examples = tajweedVerseExamples(verse, script);
+        words.forEach((word, index) => {
+          const hasWrittenSukun = splitGraphemes(word).some(glyph => /^ر.*[ْۡ]/u.test(glyph));
+          const marked = examples?.[index]?.filter(note => note.rule.startsWith("ra-sukun") && !note.condition) ?? [];
+          expect(marked.length > 0, `${verse.ref}:${index + 1}`).toBe(hasWrittenSukun);
+          if (hasWrittenSukun) written++;
+        });
+      }
+      expect(written).toBe(58);
     }
   });
 
