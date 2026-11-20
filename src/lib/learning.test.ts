@@ -12,7 +12,9 @@ import { message } from "./copy";
 import { studyNames, studySearchTerm } from "./study-copy";
 import { parseQaidaReview, qaidaRows, resolveQaidaRow } from "./qaidaPractice";
 import { compareTakhti, letterForms, lettersForFamily, tracingModel } from "./takhti";
-import { fluencyPairs, fluencyRoots, matchingReadingWord, wordBankSearch, wordGlosses } from "./fluency";
+import { fluencyPairs, fluencyRoots, fluencySentences, fluencySigns, matchingReadingWord, wordBankSearch, wordGlosses } from "./fluency";
+import { fluencyFamilyKey, fluencyLessonMessages, fluencyPairKey, fluencyRootKey, fluencySentenceKey, fluencySignKey,
+  wordGlossKey, wordGlossMessages } from "./fluency-messages.mjs";
 
 describe("Qaida practice", () => {
   it("follows the vowel board order and keeps every alphabet letter with all three marks", () => {
@@ -93,6 +95,31 @@ describe("Bundled Quran", () => {
 });
 
 describe("Core Quran words", () => {
+  it("uses the shared locale catalogue for curated words, root families, comparisons, signs and sentences", () => {
+    const expected = [
+      ...Object.entries(wordGlosses).map(([word, gloss]) => [wordGlossKey(word), gloss] as const),
+      ...Object.entries(fluencyRoots).flatMap(([root, item]) => [
+        [fluencyRootKey(root), item] as const,
+        ...item.family.map(word => [fluencyFamilyKey(root, word.tr), word] as const),
+      ]),
+      ...fluencyPairs.flatMap(pair => [
+        [fluencyPairKey(pair.verse, "quran"), pair] as const,
+        [fluencyPairKey(pair.verse, "modern"), { en: pair.modernEn, bn: pair.modernBn }] as const,
+      ]),
+      ...fluencySigns.map(sign => [fluencySignKey(sign.ar), sign] as const),
+      ...fluencySentences.flatMap(sentence => [
+        [fluencySentenceKey(sentence.id, "meaning"), sentence] as const,
+        [fluencySentenceKey(sentence.id, "hint"), { en: sentence.hintEn, bn: sentence.hintBn }] as const,
+      ]),
+    ];
+    expect(expected.map(([key]) => key).sort()).toEqual(Object.keys({ ...fluencyLessonMessages, ...wordGlossMessages }).sort());
+    for (const [key, { en }] of expected) {
+      expect(message({ mode: "adult", language: "en" }, key)).toBe(en);
+      expect(message({ mode: "maktab", language: "id" }, key)).toBe(en);
+    }
+    expect(message({ mode: "maktab", language: "bn" }, fluencyRootKey("كتب"))).toBe("লেখা");
+  });
+
   it("derives an identical 125-word list with measured occurrence coverage from the bundled corpus", () => {
     const bundled = new URL("../../public/data/qac-morphology-0.4.txt.gz", import.meta.url);
     const corpus = parseCorpus(gunzipSync(readFileSync(bundled)).toString("utf8"));

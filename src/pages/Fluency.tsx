@@ -7,17 +7,20 @@ import { useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { dateKey } from "@/lib/dates";
 import { fluencyPairs, fluencyRoots, fluencySigns } from "@/lib/fluency";
+import { fluencyFamilyKey, fluencyPairKey, fluencyRootKey, fluencySignKey } from "@/lib/fluency-messages.mjs";
+import { formatQuranReference } from "@/lib/quran";
 import { saveFluencyPractice } from "@/lib/studyMilestones";
 import type { Settings } from "@/lib/storageService";
 
 export function Fluency({ settings, now }: { settings: Settings; now: Date }) {
-  const { t, language } = useCopy();
+  const { t, language, locale } = useCopy();
   const zone = settings.city.timeZone;
   const day = Number(dateKey(now, zone).slice(-2));
   const writingDay = day % 2 === 1;
   const root = writingDay ? "كتب" : "علم";
   const daily = fluencyRoots[root];
-  const signs = fluencySigns.slice(writingDay ? 0 : 3, writingDay ? 3 : 6);
+  const signs = fluencySigns.slice(writingDay ? 0 : 3, writingDay ? 3 : 6)
+    .map(word => ({ ...word, meaning: t(fluencySignKey(word.ar)) }));
   const known = useRecord<string[]>("fluency-words", []);
   const [practice, setPractice] = useState(false);
   const [saving, setSaving] = useState<string>();
@@ -42,8 +45,8 @@ export function Fluency({ settings, now }: { settings: Settings; now: Date }) {
         <h2 className="caption">{t("fluencyRootDay")}</h2>
         <ArabicText text={Array.from(root).join(" ")} />
       </div>
-      <h3>“{daily[language]}”</h3>
-      <WordFamily words={daily.family} />
+      <h3 dir="auto">“{t(fluencyRootKey(root))}”</h3>
+      <WordFamily words={daily.family.map(word => ({ ...word, meaning: t(fluencyFamilyKey(root, word.tr)) }))} />
       <p className="small">{t(writingDay ? "fluencyMaktabNote" : "wordBankOneRoot")}</p>
     </section>
     <section className="fluency-pairs">
@@ -52,12 +55,13 @@ export function Fluency({ settings, now }: { settings: Settings; now: Date }) {
         <div className="fluency-pair-modern">
           <p className="caption">{t("fluencyModernLabel")}</p>
           <ArabicText text={pair.modern} />
-          <p className="small muted">{language === "bn" ? pair.modernBn : pair.modernEn}</p>
+          <p className="small muted" dir="auto">{t(fluencyPairKey(pair.verse, "modern"))}</p>
         </div>
         <div>
           <p className="caption">{t("wordBankQuran")}</p>
           <ArabicText text={pair.quran} citation={pair.verse} verse={pair.verse} positionOffset={pair.position - 1} />
-          <p className="small muted">{pair[language]} · {pair.verse}</p>
+          <p className="small muted"><bdi>{t(fluencyPairKey(pair.verse, "quran"))}</bdi>{" · "}
+            <bdi>{formatQuranReference(pair.verse, locale)}</bdi></p>
         </div>
       </article>)}
     </section>
@@ -66,8 +70,8 @@ export function Fluency({ settings, now }: { settings: Settings; now: Date }) {
       <p className="small muted">{t("fluencySignsHint")}</p>
       <div className="equal-row" dir="rtl">
         {signs.map(word => <div className="fluency-sign" key={word.ar}>
-          <ArabicText text={word.ar} words={[{ anatomyWord: word.vowels, transliteration: word.tr, gloss: word.en }]} showGlosses={false} />
-          <small className="muted" dir="auto">{word[language]}</small>
+          <ArabicText text={word.ar} words={[{ anatomyWord: word.vowels, transliteration: word.tr, gloss: word.meaning, glossLanguage: language }]} showGlosses={false} />
+          <small className="muted" dir="auto">{word.meaning}</small>
         </div>)}
       </div>
     </section>
@@ -78,9 +82,10 @@ export function Fluency({ settings, now }: { settings: Settings; now: Date }) {
         {signs.map(word => {
           const shown = revealed.includes(word.ar);
           return <section className="card compact-stack" key={word.ar}>
-            <ArabicText text={shown ? word.vowels : word.ar} words={[{ anatomyWord: word.vowels, transliteration: word.tr, gloss: word.en }]} showGlosses={false}
+            <ArabicText text={shown ? word.vowels : word.ar}
+              words={[{ anatomyWord: word.vowels, transliteration: word.tr, gloss: word.meaning, glossLanguage: language }]} showGlosses={false}
               onWordSelected={() => setPractice(false)} />
-            {shown && <p role="status">{word[language]}</p>}
+            {shown && <p role="status" dir="auto">{word.meaning}</p>}
             <div className="equal-row">
               <button className="action light" type="button" aria-expanded={shown}
                 onClick={() => setRevealed(previous => shown ? previous.filter(item => item !== word.ar) : [...previous, word.ar])}>{t(shown ? "fluencyHideMeaning" : "fluencyShowMeaning")}</button>

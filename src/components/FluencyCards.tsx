@@ -4,25 +4,28 @@ import { ArabicText } from "@/components/ArabicText";
 import { useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { fluencySentences, matchingReadingWord, wordBankSearch, type RootWord } from "@/lib/fluency";
+import { fluencySentenceKey } from "@/lib/fluency-messages.mjs";
+import { formatQuranReference } from "@/lib/quran";
 import { saveFluencyPractice } from "@/lib/studyMilestones";
 
-export function WordFamily({ words }: { words: RootWord[] }) {
-  const { t, language } = useCopy();
+export function WordFamily({ words }: { words: (Omit<RootWord, "en" | "bn"> & { meaning: string })[] }) {
+  const { t, language, locale } = useCopy();
   return <ul className="word-family">
     {words.map(item => <li key={item.verse ? item.verse + ":" + item.position : item.ar}>
       <div>
-        <strong><span lang="en">{item.tr}</span>{item[language] && " · " + item[language]}</strong>
-        <small>{t(item.verse ? item.modern ? "wordBankQuranModern" : "wordBankQuran" : "wordBankModern")}{item.verse && " · " + item.verse}</small>
+        <strong><bdi lang="en">{item.tr}</bdi>{" · "}<bdi>{item.meaning}</bdi></strong>
+        <small>{t(item.verse ? item.modern ? "wordBankQuranModern" : "wordBankQuran" : "wordBankModern")}
+          {item.verse && <>{" · "}<bdi>{formatQuranReference(item.verse, locale)}</bdi></>}</small>
       </div>
       <ArabicText text={item.ar} compact citation={item.verse} verse={item.verse}
         positionOffset={item.position ? item.position - 1 : 0}
-        words={[{ transliteration: item.tr, gloss: item.en }]} showGlosses={false} />
+        words={[{ transliteration: item.tr, gloss: item.meaning, glossLanguage: language }]} showGlosses={false} />
     </li>)}
   </ul>;
 }
 
 export function ModernReading({ known, zone }: { known: ReadonlySet<string>; zone: string }) {
-  const { t, language } = useCopy();
+  const { t } = useCopy();
   const read = useRecord<string[]>("fluency-read", []);
   const signs = useRecord<string[]>("fluency-words", []);
   const [index, setIndex] = useState(0);
@@ -55,10 +58,10 @@ export function ModernReading({ known, zone }: { known: ReadonlySet<string>; zon
       }}>{t("wordBankNext")}</button>
     </header>
     <ArabicText text={sentence.ar} indicators={indicators} />
-    <p className="small muted">{language === "bn" ? sentence.hintBn : sentence.hintEn}</p>
+    <p className="small muted" dir="auto">{t(fluencySentenceKey(sentence.id, "hint"))}</p>
     {reveal && <div className="word-meaning" role="status">
       <ArabicText text={sentence.vowels} compact />
-      <p>{sentence[language]}</p>
+      <p dir="auto">{t(fluencySentenceKey(sentence.id, "meaning"))}</p>
     </div>}
     <div className="equal-row">
       <button className="action soft" type="button" aria-expanded={reveal} onClick={() => setReveal(value => !value)}>{t(reveal ? "fluencyHideMeaning" : "fluencyShowMeaning")}</button>

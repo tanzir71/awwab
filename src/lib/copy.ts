@@ -31,6 +31,7 @@ import { tajweedMessages } from "./tajweed-copy";
 import { speakMessages } from "./speak-copy";
 import { speakLessonMessages } from "./speak-lesson-messages.mjs";
 import { grammarLessonMessages } from "./grammar-lesson-messages.mjs";
+import { fluencyLessonMessages, wordGlossMessages } from "./fluency-messages.mjs";
 import { readingMessages } from "./reading-copy";
 import { pseudoLiteral, type PseudoLocale } from "./pseudoLocale";
 
@@ -348,7 +349,8 @@ const navMessages: Record<string, string> = {
 const formats = new Map<string, IntlMessageFormat<Record<string, string | number>>>();
 export function message(settings: CopySettings, id: string, values?: Record<string, string | number>) {
   const language = settings.pseudoLocale ? "en" : settings.language;
-  const entry = messages[id] ?? askPhraseMessages[id] ?? umrahStepMessages[id] ?? speakLessonMessages[id] ?? grammarLessonMessages[id];
+  const entry = messages[id] ?? askPhraseMessages[id] ?? umrahStepMessages[id] ?? speakLessonMessages[id]
+    ?? grammarLessonMessages[id] ?? fluencyLessonMessages[id] ?? wordGlossMessages[id];
   const installed = localeMessage(language, id, settings.mode);
   const draft = installed ?? entry?.[language] ?? entry?.en ?? id;
   const text = typeof draft === "string" ? draft : draft[settings.mode === "maktab" ? 1 : 0];

@@ -8,6 +8,7 @@ import { landingCopyEntries } from "./landing-copy.mjs";
 import { umrahStepMessages } from "../src/lib/umrah-step-messages.mjs";
 import { speakLessonMessages } from "../src/lib/speak-lesson-messages.mjs";
 import { grammarLessonMessages } from "../src/lib/grammar-lesson-messages.mjs";
+import { fluencyLessonMessages, wordGlossMessages } from "../src/lib/fluency-messages.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const { terms: glossary } = JSON.parse(readFileSync(resolve(root, "handovers/H2-languages-paths-arabic-help/data/glossary.json"), "utf8"));
@@ -121,10 +122,15 @@ for (const [key, translations] of Object.entries(umrahStepMessages)) {
   if (messages.has(key)) throw new Error(`Duplicate catalogue message: ${key}`);
   messages.set(key, { ...translations, definition: { file: "docs/content/umrah-steps.json" }, references: [] });
 }
-for (const [catalogue, file] of [[speakLessonMessages, "src/pages/Speak.tsx"], [grammarLessonMessages, "src/pages/Grammar.tsx"]]) {
+for (const [catalogue, ...files] of [
+  [speakLessonMessages, "src/pages/Speak.tsx"],
+  [grammarLessonMessages, "src/pages/Grammar.tsx"],
+  [fluencyLessonMessages, "src/pages/Fluency.tsx", "src/components/FluencyCards.tsx", "src/pages/WordBank.tsx"],
+  [wordGlossMessages, "src/pages/WordBank.tsx", "src/pages/ReadingPractice.tsx"],
+]) {
   for (const [key, entry] of Object.entries(catalogue)) {
     if (messages.has(key)) throw new Error(`Duplicate catalogue message: ${key}`);
-    messages.set(key, { ...entry, references: [{ file }] });
+    messages.set(key, { ...entry, references: files.map(file => ({ file })) });
   }
 }
 

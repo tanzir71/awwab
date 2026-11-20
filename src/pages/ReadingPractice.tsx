@@ -9,6 +9,7 @@ import { VerseAudio } from "@/components/VerseAudio";
 import { useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { wordGlosses } from "@/lib/fluency";
+import { wordGlossKey } from "@/lib/fluency-messages.mjs";
 import { focusListItem } from "@/lib/focusListItem";
 import { studyPhrases, studyQuran, verseText, type StudyQuran } from "@/lib/hifz";
 import { showEnglishQuranMeaning } from "@/lib/languagePreferences";
@@ -118,9 +119,9 @@ function ReadingVerse({ verse, script, step, corpus, knownRoots, english = false
     ? splitArabicPhrase(rendered).filter(part => part.word).map((_part, index) => {
       const row = corpus.positions.get(`${verse.ref}:${index + 1}`);
       if (!row) return {};
-      const gloss = wordGlosses[coreWordKey(row).slice(5)];
+      const key = coreWordKey(row).slice(5);
       const familiar = row.root && knownRoots?.has(row.root);
-      return { root: row.root, gloss: gloss?.[language] ?? gloss?.en, glossLanguage: gloss?.[language] ? language : "en",
+      return { root: row.root, gloss: wordGlosses[key] ? t(wordGlossKey(key)) : undefined, glossLanguage: language,
         annotation: familiar ? { tone: "soft", label: t("readingKnownRoot") } : undefined };
     }) : tajweed ? tajweedReadingExamples(verse.ref)?.map(notes => {
       const lessons = notes.map(note => ({ title: t(`tajweedRule-${note.rule}`), to: tajweedLessonPath(note.lesson) }));

@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useRecord } from "@/hooks/use-awwab";
 import { dateKey, formatDay } from "@/lib/dates";
 import { fluencyRoots, wordBankSearch, wordGlosses } from "@/lib/fluency";
+import { fluencyFamilyKey, fluencyRootKey, wordGlossKey } from "@/lib/fluency-messages.mjs";
 import { coreVocabulary, loadMorphology } from "@/lib/morphology";
 import { coreWordSource, coreWordTotal, knownCoreQuranWords } from "@/lib/quran";
 import { grades, isDue, type ReviewGrade, type Reviews } from "@/lib/reviews";
@@ -32,12 +33,14 @@ function pronunciation(word: string) {
 function RootExplorer({ root, corpus, pinned }: { root: string; corpus: Corpus | undefined; pinned: string }) {
   const { t, language } = useCopy();
   const curated = fluencyRoots[root];
-  const family = curated?.family ?? corpus?.families.get(root)?.slice(0, 6).map(item => {
-    const ar = item.lemma || item.word;
-    const gloss = wordGlosses[ar] ?? wordGlosses[item.lemma?.replace(/\p{M}/gu, "") ?? ""];
-    return { ar, tr: gloss?.tr ?? pronunciation(ar), en: gloss?.en ?? studyNames.wordKind("en", item.type),
-      bn: gloss?.bn ?? studyNames.wordKind("bn", item.type), verse: item.verse, position: item.position };
-  }) ?? [];
+  const family = curated?.family.map(word => ({ ...word, meaning: t(fluencyFamilyKey(root, word.tr)) }))
+    ?? corpus?.families.get(root)?.slice(0, 6).map(item => {
+      const ar = item.lemma || item.word;
+      const key = wordGlosses[ar] ? ar : item.lemma?.replace(/\p{M}/gu, "") ?? "";
+      const gloss = wordGlosses[key];
+      return { ar, tr: gloss?.tr ?? pronunciation(ar), meaning: gloss ? t(wordGlossKey(key)) : studyNames.wordKind(language, item.type),
+        verse: item.verse, position: item.position };
+    }) ?? [];
   const isPinned = pinned === root;
 
   return <section className="card word-root-panel" aria-label={t("rootExplorer")}>
@@ -49,7 +52,8 @@ function RootExplorer({ root, corpus, pinned }: { root: string; corpus: Corpus |
     </header>
     <div className="row-between word-root-label">
       <div>
-        <h3><span lang="en">{curated?.tr ?? Array.from(root).map(pronunciation).join("-")}</span>{curated && " · " + curated[language]}</h3>
+        <h3><bdi lang="en">{curated?.tr ?? Array.from(root).map(pronunciation).join("-")}</bdi>
+          {curated && <>{" · "}<bdi>{t(fluencyRootKey(root))}</bdi></>}</h3>
         <p className="small muted">{t("wordBankOneRoot")}</p>
       </div>
       <ArabicText text={Array.from(root).join(" ")} />
@@ -97,6 +101,7 @@ export function WordBank({ settings, desktop, now }: { settings: Settings; deskt
   }) : [], [corpus]);
   const words = vocabulary.map(word => ({
     ...word,
+    meaning: word.gloss ? t(wordGlossKey(word.key.slice(5))) : undefined,
     kind: studyNames.wordKind(language, word.type),
     state: known.has(word.key) ? "known" as const : reviews[word.key] ? "learning" as const : "new" as const,
     review: reviews[word.key],
@@ -106,7 +111,7 @@ export function WordBank({ settings, desktop, now }: { settings: Settings; deskt
   const filtered = words.filter(item => {
     if (filter === "due" && !item.due) return false;
     if ((filter === "known" || filter === "learning") && item.state !== filter) return false;
-    return !term || [item.text, item.key.slice(5), item.gloss?.en, item.gloss?.bn, item.tr, item.root, item.type, item.kind]
+    return !term || [item.text, item.key.slice(5), item.meaning, item.gloss?.en, item.gloss?.bn, item.tr, item.root, item.type, item.kind]
       .some(value => value && wordBankSearch(value).includes(term));
   }).sort((first, second) => {
     if (sort === "arabic") return letterOrder.compare(first.text, second.text);
@@ -197,9 +202,9 @@ export function WordBank({ settings, desktop, now }: { settings: Settings; deskt
             }>{t(column)}</th>)}</tr></thead>
             <tbody>{visible.map(item => <tr key={item.key} data-root-selected={selectedRow === item.key}>
               <td><ArabicText text={item.text} citation={item.verse} verse={item.verse} positionOffset={item.position - 1}
-                words={[{ transliteration: item.tr, gloss: item.gloss?.en, root: item.root }]} showGlosses={false} /></td>
+                words={[{ transliteration: item.tr, gloss: item.meaning, glossLanguage: language, root: item.root }]} showGlosses={false} /></td>
               <td><strong lang="en">{item.tr}</strong></td>
-              <td>{item.gloss?.[language] ?? "—"}</td>
+              <td dir="auto">{item.meaning ?? "—"}</td>
               <td>{item.root ? <ArabicText text={Array.from(item.root).join(" ")} compact
                 onWordSelected={() => {
                   setRoot(item.root);
@@ -237,11 +242,12 @@ export function WordBank({ settings, desktop, now }: { settings: Settings; deskt
         <DialogTitle>{t("reviewWord")}</DialogTitle>
         {active && <>
           <ArabicText text={active.text} citation={active.verse} verse={active.verse} positionOffset={active.position - 1}
-            words={[{ transliteration: active.tr, gloss: active.gloss?.en, root: active.root }]} showGlosses={false} onWordSelected={() => review(undefined)} />
+            words={[{ transliteration: active.tr, gloss: active.meaning, glossLanguage: language, root: active.root }]} showGlosses={false}
+            onWordSelected={() => review(undefined)} />
           <button className="action light" type="button" aria-expanded={reveal} onClick={() => setReveal(previous => !previous)}>
             {t(reveal ? "fluencyHideMeaning" : "showCue")}
           </button>
-          {reveal && <p role="status">{active.gloss?.[language] ?? t("spellWordAloud")}</p>}
+          {reveal && <p role="status" dir="auto">{active.meaning ?? t("spellWordAloud")}</p>}
           <div className="equal-row">{(Object.keys(grades) as ReviewGrade[]).map(grade => <button type="button" className={`action ${grade === "got-it" ? "" : "light"}`}
             key={grade} disabled={saving} onClick={() => void save(grade)}>{t(grade)}</button>)}</div>
         </>}

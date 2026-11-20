@@ -11,7 +11,7 @@ export const fluencyMessages: MessageCatalog = {
   wordBankNewHint: { en: "added in frequency order", bn: "ব্যবহারের হার অনুসারে সাজানো" },
   wordBankFilter: { en: "Filter words", bn: "শব্দ বাছাই করুন" },
   wordBankAll: { en: "All", bn: "সব" },
-  wordBankSearch: { en: "Search Arabic, English or root", bn: "আরবি, বাংলা, ইংরেজি বা শব্দমূল খুঁজুন" },
+  wordBankSearch: { en: "Search Arabic, meaning or root", bn: "আরবি, অর্থ বা শব্দমূল খুঁজুন" },
   wordBankSort: { en: "Sort", bn: "সাজান" },
   wordBankSortFreq: { en: "Sort: most frequent", bn: "সাজান · সবচেয়ে বেশি ব্যবহৃত" },
   wordBankSortArabic: { en: "Sort: Arabic alphabet", bn: "সাজান · আরবি বর্ণক্রম" },
