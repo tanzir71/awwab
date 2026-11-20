@@ -217,6 +217,8 @@ describe("zakat", () => {
     expect(zakatMoney(result.net, "BDT", "en", true)).toBe("৳ 7,49,912");
     expect(zakatMoney(result.net, "BDT", "bn", true).replace(/[৳\s]/g, "")).toBe("৭,৪৯,৯১২");
     expect(zakatMoney(result.net, "BDT", "bn-u-nu-latn", true).replace(/[৳\s]/g, "")).toBe("7,49,912");
+    expect(zakatMoney(123_456.78, "BDT", "id", true).replace(/[^0-9.,]/g, "")).toBe("123.456,78");
+    expect(zakatMoney(123_456.78, "IDR", "id", true)).toBe("Rp\u00a0123.456,78");
   });
 
   it("reads the single saved price from an older profile in its original unit", () => {
