@@ -1,7 +1,9 @@
 import { defaults, db, getRecord, updateSettings, type Settings } from "./storageService";
+import { methodNames, type PrayerMethod } from "./prayerServices";
 import { quranText } from "./quran";
 import alphabet from "../../docs/content/arabic-letters.json";
 import onboarding from "../../docs/content/onboarding.json";
+import localeInventory from "../../handovers/H2-languages-paths-arabic-help/data/locales.json";
 
 type Placement = {
   title: string;
@@ -36,6 +38,15 @@ export function desktopPlacementPassed(answers: readonly string[]) {
 
 export function placementLesson(passed: number) {
   return placement[passed - 1]?.next ?? 1;
+}
+
+export function prayerSetupSuggestion(language: Settings["language"]): Pick<Settings, "method" | "school"> | undefined {
+  const suggestion = localeInventory.locales.find(locale => locale.code === language)?.suggestedPrayerDefaults;
+  if (!suggestion) return;
+  const method = suggestion.method.replace(/ \([^)]*\)$/, "");
+  const school = suggestion.asr === "hanafi" ? "hanafi" :
+    ["shafii", "maliki/shafii Asr (standard shadow)"].includes(suggestion.asr) ? "shafi" : undefined;
+  if (school && Object.prototype.hasOwnProperty.call(methodNames, method)) return { method: method as PrayerMethod, school };
 }
 
 export function completeOnboarding(mode: Settings["mode"], script: Settings["script"], passed: number,

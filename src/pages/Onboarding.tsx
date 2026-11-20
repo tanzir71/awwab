@@ -7,7 +7,7 @@ import { IS_PREVIEW } from "@/lib/config";
 import { useCopy } from "@/lib/copy";
 import { isAvailableLanguage, languages } from "@/lib/languagePreferences";
 import { localePackAsset } from "@/lib/localePacks";
-import { completeOnboarding, desktopPlacement, desktopPlacementPassed, placement } from "@/lib/onboarding";
+import { completeOnboarding, desktopPlacement, desktopPlacementPassed, placement, prayerSetupSuggestion } from "@/lib/onboarding";
 import { formatQuranReference, quranText } from "@/lib/quran";
 import { QuranVerseMeaning } from "@/components/QuranStudySources";
 import { restoreBackup, selectAppLanguage, type Settings } from "@/lib/storageService";
@@ -41,13 +41,14 @@ function SetupWordmark() {
 }
 
 function DesktopSetup({ step, language, children }: { step: number; language: ReactNode; children: ReactNode }) {
-  const { t } = useCopy();
+  const { t, locale } = useCopy();
+  const number = new Intl.NumberFormat(locale);
   return <div className="onboarding-desktop">
     <aside className="onboarding-aside night" data-theme-preview="adult">
       <SetupWordmark />
       <div className="stack"><WelcomeVerse />
         <ol className="setup-desktop-steps">{stepTitles.map((title, i) => <li key={title} data-passed={i < step - 1} aria-current={i === step - 1 ? "step" : undefined}>
-          <span aria-hidden="true">{i < step - 1 ? <DesignIcon name="onboarding-step-check" size={14} /> : i + 1}</span>{t(title)}
+          <span aria-hidden="true">{i < step - 1 ? <DesignIcon name="onboarding-step-check" size={14} /> : number.format(i + 1)}</span>{t(title)}
         </li>)}</ol>
       </div>
       <p className="small">{t("setupDevice")}</p>
@@ -62,7 +63,7 @@ function DesktopSetup({ step, language, children }: { step: number; language: Re
 
 function SetupProgress({ step }: { step: number }) {
   const { t } = useCopy();
-  return <div className="setup-steps" role="img" aria-label={t("setupStep", { step })}>
+  return <div className="setup-steps" role="img" aria-label={t("setupStep", { step, total: stepTitles.length })}>
     {[1, 2, 3, 4].map(i => <span key={i} data-done={i <= step} data-current={i === step} />)}
   </div>;
 }
@@ -82,12 +83,18 @@ export function Onboarding({ settings, desktop }: { settings: Settings; desktop:
   const [saving, setSaving] = useState(false);
   const heading = useRef<HTMLHeadingElement>(null);
   const backupFile = useRef<HTMLInputElement>(null);
+  const prayerStep = desktopFlow ? 3 : placement.length + 2;
 
   useLayoutEffect(() => {
     if (step === 0) return;
     window.scrollTo(0, 0);
     heading.current?.focus({ preventScroll: true });
   }, [step, question]);
+
+  function advanceToPrayer(passed: number) {
+    setStartingPoint(passed);
+    setStep(prayerStep);
+  }
 
   async function finish(passed: number, preferences: Partial<Settings> = {}) {
     if (saving) return;
@@ -207,19 +214,26 @@ export function Onboarding({ settings, desktop }: { settings: Settings; desktop:
     {desktopFlow ? <DesktopSetup step={2} language={languagePicker}>{choose}</DesktopSetup> : <div className="onboarding-inner">{choose}</div>}
   </main>;
 
-  if (desktopFlow && step === 3) return <main className="onboarding onboarding-prayer" data-theme-preview={mode}>
-    <DesktopSetup step={4} language={languagePicker}>
+  if (step === prayerStep) {
+    const prayerContent = <>
+      {!desktopFlow && <header className="row-between onboarding-step-header">
+        <SetupProgress step={4} />
+        <button className="text-button muted" type="button" disabled={saving} onClick={() => void finish(startingPoint)}>{t("skip")}</button>
+      </header>}
       <h1 ref={heading} tabIndex={-1}>{t("prayerTimes")}</h1>
-      <CityForm initial={settings} saving={saving} submitLabel="setupFinish" save={patch => finish(startingPoint, patch)} />
+      <CityForm initial={settings} suggestion={prayerSetupSuggestion(language)} saving={saving} submitLabel="setupFinish"
+        save={patch => finish(startingPoint, patch)}
+        onBack={() => setStep(desktopFlow ? 2 : 2 + Math.min(startingPoint, placement.length - 1))} />
       {notice && <p role="alert">{t(notice)}</p>}
-      <footer className="setup-desktop-actions"><button className="action light" type="button" disabled={saving} onClick={() => setStep(2)}>{t("back")}</button></footer>
-    </DesktopSetup>
-  </main>;
+    </>;
+    return <main className="onboarding onboarding-prayer" data-theme-preview={mode}>
+      {desktopFlow ? <DesktopSetup step={4} language={languagePicker}>{prayerContent}</DesktopSetup> : <div className="onboarding-inner">{prayerContent}</div>}
+    </main>;
+  }
 
   if (desktopFlow) {
     const sample = desktopPlacement[question];
     const ref = sample.chapter && `${sample.chapter}:${sample.verse}`;
-    const advance = (passed: number) => { setStartingPoint(passed); setStep(3); };
     return <main className="onboarding onboarding-recall" data-theme-preview={mode}>
       <DesktopSetup step={3} language={languagePicker}>
         <h1 ref={heading} tabIndex={-1}>{t("setupCanRead")}</h1><p className="muted">{t("setupEightQuestions")}</p>
@@ -237,10 +251,10 @@ export function Onboarding({ settings, desktop }: { settings: Settings; desktop:
           onClick={() => setResponses(values => [...values.slice(0, question), answer])}><strong>{t(`setupAnswer-${answer}`)}</strong><small>{t(`setupAnswerHint-${answer}`)}</small></button>)}</div>
         <div className="setup-question-dots" aria-hidden="true">{desktopPlacement.map((_, i) => <span key={i} data-done={i < question} data-current={i === question} />)}</div>
         <footer className="setup-desktop-actions row-between">
-          <button className="action light" type="button" onClick={() => advance(0)}>{t("setupSkipPlacement")}</button>
+          <button className="action light" type="button" onClick={() => advanceToPrayer(0)}>{t("setupSkipPlacement")}</button>
           <button className="action" type="button" disabled={!responses[question]} onClick={() => {
             setShowLetters(false);
-            if (question + 1 === desktopPlacement.length) advance(desktopPlacementPassed(responses));
+            if (question + 1 === desktopPlacement.length) advanceToPrayer(desktopPlacementPassed(responses));
             else setQuestion(index => index + 1);
           }}>{t("hifzNext")}</button>
         </footer>
@@ -276,10 +290,10 @@ export function Onboarding({ settings, desktop }: { settings: Settings; desktop:
       </section>
       <div className="onboarding-recall-actions">
         <button className="action" type="button" disabled={saving} onClick={() => {
-          if (index + 1 === placement.length) void finish(index + 1);
+          if (index + 1 === placement.length) advanceToPrayer(index + 1);
           else setStep(value => value + 1);
         }}>{t("canRead")}</button>
-        <div className="equal-row">{["readSlowly", "notYet"].map(label => <button key={label} className="action light" type="button" disabled={saving} onClick={() => void finish(index)}>{t(label)}</button>)}</div>
+        <div className="equal-row">{["readSlowly", "notYet"].map(label => <button key={label} className="action light" type="button" disabled={saving} onClick={() => advanceToPrayer(index)}>{t(label)}</button>)}</div>
       </div>
       <section className="card onboarding-recognition">
         <h2><DesignIcon name="onboarding-sparkles" size={18} />{t("setupRecognise")}</h2>
@@ -288,7 +302,7 @@ export function Onboarding({ settings, desktop }: { settings: Settings; desktop:
         {citation && <p className="small muted"><bdi>{formatQuranReference(citation, locale)}</bdi></p>}
       </section>
       {notice && <p role="status" className="small muted">{t(notice)}</p>}
-      <button className="text-button muted justify-self-end" type="button" disabled={saving} onClick={() => void finish(index)}>{t("skip")}</button>
+      <button className="text-button muted justify-self-end" type="button" disabled={saving} onClick={() => advanceToPrayer(index)}>{t("skip")}</button>
     </div>
   </main>;
 }

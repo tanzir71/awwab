@@ -43,6 +43,7 @@ Tier 1 covers the largest non-Arab Muslim populations (Indonesia, Pakistan, Indi
   | Malayalam / Tamil / Ethiopic | Noto Sans Malayalam / Tamil / Ethiopic | 1.5 |
   Urdu decision: Nastaliq was hard to read at UI sizes in testing, so the UI uses Noto Sans Arabic (see A04-ur).
 - **Per-locale prayer defaults** are *suggestions* in onboarding step 4 (`suggestedPrayerDefaults` in `locales.json`), never forced. Persian (Iran) and Azerbaijani have Shia majorities: Jaʿfari fiqh (method Tehran, combined prayers, different adhan wording) is a **content scope decision** for the product owner and needs scholar input before fa/az ship as more than UI translations.
+  - The Prayer times step on phone and desktop shows the suggestion when Awwab supports both the calculation method and Asr option. Applying it updates the form. Saving commits the selected settings to the device.
 
 ## 4. Translated religious content (licences must be checked before bundling)
 | Content | Candidate sources (verify redistribution rights for an offline app) |

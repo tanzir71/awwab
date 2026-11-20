@@ -274,6 +274,10 @@
 .onboarding-desktop-page .onboarding-welcome-footer { justify-items: start; }
 .onboarding-desktop-page .onboarding-welcome-footer > p:first-child { margin: 0; max-width: 45ch; color: var(--c-ink-muted); }
 .onboarding-prayer form .field { max-width: 480px; }
+.onboarding-prayer .onboarding-prayer-suggestion { max-width: 480px; padding: 12px; gap: 4px; background: var(--c-primary-soft); box-shadow: none; }
+.onboarding-prayer-suggestion h2 { font: var(--type-body-strong); }
+.onboarding-prayer-suggestion .text-button { justify-self: start; min-height: 44px; }
+.onboarding-prayer-suggestion .text-button[aria-disabled="true"] { color: var(--c-ink-muted); text-decoration: none; cursor: default; }
 @media (max-width: 1023px) {
   .onboarding-desktop { grid-template-columns: minmax(0, 1fr); }
   .onboarding-aside { display: none; }

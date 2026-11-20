@@ -16,7 +16,7 @@ import { message } from "./copy";
 import { updateWordChoice } from "./storageService";
 import { reviewCard, type Reviews } from "./reviews";
 import { countKnownQuranWords } from "./quran";
-import { completeOnboarding, desktopPlacementPassed, placementLesson } from "./onboarding";
+import { completeOnboarding, desktopPlacementPassed, placementLesson, prayerSetupSuggestion } from "./onboarding";
 import { finishQaidaLesson, finishSpeakUnit, markReadingPortion, rememberFlowPlace, rememberQaidaPlace, saveFluencyPractice,
   saveJuzRecitalRating, saveQaidaRowReview, saveSurahReview, saveTakhtiPractice, saveWordReview, setAyahFamiliar, setTeacherCheck, wordMilestones } from "./studyMilestones";
 import { defaultSpeakVariety, speakCourseVariety, speakGoalsKey, speakProgressKey, speakVarietyKey } from "./speakCurriculum";
@@ -44,6 +44,19 @@ describe("onboarding", () => {
     expect(desktopPlacementPassed([])).toBe(0);
     expect(desktopPlacementPassed(["easy", "easy", "easy", "easy", "effort", "easy", "easy", "easy"])).toBe(1);
     expect(desktopPlacementPassed(Array(8).fill("easy"))).toBe(4);
+  });
+
+  it("looks up supported locale suggestions and keeps the saved schedule without an explicit choice", async () => {
+    expect(prayerSetupSuggestion("bn")).toEqual({ method: "Karachi", school: "hanafi" });
+    expect(prayerSetupSuggestion("ur")).toEqual({ method: "Karachi", school: "hanafi" });
+    expect(prayerSetupSuggestion("tr")).toEqual({ method: "Turkey", school: "hanafi" });
+    expect(prayerSetupSuggestion("fr")).toEqual({ method: "MuslimWorldLeague", school: "shafi" });
+    for (const language of ["en", "id", "ms", "fa", "az", "ru"]) {
+      expect(prayerSetupSuggestion(language)).toBeUndefined();
+    }
+    await updateSettings({ language: "bn", method: "Egyptian", school: "shafi" });
+    await completeOnboarding("adult", "indopak", 0);
+    expect(await getRecord("settings", defaults)).toMatchObject({ method: "Egyptian", school: "shafi" });
   });
 
   it("saves mode, script and placement together and keeps them after a second completion", async () => {

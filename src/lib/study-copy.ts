@@ -259,7 +259,7 @@ export const studyMessages: MessageCatalog = {
   restoreError: { en: "This file could not be restored. Choose an Awwab backup.", bn: "ফাইলটি থেকে তথ্য ফেরানো যায়নি। আওয়াবের একটি ব্যাকআপ বেছে নিন।" },
   aboutAwwab: { en: "About awwab", bn: "আওয়াব সম্পর্কে" },
   skip: { en: "Skip", bn: "এড়িয়ে যান" },
-  setupStep: { en: "Step {step} of 3", bn: "৩টির মধ্যে {step, number} নম্বর ধাপ" },
+  setupStep: { en: "Step {step, number} of {total, number}", bn: "{total, number}টির মধ্যে {step, number} নম্বর ধাপ" },
   chooseLearningMode: { en: "How would you like to learn?", bn: "কীভাবে শিখতে চান?" },
   maktabOnboardingTitle: { en: "Maktab mode", bn: "মক্তব মোড" },
   chooseFamiliarScript: { en: "Which script did you learn with?", bn: "কোন লিপিতে শিখেছিলেন?" },
