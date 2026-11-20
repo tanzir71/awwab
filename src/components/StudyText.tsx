@@ -4,8 +4,9 @@ import { useCopy } from "@/lib/copy";
 
 const arabicRun = /([\p{Script=Arabic}\p{M}]+(?:[ \t]+[\p{Script=Arabic}\p{M}]+)*)/u;
 
-export function StudyText({ text }: { text: string }) {
-  return <>{text.split(arabicRun).map((part, index) => index % 2
+export function StudyText({ text, honorificsOnly = false }: { text: string; honorificsOnly?: boolean }) {
+  const arabic = honorificsOnly ? /(ﷺ)/u : arabicRun;
+  return <>{text.split(arabic).map((part, index) => index % 2
     ? <ArabicText key={index} text={part} preserveSeparators /> : <Fragment key={index}>{part}</Fragment>)}</>;
 }
 

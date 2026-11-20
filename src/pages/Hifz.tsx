@@ -266,7 +266,7 @@ function PassagePlan({ passage, portions, settings, now }: { passage: HifzPassag
       </Link>
     </section>}
     {passage.source && <section className="card compact-stack hifz-why"><h2>{t("hifzWhy")}</h2>
-      {passage.why && <p lang={virtueLanguage}><StudyText text={t(virtue)} /></p>}
+      {passage.why && <p lang={virtueLanguage} dir="auto"><StudyText text={t(virtue)} honorificsOnly /></p>}
       <p className="small muted"><span className="chip soft">{t(passage.source.grade === "hasan" ? "hifzHasan" : "hifzSahih")}</span> {passage.source.ref}</p>
     </section>}
   </>;
