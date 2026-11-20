@@ -5,7 +5,8 @@ import { hadithArchiveVersion, hadithCollections, hadithSource } from "../src/li
 import { splitUthmaniOpening } from "../src/lib/quranOpening.ts";
 import { tajweedMessages } from "../src/lib/tajweed-copy.ts";
 import { tajweedClip, tajweedDepthLessons, tajweedExcerpt, tajweedIntroKey, tajweedLessons, tajweedLessonSources,
-  tajweedReadingExamples, tajweedReference, tajweedSampleKey, tajweedTitleKey } from "../src/lib/tajweed.ts";
+  tajweedReference, tajweedSampleKey, tajweedTitleKey, tajweedVerseExamples } from "../src/lib/tajweed.ts";
+import { splitArabicWords } from "../src/lib/wordAnatomy.ts";
 import { pronunciationReview } from "./pronunciation-review.mjs";
 
 const [output] = process.argv.slice(2);
@@ -116,23 +117,50 @@ function passageRow(entry) {
   };
 }
 
+const juzAmma = Object.entries(quran.surahs).filter(([chapter]) => Number(chapter) >= 78).flatMap(([, verses]) => verses);
+const readingCoverage = { uthmani: 0, indopak: 0 };
+groups["juz-amma"] = "Juz ʿAmma reader";
+const readingRows = juzAmma.flatMap(verse => {
+  const text = { uthmani: splitUthmaniOpening(verse.uthmani, verse.ref).text, indopak: verse.indopak };
+  const sources = new Map([["ayah", { title: `Quran ${verse.ref}`, url: `https://quran.com/${verse.ref.replace(":", "/")}` }]]);
+  const fields = [];
+  for (const [script, name] of [["uthmani", "Uthmani"], ["indopak", "IndoPak"]]) {
+    const annotations = tajweedVerseExamples(verse, script);
+    if (!annotations) continue;
+    readingCoverage[script]++;
+    const words = splitArabicWords(text[script]);
+    annotations.forEach((notes, index) => {
+      const labels = notes.map(note => {
+        const lesson = tajweedLessons.find(item => item.id === note.lesson);
+        for (const source of tajweedLessonSources(lesson, false)) sources.set(source.url, source);
+        return `${tajweedMessages[tajweedTitleKey(note.lesson)].en} · ${tajweedMessages[`tajweedRule-${note.rule}`].en}`;
+      });
+      fields.push({ label: `${name} word ${index + 1} · ${labels.join(" / ")}`, value: words[index], lang: "ar" });
+    });
+  }
+  return fields.length ? [{
+    id: `reader/${verse.ref}`, variety: "reading", group: "juz-amma", label: verse.ref,
+    expected: { ar: text.uthmani, indopak: text.indopak }, fields, recordings: [], sources: [...sources.values()],
+  }] : [];
+});
+
 const rows = [
   ...tajweedLessons.flatMap(lesson => tajweedRows(lesson, false)),
   ...tajweedDepthLessons.flatMap(lesson => tajweedRows(lesson, true)),
   ...essentialPassages.map(passageRow),
+  ...readingRows,
 ];
-const juzAmma = Object.entries(quran.surahs).filter(([chapter]) => Number(chapter) >= 78).flatMap(([, verses]) => verses);
-const marked = juzAmma.filter(verse => tajweedReadingExamples(verse.ref)).length;
 review.write(output, {
   title: "Tajweed and memorisation scholar review",
   reviewFormat: "awwab-scholar-review",
   filename: "awwab-scholar-review.json",
-  instructions: `Check the app’s lesson wording, Quran excerpts, recitation references and memorisation citations. Record corrections in Notes. The Fluent reading guide currently marks examples in ${marked} of the ${juzAmma.length} āyāt of Juz ʿAmma.`,
+  instructions: `Check the app’s lesson wording, Quran excerpts, recitation references, reading annotations and memorisation citations. Record corrections in Notes. The Juz ʿAmma reader currently shows examples in ${readingCoverage.uthmani} Uthmani āyāt and ${readingCoverage.indopak} IndoPak āyāt out of ${juzAmma.length}.`,
   editionNotice: quran.notice,
   varieties: {
     essentials: { label: "Tajweed Essentials", assignment: "Check the rule wording, example and audio together." },
     advanced: { label: "Tajweed in depth", assignment: "Check the lesson explanation, focus letters and differences between scripts." },
     memorise: { label: "Memorisation", assignment: "Compare each proposed virtue with its cited narration and check the study range." },
+    reading: { label: "Reading annotations", assignment: "Check each marked word and its rule against the two scripts. Record any missing or misplaced marks." },
   },
   varietyLabel: "Material",
   groupLabel: "Lesson or collection",

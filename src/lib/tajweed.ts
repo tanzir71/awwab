@@ -1,7 +1,9 @@
 import originalLesson from "../../docs/content/tajweed-nun.json" with { type: "json" };
 import essentials from "../../docs/content/tajweed-essentials.json" with { type: "json" };
 import depth from "../../docs/content/tajweed-in-depth.json" with { type: "json" };
-import { splitArabicPhrase, splitArabicWords } from "./wordAnatomy.ts";
+import { splitUthmaniOpening } from "./quranOpening.ts";
+import { splitArabicPhrase, splitArabicWords, splitGraphemes } from "./wordAnatomy.ts";
+import type { QuranVerse } from "./quran";
 import type { Reviews } from "./reviews";
 import { studyRecitation } from "./studyRecitations.ts";
 
@@ -38,6 +40,12 @@ export const tajweedSampleKey = (sample: TajweedSample) => `${tajweedReference(s
 export const tajweedReviewId = (lesson: TajweedLesson, sample: TajweedSample) => `${tajweedReviewPrefix}${lesson.id}:${tajweedSampleKey(sample)}`;
 
 type ReadingExample = { rule: string; lesson: string; tone: typeof tajweedTones[number] };
+
+function addReadingExample(words: ReadingExample[][], index: number, example: ReadingExample) {
+  const notes = words[index] ??= [];
+  if (!notes.some(note => note.rule === example.rule)) notes.push(example);
+}
+
 const readingExamples = new Map<string, ReadingExample[][]>();
 for (const lesson of tajweedLessons) {
   if (lesson.id === "waqf") continue;
@@ -47,14 +55,60 @@ for (const lesson of tajweedLessons) {
     const words = readingExamples.get(ref) ?? [];
     const tone = tajweedTones[rules.indexOf(sample.rule) % tajweedTones.length];
     for (let index = sample.first - 1; index < sample.last; index++) {
-      const notes = words[index] ??= [];
-      if (!notes.some(note => note.rule === sample.rule)) notes.push({ rule: sample.rule, lesson: lesson.id, tone });
+      addReadingExample(words, index, { rule: sample.rule, lesson: lesson.id, tone });
     }
     readingExamples.set(ref, words);
   }
 }
 
 export const tajweedReadingExamples = (verse: string) => readingExamples.get(verse);
+
+const pauseMarks: Record<string, string> = {
+  "ۖ": "waqf-continue", "ۗ": "waqf-pause", "ۘ": "waqf-required",
+  "ۙ": "waqf-avoid", "ۚ": "waqf-choice", "ۛ": "waqf-pair",
+};
+
+function markedWordRules(text: string) {
+  const letters = splitGraphemes(text);
+  const rules = new Set<string>();
+  letters.forEach((glyph, index) => {
+    // A word-initial shaddah can come from joining to the previous word.
+    if (index > 0 && glyph.includes("ّ")) {
+      if (glyph.startsWith("ن")) rules.add("ghunnah-nun");
+      if (glyph.startsWith("م")) rules.add("ghunnah-mim");
+    }
+    if (index < letters.length - 1 && /^[قطبجد].*[ْۡ]/u.test(glyph)) rules.add("qalqalah-inside");
+  });
+  return rules;
+}
+
+export function tajweedVerseExamples(verse: QuranVerse, script: "uthmani" | "indopak") {
+  const curated = tajweedReadingExamples(verse.ref);
+  if (Number(verse.ref.split(":")[0]) < 78) return curated;
+
+  const examples = curated?.map(notes => notes.slice()) ?? [];
+  const parts = splitArabicPhrase(splitUthmaniOpening(verse.uthmani, verse.ref).text);
+  const indopakWords = splitArabicPhrase(verse.indopak).filter(part => part.word);
+  const sameWordCount = parts.filter(part => part.word).length === indopakWords.length;
+  let word = -1;
+  for (const part of parts) {
+    if (part.word) word++;
+    if (part.word && sameWordCount) {
+      const otherRules = markedWordRules(indopakWords[word].text);
+      for (const rule of markedWordRules(part.text)) {
+        // IndoPak and Uthmani sometimes mark joining or sukūn differently.
+        if (!otherRules.has(rule)) continue;
+        const lesson = rule === "qalqalah-inside" ? "qalqalah" : "ghunnah";
+        addReadingExample(examples, word, { rule, lesson, tone: rule === "ghunnah-mim" ? "tint" : "neutral" });
+      }
+    }
+    if (word < 0 || script !== "uthmani") continue;
+    for (const mark of part.text.match(/[\u06d6-\u06db]/gu) ?? []) {
+      addReadingExample(examples, word, { rule: pauseMarks[mark], lesson: "waqf", tone: "accent" });
+    }
+  }
+  return examples.length ? examples : undefined;
+}
 
 export const tajweedClip = (sample: TajweedSample) => studyRecitation(tajweedReference(sample));
 const completeCatalogue = [...tajweedLessons, ...tajweedDepthLessons];

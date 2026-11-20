@@ -22,7 +22,7 @@ import { completedReadingChapters, emptyReadingPractice, firstUnreadAyah, practi
 import { getRecord, updateSettings, type Settings } from "@/lib/storageService";
 import { studyNames } from "@/lib/study-copy";
 import { markReadingPortion, rememberFlowPlace, setTeacherCheck } from "@/lib/studyMilestones";
-import { tajweedLessonPath, tajweedReadingExamples } from "@/lib/tajweed";
+import { tajweedLessonPath, tajweedTitleKey, tajweedVerseExamples } from "@/lib/tajweed";
 import { useUi } from "@/lib/uiState";
 import { splitArabicPhrase } from "@/lib/wordAnatomy";
 import audioCatalogue from "../../public/packs/audio/index.json";
@@ -70,11 +70,16 @@ function ChapterDirectory({ mode, progress, selected, openReader }: {
 
 function ScriptSwitch({ script, change }: { script: Settings["script"]; change: (script: Settings["script"]) => void }) {
   const { t } = useCopy();
+  function selectScript(next: Settings["script"]) {
+    if (next === script) return;
+    useUi.getState().selectWord();
+    change(next);
+  }
   return <div className="reading-toolbar row-between">
     <span className="small muted">{t("readingScript")}</span>
     <div className="equal-row study-tabs" role="group" aria-label={t("readingScript")}>
-      <button type="button" className="chip" aria-pressed={script === "indopak"} onClick={() => change("indopak")}>{t("readingIndopak")}</button>
-      <button type="button" className="chip" aria-pressed={script === "uthmani"} onClick={() => change("uthmani")}>{t("readingUthmani")}</button>
+      <button type="button" className="chip" aria-pressed={script === "indopak"} onClick={() => selectScript("indopak")}>{t("readingIndopak")}</button>
+      <button type="button" className="chip" aria-pressed={script === "uthmani"} onClick={() => selectScript("uthmani")}>{t("readingUthmani")}</button>
     </div>
   </div>;
 }
@@ -132,8 +137,11 @@ function ReadingVerse({ verse, script, settings, step, corpus, knownRoots, engli
       const fallback = wordGlosses[key] ? { gloss: t(wordGlossKey(key)), glossLanguage: language } : undefined;
       return { root: row.root, ...(meaning ?? fallback),
         annotation: familiar ? { tone: "soft", label: t("readingKnownRoot") } : undefined };
-    }) : tajweed ? tajweedReadingExamples(verse.ref)?.map(notes => {
-      const lessons = notes.map(note => ({ title: t(`tajweedRule-${note.rule}`), to: tajweedLessonPath(note.lesson) }));
+    }) : tajweed ? tajweedVerseExamples(verse, script)?.map(notes => {
+      const lessons = notes.map(note => ({
+        title: t("readingTajweedRule", { lesson: t(tajweedTitleKey(note.lesson)), rule: t(`tajweedRule-${note.rule}`) }),
+        to: tajweedLessonPath(note.lesson),
+      }));
       const label = lessons.map(lesson => lesson.title).join(" · ");
       return { annotation: { tone: notes[0].tone, label, lessons } };
     }) : undefined;
@@ -203,8 +211,8 @@ function GuidedRead({ chapter, title, mode, quran, progress, settings, now }: {
       <p className="small muted">{t("readingAyahsProgress", { count: new Set(read).size, total: chapter.ayahs })}</p>
       <ScriptSwitch script={script} change={setScript} />
       {mode === "flow" && <ReadingTimer key={pageIndex} />}
-      {mode === "flow" && quran.surahs[chapter.number].some(verse => tajweedReadingExamples(verse.ref)) &&
-        <TajweedExamplesToggle enabled={tajweed} pageHasExamples={portion.verses.some(verse => tajweedReadingExamples(verse.ref))} />}
+      {mode === "flow" && quran.surahs[chapter.number].some(verse => tajweedVerseExamples(verse, script)) &&
+        <TajweedExamplesToggle enabled={tajweed} pageHasExamples={portion.verses.some(verse => tajweedVerseExamples(verse, script))} />}
       {mode === "meaning" && <>
         <div className="equal-row study-tabs" role="group" aria-label={t("readingMeaning")}>
           {meaningSteps.map(option => <button type="button" className="chip" key={option} aria-pressed={step === option} onClick={() => setStep(option)}>{t(option)}</button>)}
@@ -237,7 +245,7 @@ function TeacherPractice({ chapter, title, verses, checks, settings, now, suspen
   const reference = `surah:${chapter.number}`;
   const hasPack = audioCatalogue.packs.some(pack => pack.items.some(item => item.ref === reference));
   const prepared = teacherChecklistComplete(checks);
-  const hasExamples = verses.some(verse => tajweedReadingExamples(verse.ref));
+  const hasExamples = verses.some(verse => tajweedVerseExamples(verse, script));
   const tajweed = settings.tajweedHighlights === true;
 
   async function check(item: RecitationCheck, value: boolean) {

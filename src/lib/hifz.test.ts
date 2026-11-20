@@ -20,7 +20,7 @@ import { grammarLessonMessages, grammarLessonKey, grammarWordField, grammarExamp
 import { applyGlossary } from "./languagePreferences";
 import { askPhraseKey } from "./umrah-phrase-messages.mjs";
 import { correctTajweedSamples, tajweedClip, tajweedDepthLessons, tajweedExcerpt, tajweedLessons, tajweedPracticeSamples, tajweedPrecache,
-  tajweedProgress, tajweedReadingExamples, tajweedReference, tajweedReviewId, tajweedSampleKey } from "./tajweed";
+  tajweedProgress, tajweedReadingExamples, tajweedReference, tajweedReviewId, tajweedSampleKey, tajweedVerseExamples } from "./tajweed";
 import { newReview } from "./reviews";
 import { practiceChapters, readingPortions } from "./readingPractice";
 import { formatQuranReference } from "./quran";
@@ -260,6 +260,40 @@ describe("Learning path progress", () => {
     const overlap = tajweedReadingExamples("106:4")?.[2];
     expect(overlap?.map(note => note.rule)).toEqual(expect.arrayContaining(["ikhfa", "mim-merge"]));
     expect(tajweedReadingExamples("2:255")).toBeUndefined();
+  });
+
+  it("links explicit Juz Amma signs to the correct words without inferring cross-word recitation", () => {
+    const notes = (chapter: number, ayah: number, position: number, script: "uthmani" | "indopak") =>
+      tajweedVerseExamples(quran.surahs[chapter][ayah - 1], script)?.[position - 1]?.map(note => note.rule) ?? [];
+
+    for (const script of ["uthmani", "indopak"] as const) {
+      expect(notes(78, 1, 1, script)).toEqual(["ghunnah-mim"]);
+      expect(notes(78, 2, 2, script)).toEqual(["ghunnah-nun"]);
+      expect(notes(78, 6, 2, script)).toEqual(["qalqalah-inside"]);
+      expect(notes(97, 4, 7, script)).toEqual([]);
+      expect(notes(109, 4, 5, script)).not.toContain("qalqalah-inside");
+      expect(notes(109, 4, 4, script)).toContain("ghunnah-mim");
+    }
+    expect(notes(78, 38, 5, "uthmani")).toEqual(["waqf-continue"]);
+    expect(notes(78, 38, 5, "indopak")).toEqual([]);
+    expect(notes(98, 8, 12, "uthmani")).toEqual(["waqf-continue"]);
+    expect(notes(98, 8, 17, "uthmani")).toEqual(["waqf-choice"]);
+    expect(tajweedVerseExamples(quran.surahs[2][254], "uthmani")).toBeUndefined();
+  });
+
+  it("keeps the expanded Tajweed annotations within the rendered WordChips in both scripts", () => {
+    const juzAmma = Object.entries(quran.surahs).filter(([chapter]) => Number(chapter) >= 78).flatMap(([, verses]) => verses);
+    expect(juzAmma).toHaveLength(564);
+    for (const [script, expected] of [["uthmani", 243], ["indopak", 233]] as const) {
+      const annotated = juzAmma.filter(verse => {
+        const examples = tajweedVerseExamples(verse, script);
+        if (!examples) return false;
+        const rendered = splitArabicPhrase(studyPhrases(verse, script, true)).filter(part => part.word);
+        expect(examples.length, verse.ref).toBeLessThanOrEqual(rendered.length);
+        return true;
+      });
+      expect(annotated).toHaveLength(expected);
+    }
   });
 
   it("resumes unfinished examples in short sessions and derives stars from distinct correct answers", () => {

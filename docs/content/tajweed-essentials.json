@@ -15,6 +15,7 @@
   },
   {
     "id": "ghunnah",
+    "source": "https://qul.tarteel.ai/tajweed_rule/ghunnah",
     "rules": { "ghunnah-nun": "نّ", "ghunnah-mim": "مّ" },
     "samples": [
       { "rule": "ghunnah-nun", "chapter": 108, "ayah": 3, "first": 1, "last": 1 },
@@ -29,6 +30,7 @@
   },
   {
     "id": "qalqalah",
+    "source": "https://qul.tarteel.ai/tajweed_rule/qalaqah",
     "rules": { "qalqalah-inside": "قْ طْ بْ جْ دْ", "qalqalah-stop": "ق ط ب ج د" },
     "samples": [
       { "rule": "qalqalah-inside", "chapter": 1, "ayah": 5, "first": 2, "last": 2 },
