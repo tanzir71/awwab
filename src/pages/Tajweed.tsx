@@ -9,6 +9,7 @@ import { StudyText } from "@/components/StudyText";
 import { useAudioPlayback } from "@/hooks/use-audio-playback";
 import { asset } from "@/lib/config";
 import { useCopy } from "@/lib/copy";
+import { focusListItem } from "@/lib/focusListItem";
 import { studyQuran, verseText } from "@/lib/hifz";
 import { pathUrl } from "@/lib/learningPaths";
 import { quranText } from "@/lib/quran";
@@ -186,7 +187,7 @@ export function Tajweed({ settings, now, depth = false }: { settings: Settings; 
 
   return <div className="paths-page paths-levels tajweed-page">
     <TajweedHeading title={t(depth ? "tajweedDepthIndex" : "tajweedLessons")} back={pathUrl("read")} depth={depth} />
-    <ol className="paths-level-list">{lessons.map((item, index) => {
+    <ol className="paths-level-list" onKeyDown={focusListItem}>{lessons.map((item, index) => {
       const count = correctTajweedSamples(item, reviews);
       const done = count === item.samples.length;
       return <li key={item.id}>

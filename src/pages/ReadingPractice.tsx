@@ -9,6 +9,7 @@ import { VerseAudio } from "@/components/VerseAudio";
 import { useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { wordGlosses } from "@/lib/fluency";
+import { focusListItem } from "@/lib/focusListItem";
 import { studyPhrases, studyQuran, verseText, type StudyQuran } from "@/lib/hifz";
 import { showEnglishQuranMeaning } from "@/lib/languagePreferences";
 import { coreWordKey, loadMorphology } from "@/lib/morphology";
@@ -44,7 +45,7 @@ function ChapterDirectory({ mode, progress, selected }: { mode: PracticeMode; pr
   const number = new Intl.NumberFormat(locale);
   return <nav className="card reading-directory" aria-label={t("readingChapters")}>
     <header className="row-between"><h2>{t(mode === "teacher" ? "readingChapters" : "readingShortFirst")}</h2><small className="muted">{overview}</small></header>
-    <ul className="reading-directory-list">{practiceChapters[mode].map(chapter => {
+    <ul className="reading-directory-list" onKeyDown={focusListItem}>{practiceChapters[mode].map(chapter => {
       const read = mode === "teacher" ? [] : progress[mode][chapter.number] ?? [];
       const complete = mode === "teacher" ? teacherChecklistComplete(progress.teacher[chapter.number]) : new Set(read).size >= chapter.ayahs;
       const resume = mode === "teacher" ? undefined : firstUnreadAyah(chapter.ayahs, read);

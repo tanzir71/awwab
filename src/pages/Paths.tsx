@@ -6,6 +6,7 @@ import { StudyText } from "@/components/StudyText";
 import { useQaidaPlace, useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { asset } from "@/lib/config";
+import { focusListItem } from "@/lib/focusListItem";
 import { chapters, essentialPassages, getHifzPassage, juzs, kursiOpening, passageLabel, studyChapters, type HifzReviews } from "@/lib/hifz";
 import { grammarReviewPrefix, juzAmma, learnedSurahs, levels, pathUrl, patternReviewPrefix, rootsReviewPrefix, salahChapters, sentenceReviewPrefix,
   tracks, trackStatus, type PathLevel, type PathPlacement, type Track } from "@/lib/learningPaths";
@@ -159,7 +160,7 @@ function MobileTrackCard({ track, state }: { track: Track; state: ReturnType<typ
 
 function DesktopTrackCard({ track, state }: { track: Track; state: ReturnType<typeof usePathState> }) {
   const { t } = useCopy();
-  return <section className="card paths-desk-track">
+  return <section className="card paths-desk-track" onKeyDown={event => focusListItem(event, ".paths-level-link")}>
     <header className="with-icon"><PathIcon track={track} desktop /><Link to={pathUrl(track)}><h2>{t(trackKeys[track])}</h2></Link></header>
     {levels[track].map((item, index) => {
       const isCurrent = index + 1 === state.active[track];
@@ -246,7 +247,7 @@ function TrackLevels({ track }: { track: Track }) {
   return <div className="paths-page paths-levels">
     <header className="hifz-heading"><PathsBack to={root} /><div><h1>{t(trackKeys[track])}</h1>
       <p className="small muted">{t(track === "memorise" ? "pathsHifzSubtitle" : `${trackKeys[track]}Overview`)}</p></div></header>
-    <ol className="paths-level-list">{levels[track].map((item, index) => {
+    <ol className="paths-level-list" onKeyDown={focusListItem}>{levels[track].map((item, index) => {
       const number = index + 1;
       const active = state.active[track] === number;
       const done = levelDone(track, number, state);
@@ -275,7 +276,7 @@ function HifzDirectory() {
   const { t, language } = useCopy();
   const [selected, choose] = useState<"juz" | "surah">("juz");
   const state = usePathState();
-  return <div className="compact-stack">
+  return <div className="compact-stack" onKeyDown={event => focusListItem(event, ".paths-passage")}>
     <div className="equal-row" role="group" aria-label={t("pathsMemorise")}>
       <button type="button" aria-pressed={selected === "juz"} className={`action ${selected === "juz" ? "" : "light"}`} onClick={() => choose("juz")}>{t("hifzChooseJuz")}</button>
       <button type="button" aria-pressed={selected === "surah"} className={`action ${selected === "surah" ? "" : "light"}`} onClick={() => choose("surah")}>{t("hifzChooseSurah")}</button>
@@ -290,10 +291,10 @@ function MemoriseLevel({ number }: { number: number }) {
   const { t, language } = useCopy();
   const state = usePathState();
   if (number === 5) return <HifzDirectory />;
-  if (number === 3 || number === 4) return <div className="compact-stack">{essentialPassages.filter(passage => passage.level === number)
+  if (number === 3 || number === 4) return <div className="compact-stack" onKeyDown={focusListItem}>{essentialPassages.filter(passage => passage.level === number)
     .map(passage => <PassageRow key={passage.id} id={passage.id} />)}</div>;
   const group = number === 1 ? salahChapters.map(chapter => studyChapters.get(chapter)) : juzAmma;
-  return <div className="compact-stack">
+  return <div className="compact-stack" onKeyDown={event => focusListItem(event, ".paths-passage")}>
     {group.map(chapter => <PassageRow key={chapter.number} id={`surah-${chapter.number}`} title={studyNames.surah(language, chapter.number, chapter.title)} done={state.learned.has(chapter.number)} />)}
     {number === 1 && <Link className="action soft" to="/learn/salah">{t("understandSalah")}</Link>}
   </div>;

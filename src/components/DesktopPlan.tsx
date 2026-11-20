@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useDesktop } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { addDays, formatDay, formatTime } from "@/lib/dates";
+import { focusListItem } from "@/lib/focusListItem";
 import { calendarEventById, calendarEvents, eventDisplayDates, hijriOn, monthStartEvent, moonWatchDay, type CalendarEvent, type CalendarSettings } from "@/lib/hijri";
 import { mosqueClock, mosqueWeekday, type MosquePlan } from "@/lib/mosques";
 import { calendarDayEvents, calendarMonthOn, calendarWeekStart, fridayMosque, gregorianMonthBounds, gregorianMonthCells,
@@ -26,15 +27,6 @@ type PlanProps = {
 };
 const isWhiteDays = (event: CalendarEvent) => event.title.startsWith("White days");
 const important = ["Ramadan begins", "Eid al-Fitr", "Day of ʿArafah (fast if not on Hajj)", "Eid al-Adha", "Islamic New Year", "ʿĀshūrāʾ (fast 9 & 10)"];
-
-function moveListFocus(event: KeyboardEvent<HTMLElement>) {
-  if (event.key !== "j" && event.key !== "k" || event.altKey || event.ctrlKey || event.metaKey) return;
-  const items = [...event.currentTarget.querySelectorAll<HTMLElement>(".plan-desk-row")];
-  const index = items.findIndex(item => item === event.target);
-  if (index < 0) return;
-  event.preventDefault();
-  items[(index + (event.key === "j" ? 1 : items.length - 1)) % items.length]?.focus();
-}
 
 function MoonCard({ event, config, open, shift, district, watchNow }: {
   event: CalendarEvent; config: CalendarSettings; open: OpenEvent; shift: (step: -1 | 1) => void; district: boolean; watchNow: boolean;
@@ -90,7 +82,7 @@ function UpcomingCard({ events, hawl, today, open }: { events: CalendarEvent[]; 
         {t(expanded ? "planDeskFewerEvents" : "planDeskAllEvents")}
       </button>
     </div>
-    <ul className="plan-desk-list" onKeyDown={moveListFocus}>
+    <ul className="plan-desk-list" onKeyDown={focusListItem}>
       {(expanded ? sorted : sorted.slice(0, 4)).map(({ key, event }) => <li key={key}>{event ?
         <button type="button" className="plan-desk-row" onClick={trigger => open(trigger, event)}>
           <span><strong>{planEventLabels(event, language)[0]}</strong><small className="muted">{eventDisplayDates(event, language, t("planOr"))}</small></span>
@@ -115,7 +107,7 @@ function EidCard({ event, mosques, open }: { event?: CalendarEvent; mosques: Mos
   return <section className="card compact-stack plan-desk-eid">
     <div className="row-between"><h2>{t("planEidWhere")}</h2>{event &&
       <button type="button" className="text-button" onClick={trigger => open(trigger, event)}>{t("qadaEdit")}</button>}</div>
-    {options.length > 0 ? <ul className="plan-desk-list" onKeyDown={moveListFocus}>{options.map(({ mosque, entry, current }) => <li key={mosque.id}>
+    {options.length > 0 ? <ul className="plan-desk-list" onKeyDown={focusListItem}>{options.map(({ mosque, entry, current }) => <li key={mosque.id}>
       <button className="plan-desk-row" type="button" onClick={trigger => open(trigger, event)}>
         <span><strong>{mosque.name}</strong><small className="muted">{entry.times.map(time => mosqueClock(time, language, true)).join(" · ")}
           {" · "}{t(current ? "planEidThisYear" : "planEidLastYear")}</small></span>
@@ -141,7 +133,7 @@ function DayDetails({ day, events, today, settings, config, mosques, open, close
       <button type="button" className="icon-button" onClick={close} aria-label={t("planClose")}><X size={18} /></button>
     </div>
     <p className="small muted">{number.format(date.day)} {planMonth(date.month, language)} {number.format(date.year)}</p>
-    {events.length ? <ul className="plan-desk-list" onKeyDown={moveListFocus}>{events.map(event => <li key={event.id}>
+    {events.length ? <ul className="plan-desk-list" onKeyDown={focusListItem}>{events.map(event => <li key={event.id}>
       <button className="plan-desk-row" type="button" onClick={trigger => open(trigger, event, day)}>
         <strong>{planEventLabels(event, language)[0]}</strong><span className="plan-desk-badge" data-confirmed={event.confirmed}>
           {t(event.confirmed ? "confirmedDate" : "expectedDate")}

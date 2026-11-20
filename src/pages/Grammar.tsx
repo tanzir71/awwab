@@ -6,6 +6,7 @@ import { QuranStudySources } from "@/components/QuranStudySources";
 import { StudyText } from "@/components/StudyText";
 import { useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
+import { focusListItem } from "@/lib/focusListItem";
 import { studyQuran, verseText, type StudyQuran } from "@/lib/hifz";
 import { grammarPath, grammarReviewPrefix, pathUrl, rootsPath, rootsReviewPrefix, sentenceReviewPrefix, sentenceStructurePath } from "@/lib/learningPaths";
 import type { Reviews } from "@/lib/reviews";
@@ -108,7 +109,7 @@ export function Grammar({ settings, now, course = "foundations" }: { settings: S
   return <div className="paths-page roots-page grammar-page" data-course={course}>
     <header className="hifz-heading"><Link className="hifz-back" to={active ? content.path : pathUrl("understand")} aria-label={t("back")}><DesignIcon name="ask-icon-chev-l" size={24} /></Link>
       <div><h1>{t(content.title)}</h1><p className="small muted">{t(content.subtitle)}</p></div></header>
-    {active ? <GrammarLesson key={active.id} unit={active} course={content} settings={settings} now={now} /> : <ol className="card compact-stack grammar-index">
+    {active ? <GrammarLesson key={active.id} unit={active} course={content} settings={settings} now={now} /> : <ol className="card compact-stack grammar-index" onKeyDown={focusListItem}>
       {content.lessons.map(item => <li key={item.id}><Link className="row-between" to={`${content.path}/${item.id}`}>
         <strong>{item.title[language === "bn" ? 1 : 0]}</strong>{reviews[content.prefix + item.id]?.correct > 0 && <span aria-label={t("pathsDone")}>✓</span>}
       </Link></li>)}

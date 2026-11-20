@@ -6,6 +6,7 @@ import { LocalRecorder } from "@/components/LocalRecorder";
 import { useDesktop, useRecord } from "@/hooks/use-awwab";
 import { useAudioPlayback } from "@/hooks/use-audio-playback";
 import { useCopy } from "@/lib/copy";
+import { focusListItem } from "@/lib/focusListItem";
 import { studyQuran, verseText } from "@/lib/hifz";
 import { phraseReviewPrefix } from "@/lib/learningPaths";
 import { newReview, type ReviewGrade, type Reviews } from "@/lib/reviews";
@@ -27,7 +28,7 @@ function UnitList({ active, complete, level, variety }: { active?: string; compl
   return <section className="card speak-unit-list" aria-label={label}>
     <header className="row-between"><h2>{speakPackDetails[level] ? active ? label : t("speakPackLessons") : `${level} · ${label}`}</h2>
       <span className="small muted">{t("speakUnits", { count: units.length })}</span></header>
-    <ol>{units.map(unit => <li key={unit.id}><Link to={speakLessonPath(unit.id)} aria-current={active === unit.id ? "page" : undefined}>
+    <ol onKeyDown={focusListItem}>{units.map(unit => <li key={unit.id}><Link to={speakLessonPath(unit.id)} aria-current={active === unit.id ? "page" : undefined}>
       <span>{unit.title[language === "bn" ? 1 : 0]}</span>{complete.includes(unit.id) && <span aria-label={t("pathsDone")}>✓</span>}
     </Link></li>)}</ol>
   </section>;
