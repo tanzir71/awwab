@@ -18,6 +18,46 @@ export const settingsMessages = {
   settingsDisplay: { en: "Text size & display", bn: "লেখার আকার ও প্রদর্শন" },
   settingsPrivacy: { en: "Privacy", bn: "গোপনীয়তা" },
   settingsSources: { en: "Sources & licences", bn: "উৎস ও লাইসেন্স" },
+  sourcesTanzil: {
+    en: "Uthmani Quran text, © Tanzil Project, CC BY 3.0. The distributed verses are preserved verbatim.",
+    bn: "কুরআনের উসমানি পাঠ। © Tanzil Project, CC BY 3.0। আয়াতগুলো মূল পাঠ অনুযায়ী অপরিবর্তিত রাখা হয়েছে।",
+  },
+  sourcesPickthall: {
+    en: "The Meaning of the Glorious Koran. English renderings from Tanzil’s translation archive.",
+    bn: "এম. এম. পিকথলের ইংরেজি অনুবাদ The Meaning of the Glorious Koran। পাঠটি তানজিলের অনুবাদ সংগ্রহ থেকে নেওয়া হয়েছে।",
+  },
+  sourcesDigitalKhatt: {
+    en: "IndoPak 15-line Quran text (MIT), IndoPak and Madina fonts (SIL Open Font License). © Amine Anane and Tarteel Inc.",
+    bn: "১৫ লাইনের ইন্দোপাক কুরআন পাঠ (MIT), এবং ইন্দোপাক ও মাদিনা ফন্ট (SIL Open Font License)। © Amine Anane ও Tarteel Inc.",
+  },
+  sourcesCorpus: {
+    en: "Version 0.4 morphology, © 2011 Kais Dukes, GNU GPL. Awwab includes the original morphology file and derives its 125 core words and Fātiḥa lemma index from it.",
+    bn: "শব্দগঠনের তথ্য, সংস্করণ ০.৪। © ২০১১ Kais Dukes, GNU GPL। আওয়াবে মূল ফাইলটি রয়েছে। ১২৫টি বহুল ব্যবহৃত শব্দ ও সূরা ফাতিহার শব্দের মূল রূপের সূচি সেই ফাইল থেকে তৈরি।",
+  },
+  sourcesHadith: {
+    en: "Distributed as public-domain data under the Unlicense. Individual narrations show their specific collection, reference and grade.",
+    bn: "Unlicense-এর অধীনে তথ্যগুলো সর্বসাধারণের ব্যবহারের জন্য প্রকাশিত। প্রতিটি হাদিসের পাশে সংগ্রহ, সূত্র ও মান দেওয়া আছে।",
+  },
+  sourcesAdhan: {
+    en: "Prayer times are computed on this device with Adhan, MIT.",
+    bn: "Adhan দিয়ে এই ডিভাইসেই সালাতের সময় হিসাব করা হয়। এর লাইসেন্স MIT।",
+  },
+  sourcesMaps: {
+    en: "Haram points come from OpenStreetMap. The Makkah and Madinah map packs are Protomaps extracts. © OpenStreetMap contributors, Open Database License.",
+    bn: "হারামের স্থানগুলোর তথ্য OpenStreetMap থেকে নেওয়া। মক্কা ও মদিনার মানচিত্র প্যাক Protomaps থেকে নেওয়া। © OpenStreetMap contributors, Open Database License।",
+  },
+  sourcesFonts: {
+    en: "The Noto, Baloo 2 and Nunito fonts use the SIL Open Font License. The local notices credit the Noto families used for language names and downloaded translations.",
+    bn: "Noto, Baloo 2 ও Nunito ফন্টের লাইসেন্স SIL Open Font License। ভাষার নাম ও ডাউনলোড করা অনুবাদে ব্যবহৃত Noto ফন্টগুলোর স্বীকৃতি এই ডিভাইসে রাখা লাইসেন্স নথিতে রয়েছে।",
+  },
+  sourcesStudyAid: {
+    en: "Awwab is a learning and tracking aid. Ask a qualified scholar about religious rulings for your situation.",
+    bn: "আওয়াব শেখা ও নিজের অগ্রগতি লিখে রাখার সহায়ক। নিজের পরিস্থিতিতে ধর্মীয় বিধান জানতে একজন যোগ্য আলেমের কাছে জিজ্ঞেস করুন।",
+  },
+  sourcesReadVerse: { en: "Read the full verse", bn: "সম্পূর্ণ আয়াত পড়ুন" },
+  sourcesExcerptCredit: { en: "Meaning of the excerpt by Awwab", bn: "উদ্ধৃত অংশের ভাবার্থ · আওয়াব" },
+  sourcesVisit: { en: "Visit {name}", bn: "{name} দেখুন" },
+  sourcesReadFontLicences: { en: "Read font licences", bn: "ফন্টের লাইসেন্স পড়ুন" },
   settingsAbout: { en: "About awwab", bn: "আওয়াব সম্পর্কে" },
   settingsCategories: { en: "Settings categories", bn: "সেটিংসের বিভাগ" },
   settingsChangeLanguage: { en: "Change", bn: "বদলান" },

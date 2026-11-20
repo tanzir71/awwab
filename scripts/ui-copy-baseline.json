@@ -52,17 +52,8 @@
     "awwab": 1,
     "বা যবর বা": 1
   },
-  "src/pages/Qaida.tsx": {
-    "Al-Baqara 2:1": 1,
-    "Al-Ikhlāṣ 112:1": 1
-  },
   "src/pages/SalahWords.tsx": {
     "Quranic Arabic Corpus 0.4": 1
-  },
-  "src/pages/Sources.tsx": {
-    "Awwab is a learning and tracking aid. Ask a qualified scholar about religious rulings for your situation.": 1,
-    "Read the full verse": 1,
-    "Visit": 1
   },
   "src/pages/UmrahAsk.tsx": {
     "askPlay": 1,

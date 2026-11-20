@@ -50,6 +50,8 @@ export function studySearchTerm(text: string) {
 
 export const studyMessages: MessageCatalog = {
   studySurah1: { en: "Al-Fātiḥa", bn: "আল-ফাতিহা" },
+  studySurah2: { en: "Al-Baqarah", bn: "আল-বাকারা" },
+  studySurah17: { en: "Al-Isrāʾ", bn: "আল-ইসরা" },
   studySurah103: { en: "Al-ʿAsr", bn: "আল-আসর" },
   studySurah105: { en: "Al-Fīl", bn: "আল-ফীল" },
   studySurah106: { en: "Quraysh", bn: "কুরাইশ" },
@@ -80,6 +82,7 @@ export const studyMessages: MessageCatalog = {
   studyQaida17: { en: "Mīm sākin, qalqalah & stops", bn: "মীম সাকিন, কলকলা ও ওয়াকফ" },
   back: { en: "Back", bn: "ফিরে যান" },
   chapterHeading: { en: "{name} · {number}", bn: "{name} · {number, number}" },
+  quranChapterCitation: { en: "{name} {reference}", bn: "{name} {reference}" },
   chapterCounts: { en: "{verses} āyāt · {words} words", bn: "{verses, number} আয়াত · {words, number} শব্দ" },
   verseLabel: { en: "āyah {number}", bn: "{number, number} নম্বর আয়াত" },
   ayah: { en: "Ayah", bn: "আয়াত" },

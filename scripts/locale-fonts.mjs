@@ -6,7 +6,7 @@ import families from "./locale-fonts.json" with { type: "json" };
 
 const packages = fileURLToPath(new URL("../node_modules/@fontsource-variable/", import.meta.url));
 const files = new Map();
-const notices = "assets/locale-font-notices.txt";
+const notices = "app/locale-font-notices.txt";
 const nastaliqPackage = "noto-nastaliq-urdu";
 
 function fontAssets(name, subsets, family, weight) {

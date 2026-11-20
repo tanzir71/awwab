@@ -16,7 +16,7 @@ import { db, type Settings } from "@/lib/storageService";
 import { finishQaidaLesson, momentPath, rememberQaidaPlace, saveQaidaRowReview } from "@/lib/studyMilestones";
 import { qaidaGrades, type QaidaGrade, type Reviews } from "@/lib/reviews";
 import { wordAnatomy } from "@/lib/wordAnatomy";
-import { quranText } from "@/lib/quran";
+import { formatQuranReference, quranText } from "@/lib/quran";
 import alphabet from "../../docs/content/arabic-letters.json";
 import qaida from "../../docs/content/qaida-lessons.json";
 import { TakhtiPanel } from "./Takhti";
@@ -128,15 +128,18 @@ function QaidaQuiz({ lesson, maktab }: { lesson: number; maktab: boolean }) {
 }
 
 function SpotInQuran({ lesson, maktab }: { lesson: number; maktab: boolean }) {
-  const { t } = useCopy();
+  const { t, locale } = useCopy();
   const opening = lesson === 3;
   const verse = opening ? "2:1" : "112:1";
+  const citation = t("quranChapterCitation", {
+    name: t(opening ? "studySurah2" : "studySurah112"), reference: formatQuranReference(verse, locale),
+  });
   return <section className="card qaida-spot">
     <div className="row-between">
       <h2><DesignIcon name={`qaida-${maktab ? "maktab" : "phone"}-sparkles`} size={18} /> {t("spotInQuran")}</h2>
-      {opening ? <small>Al-Baqara 2:1</small> : <Link className="small" to="/learn/surahs/112">Al-Ikhlāṣ 112:1</Link>}
+      {opening ? <small><bdi>{citation}</bdi></small> : <Link className="small" to="/learn/surahs/112"><bdi>{citation}</bdi></Link>}
     </div>
-    <ArabicText text={opening ? qaidaRows(3)[0][0][0] : quranText[112][0].uthmani} citation={verse} verse={verse} selectedPosition={1} />
+    <ArabicText text={opening ? qaidaRows(3)[0][0][0] : quranText[112][0].uthmani} citation={citation} verse={verse} selectedPosition={1} />
     {lesson === 4 && <p className="small muted">{t("qaidaSpotQul")}</p>}
   </section>;
 }

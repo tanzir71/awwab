@@ -28,11 +28,13 @@ const stepTitles = ["setupLanguageStep", "setupLearnStep", "setupCheckStep", "pr
 const answers = ["easy", "effort", "new"] as const;
 
 function WelcomeVerse() {
-  const { t } = useCopy();
+  const { t, locale } = useCopy();
+  const verse = "17:25";
+  const citation = t("quranChapterCitation", { name: t("studySurah17"), reference: formatQuranReference(verse, locale) });
   return <section className="card onboarding-verse">
-    <ArabicText text={content.welcome.arabic} citation={content.welcome.source} verse="17:25" positionOffset={8} />
+    <ArabicText text={content.welcome.arabic} citation={citation} verse={verse} positionOffset={8} />
     <p>{t("welcomeMeaning")}</p>
-    <a href={content.welcome.url} className="caption">{content.welcome.source}</a>
+    <a href={content.welcome.url} className="caption"><bdi>{citation}</bdi></a>
   </section>;
 }
 

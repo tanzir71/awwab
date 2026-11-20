@@ -78,7 +78,7 @@ export default defineConfig(({ mode }) => {
         clientsClaim: true,
         skipWaiting: true,
         globPatterns: [
-          "app/**/*.{html,webmanifest,png,svg,otf,woff2,mjs}", "assets/**/*", "design/**/*", "data/**/*", "packs/audio/index.json",
+          "app/**/*.{html,webmanifest,png,svg,otf,woff2,mjs}", "app/locale-font-notices.txt", "assets/**/*", "design/**/*", "data/**/*", "packs/audio/index.json",
           ...Object.values(onboarding.samples).map(item => item.path),
           "packs/study-speech/*.opus",
           ...sharedSpeakClips,
