@@ -92,7 +92,7 @@ export function zakatHawl(today: string, profile: ZakatProfile | null, adjustmen
 }
 
 export function zakatMoney(amount: number, currency: string, language = "en", lakh = false) {
-  const locale = language === "bn" ? "bn-BD" : lakh && currency === "BDT" ? "en-IN" : language;
+  const locale = language === "bn" ? "bn-BD" : !language.startsWith("bn-") && lakh && currency === "BDT" ? "en-IN" : language;
   return new Intl.NumberFormat(locale, { style: "currency", currency, currencyDisplay: "narrowSymbol", minimumFractionDigits: 0, maximumFractionDigits: 2 })
     .formatToParts(amount).map(part => part.value === "৳" ? "৳ " : part.value).join("");
 }

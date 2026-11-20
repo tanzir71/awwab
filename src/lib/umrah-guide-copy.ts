@@ -29,8 +29,6 @@ export const umrahGuideMessages: MessageCatalog = {
   umrahPracticePocketDetail: { en: "Seven steps and spaces to count", bn: "সাতটি ধাপ ও চক্কর গোনার ঘর" },
   umrahPracticePaperRounds: { en: "Mark each round", bn: "প্রতিটি চক্কর চিহ্নিত করুন" },
   umrahPracticePaperLaps: { en: "Mark each lap", bn: "প্রতিটি সাঈ চক্কর চিহ্নিত করুন" },
-  umrahPracticePrint: { en: "Print A4", bn: "এ৪ কাগজে প্রিন্ট করুন" },
-  umrahPracticePrintHub: { en: "All print sheets", bn: "প্রিন্টের সব পাতা" },
   umrahPracticeBack: { en: "Back to the Umrah guide", bn: "উমরাহ নির্দেশিকায় ফিরে যান" },
   umrahDuasName: { en: "Name", bn: "নাম" },
   umrahDuasRequest: { en: "Request", bn: "অনুরোধ" },

@@ -119,12 +119,17 @@ progress::-moz-progress-bar { background: var(--control-primary); }
 .print-only { display: none; }
 .paper-header { align-items: end; gap: 10px; }
 .paper-header .wordmark { flex: 0 0 auto; }
+.paper-header .wordmark-print .wordmark-mark { width: auto; height: auto; left: 2.38px; top: 2.38px; }
 .paper-note { color: var(--c-ink-muted); font: var(--type-small); }
-.paper-timetable thead { color: var(--c-on-primary); background: var(--c-primary); }
+.paper-timetable, .paper-balances { width: 100%; border-collapse: separate; border-spacing: 0; }
+:is(.paper-timetable, .paper-balances) thead { color: var(--c-on-primary); background: var(--control-primary); }
 .paper-timetable thead th:first-child { border-start-start-radius: 6px; }
 .paper-timetable thead th:last-child { border-start-end-radius: 6px; }
-.paper-timetable :is(td, th):nth-child(n+4) { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.paper-timetable tr[data-friday="true"] { background: var(--c-primary-soft); }
+:is(.paper-timetable, .paper-balances) :is(th, td) { padding: 4px 6px; text-align: start; }
+.paper-timetable :is(td, th):nth-child(n+4), .paper-balances td { text-align: end; font-variant-numeric: tabular-nums; }
+.paper-timetable td bdi { white-space: nowrap; }
+:is(.paper-timetable, .paper-balances) tbody tr:nth-child(even) { background: var(--c-surface-alt); }
+.paper-timetable tbody tr[data-friday="true"] { background: var(--c-primary-soft); }
 .paper-timetable tr[data-friday="true"] td:first-child { font-weight: 700; }
 .paper-mosques { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(12rem, 100%), 1fr)); gap: 8px; }
 .paper-mosques .card, .paper-harakat .card, .paper-pocket-cards .card { background: var(--c-surface-alt); }
@@ -140,8 +145,12 @@ progress::-moz-progress-bar { background: var(--control-primary); }
 .paper-harakat .arabic-text { color: var(--mark-color); }
 .paper-pocket-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .paper-pocket-cards .card { display: grid; align-content: start; gap: 8px; }
-.paper-pocket-cards h2, .paper-transliteration { color: var(--c-primary); }
+.paper-pocket-cards h2, .paper-transliteration { color: var(--interactive-ink); }
 .paper-card-verses { display: grid; justify-items: start; }
+@media screen {
+  .print-page > .table-scroll { min-width: 0; }
+  .paper-timetable { min-width: 31rem; }
+}
 @media screen and (max-width: 599px) {
   .paper-pocket-cards { grid-template-columns: minmax(0, 1fr); }
   .paper-header .wordmark { font-size: 22px; }

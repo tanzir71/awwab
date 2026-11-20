@@ -164,6 +164,8 @@ describe("zakat", () => {
       complete: false, net: undefined, due: undefined, nisab: 136_850,
     });
     expect(zakatMoney(result.net, "BDT", "en", true)).toBe("৳ 7,49,912");
+    expect(zakatMoney(result.net, "BDT", "bn", true).replace(/[৳\s]/g, "")).toBe("৭,৪৯,৯১২");
+    expect(zakatMoney(result.net, "BDT", "bn-u-nu-latn", true).replace(/[৳\s]/g, "")).toBe("7,49,912");
   });
 
   it("reads the single saved price from an older profile in its original unit", () => {
