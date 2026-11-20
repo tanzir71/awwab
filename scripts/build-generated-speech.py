@@ -2,6 +2,7 @@
 
 import argparse
 from array import array
+from hashlib import sha256
 import io
 import json
 from pathlib import Path
@@ -292,19 +293,30 @@ def ask_clip_path(variety, voice, slug):
 
 def write_ask_manifest(phrases):
     voices = {}
+    checksums = {}
     for voice, name, source in (("female", "Emirati Piper", MODEL), ("male", "A3S", A3S)):
         clips = [ask_clip_path(variety, voice, slug)
                  for variety in ("saudi", "msa") for slug, _ in phrase_clips(phrases, variety)]
         if all(path.is_file() for path in clips):
-            voices[voice] = {"name": name, "source": source, "bytes": sum(path.stat().st_size for path in clips)}
+            size = 0
+            for path in clips:
+                data = path.read_bytes()
+                if not data.startswith(b"OggS") or b"OpusHead" not in data[:95]:
+                    raise ValueError(f"Invalid Opus clip: {path}")
+                checksums[path.relative_to(ROOT / "public").as_posix()] = sha256(data).hexdigest()
+                size += len(data)
+            voices[voice] = {"name": name, "source": source, "bytes": size}
     if "female" not in voices:
         raise ValueError("Build the female Ask recordings before making the shared manifest.")
+    index = (json.dumps(checksums, indent=2, sort_keys=True) + "\n").encode("utf-8")
+    (OUTPUT / "phrases" / "checksums.json").write_bytes(index)
     write(CONTENT / "umrah-phrase-audio.json", {
         "version": len(voices),
         "bytes": sum(voice["bytes"] for voice in voices.values()),
         "generated": True,
         "voices": list(voices),
         "credits": voices,
+        "checksumsSha256": sha256(index).hexdigest(),
     })
 
 
@@ -361,16 +373,22 @@ def build_male_ask(model_dir, phrases, resume):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("model", type=Path, help="Piper ONNX file, Nabra INT8 directory for msa-a1, or A3S directory for --ask-male")
+    parser.add_argument("model", type=Path, nargs="?", help="Piper ONNX file, Nabra INT8 directory for msa-a1, or A3S directory for --ask-male")
     task = parser.add_mutually_exclusive_group()
     task.add_argument("--course", choices=(*SPEAK_COURSES, "msa-a1"), help="Only rebuild the selected Speak course")
     task.add_argument("--ask-male", action="store_true", help="Build the second Ask voice using A3S")
+    task.add_argument("--ask-manifest", action="store_true", help="Index the existing Ask recordings without rebuilding speech")
     task.add_argument("--umrah-guide", action="store_true", help="Build English and Bangla Umrah narration with Piper LJSpeech and Indic Tiny TTS")
     task.add_argument("--qaida", action="store_true", help="Build Qaida drill audio and placement vowel clips with Emirati Piper")
     parser.add_argument("--piper", default="piper", help="Piper executable for --umrah-guide")
     parser.add_argument("--bangla-model", type=Path, help="Local Indic Tiny TTS Bengali model directory with code and ONNX graphs")
     parser.add_argument("--resume", action="store_true", help="Reuse completed clips when extending a Qaida or A3S build")
     args = parser.parse_args()
+    if args.ask_manifest:
+        write_ask_manifest(read(PHRASES)["phrases"])
+        return
+    if args.model is None:
+        parser.error("a model is required to generate speech")
     if args.umrah_guide:
         if args.bangla_model is None:
             parser.error("--umrah-guide requires --bangla-model")

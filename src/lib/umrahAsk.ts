@@ -62,7 +62,15 @@ export const askRelations = {
 };
 
 type AskSlots = { gate?: number; place?: keyof typeof askPlaces; relation?: keyof typeof askRelations };
+type AskGender = { speaker?: AskVoice | ""; toFemale?: boolean };
 type Translate = (key: string, values?: Record<string, string | number>) => string;
+
+export function askGenderVariant(phrase: AskPhrase, variety: AskVariety, options: AskGender) {
+  const toWoman = options.toFemale && phrase.gender?.toFemale?.[variety];
+  if (toWoman) return { text: toWoman, suffix: "to-woman" };
+  const femaleSpeaker = options.speaker === "female" && phrase.gender?.speakerFemale?.[variety];
+  if (femaleSpeaker) return { text: femaleSpeaker, suffix: "speaker-female" };
+}
 
 export function askMeaning(phrase: AskPhrase, t: Translate, { gate = 79, place = "madinah", relation = "mother" }: AskSlots = {}) {
   return t(askPhraseKey(phrase.id), { n: gate, place: t(askPlaces[place].label), relation: t(askRelations[relation].label) });
@@ -73,11 +81,11 @@ export function askPhraseMatches(phrase: AskPhrase, needle: string, meaning: str
     .some(value => value.normalize().toLowerCase().includes(needle));
 }
 
-export function renderAsk(phrase: AskPhrase, variety: AskVariety, options: AskSlots & { speaker?: AskVoice | ""; toFemale?: boolean } = {}) {
+export function renderAsk(phrase: AskPhrase, variety: AskVariety, options: AskSlots & AskGender = {}) {
   const gate = options.gate ?? 79;
   const place = askPlaces[options.place] ?? askPlaces.madinah;
   const relation = askRelations[options.relation] ?? askRelations.mother;
-  const gender = options.toFemale ? phrase.gender?.toFemale?.[variety] : options.speaker === "female" ? phrase.gender?.speakerFemale?.[variety] : undefined;
+  const gender = askGenderVariant(phrase, variety, options)?.text;
   const slot = (text: string, lang: "en" | "ar" | "tr") => text.replace("{n}", lang === "ar" ? arabicNumber.format(gate) : String(gate))
     .replace("{place}", place[lang]).replace("{relation}", relation[lang]);
   let ar = gender?.[0] ?? phrase[variety].ar;

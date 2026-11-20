@@ -1,5 +1,6 @@
 import { openSync, closeSync, readFileSync, readSync, statSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
+import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import catalogue from "../../public/packs/audio/index.json";
 import onboarding from "../../docs/content/onboarding.json";
@@ -142,6 +143,12 @@ describe("Umrah phrase recordings", () => {
     expect(askClipIds(askPhrase("lost-family"), { variety: "saudi", relation: "wife" })).toEqual(["lost-family-wife"]);
     expect(askClipIds(askPhrase("excuse-me"), { variety: "saudi", toFemale: true })).toEqual(["excuse-me-to-woman"]);
     expect(askClipIds(askPhrase("excuse-me"), { variety: "msa", toFemale: true })).toEqual(["excuse-me"]);
+    for (const variety of ["saudi", "msa"] as const) {
+      const options = { variety, speaker: "female", toFemale: true } as const;
+      const phrase = askPhrase("lost");
+      expect(renderAsk(phrase, variety, options).ar).toBe(phrase.gender.speakerFemale[variety][0]);
+      expect(askClipIds(phrase, options)).toEqual(["lost-speaker-female"]);
+    }
   });
 
   it("defines all voice and gate files without duplicates", () => {
@@ -177,6 +184,16 @@ describe("Umrah phrase recordings", () => {
         expect(male.equals(female)).toBe(false);
       }
     }
+  });
+
+  it("pins the checksum index and verifies every published recording against it", () => {
+    const indexFile = readFileSync(new URL("../../public/packs/phrases/checksums.json", import.meta.url));
+    const index = JSON.parse(indexFile.toString("utf8")) as Record<string, string>;
+    const digest = (data: Buffer) => createHash("sha256").update(data).digest("hex");
+    expect(digest(indexFile)).toBe(askAudioPack.checksumsSha256);
+    const paths = askPackPaths();
+    expect(Object.keys(index).sort()).toEqual(paths.sort());
+    for (const path of paths) expect(digest(readFileSync(new URL(`../../public/${path}`, import.meta.url))), path).toBe(index[path]);
   });
 
   it("keeps the first download playable during the upgrade", () => {

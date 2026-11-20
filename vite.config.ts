@@ -91,7 +91,8 @@ export default defineConfig(({ mode }) => {
         navigateFallback: `${base}app/index.html`,
         navigateFallbackAllowlist: [/^\/awwab\/app\//],
         runtimeCaching: [{
-          urlPattern: ({ sameOrigin, url }) => sameOrigin && url.pathname.startsWith("/awwab/packs/"),
+          urlPattern: ({ sameOrigin, url, request }) =>
+            sameOrigin && request.cache !== "no-store" && url.pathname.startsWith("/awwab/packs/"),
           handler: "CacheFirst",
           options: { cacheName: "awwab-packs-v1" },
         }],
