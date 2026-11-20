@@ -78,6 +78,8 @@ The Urdu planning draft covers Hijri calendar and moon-sighting controls, remind
 
 The Urdu settings draft includes the profile, display, reading, and privacy panels, backup and restore messages, local wording suggestions, source credits, and share controls. Review the backup replacement warning, the descriptions of on-device storage, and the distinction between the app language and the language on a share card.
 
+The Urdu reader draft includes Hadith search and citation controls, Surah reader options, and the study glosses for Al-Fātiḥa, Al-ʿAṣr, and words said in prayer. Compare the glosses with the linked Arabic excerpts. The Hadith reader uses the attributed English edition for full narrations until a reviewed Urdu edition is available.
+
 The Indonesian draft covers all 4,005 messages in the current UI catalogue, including landing, onboarding, and the Adult and Maktab variants. The review export pairs them with the English source and links to screenshots for context. Publication requires two native reviewer sign-offs.
 
 The Indonesian draft also covers How to Pray, Return, and the make-up prayer and fasting planner. The locale export includes the existing Sayyid al-Istighfār meanings, the hope verse meaning, and the Hanafi note on sujūd al-sahw. Review these against the linked source content. The reader displays the citations alongside whichever language is available.
