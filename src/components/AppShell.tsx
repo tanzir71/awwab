@@ -124,6 +124,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
   const selectWord = useUi(state => state.selectWord);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const searchDialog = useRef<HTMLDivElement>(null);
   const searchInput = useRef<HTMLInputElement>(null);
   const searchReturnFocus = useRef<HTMLElement | null>(null);
   const main = useRef<HTMLElement>(null);
@@ -266,6 +267,19 @@ export function AppShell({ children, settings, now, desktop }: { children: React
     window.addEventListener("keydown", search);
     return () => window.removeEventListener("keydown", search);
   }, [openSearch]);
+  useLayoutEffect(() => {
+    if (!searchOpen) return;
+    function closeFocusedSearch(event: KeyboardEvent) {
+      if (event.key !== "Escape" || event.defaultPrevented || event.isComposing
+        || !(event.target instanceof Node) || !searchDialog.current?.contains(event.target)) return;
+      event.preventDefault();
+      setSearchOpen(false);
+    }
+    // The shortcut can open search over another dialog. Handle Escape before Radix
+    // checks its dialog stack, which may still be updating after search opens.
+    window.addEventListener("keydown", closeFocusedSearch, true);
+    return () => window.removeEventListener("keydown", closeFocusedSearch, true);
+  }, [searchOpen]);
 
   return <div className="app-shell">
     <a className="skip-link action" href="#app-main" onClick={event => {
@@ -332,7 +346,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
     </main>
     {!fullscreen && !prayerGuide && !languageFlow && <Tabs settings={settings} umrahGuide={umrahGuide} />}
     <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
-      <DialogContent className="awwab-dialog" aria-describedby={undefined} showCloseButton={false}
+      <DialogContent ref={searchDialog} className="awwab-dialog" aria-describedby={undefined} showCloseButton={false}
         onOpenAutoFocus={event => {
           event.preventDefault();
           searchInput.current?.focus();
