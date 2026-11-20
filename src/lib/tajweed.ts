@@ -29,6 +29,7 @@ export const tajweedLessonPath = (id: string) => id === "nun" ? tajweedRoute :
 export const tajweedTitleKey = (id: string) => id === "nun" ? "tajweedNunTitle" : `tajweedTitle-${id}`;
 export const tajweedTones = ["neutral", "tint", "soft", "accent"] as const;
 export const tajweedIntroKey = (id: string) => id === "nun" ? "tajweedNunIntro" : `tajweedIntro-${id}`;
+export const tajweedNunLetter = "نْ";
 export function tajweedLessonSources(lesson: TajweedLesson, advanced: boolean) {
   return lesson.sources ?? [advanced
     ? { title: "Ibn al-Jazarī · Al-Muqaddimah al-Jazariyyah", url: "https://mutun.al-asl.com/jazariyyah.html" }

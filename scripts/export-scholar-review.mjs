@@ -4,7 +4,7 @@ import { essentialPassages, essentialStudyPassage } from "../src/lib/essentialPa
 import { hadithArchiveVersion, hadithCollections, hadithSource } from "../src/lib/hadith-catalogue.ts";
 import { splitUthmaniOpening } from "../src/lib/quranOpening.ts";
 import { tajweedMessages } from "../src/lib/tajweed-copy.ts";
-import { tajweedClip, tajweedDepthLessons, tajweedExcerpt, tajweedIntroKey, tajweedLessons, tajweedLessonSources,
+import { tajweedClip, tajweedDepthLessons, tajweedExcerpt, tajweedIntroKey, tajweedLessons, tajweedLessonSources, tajweedNunLetter,
   tajweedReadingRuleKey, tajweedReference, tajweedSampleKey, tajweedTitleKey, tajweedVerseExamples } from "../src/lib/tajweed.ts";
 import { splitArabicWords } from "../src/lib/wordAnatomy.ts";
 import { pronunciationReview } from "./pronunciation-review.mjs";
@@ -30,7 +30,8 @@ function tajweedRows(lesson, advanced) {
   }));
   const overview = {
     id: `${group}/overview`, variety, group, label: `${title} · Lesson notes`,
-    expected: { en: intro.en, bn: intro.bn }, fields: articulation, recordings: [], sources,
+    expected: { en: intro.en.replace("{arabic}", tajweedNunLetter), bn: intro.bn.replace("{arabic}", tajweedNunLetter) },
+    fields: articulation, recordings: [], sources,
   };
   const samples = lesson.samples.map(sample => {
     const verse = quran.surahs[sample.chapter]?.[sample.ayah - 1];

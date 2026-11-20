@@ -12,6 +12,7 @@ import { fluencyLessonMessages, wordGlossMessages } from "../src/lib/fluency-mes
 import { studyGlossMessages } from "../src/lib/study-gloss-messages.mjs";
 import { prayerSourceMessages } from "../src/lib/prayer-source-messages.mjs";
 import { hifzVirtueMessages } from "../src/lib/essentialPassages.ts";
+import { tajweedPointMessages } from "../src/lib/tajweed-point-messages.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const { terms: glossary } = JSON.parse(readFileSync(resolve(root, "handovers/H2-languages-paths-arabic-help/data/glossary.json"), "utf8"));
@@ -133,6 +134,7 @@ for (const [catalogue, ...files] of [
   [studyGlossMessages, "src/pages/SalahWords.tsx", "src/pages/Surahs.tsx", "src/components/WordPanel.tsx", "src/pages/Print.tsx"],
   [prayerSourceMessages, "src/pages/Return.tsx", "src/components/PrayerGuideSupport.tsx"],
   [hifzVirtueMessages, "src/pages/Hifz.tsx"],
+  [tajweedPointMessages, "src/pages/Tajweed.tsx"],
 ]) {
   for (const [key, entry] of Object.entries(catalogue)) {
     if (messages.has(key)) throw new Error(`Duplicate catalogue message: ${key}`);

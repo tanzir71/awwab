@@ -86,7 +86,9 @@ The Urdu vocabulary and Qaida draft covers all 125 core Word Bank glosses, the w
 
 The Urdu Umrah draft covers trip preparation and transfer, the daily itinerary, Haram focus, the seven ritual steps and pocket guide, and the offline map controls. Check the ritual references, the distinction between a ṭawāf round and a saʿy lap, and the description of optional location use.
 
-The Indonesian draft covers all 4,025 messages in the current UI catalogue, including landing, onboarding, and the Adult and Maktab variants. The review export pairs them with the English source and links to screenshots for context. Publication requires two native reviewer sign-offs.
+The Urdu Tajweed and reading draft covers both Tajweed levels, the 17 articulation points, script comparison, Quran reading progress, and the teacher checklist. Review the technical terms with the marked Arabic examples and their source references.
+
+The Indonesian draft covers all 4,042 messages in the current UI catalogue, including landing, onboarding, and the Adult and Maktab variants. The review export pairs them with the English source and links to screenshots for context. Publication requires two native reviewer sign-offs.
 
 The Indonesian draft also covers How to Pray, Return, and the make-up prayer and fasting planner. The locale export includes the existing Sayyid al-Istighfār meanings, the hope verse meaning, and the Hanafi note on sujūd al-sahw. Review these against the linked source content. The reader displays the citations alongside whichever language is available.
 

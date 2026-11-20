@@ -55,7 +55,7 @@ export const tajweedMessages: MessageCatalog = {
   "tajweedRule-script-iqlab": { en: "Small mīm · iqlāb", bn: "ছোট মিম · ইকলাব" },
   "tajweedHint-script-iqlab": { en: "The small mīm signals iqlāb before bāʾ. Notice the extra sukūn on nūn in the IndoPak edition here.", bn: "বার আগে ছোট মিম ইকলাব বোঝায়। এখানে ইন্দোপাক লিপিতে নুনের ওপর অতিরিক্ত সুকুন লক্ষ করুন।" },
   tajweedNunTitle: { en: "Nūn sākin & tanwīn", bn: "নূন সাকিন ও তানবীন" },
-  tajweedNunIntro: { en: "When a nūn has sukūn (نْ), or a word ends in tanwīn, the next letter guides how you read it when you continue.", bn: "নূনে সুকুন (نْ) থাকলে বা শব্দের শেষে তানবীন থাকলে মিলিয়ে পড়ার সময় পরের হরফ দেখে নিয়ম বেছে নিন।" },
+  tajweedNunIntro: { en: "When a nūn has sukūn ({arabic}), or a word ends in tanwīn, the next letter guides how you read it when you continue.", bn: "নূনে সুকুন ({arabic}) থাকলে বা শব্দের শেষে তানবীন থাকলে মিলিয়ে পড়ার সময় পরের হরফ দেখে নিয়ম বেছে নিন।" },
   "tajweedRule-izhar": { en: "Iẓhār · clear", bn: "ইযহার · স্পষ্ট" },
   "tajweedRule-izhar-mutlaq": { en: "Iẓhār muṭlaq · clear within one word", bn: "ইযহার মুতলাক · একই শব্দে স্পষ্ট উচ্চারণ" },
   "tajweedRule-idgham": { en: "Idghām · merge", bn: "ইদগাম · মিশিয়ে" },
