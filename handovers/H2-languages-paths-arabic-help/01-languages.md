@@ -92,6 +92,8 @@ The Urdu grammar draft covers Grammar Foundations, Roots & Patterns, and Sentenc
 
 The Urdu Speak draft covers the variety and goal controls and all 36 A1 lessons across Saudi Hijazi, Gulf Arabic, and Modern Standard Arabic. Review the Urdu meanings beside the matching Arabic dialogue, vocabulary, and signs. The lessons share the existing generated Arabic recordings.
 
+The Urdu draft also covers all 14 Saudi A2 and 12 Saudi B1 lessons. Review the meanings in the context of each exchange, especially the B1 reply drills, and compare the dialogue with the generated Saudi audio.
+
 The Indonesian draft covers all 4,042 messages in the current UI catalogue, including landing, onboarding, and the Adult and Maktab variants. The review export pairs them with the English source and links to screenshots for context. Publication requires two native reviewer sign-offs.
 
 The Indonesian draft also covers How to Pray, Return, and the make-up prayer and fasting planner. The locale export includes the existing Sayyid al-Istighfār meanings, the hope verse meaning, and the Hanafi note on sujūd al-sahw. Review these against the linked source content. The reader displays the citations alongside whichever language is available.
