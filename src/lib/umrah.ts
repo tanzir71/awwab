@@ -1,6 +1,7 @@
-import { dateKey } from "./dates";
+import { addDays } from "./dates";
 import { cities, currentPrayerSchedule, schedule } from "./prayerServices";
 import type { GateMemory } from "./umrahGateMemory";
+import type { PrayerId } from "@/types/Prayer";
 
 export const makkah = cities.find(city => city.name === "Makkah");
 export const madinah = cities.find(city => city.name === "Madinah");
@@ -27,6 +28,7 @@ export const initialTrip = {
   gateMemory: undefined as GateMemory | undefined,
   tawaf: 0, voluntaryTawaf: undefined as number | undefined, step: 0, sai: initialSai, saiPaused: false, dhikr: {} as Record<string, number>,
   juz: {} as Record<string, number>, haramPrayers: {} as Record<string, string[]>,
+  hotelPrayer: undefined as { date: string; id: PrayerId } | undefined,
   requests: [] as { id: string; name: string; for: string; done: string[] }[],
   preparation: undefined as typeof emptyPreparation | undefined,
 };
@@ -108,11 +110,22 @@ export function correctSai(progress: SaiProgress, count: number, at: number): Sa
 export function umrahContext(now: Date, trip: typeof initialTrip) {
   const { day, current, next } = currentPrayerSchedule(makkah, "UmmAlQura", "shafi", now);
   const times = schedule(day, makkah, "UmmAlQura", "shafi");
-  const friday = new Date(`${next.date}T12:00:00Z`).getUTCDay() === 5;
-  const leave = new Date(next.starts.valueOf() - (trip.walk + trip.crowd + (friday ? 10 : 0)) * 60_000);
+  const walkMinutes = (id: PrayerId, date: string) => trip.walk + trip.crowd
+    + (id === "dhuhr" && new Date(`${date}T12:00:00Z`).getUTCDay() === 5 ? 10 : 0);
+  const leave = new Date(next.starts.valueOf() - walkMinutes(next.id, next.date) * 60_000);
+  const leaveForDhuhr = new Date(times.dhuhr.valueOf() - walkMinutes("dhuhr", day) * 60_000);
   const iqamah = current && new Date(current.starts.valueOf() + trip.iqamah * 60_000);
   const duha = new Date(times.sunrise.valueOf() + 20 * 60_000);
   const tripActive = (!trip.start || day >= trip.start) && (!trip.end || day <= trip.end);
-  const tahajjud = new Date(next.id === "fajr" ? next.starts.valueOf() - 60 * 60_000 : times.fajr.valueOf() - 60 * 60_000);
-  return { day: dateKey(now, makkah.timeZone), current, next, leave, iqamah, duha, tripActive, tahajjud, times };
+  const thirdStarts = (sunset: Date, dawn: Date) => {
+    const start = dawn.valueOf() - (dawn.valueOf() - sunset.valueOf()) / 3;
+    return Math.ceil(start / 60_000) * 60_000;
+  };
+  const thisMorning = now < times.fajr
+    ? thirdStarts(schedule(addDays(day, -1), makkah, "UmmAlQura", "shafi").maghrib, times.fajr) : 0;
+  const alarmDay = thisMorning > now.valueOf() ? day : addDays(day, 1);
+  const tahajjud = new Date(alarmDay === day ? thisMorning
+    : thirdStarts(times.maghrib, schedule(alarmDay, makkah, "UmmAlQura", "shafi").fajr));
+  return { day, current, next, leave, leaveForDhuhr, iqamah, duha, tripActive, tahajjud, alarmDay, times,
+    crowd: walkMinutes(next.id, next.date) - trip.walk };
 }

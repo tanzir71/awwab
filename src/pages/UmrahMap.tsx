@@ -20,9 +20,10 @@ export default function UmrahMap({ trip, point, points, locationError, save }: {
 }) {
   const { t, locale } = useCopy();
   const { hash } = useLocation();
+  const toHaram = hash === "#to-haram";
   const hotel = trip.hotel.point;
   const hotelRegion = hotel ? placeRegion(hotel) : "makkah";
-  const [region, setRegion] = useState<MapRegion>(hotelRegion);
+  const [region, setRegion] = useState<MapRegion>(toHaram ? "makkah" : hotelRegion);
   const [packs, setPacks] = useState<Partial<Record<MapRegion, File>>>({});
   const [loading, setLoading] = useState(false);
   const [savingPlace, setSavingPlace] = useState(false);
@@ -48,6 +49,8 @@ export default function UmrahMap({ trip, point, points, locationError, save }: {
   const entry = region === "makkah" ? points.find(pin => pin.id === trip.gateMemory?.entry)
     ?? points.find(pin => pin.title === trip.gate) : undefined;
   const exit = region === "makkah" ? points.find(pin => pin.id === trip.gateMemory?.exit) : undefined;
+  const destination = toHaram && region === "makkah"
+    ? entry ?? points.find(pin => pin.id === "haram") : undefined;
   const entryLabel = region === "makkah" ? entry?.title || trip.gate : "";
   const center = landmarks[0].point;
 
@@ -67,14 +70,20 @@ export default function UmrahMap({ trip, point, points, locationError, save }: {
       ? { ...pin, title: t("umrahMapYouEntered", { gate: pin.title }) } : pin);
     const selected = places.find(pin => pin.point === selection);
     if (selected && !list.some(pin => pin.id === selected.id)) list.push(selected);
+    if (destination && !list.some(pin => pin.id === destination.id)) list.push(destination);
     if (user) list.push({ id: "my-location", title: t("umrahMapHere"), point: user });
     return list;
-  }, [curated, entry, places, selection, t, user]);
+  }, [curated, destination, entry, places, selection, t, user]);
   const overview = useMemo(() => curated.map(pin => pin.point).filter(pin => distance(pin, center) < 2300), [center, curated]);
   const guide = useMemo<[Coord, Coord] | undefined>(() => {
+    if (destination && !walking) {
+      const origin = user ?? nearbyMapPoint(activeHotel, "makkah");
+      return origin ? [origin, destination.point] : undefined;
+    }
     const origin = user ?? entry?.point;
     return origin && activeHotel ? [origin, activeHotel] : undefined;
-  }, [activeHotel, entry, user]);
+  }, [activeHotel, destination, entry, user, walking]);
+  const haramCamera = useMemo(() => destination ? guide ?? [destination.point] : undefined, [destination, guide]);
   const matches = query.trim() ? places.filter(pin => {
     const original = landmarks.find(item => item.id === pin.id) ?? pin;
     const keywords = pin.id.startsWith("gate-") ? t("umrahMapGateKeyword")
@@ -201,7 +210,7 @@ export default function UmrahMap({ trip, point, points, locationError, save }: {
     <h1 className="sr-only">{t("umrahMapTitle")}</h1>
     <div className="umrah-map-stage">
       <UmrahMapCanvas region={region} file={file} pins={markerPins} center={center} entry={entry?.id}
-        guide={guide} camera={camera ?? overview} label={t("umrahMapArea", { city })} onSelect={choose} />
+        guide={guide} camera={camera ?? haramCamera ?? overview} label={t("umrahMapArea", { city })} onSelect={choose} />
       <div className="umrah-map-overlay">
         <div className="umrah-map-search">
           <DesignIcon name="umrah-map-search" size={18} />
@@ -226,6 +235,11 @@ export default function UmrahMap({ trip, point, points, locationError, save }: {
           {matches.map(pin => <button type="button" key={pin.id} onClick={() => choose(pin.point)}>{pin.title}</button>)}
           {!matches.length && <p role="status" className="small muted">{t("umrahMapNoResults")}</p>}
         </section>}
+        {destination && !walking && !query.trim() && <p className="umrah-map-direction caption">
+          {t(guide ? "umrahNowMapDirection" : "umrahNowMapDestination", {
+            place: mapPlaceNames[destination.id] ? t(mapPlaceNames[destination.id]) : destination.title,
+          })}
+        </p>}
       </div>
       <button ref={placesButton} type="button" className="umrah-map-place-button action light" aria-haspopup="dialog"
         onClick={() => choose()}>{t("umrahMapPlaces")}</button>

@@ -264,6 +264,7 @@ const savedRecords: Record<string, z.ZodTypeAny> = {
     tawaf: count.max(7), voluntaryTawaf: count.max(7).optional(), step: count.max(6), saiPaused: z.boolean().optional(),
     sai: z.object({ count: count.max(7), last: z.enum(["safa", "marwah"]).optional(), lastAt: count.optional(), exited: z.boolean(), detected: z.boolean().optional() }),
     dhikr: dateCounts, juz: dateCounts, haramPrayers: dateLists,
+    hotelPrayer: z.object({ date: daySchema, id: z.enum(prayerIds) }).optional(),
   }),
   reviews: z.record(z.string(), reviewSchema),
 };

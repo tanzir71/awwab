@@ -1,13 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { calculateZakat, gramsPerBhori, initialZakat, nisabWeight, paymentsForHawl,
   zakatHawl, zakatMoney, zakatPrices, zakatProfileTotals, type ZakatProfile } from "./zakat";
-import { advanceSai, bearing, correctSai, distance, emptyPreparation, initialSai, initialTrip,
-  saiGuidePosition, saiLapEnds, tawafRounds, toggleUmrahDua, tripDates } from "./umrah";
+import { advanceSai, bearing, correctSai, distance, emptyPreparation, initialSai, initialTrip, makkah,
+  saiGuidePosition, saiLapEnds, tawafRounds, toggleUmrahDua, tripDates, umrahContext } from "./umrah";
 import { observeHaramGate, type GateWatch, type HaramOutline } from "./umrahGateMemory";
 import { mapPlaceMatches, nearbyMapPoint, placeRegion } from "./umrahMapPlaces";
 import { addDays } from "./dates";
 import { baselineMonthStart, calendarDefaults, calendarEventById, dayDifference, eventDisplayDates, monthStartEvent } from "./hijri";
 import { eventReminders } from "./calendarFile";
+import { schedule } from "./prayerServices";
 import { calendarDayEvents, calendarWeekStart, fridayMosque, gregorianMonthCells, readCalendarDay, readCalendarMonth, shiftPlanEvent } from "./plan-calendar";
 import { defaults, exportUmrahTrip, prayerStatistics, readUmrahTripFile } from "./storageService";
 import { askMeaning, askPhrase, askPhraseMatches, quickAsks, readGate, renderAsk, umrahPhrases } from "./umrahAsk";
@@ -284,6 +285,36 @@ describe("offline map places", () => {
     expect(nearbyMapPoint(nabawi, "makkah")).toBeUndefined();
     expect(nearbyMapPoint({ lat: 23.81, lon: 90.41 }, "madinah")).toBeUndefined();
     expect(nearbyMapPoint(gate.point, "makkah")).toBe(gate.point);
+  });
+});
+
+describe("Umrah Now", () => {
+  it("adds crowd time for Friday Dhuhr and keeps the other prayer walks on the saved buffer", () => {
+    const trip = { ...initialTrip, walk: 9, crowd: 17, start: "2026-11-18", end: "2026-11-26" };
+    const fajr = umrahContext(new Date("2026-11-20T01:31:00Z"), trip);
+    const dhuhr = umrahContext(new Date("2026-11-20T08:01:00Z"), trip);
+    const saturday = umrahContext(new Date("2026-11-21T08:01:00Z"), trip);
+    expect(fajr.next.id).toBe("fajr");
+    expect(fajr.next.starts.getTime() - fajr.leave.getTime()).toBe(26 * 60_000);
+    expect(dhuhr.next.id).toBe("dhuhr");
+    expect(dhuhr.next.starts.getTime() - dhuhr.leave.getTime()).toBe(36 * 60_000);
+    expect(dhuhr.leave).toEqual(dhuhr.leaveForDhuhr);
+    expect(saturday.next.starts.getTime() - saturday.leave.getTime()).toBe(26 * 60_000);
+    expect(fajr.tripActive).toBe(true);
+    expect(umrahContext(new Date("2026-11-26T21:00:00Z"), trip).tripActive).toBe(false);
+  });
+
+  it("uses the start of the next available last third across Makkah midnight", () => {
+    const priorSunset = schedule("2026-11-19", makkah, "UmmAlQura", "shafi").maghrib;
+    const context = umrahContext(new Date("2026-11-19T21:02:00Z"), initialTrip);
+    const night = context.times.fajr.getTime() - priorSunset.getTime();
+    const remaining = context.times.fajr.getTime() - context.tahajjud.getTime();
+    expect(context.alarmDay).toBe("2026-11-20");
+    expect(remaining).toBeLessThanOrEqual(night / 3);
+    expect(remaining).toBeGreaterThan(night / 3 - 60_000);
+    const afterAlarm = umrahContext(new Date(context.tahajjud.getTime() + 1000), initialTrip);
+    expect(afterAlarm.alarmDay).toBe("2026-11-21");
+    expect(afterAlarm.tahajjud.getTime()).toBeGreaterThan(context.tahajjud.getTime());
   });
 });
 

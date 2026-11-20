@@ -68,3 +68,11 @@
 .umrah-map-dialog input { min-width: 0; }
 .umrah-map-place-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; max-height: 132px; overflow: auto; padding: 4px; }
 .umrah-map-place-list button { font: var(--type-small); }
+.umrah-map-direction {
+  justify-self: start;
+  padding: 6px 10px;
+  border-radius: var(--r-control);
+  color: var(--interactive-ink);
+  background: var(--c-surface);
+  box-shadow: var(--shadow-card);
+}
