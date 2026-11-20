@@ -15,7 +15,7 @@ import { reviewCard, type Reviews } from "./reviews";
 import { countKnownQuranWords } from "./quran";
 import { completeOnboarding, desktopPlacementPassed, placementLesson } from "./onboarding";
 import { finishQaidaLesson, finishSpeakUnit, markReadingPortion, rememberQaidaPlace, saveFluencyPractice, saveJuzRecitalRating, saveQaidaRowReview, saveSurahReview, saveTakhtiPractice, saveWordReview, setAyahFamiliar, setTeacherCheck, wordMilestones } from "./studyMilestones";
-import { speakGoalsKey, speakProgressKey } from "./speakCurriculum";
+import { defaultSpeakVariety, speakCourseVariety, speakGoalsKey, speakProgressKey, speakVarietyKey } from "./speakCurriculum";
 import { completedReadingChapters, emptyReadingPractice, firstUnreadAyah, recitationChecks, teacherChecklistComplete } from "./readingPractice";
 import type { HifzPortion, JuzRecitals } from "./hifz";
 import { reviewDestination, reviewQueue, studyPlanMinutes } from "./studyDesk";
@@ -68,19 +68,28 @@ describe("saved study milestones", () => {
     await db.records.clear();
   });
 
-  it("keeps Speak completion and goals through concurrent saves and a backup", async () => {
-    await db.records.bulkPut([{ key: speakProgressKey, value: ["sim"] }, { key: speakGoalsKey, value: ["speakWork"] }]);
+  it("keeps Speak completion, goals and variety through concurrent saves and a backup", async () => {
+    await db.records.bulkPut([
+      { key: speakProgressKey, value: ["sim", "greetings"] },
+      { key: speakGoalsKey, value: ["speakWork"] },
+      { key: speakVarietyKey, value: "msa" },
+    ]);
     await Promise.all([
       finishSpeakUnit("a2-family", times.asr, dhaka.timeZone),
       finishSpeakUnit("a2-family", times.asr, dhaka.timeZone),
       finishSpeakUnit("a2-office", times.asr, dhaka.timeZone),
       finishSpeakUnit("b1-story", times.asr, dhaka.timeZone),
+      finishSpeakUnit("msa-a1-greetings", times.asr, dhaka.timeZone),
     ]);
     const file = await backup();
     await db.records.clear();
     await restoreBackup(file);
-    expect(await getRecord<string[]>(speakProgressKey, [])).toEqual(["sim", "a2-family", "a2-office", "b1-story"]);
+    expect(await getRecord<string[]>(speakProgressKey, [])).toEqual(["sim", "greetings", "a2-family", "a2-office", "b1-story", "msa-a1-greetings"]);
     expect(await getRecord<string[]>(speakGoalsKey, [])).toEqual(["speakWork"]);
+    const variety = await getRecord(speakVarietyKey, defaultSpeakVariety);
+    expect(variety).toBe("msa");
+    expect(speakCourseVariety(variety, "A1")).toBe("msa");
+    expect(speakCourseVariety(variety, "A2")).toBe("saudi-hijazi");
     expect(await getRecord<string[]>("study-days", [])).toEqual([day]);
   });
 

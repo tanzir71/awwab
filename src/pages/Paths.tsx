@@ -14,7 +14,7 @@ import { studyNames } from "@/lib/study-copy";
 import type { Reviews } from "@/lib/reviews";
 import { tajweedDepthLessons, tajweedIndex, tajweedLessons, tajweedProgress } from "@/lib/tajweed";
 import { completedReadingChapters, emptyReadingPractice, practiceChapters, teacherChecklistComplete } from "@/lib/readingPractice";
-import { speakLevels, speakProgressKey, speakUnitsByLevel } from "@/lib/speakCurriculum";
+import { defaultSpeakVariety, speakCourses, speakCourseVariety, speakLevels, speakProgressKey, speakVarietyKey, speakVarietyLabels, type SpeakVariety } from "@/lib/speakCurriculum";
 import grammar from "../../docs/content/grammar-foundations.json";
 import roots from "../../docs/content/roots-curriculum.json";
 import introPatterns from "../../docs/content/roots-and-patterns.json";
@@ -40,13 +40,19 @@ function usePathState() {
   const quranWords = useRecord<string[]>("words-known", emptyStrings);
   const vocabulary = useRecord<string[]>("word-bank-known", emptyStrings);
   const spokenLessons = useRecord(speakProgressKey, emptyStrings);
+  const speakVariety = useRecord<SpeakVariety>(speakVarietyKey, defaultSpeakVariety);
   const reading = useRecord("reading-practice", emptyReadingPractice);
   const known = useMemo(() => countKnownQuranWords(quranWords, vocabulary), [quranWords, vocabulary]);
   const learned = useMemo(() => learnedSurahs(hifz, earlier), [hifz, earlier]);
   const short = salahChapters.filter(number => learned.has(number)).length;
   const amma = juzAmma.filter(chapter => learned.has(chapter.number)).length;
-  const spokenCount = speakLevels.map(level => speakUnitsByLevel[level].filter(unit => spokenLessons.includes(unit.id)).length);
-  const spokenDone = speakLevels.map((level, index) => spokenCount[index] === speakUnitsByLevel[level].length);
+  const spokenCourses = speakLevels.map(level => {
+    const variety = speakCourseVariety(speakVariety, level);
+    const units = speakCourses[variety][level];
+    const count = units.filter(unit => spokenLessons.includes(unit.id)).length;
+    return { variety, count, total: units.length };
+  });
+  const spokenDone = spokenCourses.map(({ count, total }) => count === total);
   const grammarCount = grammar.lessons.filter(lesson => earlier[grammarReviewPrefix + lesson.id]?.correct > 0).length;
   const introDone = introPatterns.patterns.every(pattern => earlier[patternReviewPrefix + pattern.id]?.correct > 0);
   const rootsCount = Number(introDone) + roots.lessons.filter(lesson => earlier[rootsReviewPrefix + lesson.id]?.correct > 0).length;
@@ -80,7 +86,7 @@ function usePathState() {
     speak: nextSpeak < 0 ? speakLevels.length : nextSpeak,
   };
   const active = Object.fromEntries(tracks.map(track => [track, Math.min(5, Math.max(complete[track] + 1, placement[track]?.level ?? 1))])) as Record<Track, number>;
-  return { active, complete, completedQaida, learned, short, amma, known, current, placement, spokenCount, spokenDone, grammarCount, rootsCount, sentenceCount, tajweed, tajweedDepth, fluent, understood, prepared };
+  return { active, complete, completedQaida, learned, short, amma, known, current, placement, speakVariety, spokenCourses, spokenDone, grammarCount, rootsCount, sentenceCount, tajweed, tajweedDepth, fluent, understood, prepared };
 }
 
 function headingLevel(track: Track, active: number) { return levels[track][active - 1]; }
@@ -118,8 +124,11 @@ function contextLabel(track: Track, level: number, state: ReturnType<typeof useP
   if (track === "understand" && level === 3) return t("pathsLessonProgress", { count: state.rootsCount, total: rootsLessonTotal });
   if (track === "understand" && level === 4) return t("readingSurahsProgress", { count: state.understood, total: juzAmma.length });
   if (track === "understand" && level === 5) return t("pathsLessonProgress", { count: state.sentenceCount, total: sentence.lessons.length });
-  const speakLevel = speakLevels[level - 1];
-  if (track === "speak" && speakLevel) return t("pathsLessonProgress", { count: state.spokenCount[level - 1], total: speakUnitsByLevel[speakLevel].length });
+  const course = state.spokenCourses[level - 1];
+  if (track === "speak" && course) {
+    const progress = t("pathsLessonProgress", { count: course.count, total: course.total });
+    return state.speakVariety === defaultSpeakVariety ? progress : `${t(speakVarietyLabels[course.variety])} · ${progress}`;
+  }
   return trackStatus[track][level - 1];
 }
 

@@ -6,7 +6,7 @@ import { quranText } from "./quran";
 import { askAudioPack, askClipIds, askPackPaths, packVoices } from "./umrahAskAudio";
 import { askPhrase } from "./umrahAsk";
 import { asset } from "./config";
-import { speakLessonContent, speakUnitsByLevel, speakUnitNumber } from "./speakCurriculum";
+import { speakCourses, speakLessonContent, speakUnitNumber } from "./speakCurriculum";
 
 describe("Bundled recitation packs", () => {
   it("has one attributed recording for the surah and every numbered ayah", () => {
@@ -70,10 +70,11 @@ describe("Umrah phrase recordings", () => {
 });
 
 describe("Speak lesson recordings", () => {
-  it.each([["A2", 14, 4, 2], ["B1", 12, 6, 3]] as const)("includes generated %s dialogue, vocabulary and signs", (level, count, linesPerUnit, wordsPerUnit) => {
+  it.each([["saudi-hijazi", "A2", 14, 4, 2], ["saudi-hijazi", "B1", 12, 6, 3], ["msa", "A1", 12, 4, 2]] as const)("includes generated %s %s dialogue, vocabulary and signs", (variety, level, count, linesPerUnit, wordsPerUnit) => {
     const files = new Set<string>();
-    expect(speakUnitsByLevel[level]).toHaveLength(count);
-    for (const [index, unit] of speakUnitsByLevel[level].entries()) {
+    const units = speakCourses[variety][level];
+    expect(units).toHaveLength(count);
+    for (const [index, unit] of units.entries()) {
       const { lines, words, clips } = speakLessonContent(unit);
       expect(speakUnitNumber(unit)).toBe(index + 1);
       expect(lines).toHaveLength(linesPerUnit);

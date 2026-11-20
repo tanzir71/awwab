@@ -11,7 +11,7 @@ import content from "../../docs/content/roots-and-patterns.json";
 import grammar from "../../docs/content/grammar-foundations.json";
 import sentence from "../../docs/content/sentence-structure.json";
 import roots from "../../docs/content/roots-curriculum.json";
-import { speakLessonContent, speakUnitsByLevel } from "./speakCurriculum";
+import { speakCourses, speakLessonContent } from "./speakCurriculum";
 import { correctTajweedSamples, tajweedClip, tajweedDepthLessons, tajweedExcerpt, tajweedLessons, tajweedPracticeSamples, tajweedPrecache,
   tajweedProgress, tajweedReviewId, tajweedSampleKey } from "./tajweed";
 import { newReview } from "./reviews";
@@ -180,7 +180,7 @@ describe("Learning path progress", () => {
     expect(normalizeWord(splitArabicWords(verse.uthmani)[last - 1])).toBe(normalizeWord(analysis.word));
     expect(content.patterns).toHaveLength(6);
     expect(reviewDestination(patternReviewPrefix + content.patterns[0].id)).toBe(patternPracticePath);
-    for (const unit of [...speakUnitsByLevel.A2, ...speakUnitsByLevel.B1]) {
+    for (const unit of [...speakCourses["saudi-hijazi"].A2, ...speakCourses["saudi-hijazi"].B1, ...speakCourses.msa.A1]) {
       const bridge = speakLessonContent(unit).words.find(word => word.bridge);
       expect(bridge, unit.id).toBeDefined();
       const row = corpus.positions.get(bridge.bridge);

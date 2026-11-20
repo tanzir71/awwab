@@ -21,7 +21,7 @@ export const speakMessages: MessageCatalog = {
   speakEverydayLevel: { en: "Everyday", bn: "দৈনন্দিন কথাবার্তা" },
   speakConversation: { en: "Conversation", bn: "আলাপচারিতা" },
   speakUnits: { en: "{count, number} units", bn: "{count, number}টি পাঠ" },
-  speakUnitLabel: { en: "Speak · {level} · unit {number, number} · Saudi (Hijazi)", bn: "কথা বলা · {level} · {number, number} নম্বর পাঠ · সৌদি (হিজাজি)" },
+  speakUnitLabel: { en: "Speak · {level} · unit {number, number} · {variety}", bn: "কথা বলা · {level} · {number, number} নম্বর পাঠ · {variety}" },
   speakUnitNumber: { en: "Unit {number, number}", bn: "{number, number} নম্বর পাঠ" },
   speakYou: { en: "You", bn: "আপনি" },
   speakShop: { en: "Shop", bn: "দোকানি" },
@@ -49,4 +49,5 @@ export const speakMessages: MessageCatalog = {
   speakRootExplanation: { en: "Sharīḥa shares the root of “Alam nashraḥ” (94:1).", bn: "‘শারীহা’ আর ‘আলাম নাশরাহ’ (৯৪:১) একই শব্দমূল থেকে এসেছে।" },
   speakRootFamily: { en: "The root of {word} also appears in the Quran.", bn: "{word} শব্দটির মূল কুরআনেও আছে।" },
   generatedSpeech: { en: "Generated speech · Emirati voice", bn: "তৈরি করা কণ্ঠ · আমিরাতি উচ্চারণ" },
+  speakFormalSpeech: { en: "Generated speech · Nabra MSA voice", bn: "তৈরি করা কণ্ঠ · নাবরা প্রমিত আরবি" },
 };

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ArabicText } from "@/components/ArabicText";
 import { DesignIcon } from "@/components/DesignIcon";
 import { LocalRecorder } from "@/components/LocalRecorder";
@@ -11,16 +11,23 @@ import { phraseReviewPrefix } from "@/lib/learningPaths";
 import { newReview, type ReviewGrade, type Reviews } from "@/lib/reviews";
 import { finishSpeakUnit, saveLearningReview } from "@/lib/studyMilestones";
 import { updateRecord, type Settings } from "@/lib/storageService";
-import { speakGoals, speakGoalsKey, speakLessonContent, speakLessonPath, speakLevelLabels, speakLevels, speakProgressKey, speakSetupPath,
-  speakUnit, speakUnitNumber, speakUnitsByLevel, type SpeakLevel, type SpeakUnit, type SpeakWord } from "@/lib/speakCurriculum";
+import { defaultSpeakVariety, speakCourses, speakCourseVariety, speakGoals, speakGoalsKey, speakLessonContent, speakLessonPath, speakLevelLabels,
+  speakLevels, speakProgressKey, speakSetupPath, speakUnit, speakUnitNumber, speakVarieties, speakVarietyKey, speakVarietyLabels,
+  type SpeakLevel, type SpeakUnit, type SpeakVariety, type SpeakWord } from "@/lib/speakCurriculum";
 import { splitArabicWords } from "@/lib/wordAnatomy";
 
 const steps = ["speakListen", "speakWords", "speakRepeat", "speakTurn", "speakSign"];
 const goalDefaults = ["speakUmrah"];
+const varietyCards: { label: string; id?: SpeakVariety }[] = [
+  { label: speakVarietyLabels["saudi-hijazi"], id: "saudi-hijazi" },
+  { label: "speakGulf" },
+  { label: speakVarietyLabels.msa, id: "msa" },
+  { label: "speakLater" },
+];
 
-function UnitList({ active, complete, level }: { active?: string; complete: string[]; level: SpeakLevel }) {
+function UnitList({ active, complete, level, variety }: { active?: string; complete: string[]; level: SpeakLevel; variety: SpeakVariety }) {
   const { t, language } = useCopy();
-  const units = speakUnitsByLevel[level];
+  const units = speakCourses[variety][level];
   return <section className="card speak-unit-list" aria-label={t(speakLevelLabels[level])}>
     <header className="row-between"><h2>{level} · {t(speakLevelLabels[level])}</h2><span className="small muted">{t("speakUnits", { count: units.length })}</span></header>
     <ol>{units.map(unit => <li key={unit.id}><Link to={speakLessonPath(unit.id)} aria-current={active === unit.id ? "page" : undefined}>
@@ -29,20 +36,37 @@ function UnitList({ active, complete, level }: { active?: string; complete: stri
   </section>;
 }
 
-function SpeakSetup({ complete, level }: { complete: string[]; level: SpeakLevel }) {
+function SpeakSetup({ complete, level, variety }: { complete: string[]; level: SpeakLevel; variety: SpeakVariety }) {
   const { t } = useCopy();
   const selected = useRecord(speakGoalsKey, goalDefaults);
   const [error, setError] = useState(false);
+  const [changingVariety, setChangingVariety] = useState(false);
+  const navigate = useNavigate();
+  const courses = speakCourses[variety];
+  async function chooseVariety(next: SpeakVariety) {
+    setError(false);
+    setChangingVariety(true);
+    try {
+      await updateRecord(speakVarietyKey, defaultSpeakVariety, () => next);
+      navigate(speakSetupPath(speakCourses[next][level] ? level : "A1", next));
+    } catch { setError(true); }
+    finally { setChangingVariety(false); }
+  }
   return <div className="paths-page speak-page speak-setup">
     <header className="hifz-heading"><Link className="hifz-back" to="/learn/paths" aria-label={t("back")}><DesignIcon name="ask-icon-chev-l" size={24} /></Link>
       <div><h1>{t("pathsSpeak")}</h1><p className="small muted">{t("speakSubtitle")}</p></div></header>
     <div className="speak-setup-grid"><div className="compact-stack">
       <h2 className="caption">{t("speakVariety")}</h2>
-      <section className="card speak-variety selected"><h3>{t("speakSaudi")}</h3><p className="small muted">{t("speakSaudiNote")}</p></section>
-      {(["speakGulf", "speakFormal", "speakLater"] as const).map(name => <section className="card speak-variety" key={name}>
-        <div className="row-between"><h3>{t(name)}</h3><span className="small muted">{t("speakPending")}</span></div>
-        {name !== "speakLater" && <p className="small muted">{t(`${name}Note`)}</p>}
-      </section>)}
+      <div className="compact-stack" role="group" aria-label={t("speakVariety")}>
+        {varietyCards.map(({ id, label }) => id ? <button type="button" key={id} disabled={changingVariety}
+          className={`card speak-variety${variety === id ? " selected" : ""}`}
+          aria-pressed={variety === id} onClick={() => void chooseVariety(id)}>
+          <strong>{t(label)}</strong><span className="small muted">{t(`${label}Note`)}</span>
+        </button> : <section className="card speak-variety" key={label}>
+          <div className="row-between"><h3>{t(label)}</h3><span className="small muted">{t("speakPending")}</span></div>
+          {label !== "speakLater" && <p className="small muted">{t(`${label}Note`)}</p>}
+        </section>)}
+      </div>
       <h2 className="caption">{t("speakGoal")}</h2>
       <div className="chips">{speakGoals.map(goal => <button key={goal} type="button" className={`chip ${selected.includes(goal) ? "active" : "soft"}`}
         aria-pressed={selected.includes(goal)} onClick={() => {
@@ -52,16 +76,16 @@ function SpeakSetup({ complete, level }: { complete: string[]; level: SpeakLevel
       {error && <p role="alert">{t("saveError")}</p>}
       <h2 className="caption">{t("speakLevels")}</h2>
       <div className="equal-row speak-levels">
-        {speakLevels.map(choice => {
-          const count = speakUnitsByLevel[choice].length;
-          const to = choice === "A1" && level === "A1" ? speakLessonPath("greetings") : speakSetupPath(choice);
+        {speakLevels.filter(choice => courses[choice]).map(choice => {
+          const units = courses[choice];
+          const to = choice === "A1" && level === "A1" ? speakLessonPath(units[0].id) : speakSetupPath(choice, variety);
           return <Link className={`card ${choice === level ? "night" : "soft"}`} key={choice}
             to={to} aria-current={choice === level ? "true" : undefined}>
-            <strong>{choice}</strong><small>{t(speakLevelLabels[choice])} · {t("speakUnits", { count })}</small>
+            <strong>{choice}</strong><small>{t(speakLevelLabels[choice])} · {t("speakUnits", { count: units.length })}</small>
           </Link>;
         })}
       </div>
-    </div><UnitList complete={complete} level={level} /></div>
+    </div><UnitList complete={complete} level={level} variety={variety} /></div>
   </div>;
 }
 
@@ -104,15 +128,17 @@ function SpeakLesson({ unit, complete, now, settings, reviewIndex }: { unit: Spe
   const { lines, words, clips } = useMemo(() => speakLessonContent(unit), [unit]);
   const title = unit.title[lang];
   const sim = unit.id === "sim";
-  const dialogue = unit.level !== "A1" || sim;
+  const scripted = "dialogue" in unit;
+  const dialogue = scripted || sim;
   const repeatLine = dialogue ? 2 : 0;
   const replyLines = unit.level === "B1" ? [2, 4] : [repeatLine];
   const reply = replyLines[replyIndex];
   const promptLine = reply - 1;
   const number = speakUnitNumber(unit);
-  const partner = unit.level !== "A1" ? unit.partner[lang] : t("speakShop");
-  const other = unit.level === "B1" ? replyLines[1 - replyIndex] : unit.level === "A2" ? 0 : lines.length - 1;
-  const correctFirst = unit.level !== "A1" && (number + replyIndex) % 2 === 0;
+  const partner = scripted ? unit.partner[lang] : t("speakShop");
+  const other = unit.level === "B1" ? replyLines[1 - replyIndex] : scripted ? 0 : lines.length - 1;
+  const correctFirst = scripted && (number + replyIndex) % 2 === 0;
+  const setup = speakSetupPath(unit.level, unit.variety);
   const replyChoices = correctFirst ? [reply, other] : [other, reply];
   const bridge = words.find(word => word.bridge);
   const player = useAudioPlayback(Object.keys(clips), clips);
@@ -178,10 +204,10 @@ function SpeakLesson({ unit, complete, now, settings, reviewIndex }: { unit: Spe
   </section>;
 
   return <div className="paths-page speak-page speak-lesson">
-    <header className="hifz-heading"><Link className="hifz-back" to={speakSetupPath(unit.level)} aria-label={t("back")}><DesignIcon name="ask-icon-chev-l" size={24} /></Link>
-      <div><h1>{title}</h1><p className="small muted">{t("speakUnitLabel", { level: unit.level, number })}</p></div></header>
+    <header className="hifz-heading"><Link className="hifz-back" to={setup} aria-label={t("back")}><DesignIcon name="ask-icon-chev-l" size={24} /></Link>
+      <div><h1>{title}</h1><p className="small muted">{t("speakUnitLabel", { level: unit.level, number, variety: t(speakVarietyLabels[unit.variety]) })}</p></div></header>
     <div className="speak-workspace">
-      <div className="speak-workspace-nav"><UnitList active={unit.id} complete={complete} level={unit.level} /></div>
+      <div className="speak-workspace-nav"><UnitList active={unit.id} complete={complete} level={unit.level} variety={unit.variety} /></div>
       <div className="compact-stack speak-lesson-main">
         <div className="speak-steps" role="group" aria-label={title}>{steps.map((label, i) => <button type="button" key={label} aria-pressed={step === i} onClick={() => changeStep(i)}>{t(label)}</button>)}</div>
         <audio ref={player.element} preload="none" {...player.events} onEnded={() => {
@@ -240,7 +266,7 @@ function SpeakLesson({ unit, complete, now, settings, reviewIndex }: { unit: Spe
           <div className="equal-row"><button className="action light" type="button" onClick={() => listen("sign")}>{t(player.playing ? "askStop" : "speakListen")}</button>
             <button className="action light" type="button" aria-expanded={revealed} onClick={() => setRevealed(value => !value)}>{t("speakSignMeaning")}</button></div>
           {revealed && <p>{unit.meaning[lang]}</p>}
-          {complete.includes(unit.id) ? <Link className="action" to={speakSetupPath(unit.level)}>{t("pathsDone")}</Link> : <button className="action" type="button" disabled={saving} onClick={() => void finish()}>{t("speakFinish")}</button>}
+          {complete.includes(unit.id) ? <Link className="action" to={setup}>{t("pathsDone")}</Link> : <button className="action" type="button" disabled={saving} onClick={() => void finish()}>{t("speakFinish")}</button>}
           {error && <p role="alert">{t("saveError")}</p>}</section>}
         {player.error && <p role="status">{t("setupPlaybackError")}</p>}
         <div className="speak-player card night">
@@ -252,7 +278,8 @@ function SpeakLesson({ unit, complete, now, settings, reviewIndex }: { unit: Spe
             {step === 0 && <button type="button" onClick={() => setMeanings(value => !value)}>{t(meanings ? "speakHideMeanings" : "speakShowMeanings")}</button>}
             {step < steps.length - 1 && <button type="button" onClick={() => changeStep(step + 1)}>{t(steps[step + 1])} →</button>}</div>
         </div>
-        <p className="small muted">{t("generatedSpeech")}</p>
+        <p className="small muted">{unit.variety === "msa" ?
+          <a href="https://huggingface.co/oddadmix/Nabra-82M-v0.1" rel="noreferrer">{t("speakFormalSpeech")}</a> : t("generatedSpeech")}</p>
       </div>
       <aside className="compact-stack speak-workspace-side">
         {step !== 1 && wordList}
@@ -269,7 +296,10 @@ export function Speak({ settings, now }: { settings: Settings; now: Date }) {
   const review = params.get("review");
   const unit = speakUnit(id);
   const level = speakLevels.find(candidate => candidate === params.get("level")) ?? "A1";
+  const preferred = useRecord(speakVarietyKey, defaultSpeakVariety);
+  const requestedVariety = speakVarieties.find(candidate => candidate === params.get("variety"));
+  const variety = speakCourseVariety(requestedVariety ?? preferred, level);
   const complete = useRecord<string[]>(speakProgressKey, []);
   return unit ? <SpeakLesson key={`${unit.id}:${review ?? ""}`} unit={unit} complete={complete} settings={settings} now={now}
-    reviewIndex={review && /^\d+$/.test(review) ? Number(review) : undefined} /> : <SpeakSetup complete={complete} level={level} />;
+    reviewIndex={review && /^\d+$/.test(review) ? Number(review) : undefined} /> : <SpeakSetup complete={complete} level={level} variety={variety} />;
 }

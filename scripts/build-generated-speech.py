@@ -1,14 +1,12 @@
-"""Build the offline spoken Arabic clips using a local Piper ONNX voice and ffmpeg."""
+"""Build the offline spoken Arabic clips with local Piper or Nabra models and FFmpeg."""
 
 import argparse
+from array import array
 import io
 import json
 from pathlib import Path
 import subprocess
 import wave
-
-from piper import PiperVoice
-
 
 ROOT = Path(__file__).resolve().parent.parent
 PHRASES = ROOT / "handovers/H2-languages-paths-arabic-help/data/umrah-phrases.json"
@@ -47,11 +45,11 @@ def phrase_clips(phrases, variety):
         yield f"number-{number}", str(number)
 
 
-def encode(voice, path, text):
+def encode(synthesize_wav, path, text):
     path.parent.mkdir(parents=True, exist_ok=True)
     wav = io.BytesIO()
     with wave.open(wav, "wb") as stream:
-        voice.synthesize_wav(text, stream)
+        synthesize_wav(text, stream)
     result = subprocess.run(
         ["ffmpeg", "-nostdin", "-loglevel", "error", "-i", "pipe:0", "-af",
          "loudnorm=I=-16:TP=-1:LRA=7,adelay=150,apad=pad_dur=0.15", "-ac", "1", "-ar", "48000",
@@ -70,18 +68,56 @@ def course_clips(units):
             yield f"{slug}-line-{number}", line[0]
         for number, word in enumerate(unit["words"], start=1):
             yield f"{slug}-word-{number}", word["ar"]
-        yield f"sign-{slug}", unit["sign"]
+        yield f"sign-{slug}", unit.get("signSpeech", unit["sign"])
+
+
+def nabra_synthesizer(model_dir):
+    import sherpa_onnx
+
+    config = sherpa_onnx.OfflineTtsConfig(
+        model=sherpa_onnx.OfflineTtsModelConfig(
+            kokoro=sherpa_onnx.OfflineTtsKokoroModelConfig(
+                model=str(model_dir / "model.int8.onnx"),
+                voices=str(model_dir / "voices.bin"),
+                tokens=str(model_dir / "tokens.txt"),
+                data_dir=str(model_dir / "espeak-ng-data"),
+                lang="ar",
+            ),
+            num_threads=4,
+        )
+    )
+    if not config.validate():
+        raise ValueError("Pass the extracted nabra-82m-arabic-int8 directory.")
+    tts = sherpa_onnx.OfflineTts(config)
+
+    def synthesize(text, stream):
+        stream.setparams((1, 2, tts.sample_rate, 0, "NONE", "not compressed"))
+        audio = tts.generate(text, sid=0, speed=1.0)
+        if not audio.samples:
+            raise ValueError(f"Nabra produced no speech for {text}")
+        pcm = array("h", (round(32767 * max(-1.0, min(1.0, sample))) for sample in audio.samples))
+        stream.writeframes(pcm.tobytes())
+
+    return synthesize
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("model", type=Path, help="Emirati female Piper model with its .onnx.json config")
-    parser.add_argument("--course", choices=SPEAK_COURSES, help="Only rebuild the selected Speak course")
+    parser.add_argument("model", type=Path, help="Emirati Piper ONNX model, or extracted Nabra INT8 directory for msa-a1")
+    parser.add_argument("--course", choices=(*SPEAK_COURSES, "msa-a1"), help="Only rebuild the selected Speak course")
     args = parser.parse_args()
-    voice = PiperVoice.load(args.model)
+    if args.course == "msa-a1":
+        synthesize_wav = nabra_synthesizer(args.model)
+        for slug, line in course_clips(read(CONTENT / "spoken-msa-a1.json")):
+            encode(synthesize_wav, OUTPUT / "study-speech" / f"{slug}.opus", line)
+        return
+
+    from piper import PiperVoice
+
+    synthesize_wav = PiperVoice.load(args.model).synthesize_wav
     for course in (args.course,) if args.course else SPEAK_COURSES:
         for slug, line in course_clips(read(CONTENT / f"spoken-{course}.json")):
-            encode(voice, OUTPUT / "study-speech" / f"{slug}.opus", line)
+            encode(synthesize_wav, OUTPUT / "study-speech" / f"{slug}.opus", line)
     if args.course:
         return
 
@@ -91,7 +127,7 @@ def main():
     prompts.update({f"sim-word-{i}": line["ar"] for i, line in enumerate(units["simWords"], start=1)})
     prompts.update({f"sign-{unit['id']}": unit["sign"] for unit in units["units"]})
     for slug, line in prompts.items():
-        encode(voice, OUTPUT / "study-speech" / f"{slug}.opus", line)
+        encode(synthesize_wav, OUTPUT / "study-speech" / f"{slug}.opus", line)
 
     phrases = read(PHRASES)["phrases"]
     bytes_total = 0
@@ -103,7 +139,7 @@ def main():
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_bytes(other.read_bytes())
             else:
-                encode(voice, path, line)
+                encode(synthesize_wav, path, line)
             bytes_total += path.stat().st_size
         print(f"Encoded {variety} phrase clips", flush=True)
     write(CONTENT / "umrah-phrase-audio.json", {"version": 1, "bytes": bytes_total, "attribution": "Piper · Emirati Arabic voice", "source": MODEL, "generated": True, "voices": ["female"]})

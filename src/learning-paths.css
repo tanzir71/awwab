@@ -243,6 +243,7 @@
 .speak-page h2, .speak-page h3 { font: var(--type-body-strong); }
 .speak-page h2.caption { font: var(--type-caption); }
 .speak-setup-grid, .speak-workspace, .speak-dialogue { display: grid; gap: 10px; min-width: 0; align-items: start; }
+button.speak-variety { display: grid; gap: 2px; text-align: start; }
 .speak-variety.selected, .speak-line[data-you="true"] { background: var(--c-primary-soft); box-shadow: none; }
 .speak-levels .card { display: grid; gap: 2px; text-decoration: none; padding: 12px; }
 .speak-page .chip.active { background: var(--c-primary); color: var(--c-on-primary); }
