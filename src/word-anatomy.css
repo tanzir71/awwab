@@ -4,7 +4,7 @@
   padding: 8px 20px max(28px, env(safe-area-inset-bottom)); gap: 10px;
   border-radius: var(--r-sheet) var(--r-sheet) 0 0;
 }
-.anatomy-grip { width: 64px; height: 26px; display: grid; align-items: start; justify-items: start; padding-top: 2px; }
+.anatomy-grip { width: 64px; height: 44px; display: grid; align-items: start; justify-items: start; padding-top: 2px; margin-block-end: -10px; }
 .anatomy-grip::before { content: ""; display: block; width: 40px; height: 5px; border-radius: var(--r-pill); background: var(--c-line); }
 .anatomy-content { display: grid; align-content: start; min-width: 0; gap: 16px; }
 .anatomy-content[data-layout="side"] { padding-top: 20px; }
@@ -127,4 +127,11 @@
   .anatomy-content[data-layout="maktab-reader"] .anatomy-spellings > .soft { background: var(--c-surface-alt); }
   .anatomy-content[data-layout="maktab-reader"] .anatomy-modern-sentence { color: var(--c-ink-muted); }
   .anatomy-content[data-layout="maktab-reader"] .anatomy-modern-sentence .word-chip { font-size: 15px; }
+}
+
+@media (max-width: 1023px), (any-pointer: coarse) {
+  .anatomy-content .word-chip,
+  .anatomy-content[data-layout] .anatomy-modern-sentence .word-chip,
+  .anatomy-content[data-layout] .anatomy-actions .action,
+  .anatomy-panel-label .text-button { min-width: 44px; min-height: 44px; }
 }

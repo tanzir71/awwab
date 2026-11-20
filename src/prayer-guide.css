@@ -1,6 +1,6 @@
 .guide-topic-card { display: grid; gap: 10px; align-content: start; }
 .guide-topic-card > h2 { margin: 0; }
-.guide-topic-card > a { justify-self: start; }
+.guide-topic-card > a { display: inline-flex; align-items: center; min-width: 44px; min-height: 44px; justify-self: start; }
 .guide-topic-card .arabic-line { flex-wrap: wrap; overflow: visible; }
 .guide-lost[data-desktop="true"] .guide-citation { gap: 8px; }
 
@@ -73,4 +73,10 @@
 @media (1024px <= width < 1160px) {
   .anatomy-open .guide-desk-steps > li { grid-template-columns: 26px minmax(0, 1fr); }
   .anatomy-open .guide-desk-phrase { grid-column: 2; }
+}
+
+@media (min-width: 1024px) and (any-pointer: coarse) {
+  .guide-desk-tabs > button, .guide-desk-instruction > a, .guide-desk-phrase .word-chip,
+  .guide-desk-phrase-meta a, .guide-desk-audio-button, .guide-desk-next,
+  .guide-desk-word-info .action { min-width: 44px; min-height: 44px; }
 }
