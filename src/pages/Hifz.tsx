@@ -1,13 +1,15 @@
-import { useEffect, useMemo, useRef, useState, type Ref } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode, type Ref } from "react";
+import * as Tabs from "@radix-ui/react-tabs";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Link, useParams } from "react-router-dom";
 import { ArabicText } from "@/components/ArabicText";
 import { DesignIcon } from "@/components/DesignIcon";
 import { QuranStudySources, QuranVerseMeaning } from "@/components/QuranStudySources";
 import { StudyText } from "@/components/StudyText";
-import { useRecord } from "@/hooks/use-awwab";
+import { useDesktop, useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { dateKey, formatDay } from "@/lib/dates";
+import { focusListItem } from "@/lib/focusListItem";
 import { essentialPassages, getHifzPassage, groupPortions, nextPortion, passageLabel, portionBucket, portionPlan, recitalProgress, studyChapters,
   studyPhrases, studyQuran, verseText, type HifzPassage, type HifzPlans, type HifzPortion, type HifzReviews, type JuzRecital,
   type JuzRecitals, type StudyQuran } from "@/lib/hifz";
@@ -51,9 +53,11 @@ function VerseRead({ verse, settings }: { verse: QuranVerse; settings: Settings 
 }
 
 
-function StudyPortion({ item, position, title, passage, settings, now, minutes }: { item: HifzPortion; position: number; title: string;
-  passage: HifzPassage; settings: Settings; now: Date; minutes: number }) {
-  const { t, locale } = useCopy();
+function StudyPortion({ item, position, title, passage, settings, now, minutes, directory }: { item: HifzPortion; position: number; title: string;
+  passage: HifzPassage; settings: Settings; now: Date; minutes: number; directory: ReactNode }) {
+  const { t, locale, direction } = useCopy();
+  const desktop = useDesktop();
+  const wide = useDesktop(1280);
   const reviews = useRecord<HifzReviews>("hifz-portions", emptyReviews);
   const [visible, show] = useState(true);
   const [saving, markSaving] = useState(false);
@@ -71,8 +75,7 @@ function StudyPortion({ item, position, title, passage, settings, now, minutes }
     catch { setStatus(t("hifzSaveError")); }
     finally { markSaving(false); }
   }
-  return <div className="hifz-page compact-stack">
-    <PassageHeading title={t("hifzPortionTitle", { number: position })} subtitle={`${title} · ${reference}`} back={base(passage.id)} />
+  const study = <div className="compact-stack hifz-main">
     <section className="card compact-stack hifz-study-controls">
       <div className="row-between"><span className="chip soft">{t(bucketCopy[bucket])}</span><button className="text-button" type="button" aria-expanded={visible}
         onClick={() => show(!visible)}>{t(visible ? "hifzRepeat" : "hifzRead")}</button></div>
@@ -86,6 +89,19 @@ function StudyPortion({ item, position, title, passage, settings, now, minutes }
         className={`action${grade === "got-it" ? "" : " light"}`} onClick={() => void rate(grade)}>{t(grade)}</button>)}
     </div>
     {status && <p className="small muted" role="status">{status}</p>}
+  </div>;
+
+  return <div className="hifz-page hifz-portion-page compact-stack">
+    <PassageHeading title={t("hifzPortionTitle", { number: position })} subtitle={`${title} · ${reference}`} back={base(passage.id)} />
+    {!desktop ? study : wide ? <div className="hifz-workspace">{study}{directory}</div> :
+      <Tabs.Root className="workspace-tabs" dir={direction} defaultValue="reader">
+        <Tabs.List className="study-tabs equal-row" aria-label={title}>
+          <Tabs.Trigger value="reader">{t("surahReader")}</Tabs.Trigger>
+          <Tabs.Trigger value="portions">{t("hifzPortions")}</Tabs.Trigger>
+        </Tabs.List>
+        <Tabs.Content value="reader">{study}</Tabs.Content>
+        <Tabs.Content className="hifz-side-tab" value="portions">{directory}</Tabs.Content>
+      </Tabs.Root>}
     <QuranStudySources script={settings.script} />
   </div>;
 }
@@ -161,7 +177,9 @@ function WeeklyRecital({ juz, passage, title, portions, recital, settings, now }
 }
 
 function PassagePlan({ passage, portions, settings, now }: { passage: HifzPassage; portions: HifzPortion[]; settings: Settings; now: Date }) {
-  const { t, language, locale } = useCopy();
+  const { t, language, locale, direction } = useCopy();
+  const desktop = useDesktop();
+  const wide = useDesktop(1280);
   const stored = useRecord<HifzPlans>("hifz-plans", emptyPlans);
   const reviews = useRecord<HifzReviews>("hifz-portions", emptyReviews);
   const juz = passage.id.startsWith("juz-") ? Number(passage.id.slice(4)) : undefined;
@@ -197,21 +215,41 @@ function PassagePlan({ passage, portions, settings, now }: { passage: HifzPassag
     void saveHifzPlan(passage.id, value, today).catch(() => showError(true));
   }
 
-  if (item) return <StudyPortion key={item.id} item={item} position={position} title={title} passage={passage} settings={settings} now={now} minutes={minutes} />;
   if (juz && portion === "recital") return recital
     ? <WeeklyRecital juz={juz} passage={passage} title={title} portions={portions} recital={recital[juz]} settings={settings} now={now} />
     : <p role="status">{t("hifzLoading")}</p>;
   const weekly = juz && recital ? recitalProgress(portions, recital[juz], today) : undefined;
 
-  return <div className="hifz-page compact-stack">
-    <PassageHeading title={title} subtitle={subtitle} back={`/learn/paths/memorise/${legacyLevel(passage)}`} />
-    <section className="card night compact-stack hifz-summary">
+  const portionLinks = <div className="compact-stack hifz-portion-list" onKeyDown={focusListItem}>
+    {portions.map((entry, index) => {
+      const review = reviews[entry.id];
+      const bucket = portionBucket(review, today);
+      const state = entry === due ? "today" : review?.learnedOn ? "done" : "open";
+      const label = <><strong><bdi>{formatQuranReference(entry.ref, locale)}</bdi></strong>
+        <small>{review || state === "today" ? t(bucketCopy[bucket]) : formatDay(plan.dates[index].from, { month: "short", day: "numeric" }, locale)}</small>
+        {(state !== "open" || entry === upcoming) && <span className="chip">{t(state === "today" ? "hifzToday" : state === "done" ? "pathsDone" : "hifzNext")}</span>}</>;
+      return entry === item
+        ? <div key={entry.id} className="hifz-portion-row" data-state={state} aria-current="page">{label}</div>
+        : <Link key={entry.id} className="hifz-portion-row" data-state={state} to={`${base(passage.id)}/${index + 1}`}
+          onClick={() => { if (!stored[passage.id]) selectMinutes(minutes); }}>{label}</Link>;
+    })}
+  </div>;
+
+  if (item) return <StudyPortion key={item.id} item={item} position={position} title={title} passage={passage} settings={settings}
+    now={now} minutes={minutes} directory={<aside className="card compact-stack hifz-portions hifz-portion-directory">
+      <h2>{t("hifzPortions")}</h2>{portionLinks}{error && <p role="alert">{t("hifzSaveError")}</p>}
+    </aside>} />;
+
+  const summary = <section className="card night compact-stack hifz-summary">
       <div className="row-between"><div className="compact-stack"><p className="caption">{t("hifzYourPlan")}</p>
         <h2>{t("hifzPlanSize", { portions: portions.length, days: plan.days })}</h2>
         <p className="muted small">{t("hifzPlanRange", { minutes, end: formatDay(plan.end, dates, locale) })}</p>
       </div><ArabicText text={firstWord} mushaf={settings.script} citation={firstVerse.ref} verse={firstVerse.ref} /></div>
       <progress value={done} max={portions.length} aria-label={t("hifzCovered", { count: done, total: portions.length })} />
-    </section>
+  </section>;
+  const caveat = virtueNote && <p className="small muted">{t(virtueNote)}</p>;
+  const hasNotes = Boolean(weekly || passage.source);
+  const notes = <>
     {weekly && <section className="card compact-stack hifz-recital-summary">
       <h2>{t("hifzWeeklyRecital")}</h2>
       <p className="small muted">{weekly.availableOn ? t("hifzRecitalAvailable", { day: formatDay(weekly.availableOn, dates, locale) })
@@ -223,29 +261,34 @@ function PassagePlan({ passage, portions, settings, now }: { passage: HifzPassag
     {passage.source && <section className="card compact-stack hifz-why"><h2>{t("hifzWhy")}</h2><p><StudyText text={passage.why} /></p>
       <p className="small muted"><span className="chip soft">{t(passage.source.grade === "hasan" ? "hifzHasan" : "hifzSahih")}</span> {passage.source.ref}</p>
     </section>}
-    {virtueNote && <p className="small muted">{t(virtueNote)}</p>}
-    <section className="card compact-stack hifz-portions">
+  </>;
+  const roster = <section className="card compact-stack hifz-portions">
       <header className="row-between"><h2>{t("hifzPortions")}</h2>
         <label className="hifz-minutes"><span>{t("hifzMinutes")}</span><select aria-label={t("hifzMinutes")} value={minutes}
           onChange={event => selectMinutes(Number(event.currentTarget.value))}>
           {choices.map(value => <option key={value} value={value}>{number.format(value)}</option>)}
         </select></label></header>
-      {portions.map((entry, index) => {
-        const review = reviews[entry.id];
-        const bucket = portionBucket(review, today);
-        const state = entry === due ? "today" : review?.learnedOn ? "done" : "open";
-        return <Link key={entry.id} className="hifz-portion-row" data-state={state} to={`${base(passage.id)}/${index + 1}`}
-          onClick={() => { if (!stored[passage.id]) selectMinutes(minutes); }}>
-          <strong><bdi>{formatQuranReference(entry.ref, locale)}</bdi></strong><small>{review || state === "today" ? t(bucketCopy[bucket]) : formatDay(plan.dates[index].from, { month: "short", day: "numeric" }, locale)}</small>
-          {(state !== "open" || entry === upcoming) && <span className="chip">{t(state === "today" ? "hifzToday" : state === "done" ? "pathsDone" : "hifzNext")}</span>}
-        </Link>;
-      })}
+      {portionLinks}
       {error && <p role="alert">{t("hifzSaveError")}</p>}
-    </section>
-    {due ? <Link className="action" to={`${base(passage.id)}/${dueIndex + 1}`}
+  </section>;
+  const next = due ? <Link className="action hifz-next" to={`${base(passage.id)}/${dueIndex + 1}`}
       onClick={() => { if (!stored[passage.id]) selectMinutes(minutes); }}>
       {t((reviews[due.id]?.learnedOn ? "hifzReview" : "hifzStart"), { number: dueIndex + 1, ref: formatQuranReference(due.ref, locale) })}
-    </Link> : <p className="small muted" role="status">{t("hifzAllDone")}</p>}
+  </Link> : <p className="small muted" role="status">{t("hifzAllDone")}</p>;
+
+  return <div className="hifz-page hifz-plan-page compact-stack">
+    <PassageHeading title={title} subtitle={subtitle} back={`/learn/paths/memorise/${legacyLevel(passage)}`} />
+    {!desktop || !hasNotes ? <>{summary}{notes}{caveat}{roster}{next}</> : wide ? <div className="hifz-workspace">
+      <div className="compact-stack hifz-main">{summary}{caveat}{roster}{next}</div>
+      <aside className="compact-stack hifz-side">{notes}</aside>
+    </div> : <Tabs.Root className="workspace-tabs" dir={direction} defaultValue="plan">
+      <Tabs.List className="study-tabs equal-row" aria-label={title}>
+        <Tabs.Trigger value="plan">{t("hifzYourPlan")}</Tabs.Trigger>
+        <Tabs.Trigger value="notes">{t(weekly ? "hifzWeeklyRecital" : "hifzWhy")}</Tabs.Trigger>
+      </Tabs.List>
+      <Tabs.Content value="plan"><div className="compact-stack hifz-main">{summary}{caveat}{roster}{next}</div></Tabs.Content>
+      <Tabs.Content className="compact-stack hifz-side-tab" value="notes">{notes}</Tabs.Content>
+    </Tabs.Root>}
     <QuranStudySources script={settings.script} />
   </div>;
 }

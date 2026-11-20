@@ -71,7 +71,7 @@
 .paths-island-glyph .word-chip { min-width: 24px; padding: 0 1px; }
 .paths-island-glyph .word-chip > span:first-child { text-decoration: none; }
 .paths-island .chip { color: var(--interactive-ink); font-size: 10px; padding-block: 2px; }
-.hifz-page.compact-stack { gap: 12px; }
+.hifz-page.compact-stack, .hifz-main.compact-stack { gap: 12px; }
 .hifz-summary h2 { font: var(--type-display-m); margin: 0; }
 .hifz-summary .compact-stack { gap: 3px; }
 .hifz-summary > div { align-items: center; }
@@ -89,6 +89,7 @@
 .hifz-portion-row small { margin-inline-start: auto; text-align: end; color: var(--c-ink-muted); }
 .hifz-portion-row[data-state="done"] { background: var(--c-primary-soft); }
 .hifz-portion-row[data-state="today"] { background: var(--c-tint); }
+.hifz-portion-row:is(a:hover, [aria-current="page"]) { background: var(--c-primary-soft); color: var(--interactive-ink); }
 .hifz-portion-row .chip { background: var(--c-surface); font-size: 10px; text-transform: uppercase; font-weight: 700; letter-spacing: .04em; padding: 1px 8px; }
 .hifz-verse .arabic-text { display: flex; }
 .hifz-verse .arabic-line { flex-wrap: wrap; overflow: visible; }
@@ -100,8 +101,21 @@
 .hifz-recital-grid { display: grid; gap: 12px; align-items: start; }
 .hifz-recital-summary progress { width: 100%; height: 7px; accent-color: var(--control-primary); }
 @media (min-width: 1024px) {
+  :is(.hifz-plan-page, .hifz-portion-page) { width: min(100%, 1120px); margin-inline: 0; }
+  .hifz-main, .hifz-side, .hifz-side-tab { min-width: 0; }
+  .hifz-portion-row { min-height: 44px; }
+  .hifz-portions header { flex-wrap: wrap; gap: 8px; }
+  .hifz-plan-page .hifz-portion-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hifz-next { justify-self: start; }
+  .hifz-side-tab { max-inline-size: 520px; }
   .hifz-recital-page { width: min(100%, 1056px); }
   .hifz-recital-grid { grid-template-columns: minmax(232px, 260px) minmax(0, 1fr); gap: 16px; }
+}
+@media (min-width: 1280px) {
+  .hifz-workspace { display: grid; grid-template-columns: minmax(0, 2fr) minmax(220px, 1fr); gap: 16px; align-items: start; }
+  .hifz-workspace .hifz-portion-directory { position: sticky; inset-block-start: 16px; }
+  .hifz-portion-directory .hifz-portion-list { max-block-size: 62svh; overflow: auto; scrollbar-width: thin; }
+  .anatomy-open .hifz-workspace { grid-template-columns: minmax(0, 1fr); }
 }
 
 .roots-page { max-width: 730px; }
