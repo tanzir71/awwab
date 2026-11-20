@@ -10,7 +10,7 @@ import { chapters, essentialPassages, getHifzPassage, juzs, kursiOpening, passag
 import { grammarReviewPrefix, juzAmma, learnedSurahs, levels, maktabIslandStars, pathUrl, patternReviewPrefix, qaidaIslandProgress, rootsReviewPrefix, salahChapters, sentenceReviewPrefix,
   tracks, type PathPlacement, type Track } from "@/lib/learningPaths";
 import { essentialPassageTitle } from "@/lib/paths-copy";
-import { countKnownQuranWords, quranText } from "@/lib/quran";
+import { countKnownQuranWords, formatQuranReference, quranText } from "@/lib/quran";
 import { studyNames } from "@/lib/study-copy";
 import type { Reviews } from "@/lib/reviews";
 import { tajweedDepthLessons, tajweedIndex, tajweedLessons, tajweedProgress } from "@/lib/tajweed";
@@ -247,10 +247,10 @@ export function MaktabMap() {
   </div>;
 }
 
-function TrackLevels({ track }: { track: Track }) {
+function TrackLevels({ track, desktop }: { track: Track; desktop: boolean }) {
   const { t } = useCopy();
   const state = usePathState();
-  return <div className="paths-page paths-levels">
+  return <div className="paths-page paths-levels paths-track-directory">
     <header className="hifz-heading"><PathsBack to={root} /><div><h1>{t(trackKeys[track])}</h1>
       <p className="small muted">{t(track === "memorise" ? "pathsHifzSubtitle" : `${trackKeys[track]}Overview`)}</p></div></header>
     <ol className="paths-level-list" onKeyDown={focusListItem}>{levels[track].map((item, index) => {
@@ -258,8 +258,8 @@ function TrackLevels({ track }: { track: Track }) {
       const active = state.active[track] === number;
       const done = levelDone(track, number, state);
       return <li key={item.titleKey}>
-        <LevelNumber level={number} active={active} done={done} desktop={false} />
-        <Link className="card paths-level-mobile" data-state={done ? "done" : active ? "current" : "open"} to={levelLink(track, number)}>
+        <LevelNumber level={number} active={active} done={done} desktop={desktop} />
+        <Link className="card paths-level-mobile" data-state={done ? "done" : active ? "current" : "open"} to={levelLink(track, number)} aria-current={active ? "step" : undefined}>
           <div className="row-between"><strong>{t(item.titleKey)}</strong><span className="chip caption">{done ? t("pathsDone") : active ? t("pathsInProgress") : item.tag ? t(item.tag) : t("pathsLevel", { number })}</span></div>
           <p className="small muted">{contextLabel(track, number, state, t)}</p>
           {active && track === "memorise" && number === 2 && <progress max={37} value={state.amma} aria-label={t("pathsAmmaCount", { count: state.amma })} />}
@@ -267,15 +267,15 @@ function TrackLevels({ track }: { track: Track }) {
       </li>;
     })}</ol>
     <p className="small muted">{t("pathsAnyLevel")}</p>
-    <Link className="action soft" to={`${root}/check/${track}`}>{t("pathsCheck")}</Link>
+    <Link className="action soft paths-directory-check" to={`${root}/check/${track}`}>{t("pathsCheck")}</Link>
   </div>;
 }
 
 function PassageRow({ id, title, done = false }: { id: string; title?: string; done?: boolean }) {
-  const { t } = useCopy();
+  const { t, locale } = useCopy();
   const passage = getHifzPassage(id);
   return <Link className="list-row paths-passage" to={practiceLink(id)}><div><strong>{title ?? essentialPassageTitle(passage, t)}</strong>
-    <small><bdi>{passageLabel(passage)}</bdi> · {t("hifzAyahs", { count: passage.ayahs })}</small></div>{done && <span className="chip soft">{t("pathsDone")}</span>}</Link>;
+    <small><bdi dir="ltr">{formatQuranReference(passageLabel(passage), locale)}</bdi> · {t("hifzAyahs", { count: passage.ayahs })}</small></div>{done && <span className="chip soft">{t("pathsDone")}</span>}</Link>;
 }
 
 function HifzDirectory() {
@@ -283,13 +283,13 @@ function HifzDirectory() {
   const [selected, choose] = useState<"juz" | "surah">("juz");
   const state = usePathState();
   return <div className="compact-stack" onKeyDown={event => focusListItem(event, ".paths-passage")}>
-    <div className="equal-row" role="group" aria-label={t("pathsMemorise")}>
+    <div className="equal-row paths-passage-switch" role="group" aria-label={t("pathsMemorise")}>
       <button type="button" aria-pressed={selected === "juz"} className={`action ${selected === "juz" ? "" : "light"}`} onClick={() => choose("juz")}>{t("hifzChooseJuz")}</button>
       <button type="button" aria-pressed={selected === "surah"} className={`action ${selected === "surah" ? "" : "light"}`} onClick={() => choose("surah")}>{t("hifzChooseSurah")}</button>
     </div>
-    {selected === "juz" ? [...juzs].reverse().map(juz => <PassageRow key={juz.number} id={`juz-${juz.number}`} title={t("hifzJuz", { number: juz.number })} />)
+    <div className="compact-stack paths-passage-list">{selected === "juz" ? [...juzs].reverse().map(juz => <PassageRow key={juz.number} id={`juz-${juz.number}`} title={t("hifzJuz", { number: juz.number })} />)
       : chapters.map(chapter => <PassageRow key={chapter.number} id={`surah-${chapter.number}`}
-        title={studyNames.surah(language, chapter.number, chapter.title)} done={state.learned.has(chapter.number)} />)}
+        title={studyNames.surah(language, chapter.number, chapter.title)} done={state.learned.has(chapter.number)} />)}</div>
   </div>;
 }
 
@@ -297,24 +297,24 @@ function MemoriseLevel({ number }: { number: number }) {
   const { t, language } = useCopy();
   const state = usePathState();
   if (number === 5) return <HifzDirectory />;
-  if (number === 3 || number === 4) return <div className="compact-stack" onKeyDown={focusListItem}>{essentialPassages.filter(passage => passage.level === number)
+  if (number === 3 || number === 4) return <div className="compact-stack paths-passage-list" onKeyDown={focusListItem}>{essentialPassages.filter(passage => passage.level === number)
     .map(passage => <PassageRow key={passage.id} id={passage.id} />)}</div>;
   const group = number === 1 ? salahChapters.map(chapter => studyChapters.get(chapter)) : juzAmma;
-  return <div className="compact-stack" onKeyDown={event => focusListItem(event, ".paths-passage")}>
+  return <div className="compact-stack paths-passage-list" onKeyDown={event => focusListItem(event, ".paths-passage")}>
     {group.map(chapter => <PassageRow key={chapter.number} id={`surah-${chapter.number}`} title={studyNames.surah(language, chapter.number, chapter.title)} done={state.learned.has(chapter.number)} />)}
-    {number === 1 && <Link className="action soft" to="/learn/salah">{t("understandSalah")}</Link>}
+    {number === 1 && <Link className="action soft paths-directory-check" to="/learn/salah">{t("understandSalah")}</Link>}
   </div>;
 }
 
 function Outline({ track }: { track: keyof typeof outlines }) {
   const { t } = useCopy();
   const { links, units } = outlines[track];
-  return <>
+  return <div className="paths-page paths-outline-layout">
     <div className="compact-stack">{links.map(([to, label]) => <Link key={to} className="action" to={to}>{t(label)}</Link>)}</div>
     <section className="card compact-stack"><h2>{t("pathsOutline")}</h2>
       <ul className="paths-outline-list">{units.map(key => <li key={key}>{t(key)}</li>)}</ul>
     </section>
-  </>;
+  </div>;
 }
 
 export function Paths({ desktop }: { desktop: boolean }) {
@@ -325,9 +325,9 @@ export function Paths({ desktop }: { desktop: boolean }) {
   const number = Number(level);
   const item = track && levels[track][number - 1];
   if (!track) return <PathsHome desktop={desktop} />;
-  if (!item) return <TrackLevels track={track} />;
+  if (!item) return <TrackLevels track={track} desktop={desktop} />;
   if (level !== String(number)) return <Navigate replace to={pathUrl(track, number) + search} />;
-  return <div className="paths-page paths-levels">
+  return <div className="paths-page paths-levels paths-level-directory">
     <header className="hifz-heading"><PathsBack to={pathUrl(track)} /><div><h1>{t(item.titleKey)}</h1>
       <p className="small muted">{t(trackKeys[track])} · {t("pathsLevel", { number })}</p></div></header>
     {track === "memorise" && <MemoriseLevel number={number} />}

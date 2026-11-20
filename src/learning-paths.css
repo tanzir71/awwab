@@ -45,6 +45,36 @@
 .paths-question h2 { font: var(--type-title); }
 .paths-question .paths-reveal { border-radius: var(--r-control); background: var(--c-primary-soft); padding: 8px 12px; text-align: center; }
 .paths-question .paths-reveal small { display: block; }
+.path-check-workspace, .path-check-tracks { display: grid; gap: 12px; min-width: 0; align-items: start; }
+.path-check-tracks.path-check-sidebar, .path-check-progress { display: none; }
+.path-check-letter { justify-self: center; }
+@media (min-width: 1024px) {
+  .paths-levels:is(.path-check-page, .paths-track-directory, .paths-level-directory) { width: min(100%, 1080px); margin-inline: 0; }
+  .path-check-tracks:not(.path-check-sidebar), .paths-track-directory .paths-level-list, .paths-passage-list.compact-stack, .paths-outline-layout {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .path-check-tracks .list-row, .paths-track-directory .paths-level-mobile { height: 100%; }
+  .path-check-tracks .list-row:hover, .path-check-tracks .list-row[aria-current="page"], .paths-passage:hover { background: var(--c-primary-soft); }
+  .path-check-workspace > section { max-inline-size: 760px; }
+  .path-check-workspace h2 { justify-self: start; }
+  .path-check-workspace h2:focus-visible { outline-color: var(--interactive-ink); outline-offset: 3px; }
+  .path-check-workspace .paths-question > .arabic-text { font: var(--type-arabic-l); }
+  .path-check-letter .arabic-text { font: var(--type-arabic-xl); }
+  .path-check-progress { display: flex; gap: 4px; align-items: center; margin-block-end: 4px; }
+  .path-check-progress span { width: 8px; height: 8px; border-radius: var(--r-pill); background: var(--c-surface-alt); }
+  .path-check-progress [data-state="done"], .path-check-progress [data-state="current"] { background: var(--control-primary); }
+  .path-check-progress [data-state="current"] { width: 20px; }
+  .paths-passage-switch { max-inline-size: 480px; }
+  .paths-directory-check { justify-self: start; }
+  .paths-passage-list > .paths-directory-check { grid-column: 1 / -1; }
+}
+@media (min-width: 1280px) {
+  .path-check-workspace { grid-template-columns: minmax(184px, 224px) minmax(0, 1fr); gap: 16px; }
+  .path-check-tracks.path-check-sidebar { display: grid; gap: 8px; }
+  .path-check-sidebar .list-row { min-height: 44px; padding: 8px 10px; background: var(--c-surface-alt); box-shadow: none; }
+  .anatomy-open .path-check-workspace { grid-template-columns: minmax(0, 1fr); }
+  .anatomy-open .path-check-workspace .path-check-sidebar { display: none; }
+}
 .paths-map-area { position: relative; width: 100%; height: 630px; overflow: hidden; }
 .paths-map-track { position: absolute; inset-block-start: 0; left: 50%; transform: translateX(-50%); width: 390px; height: 640px; }
 .paths-map-trail { position: absolute; inset: 0; width: 390px; height: 640px; max-width: none; pointer-events: none; }
