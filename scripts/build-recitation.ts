@@ -33,12 +33,13 @@ async function request(url: string, range?: string) {
   return response;
 }
 
-if (process.argv.includes("--qaida")) {
-  const { clips } = JSON.parse(await readFile(new URL("../docs/content/qaida-recitations.json", import.meta.url), "utf8")) as {
+const lesson = process.argv.includes("--tajweed") ? "tajweed" : process.argv.includes("--qaida") ? "qaida" : undefined;
+if (lesson) {
+  const { clips } = JSON.parse(await readFile(new URL(`../docs/content/${lesson}-recitations.json`, import.meta.url), "utf8")) as {
     clips: { ref: string; throughAyah?: number; media: string; range?: string; sha256: string; startMs: number; endMs: number }[];
   };
   await mkdir(dir, { recursive: true });
-  const workingDir = await mkdtemp(join(tmpdir(), "awwab-qaida-recitations-"));
+  const workingDir = await mkdtemp(join(tmpdir(), "awwab-study-recitations-"));
   const recording = join(workingDir, "source.mp3");
   try {
     for (const clip of clips) {
@@ -52,9 +53,9 @@ if (process.argv.includes("--qaida")) {
       const { stdout } = await run("ffmpeg", ["-nostdin", "-v", "error", "-ss", String(clip.startMs / 1000), "-i", recording,
         "-t", String((clip.endMs - clip.startMs) / 1000), "-map_metadata", "-1", "-ac", "1",
         "-c:a", "libmp3lame", "-b:a", "96k", "-f", "mp3", "pipe:1"], { encoding: "buffer" });
-      if (stdout.length < 1000) throw new Error(`Empty Qaida clip for ${clip.ref}`);
+      if (stdout.length < 1000) throw new Error(`Empty clip for ${clip.ref}`);
       await writeFile(new URL(`${name}.mp3`, dir), stdout);
-      console.log(`Built Qaida āyah audio ${clip.ref}`);
+      console.log(`Built ${lesson} āyah audio ${clip.ref}`);
     }
   } finally {
     await rm(recording, { force: true });

@@ -250,7 +250,7 @@ describe("Learning path progress", () => {
           if (sample.rule === "script-wasl") expect(rendered.includes("ٱ")).toBe(script === "uthmani");
         }
         const clip = tajweedClip(sample);
-        if (clip) expect(tajweedPrecache).toContain(clip.item.path);
+        if (clip) expect(tajweedPrecache).toContain(clip.path);
         const reviewId = tajweedReviewId(lesson, sample);
         all[reviewId] = seed;
         expect(reviewDestination(reviewId)).toBe(`/learn/paths/read/4/${lesson.id}?review=${encodeURIComponent(tajweedSampleKey(sample))}`);

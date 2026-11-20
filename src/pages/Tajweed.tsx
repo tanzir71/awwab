@@ -70,12 +70,13 @@ function RuleLesson({ settings, now, lesson, reviews, depth, nextLesson }: {
   const rules = Object.keys(lesson.rules);
   const sources = Object.fromEntries(lesson.samples.flatMap(sample => {
     const clip = tajweedClip(sample);
-    return clip ? [[clip.item.ref, asset(clip.item.path)]] : [];
+    return clip ? [[clip.ref, asset(clip.path)]] : [];
   }));
   const exampleRefs = Object.keys(sources);
   const player = useAudioPlayback(exampleRefs, sources);
-  const reciter = lesson.samples.find(sample => tajweedReference(sample) === (player.track ?? exampleRefs[0]));
-  const pack = reciter && tajweedClip(reciter)?.pack;
+  const activeRef = practice && example && !player.playing ? tajweedReference(example) : player.track ?? exampleRefs[0];
+  const activeSample = lesson.samples.find(sample => tajweedReference(sample) === activeRef);
+  const recording = activeSample && tajweedClip(activeSample);
   const totalCorrect = correctTajweedSamples(lesson, reviews);
   const credits = lesson.sources ?? [depth ? jazariSource : {
     url: lesson.source ?? ruleSource,
@@ -134,7 +135,7 @@ function RuleLesson({ settings, now, lesson, reviews, depth, nextLesson }: {
         const letters = lesson.rules[rule];
         return <section className="card tajweed-rule" data-tone={tones[i % tones.length]} key={rule}>
           <div><h2>{t(`tajweedRule-${rule}`)}</h2><p className="small muted"><StudyText text={t(`tajweedHint-${rule}`)} /></p></div>
-          <div className="tajweed-example">{exampleText(sample)}<bdi className="caption muted">{tajweedReference(sample)}</bdi></div>
+          <div className="tajweed-example">{exampleText(sample)}<bdi className="caption muted">{formatQuranReference(tajweedReference(sample), locale)}</bdi></div>
           {sample.target && <div className="tajweed-focus"><span className="caption">{t("tajweedFocusLetter")}</span><ArabicText text={sample.target} compact /></div>}
           {letters && <div className="tajweed-letters"><span className="caption">{t("letters")}</span><ArabicText text={letters} compact /></div>}
         </section>;
@@ -145,12 +146,12 @@ function RuleLesson({ settings, now, lesson, reviews, depth, nextLesson }: {
         <Link className="action" to={`${route}?practice`}>{t("tajweedPractice", { count: practiceCount })}</Link>
       </div>
       {exampleRefs.length > 0 ? <div className="chips">{exampleRefs.map(ref => <button type="button" key={ref} className="chip soft"
-        aria-pressed={player.playing && player.track === ref} onClick={() => player.play(ref)}><bdi>{ref}</bdi></button>)}</div>
+        aria-pressed={player.playing && player.track === ref} onClick={() => player.play(ref)}><bdi>{formatQuranReference(ref, locale)}</bdi></button>)}</div>
         : <p className="small muted">{t("tajweedPendingAudio")}</p>}
       {lesson.articulation && <ArticulationPoints regions={lesson.articulation} />}
       <Link className="action light" to={overview}>{t(overviewLabel)}</Link>
     </> : example ? <section className="card compact-stack paths-question">
-      <p className="caption">{t("pathsCheckQuestion", { number: index + 1, total: samples.length })} · <bdi>{tajweedReference(example)}</bdi></p>
+      <p className="caption">{t("pathsCheckQuestion", { number: index + 1, total: samples.length })} · <bdi>{formatQuranReference(tajweedReference(example), locale)}</bdi></p>
       <h2>{t(depth ? `tajweedQuestion-${lesson.id}` : lesson.id === "waqf" ? "tajweedDrillMark" : "tajweedChoose")}</h2>
       {example.target && <div className="tajweed-focus"><span className="caption">{t("tajweedFocusLetter")}</span><ArabicText text={example.target} compact /></div>}
       {exampleText(example, Boolean(selection))}
@@ -199,7 +200,7 @@ function RuleLesson({ settings, now, lesson, reviews, depth, nextLesson }: {
           {t(nextLesson && totalCorrect === lesson.samples.length ? "hifzNext" : overviewLabel)}</Link>
       </div>
     </section>}
-    {pack && <p className="small muted"><a href={pack.source} rel="noreferrer">{pack.speaker}</a> · <a href={pack.licenseUrl} rel="noreferrer">{pack.attribution.split(" · ")[1]}</a> · {t("setupAudioExcerpt")}</p>}
+    {recording && <p className="small muted"><a href={recording.source} rel="noreferrer">{recording.speaker}</a> · <a href={recording.licenseUrl} rel="noreferrer">{recording.license}</a> · {t("setupAudioExcerpt")}</p>}
     <footer className="hifz-sources small muted"><p>{t("tajweedTeacher")}</p>
       {credits.map(source => <a key={source.url} href={source.url} rel="noreferrer">{source.title}</a>)}
     </footer>

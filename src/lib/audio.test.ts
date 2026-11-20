@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import catalogue from "../../public/packs/audio/index.json";
 import onboarding from "../../docs/content/onboarding.json";
 import qaidaAudio from "../../docs/content/qaida-audio.json";
+import tajweedAudio from "../../docs/content/tajweed-recitations.json";
 import rituals from "../../docs/content/umrah-steps.json";
 import { quranText, type QuranVerse } from "./quran";
 import { verseText } from "./hifz";
@@ -15,6 +16,7 @@ import { hasSharedSpeakAudio, placementSpeakPhraseIds, sharedSpeakClips } from "
 import { umrahGuidePack, umrahGuidePacks } from "./umrahGuideAudio";
 import { qaidaAudioRef, qaidaHarakatExerciseRef, qaidaRows, qaidaRowCitation } from "./qaidaPractice";
 import { qaidaRecitationLessons, qaidaRecitations } from "./qaidaRecitation";
+import { tajweedClip, tajweedDepthLessons, tajweedLessons, tajweedPrecache } from "./tajweed";
 import { normalizeWord, splitArabicWords } from "./wordAnatomy";
 
 describe("Generated Qaida practice", () => {
@@ -60,6 +62,22 @@ describe("Qaida Quran recitation", () => {
         refs.push(verse);
       }
       if (lesson !== 17) expect(qaidaRecitationLessons[qaidaAudioRef(lesson)]?.map(clip => clip.ref)).toEqual(refs);
+    }
+  });
+});
+
+describe("Supplemental Tajweed recitations", () => {
+  it("uses and precaches each attributed recitation on its cited example", () => {
+    const rules = tajweedLessons.flatMap(lesson => lesson.samples.map(tajweedClip).filter(Boolean));
+    const depth = tajweedDepthLessons.flatMap(lesson => lesson.samples.map(tajweedClip).filter(Boolean));
+    expect(rules).toHaveLength(57);
+    expect(depth).toHaveLength(37);
+    for (const clip of tajweedAudio.clips) {
+      expect([...rules, ...depth]).toContainEqual(expect.objectContaining({
+        ref: clip.ref, path: clip.path, source: clip.source, licenseUrl: clip.licenseUrl, speaker: tajweedAudio.speaker,
+      }));
+      expect(tajweedPrecache).toContain(clip.path);
+      expect(statSync(new URL(`../../public/${clip.path}`, import.meta.url)).size).toBeGreaterThan(1000);
     }
   });
 });

@@ -1,9 +1,9 @@
 import originalLesson from "../../docs/content/tajweed-nun.json";
 import essentials from "../../docs/content/tajweed-essentials.json";
 import depth from "../../docs/content/tajweed-in-depth.json";
-import recitations from "../../public/packs/audio/index.json";
 import { splitArabicPhrase, splitArabicWords } from "./wordAnatomy";
 import type { Reviews } from "./reviews";
+import { studyRecitation } from "./studyRecitations";
 
 export type TajweedSample = { rule: string; chapter: number; ayah: number; first: number; last: number; target?: string };
 export type TajweedLesson = {
@@ -48,10 +48,9 @@ for (const lesson of tajweedLessons) {
 
 export const tajweedReadingExamples = (verse: string) => readingExamples.get(verse);
 
-const recitationClips = new Map(recitations.packs.flatMap(pack => pack.items.map(item => [item.ref, { item, pack }] as const)));
-export const tajweedClip = (sample: TajweedSample) => recitationClips.get(tajweedReference(sample));
+export const tajweedClip = (sample: TajweedSample) => studyRecitation(tajweedReference(sample));
 const completeCatalogue = [...tajweedLessons, ...tajweedDepthLessons];
-export const tajweedPrecache = Array.from(new Set(completeCatalogue.flatMap(lesson => lesson.samples.flatMap(sample => tajweedClip(sample)?.item.path ?? []))));
+export const tajweedPrecache = Array.from(new Set(completeCatalogue.flatMap(lesson => lesson.samples.flatMap(sample => tajweedClip(sample)?.path ?? []))));
 
 export function tajweedReviewDestination(id: string) {
   const separator = id.indexOf(":", tajweedReviewPrefix.length);

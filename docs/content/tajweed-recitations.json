@@ -1,0 +1,84 @@
+{
+  "speaker": "Aaqib Azeez",
+  "clips": [
+    {
+      "ref": "2:2",
+      "path": "packs/audio/aaqib-azeez/2-2.mp3",
+      "source": "https://commons.wikimedia.org/wiki/File:Chapter_2%2C_Al-Baqarah_%28Murattal%29_-_Recitation_of_the_Holy_Qur%27an.mp3",
+      "media": "https://upload.wikimedia.org/wikipedia/commons/4/4f/Chapter_2%2C_Al-Baqarah_%28Murattal%29_-_Recitation_of_the_Holy_Qur%27an.mp3",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "range": "bytes=0-13500000",
+      "sha256": "c47894571bb2eacae9c9121445a05aa874cd76d6172b22b627c3a6ab5d7877ae",
+      "startMs": 15490,
+      "endMs": 26300
+    },
+    {
+      "ref": "2:27",
+      "path": "packs/audio/aaqib-azeez/2-27.mp3",
+      "source": "https://commons.wikimedia.org/wiki/File:Chapter_2%2C_Al-Baqarah_%28Murattal%29_-_Recitation_of_the_Holy_Qur%27an.mp3",
+      "media": "https://upload.wikimedia.org/wikipedia/commons/4/4f/Chapter_2%2C_Al-Baqarah_%28Murattal%29_-_Recitation_of_the_Holy_Qur%27an.mp3",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "range": "bytes=13500001-26500000",
+      "sha256": "a56000f48b847854a91817125ebe9b34112d2f17eb6ea3c56fbdd733162ab41c",
+      "startMs": 229190,
+      "endMs": 253560
+    },
+    {
+      "ref": "100:2",
+      "path": "packs/audio/aaqib-azeez/100-2.mp3",
+      "source": "https://commons.wikimedia.org/wiki/File:Chapter_100%2C_Al-Adiyat_%28Murattal%29_-_Recitation_of_the_Holy_Qur%27an.mp3",
+      "media": "https://upload.wikimedia.org/wikipedia/commons/b/b8/Chapter_100%2C_Al-Adiyat_%28Murattal%29_-_Recitation_of_the_Holy_Qur%27an.mp3",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "sha256": "799d6905704123564097dfe260fbd2c4896ae39cec472c0dc4e7078ed36ea047",
+      "startMs": 12130,
+      "endMs": 16830
+    },
+    {
+      "ref": "100:11",
+      "path": "packs/audio/aaqib-azeez/100-11.mp3",
+      "source": "https://commons.wikimedia.org/wiki/File:Chapter_100%2C_Al-Adiyat_%28Murattal%29_-_Recitation_of_the_Holy_Qur%27an.mp3",
+      "media": "https://upload.wikimedia.org/wikipedia/commons/b/b8/Chapter_100%2C_Al-Adiyat_%28Murattal%29_-_Recitation_of_the_Holy_Qur%27an.mp3",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "sha256": "799d6905704123564097dfe260fbd2c4896ae39cec472c0dc4e7078ed36ea047",
+      "startMs": 68820,
+      "endMs": 77950
+    },
+    {
+      "ref": "101:9",
+      "path": "packs/audio/aaqib-azeez/101-9.mp3",
+      "source": "https://commons.wikimedia.org/wiki/File:Chapter_101%2C_Al-Qaria_%28Murattal%29_-_Recitation_of_the_Holy_Qur%27an.mp3",
+      "media": "https://upload.wikimedia.org/wikipedia/commons/8/8e/Chapter_101%2C_Al-Qaria_%28Murattal%29_-_Recitation_of_the_Holy_Qur%27an.mp3",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "sha256": "9659e7124a6bc5894a9122c47f407bc08d1c93a974d6f6c8526ac7969ec88386",
+      "startMs": 57440,
+      "endMs": 62070
+    },
+    {
+      "ref": "102:4",
+      "path": "packs/audio/aaqib-azeez/102-4.mp3",
+      "source": "https://commons.wikimedia.org/wiki/File:Chapter_102%2C_At-Takathur_%28Murattal%29_-_Recitation_of_the_Holy_Qur%27an.mp3",
+      "media": "https://upload.wikimedia.org/wikipedia/commons/0/06/Chapter_102%2C_At-Takathur_%28Murattal%29_-_Recitation_of_the_Holy_Qur%27an.mp3",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "sha256": "0291ca5ff823b17bae5d06a3d891d72d1d03f51ff4aea172e5c3f03acac704cc",
+      "startMs": 20760,
+      "endMs": 27270
+    },
+    {
+      "ref": "104:4",
+      "path": "packs/audio/aaqib-azeez/104-4.mp3",
+      "source": "https://commons.wikimedia.org/wiki/File:Chapter_104%2C_Al-Humazah_%28Murattal%29_-_Recitation_of_the_Holy_Qur%27an.mp3",
+      "media": "https://upload.wikimedia.org/wikipedia/commons/b/bd/Chapter_104%2C_Al-Humazah_%28Murattal%29_-_Recitation_of_the_Holy_Qur%27an.mp3",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "a74e8203bc60cfedd88a14a51da09c6955891ab1c6acdbf3274b942e433c377b",
+      "startMs": 26290,
+      "endMs": 32780
+    }
+  ]
+}
