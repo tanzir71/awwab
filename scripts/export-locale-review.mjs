@@ -29,6 +29,29 @@ const { locales } = JSON.parse(readFileSync(resolve(root, "handovers/H2-language
 const glossaryFor = code => Object.fromEntries(Object.entries(glossary).map(([term, translations]) => [`term_${term}`, translations[code] ?? translations.en]));
 const tierOne = locales.filter(locale => locale.tier === 1);
 const screenshots = [...filesBelow(resolve(root, "docs/qa"), [".png"])].map(sourceName).sort();
+
+function supplementalDraft(code) {
+  const path = resolve(root, "handovers/H2-languages-paths-arabic-help/drafts", `${code}.json`);
+  const additions = new Map();
+  if (!existsSync(path)) return additions;
+  const draft = JSON.parse(readFileSync(path, "utf8"));
+  if (draft._status !== "draft" || draft.locale !== code) throw new Error(`Expected a supplemental draft for ${code}.`);
+  for (const [key, { source, text }] of Object.entries(draft.messages)) {
+    if (typeof source !== "string" || typeof text !== "string" || !text.trim()) {
+      throw new Error(`Expected source text and a draft translation for ${key} in ${code}.`);
+    }
+    const entry = messages.get(key);
+    if (entry?.[code] !== undefined) continue;
+    if (entry?.en !== source) {
+      console.warn(`Skipped the ${code} draft for ${key} because its English source changed.`);
+      continue;
+    }
+    additions.set(key, text);
+  }
+  return additions;
+}
+
+const drafts = new Map(tierOne.map(({ code }) => [code, supplementalDraft(code)]));
 mkdirSync(destination, { recursive: true });
 const filenames = ["source-ui.json", ...tierOne.map(({ code }) => `${code}.draft.json`)];
 if (filenames.some(name => existsSync(resolve(destination, name)))) {
@@ -37,12 +60,14 @@ if (filenames.some(name => existsSync(resolve(destination, name)))) {
 const write = (name, value) => writeFileSync(resolve(destination, name), JSON.stringify(value, null, 2) + "\n", { flag: "wx" });
 write("source-ui.json", { language: "en", fingerprint, messages: english, glossary: glossaryFor("en"), screenshots });
 for (const { code, native, english: name, dir } of tierOne) {
+  const additions = drafts.get(code);
   write(`${code}.draft.json`, {
     _status: "draft",
     sourceFingerprint: fingerprint,
     locale: { code, native, name, dir },
     glossary: glossaryFor(code),
-    messages: Object.fromEntries(entries.map(([key, entry]) => [key, entry[code] ?? null])),
+    ...(additions.size ? { supplementalDraftKeys: [...additions.keys()] } : {}),
+    messages: Object.fromEntries(entries.map(([key, entry]) => [key, entry[code] ?? additions.get(key) ?? null])),
   });
 }
 console.log(`Exported ${entries.length} UI messages and ${screenshots.length} screenshots for ${tierOne.length} draft catalogues.`);
