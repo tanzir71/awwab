@@ -70,6 +70,8 @@ The export includes curated word meanings for Al-Fātiḥa, Al-ʿAsr, and Salah 
 
 The Bangla export fills the remaining study glosses from `drafts/bn.json`. Reviewers can find the new entries under `supplementalDraftKeys`. Each entry is paired with its English source so the export can omit it when that source changes.
 
+The Indonesian export includes all landing and onboarding catalogue entries, shared app labels, and both versions of each Adult and Maktab message. The remaining Indonesian entries need translation. Reviewers can use the linked screenshots and the English source export to check context.
+
 After native review, record the reviewers in the catalogue’s `reviewers` array and set `_status` to `reviewed`. Use `node scripts/build-locale-pack.mjs <source-ui.json> <reviewed-catalogue.json> <output-directory>` to produce the UI catalogue. The build checks the source fingerprint, message coverage, mode variants, and ICU arguments. The review file retains the reviewer names.
 
 For a static build, set the compiler’s output directory to `public/locales`. The app installer lists the compiled files that match the current English catalogue. Selecting one in Settings or onboarding downloads it from the same origin and verifies it before saving the language preference. Installed catalogues are available offline on later visits. When a new build changes a pack, selecting that language again installs the matching revision.

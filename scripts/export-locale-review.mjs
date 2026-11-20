@@ -1,5 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { isDeepStrictEqual } from "node:util";
 import ts from "typescript";
 import { entries, filesBelow, fingerprint, glossary, messages, readSource, root, sourceName } from "./ui-catalogue.mjs";
 
@@ -36,16 +37,17 @@ function supplementalDraft(code) {
   if (!existsSync(path)) return additions;
   const draft = JSON.parse(readFileSync(path, "utf8"));
   if (draft._status !== "draft" || draft.locale !== code) throw new Error(`Expected a supplemental draft for ${code}.`);
+  const hasText = value => typeof value === "string" && value.trim().length > 0;
   for (const [key, { source, text }] of Object.entries(draft.messages)) {
-    if (typeof source !== "string" || typeof text !== "string" || !text.trim()) {
-      throw new Error(`Expected source text and a draft translation for ${key} in ${code}.`);
-    }
     const entry = messages.get(key);
     if (entry?.[code] !== undefined) continue;
-    if (entry?.en !== source) {
+    if (!entry || !isDeepStrictEqual(entry.en, source)) {
       console.warn(`Skipped the ${code} draft for ${key} because its English source changed.`);
       continue;
     }
+    const valid = typeof source === "string" ? hasText(text) :
+      text && Object.keys(text).length === 2 && hasText(text.adult) && hasText(text.maktab);
+    if (!valid) throw new Error(`Expected a draft translation for each source variant of ${key} in ${code}.`);
     additions.set(key, text);
   }
   return additions;
