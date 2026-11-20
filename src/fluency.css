@@ -1,4 +1,16 @@
-.word-bank, .word-bank-layout, .word-bank-aside, .fluency-page { display: grid; gap: 16px; min-width: 0; align-content: start; }
+.word-bank, .word-bank-layout, .word-bank-aside, .fluency-page, .fluency-layout, .fluency-main, .fluency-aside, .vocabulary-tabs {
+  display: grid; gap: 16px; min-width: 0; align-content: start;
+}
+.vocabulary-tabs .study-tabs { max-inline-size: 480px; }
+.vocabulary-tabs [role="tab"] { min-width: 0; min-height: 44px; padding: 6px 12px; border-radius: var(--r-control); color: var(--c-ink-muted); font: var(--type-body-strong); }
+.vocabulary-tabs [role="tab"][data-state="active"] { color: var(--c-ink); background: var(--c-surface); box-shadow: var(--shadow-card); }
+.vocabulary-tabs > [role="tabpanel"] { min-width: 0; }
+.vocabulary-tabs > [role="tabpanel"][data-state="inactive"] { display: none; }
+.vocabulary-tabs :is(.word-bank-aside, .fluency-aside) { grid-template-columns: repeat(2, minmax(0,1fr)); align-items: start; }
+.vocabulary-tabs .fluency-aside { grid-template-areas: "root signs" "root action"; }
+.vocabulary-tabs .fluency-daily { grid-area: root; }
+.vocabulary-tabs .fluency-signs { grid-area: signs; }
+.vocabulary-tabs .fluency-practice-button { grid-area: action; }
 .word-bank-metrics { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
 .word-bank .word-bank-metrics .card { display: grid; align-content: start; gap: 2px; padding: 12px 16px; }
 .word-bank-metrics .card:nth-child(1) { background: var(--c-primary-soft); }
@@ -17,15 +29,15 @@
 .word-bank-search input::placeholder { color: var(--c-ink-muted); opacity: 1; }
 .word-bank-sort select { border: 0; padding: 4px 8px; max-width: 100%; min-height: 36px; font: var(--type-small); }
 .word-bank-scroll { width: 100%; overflow-x: auto; scrollbar-width: thin; }
-.word-bank-table { width: 100%; border-collapse: separate; border-spacing: 0 3px; text-align: left; min-width: 655px; }
+.word-bank-table { width: 100%; border-collapse: separate; border-spacing: 0 3px; text-align: start; min-width: 655px; }
 .word-bank-table th { white-space: nowrap; font: var(--type-caption); letter-spacing: var(--tracking-caption); text-transform: uppercase; color: var(--c-ink-muted); padding: 0 8px 3px; }
 .word-bank-table td { padding: 0 8px; height: 41px; font: 500 13px/17px var(--font-body); }
 .word-bank-table tbody tr:nth-child(even) { background: transparent; }
 .word-bank-table tbody tr:nth-child(odd) td { background: var(--c-surface-alt); }
 .word-bank-table tbody tr[data-root-selected="true"] td { background: var(--c-primary-soft); }
 .word-bank-table tbody tr:hover td { background: var(--c-tint); }
-.word-bank-table td:first-child { border-radius: var(--r-control) 0 0 var(--r-control); }
-.word-bank-table td:last-child { border-radius: 0 var(--r-control) var(--r-control) 0; min-width: 65px; color: var(--c-ink-muted); }
+.word-bank-table td:first-child { border-start-start-radius: var(--r-control); border-end-start-radius: var(--r-control); }
+.word-bank-table td:last-child { border-start-end-radius: var(--r-control); border-end-end-radius: var(--r-control); min-width: 65px; color: var(--c-ink-muted); }
 .word-bank-table td[data-due="true"] { color: var(--interactive-ink); font-weight: 700; }
 .word-bank-table td:nth-child(4), .word-bank-table td:nth-child(5) { color: var(--c-ink-muted); }
 .word-bank-table td:nth-child(6) { width: 95px; }
@@ -99,21 +111,35 @@
 .fluency-sign .arabic-text { font: var(--type-arabic-m); }
 .fluency-sign .arabic-line { padding: 0; }
 .fluency-sign > small { font: var(--type-small); }
-.fluency-page > .action { min-height: 50px; }
+.fluency-practice-button { min-height: 50px; }
 .fluency-dialog > section { box-shadow: none; background: var(--c-surface-alt); }
 @media (min-width: 1024px) {
-  [data-page="word-bank"] .app-content { padding-top: 4px; }
+  :is([data-page="word-bank"], [data-page="fluency"]) .app-content { padding-top: 4px; }
+  .fluency-page { max-width: none; }
+  .fluency-title .caption { display: none; }
   .word-bank-metrics { grid-template-columns: repeat(4, minmax(0,1fr)); }
-  .word-bank-layout { grid-template-columns: minmax(0,1fr) minmax(278px, 32%); align-items: start; }
   .word-bank-controls { grid-template-columns: 1.28fr 1fr auto; }
   .word-bank-filters { grid-column: auto; }
   .word-bank-filters button, .word-bank-sort select { min-height: 26px; }
-  .word-bank-search { min-height: 28px; }
+  .word-bank-search { min-height: 28px; max-inline-size: 480px; }
   .word-bank-search input { min-height: 28px; font: 500 12px/16px var(--font-body); }
   .word-bank-sort select { appearance: none; cursor: pointer; font: 600 12px/16px var(--font-body); }
   .word-modern-reading .action { min-height: 32px; padding: 5px 8px; font: var(--type-small); }
   .anatomy-open .word-bank-layout { grid-template-columns: minmax(0, 1fr); }
   .anatomy-open .word-bank-metrics { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+@media (min-width: 1280px) {
+  .word-bank-layout { grid-template-columns: minmax(0,1fr) minmax(270px, 30%); align-items: start; }
+  .fluency-layout { grid-template-columns: minmax(0,1fr) minmax(310px, 36%); align-items: start; }
+  .fluency-main > .fluency-practice-button { justify-self: start; min-inline-size: min(100%, 220px); }
+  .anatomy-open .fluency-layout { grid-template-columns: minmax(0,1fr); }
+}
+@media (min-width: 1280px) and (max-width: 1359px) {
+  .word-bank-table { min-width: 0; }
+  .word-bank-table :is(th,td) { padding-inline: 5px; }
+  .word-bank-table th { white-space: normal; }
+  .word-bank-table progress { min-width: 48px; }
+  .word-bank-table td:nth-child(6) { width: 64px; }
 }
 @media (min-width: 1360px) {
   .app-content:not(.anatomy-open) .word-bank-layout { grid-template-columns: minmax(0,1fr) 360px; }

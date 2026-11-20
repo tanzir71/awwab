@@ -1,4 +1,5 @@
-import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import * as Tabs from "@radix-ui/react-tabs";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { ArabicText } from "@/components/ArabicText";
@@ -6,8 +7,9 @@ import { DesignIcon } from "@/components/DesignIcon";
 import { ModernReading, WordFamily } from "@/components/FluencyCards";
 import { SectionNav } from "@/components/Surface";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { useRecord } from "@/hooks/use-awwab";
+import { useDesktop, useRecord } from "@/hooks/use-awwab";
 import { dateKey, formatDay } from "@/lib/dates";
+import { focusListItem } from "@/lib/focusListItem";
 import { fluencyRoots, wordBankSearch, wordGlosses } from "@/lib/fluency";
 import { fluencyFamilyKey, fluencyRootKey, wordGlossKey } from "@/lib/fluency-messages.mjs";
 import { coreVocabulary, loadMorphology } from "@/lib/morphology";
@@ -63,7 +65,7 @@ function RootExplorer({ root, corpus, pinned }: { root: string; corpus: Corpus |
 }
 
 export function WordBank({ settings, desktop, now }: { settings: Settings; desktop: boolean; now: Date }) {
-  const { language, locale, t } = useCopy();
+  const { language, locale, direction, t } = useCopy();
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const numbers = new Intl.NumberFormat(locale);
@@ -78,6 +80,10 @@ export function WordBank({ settings, desktop, now }: { settings: Settings; deskt
   const [session, review] = useState<string>();
   const [reveal, setReveal] = useState(false);
   const [saving, setSaving] = useState(false);
+  const wide = useDesktop(1280);
+  const compactDesktop = desktop && !wide;
+  const [tab, setTab] = useState("words");
+  const rootTab = useRef<HTMLButtonElement>(null);
   const reviews = useRecord<Reviews>("reviews", {});
   const knownVocabulary = useRecord<string[]>("word-bank-known", []);
   const knownVerses = useRecord<string[]>("words-known", []);
@@ -163,16 +169,7 @@ export function WordBank({ settings, desktop, now }: { settings: Settings; deskt
   const columnNames = ["word", "wordBankTranslit", "meaning", "root", "studyType", "wordBankHowOften", "status", "wordBankNext"];
   const primaryStatus = { known: "known", learning: "wordBankLearning", new: "newWord" } as const;
 
-  return <div className="word-bank">
-    {!desktop && <SectionNav title={t("quranWordBank")} back="/learn" />}
-    <div className="word-bank-metrics">
-      {metrics.map(metric => <section className="card" key={metric.title}>
-        <h2 className="caption">{t(metric.title)}</h2>
-        <strong>{numbers.format(metric.value)}</strong>
-        <p className="small muted">{metric.hint}</p>
-      </section>)}
-    </div>
-    <div className="word-bank-layout">
+  const wordTable = (
       <section className="card word-bank-list" aria-label={t("frequentWords")}>
         <div className="word-bank-controls">
           <div className="word-bank-filters" role="group" aria-label={t("wordBankFilter")}>
@@ -195,7 +192,7 @@ export function WordBank({ settings, desktop, now }: { settings: Settings; deskt
         {error && <p role="status">{t("corpusUnavailable")} <Link className="text-button" to="/learn/salah">{t("studyFatiha")}</Link></p>}
         {!corpus && !error && <p role="status">{t("openingCorpus")}</p>}
         {corpus && visible.length > 0 && <div className="word-bank-scroll" role="region" aria-label={t("frequentWords")} tabIndex={0}>
-          <table className="word-bank-table">
+          <table className="word-bank-table" onKeyDown={desktop ? event => focusListItem(event, "tbody tr > td:first-child .word-chip") : undefined}>
             <thead><tr>{columnNames.map(column => <th key={column} scope="col" aria-sort={
               sort === "frequency" && column === "wordBankHowOften" ? "descending" :
               sort === "arabic" && column === "word" || sort === "next" && column === "wordBankNext" ? "ascending" : undefined
@@ -209,6 +206,11 @@ export function WordBank({ settings, desktop, now }: { settings: Settings; deskt
                 onWordSelected={() => {
                   setRoot(item.root);
                   setRootRow(item.key);
+                  if (compactDesktop) {
+                    setTab("roots");
+                    rootTab.current?.focus();
+                    return false;
+                  }
                   if (activeRoot !== item.root || selectedRow !== item.key) return false;
                 }} /> : "—"}</td>
               <td>{item.kind}</td>
@@ -228,11 +230,29 @@ export function WordBank({ settings, desktop, now }: { settings: Settings; deskt
           {filtered.length > limit && <button className="text-button" type="button" onClick={() => setLimit(value => value + 10)}>{t("moreWords")}</button>}
         </div>}
       </section>
-      <aside className="word-bank-aside">
-        <RootExplorer root={activeRoot} corpus={corpus} pinned={pinned} />
-        <ModernReading known={known} zone={zone} />
-      </aside>
+  );
+  const practice = <aside className="word-bank-aside">
+    <RootExplorer root={activeRoot} corpus={corpus} pinned={pinned} />
+    <ModernReading known={known} zone={zone} />
+  </aside>;
+
+  return <div className="word-bank">
+    {!desktop && <SectionNav title={t("quranWordBank")} back="/learn" />}
+    <div className="word-bank-metrics">
+      {metrics.map(metric => <section className="card" key={metric.title}>
+        <h2 className="caption">{t(metric.title)}</h2>
+        <strong>{numbers.format(metric.value)}</strong>
+        <p className="small muted">{metric.hint}</p>
+      </section>)}
     </div>
+    {compactDesktop ? <Tabs.Root className="vocabulary-tabs" dir={direction} value={tab} onValueChange={setTab}>
+      <Tabs.List className="study-tabs equal-row" aria-label={t("wordBankName")}>
+        <Tabs.Trigger value="words">{t("frequentWords")}</Tabs.Trigger>
+        <Tabs.Trigger value="roots" ref={rootTab}>{t("rootExplorer")}</Tabs.Trigger>
+      </Tabs.List>
+      <Tabs.Content value="words" forceMount>{wordTable}</Tabs.Content>
+      <Tabs.Content value="roots" forceMount>{practice}</Tabs.Content>
+    </Tabs.Root> : <div className="word-bank-layout">{wordTable}{practice}</div>}
     <footer className="row-between word-bank-footer">
       <Link className="text-button" to="/learn/fluency">{t("quranAndModern")}</Link>
       <a className="text-button" href={coreWordSource}>{t("fluencySources")}</a>

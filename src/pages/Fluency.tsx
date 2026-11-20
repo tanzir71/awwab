@@ -1,9 +1,10 @@
 import { useState } from "react";
+import * as Tabs from "@radix-ui/react-tabs";
 import { toast } from "sonner";
 import { ArabicText } from "@/components/ArabicText";
 import { WordFamily } from "@/components/FluencyCards";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { useRecord } from "@/hooks/use-awwab";
+import { useDesktop, useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { dateKey } from "@/lib/dates";
 import { fluencyPairs, fluencyRoots, fluencySigns } from "@/lib/fluency";
@@ -12,8 +13,8 @@ import { formatQuranReference } from "@/lib/quran";
 import { saveFluencyPractice } from "@/lib/studyMilestones";
 import type { Settings } from "@/lib/storageService";
 
-export function Fluency({ settings, now }: { settings: Settings; now: Date }) {
-  const { t, language, locale } = useCopy();
+export function Fluency({ settings, now, desktop }: { settings: Settings; now: Date; desktop: boolean }) {
+  const { t, language, locale, direction } = useCopy();
   const zone = settings.city.timeZone;
   const day = Number(dateKey(now, zone).slice(-2));
   const writingDay = day % 2 === 1;
@@ -25,6 +26,7 @@ export function Fluency({ settings, now }: { settings: Settings; now: Date }) {
   const [practice, setPractice] = useState(false);
   const [saving, setSaving] = useState<string>();
   const [revealed, setRevealed] = useState<string[]>([]);
+  const wide = useDesktop(1280);
 
   async function remember(word: string) {
     if (saving) return;
@@ -35,12 +37,7 @@ export function Fluency({ settings, now }: { settings: Settings; now: Date }) {
     finally { setSaving(undefined); }
   }
 
-  return <div className="fluency-page">
-    <header className="fluency-title">
-      <p className="caption">{t("fluency")}</p>
-      <h1>{t("fluencyTitle")}</h1>
-    </header>
-    <section className="card fluency-daily">
+  const dailyRoot = <section className="card fluency-daily">
       <div className="row-between">
         <h2 className="caption">{t("fluencyRootDay")}</h2>
         <ArabicText text={Array.from(root).join(" ")} />
@@ -48,8 +45,8 @@ export function Fluency({ settings, now }: { settings: Settings; now: Date }) {
       <h3 dir="auto">“{t(fluencyRootKey(root))}”</h3>
       <WordFamily words={daily.family.map(word => ({ ...word, meaning: t(fluencyFamilyKey(root, word.tr)) }))} />
       <p className="small">{t(writingDay ? "fluencyMaktabNote" : "wordBankOneRoot")}</p>
-    </section>
-    <section className="fluency-pairs">
+    </section>;
+  const comparisons = <section className="fluency-pairs">
       <h2>{t("fluencySameWord")}</h2>
       {fluencyPairs.map(pair => <article className="card equal-row fluency-pair" key={pair.verse}>
         <div className="fluency-pair-modern">
@@ -64,7 +61,8 @@ export function Fluency({ settings, now }: { settings: Settings; now: Date }) {
             <bdi>{formatQuranReference(pair.verse, locale)}</bdi></p>
         </div>
       </article>)}
-    </section>
+    </section>;
+  const signPractice = <>
     <section className="card fluency-signs">
       <h2>{t("fluencySignsTitle")}</h2>
       <p className="small muted">{t("fluencySignsHint")}</p>
@@ -75,7 +73,27 @@ export function Fluency({ settings, now }: { settings: Settings; now: Date }) {
         </div>)}
       </div>
     </section>
-    <button className="action" type="button" onClick={() => setPractice(true)}>{t("fluencyThreeWords")}</button>
+    <button className="action fluency-practice-button" type="button" onClick={() => setPractice(true)}>{t("fluencyThreeWords")}</button>
+  </>;
+
+  return <div className="fluency-page">
+    <header className="fluency-title">
+      <p className="caption">{t("fluency")}</p>
+      <h1>{t("fluencyTitle")}</h1>
+    </header>
+    {!desktop ? <>{dailyRoot}{comparisons}{signPractice}</> : wide ?
+      <div className="fluency-layout">
+        <div className="fluency-main">{comparisons}{signPractice}</div>
+        {dailyRoot}
+      </div> :
+      <Tabs.Root className="vocabulary-tabs" dir={direction} defaultValue="comparisons">
+        <Tabs.List className="study-tabs equal-row" aria-label={t("fluency")}>
+          <Tabs.Trigger value="comparisons">{t("fluencySameWord")}</Tabs.Trigger>
+          <Tabs.Trigger value="practice">{t("practise")}</Tabs.Trigger>
+        </Tabs.List>
+        <Tabs.Content value="comparisons">{comparisons}</Tabs.Content>
+        <Tabs.Content className="fluency-aside" value="practice">{dailyRoot}{signPractice}</Tabs.Content>
+      </Tabs.Root>}
     <Dialog open={practice} onOpenChange={setPractice}>
       <DialogContent className="awwab-dialog fluency-dialog" aria-describedby={undefined}>
         <DialogTitle>{t("fluencyThreeWords")}</DialogTitle>

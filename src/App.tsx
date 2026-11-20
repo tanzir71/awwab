@@ -146,7 +146,7 @@ function Main() {
         <Route path="/learn/qaida/:id?" element={<Qaida settings={settings} desktop={desktop} />} />
         <Route path="/learn/surahs/:id?" element={<SurahReader settings={settings} now={now} />} />
         <Route path="/learn/salah" element={<SalahWords settings={settings} />} />
-        <Route path="/learn/fluency" element={<Fluency settings={settings} now={now} />} />
+        <Route path="/learn/fluency" element={<Fluency settings={settings} now={now} desktop={desktop} />} />
         <Route path="/learn/words" element={<WordBank settings={settings} desktop={desktop} now={now} />} />
         <Route path="/learn/takhti/:family?" element={<Takhti />} />
         <Route path="/learn/hadith" element={<Hadith desktop={desktop} />} />
