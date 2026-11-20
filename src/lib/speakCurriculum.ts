@@ -1,5 +1,6 @@
 import starter from "../../docs/content/spoken-arabic.json";
 import everyday from "../../docs/content/spoken-saudi-a2.json";
+import conversation from "../../docs/content/spoken-saudi-b1.json";
 import { asset } from "./config";
 import { askPhrase, renderAsk } from "./umrahAsk";
 import { banglaPhrases } from "./umrah-ask-copy";
@@ -13,15 +14,15 @@ export type SpeakLevel = typeof speakLevels[number];
 export const speakLevelLabels = { A1: "speakSurvival", A2: "speakEverydayLevel", B1: "speakConversation" };
 
 type StarterUnit = typeof starter.units[number] & { level: "A1" };
-type EverydayUnit = typeof everyday[number] & { level: "A2" };
-export type SpeakUnit = StarterUnit | EverydayUnit;
+type ConversationUnit = (typeof everyday[number] | typeof conversation[number]) & { level: "A2" | "B1" };
+export type SpeakUnit = StarterUnit | ConversationUnit;
 export type SpeakWord = { ar: string; tr: string; meaning: string[]; root?: string; bridge?: string };
 type SpeakLine = SpeakWord & { clip: string };
 
 export const speakUnitsByLevel: Record<SpeakLevel, SpeakUnit[]> = {
   A1: starter.units.map(unit => ({ ...unit, level: "A1" })),
   A2: everyday.map(unit => ({ ...unit, level: "A2" })),
-  B1: [],
+  B1: conversation.map(unit => ({ ...unit, level: "B1" })),
 };
 export const speakUnits = Object.values(speakUnitsByLevel).flat();
 export const speakUnit = (id: string | undefined) => speakUnits.find(unit => unit.id === id);
@@ -35,7 +36,7 @@ export function speakLessonContent(unit: SpeakUnit) {
   let words: SpeakWord[];
   let wordClips: string[];
   const signClip = studyClipPath(`sign-${unit.id}`);
-  if (unit.level === "A2") {
+  if (unit.level !== "A1") {
     lines = unit.dialogue.map(([ar, tr, en, bn], index) => ({ ar, tr, meaning: [en, bn], clip: studyClipPath(`${unit.id}-line-${index + 1}`) }));
     words = unit.words;
     wordClips = words.map((_, index) => studyClipPath(`${unit.id}-word-${index + 1}`));

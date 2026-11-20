@@ -46,6 +46,7 @@ function usePathState() {
   const short = salahChapters.filter(number => learned.has(number)).length;
   const amma = juzAmma.filter(chapter => learned.has(chapter.number)).length;
   const spokenCount = speakLevels.map(level => speakUnitsByLevel[level].filter(unit => spokenLessons.includes(unit.id)).length);
+  const spokenDone = speakLevels.map((level, index) => spokenCount[index] === speakUnitsByLevel[level].length);
   const grammarCount = grammar.lessons.filter(lesson => earlier[grammarReviewPrefix + lesson.id]?.correct > 0).length;
   const introDone = introPatterns.patterns.every(pattern => earlier[patternReviewPrefix + pattern.id]?.correct > 0);
   const rootsCount = Number(introDone) + roots.lessons.filter(lesson => earlier[rootsReviewPrefix + lesson.id]?.correct > 0).length;
@@ -71,14 +72,15 @@ function usePathState() {
   ];
   const nextRead = readLevels.indexOf(false);
   const nextUnderstand = understandLevels.indexOf(false);
+  const nextSpeak = spokenDone.indexOf(false);
   const complete = {
     read: nextRead < 0 ? readLevels.length : nextRead,
     memorise: short >= salahChapters.length ? (amma >= juzAmma.length ? 2 : 1) : 0,
     understand: nextUnderstand < 0 ? understandLevels.length : nextUnderstand,
-    speak: spokenCount[0] === speakUnitsByLevel.A1.length ? 1 + Number(spokenCount[1] === speakUnitsByLevel.A2.length) : 0,
+    speak: nextSpeak < 0 ? speakLevels.length : nextSpeak,
   };
   const active = Object.fromEntries(tracks.map(track => [track, Math.min(5, Math.max(complete[track] + 1, placement[track]?.level ?? 1))])) as Record<Track, number>;
-  return { active, complete, completedQaida, learned, short, amma, known, current, placement, spokenCount, grammarCount, rootsCount, sentenceCount, tajweed, tajweedDepth, fluent, understood, prepared };
+  return { active, complete, completedQaida, learned, short, amma, known, current, placement, spokenCount, spokenDone, grammarCount, rootsCount, sentenceCount, tajweed, tajweedDepth, fluent, understood, prepared };
 }
 
 function headingLevel(track: Track, active: number) { return levels[track][active - 1]; }
@@ -91,7 +93,7 @@ function levelDone(track: Track, level: number, state: ReturnType<typeof usePath
     (track === "understand" && level === 3 && state.rootsCount === rootsLessonTotal) ||
     (track === "understand" && level === 4 && state.understood === juzAmma.length) ||
     (track === "understand" && level === 5 && state.sentenceCount === sentence.lessons.length) ||
-    (track === "speak" && level === 2 && state.spokenCount[1] === speakUnitsByLevel.A2.length);
+    (track === "speak" && state.spokenDone[level - 1]);
 }
 
 function PathsBack({ to }: { to: string }) {
@@ -116,7 +118,8 @@ function contextLabel(track: Track, level: number, state: ReturnType<typeof useP
   if (track === "understand" && level === 3) return t("pathsLessonProgress", { count: state.rootsCount, total: rootsLessonTotal });
   if (track === "understand" && level === 4) return t("readingSurahsProgress", { count: state.understood, total: juzAmma.length });
   if (track === "understand" && level === 5) return t("pathsLessonProgress", { count: state.sentenceCount, total: sentence.lessons.length });
-  if (track === "speak" && (level === 1 || level === 2)) return t("pathsLessonProgress", { count: state.spokenCount[level - 1], total: speakUnitsByLevel[speakLevels[level - 1]].length });
+  const speakLevel = speakLevels[level - 1];
+  if (track === "speak" && speakLevel) return t("pathsLessonProgress", { count: state.spokenCount[level - 1], total: speakUnitsByLevel[speakLevel].length });
   return trackStatus[track][level - 1];
 }
 

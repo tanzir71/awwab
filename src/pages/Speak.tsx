@@ -56,8 +56,8 @@ function SpeakSetup({ complete, level }: { complete: string[]; level: SpeakLevel
           const count = speakUnitsByLevel[choice].length;
           const to = choice === "A1" && level === "A1" ? speakLessonPath("greetings") : speakSetupPath(choice);
           return <Link className={`card ${choice === level ? "night" : "soft"}`} key={choice}
-            to={count ? to : "/learn/paths/speak/3"} aria-current={choice === level ? "true" : undefined}>
-            <strong>{choice}</strong><small>{count ? `${t(speakLevelLabels[choice])} · ${t("speakUnits", { count })}` : t("speakPending")}</small>
+            to={to} aria-current={choice === level ? "true" : undefined}>
+            <strong>{choice}</strong><small>{t(speakLevelLabels[choice])} · {t("speakUnits", { count })}</small>
           </Link>;
         })}
       </div>
@@ -92,6 +92,7 @@ function SpeakLesson({ unit, complete, now, settings, reviewIndex }: { unit: Spe
   const [slow, setSlow] = useState(false);
   const [meanings, setMeanings] = useState(true);
   const [answer, setAnswer] = useState<number>();
+  const [replyIndex, setReplyIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(false);
@@ -99,15 +100,20 @@ function SpeakLesson({ unit, complete, now, settings, reviewIndex }: { unit: Spe
   const [reviewSaved, setReviewSaved] = useState(false);
   const [queueError, setQueueError] = useState(false);
   const sequence = useRef<number>();
+  const replyHeading = useRef<HTMLHeadingElement>(null);
   const { lines, words, clips } = useMemo(() => speakLessonContent(unit), [unit]);
   const title = unit.title[lang];
   const sim = unit.id === "sim";
-  const dialogue = unit.level === "A2" || sim;
-  const question = dialogue ? 2 : 0;
+  const dialogue = unit.level !== "A1" || sim;
+  const repeatLine = dialogue ? 2 : 0;
+  const replyLines = unit.level === "B1" ? [2, 4] : [repeatLine];
+  const reply = replyLines[replyIndex];
+  const promptLine = reply - 1;
   const number = speakUnitNumber(unit);
-  const partner = unit.level === "A2" ? unit.partner[lang] : t("speakShop");
-  const other = unit.level === "A2" ? 0 : lines.length - 1;
-  const replyChoices = unit.level === "A2" && number % 2 === 0 ? [question, other] : [other, question];
+  const partner = unit.level !== "A1" ? unit.partner[lang] : t("speakShop");
+  const other = unit.level === "B1" ? replyLines[1 - replyIndex] : unit.level === "A2" ? 0 : lines.length - 1;
+  const correctFirst = unit.level !== "A1" && (number + replyIndex) % 2 === 0;
+  const replyChoices = correctFirst ? [reply, other] : [other, reply];
   const bridge = words.find(word => word.bridge);
   const player = useAudioPlayback(Object.keys(clips), clips);
   const reviews = useRecord<Reviews>("reviews", {});
@@ -207,18 +213,29 @@ function SpeakLesson({ unit, complete, now, settings, reviewIndex }: { unit: Spe
             </div>}</>}
           {queueError && <p role="alert">{t("saveError")}</p>}
         </section> : wordList)}
-        {step === 2 && <section className="card compact-stack"><h2>{t("speakRepeat")}</h2><ArabicText text={lines[question].ar} preserveSeparators />
-          <button className="action light" type="button" onClick={() => listen(`line-${question}`)}>{t(player.playing ? "askStop" : "speakListen")}</button><LocalRecorder /></section>}
-        {step === 3 && <section className="card compact-stack"><h2>{t(dialogue ? "speakChooseReply" : "speakChoose")}</h2>
+        {step === 2 && <section className="card compact-stack"><h2>{t("speakRepeat")}</h2><ArabicText text={lines[repeatLine].ar} preserveSeparators />
+          <button className="action light" type="button" onClick={() => listen(`line-${repeatLine}`)}>{t(player.playing ? "askStop" : "speakListen")}</button><LocalRecorder /></section>}
+        {step === 3 && <section className="card compact-stack"><h2 ref={replyHeading} tabIndex={-1}>{t(dialogue ? "speakChooseReply" : "speakChoose")}</h2>
+          {replyLines.length > 1 && <p className="small muted">{t("speakReplyProgress", { number: replyIndex + 1, total: replyLines.length })}</p>}
           {dialogue ? <>
             <div className="row-between"><p className="caption">{partner}</p>
-              <button className="icon-button" type="button" aria-label={t("speakHearLine", { number: 2 })} onClick={() => listen("line-1")}><DesignIcon name="speak-volume" size={14} /></button></div>
-            <ArabicText text={lines[1].ar} preserveSeparators /><p className="small muted">{lines[1].meaning[lang]}</p>
-          </> : <p>{lines[question].meaning[lang]}</p>}
+              <button className="icon-button" type="button" aria-label={t("speakHearLine", { number: promptLine + 1 })}
+                onClick={() => listen(`line-${promptLine}`)}><DesignIcon name="speak-volume" size={14} /></button></div>
+            <ArabicText text={lines[promptLine].ar} preserveSeparators /><p className="small muted">{lines[promptLine].meaning[lang]}</p>
+          </> : <p>{lines[reply].meaning[lang]}</p>}
           <div className="compact-stack">{replyChoices.map((index, i) => <div className="speak-answer" key={index}>
             <ArabicText text={lines[index].ar} preserveSeparators /><button type="button" className="action light" aria-label={t("speakReply", { number: i + 1 })}
               aria-pressed={answer === index} onClick={() => setAnswer(index)}>{i + 1}</button>
-          </div>)}</div>{answer !== undefined && <p role="status">{t(answer === question ? "lessonCorrect" : "speakTryAgain")}</p>}</section>}
+          </div>)}</div>
+          {answer !== undefined && <p role="status">{t(answer === reply ? "lessonCorrect" : "speakTryAgain")}</p>}
+          {answer === reply && replyIndex + 1 < replyLines.length && <button className="action" type="button" onClick={() => {
+            sequence.current = undefined;
+            player.element.current?.pause();
+            setReplyIndex(replyIndex + 1);
+            setAnswer(undefined);
+            replyHeading.current?.focus();
+          }}>{t("speakNextReply")}</button>}
+        </section>}
         {step === 4 && <section className="card tint compact-stack">{sign}
           <div className="equal-row"><button className="action light" type="button" onClick={() => listen("sign")}>{t(player.playing ? "askStop" : "speakListen")}</button>
             <button className="action light" type="button" aria-expanded={revealed} onClick={() => setRevealed(value => !value)}>{t("speakSignMeaning")}</button></div>
@@ -251,7 +268,7 @@ export function Speak({ settings, now }: { settings: Settings; now: Date }) {
   const [params] = useSearchParams();
   const review = params.get("review");
   const unit = speakUnit(id);
-  const level = params.get("level") === "A2" ? "A2" : "A1";
+  const level = speakLevels.find(candidate => candidate === params.get("level")) ?? "A1";
   const complete = useRecord<string[]>(speakProgressKey, []);
   return unit ? <SpeakLesson key={`${unit.id}:${review ?? ""}`} unit={unit} complete={complete} settings={settings} now={now}
     reviewIndex={review && /^\d+$/.test(review) ? Number(review) : undefined} /> : <SpeakSetup complete={complete} level={level} />;

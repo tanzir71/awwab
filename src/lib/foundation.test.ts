@@ -68,17 +68,18 @@ describe("saved study milestones", () => {
     await db.records.clear();
   });
 
-  it("keeps A1 and A2 Speak completion and goals through concurrent saves and a backup", async () => {
+  it("keeps Speak completion and goals through concurrent saves and a backup", async () => {
     await db.records.bulkPut([{ key: speakProgressKey, value: ["sim"] }, { key: speakGoalsKey, value: ["speakWork"] }]);
     await Promise.all([
       finishSpeakUnit("a2-family", times.asr, dhaka.timeZone),
       finishSpeakUnit("a2-family", times.asr, dhaka.timeZone),
       finishSpeakUnit("a2-office", times.asr, dhaka.timeZone),
+      finishSpeakUnit("b1-story", times.asr, dhaka.timeZone),
     ]);
     const file = await backup();
     await db.records.clear();
     await restoreBackup(file);
-    expect(await getRecord<string[]>(speakProgressKey, [])).toEqual(["sim", "a2-family", "a2-office"]);
+    expect(await getRecord<string[]>(speakProgressKey, [])).toEqual(["sim", "a2-family", "a2-office", "b1-story"]);
     expect(await getRecord<string[]>(speakGoalsKey, [])).toEqual(["speakWork"]);
     expect(await getRecord<string[]>("study-days", [])).toEqual([day]);
   });

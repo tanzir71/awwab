@@ -40,6 +40,8 @@ export const speakMessages: MessageCatalog = {
   speakChoose: { en: "Choose what to say in Arabic.", bn: "আরবিতে কী বলবেন বেছে নিন।" },
   speakChooseReply: { en: "How would you reply?", bn: "কীভাবে জবাব দেবেন?" },
   speakReply: { en: "Reply {number, number}", bn: "{number, number} নম্বর জবাব" },
+  speakReplyProgress: { en: "Reply {number, number} of {total, number}", bn: "{total, number}টির মধ্যে {number, number} নম্বর জবাব" },
+  speakNextReply: { en: "Next reply", bn: "পরের জবাব" },
   speakTryAgain: { en: "Try the other phrase.", bn: "অন্য কথাটি চেষ্টা করুন।" },
   speakHearLine: { en: "Play line {number, number}", bn: "{number, number} নম্বর লাইন বাজান" },
   speakFinish: { en: "Finish lesson", bn: "পাঠ শেষ করুন" },

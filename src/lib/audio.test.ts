@@ -70,14 +70,14 @@ describe("Umrah phrase recordings", () => {
 });
 
 describe("Speak lesson recordings", () => {
-  it("includes a generated Opus clip for each A2 dialogue line, word and sign", () => {
+  it.each([["A2", 14, 4, 2], ["B1", 12, 6, 3]] as const)("includes generated %s dialogue, vocabulary and signs", (level, count, linesPerUnit, wordsPerUnit) => {
     const files = new Set<string>();
-    expect(speakUnitsByLevel.A2).toHaveLength(14);
-    for (const [index, unit] of speakUnitsByLevel.A2.entries()) {
+    expect(speakUnitsByLevel[level]).toHaveLength(count);
+    for (const [index, unit] of speakUnitsByLevel[level].entries()) {
       const { lines, words, clips } = speakLessonContent(unit);
       expect(speakUnitNumber(unit)).toBe(index + 1);
-      expect(lines).toHaveLength(4);
-      expect(words).toHaveLength(2);
+      expect(lines).toHaveLength(linesPerUnit);
+      expect(words).toHaveLength(wordsPerUnit);
       for (const href of Object.values(clips)) {
         const path = href.slice(asset("").length);
         expect(files.has(path), path).toBe(false);
@@ -88,6 +88,6 @@ describe("Speak lesson recordings", () => {
         expect(clip.subarray(0, 95).includes("OpusHead")).toBe(true);
       }
     }
-    expect(files.size).toBe(98);
+    expect(files.size).toBe(count * (linesPerUnit + wordsPerUnit + 1));
   });
 });

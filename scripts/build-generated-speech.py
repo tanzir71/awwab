@@ -15,6 +15,7 @@ PHRASES = ROOT / "handovers/H2-languages-paths-arabic-help/data/umrah-phrases.js
 CONTENT = ROOT / "docs/content"
 OUTPUT = ROOT / "public/packs"
 MODEL = "https://huggingface.co/vadimbelsky/arabic-emirati-female-piper/tree/cfe173969620e40be65b5dd8ed4d97d55a864325"
+SPEAK_COURSES = ("saudi-a2", "saudi-b1")
 
 
 def read(path):
@@ -75,11 +76,12 @@ def course_clips(units):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("model", type=Path, help="Emirati female Piper model with its .onnx.json config")
-    parser.add_argument("--course", choices=["saudi-a2"], help="Only rebuild the selected Speak course")
+    parser.add_argument("--course", choices=SPEAK_COURSES, help="Only rebuild the selected Speak course")
     args = parser.parse_args()
     voice = PiperVoice.load(args.model)
-    for slug, line in course_clips(read(CONTENT / "spoken-saudi-a2.json")):
-        encode(voice, OUTPUT / "study-speech" / f"{slug}.opus", line)
+    for course in (args.course,) if args.course else SPEAK_COURSES:
+        for slug, line in course_clips(read(CONTENT / f"spoken-{course}.json")):
+            encode(voice, OUTPUT / "study-speech" / f"{slug}.opus", line)
     if args.course:
         return
 

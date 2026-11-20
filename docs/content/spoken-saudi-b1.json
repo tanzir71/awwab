@@ -1,0 +1,242 @@
+[
+  {
+    "id": "b1-story",
+    "title": ["Telling a story", "ঘটনা বলা"],
+    "partner": ["Friend", "বন্ধু"],
+    "sign": "مكتب المفقودات",
+    "meaning": ["Lost and found office", "হারানো জিনিসের দপ্তর"],
+    "dialogue": [
+      ["أمس نسيت شنطتي في الباص. ما انتبهت إلا بعد ما نزلت.", "ams nisīt shanṭatī fil-bāṣ. mā intabaht illā baʿd mā nizilt.", "Yesterday I left my bag on the bus. I only noticed after I got off.", "গতকাল বাসে ব্যাগ রেখে নেমে গিয়েছিলাম। নামার পরেই খেয়াল হলো।"],
+      ["طيب، إيش سويت أول ما انتبهت؟", "ṭayyib, ēsh sawwēt awwal mā intabaht?", "What did you do as soon as you noticed?", "খেয়াল হতেই কী করলেন?"],
+      ["أول شي اتصلت بالشركة. كانوا يبغوا يعرفوا رقم الباص.", "awwal shay ittaṣalt bish-sharika. kānū yibghū yiʿrifū ragam al-bāṣ.", "First I called the company. They wanted to know the bus number.", "প্রথমে কোম্পানিতে ফোন করলাম। তারা বাসের নম্বর জানতে চাইল।"],
+      ["وقدرت تلاقي الرقم؟ كيف انتهت القصة؟", "wa-gidirt tilāgī ar-ragam? kēf intahat al-giṣṣa?", "Did you manage to find the number? How did the story end?", "নম্বরটা খুঁজে পেলেন? শেষ পর্যন্ত কী হলো?"],
+      ["لقيته على التذكرة، وفي النهاية رجّعوا لي الشنطة.", "ligītu ʿala at-tadhkara, wa-fin-nihāya rajjaʿū lī ash-shanṭa.", "I found it on the ticket, and in the end they returned my bag.", "টিকিটে পেলাম। শেষ পর্যন্ত তারা ব্যাগটা ফিরিয়ে দিল।"],
+      ["الحمد لله. كويس إنك احتفظت بالتذكرة.", "al-ḥamdu lillāh. kwayyis innak iḥtafaẓt bit-tadhkara.", "Thank God. Good thing you kept the ticket.", "আলহামদুলিল্লাহ। টিকিটটা রেখেছিলেন, ভালো হয়েছে।"]
+    ],
+    "words": [
+      { "ar": "قِصَّة", "tr": "giṣṣa", "meaning": ["Story", "ঘটনা বা গল্প"], "root": "ق ص ص", "bridge": "12:3:5" },
+      { "ar": "اِنْتَبَهْت", "tr": "intabaht", "meaning": ["I noticed", "আমার খেয়াল হলো"] },
+      { "ar": "فِي النِّهَايَة", "tr": "fin-nihāya", "meaning": ["In the end", "শেষ পর্যন্ত"] }
+    ]
+  },
+  {
+    "id": "b1-plans",
+    "title": ["Making plans", "পরিকল্পনা করা"],
+    "partner": ["Volunteer", "স্বেচ্ছাসেবক"],
+    "sign": "نقطة التجمع",
+    "meaning": ["Meeting point", "জড়ো হওয়ার স্থান"],
+    "dialogue": [
+      ["خلينا نرتّب توزيع الوجبات يوم السبت. عندك وقت الصباح؟", "khallīnā nirattib tawzīʿ al-wajabāt yōm as-sabt. ʿindak wagt aṣ-ṣabāḥ?", "Let's plan the meal distribution for Saturday. Are you free in the morning?", "শনিবার খাবার বিতরণের পরিকল্পনা করি। সকালে সময় হবে?"],
+      ["أقدر أجي بعد عشرة. متى تبغى نبدأ؟", "agdar ajī baʿd ʿashara. matā tabgha nibdaʾ?", "I can come after ten. When do you want to start?", "দশটার পর আসতে পারি। কখন শুরু করতে চান?"],
+      ["خلينا نتقابل الساعة أحدعش عند المدخل.", "khallīnā nitgābal as-sāʿa iḥdaʿash ʿind al-madkhal.", "Let's meet at eleven by the entrance.", "এগারোটায় প্রবেশপথে দেখা করি।"],
+      ["ممتاز. وإذا اتأخّرت السيارة، إيش نسوي؟", "mumtāz. wa-idhā itʾakhkharat as-sayyāra, ēsh nisawwī?", "Great. And if the car is late, what should we do?", "দারুণ। গাড়ি দেরি করলে কী করব?"],
+      ["نبدأ بالتجهيز ونبلّغ الفريق إذا اتغيّر الوقت.", "nibdaʾ bit-tajhīz wa-niballigh al-farīg idhā itghayyar al-wagt.", "We'll start setting up and tell the team if the time changes.", "প্রস্তুতি শুরু করব, আর সময় বদলালে দলকে জানাব।"],
+      ["تمام، بأرسل الخطة للمجموعة.", "tamām, baʾarsil al-khuṭṭa lil-majmūʿa.", "Great. I'll send the plan to the group.", "ঠিক আছে, দলকে পরিকল্পনাটা পাঠিয়ে দেব।"]
+    ],
+    "words": [
+      { "ar": "وَقْت", "tr": "wagt", "meaning": ["Time", "সময়"], "root": "و ق ت", "bridge": "4:103:20" },
+      { "ar": "تَجْهِيز", "tr": "tajhīz", "meaning": ["Preparation", "প্রস্তুতি"] },
+      { "ar": "فَرِيق", "tr": "farīg", "meaning": ["Team", "দল"] }
+    ]
+  },
+  {
+    "id": "b1-opinions",
+    "title": ["Giving opinions", "মতামত দেওয়া"],
+    "partner": ["Friend", "বন্ধু"],
+    "sign": "طلبات التوصيل",
+    "meaning": ["Delivery orders", "বাড়িতে পৌঁছানোর অর্ডার"],
+    "dialogue": [
+      ["إيش رأيك نطلب الخضار أونلاين بدل ما نروح السوق؟", "ēsh raʾyak niṭlub al-khuḍār ōnlāyn badal mā nirūḥ as-sūg?", "What do you think about ordering vegetables online instead of going to the market?", "বাজারে যাওয়ার বদলে অনলাইনে সবজি অর্ডার করলে কেমন হয়?"],
+      ["أنا أفضل السوق عشان أشوف الخضار بنفسي. وإنت؟", "anā ufaḍḍil as-sūg ʿashān ashūf al-khuḍār binafsī. wa-inta?", "I prefer the market because I can see the vegetables myself. What about you?", "আমি বাজার পছন্দ করি, কারণ নিজের চোখে সবজি দেখতে পারি। আপনি?"],
+      ["أظن التوصيل أوفر في الوقت، خصوصا إذا كنا مشغولين.", "aẓunn at-tawṣīl awfar fil-wagt, khuṣūṣan idhā kunnā mashghūlīn.", "I think delivery saves time, especially when we're busy.", "আমার মনে হয় পৌঁছে দিলে সময় বাঁচে, বিশেষ করে আমরা ব্যস্ত থাকলে।"],
+      ["صحيح. بس كيف نعرف إذا الخضار طازجة؟", "ṣaḥīḥ. bass kēf niʿraf idhā al-khuḍār ṭāzaja?", "True. But how do we know the vegetables are fresh?", "ঠিক। কিন্তু সবজি টাটকা কি না কীভাবে বুঝব?"],
+      ["معاك حق. خلينا نجرّب طلب صغير أول ونشوف.", "maʿāk ḥagg. khallīnā njarrib ṭalab ṣaghīr awwal wa-nishūf.", "You have a point. Let's try a small order first and see.", "ঠিক বলেছেন। আগে ছোট একটা অর্ডার দিয়ে দেখি।"],
+      ["فكرة كويسة، وبعدين نقرر.", "fikra kwayyisa, wa-baʿdēn nigarrir.", "Good idea. Then we can decide.", "ভালো কথা। তারপর সিদ্ধান্ত নেব।"]
+    ],
+    "words": [
+      { "ar": "أَظُنّ", "tr": "aẓunn", "meaning": ["I think or assume", "আমার মনে হয়"], "root": "ظ ن ن", "bridge": "49:12:7" },
+      { "ar": "أُفَضِّل", "tr": "ufaḍḍil", "meaning": ["I prefer", "আমি বেশি পছন্দ করি"] },
+      { "ar": "خُصُوصًا", "tr": "khuṣūṣan", "meaning": ["Especially", "বিশেষ করে"] }
+    ]
+  },
+  {
+    "id": "b1-complaints",
+    "title": ["Problems & complaints", "সমস্যা ও অভিযোগ"],
+    "partner": ["Returns clerk", "ফেরত কাউন্টারের কর্মী"],
+    "sign": "الاستبدال والاسترجاع",
+    "meaning": ["Exchanges and returns", "বদল ও ফেরত"],
+    "dialogue": [
+      ["لو سمحت، أبغى أرجّع الغلاية. اشتريتها أمس وما تشتغل.", "law samaḥt, abgha arajjiʿ al-ghallāya. ishtaraythā ams wa-mā tishtaghal.", "I'd like to return the kettle, please. I bought it yesterday and it doesn't work.", "দয়া করে কেটলিটা ফেরত দিতে চাই। গতকাল কিনেছি, কাজ করছে না।"],
+      ["ممكن توضّح المشكلة؟ هل تشتغل اللمبة؟", "mumkin twaḍḍiḥ al-mushkila? hal tishtaghal al-lamba?", "Could you explain the problem? Does the light come on?", "সমস্যাটা বলবেন? বাতিটা কি জ্বলে?"],
+      ["اللمبة تشتغل، بس الموية ما تسخن أبدا.", "al-lamba tishtaghal, bass al-mōya mā tiskhan abadan.", "The light comes on, but the water never gets hot.", "বাতি জ্বলে, কিন্তু পানি একেবারেই গরম হয় না।"],
+      ["فهمت. تبغى تستبدلها ولا تفضّل ترجع فلوسك؟", "fihimt. tabgha tistabdilhā wallā tifaḍḍil tirajjiʿ fulūsak?", "I understand. Would you like an exchange or a refund?", "বুঝেছি। বদলাতে চান, নাকি টাকা ফেরত চান?"],
+      ["أفضل أسترجع المبلغ إذا ممكن. هذه الفاتورة.", "ufaḍḍil astarjiʿ al-mablagh idhā mumkin. hādhī al-fātūra.", "I'd prefer a refund if possible. Here's the receipt.", "সম্ভব হলে টাকা ফেরত চাই। এই যে রসিদ।"],
+      ["تمام، خليني أشيّك على الفاتورة.", "tamām, khallīnī ashayyik ʿala al-fātūra.", "Okay. Let me check the receipt.", "আচ্ছা, রসিদটা দেখে নিই।"]
+    ],
+    "words": [
+      { "ar": "شَكْوَى", "tr": "shakwā", "meaning": ["Complaint", "অভিযোগ"], "root": "ش ك و", "bridge": "58:1:9" },
+      { "ar": "عُطْل", "tr": "ʿuṭl", "meaning": ["Fault or breakdown", "ত্রুটি বা বিকল হওয়া"] },
+      { "ar": "اِسْتِرْجَاع", "tr": "istirjāʿ", "meaning": ["Return or refund", "ফেরত দেওয়া বা টাকা ফেরত"] }
+    ]
+  },
+  {
+    "id": "b1-bargaining",
+    "title": ["Bargaining", "দরদাম করা"],
+    "partner": ["Shopkeeper", "দোকানি"],
+    "sign": "السعر ثابت",
+    "meaning": ["Fixed price", "দাম নির্ধারিত"],
+    "dialogue": [
+      ["لو سمحت، بكم هذي الشالات؟", "law samaḥt, bikam hādhī ash-shālāt?", "Excuse me, how much are these scarves?", "মাফ করবেন, এই শালগুলোর দাম কত?"],
+      ["الواحد بأربعين. تبغى واحد ولا أكثر؟", "al-wāḥid bi-arbaʿīn. tabgha wāḥid wallā akthar?", "Forty each. Do you want one or more?", "একটা চল্লিশ। একটা চান, নাকি আরও?"],
+      ["أبغى اثنين. إذا أخذت اثنين، ممكن تخفّض السعر؟", "abgha ithnēn. idhā akhadt ithnēn, mumkin tikhaffiḍ as-siʿr?", "I want two. If I take two, can you lower the price?", "দুটো চাই। দুটো নিলে দাম কমাবেন?"],
+      ["أقدر أعطيك الاثنين بسبعين. يناسبك؟", "agdar aʿṭīk al-ithnēn bi-sabʿīn. yināsibak?", "I can give you both for seventy. Does that work for you?", "দুটো সত্তরে দিতে পারি। আপনার হবে?"],
+      ["إيوه، سبعين مناسب. شكرا لك.", "aywa, sabʿīn munāsib. shukran lak.", "Yes, seventy works. Thank you.", "হ্যাঁ, সত্তরে হবে। ধন্যবাদ।"],
+      ["العفو، تفضل.", "al-ʿafw, tfaḍḍal.", "You're welcome. Here you go.", "স্বাগতম। এই নিন।"]
+    ],
+    "words": [
+      { "ar": "ثَمَن", "tr": "thaman", "meaning": ["Price or value", "দাম বা মূল্য"], "root": "ث م ن", "bridge": "12:20:2" },
+      { "ar": "تَخْفِيض", "tr": "takhfīḍ", "meaning": ["Discount", "মূল্যছাড়"] },
+      { "ar": "يِنَاسِبَك", "tr": "yināsibak", "meaning": ["Works for you", "আপনার সুবিধা হয়"] }
+    ]
+  },
+  {
+    "id": "b1-directions",
+    "title": ["Explaining the way", "পথ বুঝিয়ে বলা"],
+    "partner": ["Visitor", "দর্শনার্থী"],
+    "sign": "مدخل المشاة",
+    "meaning": ["Pedestrian entrance", "পায়ে হেঁটে ঢোকার পথ"],
+    "dialogue": [
+      ["إذا كنت رايح المكتبة، أقدر أشرح لك الطريق.", "idhā kunt rāyiḥ al-maktaba, agdar ashraḥ lak aṭ-ṭarīg.", "If you're going to the library, I can explain the way.", "গ্রন্থাগারে গেলে আমি পথটা বুঝিয়ে দিতে পারি।"],
+      ["إيوه، شكرا. من فين أبدأ؟", "aywa, shukran. min fēn abdaʾ?", "Yes, thank you. Where do I start?", "হ্যাঁ, ধন্যবাদ। কোথা থেকে শুরু করব?"],
+      ["امشِ سيده لين تعدّي الصيدلية، وبعدين لفّ يسار.", "imshi sīda lēn tiʿaddī aṣ-ṣaydaliyya, wa-baʿdēn luff yasār.", "Go straight until you pass the pharmacy, then turn left.", "ওষুধের দোকান পার হওয়া পর্যন্ত সোজা যান। তারপর বাঁয়ে ঘুরুন।"],
+      ["وبعد ما ألف يسار، المكتبة على أي جهة؟", "wa-baʿd mā aluff yasār, al-maktaba ʿala ayy jiha?", "After I turn left, which side is the library on?", "বাঁয়ে ঘোরার পর গ্রন্থাগার কোন দিকে?"],
+      ["على يمينك، قدّام الحديقة. المدخل جنب الموقف.", "ʿala yamīnak, guddām al-ḥadīga. al-madkhal janb al-mawgif.", "On your right, across from the park. The entrance is by the parking area.", "ডানে, পার্কের উল্টো দিকে। ঢোকার পথ গাড়ি রাখার জায়গার পাশে।"],
+      ["وضحت، الله يعطيك العافية.", "waḍḥat, Allāh yaʿṭīk al-ʿāfya.", "That's clear now, thank you.", "এখন বুঝেছি, ধন্যবাদ।"]
+    ],
+    "words": [
+      { "ar": "طَرِيق", "tr": "ṭarīg", "meaning": ["Way or road", "পথ বা রাস্তা"], "root": "ط ر ق", "bridge": "20:77:10" },
+      { "ar": "تَعَدِّي", "tr": "tiʿaddī", "meaning": ["You pass", "আপনি পার হন"] },
+      { "ar": "قُدَّام", "tr": "guddām", "meaning": ["In front of or across from", "সামনে বা উল্টো দিকে"] }
+    ]
+  },
+  {
+    "id": "b1-faith",
+    "title": ["Talking about faith respectfully", "সম্মানের সঙ্গে বিশ্বাস নিয়ে কথা বলা"],
+    "partner": ["Colleague", "সহকর্মী"],
+    "sign": "قاعة الصلاة",
+    "meaning": ["Prayer room", "নামাজের কক্ষ"],
+    "dialogue": [
+      ["بس حبيت أقول لك إني صايم اليوم، عشان لو عرضت عليّ قهوة.", "bass ḥabbēt agūl lak innī ṣāyim al-yōm, ʿashān law ʿaraḍt ʿalayya gahwa.", "I just wanted to let you know I'm fasting today, in case you offer me coffee.", "জানিয়ে রাখলাম, আজ আমি রোজা রাখছি। আপনি যদি কফি দিতে চান, তাই বললাম।"],
+      ["شكرا إنك قلت لي. ممكن أسألك إيش يعني لك الصيام؟", "shukran innak gult lī. mumkin asʾalak ēsh yaʿnī lak aṣ-ṣiyām?", "Thanks for telling me. Can I ask what fasting means to you?", "বলার জন্য ধন্যবাদ। রোজা আপনার কাছে কী অর্থ বহন করে, জিজ্ঞেস করতে পারি?"],
+      ["بالنسبة لي، الصيام عبادة وفرصة أركّز فيها على صلاتي.", "bin-nisba lī, aṣ-ṣiyām ʿibāda wa-furṣa arakkiz fīhā ʿala ṣalātī.", "For me, fasting is worship and a chance to focus on my prayers.", "আমার কাছে রোজা ইবাদত এবং নামাজে মন দেওয়ার সুযোগ।"],
+      ["فهمت. تحب نرتّب اجتماعنا بعد الظهر بدل وقت الغدا؟", "fihimt. tiḥibb nirattib ijtimāʿnā baʿd aẓ-ẓuhr badal wagt al-ghadā?", "I understand. Would you like us to schedule the meeting in the afternoon instead of at lunch?", "বুঝেছি। দুপুরের খাবারের সময়ের বদলে বিকেলে মিটিং রাখব?"],
+      ["بعد الظهر يناسبني. شكرا على تفهّمك.", "baʿd aẓ-ẓuhr yināsibnī. shukran ʿala tafahhumak.", "The afternoon works for me. Thank you for understanding.", "বিকেলে আমার সুবিধা হবে। বুঝতে চাওয়ার জন্য ধন্যবাদ।"],
+      ["العفو، خلينا نختار وقت يناسبنا الاثنين.", "al-ʿafw, khallīnā nikhtār wagt yināsibnā al-ithnēn.", "You're welcome. Let's pick a time that works for both of us.", "স্বাগতম। দুজনের সুবিধা হয় এমন একটা সময় বেছে নিই।"]
+    ],
+    "words": [
+      { "ar": "صِيَام", "tr": "ṣiyām", "meaning": ["Fasting", "রোজা রাখা"], "root": "ص و م", "bridge": "2:183:6" },
+      { "ar": "بِالنِّسْبَة لِي", "tr": "bin-nisba lī", "meaning": ["For me", "আমার কাছে"] },
+      { "ar": "تَفَهُّم", "tr": "tafahhum", "meaning": ["Understanding someone's situation", "কারও পরিস্থিতি বোঝা"] }
+    ]
+  },
+  {
+    "id": "b1-news",
+    "title": ["News headlines", "সংবাদের শিরোনাম"],
+    "partner": ["Friend", "বন্ধু"],
+    "sign": "آخر الأخبار",
+    "meaning": ["Latest news", "সর্বশেষ খবর"],
+    "dialogue": [
+      ["شفت عنوان الخبر؟ يقول إن المحطة الجديدة بتفتح الخميس.", "shuft ʿunwān al-khabar? yigūl inn al-maḥaṭṭa al-jadīda bitiftaḥ al-khamīs.", "Did you see the headline? It says the new station opens on Thursday.", "শিরোনাম দেখেছেন? বলছে নতুন স্টেশন বৃহস্পতিবার খুলবে।"],
+      ["الخميس هذا ولا الأسبوع الجاي؟", "al-khamīs hādhā wallā al-usbūʿ al-jāy?", "This Thursday or next week?", "এই বৃহস্পতিবার, নাকি পরের সপ্তাহে?"],
+      ["في تفاصيل الخبر مكتوب الخميس الجاي. العنوان ما يذكر التاريخ.", "fī tafāṣīl al-khabar maktūb al-khamīs al-jāy. al-ʿunwān mā yidhkur at-tārīkh.", "The article says next Thursday. The headline doesn't give the date.", "খবরের বিস্তারিত অংশে পরের বৃহস্পতিবার লেখা আছে। শিরোনামে তারিখ বলেনি।"],
+      ["طيب، هل ذكروا وقت الافتتاح؟", "ṭayyib, hal dhakarū wagt al-iftitāḥ?", "Okay. Did they give an opening time?", "আচ্ছা, খোলার সময় বলেছে কি?"],
+      ["لسه ما أعلنوا الساعة. خلينا نتأكد قبل ما نروح.", "lissa mā aʿlanū as-sāʿa. khallīnā nitʾakkad gabl mā nirūḥ.", "They haven't announced the time yet. Let's check before we go.", "এখনও সময় ঘোষণা করেনি। যাওয়ার আগে নিশ্চিত হয়ে নিই।"],
+      ["صح، التفاصيل أهم من العنوان لحاله.", "ṣaḥḥ, at-tafāṣīl ahamm min al-ʿunwān liḥālu.", "Right. The details matter more than the headline alone.", "ঠিক। শুধু শিরোনামের চেয়ে বিস্তারিত তথ্য বেশি কাজে লাগে।"]
+    ],
+    "words": [
+      { "ar": "خَبَر", "tr": "khabar", "meaning": ["News item", "একটি খবর"], "root": "خ ب ر", "bridge": "27:7:10" },
+      { "ar": "عُنْوَان", "tr": "ʿunwān", "meaning": ["Headline or title", "শিরোনাম"] },
+      { "ar": "اِفْتِتَاح", "tr": "iftitāḥ", "meaning": ["Opening or inauguration", "উদ্বোধন"] }
+    ]
+  },
+  {
+    "id": "b1-khutbah",
+    "title": ["Khutbah phrases", "খুতবার পরিচিত বাক্য"],
+    "partner": ["Study partner", "পাঠসঙ্গী"],
+    "sign": "خطبة الجمعة",
+    "meaning": ["Friday sermon", "জুমার খুতবা"],
+    "dialogue": [
+      ["في الخطبة سمعت عبارة «أوصيكم بتقوى الله». أبغى أفهمها.", "fil-khuṭba simiʿt ʿibārat «ūṣīkum bi-taqwā Allāh». abgha afhamhā.", "In the sermon I heard ‘I counsel you to be mindful of Allah.’ I'd like to understand the phrase.", "খুতবায় শুনলাম, ‘আল্লাহর প্রতি সচেতন থাকার উপদেশ দিচ্ছি।’ বাক্যটা বুঝতে চাই।"],
+      ["ابدأ بكلمة «أوصيكم». إيش تفهم منها؟", "ibdaʾ bi-kalimat «ūṣīkum». ēsh tifham minhā?", "Start with the word ūṣīkum. What do you understand from it?", "‘উসীকুম’ দিয়ে শুরু করুন। শব্দটি থেকে কী বুঝলেন?"],
+      ["أفهم إن الخطيب يقدّم نصيحة للناس اللي يسمعوه.", "afham inn al-khaṭīb yigaddim naṣīḥa lin-nās illī yismaʿūh.", "I understand that the speaker is offering advice to the people listening.", "বুঝছি, খতিব শ্রোতাদের উপদেশ দিচ্ছেন।"],
+      ["صحيح. واستخدام «أما بعد» في الخطبة، إيش يدلّ عليه؟", "ṣaḥīḥ. wa-stikhdām «ammā baʿd» fil-khuṭba, ēsh yidull ʿalēh?", "Right. And what does ‘ammā baʿd’ signal in the sermon?", "ঠিক। আর খুতবায় ‘আম্মা বা‘দ’ কী বোঝায়?"],
+      ["يعني إنه ينتقل من المقدّمة إلى موضوع الخطبة.", "yaʿnī innu yintagil min al-mugaddima ila mawḍūʿ al-khuṭba.", "It signals a shift from the introduction to the subject of the sermon.", "ভূমিকা থেকে খুতবার মূল বিষয়ে যাচ্ছেন, সেটাই বোঝায়।"],
+      ["بالضبط. إذا سمعتها، انتبه للموضوع اللي بعدها.", "biḍ-ḍabṭ. idhā simiʿthā, intibih lil-mawḍūʿ illī baʿdahā.", "Exactly. When you hear it, listen for the topic that follows.", "ঠিক তাই। শুনলে তার পরের বিষয়টা খেয়াল করুন।"]
+    ],
+    "words": [
+      { "ar": "تَقْوَى", "tr": "taqwā", "meaning": ["God-consciousness", "আল্লাহর প্রতি সচেতনতা বা তাকওয়া"], "root": "و ق ي", "bridge": "2:197:26" },
+      { "ar": "أُوصِيكُمْ", "tr": "ūṣīkum", "meaning": ["I counsel you all", "আমি আপনাদের উপদেশ দিচ্ছি"] },
+      { "ar": "أَمَّا بَعْد", "tr": "ammā baʿd", "meaning": ["To proceed", "এবার মূল কথায় আসি"] }
+    ]
+  },
+  {
+    "id": "b1-workplace",
+    "title": ["Workplace conversations", "কর্মস্থলের কথাবার্তা"],
+    "partner": ["Colleague", "সহকর্মী"],
+    "sign": "لوحة المهام",
+    "meaning": ["Task board", "কাজের তালিকার বোর্ড"],
+    "dialogue": [
+      ["وعدت الفريق أرسل التقرير اليوم، بس الأرقام لسه ناقصة.", "waʿadt al-farīg arsil at-taqrīr al-yōm, bass al-argām lissa nāgṣa.", "I promised the team I'd send the report today, but we're still missing some figures.", "দলকে বলেছিলাম আজ রিপোর্ট পাঠাব, কিন্তু কিছু হিসাব এখনও বাকি।"],
+      ["إيش الجزء الناقص؟ يمكن أقدر أساعدك.", "ēsh al-juzʾ an-nāgiṣ? yumkin agdar asāʿidak.", "Which part is missing? I might be able to help.", "কোন অংশ বাকি? হয়তো সাহায্য করতে পারব।"],
+      ["ناقصنا إجمالي الطلبات. تقدر تراجع الجدول معي؟", "nāgiṣnā ijmālī aṭ-ṭalabāt. tigdar tirājiʿ al-jadwal maʿī?", "We're missing the total number of orders. Can you check the table with me?", "মোট অর্ডারের সংখ্যা বাকি। আমার সঙ্গে তালিকাটা দেখে দেবেন?"],
+      ["أكيد. وإذا ما خلصناه اليوم، إيش نقول للفريق؟", "akīd. wa-idhā mā khallaṣnāh al-yōm, ēsh nigūl lil-farīg?", "Sure. And if we don't finish it today, what do we tell the team?", "অবশ্যই। আজ শেষ না হলে দলকে কী বলব?"],
+      ["نرسل لهم الموجود ونوضح متى نقدر نكمّل الباقي.", "nirsil lahum al-mawjūd wa-niwaḍḍiḥ matā nigdar nikammil al-bāgī.", "We'll send what we have and explain when we can finish the rest.", "যা আছে পাঠাব, আর বাকিটা কখন শেষ করতে পারব জানাব।"],
+      ["واضح. خلينا نبدأ بالإجمالي.", "wāḍiḥ. khallīnā nibdaʾ bil-ijmālī.", "Understood. Let's start with the total.", "বুঝেছি। মোট হিসাব দিয়ে শুরু করি।"]
+    ],
+    "words": [
+      { "ar": "وَعْد", "tr": "waʿd", "meaning": ["Promise", "প্রতিশ্রুতি"], "root": "و ع د", "bridge": "5:9:1" },
+      { "ar": "إِجْمَالِيّ", "tr": "ijmālī", "meaning": ["Total", "মোট"] },
+      { "ar": "نَاقِص", "tr": "nāgiṣ", "meaning": ["Missing or incomplete", "বাকি বা অসম্পূর্ণ"] }
+    ]
+  },
+  {
+    "id": "b1-health",
+    "title": ["Health in detail", "স্বাস্থ্য নিয়ে বিস্তারিত বলা"],
+    "partner": ["Clinician", "চিকিৎসক"],
+    "sign": "ملف المريض",
+    "meaning": ["Patient record", "রোগীর নথি"],
+    "dialogue": [
+      ["أبغى أوضح الأعراض. الدوخة تجيني وتروح من يومين.", "abgha awaḍḍiḥ al-aʿrāḍ. ad-dōkha tijīnī wa-trūḥ min yōmēn.", "I'd like to explain my symptoms. The dizziness has been coming and going for two days.", "উপসর্গগুলো বুঝিয়ে বলতে চাই। দুই দিন ধরে মাথা ঘোরে, আবার থেমে যায়।"],
+      ["متى تزيد الدوخة؟ وهل معها أعراض ثانية؟", "matā tizīd ad-dōkha? wa-hal maʿahā aʿrāḍ thānya?", "When does the dizziness get worse? Do you have any other symptoms with it?", "কখন মাথা বেশি ঘোরে? সঙ্গে আর কোনো উপসর্গ আছে?"],
+      ["تزيد لما أقوم من الكرسي، وأحيانا أحس بغثيان.", "tizīd lammā agūm min al-kursī, wa-aḥyānan aḥiss bi-ghathayān.", "It gets worse when I stand up from a chair, and sometimes I feel nauseated.", "চেয়ার থেকে উঠলে বাড়ে, আর কখনো বমি বমি লাগে।"],
+      ["عندك حساسية من أدوية، أو تاخذ دواء بشكل منتظم؟", "ʿindak ḥasāsiyya min adwiya, aw tākhudh dawā bishakl muntaẓim?", "Are you allergic to any medicines, or do you take any regularly?", "কোনো ওষুধে অ্যালার্জি আছে, বা নিয়মিত কোনো ওষুধ খান?"],
+      ["عندي حساسية من البنسلين. هذه قائمة أدويتي.", "ʿindī ḥasāsiyya min al-binsilīn. hādhī gāʾimat adwiyatī.", "I'm allergic to penicillin. Here's a list of my medicines.", "পেনিসিলিনে আমার অ্যালার্জি আছে। এই যে আমার ওষুধের তালিকা।"],
+      ["شكرا، بسجّل الحساسية مع الأعراض في الملف.", "shukran, basajjil al-ḥasāsiyya maʿ al-aʿrāḍ fil-malaf.", "Thank you. I'll add the allergy and symptoms to your record.", "ধন্যবাদ। নথিতে অ্যালার্জি আর উপসর্গগুলো লিখে রাখব।"]
+    ],
+    "words": [
+      { "ar": "شِفَاء", "tr": "shifāʾ", "meaning": ["Healing or recovery", "আরোগ্য বা সুস্থতা"], "root": "ش ف ي", "bridge": "17:82:6" },
+      { "ar": "دَوْخَة", "tr": "dōkha", "meaning": ["Dizziness", "মাথা ঘোরা"] },
+      { "ar": "حَسَاسِيَّة", "tr": "ḥasāsiyya", "meaning": ["Allergy or sensitivity", "অ্যালার্জি বা সংবেদনশীলতা"] }
+    ]
+  },
+  {
+    "id": "b1-disagree",
+    "title": ["Disagreeing politely", "ভদ্রভাবে ভিন্নমত জানানো"],
+    "partner": ["Group member", "দলের সদস্য"],
+    "sign": "صندوق الاقتراحات",
+    "meaning": ["Suggestions box", "পরামর্শের বাক্স"],
+    "dialogue": [
+      ["سمعت اقتراحك نخلي الاجتماع حضوري كل أسبوع.", "simiʿt igtirāḥak nikhallī al-ijtimāʿ ḥuḍūrī kull usbūʿ.", "I heard your suggestion that we meet in person every week.", "প্রতি সপ্তাহে সরাসরি দেখা করার আপনার প্রস্তাব শুনেছি।"],
+      ["إيوه، عشان نقدر نتناقش براحة. كيف تشوف الفكرة؟", "aywa, ʿashān nigdar nitnāgash birāḥa. kēf tshūf al-fikra?", "Yes, so we can talk things through. What do you think?", "হ্যাঁ, যাতে স্বচ্ছন্দে আলোচনা করতে পারি। আপনার কী মনে হয়?"],
+      ["أتفهّم وجهة نظرك، بس مو الكل يقدر يحضر كل أسبوع.", "atafahham wijhat naẓarak, bass mū al-kull yigdar yiḥḍur kull usbūʿ.", "I see your point, but some people can't attend every week.", "আপনার কথা বুঝতে পারছি। তবে সবাই প্রতি সপ্তাহে আসতে পারবেন না।"],
+      ["طيب، عندك اقتراح ثاني يناسب الفريق؟", "ṭayyib, ʿindak igtirāḥ thānī yināsib al-farīg?", "Okay, do you have another idea that would work for the team?", "আচ্ছা, দলের সুবিধা হয় এমন অন্য প্রস্তাব আছে?"],
+      ["ممكن نجتمع حضوري مرة في الشهر، وباقي الأسابيع أونلاين.", "mumkin nijtamiʿ ḥuḍūrī marra fish-shahr, wa-bāgī al-asābīʿ ōnlāyn.", "We could meet in person once a month and online the other weeks.", "মাসে একবার সরাসরি দেখা করতে পারি। অন্য সপ্তাহগুলোতে অনলাইনে বসব।"],
+      ["كذا نقدر نتفق. خلينا نجرب شهر.", "kidhā nigdar nittifig. khallīnā njarrib shahr.", "I think we can agree on that. Let's try it for a month.", "এতে একমত হতে পারি। এক মাস চেষ্টা করে দেখি।"]
+    ],
+    "words": [
+      { "ar": "اِتِّفَاق", "tr": "ittifāg", "meaning": ["Agreement", "সম্মতি বা সমঝোতা"], "root": "و ف ق", "bridge": "78:26:2" },
+      { "ar": "وِجْهَة نَظَر", "tr": "wijhat naẓar", "meaning": ["Point of view", "দৃষ্টিভঙ্গি"] },
+      { "ar": "اِقْتِرَاح", "tr": "igtirāḥ", "meaning": ["Suggestion", "প্রস্তাব"] }
+    ]
+  }
+]

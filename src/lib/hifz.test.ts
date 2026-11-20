@@ -180,7 +180,7 @@ describe("Learning path progress", () => {
     expect(normalizeWord(splitArabicWords(verse.uthmani)[last - 1])).toBe(normalizeWord(analysis.word));
     expect(content.patterns).toHaveLength(6);
     expect(reviewDestination(patternReviewPrefix + content.patterns[0].id)).toBe(patternPracticePath);
-    for (const unit of speakUnitsByLevel.A2) {
+    for (const unit of [...speakUnitsByLevel.A2, ...speakUnitsByLevel.B1]) {
       const bridge = speakLessonContent(unit).words.find(word => word.bridge);
       expect(bridge, unit.id).toBeDefined();
       const row = corpus.positions.get(bridge.bridge);
