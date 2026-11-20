@@ -25,20 +25,35 @@ if (source.language !== "en" || source.fingerprint !== fingerprint || review.sou
   throw new Error("The translations must match the English source fingerprint from the same review export.");
 }
 
-function icuArguments(text) {
+function icuContract(text) {
   const argumentsFound = new Set();
-  function visit(elements) {
+  const required = new Set();
+  const fixed = new Set();
+  function visit(elements, pluralArgument) {
     for (const element of elements) {
-      if (element.type === TYPE.literal || element.type === TYPE.pound) continue;
+      if (element.type === TYPE.literal) continue;
+      if (element.type === TYPE.pound) {
+        required.add(pluralArgument);
+        continue;
+      }
+      const isPlural = element.type === TYPE.plural;
+      argumentsFound.add(element.value);
+      if (!isPlural) required.add(element.value);
       const keys = element.options ? Object.keys(element.options).sort() : [];
-      const choices = element.type === TYPE.plural ? keys.filter(key => key === "other" || key.startsWith("=")) : keys;
-      argumentsFound.add(JSON.stringify([element.type, element.value, element.pluralType, element.offset, choices]));
-      if (element.options) Object.values(element.options).forEach(({ value }) => visit(value));
-      if (element.children) visit(element.children);
+      const exactCounts = keys.filter(key => key.startsWith("="));
+      if (isPlural && (exactCounts.length || element.offset)) {
+        fixed.add(JSON.stringify(["plural-count", element.value, element.offset, exactCounts]));
+      } else if (element.type === TYPE.select || element.type === TYPE.tag) {
+        fixed.add(JSON.stringify([element.type, element.value, keys]));
+      }
+      if (element.options) {
+        Object.values(element.options).forEach(({ value }) => visit(value, isPlural ? element.value : pluralArgument));
+      }
+      if (element.children) visit(element.children, pluralArgument);
     }
   }
   visit(parse(text));
-  return [...argumentsFound].sort().join("\n");
+  return { argumentsFound, required, fixed };
 }
 
 function checkMessage(english, translation) {
@@ -51,7 +66,14 @@ function checkMessage(english, translation) {
     return;
   }
   if (typeof translation !== "string" || !translation.trim()) throw new Error("Translation is missing.");
-  if (icuArguments(english) !== icuArguments(translation)) throw new Error("Keep the same ICU arguments and fixed choices.");
+  const source = icuContract(english);
+  const target = icuContract(translation);
+  if ([...target.argumentsFound].some(argument => !source.argumentsFound.has(argument))
+    || [...source.required].some(argument => !target.required.has(argument))
+    || source.fixed.size !== target.fixed.size
+    || [...source.fixed].some(choice => !target.fixed.has(choice))) {
+    throw new Error("Keep the required ICU arguments and fixed choices.");
+  }
 }
 
 const translations = review.messages ?? {};
