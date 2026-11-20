@@ -2,6 +2,7 @@ import originalLesson from "../../docs/content/tajweed-nun.json" with { type: "j
 import essentials from "../../docs/content/tajweed-essentials.json" with { type: "json" };
 import depth from "../../docs/content/tajweed-in-depth.json" with { type: "json" };
 import { splitUthmaniOpening } from "./quranOpening.ts";
+import { maddForWord } from "./tajweedMadd.ts";
 import { splitArabicPhrase, splitArabicWords, splitGraphemes } from "./wordAnatomy.ts";
 import type { QuranVerse } from "./quran";
 import type { Reviews } from "./reviews";
@@ -41,7 +42,7 @@ export const tajweedReviewId = (lesson: TajweedLesson, sample: TajweedSample) =>
 
 type ReadingExample = {
   rule: string; lesson: string; tone: typeof tajweedTones[number];
-  condition?: "joining" | "continuing"; ghunnah?: boolean;
+  condition?: "joining" | "continuing" | "stopping"; ghunnah?: boolean;
 };
 
 export function tajweedReadingRuleKey(example: ReadingExample) {
@@ -213,19 +214,40 @@ export function tajweedVerseExamples(verse: QuranVerse, script: "uthmani" | "ind
     const endOfAyah = index + 1 === uthmani.length;
     const printedStop = pauses.some(mark => stopSigns.test(mark)) &&
       (script === "uthmani" || other.pauses.some(mark => stopSigns.test(mark)));
-    if ((endOfAyah || printedStop) && final[0] === otherFinal[0] && qalqalahLetters.test(final)
+    const canStop = endOfAyah || printedStop;
+    if (canStop && final[0] === otherFinal[0] && qalqalahLetters.test(final)
       && !final.includes("ً") && !otherFinal.includes("ً")) {
       addReadingExample(examples, index, { rule: "qalqalah-stop", lesson: "qalqalah", tone: "tint" });
     }
-    if (pauses.length || other.pauses.length || endOfAyah) return;
-    const next = followingConsonant(uthmani[index + 1].letters[0]);
-    if (!next || next !== followingConsonant(indopak[index + 1].letters[0])) return;
-    const rule = joinedWordRule(letters, next);
+    const canJoin = !endOfAyah && !pauses.length && !other.pauses.length;
+    const next = canJoin ? followingConsonant(uthmani[index + 1].letters[0]) : "";
+    const sameNext = next && next === followingConsonant(indopak[index + 1].letters[0]) ? next : "";
+    const madd = maddForWord(letters);
+    const otherMadd = maddForWord(other.letters);
+    const maddStop = canStop && madd.whenStopping && otherMadd.whenStopping;
+    for (const rule of madd.rules) {
+      const example = ruleExamples.get(rule);
+      if (!example || !otherMadd.rules.has(rule)) continue;
+      const onlyBeforeStop = rule === "madd-natural" && maddStop && madd.onlyNaturalBeforeFinal && otherMadd.onlyNaturalBeforeFinal;
+      addReadingExample(examples, index, onlyBeforeStop ? { ...example, condition: "continuing" } : example);
+    }
+    if (maddStop) addReadingExample(examples, index, { rule: "madd-stop", lesson: "madd", tone: "neutral" });
+    if (madd.terminal && otherMadd.terminal) {
+      const naturalInside = madd.rules.has("madd-natural") && otherMadd.rules.has("madd-natural");
+      if (sameNext === "ء") {
+        addReadingExample(examples, index, { rule: "madd-separated", lesson: "madd", tone: "soft", condition: "joining" });
+      } else if (!naturalInside && (canStop || sameNext)) {
+        addReadingExample(examples, index, { rule: "madd-natural", lesson: "madd", tone: "neutral",
+          condition: canStop ? "stopping" : undefined });
+      }
+    }
+    if (!sameNext) return;
+    const rule = joinedWordRule(letters, sameNext);
     if (!rule) return;
     const example = ruleExamples.get(rule);
     if (example && (!localRules.has(rule) || !otherRules.has(rule))
-      && rule === joinedWordRule(other.letters, next)) {
-      const ghunnah = rule === "idgham" ? /[ينمو]/u.test(next) : undefined;
+      && rule === joinedWordRule(other.letters, sameNext)) {
+      const ghunnah = rule === "idgham" ? /[ينمو]/u.test(sameNext) : undefined;
       addReadingExample(examples, index, { ...example, condition: "joining", ghunnah });
     }
   });

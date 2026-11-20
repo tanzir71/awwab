@@ -86,6 +86,14 @@
   },
   {
     "id": "madd",
+    "sources": [
+      { "title": "Quranic Universal Library · Natural madd", "url": "https://qul.tarteel.ai/tajweed_rule/madda_normal" },
+      { "title": "Quranic Universal Library · Madd in one word", "url": "https://qul.tarteel.ai/tajweed_rule/madda_obligatory_mottasel" },
+      { "title": "Quranic Universal Library · Madd across two words", "url": "https://qul.tarteel.ai/tajweed_rule/madda_obligatory_monfasel" },
+      { "title": "Quranpedia · Separated madd in joined spelling", "url": "https://tajweed.quranpedia.net/lessons/show/content/27" },
+      { "title": "Quranic Universal Library · Necessary madd", "url": "https://qul.tarteel.ai/tajweed_rule/madda_necessary" },
+      { "title": "Quranic Universal Library · Madd when stopping", "url": "https://qul.tarteel.ai/tajweed_rule/madda_permissible" }
+    ],
     "rules": { "madd-natural": "ا و ي", "madd-connected": "", "madd-separated": "", "madd-necessary": "", "madd-stop": "" },
     "samples": [
       { "rule": "madd-natural", "chapter": 1, "ayah": 4, "first": 1, "last": 1 },

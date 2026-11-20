@@ -340,7 +340,26 @@ describe("Learning path progress", () => {
     }
   });
 
-  it("keeps the expanded Tajweed annotations within the rendered WordChips in both scripts", () => {
+  it("assigns all five taught madd rules to the right words and reading conditions", () => {
+    for (const script of ["uthmani", "indopak"] as const) {
+      const notes = (chapter: number, ayah: number, position: number) =>
+        tajweedVerseExamples(quran.surahs[chapter][ayah - 1], script)?.[position - 1]?.filter(note => note.lesson === "madd") ?? [];
+      expect(notes(78, 4, 1)).toContainEqual(expect.objectContaining({ rule: "madd-natural" }));
+      expect(notes(78, 4, 2)).toContainEqual(expect.objectContaining({ rule: "madd-natural", condition: "continuing" }));
+      expect(notes(78, 4, 2)).toContainEqual(expect.objectContaining({ rule: "madd-stop" }));
+      expect(notes(78, 23, 2)).toContainEqual(expect.objectContaining({ rule: "madd-separated", condition: "joining" }));
+      expect(notes(78, 32, 1).map(note => note.rule)).toEqual(["madd-connected"]);
+      expect(notes(79, 46, 5).map(note => note.rule)).toEqual(["madd-separated"]);
+      expect(notes(80, 1, 2)).toContainEqual(expect.objectContaining({ rule: "madd-natural", condition: "stopping" }));
+      expect(notes(80, 33, 3).map(note => note.rule)).toEqual(["madd-necessary"]);
+      expect(notes(82, 6, 1).map(note => note.rule)).toEqual(["madd-separated"]);
+      expect(notes(83, 32, 5).map(note => note.rule)).toEqual(["madd-separated", "madd-connected"]);
+      expect(notes(106, 4, 7).map(note => note.rule)).toEqual(["madd-stop"]);
+      expect(notes(78, 38, 5)).toEqual([]);
+    }
+  });
+
+  it("renders a Tajweed example in every Juz Amma āyah and keeps its word positions within both scripts", () => {
     const juzAmma = Object.entries(quran.surahs).filter(([chapter]) => Number(chapter) >= 78).flatMap(([, verses]) => verses);
     expect(juzAmma).toHaveLength(564);
     for (const script of ["uthmani", "indopak"] as const) {
@@ -351,7 +370,7 @@ describe("Learning path progress", () => {
         expect(examples.length, verse.ref).toBeLessThanOrEqual(rendered.length);
         return true;
       });
-      expect(annotated).toHaveLength(540);
+      expect(annotated).toHaveLength(564);
     }
   });
 

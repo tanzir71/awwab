@@ -28,7 +28,9 @@ import { splitArabicPhrase } from "@/lib/wordAnatomy";
 import audioCatalogue from "../../public/packs/audio/index.json";
 
 const modeTitles = { flow: "readingFlow", meaning: "readingMeaning", teacher: "readingTeacher" };
-const tajweedRuleLabels = { joining: "readingTajweedJoinedRule", continuing: "readingTajweedContinuedRule" } as const;
+const tajweedRuleLabels = {
+  joining: "readingTajweedJoinedRule", continuing: "readingTajweedContinuedRule", stopping: "readingTajweedStoppedRule",
+} as const;
 const meaningSteps = ["readingWordStep", "readingPhraseStep", "readingMeaningStep"] as const;
 const emptyKeys: string[] = [];
 const ayahNumber = (verse: QuranVerse) => Number(verse.ref.split(":")[1]);
