@@ -12,22 +12,19 @@ import { speakSetupPath } from "@/lib/speakCurriculum";
 import { exportUmrahTrip, updateRecord } from "@/lib/storageService";
 import { emptyPreparation, initialTrip, maskedPhone, tripChecklist, tripDates, type TripCheck, type UmrahTrip } from "@/lib/umrah";
 import { cachedMapPack, mapPacks, mapRegions, saveMapPack, type MapRegion } from "@/lib/umrahMapPack";
-import { askDefaults, askHomePath, askPhrasePath, renderAsk } from "@/lib/umrahAsk";
+import { askDefaults, askHomePath, askMeaning, askPhrase, askPhraseMatches, askPhrasePath, renderAsk, umrahPhrases as phrases, type AskPhrase } from "@/lib/umrahAsk";
 import { askClipIds } from "@/lib/umrahAskAudio";
-import { banglaPhrases } from "@/lib/umrah-ask-copy";
-import phraseData from "../../handovers/H2-languages-paths-arabic-help/data/umrah-phrases.json";
 
-const { phrases } = phraseData;
-const samples = ["toilet", "gate-number", "take-me-hotel"].map(id => phrases.find(item => item.id === id));
+const samples = ["toilet", "gate-number", "take-me-hotel"].map(askPhrase);
 const checklistColumns = [tripChecklist.slice(0, 6), tripChecklist.slice(6)];
 const mapMegabytes = Object.values(mapPacks).reduce((sum, size) => sum + size, 0) / 1_000_000;
 type Variety = "saudi" | "msa";
-type Phrase = typeof phrases[number];
 
-function PhraseText({ phrase, variety = "saudi", gate = 79, link = false }: { phrase: Phrase; variety?: Variety; gate?: number; link?: boolean }) {
+function PhraseText({ phrase, variety = "saudi", gate = 79, link = false }: { phrase: AskPhrase; variety?: Variety; gate?: number; link?: boolean }) {
+  const { t } = useCopy();
   const words = renderAsk(phrase, variety, { gate });
-  const meaning = link && phrase.id === "gate-number" ? `Where is gate ${gate}?` : words.en;
-  const start = link ? <Link to={askPhrasePath(phrase.id, true)} className="umrah-phrase-link" lang="en">{meaning}</Link> : <strong lang="en">{meaning}</strong>;
+  const meaning = link && phrase.id === "gate-number" ? t("askPreviewGate", { n: gate }) : askMeaning(phrase, t, { gate });
+  const start = link ? <Link to={askPhrasePath(phrase.id, true)} className="umrah-phrase-link">{meaning}</Link> : <strong>{meaning}</strong>;
   return <div className="umrah-phrase-row" id={link ? undefined : phrase.id}>
     {link && <DesignIcon name="umrah-prep-volume" size={16} />}
     <div>{start}<small lang="en">{words.tr}</small></div>
@@ -45,8 +42,8 @@ function PhraseLibrary() {
   const [voiceError, setVoiceError] = useState(false);
   const audioSettings = useRecord("umrah-ask-settings", askDefaults);
   const requestedGate = Math.max(1, Math.min(300, Math.floor(Number(gate)) || 79));
-  const needle = query.trim().toLowerCase();
-  const results = phrases.filter(phrase => [phrase.en, phrase[variety].ar, phrase[variety].tr, banglaPhrases[phrase.id]].some(value => value?.toLowerCase().includes(needle)));
+  const needle = query.trim().normalize().toLowerCase();
+  const results = needle ? phrases.filter(phrase => askPhraseMatches(phrase, needle, askMeaning(phrase, t, { gate: requestedGate }))) : phrases;
   useEffect(() => {
     const phrase = hash.slice(1);
     setActive(phrase);

@@ -3,6 +3,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
+import { askPhraseMessages } from "../src/lib/umrah-phrase-messages.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const sources = new Map();
@@ -96,6 +97,17 @@ function readMessages(file, object) {
   }
 }
 readMessages(catalogue, findObject(catalogue, "messages"));
+
+const phraseSource = "handovers/H2-languages-paths-arabic-help/data/umrah-phrases.json";
+const phraseLines = new Map(readFileSync(resolve(root, phraseSource), "utf8").split("\n").flatMap((line, index) => {
+  const id = line.match(/"id": "([^"]+)"/)?.[1];
+  return id ? [[id, index + 1]] : [];
+}));
+for (const [key, translations] of Object.entries(askPhraseMessages)) {
+  if (messages.has(key)) throw new Error(`Duplicate catalogue message: ${key}`);
+  const line = phraseLines.get(key.slice(key.indexOf("-") + 1));
+  messages.set(key, { ...translations, definition: { file: phraseSource, line }, references: [] });
+}
 
 const entries = [...messages.entries()].sort(([left], [right]) => left.localeCompare(right, "en"));
 const fingerprint = createHash("sha256").update(JSON.stringify(Object.fromEntries(entries.map(([key, { en }]) => [key, en])))).digest("hex");

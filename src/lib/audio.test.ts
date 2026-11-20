@@ -8,7 +8,6 @@ import { askClipPath, askPhrase, renderAsk } from "./umrahAsk";
 import { asset } from "./config";
 import { speakCourses, speakLessonContent, speakUnitNumber } from "./speakCurriculum";
 import { hasSharedSpeakAudio, sharedSpeakClips } from "./speakAskAudio";
-import { banglaPhrases } from "./umrah-ask-copy";
 
 describe("Bundled recitation packs", () => {
   it("has one attributed recording for the surah and every numbered ayah", () => {
@@ -141,7 +140,7 @@ describe("Speak lesson recordings", () => {
       for (const line of [lines[0], lines[2]]) {
         const phrase = askPhrase(line.askId);
         const { ar, tr, en } = renderAsk(phrase, "saudi");
-        expect([line.ar, line.tr, ...line.meaning]).toEqual([ar, tr, en, banglaPhrases[phrase.id]]);
+        expect([line.ar, line.tr, ...line.meaning]).toEqual([ar, tr, en, phrase.bn]);
         expect(askClipIds(phrase, { variety: "saudi" })).toEqual([phrase.id]);
         expect(line.clip).toBe(askClipPath("saudi", "female", phrase.id));
         expect(shared.has(line.clip)).toBe(true);

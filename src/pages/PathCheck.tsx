@@ -9,11 +9,10 @@ import { dateKey } from "@/lib/dates";
 import { levels, pathUrl, tracks, type PathPlacement, type Track } from "@/lib/learningPaths";
 import { quranText } from "@/lib/quran";
 import { placement, placementAudio } from "@/lib/onboarding";
-import { askPhrase } from "@/lib/umrahAsk";
-import { banglaPhrases } from "@/lib/umrah-ask-copy";
+import { askMeaning, askPhrase, type AskPhrase } from "@/lib/umrahAsk";
 import { updateRecord, type Settings } from "@/lib/storageService";
 
-type Prompt = { prompt?: string; answer: string; ref?: string; meaning?: string; bn?: string; audio?: string; copy?: string };
+type Prompt = { prompt?: string; answer: string; ref?: string; phrase?: AskPhrase; audio?: string; copy?: string };
 const trackKeys = { read: "pathsRead", memorise: "pathsMemorise", understand: "pathsUnderstand", speak: "pathsSpeak" };
 const quiz: Record<Track, Prompt[]> = {
   read: placement.map(sample => ({ prompt: sample.arabic, answer: "", audio: placementAudio[sample.audioRef] ? sample.audioRef : undefined,
@@ -21,11 +20,14 @@ const quiz: Record<Track, Prompt[]> = {
     ref: sample.chapter ? `${sample.chapter}:${sample.verse}` : undefined })),
   memorise: [103, 108, 112].map(chapter => ({ prompt: quranText[chapter][0].uthmani, answer: quranText[chapter][1].uthmani, ref: `${chapter}:2` })),
   understand: [2, 4, 5, 6].map(ayah => ({ prompt: quranText[1][ayah - 1].uthmani, answer: quranText[1][ayah - 1].english, ref: `1:${ayah}` })),
-  speak: ["excuse-me", "toilet", "buy-sim", "lost"].map(id => ({ answer: askPhrase(id).saudi.ar, meaning: askPhrase(id).en, bn: banglaPhrases[id] })),
+  speak: ["excuse-me", "toilet", "buy-sim", "lost"].map(id => {
+    const phrase = askPhrase(id);
+    return { answer: phrase.saudi.ar, phrase };
+  }),
 };
 
 function CheckRound({ track, settings, now }: { track: Track; settings: Settings; now: Date }) {
-  const { t, language } = useCopy();
+  const { t } = useCopy();
   const questions = quiz[track];
   const [index, setIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -60,7 +62,7 @@ function CheckRound({ track, settings, now }: { track: Track; settings: Settings
     {question ? <section className="card compact-stack paths-question">
       <p className="caption">{t("pathsCheckQuestion", { number: index + 1, total: questions.length })}</p>
       <h2>{t(promptLabel[track])}</h2>
-      {question.prompt ? <ArabicText text={question.prompt} citation={question.ref} /> : <p>{language === "bn" ? question.bn : question.meaning}</p>}
+      {question.prompt ? <ArabicText text={question.prompt} citation={question.ref} /> : question.phrase && <p>{askMeaning(question.phrase, t)}</p>}
       {revealed && <div className="paths-reveal">{question.copy && <p>{t(question.copy)}</p>}
         {question.answer && (/\p{Script=Arabic}/u.test(question.answer)
           ? <ArabicText text={question.answer} citation={question.ref} preserveSeparators /> : <p lang="en">{question.answer}</p>)}

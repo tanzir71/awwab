@@ -7,8 +7,8 @@ import { baselineMonthStart, calendarDefaults, calendarEventById, dayDifference,
 import { eventReminders } from "./calendarFile";
 import { calendarDayEvents, calendarWeekStart, fridayMosque, gregorianMonthCells, readCalendarDay, readCalendarMonth, shiftPlanEvent } from "./plan-calendar";
 import { defaults, exportUmrahTrip, prayerStatistics, readUmrahTripFile } from "./storageService";
-import { askPhrase, quickAsks, readGate, renderAsk, umrahPhrases } from "./umrahAsk";
-import { banglaPhrases } from "./umrah-ask-copy";
+import { askMeaning, askPhrase, askPhraseMatches, quickAsks, readGate, renderAsk, umrahPhrases } from "./umrahAsk";
+import { message } from "./copy";
 import { adjustQadaTotals, qadaBalances, qadaCountBetween, qadaDefaults, qadaForecast, recordQada } from "./qada";
 import { assignedMosque, mapMosque, mosqueCheckedAge, mosqueDefaults, mosqueTime, mosqueWeek, timetableNotice, weeklyMosque, type Mosque } from "./mosques";
 
@@ -279,9 +279,35 @@ describe("Umrah trip transfer", () => {
 });
 
 describe("Ask in Arabic", () => {
-  it("has a Bengali search entry for every supplied phrase", () => {
+  it("renders every phrase in English and Bangla, with English fallback for an absent locale", () => {
     expect(umrahPhrases).toHaveLength(63);
-    expect(umrahPhrases.every(phrase => Boolean(banglaPhrases[phrase.id]))).toBe(true);
+    const english = message.bind(null, defaults);
+    const bangla = message.bind(null, { ...defaults, language: "bn" });
+    const fallback = message.bind(null, { ...defaults, language: "fr" });
+    for (const phrase of umrahPhrases) {
+      expect(askMeaning(phrase, english)).toBe(renderAsk(phrase, "saudi").en);
+      expect(askMeaning(phrase, fallback)).toBe(askMeaning(phrase, english));
+      expect(askMeaning(phrase, bangla)).toMatch(/\p{Script=Bengali}/u);
+    }
+  });
+
+  it("uses translated destination and family labels and respects the Bangla numeral setting", () => {
+    const bangla = message.bind(null, { ...defaults, language: "bn" });
+    const latin = message.bind(null, { ...defaults, language: "bn", nativeDigits: false });
+    const gate = askPhrase("gate-number");
+    expect(askMeaning(gate, bangla, { gate: 300 })).toBe("৩০০ নম্বর ফটক কোথায়?");
+    expect(askMeaning(gate, latin, { gate: 300 })).toBe("300 নম্বর ফটক কোথায়?");
+    expect(askMeaning(askPhrase("bus-to"), bangla, { place: "airport" })).toBe("বিমানবন্দর যাওয়ার বাস কোথায়?");
+    expect(askMeaning(askPhrase("lost-family"), bangla, { relation: "daughter" })).toBe("আমি আমার মেয়েকে খুঁজে পাচ্ছি না");
+  });
+
+  it("finds translated phrases as well as the English text and Arabic variants", () => {
+    const toilet = askPhrase("toilet");
+    const translated = "ٹوائلٹ کہاں ہے؟";
+    expect(askPhraseMatches(toilet, "ٹوائلٹ", translated)).toBe(true);
+    expect(askPhraseMatches(toilet, "toilet", translated)).toBe(true);
+    expect(askPhraseMatches(toilet, "الحمام", translated)).toBe(true);
+    expect(askPhraseMatches(toilet, "taxi", translated)).toBe(false);
   });
 
   it("uses trip context and always includes the lost phrase", () => {

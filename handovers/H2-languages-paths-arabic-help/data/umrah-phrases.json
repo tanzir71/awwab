@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "draft — native Saudi (Hijazi) speakers must review every line and record the audio; MSA lines reviewed by an Arabic teacher",
+  "status": "Draft text and generated audio for native Saudi Hijazi and Modern Standard Arabic teacher review.",
   "varieties": {
     "saudi": "Saudi · Hijazi (default)",
     "msa": "Formal / Modern Standard"
@@ -21,6 +21,7 @@
       "id": "excuse-me",
       "category": "polite",
       "en": "Excuse me / please",
+      "bn": "মাফ করবেন / দয়া করে",
       "saudi": {
         "ar": "لو سمحت",
         "tr": "law samaḥt"
@@ -45,6 +46,7 @@
       "id": "thank-you",
       "category": "polite",
       "en": "Thank you",
+      "bn": "ধন্যবাদ",
       "saudi": {
         "ar": "شكرًا، يعطيك العافية",
         "tr": "shukran, yaʿṭīk al-ʿāfya"
@@ -61,6 +63,7 @@
       "id": "jazakallah",
       "category": "polite",
       "en": "May Allah reward you with good",
+      "bn": "আল্লাহ আপনাকে উত্তম প্রতিদান দিন",
       "saudi": {
         "ar": "جزاك الله خير",
         "tr": "jazāk allāhu khēr"
@@ -77,6 +80,7 @@
       "id": "sorry",
       "category": "polite",
       "en": "Sorry",
+      "bn": "দুঃখিত",
       "saudi": {
         "ar": "آسف",
         "tr": "āsif"
@@ -105,6 +109,7 @@
       "id": "no-arabic",
       "category": "polite",
       "en": "I don't speak Arabic",
+      "bn": "আমি আরবি বলতে পারি না",
       "saudi": {
         "ar": "ما أتكلم عربي",
         "tr": "mā atkallam ʿarabi"
@@ -121,6 +126,7 @@
       "id": "speak-english",
       "category": "polite",
       "en": "Do you speak English?",
+      "bn": "আপনি কি ইংরেজি বলেন?",
       "saudi": {
         "ar": "تتكلم إنجليزي؟",
         "tr": "titkallam ingilīzi?"
@@ -137,6 +143,7 @@
       "id": "speak-urdu",
       "category": "polite",
       "en": "Do you speak Urdu?",
+      "bn": "আপনি কি উর্দু বলেন?",
       "saudi": {
         "ar": "تتكلم أردو؟",
         "tr": "titkallam urdu?"
@@ -154,6 +161,7 @@
       "id": "speak-bengali",
       "category": "polite",
       "en": "Do you speak Bengali?",
+      "bn": "আপনি কি বাংলা বলেন?",
       "saudi": {
         "ar": "تتكلم بنغالي؟",
         "tr": "titkallam bangāli?"
@@ -170,6 +178,7 @@
       "id": "speak-indonesian",
       "category": "polite",
       "en": "Do you speak Indonesian?",
+      "bn": "আপনি কি ইন্দোনেশীয় ভাষা বলেন?",
       "saudi": {
         "ar": "تتكلم إندونيسي؟",
         "tr": "titkallam indūnīsi?"
@@ -186,6 +195,7 @@
       "id": "slowly",
       "category": "polite",
       "en": "Slowly, please",
+      "bn": "দয়া করে ধীরে বলুন",
       "saudi": {
         "ar": "شوي شوي لو سمحت",
         "tr": "shwayy shwayy law samaḥt"
@@ -202,6 +212,7 @@
       "id": "repeat",
       "category": "polite",
       "en": "Say it again, please",
+      "bn": "আবার বলবেন?",
       "saudi": {
         "ar": "عيدها لو سمحت",
         "tr": "ʿīdha law samaḥt"
@@ -218,6 +229,7 @@
       "id": "write-it",
       "category": "polite",
       "en": "Please write it for me",
+      "bn": "এটা লিখে দেবেন?",
       "saudi": {
         "ar": "اكتبها لي لو سمحت",
         "tr": "iktibha li law samaḥt"
@@ -234,6 +246,7 @@
       "id": "dont-understand",
       "category": "polite",
       "en": "I don't understand",
+      "bn": "আমি বুঝতে পারছি না",
       "saudi": {
         "ar": "ما فهمت",
         "tr": "mā fihimt"
@@ -250,6 +263,7 @@
       "id": "toilet",
       "category": "directions",
       "en": "Where is the toilet?",
+      "bn": "টয়লেট কোথায়?",
       "saudi": {
         "ar": "فين الحمام؟",
         "tr": "fēn al-ḥammām?"
@@ -265,13 +279,15 @@
       ],
       "sign": {
         "ar": "دورات المياه",
-        "en": "Toilets"
+        "en": "Toilets",
+        "bn": "টয়লেট"
       }
     },
     {
       "id": "wudu",
       "category": "directions",
       "en": "Where is the wudu area?",
+      "bn": "ওজুর জায়গা কোথায়?",
       "saudi": {
         "ar": "فين مكان الوضوء؟",
         "tr": "fēn makān al-wuḍūʾ?"
@@ -286,13 +302,15 @@
       ],
       "sign": {
         "ar": "أماكن الوضوء",
-        "en": "Wudu areas"
+        "en": "Wudu areas",
+        "bn": "ওজুর জায়গা"
       }
     },
     {
       "id": "women-prayer",
       "category": "directions",
       "en": "Where is the women's prayer area?",
+      "bn": "নারীদের নামাজের জায়গা কোথায়?",
       "saudi": {
         "ar": "فين مصلى النساء؟",
         "tr": "fēn muṣalla an-nisāʾ?"
@@ -307,13 +325,15 @@
       ],
       "sign": {
         "ar": "مصلى النساء",
-        "en": "Women's prayer area"
+        "en": "Women's prayer area",
+        "bn": "নারীদের নামাজের জায়গা"
       }
     },
     {
       "id": "gate-number",
       "category": "directions",
       "en": "Where is gate number {n}?",
+      "bn": "{n} নম্বর ফটক কোথায়?",
       "saudi": {
         "ar": "فين باب رقم {n}؟",
         "tr": "fēn bāb raqam {n}?"
@@ -334,6 +354,7 @@
       "id": "king-fahd-gate",
       "category": "directions",
       "en": "Where is King Fahd Gate (79)?",
+      "bn": "বাদশাহ ফাহদ ফটক (৭৯) কোথায়?",
       "saudi": {
         "ar": "فين باب الملك فهد؟",
         "tr": "fēn bāb al-malik fahd?"
@@ -351,6 +372,7 @@
       "id": "zamzam",
       "category": "directions",
       "en": "Where is the Zamzam water?",
+      "bn": "জমজমের পানি কোথায়?",
       "saudi": {
         "ar": "فين موية زمزم؟",
         "tr": "fēn mōyat zamzam?"
@@ -367,6 +389,7 @@
       "id": "masa",
       "category": "directions",
       "en": "Where is the Masʿā (saʿy area)?",
+      "bn": "সাঈ করার জায়গা কোথায়?",
       "saudi": {
         "ar": "فين المسعى؟",
         "tr": "fēn al-masʿā?"
@@ -384,6 +407,7 @@
       "id": "mataf",
       "category": "directions",
       "en": "Where is the Maṭāf (ṭawāf area)?",
+      "bn": "তাওয়াফ করার জায়গা কোথায়?",
       "saudi": {
         "ar": "فين المطاف؟",
         "tr": "fēn al-maṭāf?"
@@ -401,6 +425,7 @@
       "id": "shoes",
       "category": "directions",
       "en": "Where can I leave my shoes?",
+      "bn": "জুতা কোথায় রাখব?",
       "saudi": {
         "ar": "فين مكان الأحذية؟",
         "tr": "fēn makān al-aḥdhiya?"
@@ -417,6 +442,7 @@
       "id": "to-haram",
       "category": "directions",
       "en": "How do I get to the Haram?",
+      "bn": "হারামে কীভাবে যাব?",
       "saudi": {
         "ar": "كيف أروح الحرم؟",
         "tr": "kēf arūḥ al-ḥaram?"
@@ -434,6 +460,7 @@
       "id": "nearest-mosque",
       "category": "directions",
       "en": "Where is the nearest mosque?",
+      "bn": "সবচেয়ে কাছের মসজিদ কোথায়?",
       "saudi": {
         "ar": "فين أقرب مسجد؟",
         "tr": "fēn agrab masjid?"
@@ -452,6 +479,7 @@
       "id": "exit",
       "category": "directions",
       "en": "Where is the exit?",
+      "bn": "বের হওয়ার পথ কোথায়?",
       "saudi": {
         "ar": "فين المخرج؟",
         "tr": "fēn al-makhraj?"
@@ -469,6 +497,7 @@
       "id": "elevator",
       "category": "directions",
       "en": "Where is the lift?",
+      "bn": "লিফট কোথায়?",
       "saudi": {
         "ar": "فين المصعد؟",
         "tr": "fēn al-maṣʿad?"
@@ -486,6 +515,7 @@
       "id": "far",
       "category": "directions",
       "en": "Is it far?",
+      "bn": "এটা কি দূরে?",
       "saudi": {
         "ar": "بعيد؟",
         "tr": "baʿīd?"
@@ -502,6 +532,7 @@
       "id": "show-map",
       "category": "directions",
       "en": "Please show me on the map",
+      "bn": "মানচিত্রে দেখাবেন?",
       "saudi": {
         "ar": "وريني في الخريطة لو سمحت",
         "tr": "warrīni fil-kharīṭa law samaḥt"
@@ -518,6 +549,7 @@
       "id": "rawdah-line",
       "category": "directions",
       "en": "Is this the line for the Rawḍah?",
+      "bn": "এটা কি রওদায় যাওয়ার লাইন?",
       "saudi": {
         "ar": "هذا الطابور حق الروضة؟",
         "tr": "hādha aṭ-ṭābūr ḥagg ar-rawḍa?"
@@ -534,6 +566,7 @@
       "id": "buy-sim",
       "category": "phone",
       "en": "Where can I buy a SIM card?",
+      "bn": "কোথায় সিম কিনতে পারি?",
       "saudi": {
         "ar": "فين أشتري شريحة؟",
         "tr": "fēn ashtari sharīḥa?"
@@ -551,6 +584,7 @@
       "id": "sim-internet",
       "category": "phone",
       "en": "I want a SIM with internet",
+      "bn": "ইন্টারনেটসহ একটা সিম চাই",
       "saudi": {
         "ar": "أبغى شريحة فيها إنترنت",
         "tr": "abgha sharīḥa fīha internet"
@@ -567,6 +601,7 @@
       "id": "recharge",
       "category": "phone",
       "en": "I want to top up my balance",
+      "bn": "সিমে টাকা ভরতে চাই",
       "saudi": {
         "ar": "أبغى أشحن رصيد",
         "tr": "abgha ashḥan raṣīd"
@@ -583,6 +618,7 @@
       "id": "wifi",
       "category": "phone",
       "en": "What is the Wi-Fi password?",
+      "bn": "ওয়াই-ফাই পাসওয়ার্ড কী?",
       "saudi": {
         "ar": "إيش الرقم السري للواي فاي؟",
         "tr": "ēsh ar-raqam as-sirri lil-wāy fāy?"
@@ -600,6 +636,7 @@
       "id": "charge-phone",
       "category": "phone",
       "en": "Can I charge my phone here?",
+      "bn": "এখানে কি ফোন চার্জ দিতে পারি?",
       "saudi": {
         "ar": "أقدر أشحن جوالي هنا؟",
         "tr": "agdar ashḥan jawwāli hina?"
@@ -618,6 +655,7 @@
       "id": "take-me-hotel",
       "category": "transport",
       "en": "Take me to this hotel, please",
+      "bn": "দয়া করে আমাকে এই হোটেলে নিয়ে যান",
       "saudi": {
         "ar": "ودّني هذا الفندق لو سمحت",
         "tr": "waddīni hādha al-funduq law samaḥt"
@@ -636,6 +674,7 @@
       "id": "fare-haram",
       "category": "transport",
       "en": "How much to the Haram?",
+      "bn": "হারাম পর্যন্ত ভাড়া কত?",
       "saudi": {
         "ar": "بكم للحرم؟",
         "tr": "bikam lil-ḥaram?"
@@ -653,6 +692,7 @@
       "id": "stop-here",
       "category": "transport",
       "en": "Stop here, please",
+      "bn": "দয়া করে এখানে থামুন",
       "saudi": {
         "ar": "وقّف هنا لو سمحت",
         "tr": "waggif hina law samaḥt"
@@ -669,6 +709,7 @@
       "id": "taxi-stand",
       "category": "transport",
       "en": "Where is the taxi stand?",
+      "bn": "ট্যাক্সি কোথায় পাব?",
       "saudi": {
         "ar": "فين موقف التكاسي؟",
         "tr": "fēn mawgif at-takāsi?"
@@ -686,6 +727,7 @@
       "id": "bus-to",
       "category": "transport",
       "en": "Where is the bus to {place}?",
+      "bn": "{place} যাওয়ার বাস কোথায়?",
       "saudi": {
         "ar": "فين الباص اللي يروح {place}؟",
         "tr": "fēn al-bāṣ illi yrūḥ {place}?"
@@ -705,6 +747,7 @@
       "id": "haramain-train",
       "category": "transport",
       "en": "Where is the Haramain train station?",
+      "bn": "হারামাইন ট্রেন স্টেশন কোথায়?",
       "saudi": {
         "ar": "فين محطة قطار الحرمين؟",
         "tr": "fēn maḥaṭṭat giṭār al-ḥaramēn?"
@@ -722,6 +765,7 @@
       "id": "water",
       "category": "food",
       "en": "Water, please",
+      "bn": "দয়া করে পানি দিন",
       "saudi": {
         "ar": "موية لو سمحت",
         "tr": "mōya law samaḥt"
@@ -738,6 +782,7 @@
       "id": "restaurant",
       "category": "food",
       "en": "Where is there a restaurant?",
+      "bn": "কাছাকাছি খাবারের দোকান কোথায়?",
       "saudi": {
         "ar": "فين فيه مطعم؟",
         "tr": "fēn fīh maṭʿam?"
@@ -755,6 +800,7 @@
       "id": "not-spicy",
       "category": "food",
       "en": "Not spicy, please",
+      "bn": "দয়া করে ঝাল দেবেন না",
       "saudi": {
         "ar": "بدون حار لو سمحت",
         "tr": "bidūn ḥārr law samaḥt"
@@ -771,6 +817,7 @@
       "id": "allergy-nuts",
       "category": "food",
       "en": "I'm allergic to nuts",
+      "bn": "বাদামে আমার অ্যালার্জি আছে",
       "saudi": {
         "ar": "عندي حساسية من المكسرات",
         "tr": "ʿindi ḥassāsiyya min al-mukassarāt"
@@ -787,6 +834,7 @@
       "id": "bill",
       "category": "food",
       "en": "The bill, please",
+      "bn": "দয়া করে বিল দিন",
       "saudi": {
         "ar": "الحساب لو سمحت",
         "tr": "al-ḥisāb law samaḥt"
@@ -803,6 +851,7 @@
       "id": "how-much",
       "category": "shopping",
       "en": "How much is this?",
+      "bn": "এটার দাম কত?",
       "saudi": {
         "ar": "بكم هذا؟",
         "tr": "bikam hādha?"
@@ -820,6 +869,7 @@
       "id": "discount",
       "category": "shopping",
       "en": "It's expensive. Any discount?",
+      "bn": "দাম বেশি। একটু কম হবে?",
       "saudi": {
         "ar": "غالي، فيه تخفيض؟",
         "tr": "ghāli, fīh takhfīḍ?"
@@ -836,6 +886,7 @@
       "id": "card-payment",
       "category": "shopping",
       "en": "Can I pay by card?",
+      "bn": "কার্ডে টাকা দিতে পারি?",
       "saudi": {
         "ar": "فيه شبكة؟",
         "tr": "fīh shabaka?"
@@ -854,6 +905,7 @@
       "id": "key-broken",
       "category": "hotel",
       "en": "My room key isn't working",
+      "bn": "ঘরের চাবি কাজ করছে না",
       "saudi": {
         "ar": "المفتاح ما يشتغل",
         "tr": "al-muftāḥ mā yishtaghil"
@@ -870,6 +922,7 @@
       "id": "ac-broken",
       "category": "hotel",
       "en": "The air conditioning isn't working",
+      "bn": "এসি কাজ করছে না",
       "saudi": {
         "ar": "المكيّف ما يشتغل",
         "tr": "al-mukayyif mā yishtaghil"
@@ -886,6 +939,7 @@
       "id": "checkout",
       "category": "hotel",
       "en": "What time is checkout?",
+      "bn": "ঘর ছাড়ার সময় কখন?",
       "saudi": {
         "ar": "متى وقت الخروج؟",
         "tr": "mita wagt al-khurūj?"
@@ -902,6 +956,7 @@
       "id": "towels-water",
       "category": "hotel",
       "en": "More water and towels, please",
+      "bn": "তোয়ালে আর পানি দিতে পারবেন?",
       "saudi": {
         "ar": "أبغى موية وفوط زيادة لو سمحت",
         "tr": "abgha mōya w fuwaṭ ziyāda law samaḥt"
@@ -918,6 +973,7 @@
       "id": "pharmacy",
       "category": "help",
       "en": "Where is the pharmacy?",
+      "bn": "ফার্মেসি কোথায়?",
       "saudi": {
         "ar": "فين الصيدلية؟",
         "tr": "fēn aṣ-ṣaydaliyya?"
@@ -936,6 +992,7 @@
       "id": "need-doctor",
       "category": "help",
       "en": "I need a doctor",
+      "bn": "আমার একজন ডাক্তার দরকার",
       "saudi": {
         "ar": "أحتاج دكتور",
         "tr": "aḥtāj daktōr"
@@ -953,6 +1010,7 @@
       "id": "heat",
       "category": "help",
       "en": "I feel unwell from the heat",
+      "bn": "গরমে আমার শরীর খারাপ লাগছে",
       "saudi": {
         "ar": "أنا تعبان من الحر",
         "tr": "ana taʿbān min al-ḥarr"
@@ -978,6 +1036,7 @@
       "id": "wheelchair",
       "category": "help",
       "en": "I need a wheelchair",
+      "bn": "হুইলচেয়ার কোথায় পাব?",
       "saudi": {
         "ar": "أحتاج كرسي متحرك",
         "tr": "aḥtāj kursi mutaḥarrik"
@@ -995,6 +1054,7 @@
       "id": "lost",
       "category": "help",
       "en": "I'm lost",
+      "bn": "আমি পথ হারিয়েছি",
       "saudi": {
         "ar": "أنا ضايع",
         "tr": "ana ḍāyiʿ"
@@ -1025,6 +1085,7 @@
       "id": "lost-family",
       "category": "help",
       "en": "I lost my {relation}",
+      "bn": "আমি আমার {relation}কে খুঁজে পাচ্ছি না",
       "saudi": {
         "ar": "ضاع {relation}",
         "tr": "ḍāʿ {relation}"
@@ -1045,6 +1106,7 @@
       "id": "call-number",
       "category": "help",
       "en": "Please call this number",
+      "bn": "দয়া করে এই নম্বরে ফোন করুন",
       "saudi": {
         "ar": "اتصل على هذا الرقم لو سمحت",
         "tr": "ittaṣil ʿala hādha ar-raqam law samaḥt"
@@ -1063,6 +1125,7 @@
       "id": "lost-found",
       "category": "help",
       "en": "Where is lost and found?",
+      "bn": "হারানো জিনিস খোঁজার দপ্তর কোথায়?",
       "saudi": {
         "ar": "فين مكتب المفقودات؟",
         "tr": "fēn maktab al-mafqūdāt?"
@@ -1079,6 +1142,7 @@
       "id": "help-me",
       "category": "help",
       "en": "Help me!",
+      "bn": "আমাকে সাহায্য করুন!",
       "saudi": {
         "ar": "ساعدني!",
         "tr": "sāʿidni!"
@@ -1096,6 +1160,7 @@
       "id": "ambulance",
       "category": "help",
       "en": "Call an ambulance",
+      "bn": "দয়া করে অ্যাম্বুলেন্স ডাকুন",
       "saudi": {
         "ar": "اتصل بالإسعاف",
         "tr": "ittaṣil bil-isʿāf"
@@ -1114,6 +1179,7 @@
       "id": "police",
       "category": "help",
       "en": "Call the police",
+      "bn": "দয়া করে পুলিশ ডাকুন",
       "saudi": {
         "ar": "اتصل بالشرطة",
         "tr": "ittaṣil bish-shurṭa"

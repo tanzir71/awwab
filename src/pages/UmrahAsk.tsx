@@ -11,9 +11,9 @@ import { dayDifference } from "@/lib/hijri";
 import { speakSetupPath } from "@/lib/speakCurriculum";
 import { updateRecord } from "@/lib/storageService";
 import { emptyPreparation, initialTrip, makkah, maskedPhone, type TripState, type UmrahTrip } from "@/lib/umrah";
-import { answerWords, arabicNumber, askCategories, askDefaults, askPhrase, askPhrasePath as phraseLink, askPlaces, askRelations, askVarieties, askVoices, helperDirections,
+import { answerWords, arabicNumber, askCategories, askDefaults, askMeaning, askPhrase, askPhraseMatches, askPhrasePath as phraseLink, askPlaces, askRelations, askVarieties, askVoices, helperDirections,
   quickAsks, readGate, renderAsk, umrahPhrases, type AskPhrase, type AskVariety, type AskVoice, type CustomPhrase } from "@/lib/umrahAsk";
-import { banglaPhrases } from "@/lib/umrah-ask-copy";
+import { askSignKey } from "@/lib/umrah-phrase-messages.mjs";
 import { askClipIds } from "@/lib/umrahAskAudio";
 
 const home = "/umrah/ask";
@@ -25,8 +25,8 @@ const quickLabels: Record<string, string> = { toilet: "askToilet", wudu: "askWud
 const contextLabel: Partial<Record<TripState, string>> = { "At the hotel": "askHotelQuick", "In the Haram": "askHaram", "Doing Umrah": "askHaram", Walking: "askWalking", "Eating out": "askFoodQuick" };
 const replyKey: Record<string, string> = { right: "askRight", left: "askLeft", "straight on": "askStraight", upstairs: "askUp", downstairs: "askDown", near: "askNear", far: "askFar", behind: "askBehind" };
 const noCustom: CustomPhrase[] = [];
-const toiletGloss = { saudi: [{ gloss: "where", transliteration: "fēn" }, { gloss: "the toilet", transliteration: "al-ḥammām" }],
-  msa: [{ gloss: "where", transliteration: "ayna" }, { gloss: "room", transliteration: "dawratu" }, { gloss: "the water", transliteration: "al-miyāh" }] };
+const toiletGloss = { saudi: [{ gloss: "askGlossWhere", transliteration: "fēn" }, { gloss: "askGlossToilet", transliteration: "al-ḥammām" }],
+  msa: [{ gloss: "askGlossWhere", transliteration: "ayna" }, { gloss: "askGlossRoom", transliteration: "dawratu" }, { gloss: "askGlossWater", transliteration: "al-miyāh" }] };
 
 function useAsk() {
   const settings = useRecord("umrah-ask-settings", askDefaults);
@@ -42,7 +42,7 @@ function useAsk() {
 function usePhrase(id: string) {
   const list = useRecord("umrah-custom-phrases", noCustom);
   const [params, setParams] = useSearchParams();
-  const { language, locale } = useCopy();
+  const { t } = useCopy();
   const { settings, change, error } = useAsk();
   const phrase = askPhrase(id);
   const custom = list.find(item => item.id === id);
@@ -55,8 +55,7 @@ function usePhrase(id: string) {
   const variants = { gate, place: placeKey, relation: relationKey, speaker: settings.speaker, toFemale, variety: settings.variety };
   const text = phrase ? renderAsk(phrase, settings.variety, variants) : undefined;
   const clips = phrase ? askClipIds(phrase, variants) : [];
-  const translated = phrase && banglaPhrases[phrase.id]?.replace("{n}", new Intl.NumberFormat(locale, { useGrouping: false }).format(gate))
-    .replace("{place}", askPlaces[placeKey].bn).replace("{relation}", askRelations[relationKey].bn);
+  const meaning = phrase && askMeaning(phrase, t, variants);
   function updateSlot(key: string, value: string) {
     const next = new URLSearchParams(params);
     next.set(key, value);
@@ -64,7 +63,7 @@ function usePhrase(id: string) {
   }
   const query = params.toString();
   const suffix = query ? `?${query}` : "";
-  return { settings, change, error, phrase, custom, text, clips, translated: language === "bn" ? translated : undefined, gate, placeKey, relationKey, toFemale, updateSlot, suffix };
+  return { settings, change, error, phrase, custom, text, clips, meaning, gate, placeKey, relationKey, toFemale, updateSlot, suffix };
 }
 
 function PhraseArabic({ text, words }: { text: string; words?: typeof toiletGloss.saudi }) {
@@ -120,7 +119,7 @@ function CustomPhraseForm() {
 }
 
 export function UmrahAskHome() {
-  const { t, language, locale } = useCopy();
+  const { t, locale } = useCopy();
   const { trip, now } = useOutletContext<{ trip: UmrahTrip; now: Date }>();
   const { settings, change, error } = useAsk();
   const custom = useRecord("umrah-custom-phrases", noCustom);
@@ -128,15 +127,15 @@ export function UmrahAskHome() {
   const [query, setQuery] = useState("");
   const category = askCategories.find(item => item === params.get("category"));
   const needle = query.trim().normalize().toLowerCase();
-  const results = umrahPhrases.filter(phrase => (!category || phrase.category === category) && (!needle ||
-    [phrase.en, banglaPhrases[phrase.id], phrase.saudi.ar, phrase.msa.ar, phrase.saudi.tr, phrase.msa.tr].some(value => value?.normalize().toLowerCase().includes(needle))));
+  const meaning = (phrase: AskPhrase) => askMeaning(phrase, t);
+  const results = umrahPhrases.filter(phrase => (!category || phrase.category === category) &&
+    (!needle || askPhraseMatches(phrase, needle, meaning(phrase))));
   const customResults = category ? [] : custom.filter(item => [item.ar, item.meaning].some(value => value.normalize().toLowerCase().includes(needle)));
   const searching = Boolean(category || needle);
   const prepare = trip.preparation ?? emptyPreparation;
   const today = dateKey(now, makkah.timeZone);
   const tripDay = trip.start && trip.end && trip.start <= today && today <= trip.end
     ? t("askTripDay", { day: dayDifference(today, trip.start) + 1, total: dayDifference(trip.end, trip.start) + 1 }) : formatTime(now, makkah.timeZone, locale);
-  const meaning = (phrase: AskPhrase) => language === "bn" ? banglaPhrases[phrase.id] : phrase.en;
 
   return <section className="ask-home" aria-labelledby="ask-home-title">
     <header className="ask-home-header night row-between"><div>
@@ -153,7 +152,7 @@ export function UmrahAskHome() {
       </label>
       {searching ? <div className="compact-stack">
         {results.map(phrase => <Link className={`list-row${phrase.urgent ? " ask-urgent" : ""}`} to={phraseLink(phrase.id)} key={phrase.id}>
-          {meaning(phrase)?.replace("{n}", new Intl.NumberFormat(locale).format(79)).replace("{place}", askPlaces.madinah[language]).replace("{relation}", askRelations.mother[language])}
+          {meaning(phrase)}
         </Link>)}
         {customResults.map(item => <Link className="list-row" to={phraseLink(item.id)} key={item.id}>{item.meaning}</Link>)}
         {!results.length && !customResults.length && <p className="muted" role="status">{t("umrahPrepNoPhrases")}</p>}
@@ -207,15 +206,15 @@ function GateNumber({ gate, change }: { gate: number; change: (value: string) =>
 }
 
 function Slots({ item }: { item: ReturnType<typeof usePhrase> }) {
-  const { t, language } = useCopy();
+  const { t } = useCopy();
   if (item.phrase?.id === "gate-number") return <GateNumber gate={item.gate} change={gate => item.updateSlot("gate", gate)} />;
   if (item.phrase?.id === "bus-to") return <label className="field ask-slot">{t("askDestination")}
     <select value={item.placeKey} onChange={event => item.updateSlot("place", event.currentTarget.value)}>
-      {Object.entries(askPlaces).map(([key, value]) => <option key={key} value={key}>{value[language]}</option>)}
+      {Object.entries(askPlaces).map(([key, value]) => <option key={key} value={key}>{t(value.label)}</option>)}
     </select></label>;
   if (item.phrase?.id === "lost-family") return <label className="field ask-slot">{t("askRelative")}
     <select value={item.relationKey} onChange={event => item.updateSlot("relation", event.currentTarget.value)}>
-      {Object.entries(askRelations).map(([key, value]) => <option key={key} value={key}>{value[language]}</option>)}
+      {Object.entries(askRelations).map(([key, value]) => <option key={key} value={key}>{t(value.label)}</option>)}
     </select></label>;
   return null;
 }
@@ -264,9 +263,9 @@ function PhraseControls({ item }: { item: ReturnType<typeof usePhrase> }) {
 
 export function UmrahAskPhrase() {
   const { id } = useParams();
-  const { t } = useCopy();
+  const { t, language } = useCopy();
   const item = usePhrase(id);
-  const { phrase, custom, text, translated, settings, change, updateSlot, toFemale } = item;
+  const { phrase, custom, text, meaning, settings, change, updateSlot, toFemale } = item;
   if (!phrase && !custom) return <div className="ask-inner"><Back to={home}>{t("askHome")}</Back></div>;
   const sign = phrase?.sign;
   return <section className="ask-inner compact-stack">
@@ -277,9 +276,10 @@ export function UmrahAskPhrase() {
     <section className="card ask-phrase-card compact-stack">
       <div className="ask-hero-arabic"><PhraseArabic text={custom?.ar ?? text.ar} /></div>
       {text && <><p className="ask-translit" lang="en">{text.tr}</p><p lang="en">{text.en}</p></>}
-      {translated && <p className="small muted" lang="bn">{translated}</p>}
+      {meaning && meaning !== text.en && <p className="small muted" lang={language}>{meaning}</p>}
       {custom && <p>{custom.meaning}</p>}
-      {phrase?.id === "toilet" && <div className="ask-glosses"><PhraseArabic text={text.ar} words={toiletGloss[settings.variety]} /></div>}
+      {phrase?.id === "toilet" && <div className="ask-glosses"><PhraseArabic text={text.ar}
+        words={toiletGloss[settings.variety].map(word => ({ ...word, gloss: t(word.gloss), glossLanguage: language }))} /></div>}
       <Slots item={item} />
       {phrase?.gender?.toFemale?.[settings.variety] && <button type="button" className="chip soft ask-option" aria-pressed={toFemale}
         onClick={() => updateSlot("to", toFemale ? "default" : "woman")}>{t("askToFemale")}</button>}
@@ -292,7 +292,7 @@ export function UmrahAskPhrase() {
         <PhraseArabic text={reply.ar} />
       </div>)}</div>
     </section>}
-    {sign && <div className="ask-sign row-between"><span>{t("askSign", { sign: sign.en })}</span><PhraseArabic text={sign.ar} /></div>}
+    {sign && <div className="ask-sign row-between"><span>{t("askSign", { sign: t(askSignKey(phrase.id)) })}</span><PhraseArabic text={sign.ar} /></div>}
     {item.error && <p role="alert">{item.error}</p>}
   </section>;
 }
@@ -359,7 +359,7 @@ export function UmrahAskShow() {
       {lost && <div className="ask-show-phone">{prep.leader && <p>{prep.leader}</p>}
         {phoneHref(prep.phone) ? <a href={phoneHref(prep.phone)} dir="ltr">{prep.phone}</a> : <bdi>{prep.phone}</bdi>}</div>}
       <div className="ask-show-meaning"><p className="ask-translit" lang="en">{lost ? `${main.tr}. ${callNumber.tr}.` : main?.tr}</p>
-        <p>{lost ? t("askLostHelp") : hotel ? t("askHotelTake") : item.translated ?? item.custom?.meaning ?? main.en}</p>
+        <p>{lost ? t("askLostHelp") : hotel ? t("askHotelTake") : item.meaning ?? item.custom?.meaning ?? main.en}</p>
         {hotel && trip.hotel.name && <small>{trip.hotel.name}</small>}
       </div>
       <Slots item={item} />
@@ -370,8 +370,8 @@ export function UmrahAskShow() {
         <div className="equal-row ask-directions">{helperDirections.map(direction => <div className="ask-direction" key={direction.en}>
           <span aria-hidden="true">{direction.arrow}</span>
           <ArabicText text={direction.ar} words={[{ transliteration: direction.tr }]} showGlosses={false}
-            onWordSelected={() => { setReply(t(replyKey[direction.en])); return false; }} />
-        </div>)}</div>{reply && <p className="ask-reply" role="status">{t("askTapped", { direction: reply })}</p>}
+            onWordSelected={() => { setReply(replyKey[direction.en]); return false; }} />
+        </div>)}</div>{reply && <p className="ask-reply" role="status">{t("askTapped", { direction: t(reply) })}</p>}
       </section>}
       {item.custom ? <DeviceVoice text={item.custom.ar} slow={settings.slow} /> : <AskAudioButton ids={clipIds} settings={settings} label="askPlayAgain" />}
     </div>

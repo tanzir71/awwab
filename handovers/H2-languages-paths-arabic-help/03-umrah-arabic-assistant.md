@@ -45,6 +45,12 @@ Phrases: [`data/umrah-phrases.json`](data/umrah-phrases.json) (63, Saudi Hijazi 
 
 Publish the reviewed Opus files under `public/packs/phrases/<variety>/<voice>/`. Use the phrase ID for standard clips, `gate-number.opus` for the gate prefix and `number-1.opus` through `number-300.opus` for the numbers. The bus and family phrases use complete clips with the slot appended to the ID, such as `bus-to-madinah.opus` and `lost-family-mother.opus`. Use `-speaker-female` or `-to-woman` for the corresponding alternative forms in the phrase data. The version 2 manifest at `docs/content/umrah-phrase-audio.json` records the combined size and credits for each voice. Female clips from version 1 stay playable during the upgrade. The app installs recordings on request and reads the saved files for offline playback.
 
+## Phrase translations
+
+English and Bangla meanings are bundled with the phrase data. The locale review export includes each phrase as `askPhrase-<id>` and each sign as `askSign-<id>`. Keep the ICU arguments for gate numbers, destinations and family members in the translation. The destination and family labels have their own catalogue entries.
+
+The phone phrase cards, Show mode and desktop practice use the downloaded catalogue offline. Search matches the selected translation, English, Bangla, Arabic and transliteration. Arabic text, variant selections and audio filenames continue to come from the phrase data.
+
 ## Data model
 ```ts
 Phrase { id, category, en, saudi: { ar, tr }, msa: { ar, tr }, contexts: string[], slots?, gender?, sign?, urgent?, note? }

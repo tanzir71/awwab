@@ -15,7 +15,7 @@ import { updateRecord, type Settings } from "@/lib/storageService";
 import { defaultSpeakVariety, speakCourses, speakCourseTitle, speakCourseVariety, speakGoals, speakGoalsKey, speakLessonContent, speakLessonPath, speakLevelLabels,
   speakLevels, speakPackDetails, speakPacks, speakProgressKey, speakSetupPath, speakUnit, speakUnitNumber, speakVarieties, speakVarietyKey, speakVarietyLabels,
   type SpeakCourse, type SpeakLevel, type SpeakPack, type SpeakUnit, type SpeakVariety, type SpeakWord } from "@/lib/speakCurriculum";
-import { askHomePath, askPhrasePath } from "@/lib/umrahAsk";
+import { askHomePath, askMeaning, askPhrase, askPhrasePath } from "@/lib/umrahAsk";
 import { splitArabicWords } from "@/lib/wordAnatomy";
 
 const steps = ["speakListen", "speakWords", "speakRepeat", "speakTurn", "speakSign"];
@@ -148,6 +148,7 @@ function SpeakLesson({ unit, complete, now, settings, reviewIndex }: { unit: Spe
   const sequence = useRef<number>();
   const replyHeading = useRef<HTMLHeadingElement>(null);
   const { lines, words, clips } = useMemo(() => speakLessonContent(unit), [unit]);
+  const lineMeaning = (line: typeof lines[number]) => line.askId ? askMeaning(askPhrase(line.askId), t) : line.meaning[lang];
   const title = unit.title[lang];
   const sim = unit.id === "sim";
   const scripted = "dialogue" in unit;
@@ -246,7 +247,7 @@ function SpeakLesson({ unit, complete, now, settings, reviewIndex }: { unit: Spe
               <button className="icon-button" type="button" aria-label={t("speakHearLine", { number: i + 1 })} aria-pressed={player.playing && player.track === `line-${i}`}
                 onClick={() => listen(`line-${i}`)}><DesignIcon name="speak-volume" size={14} /></button></div>
             <ArabicText text={line.ar} preserveSeparators />
-            <strong className="small" lang="en">{line.tr}</strong>{meanings && <p className="muted small">{line.meaning[lang]}</p>}
+            <strong className="small" lang="en">{line.tr}</strong>{meanings && <p className="muted small">{lineMeaning(line)}</p>}
             {isUmrahPack && line.askId && <Link className="small speak-ask-link" to={askPhrasePath(line.askId, desktop)}>{t("speakOpenInAsk")}</Link>}
           </section>)}</div>
           {sim && <div className="card tint speak-bridge"><div><h2 className="caption">{t("speakRoot")}</h2><p className="small">{t("speakRootExplanation")}</p></div>
@@ -271,8 +272,8 @@ function SpeakLesson({ unit, complete, now, settings, reviewIndex }: { unit: Spe
             <div className="row-between"><p className="caption">{partner}</p>
               <button className="icon-button" type="button" aria-label={t("speakHearLine", { number: promptLine + 1 })}
                 onClick={() => listen(`line-${promptLine}`)}><DesignIcon name="speak-volume" size={14} /></button></div>
-            <ArabicText text={lines[promptLine].ar} preserveSeparators /><p className="small muted">{lines[promptLine].meaning[lang]}</p>
-          </> : <p>{lines[reply].meaning[lang]}</p>}
+            <ArabicText text={lines[promptLine].ar} preserveSeparators /><p className="small muted">{lineMeaning(lines[promptLine])}</p>
+          </> : <p>{lineMeaning(lines[reply])}</p>}
           <div className="compact-stack">{replyChoices.map((index, i) => <div className="speak-answer" key={index}>
             <ArabicText text={lines[index].ar} preserveSeparators /><button type="button" className="action light" aria-label={t("speakReply", { number: i + 1 })}
               aria-pressed={answer === index} onClick={() => setAnswer(index)}>{i + 1}</button>

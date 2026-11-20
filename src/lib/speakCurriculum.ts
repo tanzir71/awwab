@@ -7,7 +7,6 @@ import umrah from "../../docs/content/spoken-umrah-hajj.json";
 import gulfWork from "../../docs/content/spoken-gulf-work.json";
 import { asset } from "./config";
 import { askClipPath, askPhrase, renderAsk } from "./umrahAsk";
-import { banglaPhrases } from "./umrah-ask-copy";
 
 export const speakBase = "/learn/speak";
 export const speakProgressKey = "speak-complete";
@@ -69,8 +68,9 @@ export const speakLessonPath = (id: string) => `${speakBase}/${id}`;
 export const studyClipPath = (name: string) => `packs/study-speech/${name}.opus`;
 
 function sharedAskLine(id: string): SpeakLine {
-  const line = renderAsk(askPhrase(id), "saudi");
-  return { ...line, meaning: [line.en, banglaPhrases[id] ?? line.en], clip: askClipPath("saudi", "female", id), askId: id };
+  const phrase = askPhrase(id);
+  const line = renderAsk(phrase, "saudi");
+  return { ...line, meaning: [line.en, phrase.bn], clip: askClipPath("saudi", "female", id), askId: id };
 }
 
 export function speakLessonContent(unit: SpeakUnit) {

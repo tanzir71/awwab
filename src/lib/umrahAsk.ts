@@ -1,6 +1,7 @@
 import source from "../../handovers/H2-languages-paths-arabic-help/data/umrah-phrases.json";
 import replies from "../../handovers/H2-languages-paths-arabic-help/data/reply-words.json";
 import type { TripState } from "./umrah";
+import { askPhraseKey } from "./umrah-phrase-messages.mjs";
 
 export const askCategories = ["directions", "phone", "transport", "food", "help", "hotel", "shopping", "polite"] as const;
 export const askVarieties = ["saudi", "msa"] as const;
@@ -46,23 +47,33 @@ export function readGate(value: string | null) {
 }
 
 export const askPlaces = {
-  madinah: { en: "Madinah", bn: "মদিনা", ar: "المدينة", tr: "al-Madīna" },
-  jeddah: { en: "Jeddah", bn: "জেদ্দা", ar: "جدة", tr: "Jidda" },
-  airport: { en: "the airport", bn: "বিমানবন্দর", ar: "المطار", tr: "al-maṭār" },
-  hotel: { en: "the hotel", bn: "হোটেল", ar: "الفندق", tr: "al-funduq" },
+  madinah: { en: "Madinah", label: "umrahPrepMadinah", ar: "المدينة", tr: "al-Madīna" },
+  jeddah: { en: "Jeddah", label: "askPlaceJeddah", ar: "جدة", tr: "Jidda" },
+  airport: { en: "the airport", label: "askPlaceAirport", ar: "المطار", tr: "al-maṭār" },
+  hotel: { en: "the hotel", label: "askPlaceHotel", ar: "الفندق", tr: "al-funduq" },
 };
 export const askRelations = {
-  mother: { en: "mother", bn: "মা", ar: "أمي", tr: "ummi", female: true },
-  father: { en: "father", bn: "বাবা", ar: "أبوي", tr: "abūy", female: false },
-  son: { en: "son", bn: "ছেলে", ar: "ولدي", tr: "waladi", female: false },
-  daughter: { en: "daughter", bn: "মেয়ে", ar: "بنتي", tr: "binti", female: true },
-  wife: { en: "wife", bn: "স্ত্রী", ar: "زوجتي", tr: "zōjti", female: true },
-  husband: { en: "husband", bn: "স্বামী", ar: "زوجي", tr: "zōji", female: false },
+  mother: { en: "mother", label: "askRoleMother", ar: "أمي", tr: "ummi", female: true },
+  father: { en: "father", label: "askRoleFather", ar: "أبوي", tr: "abūy", female: false },
+  son: { en: "son", label: "askRoleSon", ar: "ولدي", tr: "waladi", female: false },
+  daughter: { en: "daughter", label: "askRoleDaughter", ar: "بنتي", tr: "binti", female: true },
+  wife: { en: "wife", label: "askRoleWife", ar: "زوجتي", tr: "zōjti", female: true },
+  husband: { en: "husband", label: "askRoleHusband", ar: "زوجي", tr: "zōji", female: false },
 };
 
-export function renderAsk(phrase: AskPhrase, variety: AskVariety, options: {
-  gate?: number; place?: keyof typeof askPlaces; relation?: keyof typeof askRelations; speaker?: AskVoice | ""; toFemale?: boolean;
-} = {}) {
+type AskSlots = { gate?: number; place?: keyof typeof askPlaces; relation?: keyof typeof askRelations };
+type Translate = (key: string, values?: Record<string, string | number>) => string;
+
+export function askMeaning(phrase: AskPhrase, t: Translate, { gate = 79, place = "madinah", relation = "mother" }: AskSlots = {}) {
+  return t(askPhraseKey(phrase.id), { n: gate, place: t(askPlaces[place].label), relation: t(askRelations[relation].label) });
+}
+
+export function askPhraseMatches(phrase: AskPhrase, needle: string, meaning: string) {
+  return [meaning, phrase.en, phrase.bn, phrase.saudi.ar, phrase.msa.ar, phrase.saudi.tr, phrase.msa.tr]
+    .some(value => value.normalize().toLowerCase().includes(needle));
+}
+
+export function renderAsk(phrase: AskPhrase, variety: AskVariety, options: AskSlots & { speaker?: AskVoice | ""; toFemale?: boolean } = {}) {
   const gate = options.gate ?? 79;
   const place = askPlaces[options.place] ?? askPlaces.madinah;
   const relation = askRelations[options.relation] ?? askRelations.mother;
