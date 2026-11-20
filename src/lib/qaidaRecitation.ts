@@ -1,5 +1,5 @@
-import { qaidaAudioRef, qaidaRowCitation, qaidaRows } from "./qaidaPractice";
-import { studyRecitation, type StudyRecitation } from "./studyRecitations";
+import { qaidaAudioRef, qaidaRowCitation, qaidaRows } from "./qaidaPractice.ts";
+import { studyRecitation, type StudyRecitation } from "./studyRecitations.ts";
 
 const advancedLessons = [14, 15, 16, 17];
 const rowRecitations = advancedLessons.flatMap(lesson => qaidaRows(lesson).flatMap((_row, index) => {
