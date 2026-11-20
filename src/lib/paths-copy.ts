@@ -68,6 +68,8 @@ export const pathsMessages: MessageCatalog = {
   pathsCheckBi: { en: "Bāʾ with kasra · bi", bn: "বা হরফে যের · বি" },
   pathsMap: { en: "My learning map", bn: "আমার শেখার মানচিত্র" },
   pathsMapSubtitle: { en: "Each island has stars to collect", bn: "প্রতিটি দ্বীপে সংগ্রহ করার মতো তারা আছে" },
+  pathsMapTrail: { en: "Map", bn: "মানচিত্র" },
+  pathsMapProgress: { en: "Island progress", bn: "দ্বীপের অগ্রগতি" },
   pathsIslandLetters: { en: "Letters", bn: "হরফ" },
   pathsIslandHarakat: { en: "Harakat", bn: "হরকত" },
   pathsIslandJoining: { en: "Joining", bn: "হরফ জোড়া" },
