@@ -1,11 +1,11 @@
 import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, it } from "vitest";
-import { addDays } from "./dates";
+import { addDays, formatDay } from "./dates";
 import { baselineMonthStart, calendarEventById, calendarEvents, hijriOn, monthStart, possibleMonthStarts } from "./hijri";
 import { cities, currentPrayerSchedule, prayerDay, schedule } from "./prayerServices";
 import { db, backup, defaults, getRecord, logPrayer, migrateLegacy, prayerStatistics, restoreBackup, updateSettings } from "./storageService";
 import { initialZakat, type ZakatProfile } from "./zakat";
-import { calendarFile, eventReminders } from "./calendarFile";
+import { calendarFile, eventReminders, prayerReminders } from "./calendarFile";
 import { estimateQada, finishQada, qadaDefaults } from "./qada";
 import { mosqueDefaults, type Mosque } from "./mosques";
 import { guideRakahIndex, guideReference, prayerGuide, prayerGuidePath } from "./prayerGuide";
@@ -486,6 +486,10 @@ describe("device prayer records", () => {
 });
 
 describe("Hijri confirmation", () => {
+  it("uses the Gregorian year in localized Gregorian dates", () => {
+    expect(formatDay(day, { year: "numeric" }, "fa")).toBe("۲۰۲۶");
+  });
+
   it("re-anchors the current month and shifts later expected events", () => {
     const original = baselineMonthStart(1448, 9);
     expect(hijriOn(original)).toEqual({ year: 1448, month: 9, day: 1 });
@@ -504,6 +508,28 @@ describe("Hijri confirmation", () => {
     expect(file).toContain("DTSTART;VALUE=DATE:20261119\r\n");
     expect(file).toContain("SUMMARY:A\\, B\r\n");
     expect(file).toContain("TRIGGER:-PT5M\r\n");
+  });
+
+  it("localizes calendar text while preserving reminder IDs, times and confirmation dates", () => {
+    const settings = { ...defaults, language: "bn" as const };
+    const id = "1448-10-6";
+    const calendar = { anchors: [], overrides: { [id]: { date: "2027-03-11", source: "Family", adjust: 0 as const } },
+      moonReminders: { "1448-7-2": true } };
+    const prayers = prayerReminders(day, settings, 1, 5);
+    const events = eventReminders(day, settings, calendar);
+    expect(prayers[0]).toMatchObject({
+      id: `prayer-${day}-fajr`, start: times.fajr, alarm: 5, title: "ফজর নামাজ",
+    });
+    expect(events.find(item => item.id === `event-${id}-0`)).toMatchObject({
+      start: "2027-03-11", title: "ঈদুল ফিতর", description: "পরিবার",
+    });
+    expect(events.find(item => item.id === "moon-watch-1448-7")).toMatchObject({
+      alarm: 0, title: "রজব মাসের চাঁদ দেখুন",
+    });
+    const file = calendarFile([...prayers, ...events]).replace(/\r\n /g, "");
+    expect(file).toContain("DESCRIPTION:ঢাকা শহরের জন্য ডিভাইসে হিসাব করা হয়েছে।\r\n");
+    expect(file).toContain("SUMMARY:সম্ভাব্য: রজব শুরু\r\n");
+    expect(file).toContain("UID:event-1448-10-6-0@awwab\r\n");
   });
 
   it("shows both local sighting dates even after a baseline 30-day month", () => {

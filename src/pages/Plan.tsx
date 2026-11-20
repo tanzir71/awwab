@@ -14,7 +14,7 @@ import { calendarDefaults, calendarEventById, calendarEvents, dayDifference, hij
   moonWatchDay, possibleMonthStarts, type CalendarEvent, type CalendarSettings, type MonthAnchor } from "@/lib/hijri";
 import { mosqueDefaults } from "@/lib/mosques";
 import { shiftPlanEvent } from "@/lib/plan-calendar";
-import { planAuthorities, planEventCopy, planMonth } from "@/lib/plan-copy";
+import { planAuthorities, planEventLabels, planMonth } from "@/lib/plan-copy";
 import { getRecord, updateRecord, type Settings } from "@/lib/storageService";
 import { zakatHawl, type ZakatProfile } from "@/lib/zakat";
 
@@ -24,15 +24,15 @@ function startMonth(config: CalendarSettings, anchor: MonthAnchor) {
   return { ...config, sightingSource: anchor.source, anchors: [...config.anchors.filter(item => item.year !== anchor.year || item.month !== anchor.month), anchor] };
 }
 
-function compactDates(dates: string[], language: Settings["language"], separator: string) {
+function compactDates(dates: string[], locale: string, separator: string) {
   const short = { weekday: "short", day: "numeric" } as const;
   const last = dates[dates.length - 1];
-  return dates.map(date => formatDay(date, { ...short, month: date !== last && date.slice(0, 7) === last.slice(0, 7) ? undefined : "short" }, language)).join(separator);
+  return dates.map(date => formatDay(date, { ...short, month: date !== last && date.slice(0, 7) === last.slice(0, 7) ? undefined : "short" }, locale)).join(separator);
 }
 
 export function Plan({ settings, now, desktop }: { settings: Settings; now: Date; desktop: boolean }) {
-  const { t, language } = useCopy();
-  const number = new Intl.NumberFormat(language, { useGrouping: false });
+  const { t, language, locale } = useCopy();
+  const number = new Intl.NumberFormat(locale, { useGrouping: false });
   const [query, setQuery] = useSearchParams();
   const [expanded, setExpanded] = useState(false);
   const [monthOffset, setMonthOffset] = useState(0);
@@ -59,8 +59,8 @@ export function Plan({ settings, now, desktop }: { settings: Settings; now: Date
   const monthTitle = `${planMonth(displayMonth, language)} ${number.format(displayYear)}`;
   const displayEnd = addDays(displayStart.date, displayLength - 1);
   const monthLabel = displayStart.date.slice(0, 7) === displayEnd.slice(0, 7)
-    ? formatDay(displayEnd, { month: "short", year: "numeric" }, language)
-    : `${formatDay(displayStart.date, { month: "short", year: displayStart.date.slice(0, 4) === displayEnd.slice(0, 4) ? undefined : "numeric" }, language)} – ${formatDay(displayEnd, { month: "short", year: "numeric" }, language)}`;
+    ? formatDay(displayEnd, { month: "short", year: "numeric" }, locale)
+    : `${formatDay(displayStart.date, { month: "short", year: displayStart.date.slice(0, 4) === displayEnd.slice(0, 4) ? undefined : "numeric" }, locale)} – ${formatDay(displayEnd, { month: "short", year: "numeric" }, locale)}`;
   const nextMonth = hijri.month % 12 + 1;
   const nextYear = hijri.year + Number(nextMonth === 1);
   const nextName = planMonth(nextMonth, language);
@@ -80,7 +80,7 @@ export function Plan({ settings, now, desktop }: { settings: Settings; now: Date
   [displayStart.date, displayEnd, adjustment, config, desktop]);
   const eventId = query.get("event");
   const selected = eventId ? calendarEventById(eventId, adjustment, config) : undefined;
-  const dateLabel = (date: string) => formatDay(date, { weekday: "short", day: "numeric", month: "short" }, language);
+  const dateLabel = (date: string) => formatDay(date, { weekday: "short", day: "numeric", month: "short" }, locale);
 
   function exportCalendar(calendar: CalendarSettings) {
     saveCalendar([...prayerReminders(day, settings, 30, 5), ...eventReminders(day, settings, calendar)]);
@@ -147,14 +147,14 @@ export function Plan({ settings, now, desktop }: { settings: Settings; now: Date
 
     {monthDates.length > 1 && <section className="night plan-moon-card" aria-label={t("planMoonWatch")}>
       <p className="caption with-icon"><DesignIcon name="plan-moon" size={18} />{t("planMoonWatch")}</p>
-      <h2>{watchNow ? t("planSeen") : t("planStarts", { month: nextName, dates: compactDates(monthDates, language, t("planOr")) })}</h2>
+      <h2>{watchNow ? t("planSeen") : t("planStarts", { month: nextName, dates: compactDates(monthDates, locale, t("planOr")) })}</h2>
       <p className="muted small">{watchNow ? t("planSeenDetail", { month: nextName }) : t("planWatchDetail", { date: dateLabel(watchDate) })}</p>
       <div className="equal-row">
         {watchNow ? <button className="action plan-moon-primary" onClick={event => openPanel(event, "month", monthDates[0])}>{t("planTomorrow")}</button>
           : <button className="action plan-moon-primary" onClick={() => {
             if (watch) saveCalendar([watch], "awwab-moon-watch.ics");
             else toast.error(t("planWatchUnavailable"));
-          }}>{t("planWatchReminder", { day: formatDay(watchDate, { weekday: "short" }, language) })}</button>}
+          }}>{t("planWatchReminder", { day: formatDay(watchDate, { weekday: "short" }, locale) })}</button>}
         <button className="action light" onClick={event => openPanel(event, "month", watchNow ? monthDates[1] : monthDates[0])}>
           {t(watchNow ? "planCompleteThirty" : "planItConfirmed")}
         </button>
@@ -165,8 +165,8 @@ export function Plan({ settings, now, desktop }: { settings: Settings; now: Date
       <div className="month-grid">
         {Array.from({ length: 7 }, (_, i) => {
           const weekday = addDays("2026-11-15", i);
-          return <small key={weekday} className="plan-weekday muted" aria-label={formatDay(weekday, { weekday: "long" }, language)}>
-            {formatDay(weekday, { weekday: "narrow" }, language)}
+          return <small key={weekday} className="plan-weekday muted" aria-label={formatDay(weekday, { weekday: "long" }, locale)}>
+            {formatDay(weekday, { weekday: "narrow" }, locale)}
           </small>;
         })}
         {Array.from({ length: before }, (_, i) => <span key={i} />)}
@@ -178,7 +178,7 @@ export function Plan({ settings, now, desktop }: { settings: Settings; now: Date
           const label = `${number.format(i + 1)} ${planMonth(displayMonth, language)} · ${dateLabel(date)}`;
           const content = <><strong>{number.format(i + 1)}{kind === "expected" && "?"}</strong><small>{number.format(Number(date.slice(-2)))}</small></>;
           return <div className="month-day" key={date} data-kind={kind} data-event={!!event} title={label}>
-            {event ? <button aria-haspopup="dialog" onClick={click => openEvent(click, event.id)}>{content}<span className="sr-only"> · {label} · {planEventCopy[event.title][language][0]}</span></button>
+            {event ? <button aria-haspopup="dialog" onClick={click => openEvent(click, event.id)}>{content}<span className="sr-only"> · {label} · {planEventLabels(event, language, t)[0]}</span></button>
               : <span aria-current={date === day ? "date" : undefined}><span className="sr-only">{label}</span><span aria-hidden="true">{content}</span></span>}
           </div>;
         })}
@@ -188,9 +188,9 @@ export function Plan({ settings, now, desktop }: { settings: Settings; now: Date
           <li data-kind="current">{t("today")}</li><li data-kind="white-days">{t("planWhiteDays")}</li><li data-kind="expected">{t("planDependsOnMoon")}</li>
         </ul>
         <div className="plan-month-navigation">
-          <button className="icon-button" aria-label={t("planPrevMonth")} onClick={() => setMonthOffset(value => Math.max(-48, value - 1))} disabled={monthOffset === -48}><ChevronLeft size={17} /></button>
+          <button className="icon-button" aria-label={t("planPrevMonth")} onClick={() => setMonthOffset(value => Math.max(-48, value - 1))} disabled={monthOffset === -48}><ChevronLeft className="icon-dir" size={17} /></button>
           {monthOffset !== 0 && <button className="text-button" onClick={() => setMonthOffset(0)}>{t("planCurrentMonth")}</button>}
-          <button className="icon-button" aria-label={t("planNextMonth")} onClick={() => setMonthOffset(value => Math.min(48, value + 1))} disabled={monthOffset === 48}><ChevronRight size={17} /></button>
+          <button className="icon-button" aria-label={t("planNextMonth")} onClick={() => setMonthOffset(value => Math.min(48, value + 1))} disabled={monthOffset === 48}><ChevronRight className="icon-dir" size={17} /></button>
         </div>
       </div>
     </section>
@@ -202,9 +202,9 @@ export function Plan({ settings, now, desktop }: { settings: Settings; now: Date
       </div>
       <div className="compact-stack">
         {(expanded ? events : events.slice(0, 5)).map(event => {
-          const [title, detail] = planEventCopy[event.title][language];
+          const [title, detail] = planEventLabels(event, language, t);
           const status = event.confirmed ? "confirmedDate" : event.kind === "follows-month" ? "planFollowsMonth" : "expectedDate";
-          const dates = compactDates(event.dates, language, t("planOr"));
+          const dates = compactDates(event.dates, locale, t("planOr"));
           const offset = config.overrides[event.id]?.adjust ?? 0;
           return <article className="card plan-event-card" key={event.id}>
             <button className="plan-open-event" aria-haspopup="dialog" onClick={click => openEvent(click, event.id)}>

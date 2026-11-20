@@ -31,14 +31,14 @@ const important = ["Ramadan begins", "Eid al-Fitr", "Day of ʿArafah (fast if no
 function MoonCard({ event, config, open, shift, district, watchNow }: {
   event: CalendarEvent; config: CalendarSettings; open: OpenEvent; shift: (step: -1 | 1) => void; district: boolean; watchNow: boolean;
 }) {
-  const { t, language } = useCopy();
-  const [title] = planEventLabels(event, language);
+  const { t, language, locale } = useCopy();
+  const [title] = planEventLabels(event, language, t);
   const source = planAuthorities.find(item => item.value === event.source);
   const offset = config.overrides[event.id]?.adjust ?? 0;
   return <section className="card night plan-desk-moon compact-stack" aria-label={t("planMoonWatch")}>
     <p className="caption">{t(event.confirmed ? "confirmedDate" : "planDeskMoonDependent")}</p>
     <h2><button type="button" onClick={trigger => open(trigger, event)}>{title}</button></h2>
-    <p className="muted small">{eventDisplayDates(event, language, t("planOr"))} · {t(event.confirmed ? "confirmedDate" : "expectedDate")}</p>
+    <p className="muted small">{eventDisplayDates(event, locale, t("planOr"))} · {t(event.confirmed ? "confirmedDate" : "expectedDate")}</p>
     {event.confirmed ? event.source && <p className="muted small">{t("planConfirmedBy", {
       source: source ? t(source === planAuthorities[0] && district ? "planNationalBd" : source.label) : event.source,
     })}</p> : <>
@@ -67,14 +67,14 @@ function MoonCard({ event, config, open, shift, district, watchNow }: {
 }
 
 function UpcomingCard({ events, hawl, today, open }: { events: CalendarEvent[]; hawl: Hawl; today: string; open: OpenEvent }) {
-  const { t, language } = useCopy();
+  const { t, language, locale } = useCopy();
   const [expanded, setExpanded] = useState(false);
   const nextWhite = events.find(isWhiteDays);
   const limited = events.filter(event => event === nextWhite || important.includes(event.title)).slice(0, 5);
   const rows = (expanded ? events : limited).map(event => ({ date: event.dates[0], key: event.id, event }));
   const visibleHawl = hawl && hawl.date >= today ? [{ date: hawl.date, key: "hawl", event: undefined }] : [];
   const sorted = [...rows, ...visibleHawl].sort((a, b) => a.date.localeCompare(b.date));
-  const yearNumber = new Intl.NumberFormat(language, { useGrouping: false });
+  const yearNumber = new Intl.NumberFormat(locale, { useGrouping: false });
 
   return <section className="card compact-stack plan-desk-upcoming">
     <div className="row-between"><h2>{t("planUpcoming")}</h2>
@@ -85,7 +85,7 @@ function UpcomingCard({ events, hawl, today, open }: { events: CalendarEvent[]; 
     <ul className="plan-desk-list" onKeyDown={focusListItem}>
       {(expanded ? sorted : sorted.slice(0, 4)).map(({ key, event }) => <li key={key}>{event ?
         <button type="button" className="plan-desk-row" onClick={trigger => open(trigger, event)}>
-          <span><strong>{planEventLabels(event, language)[0]}</strong><small className="muted">{eventDisplayDates(event, language, t("planOr"))}</small></span>
+          <span><strong>{planEventLabels(event, language, t)[0]}</strong><small className="muted">{eventDisplayDates(event, locale, t("planOr"))}</small></span>
           <span className="plan-desk-badge" data-confirmed={event.confirmed}>{t(event.confirmed ? "confirmedDate" : "expectedDate")}</span>
         </button> : <Link to="/plan/zakat" className="plan-desk-row">
           <span><strong>{t("planPersonalZakatDate")}</strong><small className="muted">{yearNumber.format(hawl.day)} {planMonth(hawl.month, language)} {yearNumber.format(hawl.year)}</small></span>
@@ -96,7 +96,7 @@ function UpcomingCard({ events, hawl, today, open }: { events: CalendarEvent[]; 
 }
 
 function EidCard({ event, mosques, open }: { event?: CalendarEvent; mosques: MosquePlan; open: OpenEvent }) {
-  const { t, language } = useCopy();
+  const { t, locale } = useCopy();
   const type = event?.title === "Eid al-Adha" ? "eid_adha" : "eid_fitr";
   const year = Number(event?.dates[0].slice(0, 4));
   const options = mosques.mosques.flatMap(mosque => {
@@ -109,7 +109,7 @@ function EidCard({ event, mosques, open }: { event?: CalendarEvent; mosques: Mos
       <button type="button" className="text-button" onClick={trigger => open(trigger, event)}>{t("qadaEdit")}</button>}</div>
     {options.length > 0 ? <ul className="plan-desk-list" onKeyDown={focusListItem}>{options.map(({ mosque, entry, current }) => <li key={mosque.id}>
       <button className="plan-desk-row" type="button" onClick={trigger => open(trigger, event)}>
-        <span><strong>{mosque.name}</strong><small className="muted">{entry.times.map(time => mosqueClock(time, language, true)).join(" · ")}
+        <span><strong>{mosque.name}</strong><small className="muted">{entry.times.map(time => mosqueClock(time, locale, true)).join(" · ")}
           {" · "}{t(current ? "planEidThisYear" : "planEidLastYear")}</small></span>
       </button>
     </li>)}</ul> : <p className="small muted">{t("planDeskEidPending")}</p>}
@@ -120,40 +120,40 @@ function DayDetails({ day, events, today, settings, config, mosques, open, close
   day: string; events: CalendarEvent[]; today: string; settings: Settings; config: CalendarSettings; mosques: MosquePlan;
   open: OpenEvent; close: () => void;
 }) {
-  const { t, language } = useCopy();
+  const { t, language, locale } = useCopy();
   const date = hijriOn(day, settings.hijriAdjust, config.anchors);
-  const number = new Intl.NumberFormat(language, { useGrouping: false });
+  const number = new Intl.NumberFormat(locale, { useGrouping: false });
   const friday = mosqueWeekday(day) === 5;
   const mosque = friday ? fridayMosque(mosques) : undefined;
   const times = schedule(day, settings.city, settings.method, settings.school);
   return <section className="card compact-stack plan-desk-day-panel" aria-label={t("planDetails")}>
     <div className="row-between">
       <div><p className="caption">{t(day === today ? "today" : "planDetails")}</p>
-        <h2 data-plan-panel-heading tabIndex={-1}>{formatDay(day, { weekday: "long", day: "numeric", month: "long" }, language)}</h2></div>
+        <h2 data-plan-panel-heading tabIndex={-1}>{formatDay(day, { weekday: "long", day: "numeric", month: "long" }, locale)}</h2></div>
       <button type="button" className="icon-button" onClick={close} aria-label={t("planClose")}><X size={18} /></button>
     </div>
     <p className="small muted">{number.format(date.day)} {planMonth(date.month, language)} {number.format(date.year)}</p>
     {events.length ? <ul className="plan-desk-list" onKeyDown={focusListItem}>{events.map(event => <li key={event.id}>
       <button className="plan-desk-row" type="button" onClick={trigger => open(trigger, event, day)}>
-        <strong>{planEventLabels(event, language)[0]}</strong><span className="plan-desk-badge" data-confirmed={event.confirmed}>
+        <strong>{planEventLabels(event, language, t)[0]}</strong><span className="plan-desk-badge" data-confirmed={event.confirmed}>
           {t(event.confirmed ? "confirmedDate" : "expectedDate")}
         </span>
       </button>
     </li>)}</ul> : <p className="small muted">{t("planDeskNoEvents")}</p>}
     {friday && <div className="plan-desk-jumuah-card compact-stack">
       <strong>{t("planDeskJumuah")}</strong>
-      {mosque?.jumuah?.prayer ? <p>{mosque.name} · {mosqueClock(mosque.jumuah.prayer, language)}</p> :
+      {mosque?.jumuah?.prayer ? <p>{mosque.name} · {mosqueClock(mosque.jumuah.prayer, locale)}</p> :
         <Link to="/plan/mosques" className="text-button">{t("planDeskJumuahPending")}</Link>}
     </div>}
     <h3>{t("prayerTimes")}</h3>
     <dl className="plan-desk-prayer-times">
-      {prayerIds.map(id => <div key={id}><dt>{t(id)}</dt><dd>{Number.isFinite(times[id].valueOf()) ? formatTime(times[id], settings.city.timeZone, language) : "—"}</dd></div>)}
+      {prayerIds.map(id => <div key={id}><dt>{t(id)}</dt><dd>{Number.isFinite(times[id].valueOf()) ? formatTime(times[id], settings.city.timeZone, locale) : "—"}</dd></div>)}
     </dl>
   </section>;
 }
 
 export function DesktopPlan({ today, now, settings, config, mosques, hawl, saved, exportCalendar, saveCalendar, confirmEvent }: PlanProps) {
-  const { t, language } = useCopy();
+  const { t, language, locale } = useCopy();
   const wide = useDesktop(1280);
   const [query, setQuery] = useSearchParams();
   const [drawer, setDrawer] = useState(false);
@@ -162,18 +162,18 @@ export function DesktopPlan({ today, now, settings, config, mosques, hawl, saved
   const detailButton = useRef<HTMLButtonElement>();
   const focus = useRef<HTMLElement>();
   const { hijriAdjust, city } = settings;
-  const number = new Intl.NumberFormat(language, { useGrouping: false });
+  const number = new Intl.NumberFormat(locale, { useGrouping: false });
   const month = readCalendarMonth(query.get("month"), today);
   const selectedDate = readCalendarDay(query.get("day"), today);
   const eventId = query.get("event");
   const event = eventId ? calendarEventById(eventId, hijriAdjust, config) : undefined;
   const hasDetail = Boolean(selectedDate || event);
   const { first, last } = gregorianMonthBounds(month);
-  const displayMonth = formatDay(first, { month: "long", year: "numeric" }, language);
+  const displayMonth = formatDay(first, { month: "long", year: "numeric" }, locale);
   const firstWeekday = calendarWeekStart(language, city.timeZone, navigator.languages);
   const cells = useMemo(() => gregorianMonthCells(month, firstWeekday, hijriAdjust, config), [month, firstWeekday, hijriAdjust, config]);
   const friday = fridayMosque(mosques)?.jumuah?.prayer;
-  const fridayTime = friday && mosqueClock(friday, language, true);
+  const fridayTime = friday && mosqueClock(friday, locale, true);
   const district = city.timeZone === "Asia/Dhaka";
   const hijri = hijriOn(today, hijriAdjust, config.anchors);
   const moonStarts = monthStartsInRange(first, last, hijriAdjust, config);
@@ -258,8 +258,8 @@ export function DesktopPlan({ today, now, settings, config, mosques, hawl, saved
       <div className="plan-desk-month">
         {Array.from({ length: 7 }, (_, i) => {
           const day = addDays("2026-11-15", (firstWeekday + i) % 7);
-          return <span className="caption" key={day} aria-label={formatDay(day, { weekday: "long" }, language)}>
-            {formatDay(day, { weekday: "short" }, language)}
+          return <span className="caption" key={day} aria-label={formatDay(day, { weekday: "long" }, locale)}>
+            {formatDay(day, { weekday: "short" }, locale)}
           </span>;
         })}
         {cells.map(cell => <div key={cell.day} className="plan-desk-cell" data-adjacent={cell.adjacent} data-today={cell.day === today}
@@ -272,11 +272,11 @@ export function DesktopPlan({ today, now, settings, config, mosques, hawl, saved
             </span>
           </button>
           <span hidden id={"plan-day-" + cell.day}>
-            {formatDay(cell.day, { weekday: "long", day: "numeric", month: "long" }, language)} ·
+            {formatDay(cell.day, { weekday: "long", day: "numeric", month: "long" }, locale)} ·
             {" "}{number.format(cell.hijri.day)} {planMonth(cell.hijri.month, language)}
           </span>
           {cell.events.map(item => {
-            const title = isWhiteDays(item) ? t("planDeskWhiteDay") : planEventLabels(item, language)[0];
+            const title = isWhiteDays(item) ? t("planDeskWhiteDay") : planEventLabels(item, language, t)[0];
             const alternate = !isWhiteDays(item) && !item.confirmed && item.dates[1] === cell.day;
             const secondChoice = item.hijriDay === 1 && !item.title.startsWith("Eid")
               ? t("planDeskAlternateStart", { month: planMonth(item.month, language), day: item.hijriDay })

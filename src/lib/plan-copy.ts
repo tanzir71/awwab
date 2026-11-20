@@ -1,4 +1,4 @@
-import type { MessageCatalog } from "./copy";
+import type { MessageCatalog, useCopy } from "./copy";
 import { baselineMonthStart, hijriMonths, hijriMonthsBn, type CalendarEvent } from "./hijri";
 
 export const planMonthsBn = hijriMonthsBn;
@@ -21,29 +21,62 @@ export const planAuthorities = [
   { value: "Family", label: "planFamily" },
 ] as const;
 
-export const planEventCopy: Record<string, { en: [string, string]; bn: [string, string] }> = {
-  "Islamic New Year": { en: ["Islamic New Year", "1 Muharram"], bn: ["হিজরি নববর্ষ", "১ মুহাররম"] },
-  "ʿĀshūrāʾ (fast 9 & 10)": { en: ["ʿĀshūrāʾ", "9 and 10 Muharram"], bn: ["আশুরা", "৯ ও ১০ মুহাররম"] },
-  "Rajab begins": { en: ["Rajab begins", "Check the local crescent sighting"], bn: ["রজব শুরু", "স্থানীয় চাঁদ দেখার খবর জানো"] },
-  "Mid-Shaʿbān (observed by many; scholars differ on practices)": { en: ["15 Shaʿbān", "Observed by many. Scholars differ on practices."], bn: ["১৫ শাবান", "অনেকে পালন করেন। আমল নিয়ে আলেমদের মতভেদ আছে।"] },
-  "Ramadan begins": { en: ["Ramadan begins", "Dates depend on the local sighting"], bn: ["রমজান শুরু", "তারিখ স্থানীয় চাঁদ দেখার ওপর নির্ভর করে"] },
-  "Last ten nights / Laylat al-Qadr": { en: ["Last ten nights", "Laylat al-Qadr"], bn: ["শেষ দশ রাত", "লাইলাতুল কদর"] },
-  "Eid al-Fitr": { en: ["Eid al-Fitr", "Tap to plan where you’ll pray"], bn: ["ঈদুল ফিতর", "কোথায় নামাজ পড়বে ঠিক করো"] },
-  "Six fasts of Shawwāl window": { en: ["Six fasts of Shawwāl", "Follows the start of Shawwāl"], bn: ["শাওয়ালের ছয় রোজা", "শাওয়াল শুরুর সঙ্গে তারিখ বদলায়"] },
-  "First ten days": { en: ["First ten days of Dhu al-Hijjah", "Follows the start of Dhu al-Hijjah"], bn: ["জিলহজের প্রথম দশ দিন", "জিলহজ শুরুর সঙ্গে তারিখ বদলায়"] },
-  "Day of ʿArafah (fast if not on Hajj)": { en: ["Day of ʿArafah", "Fast if you’re not on Hajj"], bn: ["আরাফার দিন", "হজে না থাকলে রোজা রাখো"] },
-  "Eid al-Adha": { en: ["Eid al-Adha", "Tap to plan where you’ll pray"], bn: ["ঈদুল আজহা", "কোথায় নামাজ পড়বে ঠিক করো"] },
-  "White days (Ayyām al-Bīḍ)": { en: ["White days", "13–15 of each Hijri month"], bn: ["আইয়ামে বীজ", "প্রতি হিজরি মাসের ১৩–১৫ তারিখ"] },
+const eventCopyKeys: Record<string, [string, string, string?]> = {
+  "Islamic New Year": ["planEventNewYear", "planEventNewYearDetail"],
+  "ʿĀshūrāʾ (fast 9 & 10)": ["planEventAshura", "planEventAshuraDetail", "planEventAshuraFast"],
+  "Rajab begins": ["planEventRajab", "planCheckLocalCrescent"],
+  "Mid-Shaʿbān (observed by many; scholars differ on practices)": ["planEventShaban", "planEventShabanDetail", "planEventShabanDetail"],
+  "Ramadan begins": ["planEventRamadan", "planEventRamadanDetail"],
+  "Last ten nights / Laylat al-Qadr": ["planEventTenNights", "planEventTenNightsDetail", "planEventTenNightsDetail"],
+  "Eid al-Fitr": ["planEventFitr", "planEventEidDetail"],
+  "Six fasts of Shawwāl window": ["planEventSixFasts", "planEventSixFastsDetail"],
+  "First ten days": ["planEventTenDays", "planEventTenDaysDetail"],
+  "Day of ʿArafah (fast if not on Hajj)": ["planEventArafah", "planEventArafahDetail", "planEventArafahDetail"],
+  "Eid al-Adha": ["planEventAdha", "planEventEidDetail"],
+  "White days (Ayyām al-Bīḍ)": ["planEventWhiteDays", "planEventWhiteDaysDetail"],
 };
 
-export function planEventLabels(event: CalendarEvent, language: string) {
-  return planEventCopy[event.title]?.[language === "bn" ? "bn" : "en"] ?? [
-    language === "bn" ? planMonth(event.month, language) + " শুরু" : event.title,
-    language === "bn" ? "স্থানীয় চাঁদ দেখার খবর জানো" : "Check the local crescent sighting",
-  ];
+export function planEventLabels(event: CalendarEvent, language: string, t: ReturnType<typeof useCopy>["t"]) {
+  const keys = eventCopyKeys[event.title];
+  const { hijriDay: day } = event;
+  const month = planMonth(event.month, language);
+  const values = { day, month, earlier: day - 1, end: day + 2 };
+  if (keys) {
+    const [title, detail, reminderNote] = keys;
+    return [t(title, values), t(detail, values), reminderNote && t(reminderNote, values)] as const;
+  }
+  return [
+    event.kind === "moon" ? t("planEventMonthStart", { month }) : event.title,
+    t("planCheckLocalCrescent"),
+  ] as const;
 }
 
 export const planMessages = {
+  planEventNewYear: { en: "Islamic New Year", bn: "হিজরি নববর্ষ" },
+  planEventNewYearDetail: { en: "{day, number} {month}", bn: "{day, number} {month}" },
+  planEventAshura: { en: "ʿĀshūrāʾ", bn: "আশুরা" },
+  planEventAshuraDetail: { en: "{earlier, number} and {day, number} {month}", bn: "{earlier, number} ও {day, number} {month}" },
+  planEventAshuraFast: { en: "Fast on {earlier, number} and {day, number} {month}.", bn: "{month} মাসের {earlier, number} ও {day, number} তারিখে রোজা রাখো।" },
+  planEventRajab: { en: "Rajab begins", bn: "রজব শুরু" },
+  planCheckLocalCrescent: { en: "Check the local crescent sighting", bn: "স্থানীয় চাঁদ দেখার খবর জানো" },
+  planEventShaban: { en: "{day, number} Shaʿbān", bn: "{day, number} শাবান" },
+  planEventShabanDetail: { en: "Observed by many. Scholars differ on practices.", bn: "অনেকে পালন করেন। আমল নিয়ে আলেমদের মতভেদ আছে।" },
+  planEventRamadan: { en: "Ramadan begins", bn: "রমজান শুরু" },
+  planEventRamadanDetail: { en: "Dates depend on the local sighting", bn: "তারিখ স্থানীয় চাঁদ দেখার ওপর নির্ভর করে" },
+  planEventTenNights: { en: "Last ten nights", bn: "শেষ দশ রাত" },
+  planEventTenNightsDetail: { en: "Laylat al-Qadr", bn: "লাইলাতুল কদর" },
+  planEventFitr: { en: "Eid al-Fitr", bn: "ঈদুল ফিতর" },
+  planEventAdha: { en: "Eid al-Adha", bn: "ঈদুল আজহা" },
+  planEventEidDetail: { en: "Tap to plan where you’ll pray", bn: "কোথায় নামাজ পড়বে ঠিক করো" },
+  planEventSixFasts: { en: "Six fasts of Shawwāl", bn: "শাওয়ালের ছয় রোজা" },
+  planEventSixFastsDetail: { en: "Follows the start of Shawwāl", bn: "শাওয়াল শুরুর সঙ্গে তারিখ বদলায়" },
+  planEventTenDays: { en: "First ten days of Dhu al-Hijjah", bn: "জিলহজের প্রথম দশ দিন" },
+  planEventTenDaysDetail: { en: "Follows the start of Dhu al-Hijjah", bn: "জিলহজ শুরুর সঙ্গে তারিখ বদলায়" },
+  planEventArafah: { en: "Day of ʿArafah", bn: "আরাফার দিন" },
+  planEventArafahDetail: { en: "Fast if you’re not on Hajj", bn: "হজে না থাকলে রোজা রাখো" },
+  planEventWhiteDays: { en: "White days", bn: "আইয়ামে বীজ" },
+  planEventWhiteDaysDetail: { en: "{day, number}–{end, number} of each Hijri month", bn: "প্রতি হিজরি মাসের {day, number}–{end, number} তারিখ" },
+  planEventMonthStart: { en: "{month} begins", bn: "{month} শুরু" },
   planTitle: { en: "Islamic calendar", bn: "হিজরি ক্যালেন্ডার" },
   planSighting: { en: "Moon-sighting source", bn: "চাঁদ দেখার খবরের উৎস" },
   planNational: { en: "Local committee", bn: "স্থানীয় কমিটি" },

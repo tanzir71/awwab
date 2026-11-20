@@ -1,9 +1,12 @@
 import { addDays } from "./dates";
 import { schedule } from "./prayerServices";
-import { prayerIds, prayerNames } from "@/types/Prayer";
+import { prayerIds } from "@/types/Prayer";
 import type { Settings } from "./storageService";
-import { calendarEventById, calendarEvents, eventMoonReminder, hijriMonths, moonWatchDay, type CalendarEvent, type CalendarSettings } from "./hijri";
+import { calendarEventById, calendarEvents, eventMoonReminder, moonWatchDay, type CalendarEvent, type CalendarSettings } from "./hijri";
 import { downloadFile } from "./download";
+import { message } from "./copy";
+import { planAuthorities, planEventLabels, planMonth } from "./plan-copy";
+import { prayerCityLabel } from "./settings-copy";
 
 interface CalendarItem { id: string; title: string; start: Date | string; alarm?: number; description?: string }
 const escapeText = (value: string) => value.replace(/\\/g, "\\\\").replace(/\r?\n/g, "\\n").replace(/[;,]/g, "\\$&");
@@ -40,17 +43,21 @@ export function saveCalendar(items: CalendarItem[], file = "awwab-reminders.ics"
 }
 
 export function prayerReminders(day: string, settings: Settings, days: number, alarm: number) {
+  const t = message.bind(null, { ...settings, pseudoLocale: undefined });
+  const description = t("settingsCalendarPrayerCity", { city: prayerCityLabel(settings.city, t) });
   return Array.from({ length: days }, (_, i) => {
     const date = addDays(day, i);
     const times = schedule(date, settings.city, settings.method, settings.school);
     return prayerIds.filter(id => Number.isFinite(times[id].valueOf())).map(id => ({
-      id: `prayer-${date}-${id}`, title: `${prayerNames[id]} prayer`, start: times[id], alarm,
-      description: `Calculated on device for ${settings.city.name}.`,
+      id: `prayer-${date}-${id}`, title: t("settingsCalendarPrayerTitle", { name: t(id) }),
+      start: times[id], alarm, description,
     }));
   }).flat();
 }
 
 export function eventReminders(day: string, settings: Settings, calendar: CalendarSettings) {
+  const t = message.bind(null, { ...settings, pseudoLocale: undefined });
+  const localized = settings.language !== "en";
   const end = addDays(day, 365);
   const events = calendarEvents(day, end, settings.hijriAdjust, calendar).filter(event => event.kind !== "weekly");
   const customStarts = new Set([
@@ -62,11 +69,13 @@ export function eventReminders(day: string, settings: Settings, calendar: Calend
     .filter((event): event is CalendarEvent => !!event && event.dates.some(date => date >= day && date <= end));
   const distinct = new Map([...events, ...additional].map(event => [event.id, event]));
   return [...distinct.values()].flatMap(event => {
+    const [name, , note] = localized ? planEventLabels(event, settings.language, t) : [event.title];
+    const title = event.confirmed ? name : t("settingsCalendarExpected", { event: name });
+    const authority = localized && planAuthorities.find(option => option.value === event.source);
+    const confirmation = authority ? t(authority.label) : event.source;
+    const description = [note, event.confirmed ? confirmation : t("settingsCalendarEstimate")].filter(Boolean).join("\n") || undefined;
     const entries: CalendarItem[] = event.dates.map((date, i) => ({
-      id: `event-${event.id}-${i}`,
-      title: event.confirmed ? event.title : `Expected: ${event.title}`,
-      start: date,
-      description: event.confirmed ? event.source : "Estimated Hijri date. Check your local moon-sighting announcement.",
+      id: `event-${event.id}-${i}`, title, start: date, description,
     }));
     if (eventMoonReminder(event, calendar)) {
       const watch = moonWatchDay(event.year, event.month, settings.hijriAdjust, calendar.anchors);
@@ -80,5 +89,8 @@ export function eventReminders(day: string, settings: Settings, calendar: Calend
 export function crescentReminder(day: string, settings: Settings, year: number, month: number): CalendarItem | undefined {
   const start = schedule(day, settings.city, settings.method, settings.school).maghrib;
   if (!Number.isFinite(start.valueOf())) return undefined;
-  return { id: `moon-watch-${year}-${month}`, title: `Check the moon for ${hijriMonths[month - 1]}`, start, alarm: 0 };
+  const title = message({ ...settings, pseudoLocale: undefined }, "settingsCalendarMoonTitle", {
+    month: planMonth(month, settings.language),
+  });
+  return { id: `moon-watch-${year}-${month}`, title, start, alarm: 0 };
 }

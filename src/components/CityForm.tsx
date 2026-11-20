@@ -3,6 +3,7 @@ import { cities, methodNames, type City, type PrayerMethod } from "@/lib/prayerS
 import { dateKey } from "@/lib/dates";
 import { useCopy } from "@/lib/copy";
 import { guideReference } from "@/lib/prayerGuide";
+import { prayerCityLabel } from "@/lib/settings-copy";
 import type { Settings } from "@/lib/storageService";
 
 export function CityForm({ initial, save, submitLabel = "settingsPrayerSave", saving = false }: { initial: Settings; save: (patch: Partial<Settings>) => Promise<void>; submitLabel?: string; saving?: boolean }) {
@@ -31,7 +32,7 @@ export function CityForm({ initial, save, submitLabel = "settingsPrayerSave", sa
         const selected = cities.find(item => item.name === event.target.value);
         if (selected) setCity(selected);
       }}>
-        {cities.map(item => <option key={item.name}>{item.name}</option>)}<option value="">{t("settingsCityManual")}</option>
+        {cities.map(item => <option key={item.name} value={item.name}>{prayerCityLabel(item, t)}</option>)}<option value="">{t("settingsCityManual")}</option>
       </select>
     </label>
     {!preset && <>
@@ -42,7 +43,9 @@ export function CityForm({ initial, save, submitLabel = "settingsPrayerSave", sa
       </div>
       <label className="field">{t("settingsTimeZone")}<input value={city.timeZone} required onChange={event => patch({ timeZone: event.target.value.trim() })} /></label>
     </>}
-    <label className="field">{t("settingsCalcMethod")}<select name="method" defaultValue={initial.method}>{Object.entries(methodNames).map(([id, label]) => <option value={id} key={id}>{label}</option>)}</select></label>
+    <label className="field">{t("settingsCalcMethod")}<select name="method" defaultValue={initial.method}>
+      {Object.keys(methodNames).map(id => <option value={id} key={id}>{t(`settingsMethod${id}`)}</option>)}
+    </select></label>
     <label className="field">{t("settingsAsrCalc")}<select name="school" defaultValue={initial.school}>
       <option value="hanafi">{t("prayerGuideHanafi")}</option><option value="shafi">{t("settingsCalcSchoolOther")}</option>
     </select></label>

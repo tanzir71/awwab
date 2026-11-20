@@ -29,7 +29,7 @@ function PlanSwitch({ checked, onChange, title, children, disabled }: {
 }
 
 function EidJamaat({ event, mosques, city }: { event: CalendarEvent; mosques: MosquePlan; city: string }) {
-  const { t, language } = useCopy();
+  const { t, locale } = useCopy();
   const [location, setLocation] = useState<"home" | "hometown">("home");
   const [editor, setEditor] = useState<{ mosque: Mosque; times: string[] }>();
   const [saving, setSaving] = useState(false);
@@ -79,7 +79,7 @@ function EidJamaat({ event, mosques, city }: { event: CalendarEvent; mosques: Mo
       const current = mosque.occasional.find(item => item.type === type && item.year === year);
       const previous = mosque.occasional.find(item => item.type === type && item.year === year - 1);
       const times = current?.times ?? previous?.times ?? [];
-      const number = new Intl.NumberFormat(language, { useGrouping: false });
+      const number = new Intl.NumberFormat(locale, { useGrouping: false });
       const visibleTimes = times.map(time => time.replace(/^0/, "").replace(/\d/g, digit => number.format(Number(digit))));
       return <div className="card plan-eid-mosque" key={mosque.id}>
         <div className="row-between"><strong>{mosque.name}</strong>{visibleTimes.length > 0 && <b>{visibleTimes.join(" · ")}</b>}</div>
@@ -105,7 +105,7 @@ export function EventSheet({ event, settings, config, mosques, onConfirm, onMoon
   onClose: () => void; onRestoreFocus: () => void;
   presentation?: "dialog" | "panel"; initialDate?: string; initialSource?: string;
 }) {
-  const { t, language } = useCopy();
+  const { t, language, locale } = useCopy();
   const [choice, setChoice] = useState(initialDate ?? event.dates[0]);
   const [source, setSource] = useState(initialSource ?? config.sightingSource ?? planAuthorities[0].value);
   const [moveAfter, setMoveAfter] = useState(true);
@@ -118,9 +118,9 @@ export function EventSheet({ event, settings, config, mosques, onConfirm, onMoon
   const estimatedDate = addDays(estimatedStart, event.hijriDay - 1 + offset);
   const previousMonth = planMonth(event.month === 1 ? 12 : event.month - 1, language);
   const selected = event.dates.includes(choice) ? choice : event.dates[0];
-  const dateLabel = (date: string) => formatDay(date, { weekday: "short", day: "numeric", month: "short" }, language);
-  const [title, detail] = planEventLabels(event, language);
-  const number = new Intl.NumberFormat(language, { useGrouping: false });
+  const dateLabel = (date: string) => formatDay(date, { weekday: "short", day: "numeric", month: "short" }, locale);
+  const [title, detail] = planEventLabels(event, language, t);
+  const number = new Intl.NumberFormat(locale, { useGrouping: false });
   const district = settings.city.timeZone === "Asia/Dhaka";
   const announcedBy = planAuthorities.find(authority => authority.value === event.source);
   const sourceText = announcedBy ? t(announcedBy === planAuthorities[0] && district ? "planNationalBd" : announcedBy.label) : event.source;

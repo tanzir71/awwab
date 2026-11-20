@@ -287,7 +287,6 @@ const messages: MessageCatalog = {
   spellingStyle: { en: "Spelling style", bn: "বানান শেখার ধরন" },
   banglaAmpara: { en: "Bangla Ampara", bn: "বাংলা আমপারা" },
   interfaceLanguage: { en: "Interface language", bn: "অ্যাপের ভাষা" },
-  banglaPreview: { en: "বাংলা · preview", bn: "বাংলা · পরীক্ষামূলক" },
   savedOnDevice: { en: "Saved on this device.", bn: "এই ডিভাইসে সেভ করা হয়েছে।" },
   saveError: { en: "Your changes could not be saved. Try again.", bn: "পরিবর্তন সেভ করা যায়নি। আবার চেষ্টা করুন।" },
   spellItOut: { en: "Spell it out", bn: "বানান করে পড়ুন" },

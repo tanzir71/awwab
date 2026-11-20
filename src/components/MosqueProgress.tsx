@@ -1,7 +1,10 @@
-const stages = ["Foundation", "Walls", "Dome", "Minarets", "Complete"];
+import { useCopy } from "@/lib/copy";
+
+const stages = ["profileFoundation", "profileWalls", "profileDome", "profileMinarets", "profileComplete"];
 const thresholds = [0, 20, 40, 65, 85];
 
 export default function MosqueProgress({ consistency, dimmed }: { consistency: number; dimmed: boolean }) {
+  const { t } = useCopy();
   const stage = thresholds.filter(value => consistency >= value).length;
   return <section className="card night compact-stack text-center">
     <div className="masjid" aria-hidden="true" style={{ opacity: dimmed ? .78 : 1 }}>
@@ -10,7 +13,7 @@ export default function MosqueProgress({ consistency, dimmed }: { consistency: n
       {stage >= 2 && <><i className="wall" /><i className="door" /></>}
       <i className="foundation" />
     </div>
-    <strong>Stage {stage} of 5 · {stages[stage - 1]}</strong>
-    <p className="muted small">Built from consistency, one prayer at a time. A missed day dims the lamps.</p>
+    <strong>{t("profileMasjidStage", { stage, total: stages.length, name: t(stages[stage - 1]) })}</strong>
+    <p className="muted small">{t("profileMasjidHint")}</p>
   </section>;
 }

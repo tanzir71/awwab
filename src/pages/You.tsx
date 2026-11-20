@@ -7,35 +7,41 @@ import MosqueProgress from "@/components/MosqueProgress";
 import { ListLink, SectionNav } from "@/components/Surface";
 import { usePrayerLogs, useRecord } from "@/hooks/use-awwab";
 import { backup, defaults, getRecord, prayerStatistics, restoreBackup, updateSettings, type Settings } from "@/lib/storageService";
-import { methodNames } from "@/lib/prayerServices";
+import { prayerCityLabel } from "@/lib/settings-copy";
 import { dateKey } from "@/lib/dates";
 import { downloadFile } from "@/lib/download";
 import { prayerReminders, saveCalendar, eventReminders } from "@/lib/calendarFile";
 import { calendarDefaults } from "@/lib/hijri";
 import { message as copy, useCopy } from "@/lib/copy";
 import { prayerGuidePath } from "@/lib/prayerGuide";
-import { textSizes } from "@/lib/languagePreferences";
+import { languages, textSizes } from "@/lib/languagePreferences";
+import { countKnownQuranWords } from "@/lib/quran";
+
+const emptyWords: string[] = [];
 
 function Profile({ settings, now, desktop = false }: { settings: Settings; now: Date; desktop?: boolean }) {
   const { locale, t } = useCopy();
   const logs = usePrayerLogs();
+  const knownVerses = useRecord("words-known", emptyWords);
+  const vocabulary = useRecord("word-bank-known", emptyWords);
   const day = dateKey(now, settings.city.timeZone);
   const stats = prayerStatistics(logs, day);
   const number = new Intl.NumberFormat(locale);
   const percent = new Intl.NumberFormat(locale, { style: "percent" });
+  const date = new Intl.DateTimeFormat(locale === "en" ? "en-GB" : locale, { dateStyle: "medium", calendar: "gregory", timeZone: "UTC" });
   return <section className="stack settings-profile-stats">
     <header><p className="caption">{t("you")}</p>{desktop ? <h2>{t(stats.activeDays ? "profileGrowing" : "profileBuild")}</h2>
       : <h1>{t(stats.activeDays ? "profileGrowing" : "profileBuild")}</h1>}</header>
-    <MosqueProgress consistency={stats.consistency} dimmed={stats.activeDays > 0 && !stats.recent[28]?.count} />
+    <MosqueProgress consistency={stats.consistency} dimmed={stats.activeDays > 0 && !stats.recent.at(-2)?.count} />
     <div className="equal-row">
       <div className="card"><strong>{percent.format(stats.consistency / 100)}</strong><small className="muted">{t("profilePrayedMonth")}</small></div>
       <div className="card"><strong>{number.format(stats.returns)}</strong><small className="muted">{t("profileReturns")}</small></div>
-      <div className="card"><strong>{number.format(stats.activeDays)}</strong><small className="muted">{t("profileDays")}</small></div>
+      <div className="card"><strong>{number.format(countKnownQuranWords(knownVerses, vocabulary))}</strong><small className="muted">{t("quranWordsKnown")}</small></div>
     </div>
     <section className="card"><div className="row-between"><strong>{t("profileLastMonth")}</strong><small className="muted">{t("profilePrayersPerDay")}</small></div>
       <div className="heat-strip" role="list" aria-label={t("profilePrayersByDay")}>
         {stats.recent.map(({ day, count }) => {
-          const label = t("profilePrayersOnDay", { day, count });
+          const label = t("profilePrayersOnDay", { day: date.format(new Date(day + "T12:00:00Z")), count });
           return <span role="listitem" aria-label={label} title={label} key={day}
             data-active={count > 0} style={{ "--fade": `${(5 - count) * 17}%` } as React.CSSProperties} />;
         })}
@@ -56,7 +62,10 @@ export function You({ settings, now, desktop }: { settings: Settings; now: Date;
       <ListLink to="/you/learning" icon={<Sparkles size={22} />} title={t("learningMode")} detail={t(settings.mode === "maktab" ? "maktabMode" : "adultModeDetail")} />
       <ListLink to="/you/learning#script" icon={<BookOpen size={22} />} title={t("script")} detail={t(settings.script === "indopak" ? "profileIndopak" : "profileUthmani")} />
       <ListLink to="/you/language" icon={<Languages size={22} />} title={t("settingsLanguage")} />
-      <ListLink to="/you/prayer" icon={<Compass size={22} />} title={t("prayerTimes")} detail={`${settings.city.name} · ${methodNames[settings.method]}`} />
+      <ListLink to="/you/prayer" icon={<Compass size={22} />} title={t("prayerTimes")} detail={t("profilePrayerContext", {
+        asr: t(settings.school === "hanafi" ? "profileHanafiAsr" : "profileStandardAsr"),
+        method: t(`settingsMethod${settings.method}`), city: prayerCityLabel(settings.city, t),
+      })} />
       <ListLink to="/you/hijri" icon={<Calendar size={22} />} title={t("settingsHijri")} detail={t("profileHijriOffset", { count: settings.hijriAdjust })} />
       <ListLink to="/you/reminders" icon={<Bell size={22} />} title={t("reminders")} detail={t("profileRemindersHint")} />
       <ListLink to="/you/audio" icon={<Download size={22} />} title={t("offlineAudio")} detail={t("chooseRecitations")} />
@@ -73,6 +82,7 @@ export function You({ settings, now, desktop }: { settings: Settings; now: Date;
 
 export function SettingsPage({ settings, now, panel, desktop }: { settings: Settings; now: Date; panel: string; desktop: boolean }) {
   const { locale, t } = useCopy();
+  const language = languages.find(item => item.code === settings.language);
   const title = ({ learning: t(desktop ? "settingsProfile" : "learningSettings"), prayer: t(desktop ? "settingsPrayer" : "prayerTimes"), hijri: t("settingsHijri"),
     reminders: t(desktop ? "settingsReminders" : "reminders"), data: t("settingsBackup"), display: t("settingsDisplay"), privacy: t("settingsPrivacy"), about: t("settingsAbout") })[panel];
   const [search] = useSearchParams();
@@ -114,11 +124,9 @@ export function SettingsPage({ settings, now, panel, desktop }: { settings: Sett
           <option value="en" lang="en">English</option><option value="ampara-bn">{t("banglaAmpara")}</option>
         </select>
       </label>
-      {!desktop && <label className="field">{t("interfaceLanguage")}
-        <select aria-label={t("interfaceLanguage")} value={settings.language} onChange={event => void save({ language: event.target.value as Settings["language"] })}>
-          <option value="en" lang="en">English</option><option value="bn" lang="bn">{t("banglaPreview")}</option>
-        </select>
-      </label>}
+      {!desktop && <Link className="list-row" to="/you/language/picker">
+        <span>{t("interfaceLanguage")}</span><bdi lang={language?.code} dir={language?.dir === "rtl" ? "rtl" : "ltr"}>{language?.native}</bdi>
+      </Link>}
     </section>}
     {panel === "prayer" && <><CityForm initial={settings} save={save} />
       <Link className="list-row" to="/you/hijri">{t("settingsHijri")}</Link>

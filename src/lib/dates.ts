@@ -18,8 +18,9 @@ export function addDays(day: string, amount: number) {
 }
 
 export function formatDay(day: string, options?: Intl.DateTimeFormatOptions, language = "en-GB") {
-  return new Intl.DateTimeFormat(language === "en" ? "en-GB" : language, { dateStyle: options ? undefined : "full", ...options, timeZone: "UTC" })
-    .format(new Date(`${day}T12:00:00Z`));
+  return new Intl.DateTimeFormat(language === "en" ? "en-GB" : language, {
+    dateStyle: options ? undefined : "full", calendar: "gregory", ...options, timeZone: "UTC",
+  }).format(new Date(`${day}T12:00:00Z`));
 }
 
 export function formatTime(date: Date, timeZone: string, language = "en", compact = false) {
