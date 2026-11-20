@@ -25,12 +25,8 @@ export function localePackAsset(code: string): PackAsset | undefined {
   return Object.prototype.hasOwnProperty.call(published, code) ? published[code] : undefined;
 }
 
-export function hasLocaleMessages(code: string) {
-  return packsByLocale.has(code);
-}
-
 export function hasLoadedLocalePack(code: string) {
-  return hasLocaleMessages(code) && localePackAsset(code)?.fonts.every(font => activeFonts.has(checkedUrl(font.path, font)));
+  return packsByLocale.has(code);
 }
 
 export function localeMessage(code: string, key: string, mode: "adult" | "maktab") {
@@ -123,7 +119,7 @@ export async function installedLocalePacks() {
 }
 
 export async function loadLocalePack(code: string, download = false) {
-  if (download ? hasLoadedLocalePack(code) : hasLocaleMessages(code)) return true;
+  if (hasLoadedLocalePack(code)) return true;
   const info = localePackAsset(code);
   if (!info) return false;
 
@@ -131,7 +127,7 @@ export async function loadLocalePack(code: string, download = false) {
   const catalogue = await loadAsset(cache, packUrl(code, info), info, download);
   if (!catalogue) return false;
   for (const font of info.fonts) {
-    await loadFont(cache, font, download);
+    if (!(await loadFont(cache, font, download))) return false;
   }
   packsByLocale.set(code, JSON.parse(new TextDecoder().decode(catalogue)) as LocalePack);
   return true;

@@ -10,7 +10,7 @@ import { useClock, useDesktop, useSettings } from "@/hooks/use-awwab";
 import { defaults, migrateLegacy } from "@/lib/storageService";
 import { CopyContext, message } from "@/lib/copy";
 import { isBuiltIn, languages } from "@/lib/languagePreferences";
-import { hasLocaleMessages, loadLocalePack, loadLocaleReadingFont, localePackAsset } from "@/lib/localePacks";
+import { hasLoadedLocalePack, loadLocalePack, loadLocaleReadingFont, localePackAsset } from "@/lib/localePacks";
 import { readPseudoLocale } from "@/lib/pseudoLocale";
 import { speakPacks, speakSetupPath } from "@/lib/speakCurriculum";
 import Today, { PrayerWeek } from "@/pages/Index";
@@ -55,7 +55,7 @@ function Main() {
   const [pseudoLocale] = useState(() => import.meta.env.DEV || import.meta.env.MODE === "preview" ? readPseudoLocale(window.location.search) : undefined);
   const [restoredLocale, setRestoredLocale] = useState("");
   const preferredLocale = saved?.language ?? "en";
-  const hasPack = hasLocaleMessages(preferredLocale);
+  const hasPack = hasLoadedLocalePack(preferredLocale);
   const restoringLocale = !pseudoLocale && !hasPack && restoredLocale !== preferredLocale && Boolean(localePackAsset(preferredLocale));
   const language = !pseudoLocale && (isBuiltIn(preferredLocale) || hasPack) ? preferredLocale : "en";
   const settings = useMemo(() => saved && { ...saved, language, pseudoLocale }, [saved, language, pseudoLocale]);

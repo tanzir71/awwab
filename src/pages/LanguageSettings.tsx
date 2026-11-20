@@ -40,8 +40,8 @@ function useLanguageChoices() {
     if (busy) return;
     setBusy(code);
     try {
-      if (!(await selectAppLanguage(code))) toast.error(t("settingsLanguageDownloadError"));
-      onSaved?.();
+      if (await selectAppLanguage(code)) onSaved?.();
+      else toast.error(t("settingsLanguageDownloadError"));
     } catch {
       toast.error(t(localePackAsset(code) ? "settingsLanguageDownloadError" : "saveError"));
     } finally {
