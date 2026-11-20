@@ -25,6 +25,7 @@ export interface Settings {
   spellStyle: "en" | "ampara-bn";
   language: AppLanguage;
   nativeDigits?: boolean;
+  urduNastaliq?: boolean;
   quranMeanings?: boolean;
   englishMeaning?: boolean;
   textSize?: typeof textSizes[number];
@@ -132,6 +133,7 @@ const settingsSchema = z.object({
   spellStyle: z.enum(["en", "ampara-bn"]),
   language: languageSchema,
   nativeDigits: z.boolean().optional(),
+  urduNastaliq: z.boolean().optional(),
   quranMeanings: z.boolean().optional(),
   englishMeaning: z.boolean().optional(),
   textSize: z.enum(textSizes).optional(),

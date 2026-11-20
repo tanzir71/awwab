@@ -52,8 +52,8 @@ export function PrayerGuide({ settings, desktop }: { settings: Settings; desktop
         <span className="chip soft">{t(hanafi ? "prayerGuideHanafi" : "prayerGuideFard")}</span>
         <span className="small muted">{t(hanafi ? "prayerGuideFollowing" : "prayerGuideShared")}</span>
       </Link>
-      {groups.some(group => group.type === "witr") && <p className="small muted">{t("guideWitrDifference")}</p>}
-      {prayer === "jumuah" && <p className="small muted">{t("guideJumuahIntro")} <a href={notes.jumuah.url}>{hadithCitation(notes.jumuah, copy).full}</a></p>}
+      {groups.some(group => group.type === "witr") && <p className="small muted reading-copy">{t("guideWitrDifference")}</p>}
+      {prayer === "jumuah" && <p className="small muted reading-copy">{t("guideJumuahIntro")} <a href={notes.jumuah.url}>{hadithCitation(notes.jumuah, copy).full}</a></p>}
       <section className="guide-rakahs" aria-labelledby="guide-rakahs-heading">
         <h2 id="guide-rakahs-heading">{t("guideStepHeading", { count: fardCount })}</h2>
         <ol className="compact-stack" role="list">

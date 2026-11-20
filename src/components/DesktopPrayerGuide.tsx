@@ -104,7 +104,7 @@ function GuideRakahSteps({ step, context, friday }: { step: PrayerOutline["steps
   return <ol role="list" className="guide-desk-steps">
     {steps.map(({ id, title, detail, phrase }, index) => <li className={id === "recite" ? "card tint" : "card"} key={id}>
       <span className="guide-desk-step-number" aria-hidden="true">{number.format(index + 1)}</span>
-      <div className="guide-desk-instruction"><strong>{t(title)}</strong><p className="muted">{t(detail)}</p>
+      <div className="guide-desk-instruction"><strong>{t(title)}</strong><p className="muted reading-copy">{t(detail)}</p>
         {id === "recite" && !friday && addSurah && <Link to={`/learn/surahs/${step.suggestion.number}?${context}`}>{addSurah}</Link>}
       </div>
       <StepPhrase phrase={phrase} />

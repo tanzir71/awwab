@@ -10,7 +10,7 @@ import { useClock, useDesktop, useSettings } from "@/hooks/use-awwab";
 import { defaults, migrateLegacy } from "@/lib/storageService";
 import { CopyContext, message } from "@/lib/copy";
 import { isBuiltIn, languages } from "@/lib/languagePreferences";
-import { hasLocaleMessages, loadLocalePack, localePackAsset } from "@/lib/localePacks";
+import { hasLocaleMessages, loadLocalePack, loadLocaleReadingFont, localePackAsset } from "@/lib/localePacks";
 import { readPseudoLocale } from "@/lib/pseudoLocale";
 import { speakPacks, speakSetupPath } from "@/lib/speakCurriculum";
 import Today, { PrayerWeek } from "@/pages/Index";
@@ -73,6 +73,18 @@ function Main() {
     });
     return () => { active = false; };
   }, [preferredLocale, restoringLocale]);
+  useEffect(() => {
+    if (settings?.language !== "ur" || !settings.urduNastaliq) return;
+    let active = true;
+    const root = document.documentElement;
+    void loadLocaleReadingFont("ur").then(loaded => {
+      if (active && loaded) root.dataset.urduReading = "nastaliq";
+    }).catch(() => {});
+    return () => {
+      active = false;
+      delete root.dataset.urduReading;
+    };
+  }, [settings]);
   useEffect(() => {
     let active = true;
     void Promise.resolve().then(() => migrateLegacy(window.localStorage)).then(() => {

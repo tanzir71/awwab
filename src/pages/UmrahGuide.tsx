@@ -123,7 +123,7 @@ export function UmrahGuide() {
           </div>
         </> : <>
           <h3>{title}</h3>
-          <p>{t(umrahStepSummary(step.id))}</p>
+          <p className="reading-copy">{t(umrahStepSummary(step.id))}</p>
           <div className="equal-row">
             <button type="button" className="action light" aria-pressed={complete} onClick={toggleStep}>
               {t(complete ? "umrahPracticeCompleted" : "umrahPracticeComplete")}

@@ -10,7 +10,7 @@ import { useDesktop } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { formatLocale, glossaryOptions, glossaryValue, isAvailableLanguage, languages, languageMatches, nativeNumberingSystem, salahVariants, suggestedLanguage,
   type AppLanguage, type GlossaryTerm, type LanguageItem } from "@/lib/languagePreferences";
-import { hasLoadedLocalePack, installedLocalePacks, localePackAsset } from "@/lib/localePacks";
+import { hasLoadedLocalePack, hasLocaleReadingFont, installedLocalePacks, loadLocaleReadingFont, localePackAsset } from "@/lib/localePacks";
 import { selectAppLanguage, updateSettings, updateWordChoice, type Settings } from "@/lib/storageService";
 
 const quickLanguages = languages.filter(item => item.tier === 1 || item.code === "hi");
@@ -135,12 +135,44 @@ function ReadingToggle({ title, hint, enabled, disabled = false, onToggle }: {
   </button>;
 }
 
+function UrduReadingStyle({ preferred, bytes }: { preferred: boolean; bytes: number }) {
+  const { t } = useCopy();
+  const [ready, setReady] = useState(() => hasLocaleReadingFont("ur"));
+  const [saving, setSaving] = useState(false);
+  useEffect(() => {
+    let active = true;
+    void loadLocaleReadingFont("ur").then(loaded => {
+      if (active && loaded) setReady(true);
+    }).catch(() => {});
+    return () => { active = false; };
+  }, []);
+  async function change(urduNastaliq: boolean) {
+    setSaving(true);
+    try {
+      if (urduNastaliq) {
+        if (!(await loadLocaleReadingFont("ur", true))) throw new Error("The Urdu reading font is unavailable");
+        setReady(true);
+      }
+      await updateSettings({ urduNastaliq });
+    } catch {
+      toast.error(t("settingsNastaliqError"));
+    } finally {
+      setSaving(false);
+    }
+  }
+  const hint = saving && !ready ? t("settingsLanguageDownloading") : ready ? t("settingsNastaliqHint") :
+    t("settingsNastaliqDownloadHint", { size: t("fileSizeMB", { size: bytes / 1_000_000 }) });
+  return <ReadingToggle title={t("settingsNastaliq")} hint={hint} disabled={saving}
+    enabled={preferred && ready} onToggle={next => void change(next)} />;
+}
+
 function ReadingHelp({ settings }: { settings: Settings }) {
   const { t } = useCopy();
   const { language, nativeDigits } = settings;
   const localEnglish = language === "en";
   const bangla = language === "bn";
   const localDigits = nativeNumberingSystem(language) !== "latn";
+  const nastaliqFont = language === "ur" ? localePackAsset(language)?.readingFont : undefined;
   function save(patch: Partial<Settings>) {
     void updateSettings(patch).catch(() => toast.error(t("saveError")));
   }
@@ -154,6 +186,7 @@ function ReadingHelp({ settings }: { settings: Settings }) {
       example: new Intl.NumberFormat(formatLocale({ language })).format(123),
     })} hint={t("settingsNativeDigitsHint")}
       enabled={nativeDigits !== false} onToggle={nativeDigits => save({ nativeDigits })} />}
+    {nastaliqFont && <UrduReadingStyle preferred={Boolean(settings.urduNastaliq)} bytes={nastaliqFont.bytes} />}
   </section>;
 }
 

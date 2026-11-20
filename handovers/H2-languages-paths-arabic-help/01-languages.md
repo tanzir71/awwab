@@ -72,6 +72,8 @@ For a static build, set the compiler’s output directory to `public/locales`. T
 
 The installer also verifies and caches any script fonts needed by a published locale. Locales that share a font reuse the cached file. The app includes small language-name fonts so the picker can show native names before installation, including offline. Regenerate those subsets with `python scripts/build-locale-name-fonts.py` using the pinned Fontsource packages and FontTools with Brotli support.
 
+With a published Urdu pack selected, enable **Nastaliq for Urdu reading** under **Reading help**. The first use verifies and downloads Noto Nastaliq Urdu. The setting reuses that offline font for longer Urdu guidance in How to pray and Umrah. The font choice is included in backups.
+
 The review export includes the landing page, navigation labels, metadata and image descriptions. Production emits an English page and an HTML alternate for each compiled locale. The nav lists those editions and switches between them without a reload. Each edition has a canonical URL and `hreflang` links. Opening Awwab from a localized edition sets the app language. The landing pages work offline after their worker finishes caching them. Preview builds include draft Bangla for layout review and carry a `noindex` directive.
 
 ## 6. Acceptance

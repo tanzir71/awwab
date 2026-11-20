@@ -204,7 +204,7 @@ export function UmrahRituals() {
         <p className="caption">{t("umrahGuideStep", { step: trip.step + 1, total })}</p><h2>{title}</h2>
         {step.notes?.map((_, index) => {
           const key = umrahStepNote(step.id, index);
-          return <p className="muted" key={key}>{t(key)}</p>;
+          return <p className="muted reading-copy" key={key}>{t(key)}</p>;
         })}
         {isTawaf && <UmrahTawafDiagram />}
         {isTawaf && <>
@@ -230,7 +230,7 @@ export function UmrahRituals() {
     {isSai ? <details className="umrah-sai-steps">
       <summary>{t("umrahGuideSteps")}</summary>{stepList}
     </details> : <section className="compact-stack"><h2>{t("umrahGuideSteps")}</h2>{stepList}</section>}
-    <p className="card tint muted">{t("umrahGuideScholars")}</p>
+    <p className="card tint muted reading-copy">{t("umrahGuideScholars")}</p>
     {isSai ? <div className="equal-row">
       <Link to="/plan" className="action light">{t("umrahBackToPlan")}</Link>
       <Link to="/print/umrah-guide" className="action soft">{t("umrahGuidePrint")}</Link>

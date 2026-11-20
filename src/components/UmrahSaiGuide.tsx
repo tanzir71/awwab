@@ -95,7 +95,7 @@ export function UmrahSaiGuide({ trip, step, total, course, point, save, note, lo
         <h2 className="with-icon"><DesignIcon name="umrah-prep-volume" size={16} />
           {finished ? t("umrahSaiName") : t("umrahSaiOnArrival", { destination })}
         </h2>
-        <p className="small muted">{note}</p>
+        <p className="small muted reading-copy">{note}</p>
         <details>
           <summary className="small">{t("umrahGuideVoice")}</summary>
           {children}

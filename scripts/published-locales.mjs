@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { entries, fingerprint, root } from "./ui-catalogue.mjs";
-import { localeFonts } from "./locale-fonts.mjs";
+import { localeFonts, localeReadingFont } from "./locale-fonts.mjs";
 
 export function publishedLocales() {
   const directory = resolve(root, "public/locales");
@@ -19,7 +19,8 @@ export function publishedLocales() {
       throw new Error(`${file} does not match the current UI catalogue. Compile the matching reviewed locale before publishing it.`);
     }
     const fonts = localeFonts(locale.script);
-    published.push([locale.code, { bytes: bytes.length, digest: createHash("sha256").update(bytes).digest("hex"), fonts }]);
+    published.push([locale.code, { bytes: bytes.length, digest: createHash("sha256").update(bytes).digest("hex"),
+      fonts, readingFont: localeReadingFont(locale.code) }]);
   }
   return Object.fromEntries(published);
 }

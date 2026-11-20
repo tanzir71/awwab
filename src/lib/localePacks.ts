@@ -1,8 +1,8 @@
 import { asset } from "./config";
 
 type CheckedAsset = { bytes: number; digest: string };
-type PackFont = CheckedAsset & { path: string; family: string; unicodeRange: string };
-type PackAsset = CheckedAsset & { fonts: PackFont[] };
+type PackFont = CheckedAsset & { path: string; family: string; unicodeRange: string; weight: string };
+type PackAsset = CheckedAsset & { fonts: PackFont[]; readingFont?: PackFont };
 type PackMessages = Record<string, string | { adult: string; maktab: string }>;
 declare const __AWWAB_PUBLISHED_LOCALES__: Record<string, PackAsset>;
 
@@ -61,6 +61,29 @@ async function loadAsset(cache: Cache, url: string, info: CheckedAsset, download
   return bytes;
 }
 
+async function loadFont(cache: Cache, font: PackFont, download: boolean) {
+  const url = checkedUrl(font.path, font);
+  if (activeFonts.has(url)) return true;
+  const bytes = await loadAsset(cache, url, font, download);
+  if (!bytes) return false;
+  const face = await new FontFace(font.family, bytes, { weight: font.weight, unicodeRange: font.unicodeRange }).load();
+  if (!activeFonts.has(url)) {
+    document.fonts.add(face);
+    activeFonts.add(url);
+  }
+  return true;
+}
+
+export function hasLocaleReadingFont(code: string) {
+  const font = localePackAsset(code)?.readingFont;
+  return Boolean(font && activeFonts.has(checkedUrl(font.path, font)));
+}
+
+export async function loadLocaleReadingFont(code: string, download = false) {
+  const font = localePackAsset(code)?.readingFont;
+  return font ? loadFont(await caches.open(cacheName), font, download) : false;
+}
+
 export async function installedLocalePacks() {
   if (!Object.keys(published).length || !("caches" in globalThis)) return new Set<string>();
   const cache = await caches.open(cacheName);
@@ -78,15 +101,7 @@ export async function loadLocalePack(code: string, download = false) {
   const catalogue = await loadAsset(cache, packUrl(code, info), info, download);
   if (!catalogue) return false;
   for (const font of info.fonts) {
-    const url = checkedUrl(font.path, font);
-    if (activeFonts.has(url)) continue;
-    const bytes = await loadAsset(cache, url, font, download);
-    if (!bytes) continue;
-    const face = await new FontFace(font.family, bytes, { weight: "100 900", unicodeRange: font.unicodeRange }).load();
-    if (!activeFonts.has(url)) {
-      document.fonts.add(face);
-      activeFonts.add(url);
-    }
+    await loadFont(cache, font, download);
   }
   messagesByLocale.set(code, JSON.parse(new TextDecoder().decode(catalogue)).messages as PackMessages);
   return true;

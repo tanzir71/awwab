@@ -46,7 +46,7 @@ export function PrayerGuideLostCount({ desktop = false, hanafi = false, topic = 
   const hanafiLanguage = language === "bn" ? "bn" : "en";
   return <section className="card tint guide-lost" data-desktop={desktop}>
     <h2 className="with-icon">{!desktop && <DesignIcon name="guide-refresh" size={18} />}{t(topic ? "guideSahw" : desktop ? "guideLostShort" : "guideLostCount")}</h2>
-    <p className={desktop ? "small" : "small muted"}>{t(desktop ? "guideLostDesktopHelp" : "guideLostCountHelp")}</p>
+    <p className={desktop ? "small reading-copy" : "small muted reading-copy"}>{t(desktop ? "guideLostDesktopHelp" : "guideLostCountHelp")}</p>
     <a href={lostCount.url} className="guide-citation" aria-label={citation.full}>
       <span className="chip soft caption">{desktop ? citation.grade : t("hadithCitationGradeFirst", citation)}</span>
       {desktop && <span className="small muted">{citation.reference}</span>}
@@ -63,7 +63,7 @@ export function PrayerGuideTopicCard({ topic, hanafi, desktop = false }: { topic
   const source = topic === "witr" ? notes.qunut : notes[topic];
   return <section className="card guide-topic-card">
     <h2>{t(guideTopics[topic].name)}</h2>
-    <p>{t(detail)}</p>
+    <p className="reading-copy">{t(detail)}</p>
     {topic === "witr" && <>
       <p className="small muted">{t("guideQunutExcerpt")}</p>
       <ArabicText text={notes.qunut.arabic} citation={source.source} />

@@ -311,6 +311,11 @@ progress::-moz-progress-bar { background: var(--control-primary); }
   --font-display: var(--font-arabic);
   --font-body: var(--font-arabic);
 }
+:root[lang="ur"][data-urdu-reading="nastaliq"] .reading-copy:lang(ur) {
+  font-family: "Noto Nastaliq Urdu Variable", var(--font-body);
+  line-height: 1.9;
+  letter-spacing: normal;
+}
 .arabic-line { display: flex; flex-wrap: wrap; gap: 3px; max-inline-size: 100%; padding: 3px; }
 .arabic-line.arabic-phrase-line { display: block; }
 .arabic-phrase-line .word-chip { vertical-align: middle; }
