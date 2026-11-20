@@ -142,22 +142,31 @@ QAIDA_WORDS = {
     "بَابٌ": "baːbun", "قَلَمٌ": "qalamun", "كِتَابٌ": "kitaːbun",
     "بَابًا": "baːban", "قَلَمٍ": "qalamin", "كِتَابٍ": "kitaːbin",
     "بَا": "baː", "بِي": "biː", "بُو": "buː", "بَيْ": "baj", "بَوْ": "baw",
+    "بِسْمِ": "bismi", "أَحَدٌ": "ʔaħadun", "يَوْمٌ": "jawmun", "ٱلْعَصْرِ": "ʔalʕasˤri",
+    "هَٰذَا": "haːðaː", "مَٰلِكِ": "maːliki", "ٱلرَّحْمَٰنِ": "ʔarːaħmaːni", "مُوسَىٰ": "muːsaː",
+    "خَيْرٌ": "xajrun", "سَلَامٌ": "salaːmun", "نُورٌ": "nuːrun", "رَيْبٌ": "rajbun",
+    "أَبْ": "ʔab", "أَجْ": "ʔadʒ", "أَدْ": "ʔad", "بِسْ": "bis",
+    "ٱلْحَمْدُ": "ʔalħamdu", "نَعْبُدُ": "naʕbudu", "ٱهْدِنَا": "ʔihdinaː",
+    "رَبَّ": "rabːa", "إِنَّ": "ʔinːa", "أُمُّ": "ʔumːu", "حَقٌّ": "ħaqːun",
+    "ٱلضُّحَىٰ": "ʔadˤːuħaː", "ٱلنَّاسِ": "ʔanːaːsi", "ٱلصَّمَدُ": "ʔasˤːamadu",
 }
-QAIDA_DRILL_LESSONS = (1, 2, 4, 5, 8)
+QAIDA_DRILL_LESSONS = tuple(range(1, 14))
 
 
 def qaida_phonemes(text, lesson):
-    if lesson in (1, 2):
-        return [QAIDA_LETTERS[letter][1] for letter in text]
+    if lesson <= 3:
+        return [QAIDA_LETTERS[letter][1] for letter in text if letter != "ٓ"]
     if text in QAIDA_WORDS:
         return [QAIDA_WORDS[text]]
     letter, mark = text
     return [QAIDA_LETTERS[letter][0] + QAIDA_MARKS[mark]]
 
 
-def build_qaida_placement(render):
+def build_qaida_placement(render, resume=False):
     for slug, text in (("bi", "بِ"), ("bu", "بُ")):
-        render(qaida_phonemes(text, 4), OUTPUT / "study-speech" / f"{slug}.opus")
+        path = OUTPUT / "study-speech" / f"{slug}.opus"
+        if not resume or not path.is_file():
+            render(qaida_phonemes(text, 4), path)
 
 
 def qaida_renderer(voice):
@@ -189,7 +198,7 @@ def qaida_renderer(voice):
     return render
 
 
-def build_qaida(voice):
+def build_qaida(voice, resume):
     # Both the visible exercises and the generated clips use the same row data and saved recording keys.
     query = """
         import { qaidaAudioRef, qaidaHarakatExercise, qaidaHarakatExerciseRef, qaidaRows } from './src/lib/qaidaPractice.ts';
@@ -207,7 +216,9 @@ def build_qaida(voice):
 
     def clip(ref, ipa):
         relative = f"packs/study-speech/{ref.replace(':', '-')}.opus"
-        render(ipa, ROOT / "public" / relative)
+        path = ROOT / "public" / relative
+        if not resume or not path.is_file() or path.stat().st_size < 1000:
+            render(ipa, path)
         items[ref] = relative
 
     for drill in data["drills"]:
@@ -221,7 +232,7 @@ def build_qaida(voice):
         print(f"Encoded {len(drill['rows'])} rows and a full exercise for lesson {lesson}", flush=True)
     intro = data["intro"]
     clip(intro["ref"], [part for text in intro["text"] for part in qaida_phonemes(text, 4)])
-    build_qaida_placement(render)
+    build_qaida_placement(render, resume)
     write(CONTENT / "qaida-audio.json", {"voice": "Emirati Piper", "source": MODEL, "lessons": QAIDA_DRILL_LESSONS, "items": items})
 
 
@@ -352,7 +363,7 @@ def main():
     task.add_argument("--qaida", action="store_true", help="Build Qaida drill audio and placement vowel clips with Emirati Piper")
     parser.add_argument("--piper", default="piper", help="Piper executable for --umrah-guide")
     parser.add_argument("--bangla-model", type=Path, help="Local Indic Tiny TTS Bengali model directory with code and ONNX graphs")
-    parser.add_argument("--resume", action="store_true", help="Reuse completed clips when resuming an A3S build")
+    parser.add_argument("--resume", action="store_true", help="Reuse completed clips when extending a Qaida or A3S build")
     args = parser.parse_args()
     if args.umrah_guide:
         if args.bangla_model is None:
@@ -372,7 +383,7 @@ def main():
 
     voice = PiperVoice.load(args.model)
     if args.qaida:
-        build_qaida(voice)
+        build_qaida(voice, args.resume)
         return
     synthesize_wav = voice.synthesize_wav
     for course in (args.course,) if args.course else SPEAK_COURSES:

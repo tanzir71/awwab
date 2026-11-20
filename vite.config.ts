@@ -11,6 +11,7 @@ import anatomySample from "./docs/content/word-anatomy.sample.json";
 import onboarding from "./docs/content/onboarding.json";
 import { sharedSpeakClips } from "./src/lib/speakAskAudio";
 import { tajweedPrecache } from "./src/lib/tajweed";
+import { qaidaRecitations } from "./src/lib/qaidaRecitation";
 import { publishedLocales } from "./scripts/published-locales.mjs";
 import { localeFontFiles } from "./scripts/locale-fonts.mjs";
 import { landingPages } from "./scripts/landing-pages.mjs";
@@ -81,6 +82,7 @@ export default defineConfig(({ mode }) => {
           "app/**/*.{html,webmanifest,png,svg,otf,woff2,mjs}", "app/locale-font-notices.txt", "assets/**/*", "design/**/*", "data/**/*", "packs/audio/index.json",
           ...Object.values(onboarding.samples).map(item => item.path),
           "packs/study-speech/*.opus",
+          ...Object.values(qaidaRecitations).map(item => item.path),
           ...sharedSpeakClips,
           ...tajweedPrecache,
         ],

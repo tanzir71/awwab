@@ -33,6 +33,15 @@ export function qaidaExamples(lesson: number) {
 export const qaidaHarakatExercise = "تَ تِ جُ حَ حِ دُ";
 export const qaidaHarakatExerciseRef = "qaida:4:examples";
 
+const citedRows: Record<number, string[]> = {
+  3: ["2:1", "36:1", "26:1", "20:1", "19:1"],
+  17: ["112:1", "112:2", "112:3"],
+};
+
+export function qaidaRowVerse(lesson: number, row: number) {
+  return citedRows[lesson]?.[row];
+}
+
 export function qaidaAudioRef(lesson: number, row?: number) {
   if (row === undefined) return `qaida:${lesson}:lesson`;
   const revision = lesson === 4 || lesson === 5 ? ":v2" : "";

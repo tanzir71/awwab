@@ -11,11 +11,13 @@ import { asset } from "./config";
 import { speakCourses, speakLessonContent, speakUnitNumber } from "./speakCurriculum";
 import { hasSharedSpeakAudio, placementSpeakPhraseIds, sharedSpeakClips } from "./speakAskAudio";
 import { umrahGuidePack, umrahGuidePacks } from "./umrahGuideAudio";
-import { qaidaAudioRef, qaidaHarakatExerciseRef, qaidaRows } from "./qaidaPractice";
+import { qaidaAudioRef, qaidaHarakatExerciseRef, qaidaRows, qaidaRowVerse } from "./qaidaPractice";
+import { qaidaRecitations, qaidaReciter } from "./qaidaRecitation";
+import { normalizeWord } from "./wordAnatomy";
 
 describe("Generated Qaida practice", () => {
   it("includes a playable clip for every row and full exercise in the covered lessons", () => {
-    expect(qaidaAudio.lessons).toEqual([1, 2, 4, 5, 8]);
+    expect(qaidaAudio.lessons).toEqual(Array.from({ length: 13 }, (_, index) => index + 1));
     const expected = qaidaAudio.lessons.flatMap(lesson => [qaidaAudioRef(lesson), ...qaidaRows(lesson).map((_row, index) =>
       qaidaAudioRef(lesson, index))]);
     expect(Object.keys(qaidaAudio.items).sort()).toEqual([...expected, qaidaHarakatExerciseRef].sort());
@@ -24,6 +26,21 @@ describe("Generated Qaida practice", () => {
       const clip = readFileSync(new URL(`../../public/${path}`, import.meta.url));
       expect(clip.includes(Buffer.from("OpusHead")), path).toBe(true);
       expect(clip.length, path).toBeGreaterThan(1000);
+    }
+  });
+});
+
+describe("Qaida Quran recitation", () => {
+  it("uses the attributed surah and plays the cited complete verse for each practice row", () => {
+    expect(qaidaRecitations[qaidaAudioRef(17)]?.ref).toBe("surah:112");
+    expect(qaidaReciter.licenseUrl).toMatch(/^https:\/\/creativecommons\.org\//);
+    for (const [index, row] of qaidaRows(17).entries()) {
+      const source = qaidaRecitations[qaidaAudioRef(17, index)];
+      const verse = quranText[112][index];
+      expect(source?.ref).toBe(verse.ref);
+      expect(source?.ref).toBe(qaidaRowVerse(17, index));
+      expect(normalizeWord(verse.uthmani).startsWith(normalizeWord(row.flat().join(" ")))).toBe(true);
+      expect(qaidaReciter.items).toContainEqual(source);
     }
   });
 });

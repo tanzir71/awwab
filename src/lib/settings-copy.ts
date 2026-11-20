@@ -43,8 +43,8 @@ export const settingsMessages = {
     bn: "Adhan দিয়ে এই ডিভাইসেই সালাতের সময় হিসাব করা হয়। এর লাইসেন্স MIT।",
   },
   sourcesQaidaSpeech: {
-    en: "Generated pronunciations for Qaida letter and vowel drills and the placement sounds.",
-    bn: "কায়দার হরফ ও স্বরের অনুশীলন এবং শুরুর যাচাইয়ের জন্য তৈরি উচ্চারণ।",
+    en: "Generated pronunciation for Qaida drills and the placement sounds.",
+    bn: "কায়দার অনুশীলন ও শুরুর যাচাইয়ের জন্য তৈরি উচ্চারণ।",
   },
   sourcesMaps: {
     en: "Haram points come from OpenStreetMap. The Makkah and Madinah map packs are Protomaps extracts. © OpenStreetMap contributors, Open Database License.",
