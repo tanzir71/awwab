@@ -11,6 +11,7 @@ const read = path => JSON.parse(readFileSync(path, "utf8"));
 const source = read(sourcePath);
 const review = read(reviewPath);
 const { locales } = read(new URL("../handovers/H2-languages-paths-arabic-help/data/locales.json", import.meta.url));
+const { terms } = read(new URL("../handovers/H2-languages-paths-arabic-help/data/glossary.json", import.meta.url));
 const locale = locales.find(item => item.code === review.locale?.code);
 if (!locale) throw new Error("The review must name a locale in the handover inventory.");
 
@@ -20,12 +21,12 @@ if (review._status !== "reviewed" || new Set(names.map(name => name.toLowerCase(
 }
 
 const sourceMessages = Object.fromEntries(Object.entries(source.messages).map(([key, entry]) => [key, entry.text]));
-const fingerprint = createHash("sha256").update(JSON.stringify(sourceMessages)).digest("hex");
+const fingerprint = createHash("sha256").update(JSON.stringify({ messages: sourceMessages, glossary: terms })).digest("hex");
 if (source.language !== "en" || source.fingerprint !== fingerprint || review.sourceFingerprint !== fingerprint) {
-  throw new Error("The translations must match the English source fingerprint from the same review export.");
+  throw new Error("The translations must match the message and glossary fingerprint from the same review export.");
 }
 
-function icuContract(text) {
+function icuContract(text, allowGlossary) {
   const argumentsFound = new Set();
   const required = new Set();
   const fixed = new Set();
@@ -35,6 +36,10 @@ function icuContract(text) {
       if (element.type === TYPE.pound) {
         required.add(pluralArgument);
         continue;
+      }
+      if (element.value.startsWith("term_") &&
+        (!allowGlossary || element.type !== TYPE.argument || !Object.hasOwn(terms, element.value.slice(5)))) {
+        throw new Error("Use only documented glossary terms as plain arguments in app copy.");
       }
       const isPlural = element.type === TYPE.plural;
       argumentsFound.add(element.value);
@@ -56,19 +61,19 @@ function icuContract(text) {
   return { argumentsFound, required, fixed };
 }
 
-function checkMessage(english, translation) {
+function checkMessage(english, translation, allowGlossary) {
   if (typeof english !== "string") {
     if (!translation || typeof translation !== "object" || Object.keys(translation).length !== 2) {
       throw new Error("Provide both Adult and Maktab text.");
     }
-    checkMessage(english.adult, translation.adult);
-    checkMessage(english.maktab, translation.maktab);
+    checkMessage(english.adult, translation.adult, allowGlossary);
+    checkMessage(english.maktab, translation.maktab, allowGlossary);
     return;
   }
   if (typeof translation !== "string" || !translation.trim()) throw new Error("Translation is missing.");
-  const source = icuContract(english);
-  const target = icuContract(translation);
-  if ([...target.argumentsFound].some(argument => !source.argumentsFound.has(argument))
+  const source = icuContract(english, allowGlossary);
+  const target = icuContract(translation, allowGlossary);
+  if ([...target.argumentsFound].some(argument => !source.argumentsFound.has(argument) && !argument.startsWith("term_"))
     || [...source.required].some(argument => !target.required.has(argument))
     || source.fixed.size !== target.fixed.size
     || [...source.fixed].some(choice => !target.fixed.has(choice))) {
@@ -80,7 +85,7 @@ const translations = review.messages ?? {};
 const unknown = Object.keys(translations).filter(key => !Object.hasOwn(sourceMessages, key));
 if (unknown.length) throw new Error(`Unknown message keys: ${unknown.join(", ")}`);
 for (const [key, english] of Object.entries(sourceMessages)) {
-  try { checkMessage(english, translations[key]); }
+  try { checkMessage(english, translations[key], !key.startsWith("landing")); }
   catch (error) { throw new Error(`${key}: ${error.message}`); }
 }
 

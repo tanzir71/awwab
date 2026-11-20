@@ -18,7 +18,7 @@ Tier 1 covers the largest non-Arab Muslim populations (Indonesia, Pakistan, Indi
 ## 2. Experience
 - **Where:** onboarding step 1 (DC01/A01), Settings → Language & words (A26 / DC09), the sidebar language chip on desktop, and the landing-page nav.
 - **Picker (A26):** suggested language from `navigator.languages`; search; each row shows the name **in its own script and font**, the English name, an RTL tag where relevant, and download state/size. Choosing a language downloads its pack once (catalog + font subset + translations), then it works offline.
-- **Your words (A27):** Muslims say the same thing differently (namaz / salat / sholat / solat / sallah). Catalog strings reference terms (`{term.salah}`), and the user picks the option that sounds right. Terms and options: [`data/glossary.json`](data/glossary.json).
+- **Your words (A27):** Muslims say the same thing differently (namaz / salat / sholat / solat / sallah). Catalog strings reference terms (`{term_salah}`), and the user picks the option that sounds right. Terms and options are in [`data/glossary.json`](data/glossary.json).
 - **Reading help:** "Quran meanings in the app language" (on), "Show English under each line" (off; useful while a translation is in review), native digits toggle (e.g. Bangla ১২৩).
 - **Spelling style** stays separate: Ampara (বা যবর বা) or English (Bāʾ + fatha = ba). Later locales can add their own (e.g. Urdu: “ب زبر بَ”).
 - **Share cards** use the app language for titles, captions, numbers and the footer tagline. Export uses the same type and layout as the preview. The link stays fixed. Quotes use the sourced English meaning while local editions are pending, with the language and source identified on the card.
@@ -61,6 +61,8 @@ Show the translation's name and source under every translated āyah (principle: 
 5. The figures in Figma are layout tests with draft translations (label on the page says so).
 
 Generate the Tier 1 UI review files with `node scripts/export-locale-review.mjs <review-directory>`. The export includes the English ICU messages, Adult and Maktab variants, source locations, references in the app, and an index of available screenshots. Every locale file is marked as a draft. Use the English source fingerprint to match translations to the same set of messages. Choose a fresh directory for each export to preserve work in earlier drafts.
+
+Keep the glossary arguments already present in source messages, and use the export’s `glossary` entries to add other terms to app copy where they fit. Use each as a plain ICU argument, such as `{term_wudu}`. The app fills it with the user's saved choice or the glossary default. The fingerprint includes the options in `data/glossary.json` so a change to the glossary requires a new review export.
 
 After native review, record the reviewers in the catalogue’s `reviewers` array and set `_status` to `reviewed`. Use `node scripts/build-locale-pack.mjs <source-ui.json> <reviewed-catalogue.json> <output-directory>` to produce the UI catalogue. The build checks the source fingerprint, message coverage, mode variants, and ICU arguments. The review file retains the reviewer names.
 

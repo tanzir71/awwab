@@ -64,6 +64,14 @@ export function applyGlossary(format: string, language: AppLanguage, choices?: W
   return format.replace(banglaSpellings, word => glossaryValue("bn", termsBySpelling.get(word), choices));
 }
 
+export function glossaryArguments(format: string, language: AppLanguage, choices?: WordChoices) {
+  const values: Record<string, string> = {};
+  for (const [, argument, term] of format.matchAll(/\{\s*(term_([a-z]+))\s*\}/g)) {
+    if (Object.prototype.hasOwnProperty.call(glossary.terms, term)) values[argument] = glossaryValue(language, term as GlossaryTerm, choices);
+  }
+  return values;
+}
+
 export function formatLocale({ language, nativeDigits }: { language: AppLanguage; nativeDigits?: boolean }) {
   return language === "bn" && nativeDigits === false ? "bn-u-nu-latn" : language;
 }

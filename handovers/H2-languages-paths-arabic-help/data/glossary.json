@@ -1,7 +1,7 @@
 {
   "version": 1,
   "status": "draft — every term needs native-speaker review; the first option is the default",
-  "howItWorks": "Catalog strings reference terms as {term.salah}, {term.fajr} … The user can pick an option per term in Settings → Language & words (A27).",
+  "howItWorks": "Catalog strings reference terms as {term_salah}, {term_fajr} … The user can pick an option per term in Settings → Language & words (A27).",
   "terms": {
     "salah": {
       "en": [

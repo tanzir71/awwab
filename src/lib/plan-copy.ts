@@ -50,7 +50,7 @@ export const planMessages = {
   planCheckLocalCrescent: { en: "Check the local crescent sighting", bn: "স্থানীয় চাঁদ দেখার খবর জানো" },
   planEventShaban: { en: "{day, number} Shaʿbān", bn: "{day, number} শাবান" },
   planEventShabanDetail: { en: "Observed by many. Scholars differ on practices.", bn: "অনেকে পালন করেন। আমল নিয়ে আলেমদের মতভেদ আছে।" },
-  planEventRamadan: { en: "Ramadan begins", bn: "রমজান শুরু" },
+  planEventRamadan: { en: "{term_ramadan} begins", bn: "{term_ramadan} শুরু" },
   planEventRamadanDetail: { en: "Dates depend on the local sighting", bn: "তারিখ স্থানীয় চাঁদ দেখার ওপর নির্ভর করে" },
   planEventTenNights: { en: "Last ten nights", bn: "শেষ দশ রাত" },
   planEventTenNightsDetail: { en: "Laylat al-Qadr", bn: "লাইলাতুল কদর" },

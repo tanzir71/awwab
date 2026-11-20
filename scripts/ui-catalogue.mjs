@@ -8,6 +8,7 @@ import { landingCopyEntries } from "./landing-copy.mjs";
 import { umrahStepMessages } from "../src/lib/umrah-step-messages.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
+const { terms: glossary } = JSON.parse(readFileSync(resolve(root, "handovers/H2-languages-paths-arabic-help/data/glossary.json"), "utf8"));
 const sources = new Map();
 const sourceName = path => relative(root, path).split("\\").join("/");
 
@@ -120,6 +121,7 @@ for (const [key, translations] of Object.entries(umrahStepMessages)) {
 }
 
 const entries = [...messages.entries()].sort(([left], [right]) => left.localeCompare(right, "en"));
-const fingerprint = createHash("sha256").update(JSON.stringify(Object.fromEntries(entries.map(([key, { en }]) => [key, en])))).digest("hex");
+const englishMessages = Object.fromEntries(entries.map(([key, { en }]) => [key, en]));
+const fingerprint = createHash("sha256").update(JSON.stringify({ messages: englishMessages, glossary })).digest("hex");
 
-export { entries, filesBelow, fingerprint, messages, readSource, root, sourceName };
+export { entries, filesBelow, fingerprint, glossary, messages, readSource, root, sourceName };

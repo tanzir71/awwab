@@ -1,6 +1,6 @@
 import { IntlMessageFormat, PART_TYPE } from "intl-messageformat";
 import { createContext, useContext, useMemo } from "react";
-import { prayerNames, prayerStatusNames } from "../types/Prayer";
+import { prayerStatusNames } from "../types/Prayer";
 import { rakatNames } from "./prayerServices";
 import type { Settings } from "./storageService";
 import { studyMessages } from "./study-copy";
@@ -16,7 +16,7 @@ import { planMessages } from "./plan-copy";
 import { mosqueMessages } from "./mosque-copy";
 import { zakatMessages } from "./zakat-copy";
 import { guideMessages } from "./guide-copy";
-import { applyGlossary, formatLocale, languages, type BuiltInLanguage } from "./languagePreferences";
+import { applyGlossary, formatLocale, glossaryArguments, languages, type BuiltInLanguage } from "./languagePreferences";
 import { localeMessage } from "./localePacks";
 import { settingsMessages } from "./settings-copy";
 import { umrahPrepMessages } from "./umrah-prep-copy";
@@ -212,7 +212,7 @@ const messages: MessageCatalog = {
   qadaTargetDate: { en: "By {date} at {count, number}/day", bn: "দিনে {count, number} ওয়াক্তে {date} পর্যন্ত" },
   learning: { en: "Learning", bn: "পড়ার অগ্রগতি" },
   qaidaLessons: { en: "Qaida lessons", bn: "কায়দার পাঠ" },
-  surahsSolid: { en: "Surahs for salah (solid)", bn: "সালাতের সূরা (ভালোভাবে শেখা)" },
+  surahsSolid: { en: "Surahs for {term_salah} (solid)", bn: "{term_salah}ের সূরা (ভালোভাবে শেখা)" },
   coreQuranWords: { en: "Core Quran words", bn: "কুরআনের মূল শব্দ" },
   takhtiFamilies: { en: "Takhti letter families", bn: "তখতির হরফের পরিবার" },
   expectedDate: { en: "Expected", bn: "সম্ভাব্য" },
@@ -221,11 +221,11 @@ const messages: MessageCatalog = {
   yours: { en: "Yours", bn: "আপনার" },
   tapAction: { en: "Tap", bn: "চাপ দিন" },
   unavailable: { en: "Unavailable", bn: "পাওয়া যায়নি" },
-  fajr: { en: prayerNames.fajr, bn: "ফজর" },
-  dhuhr: { en: prayerNames.dhuhr, bn: "যোহর" },
-  asr: { en: prayerNames.asr, bn: "আসর" },
-  maghrib: { en: prayerNames.maghrib, bn: "মাগরিব" },
-  isha: { en: prayerNames.isha, bn: "এশা" },
+  fajr: { en: "{term_fajr}", bn: "{term_fajr}" },
+  dhuhr: { en: "{term_dhuhr}", bn: "{term_dhuhr}" },
+  asr: { en: "{term_asr}", bn: "{term_asr}" },
+  maghrib: { en: "{term_maghrib}", bn: "{term_maghrib}" },
+  isha: { en: "{term_isha}", bn: "{term_isha}" },
   upcoming: { en: prayerStatusNames.upcoming, bn: "সামনে" },
   now: { en: prayerStatusNames.now, bn: "এখন" },
   done: { en: prayerStatusNames.done, bn: "ওয়াক্তে আদায় হয়েছে" },
@@ -247,9 +247,9 @@ const messages: MessageCatalog = {
   shortSurah: { en: "Start with a short surah", bn: "একটি ছোট সূরা দিয়ে শুরু করুন" },
   nooraniQaida: { en: "Noorani Qaida", bn: "নূরানী কায়দা" },
   lessonsPractised: { en: "{count} of 17 lessons practised", bn: "১৭টির মধ্যে {count, number}টি পাঠ অনুশীলন করেছেন" },
-  surahsForSalah: { en: "Surahs for salah", bn: "সালাতের সূরা" },
+  surahsForSalah: { en: "Surahs for {term_salah}", bn: "{term_salah}ের সূরা" },
   listenReadRecall: { en: "Listen, read and recall", bn: "শুনুন, পড়ুন ও মনে করুন" },
-  understandSalah: { en: "Understand your salah", bn: "সালাতের অর্থ বুঝি" },
+  understandSalah: { en: "Understand your {term_salah}", bn: "{term_salah}ের অর্থ বুঝি" },
   tapToSpell: { en: "Tap a word to spell it out", bn: "বানান দেখতে শব্দে চাপ দিন" },
   learnLetterShapes: { en: "Learn Arabic letter shapes", bn: "আরবি হরফের আকার শিখুন" },
   exploreArabic: { en: "Explore Quranic and modern Arabic", bn: "কুরআনের আরবি ও আধুনিক আরবি দেখুন" },
@@ -295,7 +295,7 @@ const messages: MessageCatalog = {
   quranWords: { en: "Quran words", bn: "কুরআনের শব্দ" },
   quranWordsKnown: { en: "Quran words known", bn: "কুরআনের চেনা শব্দ" },
   of125Words: { en: "of 125 core words", bn: "মূল শব্দ, মোট ১২৫টি" },
-  startWithSalah: { en: "Start with the words you read in salah.", bn: "সালাতে যে শব্দগুলো পড়েন সেগুলো দিয়ে শুরু করুন।" },
+  startWithSalah: { en: "Start with the words you read in {term_salah}.", bn: "{term_salah}ে যে শব্দগুলো পড়েন সেগুলো দিয়ে শুরু করুন।" },
   reviewsAhead: { en: "Reviews ahead", bn: "সামনের ঝালাই" },
   sevenDays: { en: "7 days", bn: "৭ দিন" },
   recallScore: { en: "{count}% marked Got it", bn: "{count, number}% সঠিক মনে ছিল" },
@@ -344,15 +344,18 @@ const formats = new Map<string, IntlMessageFormat<Record<string, string | number
 export function message(settings: CopySettings, id: string, values?: Record<string, string | number>) {
   const language = settings.pseudoLocale ? "en" : settings.language;
   const entry = messages[id] ?? askPhraseMessages[id] ?? umrahStepMessages[id];
-  const draft = localeMessage(language, id, settings.mode) ?? entry?.[language] ?? entry?.en ?? id;
-  const format = applyGlossary(typeof draft === "string" ? draft : draft[settings.mode === "maktab" ? 1 : 0], language, settings.wordChoices);
+  const installed = localeMessage(language, id, settings.mode);
+  const draft = installed ?? entry?.[language] ?? entry?.en ?? id;
+  const text = typeof draft === "string" ? draft : draft[settings.mode === "maktab" ? 1 : 0];
+  const format = installed === undefined ? applyGlossary(text, language, settings.wordChoices) : text;
+  const parameters = format.includes("term_") ? { ...values, ...glossaryArguments(format, language, settings.wordChoices) } : values;
   const locale = formatLocale({ ...settings, language });
   const key = locale + ":" + format;
   if (!formats.has(key)) formats.set(key, new IntlMessageFormat<Record<string, string | number>>(format, locale));
   const formatter = formats.get(key);
-  if (settings.pseudoLocale && entry) return formatter.formatToParts(values).map(part =>
+  if (settings.pseudoLocale && entry) return formatter.formatToParts(parameters).map(part =>
     part.type === PART_TYPE.literal ? pseudoLiteral(part.value, settings.pseudoLocale) : part.value).join("");
-  return formatter.format(values) as string;
+  return formatter.format(parameters) as string;
 }
 
 export function useCopy() {

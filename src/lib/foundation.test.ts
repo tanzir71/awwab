@@ -12,6 +12,7 @@ import { mosqueDefaults, type Mosque } from "./mosques";
 import { guideRakahIndex, guideReference, prayerGuide, prayerGuidePath } from "./prayerGuide";
 import { applyGlossary, formatLocale, glossaryValue, isBuiltIn, languageMatches, languages, showEnglishQuranMeaning, suggestedLanguage } from "./languagePreferences";
 import { planMonth } from "./plan-copy";
+import { message } from "./copy";
 import { updateWordChoice } from "./storageService";
 import { reviewCard, type Reviews } from "./reviews";
 import { countKnownQuranWords } from "./quran";
@@ -343,6 +344,16 @@ describe("language settings", () => {
     expect(showEnglishQuranMeaning({ language: "ur" })).toBe(true);
     expect(glossaryValue("ps", "salah")).toBe(glossaryValue("en", "salah"));
     expect(planMonth(9, "ur")).toMatch(/\p{Script=Arabic}/u);
+  });
+
+  it("formats glossary arguments with the active language's choices and keeps ICU numbers intact", () => {
+    const wordChoices = { bn: { salah: "সালাত", ramadan: "রামাদান" }, id: { salah: "sholat", dhuhr: "Dzuhur" } };
+    expect(message(defaults, "surahsForSalah")).toBe("Surahs for salah");
+    expect(message({ ...defaults, language: "bn", wordChoices }, "surahsForSalah")).toBe("সালাতের সূরা");
+    expect(message({ ...defaults, language: "bn", wordChoices }, "qadaRamadan", { count: 12 })).toBe("রামাদান আসতে ১২ দিন বাকি");
+    expect(message({ ...defaults, language: "id", wordChoices }, "dhuhr")).toBe("Dzuhur");
+    expect(message({ ...defaults, language: "id", wordChoices }, "surahsForSalah")).toBe("Surahs for sholat");
+    expect(message({ ...defaults, language: "id" }, "dhuhr")).toBe("Zuhur");
   });
 });
 
