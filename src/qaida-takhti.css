@@ -204,6 +204,7 @@
   .qaida-spell-equation .word-chip { min-width: 26px; min-height: 38px; }
   .qaida-spell-equation > .qaida-spell-mark { color: var(--interactive-ink); }
   .qaida-reading-card .action, .write-desktop-panel .action { min-height: 32px; padding: 4px 6px; font: var(--type-small); gap: 5px; }
+  .qaida-reading-card .qaida-audio .action { flex-wrap: wrap; row-gap: 0; overflow-wrap: anywhere; }
   .qaida-reading-card .small, .qaida-spell-card .small, .write-desktop-panel .small { line-height: 1.35; }
   .write-desktop-panel .row-between { align-items: baseline; gap: 5px; }
   .write-desktop-panel .write-board-stack { gap: 10px; }
