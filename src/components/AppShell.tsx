@@ -1,9 +1,10 @@
-import { useEffect, useLayoutEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
+import { X } from "lucide-react";
 import { DesignIcon, Wordmark } from "./DesignIcon";
 import { ShareLink } from "./ShareLink";
 import { WordPanel } from "./WordPanel";
-import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogTitle } from "./ui/dialog";
 import { useDesktop, useRecord, usePrayerLogs } from "@/hooks/use-awwab";
 import { dateKey, duration, formatDay } from "@/lib/dates";
 import { calendarDefaults, hijriLabel, hijriOn } from "@/lib/hijri";
@@ -23,6 +24,8 @@ import { gregorianMonthBounds, readCalendarMonth } from "@/lib/plan-calendar";
 import { zakatHawl, type ZakatProfile } from "@/lib/zakat";
 import { initialTrip, tripDates } from "@/lib/umrah";
 import { formatLocale, languages } from "@/lib/languagePreferences";
+import { latinDigits } from "@/lib/localeNumbers";
+import { focusListItem } from "@/lib/focusListItem";
 import { prayerCityLabel } from "@/lib/settings-copy";
 import { speakCourseTitle, speakSetupPath, speakUnit, speakUnitNumber, speakVarietyLabels } from "@/lib/speakCurriculum";
 import qaida from "../../docs/content/qaida-lessons.json";
@@ -62,10 +65,43 @@ const groups: { label: string; items: NavItem[] }[] = [
   ] },
 ];
 const simple = [mobile[1], mobile[0], ...mobile.slice(2)];
-const librarySearch = [
-  ...qaida.lessons.map(item => ({ title: `Qaida ${item.n} · ${item.title}`, to: `/learn/qaida/${item.n}`, terms: item.traditional })),
-  ...surahs.surahs.slice(0, 12).map(item => ({ title: item.transliteration, to: `/learn/surahs/${item.number}`, terms: `${item.nameArabic} ${item.english}` })),
-];
+const destinations = groups.flatMap(group => group.items);
+
+function normalizeSearch(text: string, locale: string) {
+  return latinDigits(text, locale).trim().toLowerCase().normalize("NFD")
+    .replace(/(\p{Script=Latin})\p{Mark}+/gu, "$1")
+    .replace(/[\u064b-\u0652\u0670]/g, "")
+    .normalize("NFC");
+}
+
+function searchApp(settings: Settings, query: string) {
+  const locale = formatLocale({ language: settings.language });
+  const terms = normalizeSearch(query, locale).split(/\s+/).filter(Boolean);
+  function matches(text: string) {
+    const searchable = normalizeSearch(text, locale);
+    const words = searchable.split(/[^\p{Letter}\p{Mark}\p{Number}]+/u);
+    return terms.every(term => /^\d+$/.test(term) ? words.includes(term) : searchable.includes(term));
+  }
+  const screens = destinations.map(({ title, to }) => ({
+    title: navigationLabel(settings, title), to, aliases: title,
+  })).filter(({ title, aliases }) => matches(`${title} ${aliases}`));
+  if (!terms.length) return screens;
+
+  const lessons = qaida.lessons.map(item => ({
+    title: message(settings, "searchQaidaLesson", {
+      number: item.n, title: studyNames.lesson(settings.language, item.n, item.title),
+    }),
+    to: `/learn/qaida/${item.n}`,
+    aliases: `Qaida ${item.n} ${item.title} ${item.traditional}`,
+  }));
+  const chapters = surahs.surahs.slice(0, 12).map(item => ({
+    title: studyNames.surah(settings.language, item.number, item.transliteration),
+    to: `/learn/surahs/${item.number}`,
+    aliases: `Surah ${item.number} ${item.transliteration} ${item.nameArabic} ${item.english}`,
+  }));
+  const matchedLibrary = [...lessons, ...chapters].filter(({ title, aliases }) => matches(`${title} ${aliases}`));
+  return [...screens, ...matchedLibrary.slice(0, 12)];
+}
 
 function Tabs({ settings, umrahGuide }: { settings: Settings; umrahGuide: boolean }) {
   const { mode } = settings;
@@ -87,6 +123,10 @@ export function AppShell({ children, settings, now, desktop }: { children: React
   const selectWord = useUi(state => state.selectWord);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const searchInput = useRef<HTMLInputElement>(null);
+  const searchReturnFocus = useRef<HTMLElement | null>(null);
+  const main = useRef<HTMLElement>(null);
+  const searchResults = useMemo(() => searchOpen ? searchApp(settings, query) : [], [searchOpen, settings, query]);
   const calendar = useRecord("calendar", calendarDefaults);
   const logs = usePrayerLogs();
   const reviews = useRecord<Reviews>("reviews", {});
@@ -126,7 +166,6 @@ export function AppShell({ children, settings, now, desktop }: { children: React
     "/plan/mosques": number.format(mosques.mosques.length),
     "/plan/zakat": hawl && t("zakatDayBadge", { days: hawl.daysUntil }),
   };
-  const destinations = groups.flatMap(group => group.items);
   const hifzRoute = location.pathname.startsWith("/learn/hifz/");
   const umrahGuide = location.pathname === "/plan/umrah-guide";
   const sectionPath = hifzRoute ? "/learn/paths" : umrahGuide ? "/plan" : location.pathname;
@@ -203,16 +242,26 @@ export function AppShell({ children, settings, now, desktop }: { children: React
     window.scrollTo(0, 0);
   }, [location.pathname, selectWord]);
 
+  const openSearch = useCallback(() => {
+    if (searchOpen) {
+      searchInput.current?.focus();
+    } else {
+      const focused = document.activeElement;
+      searchReturnFocus.current = focused instanceof HTMLElement && focused !== document.body ? focused : null;
+      setSearchOpen(true);
+    }
+  }, [searchOpen]);
   useEffect(() => {
     const search = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+      if (!event.defaultPrevented && !event.isComposing && !event.altKey && !event.shiftKey
+        && (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        setSearchOpen(true);
+        openSearch();
       }
     };
     window.addEventListener("keydown", search);
     return () => window.removeEventListener("keydown", search);
-  }, []);
+  }, [openSearch]);
 
   return <div className="app-shell">
     <a className="skip-link action" href="#app-main" onClick={event => {
@@ -222,7 +271,9 @@ export function AppShell({ children, settings, now, desktop }: { children: React
     {!fullscreen && <nav className={`sidebar ${learnWorkspace ? "desktop-learn-nav" : ""}`} aria-label={t("mainNavigation")}>
       <Link to="/learn" aria-label={t("studyHomeLink")}><Wordmark /></Link>
       {settings.mode === "adult" ? <>
-        <button type="button" className="search-button" onClick={() => setSearchOpen(true)}><DesignIcon name="desk-eye" size={15} /> {t("search")} <kbd className="chip">Ctrl K</kbd></button>
+        <button type="button" className="search-button" aria-keyshortcuts="Control+K Meta+K" onClick={openSearch}>
+          <DesignIcon name="desk-eye" size={15} /> {t("search")} <kbd className="chip" dir="ltr" aria-hidden="true">{t("searchShortcut")}</kbd>
+        </button>
         {groups.map(group => <div key={group.label}>
           <p className="caption nav-group">{navigationLabel(settings, group.label)}</p>
           {group.items.filter(item => !learnWorkspace || item.to !== "/you").map(item => {
@@ -256,7 +307,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
         </div>
       </>}
     </nav>}
-    <main className="app-main" id="app-main" tabIndex={-1} data-page={shareSheet ? "share-sheet" : shareMoment ? "share-moment" : umrahDesktop ? "umrah-prep" : prayerGuide ? "prayer-guide" : salahStudy ? "salah-study" : today ? "today" : planDesktop ? "plan-desktop" : mosquesDesktop ? "mosques-desktop" : returnDesktop ? "return-desktop" : hadithDesktop ? "hadith-desktop" : settingsDesktop ? "settings-desktop" : languageFlow ? "settings-language-flow" : pathsHome ? "paths" : studyHome ? "learn" : chapter ? "surah-reader" : lesson ? "qaida-lesson" : wordBank ? "word-bank" : fluency ? "fluency" : location.pathname.startsWith("/learn/takhti") ? "takhti" : undefined}>
+    <main ref={main} className="app-main" id="app-main" tabIndex={-1} data-page={shareSheet ? "share-sheet" : shareMoment ? "share-moment" : umrahDesktop ? "umrah-prep" : prayerGuide ? "prayer-guide" : salahStudy ? "salah-study" : today ? "today" : planDesktop ? "plan-desktop" : mosquesDesktop ? "mosques-desktop" : returnDesktop ? "return-desktop" : hadithDesktop ? "hadith-desktop" : settingsDesktop ? "settings-desktop" : languageFlow ? "settings-language-flow" : pathsHome ? "paths" : studyHome ? "learn" : chapter ? "surah-reader" : lesson ? "qaida-lesson" : wordBank ? "word-bank" : fluency ? "fluency" : location.pathname.startsWith("/learn/takhti") ? "takhti" : undefined}>
       {!fullscreen && (!umrahGuide || desktop) && !((today || studyHome || surahStudy) && settings.mode === "maktab") && <header className="topbar">
         <div>{today || learnWorkspace || zakatPage || planDesktop || mosquesDesktop || returnDesktop || guideDesktop || hadithDesktop || settingsDesktop || umrahDesktop ? <h1>{umrahDesktop ? t("umrahPrepare") : settingsDesktop ? t("settingsDeskTitle") : guideDesktop ? t("howToPray") : qaidaStudy ? t("qaidaDesktopTitle", { number: lesson.n }) : surahStudy ? t("surahsForSalah") : wordBankStudy ? t("wordBankName") : title}</h1> : <h2>{title}</h2>}
           <p className="small muted">{guideDesktop ? <>
@@ -277,15 +328,28 @@ export function AppShell({ children, settings, now, desktop }: { children: React
     </main>
     {!fullscreen && !prayerGuide && !languageFlow && <Tabs settings={settings} umrahGuide={umrahGuide} />}
     <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
-      <DialogContent className="awwab-dialog" aria-describedby={undefined}>
-        <DialogTitle>{t("searchApp")}</DialogTitle>
-        <input className="input" placeholder={t("findScreen")} aria-label={t("findScreen")} value={query} onChange={event => setQuery(event.target.value)} />
-        <div className="compact-stack">
-          {destinations.filter(item => `${item.title} ${navigationLabel(settings, item.title)}`.toLowerCase().includes(query.trim().toLowerCase())).map(item =>
-            <Link to={item.to} onClick={() => setSearchOpen(false)} key={item.to} className="list-row">{navigationLabel(settings, item.title)}</Link>)}
-          {query.trim() && librarySearch.filter(item => `${item.title} ${item.terms}`.toLowerCase().includes(query.trim().toLowerCase())).slice(0, 12).map(item =>
-            <Link to={item.to} onClick={() => setSearchOpen(false)} key={item.to} className="list-row">{item.title}</Link>)}
+      <DialogContent className="awwab-dialog" aria-describedby={undefined} showCloseButton={false}
+        onOpenAutoFocus={event => {
+          event.preventDefault();
+          searchInput.current?.focus();
+        }}
+        onCloseAutoFocus={event => {
+          event.preventDefault();
+          const target = searchReturnFocus.current;
+          (target?.isConnected && target.getClientRects().length ? target : main.current)?.focus();
+        }}>
+        <div className="row-between">
+          <DialogTitle>{t("searchApp")}</DialogTitle>
+          <DialogClose className="icon-button" aria-label={t("shareClose")}><X size={18} aria-hidden="true" /></DialogClose>
         </div>
+        <input ref={searchInput} type="search" className="input" placeholder={t("findScreen")} aria-label={t("findScreen")}
+          value={query} onChange={event => setQuery(event.target.value)} />
+        {searchResults.length > 0 ? <div className="compact-stack" onKeyDown={focusListItem}>
+          {searchResults.map(({ title, to }) => <Link to={to} key={to} className="list-row" onClick={() => {
+            searchReturnFocus.current = main.current;
+            setSearchOpen(false);
+          }}>{title}</Link>)}
+        </div> : searchOpen && <p className="small muted" role="status">{t("searchNoResults")}</p>}
       </DialogContent>
     </Dialog>
   </div>;
