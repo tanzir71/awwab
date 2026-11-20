@@ -4,10 +4,12 @@ type CheckedAsset = { bytes: number; digest: string };
 type PackFont = CheckedAsset & { path: string; family: string; unicodeRange: string; weight: string };
 type PackAsset = CheckedAsset & { fonts: PackFont[]; readingFont?: PackFont };
 type PackMessages = Record<string, string | { adult: string; maktab: string }>;
+type QuranMeaningEdition = { credit: string; source: string; license: string; licenseUrl: string; verses: Record<string, string> };
+type LocalePack = { messages: PackMessages; quran?: QuranMeaningEdition };
 declare const __AWWAB_PUBLISHED_LOCALES__: Record<string, PackAsset>;
 
 const published = typeof __AWWAB_PUBLISHED_LOCALES__ === "undefined" ? {} : __AWWAB_PUBLISHED_LOCALES__;
-const messagesByLocale = new Map<string, PackMessages>();
+const packsByLocale = new Map<string, LocalePack>();
 const activeFonts = new Set<string>();
 const cacheName = "awwab-locales";
 
@@ -16,7 +18,7 @@ export function localePackAsset(code: string): PackAsset | undefined {
 }
 
 export function hasLocaleMessages(code: string) {
-  return messagesByLocale.has(code);
+  return packsByLocale.has(code);
 }
 
 export function hasLoadedLocalePack(code: string) {
@@ -24,10 +26,14 @@ export function hasLoadedLocalePack(code: string) {
 }
 
 export function localeMessage(code: string, key: string, mode: "adult" | "maktab") {
-  const catalogue = messagesByLocale.get(code);
+  const catalogue = packsByLocale.get(code)?.messages;
   if (!catalogue || !Object.prototype.hasOwnProperty.call(catalogue, key)) return undefined;
   const value = catalogue[key];
   return typeof value === "string" ? value : value[mode];
+}
+
+export function localeQuranEdition(code: string) {
+  return packsByLocale.get(code)?.quran;
 }
 
 function checkedUrl(path: string, info: CheckedAsset) {
@@ -103,6 +109,6 @@ export async function loadLocalePack(code: string, download = false) {
   for (const font of info.fonts) {
     await loadFont(cache, font, download);
   }
-  messagesByLocale.set(code, JSON.parse(new TextDecoder().decode(catalogue)).messages as PackMessages);
+  packsByLocale.set(code, JSON.parse(new TextDecoder().decode(catalogue)) as LocalePack);
   return true;
 }

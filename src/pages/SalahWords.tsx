@@ -10,7 +10,6 @@ import { useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { prayerGuidePath } from "@/lib/prayerGuide";
 import { coreWordCoverage, coreWordSource, coreWordTotal, countKnownQuranWords, fatihaMorphology, formatQuranReference, quranText } from "@/lib/quran";
-import { showEnglishQuranMeaning } from "@/lib/languagePreferences";
 import type { Settings } from "@/lib/storageService";
 import { momentPath, setAyahFamiliar } from "@/lib/studyMilestones";
 import { studyNames } from "@/lib/study-copy";
@@ -89,7 +88,7 @@ export function SalahWords({ settings }: { settings: Settings }) {
         <p className="small muted">{notes.transliteration && <><bdi lang="ar-Latn">{notes.transliteration}</bdi> · </>}
           <a href={`https://quran.com/${verse.ref.replace(":", "/")}`}><bdi>{reference}</bdi></a>
         </p>
-        {showEnglishQuranMeaning(settings) && <QuranVerseMeaning text={verse.english} />}
+        <QuranVerseMeaning verse={verse} settings={settings} />
         <div className="salah-root small">
           <ArabicText text={words[position - 1]} compact citation={verse.ref} verse={verse.ref} positionOffset={position - 1} />
           <span lang="en">{notes.glosses[position - 1]}</span>

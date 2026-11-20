@@ -1,6 +1,6 @@
 import inventory from "../../handovers/H2-languages-paths-arabic-help/data/locales.json";
 import glossary from "../../handovers/H2-languages-paths-arabic-help/data/glossary.json";
-import { localePackAsset } from "./localePacks";
+import { localePackAsset, localeQuranEdition } from "./localePacks";
 
 export const builtInLanguages = ["en", "bn"] as const;
 export type BuiltInLanguage = typeof builtInLanguages[number];
@@ -88,7 +88,13 @@ export function formatLocale({ language, nativeDigits }: { language: AppLanguage
   return browser === desired ? language : `${language}-u-nu-${desired}`;
 }
 
-export function showEnglishQuranMeaning(preferences: { language: AppLanguage; quranMeanings?: boolean; englishMeaning?: boolean }) {
-  const localMeaning = preferences.language === "en" && preferences.quranMeanings !== false;
-  return localMeaning || (preferences.englishMeaning ?? preferences.language !== "en");
+export function quranMeaningPreferences({ language, quranMeanings, englishMeaning }: {
+  language: AppLanguage; quranMeanings?: boolean; englishMeaning?: boolean;
+}) {
+  const edition = localeQuranEdition(language);
+  const showLocal = quranMeanings !== false;
+  return {
+    local: showLocal ? edition : undefined,
+    english: (language === "en" && showLocal) || (englishMeaning ?? (language !== "en" && !edition)),
+  };
 }

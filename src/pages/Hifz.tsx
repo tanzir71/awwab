@@ -13,7 +13,6 @@ import { focusListItem } from "@/lib/focusListItem";
 import { essentialPassages, getHifzPassage, groupPortions, nextPortion, passageLabel, portionBucket, portionPlan, recitalProgress, studyChapters,
   studyPhrases, studyQuran, verseText, type HifzPassage, type HifzPlans, type HifzPortion, type HifzReviews, type JuzRecital,
   type JuzRecitals, type StudyQuran } from "@/lib/hifz";
-import { showEnglishQuranMeaning } from "@/lib/languagePreferences";
 import { essentialPassageTitle } from "@/lib/paths-copy";
 import { formatQuranReference, type QuranVerse } from "@/lib/quran";
 import { saveHifzPlan, saveJuzRecitalRating, savePortionReview } from "@/lib/studyMilestones";
@@ -48,7 +47,7 @@ function VerseRead({ verse, settings }: { verse: QuranVerse; settings: Settings 
     <strong className="small"><bdi>{formatQuranReference(verse.ref, locale)}</bdi></strong>
     {opening && <ArabicText text={opening} citation="1:1" verse="1:1" mushaf={settings.script} />}
     <ArabicText text={studyPhrases(verse, settings.script)} citation={verse.ref} verse={verse.ref} mushaf={settings.script} preserveSeparators />
-    {showEnglishQuranMeaning(settings) && <QuranVerseMeaning text={verse.english} />}
+    <QuranVerseMeaning verse={verse} settings={settings} />
   </article>;
 }
 

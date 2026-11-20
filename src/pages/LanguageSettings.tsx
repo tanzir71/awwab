@@ -10,7 +10,7 @@ import { useDesktop } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { formatLocale, glossaryOptions, glossaryValue, isAvailableLanguage, languages, languageMatches, nativeNumberingSystem, salahVariants, suggestedLanguage,
   type AppLanguage, type GlossaryTerm, type LanguageItem } from "@/lib/languagePreferences";
-import { hasLoadedLocalePack, hasLocaleReadingFont, installedLocalePacks, loadLocaleReadingFont, localePackAsset } from "@/lib/localePacks";
+import { hasLoadedLocalePack, hasLocaleReadingFont, installedLocalePacks, loadLocaleReadingFont, localePackAsset, localeQuranEdition } from "@/lib/localePacks";
 import { selectAppLanguage, updateSettings, updateWordChoice, type Settings } from "@/lib/storageService";
 
 const quickLanguages = languages.filter(item => item.tier === 1 || item.code === "hi");
@@ -170,6 +170,8 @@ function ReadingHelp({ settings }: { settings: Settings }) {
   const { t } = useCopy();
   const { language, nativeDigits } = settings;
   const localEnglish = language === "en";
+  const edition = localeQuranEdition(language);
+  const localMeaning = localEnglish || Boolean(edition);
   const bangla = language === "bn";
   const localDigits = nativeNumberingSystem(language) !== "latn";
   const nastaliqFont = language === "ur" ? localePackAsset(language)?.readingFont : undefined;
@@ -178,10 +180,10 @@ function ReadingHelp({ settings }: { settings: Settings }) {
   }
   return <section className="card settings-reading-help">
     <h2>{t("settingsReadingHelp")}</h2>
-    <ReadingToggle title={t("settingsMeaningLocal")} hint={t(localEnglish ? "settingsMeaningLocalEnglish" : bangla ? "settingsMeaningLocalPending" : "settingsMeaningOtherPending")}
-      enabled={localEnglish && settings.quranMeanings !== false} disabled={!localEnglish} onToggle={quranMeanings => save({ quranMeanings })} />
+    <ReadingToggle title={t("settingsMeaningLocal")} hint={edition?.credit ?? t(localEnglish ? "settingsMeaningLocalEnglish" : bangla ? "settingsMeaningLocalPending" : "settingsMeaningOtherPending")}
+      enabled={localMeaning && settings.quranMeanings !== false} disabled={!localMeaning} onToggle={quranMeanings => save({ quranMeanings })} />
     <ReadingToggle title={t("settingsMeaningEnglish")} hint={t("settingsMeaningEnglishHint")}
-      enabled={settings.englishMeaning ?? !localEnglish} onToggle={englishMeaning => save({ englishMeaning })} />
+      enabled={settings.englishMeaning ?? !localMeaning} onToggle={englishMeaning => save({ englishMeaning })} />
     {localDigits && <ReadingToggle title={bangla ? t("settingsNativeDigits") : t("settingsLocaleDigits", {
       example: new Intl.NumberFormat(formatLocale({ language })).format(123),
     })} hint={t("settingsNativeDigitsHint")}

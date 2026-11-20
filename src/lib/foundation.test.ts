@@ -1,5 +1,5 @@
 import "fake-indexeddb/auto";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { addDays, formatDay, formatTime } from "./dates";
 import { baselineMonthStart, calendarEventById, calendarEvents, hijriOn, monthStart, possibleMonthStarts } from "./hijri";
 import { cities, currentPrayerSchedule, prayerDay, schedule } from "./prayerServices";
@@ -10,7 +10,8 @@ import { calendarFile, eventReminders, prayerReminders } from "./calendarFile";
 import { estimateQada, finishQada, qadaDefaults } from "./qada";
 import { mosqueDefaults, type Mosque } from "./mosques";
 import { guideRakahIndex, guideReference, prayerGuide, prayerGuidePath } from "./prayerGuide";
-import { applyGlossary, formatLocale, glossaryValue, isBuiltIn, languageMatches, languages, showEnglishQuranMeaning, suggestedLanguage } from "./languagePreferences";
+import { applyGlossary, formatLocale, glossaryValue, isBuiltIn, languageMatches, languages, quranMeaningPreferences, suggestedLanguage } from "./languagePreferences";
+import * as localePacks from "./localePacks";
 import { planMonth } from "./plan-copy";
 import { message } from "./copy";
 import { updateWordChoice } from "./storageService";
@@ -356,12 +357,24 @@ describe("language settings", () => {
     expect(applyGlossary("Make-up prayers", "en", words)).toBe("Make-up prayers");
     expect(new Intl.NumberFormat(formatLocale({ language: "bn" })).format(123)).toBe("১২৩");
     expect(new Intl.NumberFormat(formatLocale({ language: "bn", nativeDigits: false })).format(123)).toBe("123");
-    expect(showEnglishQuranMeaning({ language: "bn" })).toBe(true);
-    expect(showEnglishQuranMeaning({ language: "bn", englishMeaning: false })).toBe(false);
-    expect(showEnglishQuranMeaning({ language: "en", quranMeanings: false, englishMeaning: true })).toBe(true);
-    expect(showEnglishQuranMeaning({ language: "ur" })).toBe(true);
+    expect(quranMeaningPreferences({ language: "bn" })).toEqual({ local: undefined, english: true });
+    expect(quranMeaningPreferences({ language: "bn", englishMeaning: false }).english).toBe(false);
+    expect(quranMeaningPreferences({ language: "en", quranMeanings: false, englishMeaning: true }).english).toBe(true);
+    expect(quranMeaningPreferences({ language: "ur" }).english).toBe(true);
     expect(glossaryValue("ps", "salah")).toBe(glossaryValue("en", "salah"));
     expect(planMonth(9, "ur")).toMatch(/\p{Script=Arabic}/u);
+  });
+
+  it("uses an installed Quran edition with independent English and local controls", () => {
+    const edition = { credit: "Test edition", source: "https://example.com/edition", license: "Test license",
+      licenseUrl: "https://example.com/license", verses: { "1:1": "Fixture text" } };
+    const installed = vi.spyOn(localePacks, "localeQuranEdition").mockImplementation(code => code === "ur" ? edition : undefined);
+    try {
+      expect(quranMeaningPreferences({ language: "ur" })).toEqual({ local: edition, english: false });
+      expect(quranMeaningPreferences({ language: "ur", englishMeaning: true })).toEqual({ local: edition, english: true });
+      expect(quranMeaningPreferences({ language: "ur", quranMeanings: false })).toEqual({ local: undefined, english: false });
+      expect(quranMeaningPreferences({ language: "bn" })).toEqual({ local: undefined, english: true });
+    } finally { installed.mockRestore(); }
   });
 
   it("formats glossary arguments with the active language's choices and keeps ICU numbers intact", () => {

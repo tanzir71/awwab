@@ -106,7 +106,7 @@ function CheckRound({ track, settings, now }: { track: Track; settings: Settings
         {revealed && <div ref={answer} tabIndex={-1} className="paths-reveal">
           {question.copy && <p>{t(question.copy)}</p>}
           {question.answer && <CheckVerse verse={question.answer} script={settings.script} />}
-          {question.showMeaning && question.prompt && <QuranVerseMeaning text={question.prompt.english} />}
+          {question.showMeaning && question.prompt && <QuranVerseMeaning verse={question.prompt} settings={settings} reveal />}
           {question.audio && <PlacementAudio key={question.audio} reference={question.audio}
             title={question.prompt ? formatQuranReference(question.prompt.ref, locale) : t(question.copy ?? trackKeys[track])} />}
           {question.phrase && <>

@@ -4,6 +4,7 @@ import { ArabicText } from "@/components/ArabicText";
 import { SectionNav } from "@/components/Surface";
 import { asset, IS_PREVIEW } from "@/lib/config";
 import { useCopy } from "@/lib/copy";
+import { localeQuranEdition } from "@/lib/localePacks";
 import { formatQuranReference } from "@/lib/quran";
 import { useUi } from "@/lib/uiState";
 import { splitArabicWords } from "@/lib/wordAnatomy";
@@ -28,7 +29,8 @@ const sources = [
 ] as const;
 
 export function Sources() {
-  const { t, locale } = useCopy();
+  const { t, language, locale } = useCopy();
+  const edition = localeQuranEdition(language);
   const [search] = useSearchParams();
   const index = Number(search.get("word")) - 1;
   const selected = verseWords[index];
@@ -47,6 +49,12 @@ export function Sources() {
       <p>{t("welcomeMeaning")}</p>
       <small className="muted">{t("sourcesExcerptCredit")}</small>
       <a className="text-button" href={welcome.url}>{t("sourcesReadVerse")}</a>
+    </section>}
+    {edition && <section className="card compact-stack">
+      <h2 dir="auto">{edition.credit}</h2>
+      <p>{t("settingsMeaningLocal")}</p>
+      <div className="chips"><a className="text-button" href={edition.source} rel="noreferrer">{t("sourcesVisit", { name: edition.credit })}</a>
+        <a className="text-button" href={edition.licenseUrl} dir="auto" rel="noreferrer">{edition.license}</a></div>
     </section>}
     {sources.map(source => <section className="card compact-stack" key={source.name}>
       <h2><bdi lang="en">{source.name}</bdi></h2>

@@ -17,7 +17,7 @@ import { qadaBalances, qadaDefaults } from "@/lib/qada";
 import { families, letterForms, lettersForFamily } from "@/lib/takhti";
 import { initialZakat, metalLabels, zakatMoney, zakatProfileTotals, zakatSources } from "@/lib/zakat";
 import { studyNames } from "@/lib/study-copy";
-import { showEnglishQuranMeaning } from "@/lib/languagePreferences";
+import { quranMeaningPreferences } from "@/lib/languagePreferences";
 import type { Settings } from "@/lib/storageService";
 import { prayerIds } from "@/types/Prayer";
 import { quranMeaningSource, quranText } from "@/lib/quran";
@@ -216,7 +216,7 @@ export function PrintSheet({ settings, now }: { settings: Settings; now: Date })
     </>;
   } else if (sheet === "surah-cards") {
     const cards = [selected, ...pocketSet.filter(number => number !== selected)].slice(0, 4);
-    const english = showEnglishQuranMeaning(settings);
+    const { local, english } = quranMeaningPreferences(settings);
     heading = t("printSurahTitle");
     subtitle = t("printSurahIntro");
     content = <>
@@ -234,10 +234,12 @@ export function PrintSheet({ settings, now }: { settings: Settings; now: Date })
             {verses.map(verse => <ArabicText key={verse.ref} text={verseLines(verse[settings.script])} mushaf={settings.script} citation={verse.ref} verse={verse.ref} />)}
           </div>
           {transliteration && <p className="paper-transliteration" lang="ar-Latn" dir="ltr">{transliteration}</p>}
+          {local && <p lang={language} dir="auto">{verses.map(verse => local.verses[verse.ref]).join(" ")}</p>}
           {english && <p lang="en" dir="ltr">{verses.map(verse => verse.english).join(" ")}</p>}
         </section>;
       })}</div>
       <p className="paper-note">{t(settings.script === "indopak" ? "printIndopakCredit" : "printUthmaniCredit")}
+        {local && <> · <a href={local.source} dir="auto" rel="noreferrer">{local.credit}</a></>}
         {english && <> · <a href={quranMeaningSource} rel="noreferrer">{t("printPickthallCredit")}</a></>} · {t("printBrandCredit")}</p>
     </>;
   } else if (sheet === "umrah-guide") {

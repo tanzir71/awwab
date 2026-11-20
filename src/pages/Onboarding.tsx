@@ -301,7 +301,7 @@ export function Onboarding({ settings, desktop }: { settings: Settings; desktop:
       <section className="card onboarding-recognition">
         <h2><DesignIcon name="onboarding-sparkles" size={18} />{t("setupRecognise")}</h2>
         <p className="small muted">{t(placementHints[index])}</p>
-        {verse && <QuranVerseMeaning text={verse.english} />}
+        {verse && <QuranVerseMeaning verse={verse} settings={settings} reveal />}
         {citation && <p className="small muted"><bdi>{formatQuranReference(citation, locale)}</bdi></p>}
       </section>
       {notice && <p role="status" className="small muted">{t(notice)}</p>}

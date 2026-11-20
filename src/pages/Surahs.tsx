@@ -16,7 +16,7 @@ import { focusListItem } from "@/lib/focusListItem";
 import { prayerGuidePath } from "@/lib/prayerGuide";
 import { parseQaidaReview } from "@/lib/qaidaPractice";
 import { formatQuranReference, quranText, type QuranVerse } from "@/lib/quran";
-import { showEnglishQuranMeaning } from "@/lib/languagePreferences";
+import { quranMeaningPreferences } from "@/lib/languagePreferences";
 import { grades, isDue, reviewCard, type ReviewGrade, type Reviews } from "@/lib/reviews";
 import { updateRecord, type Settings } from "@/lib/storageService";
 import { isSurahStudyReview, reviewDestination } from "@/lib/studyDesk";
@@ -157,8 +157,9 @@ function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; set
   const [tab, setTab] = useState("read");
   const mode = modes.find(value => value === params.get("mode")) ?? "read";
   const [display, setDisplay] = useState({ translit: true, translation: undefined as boolean | undefined, word: adultDesk });
-  const enabled = { ...display, translation: display.translation ?? showEnglishQuranMeaning(settings) };
-  const options = [["translit", "surahTranslit"], ["translation", language === "en" ? "surahTranslation" : "surahEnglishTranslation"],
+  const meaning = quranMeaningPreferences(settings);
+  const enabled = { ...display, translation: display.translation ?? Boolean(meaning.local || meaning.english) };
+  const options = [["translit", "surahTranslit"], ["translation", language === "en" || meaning.local ? "surahTranslation" : "surahEnglishTranslation"],
     ["word", "surahWordByWord"]] as const;
   const [hints, setHints] = useState<Record<string, boolean>>({});
   const [loops, setLoops] = useState<Record<string, boolean>>({});
@@ -304,7 +305,7 @@ function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; set
           </div>
           <div className="surah-verse-foot">
             <div>{!recalling && display.translit && <p className="surah-transliteration" lang="ar-Latn" dir="ltr">{verseTransliteration(verse, index)}</p>}
-              {enabled.translation && <QuranVerseMeaning text={verse.english} cue={recalling} />}
+              {enabled.translation && <QuranVerseMeaning verse={verse} settings={settings} english={meaning.english || !meaning.local} cue={recalling} />}
               {recalling && index > 1 && <button className="text-button surah-hint-control" type="button" aria-expanded={visible}
                 onClick={() => setHints(previous => ({ ...previous, [verse.ref]: !visible }))}>
                 <DesignIcon name="surah-mobile-eye" size={16} />{t(visible ? "hideInitials" : "showInitials")}</button>}

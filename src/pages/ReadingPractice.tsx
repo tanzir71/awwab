@@ -13,7 +13,7 @@ import { wordGlosses } from "@/lib/fluency";
 import { wordGlossKey } from "@/lib/fluency-messages.mjs";
 import { focusListItem } from "@/lib/focusListItem";
 import { studyPhrases, studyQuran, verseText, type StudyQuran } from "@/lib/hifz";
-import { showEnglishQuranMeaning } from "@/lib/languagePreferences";
+import { quranMeaningPreferences } from "@/lib/languagePreferences";
 import { coreWordKey, loadMorphology } from "@/lib/morphology";
 import { formatQuranReference, knownCoreQuranWords, type QuranVerse } from "@/lib/quran";
 import { completedReadingChapters, emptyReadingPractice, firstUnreadAyah, practiceChapters, practicePage, readingPortions, readingPracticePaths,
@@ -114,8 +114,9 @@ function TajweedExamplesToggle({ enabled, pageHasExamples }: { enabled: boolean;
   </div>;
 }
 
-function ReadingVerse({ verse, script, step, corpus, knownRoots, english = false, tajweed = false }: {
-  verse: QuranVerse; script: Settings["script"]; step?: MeaningStep; corpus?: Corpus; knownRoots?: ReadonlySet<string>; english?: boolean; tajweed?: boolean;
+function ReadingVerse({ verse, script, settings, step, corpus, knownRoots, english = false, tajweed = false }: {
+  verse: QuranVerse; script: Settings["script"]; settings: Settings; step?: MeaningStep; corpus?: Corpus;
+  knownRoots?: ReadonlySet<string>; english?: boolean; tajweed?: boolean;
 }) {
   const { t, language, locale } = useCopy();
   const { opening, text } = verseText(verse, script);
@@ -138,7 +139,7 @@ function ReadingVerse({ verse, script, step, corpus, knownRoots, english = false
     <bdi className="caption muted">{formatQuranReference(verse.ref, locale)}</bdi>
     {opening && <ArabicText text={opening} citation="1:1" verse="1:1" mushaf={script} preserveSeparators />}
     <ArabicText text={rendered} citation={verse.ref} verse={verse.ref} mushaf={script} words={words} preserveSeparators />
-    {english && <QuranVerseMeaning text={verse.english} />}
+    {step === "readingMeaningStep" && <QuranVerseMeaning verse={verse} settings={settings} english={english} />}
   </article>;
 }
 
@@ -174,7 +175,7 @@ function GuidedRead({ chapter, title, mode, quran, progress, settings, now }: {
   const nextChapter = practiceChapters[mode][practiceChapters[mode].indexOf(chapter) + 1];
   const ayahs = portion.verses.map(ayahNumber);
   const saved = ayahs.every(ayah => read.includes(ayah));
-  const english = mode === "meaning" && step === "readingMeaningStep" && (showEnglishQuranMeaning(settings) || revealEnglish);
+  const english = quranMeaningPreferences(settings).english || revealEnglish;
   const tajweed = mode === "flow" && settings.tajweedHighlights === true;
 
   useEffect(() => {
@@ -211,7 +212,7 @@ function GuidedRead({ chapter, title, mode, quran, progress, settings, now }: {
           onClick={() => setRevealEnglish(true)}>{t("readingShowEnglish")}</button>}
       </>}
     </div>
-    {portion.verses.map(verse => <ReadingVerse key={verse.ref} verse={verse} script={script} step={mode === "meaning" ? step : undefined}
+    {portion.verses.map(verse => <ReadingVerse key={verse.ref} verse={verse} script={script} settings={settings} step={mode === "meaning" ? step : undefined}
       corpus={corpus} knownRoots={roots} english={english} tajweed={tajweed} />)}
     <button type="button" className="action" disabled={saving || saved} onClick={() => void save()}>{t(saved ? "readingSavedAyahs" : "readingSaveAyahs")}</button>
     {notice?.page === pageIndex && <p className="small muted" role={notice.message === "saveError" ? "alert" : "status"}>{t(notice.message)}</p>}
@@ -265,7 +266,7 @@ function TeacherPractice({ chapter, title, verses, checks, settings, now, suspen
       <ScriptSwitch script={script} change={setScript} />
       {hasExamples && <TajweedExamplesToggle enabled={tajweed} pageHasExamples />}
     </div>
-    {verses.map(verse => <ReadingVerse key={verse.ref} verse={verse} script={script} tajweed={tajweed} />)}
+    {verses.map(verse => <ReadingVerse key={verse.ref} verse={verse} script={script} settings={settings} tajweed={tajweed} />)}
     <QuranStudySources script={script} />
   </section>;
 }
