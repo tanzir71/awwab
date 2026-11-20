@@ -1,11 +1,12 @@
 import { readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { curatedHadith, curatedHadithFor, desktopHadith, hadithCitation, hadithGradeLabel, hadithId, hadithNumberLabel, hadithReferenceLabel, hadithSource,
-  hadithSummary, parseHadithId, riyadSelections, searchHadith, topicMatches } from "./hadith";
+  hadithSummary, localHadithMeaning, parseHadithId, riyadSelections, searchHadith, topicMatches } from "./hadith";
 import { canonicalHadithNumber, collectionIds, hadithArchiveVersion, narrationGrade, type HadithNarration } from "./hadith-catalogue";
 import { message } from "./copy";
 import { formatLocale } from "./languagePreferences";
+import * as localePacks from "./localePacks";
 
 const archive = collectionIds.flatMap(collection => {
   const file = new URL(`../../public/data/hadith-${collection}-v${hadithArchiveVersion}.json.gz`, import.meta.url);
@@ -80,6 +81,22 @@ describe("hadith editions", () => {
     expect(searchHadith("প্রতিবেশীর ক্ষতি", archive, "all").matches.some(item => item.number === "6018")).toBe(true);
     expect(searchHadith("Riyad 14", archive, "riyadussalihin").riyad.map(item => item.original)).toEqual(["muslim:2702b"]);
     expect(searchHadith("999999999", archive, "all")).toEqual({ matches: [], riyad: [] });
+  });
+
+  it("searches and attributes installed translation text under the original collection and suffix", () => {
+    const original = byId.get("muslim:2702b");
+    const text = "آزمائشی عبارت قربت";
+    const edition = { credit: "Test edition", source: "https://example.com/edition", license: "Test license",
+      licenseUrl: "https://example.com/license", narrations: { "2702b": { book: original.book, inBook: original.inBook, text } } };
+    const installed = vi.spyOn(localePacks, "localeHadithEditions").mockImplementation(code => code === "ur" ? { muslim: edition } : undefined);
+    try {
+      expect(localHadithMeaning(original, "ur")).toEqual({ text, language: "ur", credit: edition.credit, source: edition.source });
+      expect(localHadithMeaning(byId.get("muslim:2702a"), "ur")).toBeUndefined();
+      expect(searchHadith("عبارت قربت", [original], "muslim", "ur").matches).toEqual([original]);
+      expect(searchHadith("عبارت قربت", [original], "riyadussalihin", "ur").riyad.map(item => item.original)).toEqual(["muslim:2702b"]);
+      expect(searchHadith("عبارت قربت", [original], "bukhari", "ur").matches).toEqual([]);
+      expect(searchHadith("عبارت قربت", [original], "all", "en").matches).toEqual([]);
+    } finally { installed.mockRestore(); }
   });
 
   it("keeps the desktop topics and highlighted bilingual excerpt attached to their verified references", () => {

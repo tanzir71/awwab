@@ -10,7 +10,8 @@ export interface HadithShareData {
   reference: string;
   source: string;
   text: string;
-  textLanguage: "en" | "bn";
+  textLanguage: string;
+  credit?: string;
   arabic?: string;
   summary: boolean;
 }
@@ -20,7 +21,7 @@ export function HadithShare({ data }: { data: HadithShareData }) {
   const [artifact, setArtifact] = useState<ShareArtifact>();
   const badge = t(data.summary ? "hadithShareSummary" : "hadithExcerpt");
   const tagline = t("cardFooterTagline");
-  const note = [data.source.replace(/^https:\/\//, ""), language !== "en" && data.textLanguage === "en" && t("cardEnglishMeaning")]
+  const note = [data.source.replace(/^https:\/\//, ""), data.credit, language !== "en" && data.textLanguage === "en" && t("cardEnglishMeaning")]
     .filter(Boolean).join(" · ");
   const model = useMemo<ShareModel>(() => ({ template: "hadith", language, format: "post", light: true, showPrayerNumbers: false,
     card: { badge, tagline, title: data.title, detail: data.text, arabic: data.arabic, citation: data.reference, note },
@@ -33,7 +34,7 @@ export function HadithShare({ data }: { data: HadithShareData }) {
     const files = [file];
     try {
       if (navigator.canShare?.({ files })) {
-        await navigator.share({ files, title: data.title, text: `${data.reference}\n${data.source}`, url: SHARE_URL });
+        await navigator.share({ files, title: data.title, text: [data.reference, data.credit, data.source].filter(Boolean).join("\n"), url: SHARE_URL });
         return;
       }
     } catch (error) {

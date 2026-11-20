@@ -3,6 +3,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { entries, fingerprint, root } from "./ui-catalogue.mjs";
 import { localeFonts, localeReadingFont } from "./locale-fonts.mjs";
+import { checkHadithMeaningEditions } from "./hadith-meaning-edition.mjs";
 import { checkQuranMeaningEdition } from "./quran-meaning-edition.mjs";
 
 export function publishedLocales() {
@@ -20,6 +21,7 @@ export function publishedLocales() {
       throw new Error(`${file} does not match the current UI catalogue. Compile the matching reviewed locale before publishing it.`);
     }
     if (pack.quran !== undefined) checkQuranMeaningEdition(pack.quran, locale.code);
+    if (pack.hadith !== undefined) checkHadithMeaningEditions(pack.hadith, locale.code);
     const fonts = localeFonts(locale.script);
     published.push([locale.code, { bytes: bytes.length, digest: createHash("sha256").update(bytes).digest("hex"),
       fonts, readingFont: localeReadingFont(locale.code) }]);

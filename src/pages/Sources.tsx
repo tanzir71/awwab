@@ -4,7 +4,7 @@ import { ArabicText } from "@/components/ArabicText";
 import { SectionNav } from "@/components/Surface";
 import { asset, IS_PREVIEW } from "@/lib/config";
 import { useCopy } from "@/lib/copy";
-import { localeQuranEdition } from "@/lib/localePacks";
+import { localeHadithEditions, localeQuranEdition } from "@/lib/localePacks";
 import { formatQuranReference } from "@/lib/quran";
 import { useUi } from "@/lib/uiState";
 import { splitArabicWords } from "@/lib/wordAnatomy";
@@ -30,7 +30,13 @@ const sources = [
 
 export function Sources() {
   const { t, language, locale } = useCopy();
-  const edition = localeQuranEdition(language);
+  const quranEdition = localeQuranEdition(language);
+  const editions = [
+    ...(quranEdition ? [{ edition: quranEdition, label: t("settingsMeaningLocal") }] : []),
+    ...Object.entries(localeHadithEditions(language) ?? {}).map(([collection, edition]) => ({
+      edition, label: t(`hadithCollection-${collection}`),
+    })),
+  ];
   const [search] = useSearchParams();
   const index = Number(search.get("word")) - 1;
   const selected = verseWords[index];
@@ -50,12 +56,12 @@ export function Sources() {
       <small className="muted">{t("sourcesExcerptCredit")}</small>
       <a className="text-button" href={welcome.url}>{t("sourcesReadVerse")}</a>
     </section>}
-    {edition && <section className="card compact-stack">
+    {editions.map(({ edition, label }) => <section className="card compact-stack" key={label}>
       <h2 dir="auto">{edition.credit}</h2>
-      <p>{t("settingsMeaningLocal")}</p>
+      <p>{label}</p>
       <div className="chips"><a className="text-button" href={edition.source} rel="noreferrer">{t("sourcesVisit", { name: edition.credit })}</a>
         <a className="text-button" href={edition.licenseUrl} dir="auto" rel="noreferrer">{edition.license}</a></div>
-    </section>}
+    </section>)}
     {sources.map(source => <section className="card compact-stack" key={source.name}>
       <h2><bdi lang="en">{source.name}</bdi></h2>
       <p>{t(source.description)}</p>

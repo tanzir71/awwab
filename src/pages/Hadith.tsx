@@ -3,15 +3,16 @@ import { useSearchParams } from "react-router-dom";
 import { X } from "lucide-react";
 import { ArabicText } from "@/components/ArabicText";
 import { DesktopHadith } from "@/components/DesktopHadith";
-import { GradeBadge, HadithSnippet, HadithTranslation } from "@/components/HadithText";
+import { GradeBadge, HadithSnippet, HadithTranslation, LocalHadithTranslation } from "@/components/HadithText";
 import { Dialog, DialogClose, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useCopy } from "@/lib/copy";
 import { useHadithEditions, useHadithNarration } from "@/hooks/use-hadith";
 import {
   curatedGrade, curatedHadith, curatedHadithFor, featuredArabic, featuredHadith, hadithGradeLabel, hadithId, hadithName, hadithReferenceLabel, hadithSource, hadithSummary,
-  parseHadithId, searchHadith, type CollectionScope,
+  localHadithMeaning, parseHadithId, searchHadith, type CollectionScope,
 } from "@/lib/hadith";
 import { collectionIds, editionUrl } from "@/lib/hadith-catalogue";
+import { localeHadithEditions } from "@/lib/localePacks";
 import { splitArabicWords } from "@/lib/wordAnatomy";
 import { useUi } from "@/lib/uiState";
 
@@ -30,9 +31,10 @@ function HadithDetail({ id, close }: { id: string; close: () => void }) {
   const title = related ? hadithReferenceLabel("riyadussalihin", related.number, labels) : citation || t("hadithRead");
   const grade = narration?.grade ?? (seed ? curatedGrade(seed) : undefined);
   const source = related?.url ?? seed?.url ?? (narration && hadithSource(narration));
+  const local = narration && localHadithMeaning(narration, language);
   const summaryItem = related ?? seed;
   const summary = summaryItem && hadithSummary(summaryItem, language);
-  const bangla = summary?.language === "bn" ? summary.text : undefined;
+  const bangla = !local && summary?.language === "bn" ? summary.text : undefined;
   const alsoIn = seed?.alsoIn && parseHadithId(seed.alsoIn);
   return <Dialog open onOpenChange={open => { if (!open) close(); }}>
     <DialogContent className="awwab-dialog hadith-detail" showCloseButton={false} aria-describedby={undefined}>
@@ -52,7 +54,8 @@ function HadithDetail({ id, close }: { id: string; close: () => void }) {
       </div>}
       {!narration ? <p className="small muted" role="status">{t(status === "missing" ? "hadithNotFound" : status === "unavailable" ? "collectionUnavailable" : "openingCollection")}</p> :
         <>
-          {bangla ? <details className="hadith-english-disclosure">
+          {local ? <LocalHadithTranslation local={local} english={narration.text} citation={citation} close={close} />
+            : bangla ? <details className="hadith-english-disclosure">
             <summary className="text-button">{t("hadithReadEnglish")}</summary>
             <HadithTranslation text={narration.text} source={citation} close={close} />
           </details> : <div className="hadith-meaning">
@@ -87,7 +90,8 @@ function ArchiveSearch({ onRead, initialQuery }: { onRead: (id: string) => void;
   const input = useRef<HTMLInputElement>(null);
   const deferred = useDeferredValue(query);
   const search = deferred.trim();
-  const result = useMemo(() => data?.scope === scope && search ? searchHadith(search, data.items, scope) : undefined, [data, scope, search]);
+  const result = useMemo(() => data?.scope === scope && search ? searchHadith(search, data.items, scope, language) : undefined,
+    [data, scope, search, language]);
   const total = result ? result.matches.length + result.riyad.length : 0;
 
   useEffect(() => {
@@ -107,7 +111,7 @@ function ArchiveSearch({ onRead, initialQuery }: { onRead: (id: string) => void;
       {collectionIds.map(id => <option key={id} value={id}>{hadithName(id, language)}</option>)}
       <option value="riyadussalihin">{t("hadithRiyadSelections")}</option>
     </select></label>
-    {language === "bn" && <p className="small muted">{t("hadithSearchBangla")}</p>}
+    {language === "bn" && !localeHadithEditions(language) && <p className="small muted">{t("hadithSearchBangla")}</p>}
     {scope === "riyadussalihin" && <p className="small muted">{t("hadithRiyadScope")}</p>}
     {data?.scope !== scope && <p role="status" className="small">{t("openingCollection")}</p>}
     {data?.scope === scope && data.missing > 0 && <p role="status" className="small">{t("hadithSomeUnavailable")}</p>}
@@ -116,9 +120,10 @@ function ArchiveSearch({ onRead, initialQuery }: { onRead: (id: string) => void;
       <p role="status" className="small muted">{t("hadithResults", { count: total })}</p>
       <div className="hadith-list">
         {result.riyad.slice(0, limit).map(item => {
-          const preview = hadithSummary(item, language);
+          const local = localHadithMeaning(parseHadithId(item.original), language);
+          const preview = local ?? hadithSummary(item, language);
           return <button className="card hadith-list-item" key={item.number} type="button" onClick={() => onRead(hadithId("riyadussalihin", item.number))}>
-            <HadithSnippet {...preview} full />
+            <HadithSnippet {...preview} full={!local} verbatim={Boolean(local)} />
             <span className="hadith-item-source">
               <small>{hadithReferenceLabel("riyadussalihin", item.number, labels)}</small><GradeBadge grade={item.grade} />
             </span>
@@ -127,9 +132,10 @@ function ArchiveSearch({ onRead, initialQuery }: { onRead: (id: string) => void;
         {result.matches.slice(0, Math.max(0, limit - result.riyad.length)).map(item => {
           const id = hadithId(item.collection, item.number);
           const seed = curatedHadithFor(id);
-          const preview = seed ? hadithSummary(seed, language) : { text: item.text, language: "en" as const };
+          const local = localHadithMeaning(item, language);
+          const preview = local ?? (seed ? hadithSummary(seed, language) : { text: item.text, language: "en" });
           return <button className="card hadith-list-item" type="button" key={id} onClick={() => onRead(id)}>
-            <HadithSnippet {...preview} />
+            <HadithSnippet {...preview} verbatim={Boolean(local)} />
             <span className="hadith-item-source">
               <small>{hadithReferenceLabel(item.collection, item.number, labels, true)}</small>
               <GradeBadge grade={item.grade} />

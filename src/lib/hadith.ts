@@ -1,5 +1,6 @@
 import { asset } from "./config";
 import { collectionIds, editionUrl, hadithArchiveVersion, hadithCollections, type HadithCollection, type HadithGrade, type HadithNarration } from "./hadith-catalogue";
+import { localeHadithEditions } from "./localePacks";
 import { studySearchTerm } from "./study-copy";
 import type { useCopy } from "./copy";
 import curated from "../../docs/content/hadith-curated.json";
@@ -30,6 +31,7 @@ export const riyadSelections = curated.riyad;
 const archives = new Map<HadithCollection, Promise<HadithNarration[]>>();
 const curatedById = new Map(curatedHadith.map(item => [hadithId(item.collection, item.number), item]));
 const searchText = new WeakMap<HadithNarration, string>();
+const translatedSearchText = new WeakMap<{ text: string }, string>();
 const repentanceReading = ["tirmidhi:3540", "bukhari:6307", "bukhari:6464", "bukhari:6306", "bukhari:1"];
 
 export const desktopHadith = [...repentanceReading.map(id => curatedById.get(id)),
@@ -112,6 +114,13 @@ export function hadithSummary(item: { summary: string; summaryBn?: string }, lan
   return { text: item.summary.replace(/^Ḥadīth qudsī: /, "").replace("He ﷺ", "The Prophet"), language: "en" as const };
 }
 
+export function localHadithMeaning(ref: { collection: HadithCollection; number: string | number } | undefined, language: string) {
+  if (!ref) return undefined;
+  const edition = localeHadithEditions(language)?.[ref.collection];
+  const translation = edition?.narrations[ref.number];
+  return translation ? { text: translation.text, language, credit: edition.credit, source: edition.source } : undefined;
+}
+
 export function hadithGradeLabel(grade: HadithGrade, { t }: Pick<ReturnType<typeof useCopy>, "t">) {
   const normalized = grade.label.toLowerCase();
   const label = normalized === "sahih" || normalized === "hasan"
@@ -160,10 +169,21 @@ function matchNumber(number: string, requested: string) {
   return number === requested || /^\d+$/.test(requested) && number.replace(/[a-z]$|\.\d+$/g, "") === requested;
 }
 
-export function searchHadith(query: string, narrations: HadithNarration[], scope: CollectionScope) {
+function searchableTranslation(translation?: { text: string }) {
+  if (!translation) return "";
+  let text = translatedSearchText.get(translation);
+  if (text === undefined) {
+    text = normalizeHadithSearch(translation.text);
+    translatedSearchText.set(translation, text);
+  }
+  return text;
+}
+
+export function searchHadith(query: string, narrations: HadithNarration[], scope: CollectionScope, language = "en") {
   const normalized = normalizeHadithSearch(query);
   const reference = queryReference(normalized);
   const terms = normalized.split(" ").filter(Boolean);
+  const editions = localeHadithEditions(language);
   const matches = scope === "riyadussalihin" ? [] : narrations.filter(narration => {
     if (scope !== "all" && scope !== narration.collection) return false;
     if (reference) return (!reference.collection || reference.collection === narration.collection) && matchNumber(narration.number, reference.number);
@@ -176,14 +196,17 @@ export function searchHadith(query: string, narrations: HadithNarration[], scope
       ].filter(Boolean).join(" "));
       searchText.set(narration, haystack);
     }
-    return terms.every(term => haystack.includes(term));
+    const translation = searchableTranslation(editions?.[narration.collection]?.narrations[narration.number]);
+    return terms.every(term => haystack.includes(term) || translation.includes(term));
   });
   const riyad = scope !== "all" && scope !== "riyadussalihin" ? [] : riyadSelections.flatMap(item => {
     const narration = narrations.find(narration => hadithId(narration.collection, narration.number) === item.original);
     if (!narration) return [];
+    const translation = searchableTranslation(editions?.[narration.collection]?.narrations[narration.number]);
+    const summary = normalizeHadithSearch(`${item.summary} ${item.summaryBn} riyad as salihin riyadussalihin রিয়াদুস সালিহিন`);
     const includes = reference
       ? (!reference.collection || reference.collection === "riyadussalihin") && matchNumber(item.number, reference.number)
-      : terms.every(term => normalizeHadithSearch(`${item.summary} ${item.summaryBn} riyad as salihin riyadussalihin রিয়াদুস সালিহিন`).includes(term));
+      : terms.every(term => summary.includes(term) || translation.includes(term));
     return includes ? [{ ...item, grade: narration.grade }] : [];
   });
   return { matches, riyad };

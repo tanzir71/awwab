@@ -1,12 +1,15 @@
 import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { parseArgs } from "node:util";
 import { parse, TYPE } from "@formatjs/icu-messageformat-parser";
+import { checkHadithMeaningEditions } from "./hadith-meaning-edition.mjs";
 import { checkQuranMeaningEdition } from "./quran-meaning-edition.mjs";
 
-const [sourcePath, reviewPath, output, quranPath] = process.argv.slice(2);
-if (!sourcePath || !reviewPath || !output || process.argv.length > 6) {
-  throw new Error("Usage: node scripts/build-locale-pack.mjs <source-ui.json> <reviewed-catalogue.json> <output-directory> [reviewed-quran-meanings.json]");
+const { positionals, values } = parseArgs({ allowPositionals: true, options: { hadith: { type: "string" } } });
+const [sourcePath, reviewPath, output, quranPath] = positionals;
+if (!sourcePath || !reviewPath || !output || positionals.length > 4) {
+  throw new Error("Usage: node scripts/build-locale-pack.mjs <source-ui.json> <reviewed-catalogue.json> <output-directory> [reviewed-quran-meanings.json] [--hadith reviewed-hadith-meanings.json]");
 }
 const read = path => JSON.parse(readFileSync(path, "utf8"));
 const source = read(sourcePath);
@@ -99,7 +102,16 @@ if (quranPath) {
   quran = checkQuranMeaningEdition(edition, locale.code);
 }
 
-const pack = { version: 1, locale: locale.code, dir: locale.dir, sourceFingerprint: fingerprint, messages: translations, quran };
+let hadith;
+if (values.hadith) {
+  const edition = read(values.hadith);
+  if (edition?.locale !== locale.code || edition._status !== "reviewed") {
+    throw new Error("Supply reviewed Hadith editions in the catalogue’s language.");
+  }
+  hadith = checkHadithMeaningEditions(edition.collections, locale.code);
+}
+
+const pack = { version: 1, locale: locale.code, dir: locale.dir, sourceFingerprint: fingerprint, messages: translations, quran, hadith };
 mkdirSync(output, { recursive: true });
 const destination = resolve(output, `${locale.code}.json`);
 writeFileSync(destination, JSON.stringify(pack) + "\n", { flag: "wx" });
