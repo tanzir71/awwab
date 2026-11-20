@@ -1,0 +1,182 @@
+[
+  {
+    "id": "gulf-work-first-day",
+    "title": ["Meeting colleagues", "সহকর্মীদের সঙ্গে পরিচয়"],
+    "partner": ["Colleague", "সহকর্মী"],
+    "sign": "مدخل الموظفين",
+    "signSpeech": "مَدْخَلُ الْمُوَظَّفِينَ",
+    "meaning": ["Staff entrance", "কর্মীদের প্রবেশপথ"],
+    "dialogue": [
+      ["السَّلَام عَلَيْكُم. أَنَا يِدِيد هِنِي، اسْمِي سَامِي.", "as-salām ʿalaykum. anā yidīd hinī, ismī sāmī.", "Peace be upon you. I'm new here. My name's Sami.", "আপনার ওপর শান্তি বর্ষিত হোক। আমি এখানে নতুন। আমার নাম সামি।"],
+      ["وَعَلَيْكُم السَّلَام. حَيَّاك اللَّه. فِي أَيّ قِسْم تِشْتَغِل؟", "wa ʿalaykum as-salām. ḥayyāk allāh. fī ayy gism tishtagil?", "And peace be upon you. Welcome. Which department do you work in?", "আপনার ওপরও শান্তি বর্ষিত হোক। স্বাগতম। কোন বিভাগে কাজ করেন?"],
+      ["أَشْتَغِل فِي الْمَخْزَن. وَيْن مَدْخَل الْمُوَظَّفِين؟", "ashtagil fil-makhzan. wayn madkhal il-muwaẓẓafīn?", "I work in the stockroom. Where's the staff entrance?", "আমি গুদামে কাজ করি। কর্মীদের প্রবেশপথ কোথায়?"],
+      ["مِنْ هَالْبَاب. تَعَال، بِوَرِّيك مَكَان الْعَمَل.", "min hal-bāb. taʿāl, bawarrīk makān il-ʿamal.", "Through this door. Come, I'll show you where you'll be working.", "এই দরজা দিয়ে। আসুন, কাজের জায়গাটা দেখিয়ে দিই।"]
+    ],
+    "words": [
+      { "ar": "عَمَل", "tr": "ʿamal", "meaning": ["Work", "কাজ"], "root": "ع م ل", "bridge": "18:110:18" },
+      { "ar": "قِسْم", "tr": "gism", "meaning": ["Department", "বিভাগ"] }
+    ]
+  },
+  {
+    "id": "gulf-work-interview",
+    "title": ["Applying for a job", "চাকরির আবেদন"],
+    "partner": ["Interviewer", "সাক্ষাৎকারগ্রহণকারী"],
+    "sign": "طلبات التوظيف",
+    "signSpeech": "طَلَبَاتُ التَّوْظِيفِ",
+    "meaning": ["Job applications", "চাকরির আবেদন"],
+    "dialogue": [
+      ["أَبْغِي أَقَدِّم عَ الْوَظِيفَة. عِنْدِي مَوْعِد الْيَوْم.", "abghī agaddim ʿal-waẓīfa. ʿindī mawʿid il-yōm.", "I'd like to apply for the job. I have an appointment today.", "চাকরিটায় আবেদন করতে চাই। আজ আমার সাক্ষাতের সময় ঠিক করা আছে।"],
+      ["هَيْه، تَفَضَّل. عِنْدَك خِبْرَة فِي هَالشُّغْل؟", "hayh, tafaḍḍal. ʿindak khibra fī hash-shughl?", "Yes, come in. Do you have experience in this kind of work?", "হ্যাঁ, আসুন। এই ধরনের কাজে আপনার অভিজ্ঞতা আছে?"],
+      ["هَيْه، اشْتَغَلْت فِي مَخْزَن سَنَتَيْن. هَذِي سِيرَتِي الذَّاتِيَّة.", "hayh, ishtagalt fī makhzan sanatayn. hadhī sīratī idh-dhātiyya.", "Yes, I worked in a stockroom for two years. Here's my CV.", "হ্যাঁ, দুই বছর গুদামে কাজ করেছি। এই নিন আমার জীবনবৃত্তান্ত।"],
+      ["مَشْكُور. بِنْطَّالِعْهَا وَنَرُدّ عَلَيْك.", "mashkūr. binṭāliʿhā wa-narudd ʿalayk.", "Thank you. We'll look it over and get back to you.", "ধন্যবাদ। আমরা দেখে আপনাকে জানাব।"]
+    ],
+    "words": [
+      { "ar": "خِبْرَة", "tr": "khibra", "meaning": ["Experience", "অভিজ্ঞতা"], "root": "خ ب ر", "bridge": "49:13:20" },
+      { "ar": "وَظِيفَة", "tr": "waẓīfa", "meaning": ["Job or position", "চাকরি বা পদ"] }
+    ]
+  },
+  {
+    "id": "gulf-work-shifts",
+    "title": ["Shifts & schedules", "শিফট ও কাজের সময়সূচি"],
+    "partner": ["Supervisor", "তত্ত্বাবধায়ক"],
+    "sign": "جدول المناوبات",
+    "signSpeech": "جَدْوَلُ الْمُنَاوَبَاتِ",
+    "meaning": ["Shift schedule", "শিফটের সময়সূচি"],
+    "dialogue": [
+      ["السَّاعَة كَمْ يِبْدَا دَوَامِي بَاجِر؟", "is-sāʿa kam yibda dawāmī bājir?", "What time does my shift start tomorrow?", "আগামীকাল আমার শিফট কয়টায় শুরু?"],
+      ["السَّاعَة سَبْع الصُّبْح. وَصَلَك الْجَدْوَل الْيِدِيد؟", "is-sāʿa sabʿ iṣ-ṣubḥ. waṣalak il-jadwal il-yidīd?", "Seven in the morning. Did you get the new schedule?", "সকাল সাতটায়। নতুন সময়সূচি পেয়েছেন?"],
+      ["لَا بَعْدْ. تِقْدَر تِرْسِلْه لِي؟", "lā, baʿd. tigdar tirsilh lī?", "Not yet. Can you send it to me?", "এখনো পাইনি। আমাকে পাঠাতে পারবেন?"],
+      ["هَيْه، بِرْسِلْه لَك الْحِين.", "hayh, barsilh lak il-ḥīn.", "Yes, I'll send it to you now.", "হ্যাঁ, এখনই আপনাকে পাঠাচ্ছি।"]
+    ],
+    "words": [
+      { "ar": "دَوَام", "tr": "dawām", "meaning": ["Work hours or shift", "কাজের সময় বা শিফট"], "root": "د و م", "bridge": "11:107:4" },
+      { "ar": "جَدْوَل", "tr": "jadwal", "meaning": ["Schedule", "সময়সূচি"] }
+    ]
+  },
+  {
+    "id": "gulf-work-contract",
+    "title": ["Reading a contract", "চুক্তি পড়া"],
+    "partner": ["HR assistant", "মানবসম্পদ বিভাগের সহকারী"],
+    "sign": "عقد العمل",
+    "signSpeech": "عَقْدُ الْعَمَلِ",
+    "meaning": ["Employment contract", "চাকরির চুক্তি"],
+    "dialogue": [
+      ["هَذَا عَقْد الْعَمَل؟ مُمْكِن آخُذ نُسْخَة؟", "hādhā ʿagd il-ʿamal? mumkin ākhudh nuskha?", "Is this the employment contract? Could I have a copy?", "এটা কি চাকরির চুক্তি? একটা কপি পেতে পারি?"],
+      ["هَيْه. تَبْغِي تِقْرَاه الْحِين؟", "hayh. tabghī tigrāh il-ḥīn?", "Yes. Would you like to read it now?", "হ্যাঁ। এখন পড়তে চান?"],
+      ["هَيْه، أَبْغِي أَقْرَاه قَبْل لَا أَوَقِّع. مُمْكِن تِشْرَح لِي هَالْبَنْد؟", "hayh, abghī agrāh gabl lā awaggiʿ. mumkin tishraḥ lī hal-band?", "Yes, I'd like to read it before I sign. Could you explain this clause?", "হ্যাঁ, সই করার আগে পড়তে চাই। এই ধারাটা বুঝিয়ে বলতে পারবেন?"],
+      ["أَكِيد. حَدِّد لِي الْبَنْد اللِّي تَبْغِي تِفْهَمَه.", "akīd. ḥaddid lī il-band illi tabghī tifhamah.", "Of course. Point to the clause you'd like to understand.", "অবশ্যই। যে ধারাটা বুঝতে চান, সেটা দেখিয়ে দিন।"]
+    ],
+    "words": [
+      { "ar": "عَقْد", "tr": "ʿagd", "meaning": ["Contract", "চুক্তি"], "root": "ع ق د", "bridge": "5:1:5" },
+      { "ar": "بَنْد", "tr": "band", "meaning": ["Clause or item", "ধারা বা দফা"] }
+    ]
+  },
+  {
+    "id": "gulf-work-pay",
+    "title": ["Reading a payslip", "বেতনের হিসাবপত্র পড়া"],
+    "partner": ["Payroll clerk", "বেতন বিভাগের কর্মী"],
+    "sign": "كشف الراتب",
+    "signSpeech": "كَشْفُ الرَّاتِبِ",
+    "meaning": ["Payslip", "বেতনের হিসাবপত্র"],
+    "dialogue": [
+      ["مُمْكِن آخُذ كَشْف رَاتِب هَالشَّهْر؟", "mumkin ākhudh kashf rātib hash-shahr?", "Could I have this month's payslip?", "এই মাসের বেতনের হিসাবপত্রটা পেতে পারি?"],
+      ["هَيْه، هَذَا الْكَشْف. أَيّ مَبْلَغ تَبْغِي تِرَاجِعَه؟", "hayh, hādhā il-kashf. ayy mablagh tabghī tirājiʿah?", "Yes, here's the payslip. Which amount would you like to check?", "হ্যাঁ, এই নিন হিসাবপত্র। কোন টাকার অঙ্কটা মিলিয়ে দেখতে চান?"],
+      ["أَبْغِي أَعْرِف صَافِي الْأَجْر. شُو يَعْنِي هَالْخَصْم؟", "abghī aʿrif ṣāfī l-ajr. shū yaʿnī hal-khaṣm?", "I'd like to check my take-home pay. What does this deduction mean?", "হাতে কত পাব, সেটা দেখতে চাই। এই টাকা কেন কাটা হয়েছে?"],
+      ["خَلَّنَا نِرَاجِع الْبُنُود وَاحِد وَاحِد.", "khallanā nirājiʿ il-bunūd wāḥid wāḥid.", "Let's go through the items one at a time.", "একটা একটা করে হিসাব মিলিয়ে দেখি।"]
+    ],
+    "words": [
+      { "ar": "أَجْر", "tr": "ajr", "meaning": ["Pay or wages", "মজুরি বা পারিশ্রমিক"], "root": "أ ج ر", "bridge": "28:25:11" },
+      { "ar": "خَصْم", "tr": "khaṣm", "meaning": ["Deduction", "কেটে রাখা টাকা"] }
+    ]
+  },
+  {
+    "id": "gulf-work-overtime",
+    "title": ["Checking overtime hours", "বাড়তি কাজের সময় মিলিয়ে দেখা"],
+    "partner": ["Timekeeper", "কাজের সময়ের হিসাবরক্ষক"],
+    "sign": "سجل الحضور والانصراف",
+    "signSpeech": "سِجِلُّ الْحُضُورِ وَالِانْصِرَافِ",
+    "meaning": ["Clock-in and clock-out log", "কাজে আসা ও বের হওয়ার সময়ের খাতা"],
+    "dialogue": [
+      ["أَمْس اشْتَغَلْت سَاعَتَيْن زِيَادَة. وَيْن أُسَجِّلْهِنّ؟", "ams ishtagalt sāʿatayn ziyāda. wayn usajjilhin?", "I worked two extra hours yesterday. Where do I log them?", "গতকাল দুই ঘণ্টা বেশি কাজ করেছি। সময়টা কোথায় লিখব?"],
+      ["فِي سِجِلّ الدَّوَام. عِنْدَك وَقْت الدُّخُول وَوَقْت الطُّلُوع؟", "fī sijill id-dawām. ʿindak wagt id-dukhūl wa-wagt iṭ-ṭulūʿ?", "In the work log. Do you have your start and finish times?", "কাজের সময়ের খাতায়। কখন ঢুকেছেন আর কখন বের হয়েছেন, সময় দুটো কাছে আছে?"],
+      ["هَيْه، كَاتِبْهِنّ هِنِي. تِقْدَر تِرَاجِع السَّاعَات مَعَاي؟", "hayh, kātibhin hinī. tigdar tirājiʿ is-sāʿāt maʿāy?", "Yes, I wrote them down here. Can you check the hours with me?", "হ্যাঁ, এখানে লিখে রেখেছি। আমার সঙ্গে সময়টা মিলিয়ে দেখতে পারবেন?"],
+      ["هَيْه، هَات السِّجِلّ وَنِرَاجِعَه سَوَا.", "hayh, hāt is-sijill wa-nirājiʿah sawā.", "Yes, bring the log and we'll check it together.", "হ্যাঁ, খাতাটা আনুন। একসঙ্গে মিলিয়ে দেখব।"]
+    ],
+    "words": [
+      { "ar": "سَاعَة", "tr": "sāʿa", "meaning": ["Hour", "ঘণ্টা"], "root": "س و ع", "bridge": "7:34:9" },
+      { "ar": "زِيَادَة", "tr": "ziyāda", "meaning": ["Extra or additional", "বাড়তি"] }
+    ]
+  },
+  {
+    "id": "gulf-work-leave",
+    "title": ["Requesting a day off", "ছুটির আবেদন"],
+    "partner": ["Supervisor", "তত্ত্বাবধায়ক"],
+    "sign": "طلب إجازة",
+    "signSpeech": "طَلَبُ إِجَازَةٍ",
+    "meaning": ["Leave request", "ছুটির আবেদন"],
+    "dialogue": [
+      ["أَبْغِي أَسْتَأْذِن. مُمْكِن آخُذ إِجَازَة يَوْم الْخَمِيس؟", "abghī astaʾdhin. mumkin ākhudh ijāza yōm il-khamīs?", "I'd like to ask for permission. Could I take Thursday off?", "একটা অনুমতি চাই। বৃহস্পতিবার ছুটি নিতে পারি?"],
+      ["أَيّ يَوْم بِتْرُدّ عَ الدَّوَام؟", "ayy yōm bitrudd ʿad-dawām?", "Which day will you be back at work?", "কোন দিন কাজে ফিরবেন?"],
+      ["بِرُدّ يَوْم الْجُمُعَة. وَيْن أُقَدِّم الطَّلَب؟", "barudd yōm il-jumʿa. wayn ugaddim iṭ-ṭalab?", "I'll be back Friday. Where do I submit the request?", "শুক্রবার ফিরব। আবেদনটা কোথায় জমা দেব?"],
+      ["عَبِّ الطَّلَب وَارْسِلْه لِي عَ الْإِيمَيْل.", "ʿabbi ṭ-ṭalab warsilh lī ʿal-īmēl.", "Fill in the request and email it to me.", "আবেদনটা পূরণ করে আমাকে ইমেইলে পাঠান।"]
+    ],
+    "words": [
+      { "ar": "أَسْتَأْذِن", "tr": "astaʾdhin", "meaning": ["I ask permission", "আমি অনুমতি চাই"], "root": "أ ذ ن", "bridge": "24:58:4" },
+      { "ar": "إِجَازَة", "tr": "ijāza", "meaning": ["Leave or time off", "ছুটি"] }
+    ]
+  },
+  {
+    "id": "gulf-work-instructions",
+    "title": ["Asking for instructions", "নির্দেশনা চাওয়া"],
+    "partner": ["Trainer", "প্রশিক্ষক"],
+    "sign": "تعليمات السلامة",
+    "signSpeech": "تَعْلِيمَاتُ السَّلَامَةِ",
+    "meaning": ["Safety instructions", "নিরাপত্তার নির্দেশনা"],
+    "dialogue": [
+      ["أَنَا مَبْ عَارِف كَيْف أَسْتَخْدِم هَالْجِهَاز.", "anā mab ʿārif kayf astakhdim hal-jihāz.", "I'm unsure how to use this equipment.", "এই যন্ত্রটা কীভাবে ব্যবহার করতে হয়, বুঝতে পারছি না।"],
+      ["زَيْن إِنَّك سَأَلْت. تَبْغِي أَشْرَح لَك قَبْل لَا تِبْدَا؟", "zayn innak saʾalt. tabghī ashraḥ lak gabl lā tibda?", "I'm glad you asked. Shall I explain before you start?", "জিজ্ঞেস করেছেন ভালো হয়েছে। শুরুর আগে বুঝিয়ে দেব?"],
+      ["هَيْه، لَوْ سَمَحْت. تِقْدَر تِوَرِّينِي تَعْلِيمَات السَّلَامَة؟", "hayh, law samaḥt. tigdar tiwarrīnī taʿlīmāt is-salāma?", "Yes, please. Could you show me the safety instructions?", "হ্যাঁ, দয়া করে। নিরাপত্তার নির্দেশনাগুলো দেখাবেন?"],
+      ["أَكِيد، بِنْقْرَاهَا سَوَا قَبْل لَا تِشْتَغِل.", "akīd, bingrāhā sawā gabl lā tishtagil.", "Of course. We'll read them together before you start work.", "অবশ্যই। কাজ শুরুর আগে একসঙ্গে পড়ে নেব।"]
+    ],
+    "words": [
+      { "ar": "سَلَامَة", "tr": "salāma", "meaning": ["Safety", "নিরাপত্তা"], "root": "س ل م", "bridge": "36:58:1" },
+      { "ar": "تَعْلِيمَات", "tr": "taʿlīmāt", "meaning": ["Instructions", "নির্দেশনা"] }
+    ]
+  },
+  {
+    "id": "gulf-work-concern",
+    "title": ["Raising a concern", "সমস্যার কথা জানানো"],
+    "partner": ["Staff liaison", "কর্মীদের যোগাযোগ কর্মকর্তা"],
+    "sign": "الشكاوى والملاحظات",
+    "signSpeech": "الشَّكَاوَى وَالْمُلَاحَظَاتُ",
+    "meaning": ["Complaints and feedback", "অভিযোগ ও মতামত"],
+    "dialogue": [
+      ["عِنْدِي مُشْكِلَة فِي الشُّغْل. مَعَ مَنُو أَرْمِس؟", "ʿindī mushkila fish-shughl. maʿa manū armis?", "I have a problem at work. Who can I speak with?", "কাজে একটা সমস্যা হয়েছে। কার সঙ্গে কথা বলতে পারি?"],
+      ["تِقْدَر تِرْمِس مَعَاي. تَبْغِي تِقَدِّم شَكْوَى؟", "tigdar tirmis maʿāy. tabghī tigaddim shakwā?", "You can speak with me. Would you like to make a complaint?", "আমার সঙ্গে কথা বলতে পারেন। অভিযোগ জানাতে চান?"],
+      ["أَبْغِي أَفْهَم الطَّرِيقَة أَوَّل. مُمْكِن نِرْمِس فِي مَكَان خَاصّ؟", "abghī afham iṭ-ṭarīga awwal. mumkin nirmis fī makān khāṣṣ?", "I'd like to understand the process first. Can we speak somewhere private?", "আগে প্রক্রিয়াটা বুঝতে চাই। আলাদা কোথাও কথা বলতে পারি?"],
+      ["هَيْه، نِقْدَر نِرْمِس فِي الْمَكْتَب.", "hayh, nigdar nirmis fil-maktab.", "Yes, we can speak in the office.", "হ্যাঁ, অফিসে কথা বলতে পারি।"]
+    ],
+    "words": [
+      { "ar": "شَكْوَى", "tr": "shakwā", "meaning": ["Complaint", "অভিযোগ"], "root": "ش ك و", "bridge": "58:1:9" },
+      { "ar": "مَكَان خَاصّ", "tr": "makān khāṣṣ", "meaning": ["Private place", "আলাদা জায়গা"] }
+    ]
+  },
+  {
+    "id": "gulf-work-rights",
+    "title": ["Asking about workplace rights", "কর্মক্ষেত্রের অধিকার সম্পর্কে জানতে চাওয়া"],
+    "partner": ["Information desk attendant", "তথ্যকেন্দ্রের কর্মী"],
+    "sign": "حقوق العمال",
+    "signSpeech": "حُقُوقُ الْعُمَّالِ",
+    "meaning": ["Workers’ rights", "কর্মীদের অধিকার"],
+    "dialogue": [
+      ["لَوْ سَمَحْت، وَيْن أَسْأَل عَنْ حُقُوقِي فِي الشُّغْل؟", "law samaḥt, wayn asʾal ʿan ḥugūgī fish-shughl?", "Excuse me, where can I ask about my rights at work?", "মাফ করবেন, কর্মক্ষেত্রে আমার অধিকার সম্পর্কে কোথায় জানতে পারি?"],
+      ["تَبْغِي رَقْم الْجِهَة الْمُخْتَصَّة؟", "tabghī ragm il-jiha l-mukhtaṣṣa?", "Would you like the number for the office that handles this?", "এই বিষয়টা দেখে যে দপ্তর, তার ফোন নম্বর চান?"],
+      ["هَيْه، اكْتِبْه لِي لَوْ سَمَحْت. أَبْغِي أَسْأَل إِذَا عِنْدَهُمْ مُتَرْجِم.", "hayh, iktibh lī law samaḥt. abghī asʾal idhā ʿindahum mutarjim.", "Yes, please write it down. I'd like to ask if they have an interpreter.", "হ্যাঁ, দয়া করে লিখে দিন। ওদের দোভাষী আছে কি না, জিজ্ঞেস করতে চাই।"],
+      ["هَذَا الرَّقْم. يَوْم تِتَّصِل، قُول لَهُمْ أَيّ لُغَة تِتْكَلَّم.", "hādhā r-ragm. yōm tittaṣil, gūl lahum ayy lugha titkallam.", "Here's the number. When you call, tell them which language you speak.", "এই নিন নম্বর। ফোন করলে আপনি কোন ভাষায় কথা বলেন, সেটা জানাবেন।"]
+    ],
+    "words": [
+      { "ar": "حَقّ", "tr": "ḥagg", "meaning": ["A right", "অধিকার"], "root": "ح ق ق", "bridge": "17:26:4" },
+      { "ar": "مُتَرْجِم", "tr": "mutarjim", "meaning": ["Interpreter or translator", "দোভাষী বা অনুবাদক"] }
+    ]
+  }
+]

@@ -132,7 +132,7 @@ function contextLabel(track: Track, level: number, state: ReturnType<typeof useP
   const course = state.spokenCourses[level - 1];
   if (track === "speak" && course) {
     const progress = t("pathsLessonProgress", { count: course.count, total: course.total });
-    return state.speakVariety === defaultSpeakVariety ? progress : `${t(speakVarietyLabels[course.variety])} · ${progress}`;
+    return state.speakVariety === defaultSpeakVariety && course.variety === defaultSpeakVariety ? progress : `${t(speakVarietyLabels[course.variety])} · ${progress}`;
   }
   return trackStatus[track][level - 1];
 }

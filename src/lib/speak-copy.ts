@@ -20,6 +20,7 @@ export const speakMessages: MessageCatalog = {
   speakPracticePacks: { en: "Practice packs", bn: "অনুশীলনের প্যাক" },
   speakPackLessons: { en: "Lessons", bn: "পাঠ" },
   speakUmrahPackDescription: { en: "Practise Saudi Hijazi phrases for finding your way, asking for help and getting around during Umrah and Hajj.", bn: "উমরাহ ও হজের সময় পথ খোঁজা, সাহায্য চাওয়া এবং যাতায়াতের জন্য সৌদি হিজাজি বাক্য অনুশীলন করুন।" },
+  speakWorkPackDescription: { en: "Practise Emirati Arabic for job interviews, shifts, contracts and payslips. Learn to ask about safety and workplace rights.", bn: "চাকরির সাক্ষাৎকার, শিফট, চুক্তি ও বেতনের হিসাবের জন্য আমিরাতি আরবি অনুশীলন করুন। নিরাপত্তা ও কর্মক্ষেত্রের অধিকার সম্পর্কে প্রশ্ন করতে শিখুন।" },
   speakOpenInAsk: { en: "Open phrase in Ask in Arabic", bn: "আরবিতে জিজ্ঞেস করুন পাতায় বাক্যটি খুলুন" },
   speakPractiseForUmrah: { en: "Practise for Umrah & Hajj", bn: "উমরাহ ও হজের জন্য অনুশীলন করুন" },
   speakSurvival: { en: "Survival", bn: "জরুরি কথাবার্তা" },

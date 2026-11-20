@@ -10,6 +10,7 @@ import { useClock, useDesktop, useSettings } from "@/hooks/use-awwab";
 import { migrateLegacy } from "@/lib/storageService";
 import { CopyContext } from "@/lib/copy";
 import { readPseudoLocale } from "@/lib/pseudoLocale";
+import { speakPacks, speakSetupPath } from "@/lib/speakCurriculum";
 import Today, { PrayerWeek } from "@/pages/Index";
 import { PrayerGuide } from "@/pages/PrayerGuide";
 import { Learn } from "@/pages/Learn";
@@ -108,7 +109,7 @@ function Main() {
         <Route path="/learn/paths/speak/1" element={<Navigate replace to="/learn/speak" />} />
         <Route path="/learn/paths/speak/2" element={<Navigate replace to="/learn/speak?level=A2" />} />
         <Route path="/learn/paths/speak/3" element={<Navigate replace to="/learn/speak?level=B1" />} />
-        <Route path="/learn/paths/speak/4" element={<Speak pack="umrah-hajj" settings={settings} now={now} />} />
+        {speakPacks.map(pack => <Route key={pack} path={speakSetupPath(pack)} element={<Speak pack={pack} settings={settings} now={now} />} />)}
         <Route path="/learn/qaida/:id?" element={<Qaida settings={settings} desktop={desktop} />} />
         <Route path="/learn/surahs/:id?" element={<SurahReader settings={settings} now={now} />} />
         <Route path="/learn/salah" element={<SalahWords settings={settings} />} />

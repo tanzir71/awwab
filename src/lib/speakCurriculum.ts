@@ -4,6 +4,7 @@ import conversation from "../../docs/content/spoken-saudi-b1.json";
 import gulf from "../../docs/content/spoken-gulf-a1.json";
 import modernStandard from "../../docs/content/spoken-msa-a1.json";
 import umrah from "../../docs/content/spoken-umrah-hajj.json";
+import gulfWork from "../../docs/content/spoken-gulf-work.json";
 import { asset } from "./config";
 import { askClipPath, askPhrase, renderAsk } from "./umrahAsk";
 import { banglaPhrases } from "./umrah-ask-copy";
@@ -15,11 +16,11 @@ export const speakVarietyKey = "speak-variety";
 export const speakGoals = ["speakUmrah", "speakWork", "speakEveryday", "speakNews"] as const;
 export const speakLevels = ["A1", "A2", "B1"] as const;
 export type SpeakLevel = typeof speakLevels[number];
-export const speakPacks = ["umrah-hajj"] as const;
+export const speakPacks = ["umrah-hajj", "gulf-work"] as const;
 export type SpeakPack = typeof speakPacks[number];
 export const speakPathCourses = [...speakLevels, ...speakPacks] as const;
 export type SpeakCourse = typeof speakPathCourses[number];
-export const speakLevelLabels = { A1: "speakSurvival", A2: "speakEverydayLevel", B1: "speakConversation", "umrah-hajj": "speakUmrah" };
+export const speakLevelLabels = { A1: "speakSurvival", A2: "speakEverydayLevel", B1: "speakConversation", "umrah-hajj": "speakUmrah", "gulf-work": "speakWork" };
 export const speakVarieties = ["saudi-hijazi", "gulf", "msa"] as const;
 export type SpeakVariety = typeof speakVarieties[number];
 export const defaultSpeakVariety: SpeakVariety = "saudi-hijazi";
@@ -27,11 +28,12 @@ export const speakVarietyLabels = { "saudi-hijazi": "speakSaudi", gulf: "speakGu
 type SpeakPackDetails = { path: string; variety: SpeakVariety; description: string };
 export const speakPackDetails: Readonly<Partial<Record<SpeakCourse, SpeakPackDetails>>> = {
   "umrah-hajj": { path: "/learn/paths/speak/4", variety: "saudi-hijazi", description: "speakUmrahPackDescription" },
+  "gulf-work": { path: "/learn/paths/speak/5", variety: "gulf", description: "speakWorkPackDescription" },
 };
 export const speakCourseTitle = (course: SpeakCourse, t: (key: string) => string) => speakPackDetails[course] ? t(speakLevelLabels[course]) : course;
 
 type StarterUnit = typeof starter.units[number] & { level: "A1"; variety: "saudi-hijazi" };
-type ConversationUnit = (typeof everyday[number] | typeof conversation[number] | typeof gulf[number] | typeof modernStandard[number] | typeof umrah[number]) &
+type ConversationUnit = (typeof everyday[number] | typeof conversation[number] | typeof gulf[number] | typeof modernStandard[number] | typeof umrah[number] | typeof gulfWork[number]) &
   { level: SpeakCourse; variety: SpeakVariety };
 export type SpeakUnit = StarterUnit | ConversationUnit;
 export type SpeakWord = { ar: string; tr: string; meaning: string[]; root?: string; bridge?: string };
@@ -44,7 +46,10 @@ export const speakCourses: Record<SpeakVariety, Partial<Record<SpeakCourse, Spea
     B1: conversation.map(unit => ({ ...unit, level: "B1", variety: "saudi-hijazi" })),
     "umrah-hajj": umrah.map(unit => ({ ...unit, level: "umrah-hajj", variety: "saudi-hijazi" })),
   },
-  gulf: { A1: gulf.map(unit => ({ ...unit, level: "A1", variety: "gulf" })) },
+  gulf: {
+    A1: gulf.map(unit => ({ ...unit, level: "A1", variety: "gulf" })),
+    "gulf-work": gulfWork.map(unit => ({ ...unit, level: "gulf-work", variety: "gulf" })),
+  },
   msa: { A1: modernStandard.map(unit => ({ ...unit, level: "A1", variety: "msa" })) },
 };
 export const speakCourseVariety = (preferred: SpeakVariety, course: SpeakCourse) =>

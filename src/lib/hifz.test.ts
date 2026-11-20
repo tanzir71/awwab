@@ -181,7 +181,7 @@ describe("Learning path progress", () => {
     expect(content.patterns).toHaveLength(6);
     expect(reviewDestination(patternReviewPrefix + content.patterns[0].id)).toBe(patternPracticePath);
     for (const unit of [...speakCourses["saudi-hijazi"].A2, ...speakCourses["saudi-hijazi"].B1, ...speakCourses["saudi-hijazi"]["umrah-hajj"],
-      ...speakCourses.gulf.A1, ...speakCourses.msa.A1]) {
+      ...speakCourses.gulf.A1, ...speakCourses.gulf["gulf-work"], ...speakCourses.msa.A1]) {
       const bridge = speakLessonContent(unit).words.find(word => word.bridge);
       expect(bridge, unit.id).toBeDefined();
       const row = corpus.positions.get(bridge.bridge);

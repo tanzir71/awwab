@@ -77,6 +77,7 @@ describe("Speak lesson recordings", () => {
     ["saudi-hijazi", "B1", 12, 6, 3],
     ["saudi-hijazi", "umrah-hajj", 9, 4, 2],
     ["gulf", "A1", 12, 4, 2],
+    ["gulf", "gulf-work", 10, 4, 2],
     ["msa", "A1", 12, 4, 2],
   ] as const)("includes generated %s %s dialogue, vocabulary and signs", (variety, level, count, linesPerUnit, wordsPerUnit) => {
     const files = new Set<string>();

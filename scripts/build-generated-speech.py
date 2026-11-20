@@ -13,7 +13,7 @@ PHRASES = ROOT / "handovers/H2-languages-paths-arabic-help/data/umrah-phrases.js
 CONTENT = ROOT / "docs/content"
 OUTPUT = ROOT / "public/packs"
 MODEL = "https://huggingface.co/vadimbelsky/arabic-emirati-female-piper/tree/cfe173969620e40be65b5dd8ed4d97d55a864325"
-SPEAK_COURSES = ("saudi-a2", "saudi-b1", "gulf-a1", "umrah-hajj")
+SPEAK_COURSES = ("saudi-a2", "saudi-b1", "gulf-a1", "umrah-hajj", "gulf-work")
 
 
 def read(path):
