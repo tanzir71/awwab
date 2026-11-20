@@ -66,11 +66,11 @@ const librarySearch = [
   ...surahs.surahs.slice(0, 12).map(item => ({ title: item.transliteration, to: `/learn/surahs/${item.number}`, terms: `${item.nameArabic} ${item.english}` })),
 ];
 
-function Tabs({ settings }: { settings: Settings }) {
+function Tabs({ settings, umrahGuide }: { settings: Settings; umrahGuide: boolean }) {
   const { mode } = settings;
   return <nav className="tabbar" aria-label={message(settings, "mainNavigation")}>
     {mobile.map(item => <NavLink to={item.to} key={item.to}>{({ isActive }) => <>
-      <span className="tab-icon"><DesignIcon size={22} name={mode === "adult"
+      <span className="tab-icon"><DesignIcon size={22} name={mode === "adult" && umrahGuide ? `umrah-practice-${item.tab}` : mode === "adult"
         ? `tab-${item.tab}${isActive === (item.tab === "home") ? "" : "1"}`
         : isActive || item.tab !== "home" ? `maktab-today-${item.tab === "book" || item.tab === "ret" ? `${item.tab}${item.tab === "book" ? "1" : "2"}` : item.tab}` : "tab-home1"} /></span>
       {navigationLabel(settings, item.title)}
@@ -125,7 +125,8 @@ export function AppShell({ children, settings, now, desktop }: { children: React
   };
   const destinations = groups.flatMap(group => group.items);
   const hifzRoute = location.pathname.startsWith("/learn/hifz/");
-  const sectionPath = hifzRoute ? "/learn/paths" : location.pathname;
+  const umrahGuide = location.pathname === "/plan/umrah-guide";
+  const sectionPath = hifzRoute ? "/learn/paths" : umrahGuide ? "/plan" : location.pathname;
   const heading = [...destinations].sort((a, b) => b.to.length - a.to.length).find(item => sectionPath.startsWith(item.to));
   const spokenUnit = desktop && location.pathname.startsWith("/learn/speak/") && speakUnit(location.pathname.split("/").at(-1));
   const title = spokenUnit ? `${t("pathsSpeak")} · ${speakCourseTitle(spokenUnit.level, t)} · ${spokenUnit.title[settings.language === "bn" ? 1 : 0]}` : returnDesktop && location.pathname === "/return/qada" ? t("qadaTitle")
@@ -222,7 +223,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
         {groups.map(group => <div key={group.label}>
           <p className="caption nav-group">{navigationLabel(settings, group.label)}</p>
           {group.items.filter(item => !learnWorkspace || item.to !== "/you").map(item => {
-            const currentPath = hifzRoute && item.to === sectionPath;
+            const currentPath = (hifzRoute || umrahGuide) && item.to === sectionPath;
             const ItemLink = currentPath ? Link : NavLink;
             return <ItemLink key={item.to} to={item.to} end={item.end} aria-current={currentPath ? "location" : "page"}>
               {wordBankStudy && item.to === "/learn/words" ? <DesignIcon name="word-bank-desk-list" size={16} /> :
@@ -253,7 +254,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
       </>}
     </nav>}
     <main className="app-main" id="app-main" tabIndex={-1} data-page={shareSheet ? "share-sheet" : shareMoment ? "share-moment" : umrahDesktop ? "umrah-prep" : prayerGuide ? "prayer-guide" : salahStudy ? "salah-study" : today ? "today" : planDesktop ? "plan-desktop" : mosquesDesktop ? "mosques-desktop" : returnDesktop ? "return-desktop" : hadithDesktop ? "hadith-desktop" : settingsDesktop ? "settings-desktop" : languageFlow ? "settings-language-flow" : pathsHome ? "paths" : studyHome ? "learn" : chapter ? "surah-reader" : lesson ? "qaida-lesson" : wordBank ? "word-bank" : fluency ? "fluency" : location.pathname.startsWith("/learn/takhti") ? "takhti" : undefined}>
-      {!fullscreen && !((today || studyHome || surahStudy) && settings.mode === "maktab") && <header className="topbar">
+      {!fullscreen && (!umrahGuide || desktop) && !((today || studyHome || surahStudy) && settings.mode === "maktab") && <header className="topbar">
         <div>{today || learnWorkspace || zakatPage || planDesktop || mosquesDesktop || returnDesktop || guideDesktop || hadithDesktop || settingsDesktop || umrahDesktop ? <h1>{umrahDesktop ? t("umrahPrepare") : settingsDesktop ? t("settingsDeskTitle") : guideDesktop ? t("howToPray") : qaidaStudy ? t("qaidaDesktopTitle", { number: lesson.n }) : surahStudy ? t("surahsForSalah") : wordBankStudy ? t("wordBankName") : title}</h1> : <h2>{title}</h2>}
           <p className="small muted">{guideDesktop ? <>
             <Link to={`/you/prayer?${guideSettingsQuery}`}>{t(guideReference(settings) === "hanafi" ? "prayerGuideHanafi" : "prayerGuideFard")} · {t("prayerGuideSettings")}</Link> · {t("guideDesktopAnatomy")}
@@ -271,7 +272,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
         <WordPanel desktop={desktop} settings={settings} reader={surahStudy} />
       </div>
     </main>
-    {!fullscreen && !prayerGuide && !languageFlow && <Tabs settings={settings} />}
+    {!fullscreen && !prayerGuide && !languageFlow && <Tabs settings={settings} umrahGuide={umrahGuide} />}
     <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
       <DialogContent className="awwab-dialog" aria-describedby={undefined}>
         <DialogTitle>{t("searchApp")}</DialogTitle>

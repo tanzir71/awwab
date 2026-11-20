@@ -21,6 +21,7 @@ import { localeMessage } from "./localePacks";
 import { settingsMessages } from "./settings-copy";
 import { umrahPrepMessages } from "./umrah-prep-copy";
 import { umrahNowMessages } from "./umrah-now-copy";
+import { umrahGuideMessages } from "./umrah-guide-copy";
 import { askMessages } from "./umrah-ask-copy";
 import { askPhraseMessages } from "./umrah-phrase-messages.mjs";
 import { umrahStepMessages } from "./umrah-step-messages.mjs";
@@ -41,6 +42,7 @@ const messages: MessageCatalog = {
   ...pathsMessages,
   ...askMessages,
   ...umrahNowMessages,
+  ...umrahGuideMessages,
   ...umrahPrepMessages,
   ...studyMessages,
   ...shareMessages,

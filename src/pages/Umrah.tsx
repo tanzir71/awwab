@@ -2,13 +2,13 @@ import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate, useOutletContext } from "react-router-dom";
 import { ArrowLeft, Compass, Download, Heart, MapPin, Plus } from "lucide-react";
 import { toast } from "sonner";
-import { ArabicText } from "@/components/ArabicText";
 import { DesignIcon } from "@/components/DesignIcon";
 import { HaramFocusPanel } from "@/components/HaramFocusPanel";
 import { SectionNav } from "@/components/Surface";
 import { UmrahNowPanel } from "@/components/UmrahNowPanel";
 import { UmrahPreparation } from "@/components/UmrahPreparation";
 import { UmrahGuideVoice } from "@/components/UmrahGuideVoice";
+import { UmrahRitualDua, UmrahRitualSources, UmrahTawafDiagram } from "@/components/UmrahRitualContent";
 import { UmrahSaiGuide } from "@/components/UmrahSaiGuide";
 import { UmrahWalkSetup } from "@/components/UmrahWalkSetup";
 import { UmrahTripForm, UmrahTripImport } from "@/components/UmrahTripForm";
@@ -22,7 +22,6 @@ import { advanceSai, distance, initialTrip, makkah, tawafRounds, toggleUmrahDua,
 import { observeHaramGate, type GateWatch } from "@/lib/umrahGateMemory";
 import { umrahStepNote, umrahStepTitle } from "@/lib/umrah-step-messages.mjs";
 import ritual from "../../docs/content/umrah-steps.json";
-import duas from "../../docs/content/umrah-duas.json";
 import osm from "../../public/data/umrah-osm-v1.json";
 import outline from "../../public/data/umrah-haram-outline-v1.json";
 
@@ -207,8 +206,7 @@ export function UmrahRituals() {
           const key = umrahStepNote(step.id, index);
           return <p className="muted" key={key}>{t(key)}</p>;
         })}
-        {step.id === "talbiyah" && <><ArabicText text={duas.talbiyah.arabic} citation={duas.talbiyah.source} /><a className="caption" href={duas.talbiyah.url}>{duas.talbiyah.source}</a></>}
-        {isTawaf && <div className="tawaf-diagram" aria-label={t("umrahGuideDiagram")} role="img"><span>{t("umrahGuideKaaba")}</span><i>↺</i></div>}
+        {isTawaf && <UmrahTawafDiagram />}
         {isTawaf && <>
           <div className="row-between"><strong className="numeral">{t("umrahGuideCount", { count, total: 7 })}</strong>
             <span>{t("umrahGuideRounds")}</span></div>
@@ -223,7 +221,10 @@ export function UmrahRituals() {
           <button className="action light" disabled={trip.step < 1} onClick={() => void save(old => ({ ...old, step: Math.max(0, old.step - 1) }))}>{t("umrahGuidePrevious")}</button>
           <button className="action soft" disabled={trip.step >= total - 1} onClick={() => void save(old => ({ ...old, step: Math.min(total - 1, old.step + 1) }))}>{t("umrahGuideNext")}</button>
         </div>
+        <p className="muted small"><UmrahRitualSources sources={step.sources} /></p>
       </section>
+      {step.id === "talbiyah" && <UmrahRitualDua kind="talbiyah" />}
+      {isTawaf && <UmrahRitualDua kind="good" />}
       {voice}
     </>}
     {isSai ? <details className="umrah-sai-steps">
@@ -234,54 +235,48 @@ export function UmrahRituals() {
       <Link to="/plan" className="action light">{t("umrahBackToPlan")}</Link>
       <Link to="/print/umrah-guide" className="action soft">{t("umrahGuidePrint")}</Link>
     </div> : <Link to="/print/umrah-guide" className="action soft">{t("umrahGuidePrint")}</Link>}
-    {isSai && <p className="small"><a href={osm.license} rel="noreferrer">{osm.attribution}</a></p>}
+    {isSai && <p className="small"><UmrahRitualSources sources={step.sources} /> · <a href={osm.license} rel="noreferrer">{osm.attribution}</a></p>}
   </>;
 }
 
 export function UmrahDuas() {
+  const { t } = useCopy();
   const { trip, save, now } = useTrip();
   const day = dateKey(now, makkah.timeZone);
   const { hash } = useLocation();
   const requestsSection = useRef<HTMLElement>(null);
+  const [saving, setSaving] = useState(false);
   useEffect(() => {
     if (hash !== "#requests") return;
     const frame = requestAnimationFrame(() => requestsSection.current?.scrollIntoView({ block: "start" }));
     return () => cancelAnimationFrame(frame);
   }, [hash]);
   return <>
-    <section className="card stack">
-      <h2>Between the Yemeni corner and Black Stone</h2>
-      <ArabicText text={duas.good.arabic} citation={duas.good.source} />
-      <p>{duas.good.meaning}</p>
-      <a className="caption" href={duas.good.url}>{duas.good.source}</a>
-    </section>
-    <section className="card stack">
-      <h2>Talbiyah</h2>
-      <ArabicText text={duas.talbiyah.arabic} citation={duas.talbiyah.source} />
-      <p>{duas.talbiyah.meaning}</p>
-      <a className="caption" href={duas.talbiyah.url}>{duas.talbiyah.source}</a>
-    </section>
+    <UmrahRitualDua kind="good" />
+    <UmrahRitualDua kind="talbiyah" />
     <section className="card stack" ref={requestsSection} id="requests">
-      <h2>Duʿā requests</h2>
-      <form className="compact-stack" onSubmit={event => {
+      <h2>{t("umrahFocusRequestTitle")}</h2>
+      <form className="compact-stack" onSubmit={async event => {
         event.preventDefault();
+        if (saving) return;
         const form = event.currentTarget;
         const values = new FormData(form);
         const name = String(values.get("name")).trim();
         const request = String(values.get("request")).trim();
         if (!name || !request) return;
-        void save(old => ({ ...old, requests: [...old.requests, { id: crypto.randomUUID(), name, for: request, done: [] }] }));
-        form.reset();
+        setSaving(true);
+        if (await save(old => ({ ...old, requests: [...old.requests, { id: crypto.randomUUID(), name, for: request, done: [] }] }))) form.reset();
+        setSaving(false);
       }}>
-        <label className="field">Name<input name="name" required maxLength={100} /></label>
-        <label className="field">Request<input name="request" required maxLength={500} /></label>
-        <button className="action soft"><Plus size={17} /> Add request</button>
+        <label className="field">{t("umrahDuasName")}<input name="name" dir="auto" required maxLength={100} /></label>
+        <label className="field">{t("umrahDuasRequest")}<input name="request" dir="auto" required maxLength={500} /></label>
+        <button className="action soft" disabled={saving}><Plus size={17} />{t("umrahFocusAddRequest")}</button>
       </form>
       {trip.requests.map(item => <div className="list-row" key={item.id}>
-        <span className="icon-box"><Heart size={19} /></span><span><strong>{item.name}</strong><small>{item.for}</small></span>
+        <span className="icon-box"><Heart size={19} /></span><span><strong><bdi>{item.name}</bdi></strong><small><bdi>{item.for}</bdi></small></span>
         <button className="action light" aria-pressed={item.done.includes(day)} onClick={() => void save(old => ({
           ...old, requests: toggleUmrahDua(old.requests, item.id, day),
-        }))}>{item.done.includes(day) ? "Prayed ✓" : "Prayed"}</button>
+        }))}>{t("umrahDuasPrayed")}{item.done.includes(day) && <DesignIcon name="onboarding-mode-check" size={14} />}</button>
       </div>)}
     </section>
   </>;
@@ -292,7 +287,7 @@ export function UmrahPlan() {
   const { trip } = useTrip();
   const navigate = useNavigate();
   return <>
-    <SectionNav title="Your Umrah trip" back="/umrah" />
+    <SectionNav title={t("umrahPrepTrip")} back="/umrah" />
     <UmrahTripForm trip={trip} gates={gateNames} />
     <UmrahTripImport onImported={() => navigate("/umrah")} />
     <Link className="action soft" to="/umrah/location" state={{ from: "plan" }}>{t("umrahWalkLink")}</Link>

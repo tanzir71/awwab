@@ -194,6 +194,7 @@ export function UmrahPreparation({ trip, gates }: { trip: UmrahTrip; gates: stri
           <button type="button" className="action light" onClick={() => downloadFile(new Blob([exportUmrahTrip(trip)], { type: "application/json" }), "awwab-umrah-trip.json")}>{t("umrahPrepExport")}</button>
           <Link className="action umrah-prep-print" to="/print/umrah-guide">{t("umrahPrepPrint")}</Link>
         </div>
+        <Link className="action light" to="/plan/umrah-guide" state={{ from: "umrah-preparation" }}>{t("umrahPracticeOpen")}</Link>
       </section>
     </div>
   </div></div>;

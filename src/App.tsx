@@ -43,6 +43,7 @@ import { Share } from "@/pages/Share";
 import { shareReturnPath } from "@/lib/shareNavigation";
 import { Milestone } from "@/pages/Milestone";
 import { HaramFocus, UmrahDuas, UmrahMapPage, UmrahNow, UmrahPlan, UmrahRituals, UmrahShell, WalkWithMe } from "@/pages/Umrah";
+import { UmrahGuide } from "@/pages/UmrahGuide";
 import { UmrahAskCards, UmrahAskHome, UmrahAskPhrase, UmrahAskShow } from "@/pages/UmrahAsk";
 import { Sources } from "@/pages/Sources";
 import { WordBank } from "@/pages/WordBank";
@@ -140,6 +141,7 @@ function Main() {
         <Route path="/plan" element={<Plan settings={settings} now={now} desktop={desktop} />} />
         <Route path="/plan/mosques" element={<Mosques settings={settings} now={now} desktop={desktop} />} />
         <Route path="/plan/zakat" element={<Zakat settings={settings} now={now} desktop={desktop} />} />
+        <Route path="/plan/umrah-guide" element={<UmrahGuide />} />
         <Route path="/share" element={<Share key={search} settings={settings} now={now} />} />
         <Route path="/share/milestone/:kind/:number" element={<Milestone settings={settings} now={now} />} />
         <Route path="/install" element={<div className="stack"><AppInstallPrompt /><Link className="action soft" to="/">Continue to awwab</Link></div>} />

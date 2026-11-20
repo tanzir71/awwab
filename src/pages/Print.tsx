@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useParams, useSearchParams } from "react-router-dom";
 import { Download, Printer } from "lucide-react";
 import { ArabicText } from "@/components/ArabicText";
 import { Wordmark } from "@/components/DesignIcon";
@@ -20,6 +20,8 @@ import { splitArabicWords, wordAnatomy } from "@/lib/wordAnatomy";
 import surahs from "../../docs/content/surahs-for-salah.json";
 import ritual from "../../docs/content/umrah-steps.json";
 import cardTransliteration from "../../docs/content/print-surah-transliteration.json";
+import { UmrahRitualDua, UmrahRitualSources } from "@/components/UmrahRitualContent";
+import { umrahStepSummary, umrahStepTitle } from "@/lib/umrah-step-messages.mjs";
 
 const sheets = [
   { to: "timetable", title: "Monthly prayer timetable", detail: "Adhan and local jamaat times" },
@@ -40,9 +42,12 @@ function verseLines(text: string) {
 }
 
 export function PrintHub() {
+  const { t } = useCopy();
   return <div className="stack">
     <SectionNav title="Print & export" back="/plan" />
-    {sheets.map(item => <ListLink key={item.to} to={`/print/${item.to}`} icon={<Printer size={19} />} title={item.title} detail={item.detail} />)}
+    {sheets.map(item => <ListLink key={item.to} to={`/print/${item.to}`} icon={<Printer size={19} />}
+      title={item.to === "umrah-guide" ? t("umrahPracticePocket") : item.title}
+      detail={item.to === "umrah-guide" ? t("umrahPracticePocketDetail") : item.detail} />)}
     <ListLink to="/you/reminders" icon={<Download size={19} />} title="Calendar reminders" detail="Export to your device calendar" />
     <ListLink to="/you/data" icon={<Download size={19} />} title="Backup" detail="Export your on-device records" />
   </div>;
@@ -76,8 +81,10 @@ export function WordPrintSheet() {
 }
 
 export function PrintSheet({ settings, now }: { settings: Settings; now: Date }) {
-  const { t, language } = useCopy();
+  const { t, locale, language } = useCopy();
   const { sheet, family } = useParams();
+  const { state } = useLocation();
+  const fromPractice = sheet === "umrah-guide" && state?.from === "umrah-guide";
   const title = sheets.find(item => item.to.split("/")[0] === sheet)?.title;
   const [selected, setSelected] = useState(108);
   const day = dateKey(now, settings.city.timeZone);
@@ -180,8 +187,25 @@ export function PrintSheet({ settings, now }: { settings: Settings; now: Date })
       <p className="paper-note">{settings.script === "indopak" ? "DigitalKhatt IndoPak text" : "Tanzil Quran text"} · Pickthall translation. Printed from Awwab.</p>
     </>;
   } else if (sheet === "umrah-guide") {
-    content = <ol className="compact-stack">{ritual.steps.map((step, i) => <li className="card compact-stack" key={step.id}><h3>{i + 1}. {step.title}</h3>{step.notes?.map(note => <p key={note}>{note}</p>)}
-      {step.counter && <p>Rounds or laps · ○ ○ ○ ○ ○ ○ ○</p>}</li>)}</ol>;
+    heading = t("umrahPracticePocket");
+    const number = new Intl.NumberFormat(locale);
+    content = <div className="umrah-pocket compact-stack">
+      <ol className="umrah-pocket-steps">
+        {ritual.steps.map((step, i) => <li className="card" key={step.id}>
+          <h2>{number.format(i + 1)} · {t(umrahStepTitle(step.id))}</h2>
+          <p>{t(umrahStepSummary(step.id))}</p>
+          <p className="paper-note"><UmrahRitualSources sources={step.sources} /></p>
+          {step.counter && <div className="umrah-paper-count">
+            <p>{t(step.id === "tawaf" ? "umrahPracticePaperRounds" : "umrahPracticePaperLaps")}</p>
+            <ol>{Array.from({ length: 7 }, (_, index) => <li key={index}>{number.format(index + 1)}</li>)}</ol>
+          </div>}
+        </li>)}
+      </ol>
+      <div className="umrah-pocket-duas">
+        <UmrahRitualDua kind="talbiyah" /><UmrahRitualDua kind="good" />
+      </div>
+      <p className="paper-note">{t("umrahGuideScholars")}</p>
+    </div>;
   } else if (sheet === "qada-sheet") {
     content = <><table><thead><tr><th>Prayer</th><th>Remaining</th><th>Made up</th></tr></thead><tbody>
       {prayerIds.map(id => {
@@ -204,7 +228,11 @@ export function PrintSheet({ settings, now }: { settings: Settings; now: Date })
       <p className="small zakat-sources">{Object.entries(zakatSources).map(([key, href]) => <a key={key} href={href} rel="noreferrer">{t(key)}</a>)}</p></>;
   }
   return <div className="print-page stack" data-sheet={sheet}>
-    <div className="no-print equal-row"><Link to="/print" className="action light">All print sheets</Link><button className="action" onClick={() => window.print()}><Printer size={18} /> Print A4</button></div>
+    <div className="no-print equal-row">
+      {fromPractice ? <Link to="/plan/umrah-guide" className="action light">{t("umrahPracticeBack")}</Link>
+        : <Link to="/print" className="action light">{sheet === "umrah-guide" ? t("umrahPracticePrintHub") : "All print sheets"}</Link>}
+      <button className="action" onClick={() => window.print()}><Printer size={18} />{sheet === "umrah-guide" ? t("umrahPracticePrint") : "Print A4"}</button>
+    </div>
     <header className="paper-header row-between"><div><h1>{heading}</h1>{subtitle && <p className="paper-note">{subtitle}</p>}</div><Wordmark /></header>
     {content}
   </div>;

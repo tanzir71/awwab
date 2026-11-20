@@ -229,6 +229,7 @@ export function Plan({ settings, now, desktop }: { settings: Settings; now: Date
       <Link className="card" to="/plan/zakat"><span className="icon-box"><DesignIcon name="plan-coins" /></span><strong>{t("zakat")}</strong><small className="muted">{hawl ? `${number.format(hawl.day)} ${planMonth(hawl.month, language)}` : t("planZakatDetail")}</small></Link>
       <Link className="card" to="/umrah"><span className="icon-box"><DesignIcon name="plan-cube" /></span><strong>{t("planUmrah")}</strong><small className="muted">{t("planUmrahDetail")}</small></Link>
     </nav>
+    <Link className="action soft" to="/plan/umrah-guide">{t("umrahPracticeOpen")}</Link>
     <div className="row-between plan-more">
       <Link className="text-button" to="/you/hijri">{t("planTitle")} · {t("settings")}</Link>
       <button className="text-button" onClick={() => setExpanded(value => !value)}>{t(expanded ? "planSeeFewer" : "planSeeYear")}</button>

@@ -1,0 +1,134 @@
+.app-content:has(> .umrah-practice) { padding-block-start: 0; }
+.umrah-practice > .section-nav { min-height: 56px; margin-inline: -8px; margin-block-end: 16px; gap: 8px; }
+.umrah-practice .section-nav .icon-button { position: relative; isolation: isolate; background: transparent; box-shadow: none; }
+.umrah-practice .section-nav .icon-button::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  z-index: -1;
+  background: var(--c-surface);
+  border-radius: var(--r-pill);
+  box-shadow: var(--shadow-card);
+}
+.umrah-practice-body { display: grid; gap: 16px; align-items: start; }
+.umrah-practice-active { display: grid; gap: 12px; border-radius: var(--r-card); padding: 16px; scroll-margin: 16px; }
+.umrah-practice-active h2 { margin: 0; }
+.umrah-practice-active h2:focus { outline: none; }
+.umrah-practice-active .row-between { flex-wrap: wrap; }
+.umrah-tawaf-diagram { container-type: inline-size; }
+.umrah-tawaf-canvas { position: relative; height: 240px; }
+.umrah-tawaf-art {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) scale(var(--diagram-scale, 1));
+  transform-origin: center top;
+  width: 300px;
+  height: 240px;
+  overflow: hidden;
+}
+.umrah-tawaf-art > * { position: absolute; }
+.umrah-tawaf-art img { display: block; max-width: none; }
+.umrah-tawaf-track { left: 40px; top: 10px; }
+.umrah-tawaf-arc { left: 168.524px; top: 42.208px; }
+.umrah-tawaf-stone { left: 176px; top: 146px; }
+.umrah-tawaf-direction { left: 136px; top: 4px; }
+.umrah-tawaf-kaaba {
+  left: 112px;
+  top: 88px;
+  width: 64px;
+  height: 72px;
+  border-radius: 4px;
+  background: var(--c-ink);
+  transform: rotate(8deg);
+}
+.umrah-tawaf-kaaba::after { content: ""; display: block; margin-block-start: 10px; height: 7px; background: var(--c-accent); }
+.umrah-tawaf-maqam { left: 104px; top: 40px; width: 10px; height: 14px; border-radius: var(--r-pill); background: var(--c-night-muted); }
+.umrah-tawaf-maqam-label, .umrah-tawaf-stone-label { font: var(--type-caption); letter-spacing: var(--tracking-caption); }
+.umrah-tawaf-maqam-label { left: 40px; top: 22px; color: var(--c-night-muted); }
+.umrah-tawaf-stone-label { left: 186px; top: 170px; max-width: 113px; color: var(--c-on-night); }
+@container (max-width: 299px) {
+  .umrah-tawaf-canvas { --diagram-scale: .89; height: 214px; }
+}
+@container (max-width: 269px) {
+  .umrah-tawaf-canvas { --diagram-scale: .81; height: 195px; }
+}
+.umrah-practice-laps {
+  justify-self: center;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: clamp(4px, 1.5vw, 8px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.umrah-practice-laps li, .umrah-practice-progress {
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-pill);
+  font: var(--type-caption);
+}
+.umrah-practice-laps li { width: 30px; height: 30px; background: var(--c-overlay-on-night); color: var(--c-night-muted); }
+.umrah-practice-laps li[data-done="true"] { background: var(--c-accent); color: var(--c-ink); }
+.umrah-practice-laps li[data-next="true"] { background: var(--c-on-night); color: var(--c-night); }
+.umrah-practice-count { text-align: center; }
+.umrah-practice-active .action { font: var(--type-body-strong); min-height: 50px; }
+.umrah-practice-active .action.gold { color: var(--c-ink); padding: 10px 8px; }
+.umrah-ritual-dua { display: grid; gap: 6px; background: var(--c-tint); border-radius: var(--r-card); padding: 16px; }
+.umrah-ritual-dua h2.caption { margin: 0; }
+.umrah-ritual-dua .arabic-line { padding: 0; }
+.umrah-ritual-sources a { text-decoration: underline; text-underline-offset: .15em; }
+.night .umrah-ritual-sources a { color: var(--c-night-muted); }
+.umrah-practice-aside > p { padding-inline: 4px; }
+.umrah-practice-steps > h2 { margin: 0 0 4px; }
+.umrah-practice-steps ol, .umrah-pocket ol { list-style: none; margin: 0; padding: 0; }
+.umrah-practice-steps .list-row { width: 100%; padding: 12px 16px; align-items: center; }
+.umrah-practice-steps .list-row strong { font: var(--type-body-strong); }
+.umrah-practice-steps .list-row small { margin-top: 2px; }
+.umrah-practice-steps .list-row[aria-current] { background: var(--c-primary-soft); box-shadow: none; }
+.umrah-practice-progress { width: 32px; height: 32px; flex: 0 0 32px; background: var(--c-surface-alt); color: var(--c-ink); }
+.umrah-practice-steps .list-row:is([aria-current], [data-done="true"]) .umrah-practice-progress {
+  background: var(--control-primary);
+  color: var(--c-on-primary);
+}
+.umrah-practice-options { max-height: calc(100dvh - 24px); overflow: auto; }
+.umrah-pocket .umrah-pocket-steps, .umrah-pocket-duas { display: grid; gap: 8px; }
+.umrah-pocket-steps .card { display: grid; align-content: start; gap: 4px; }
+.umrah-pocket-steps h2 { font: var(--type-body-strong); }
+.umrah-pocket-steps .card p { margin: 0; }
+.umrah-paper-count ol { display: flex; flex-wrap: wrap; gap: 4px; }
+.umrah-paper-count li {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--r-pill);
+  background: var(--c-surface-alt);
+  color: var(--c-ink);
+}
+@media (min-width: 1024px) {
+  .umrah-practice > .section-nav { margin-inline: 0; }
+  .umrah-practice-body {
+    grid-template-columns: minmax(220px, .8fr) minmax(292px, 1.4fr);
+    grid-template-areas: "steps main" "steps notes";
+    align-content: start;
+  }
+  .umrah-practice-active { grid-area: main; }
+  .umrah-practice-aside { grid-area: notes; }
+  .umrah-practice-steps { grid-area: steps; }
+}
+@media (min-width: 1280px) {
+  .umrah-practice-body {
+    grid-template-columns: minmax(216px, .8fr) minmax(312px, 1.2fr) minmax(230px, 1fr);
+    grid-template-areas: "steps main notes";
+  }
+}
+@media print {
+  .umrah-pocket .umrah-pocket-steps, .umrah-pocket-duas { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }
+  .umrah-pocket-steps .card, .umrah-pocket .umrah-ritual-dua { align-content: start; break-inside: avoid; padding: 8pt; }
+  .umrah-pocket-steps .card { font-size: 10pt; }
+  .umrah-pocket-steps .card:nth-child(odd) { background: var(--c-surface-alt); }
+  .umrah-pocket-steps .card:nth-child(odd) .umrah-paper-count li { background: var(--c-surface); }
+  .umrah-pocket .arabic-text { font-size: 17pt; }
+  .umrah-pocket .word-chip { padding: 1pt 2pt; }
+  .umrah-pocket .umrah-ritual-sources a { color: var(--c-ink); }
+}

@@ -387,10 +387,13 @@ describe("device prayer records", () => {
       step: 5, voluntaryTawaf: 4, saiPaused: true, sai: { count: 1, last: "marwah" as const, exited: false, detected: true },
     };
     await db.records.put({ key: "umrah", value: trip });
+    const practice = { step: 2, tawaf: 5, sai: 3, completed: [0, 1] };
+    await db.records.put({ key: "umrah-practice", value: practice });
     const file = await backup();
     await db.records.clear();
     await restoreBackup(file);
     expect(await getRecord("umrah", initialTrip)).toEqual(JSON.parse(JSON.stringify({ ...trip, gps: false, auto: false })));
+    expect(await getRecord("umrah-practice", undefined)).toEqual(practice);
     const plan = readUmrahTripFile(exportUmrahTrip(trip));
     for (const key of ["gps", "auto", "walkOptions", "gateMemory", "hotelPrayer", "voluntaryTawaf", "saiPaused", "sai"]) {
       expect(plan).not.toHaveProperty(key);

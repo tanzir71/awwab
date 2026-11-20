@@ -3,13 +3,16 @@
     "source": "Bukhari 1549 · Sahih",
     "url": "https://sunnah.com/bukhari:1549",
     "arabic": "لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ\nلَبَّيْكَ لَا شَرِيكَ لَكَ لَبَّيْكَ\nإِنَّ الْحَمْدَ وَالنِّعْمَةَ لَكَ وَالْمُلْكَ\nلَا شَرِيكَ لَكَ",
-    "meaning": "I answer Your call, O Allah. You have no partner. All praise, favour and sovereignty belong to You."
+    "meaning": "I answer Your call, O Allah. You have no partner. All praise, favour and sovereignty belong to You.",
+    "meaningBn": "হে আল্লাহ, আমি আপনার ডাকে সাড়া দিচ্ছি। আপনার কোনো শরিক নেই। সব প্রশংসা, নেয়ামত ও রাজত্ব আপনারই।"
   },
   "good": {
     "source": "Al-Baqarah 2:201",
     "url": "https://quran.com/2/201",
     "arabic": "رَبَّنَآ ءَاتِنَا فِى ٱلدُّنْيَا حَسَنَةً\nوَفِى ٱلْـَٔاخِرَةِ حَسَنَةً وَقِنَا عَذَابَ ٱلنَّارِ",
-    "meaning": "Our Lord, give us good in this world and good in the hereafter, and protect us from the punishment of the Fire."
+    "meaning": "Our Lord, give us good in this world and good in the hereafter, and protect us from the punishment of the Fire.",
+    "meaningBn": "হে আমাদের প্রতিপালক, আমাদের দুনিয়ায় কল্যাণ দিন, আখিরাতেও কল্যাণ দিন এবং আগুনের শাস্তি থেকে আমাদের রক্ষা করুন।",
+    "practice": { "label": "Abu Dawud 1892 · Hasan (Al-Albani)", "url": "https://sunnah.com/abudawud:1892" }
   },
   "subhanallah": {
     "source": "Muslim 597a · Sahih",

@@ -5,6 +5,9 @@
    "id": "ihram",
    "title": "Iḥrām & intention",
    "titleBn": "ইহরাম ও নিয়ত",
+   "summary": "Check your mīqāt before arrival.",
+   "summaryBn": "পৌঁছানোর আগে আপনার মিকাত জেনে নিন।",
+   "sources": [{ "label": "Bukhari 1524 · Sahih", "url": "https://sunnah.com/bukhari:1524" }],
    "narration": {
     "en": "Ihram and intention. Check your miqat before arrival. If you are flying, listen for the airline's announcement.",
     "bn": "ইহরাম ও নিয়ত। পৌঁছানোর আগে আপনার মিকাত জেনে নিন। বিমানে গেলে বিমান সংস্থার ঘোষণা শুনুন।"
@@ -18,6 +21,9 @@
    "id": "talbiyah",
    "title": "Talbiyah",
    "titleBn": "তালবিয়া",
+   "summary": "Recite the Talbiyah after making your intention.",
+   "summaryBn": "নিয়তের পর তালবিয়া পড়ুন।",
+   "sources": [{ "label": "Bukhari 1549 · Sahih", "url": "https://sunnah.com/bukhari:1549" }],
    "narration": {
     "en": "Talbiyah. This step follows the intention. The words of the Talbiyah are on the screen with their source.",
     "bn": "তালবিয়া। এই ধাপ নিয়তের পর। তালবিয়ার শব্দ ও সূত্র পর্দায় দেওয়া আছে।"
@@ -28,6 +34,9 @@
    "id": "tawaf",
    "title": "Ṭawāf · 7 rounds",
    "titleBn": "তাওয়াফ · সাত চক্কর",
+   "summary": "Start at the Black Stone line with the Kaʿbah on your left.",
+   "summaryBn": "হাজরে আসওয়াদের রেখা থেকে শুরু করুন, কাবা বাঁ পাশে রাখুন।",
+   "sources": [{ "label": "Muslim 1218a · Sahih", "url": "https://sunnah.com/muslim:1218a" }],
    "narration": {
     "en": "Tawaf. Begin at the Black Stone line and keep the Kaaba on your left. Count seven rounds by hand. The guide shows the supplication for the stretch between the Yemeni Corner and the Black Stone.",
     "bn": "তাওয়াফ। হাজরে আসওয়াদের রেখা থেকে শুরু করুন এবং কাবা আপনার বাঁ পাশে রাখুন। সাত চক্কর নিজে গুনুন। রুকনে ইয়ামানি ও হাজরে আসওয়াদের মাঝের দোয়া নির্দেশিকায় দেওয়া আছে।"
@@ -49,6 +58,9 @@
    "id": "two_rakahs",
    "title": "Two rakʿahs",
    "titleBn": "দুই রাকাত",
+   "summary": "Behind Maqām Ibrāhīm if you can, elsewhere in the masjid if crowded.",
+   "summaryBn": "সম্ভব হলে মাকামে ইবরাহিমের পেছনে, ভিড় হলে মসজিদের অন্য জায়গায় পড়ুন।",
+   "sources": [{ "label": "Muslim 1218a · Sahih", "url": "https://sunnah.com/muslim:1218a" }],
    "narration": {
     "en": "Two rakats. If you can, pray behind Maqam Ibrahim. If it is crowded, use another place in the mosque.",
     "bn": "দুই রাকাত। সম্ভব হলে মাকামে ইবরাহিমের পেছনে নামাজ পড়ুন। ভিড় হলে মসজিদের অন্য জায়গায় পড়ুন।"
@@ -65,6 +77,9 @@
    "id": "zamzam",
    "title": "Zamzam",
    "titleBn": "জমজম",
+   "summary": "Drink Zamzam before continuing to Saʿy.",
+   "summaryBn": "সাঈ শুরু করার আগে জমজম পান করুন।",
+   "sources": [{ "label": "Bukhari 1637 · Sahih", "url": "https://sunnah.com/bukhari:1637" }],
    "narration": {
     "en": "Zamzam. This step comes before Sa'y. Continue when you're ready.",
     "bn": "জমজম। এই ধাপ সাঈয়ের আগে। প্রস্তুত হলে পরের ধাপে যান।"
@@ -75,6 +90,9 @@
    "id": "sai",
    "title": "Saʿy · 7 laps",
    "titleBn": "সাঈ · সাত চক্কর",
+   "summary": "Ṣafā to Marwah is one lap. Finish the seventh at Marwah.",
+   "summaryBn": "সাফা থেকে মারওয়া পর্যন্ত এক চক্কর। সপ্তম চক্কর মারওয়ায় শেষ করুন।",
+   "sources": [{ "label": "Muslim 1218a · Sahih", "url": "https://sunnah.com/muslim:1218a" }],
    "narration": {
     "en": "Sa'y. One walk from Safa to Marwah counts as one lap. Alternate between the two ends and finish the seventh lap at Marwah. Men jog lightly between the green lights.",
     "bn": "সাঈ। সাফা থেকে মারওয়া পর্যন্ত একবার গেলে এক চক্কর হয়। দুই প্রান্তের মধ্যে পালা করে হেঁটে সপ্তম চক্কর মারওয়ায় শেষ করুন। সবুজ বাতির মাঝের অংশে পুরুষেরা হালকা দৌড়াবেন।"
@@ -94,6 +112,12 @@
    "id": "halq",
    "title": "Shave or trim",
    "titleBn": "চুল মুণ্ডন বা ছাঁটা",
+   "summary": "Men shave or trim their hair. Women trim their hair.",
+   "summaryBn": "পুরুষেরা মাথা মুণ্ডন বা চুল ছাঁটেন। নারীরা চুল ছাঁটেন।",
+   "sources": [
+    { "label": "Bukhari 1727 · Sahih", "url": "https://sunnah.com/bukhari:1727" },
+    { "label": "Abu Dawud 1985 · Sahih (Al-Albani)", "url": "https://sunnah.com/abudawud:1985" }
+   ],
    "narration": {
     "en": "Shave or trim. Men can shave or trim their hair. Women trim about a fingertip's length.",
     "bn": "চুল মুণ্ডন বা ছাঁটা। পুরুষেরা মাথা মুণ্ডন বা চুল ছাঁটতে পারেন। নারীরা আঙুলের ডগা পরিমাণ চুল ছাঁটবেন।"

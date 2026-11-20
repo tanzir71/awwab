@@ -14,6 +14,7 @@
 @import "./settings.css";
 @import "./umrah-prep.css";
 @import "./umrah-now.css";
+@import "./umrah-guide.css";
 @import "./umrah-ask.css";
 @import "./umrah-sai.css";
 @import "./umrah-walk.css";
@@ -533,9 +534,6 @@ progress::-moz-progress-bar { background: var(--control-primary); }
 .umrah-tabs a[aria-current] { color: var(--c-on-night); }
 .umrah-tabs a[aria-current] > span { background: var(--c-overlay-on-night); }
 .umrah-tabs a:focus-visible { outline-color: var(--c-on-night); }
-.tawaf-diagram { margin: 0 auto; width: 150px; aspect-ratio: 1; display: grid; place-items: center; position: relative; border-radius: 50%; background: var(--c-overlay-on-night); }
-.tawaf-diagram > span { padding: 14px; color: var(--c-on-night); background: var(--c-ink); }
-.tawaf-diagram > i { position: absolute; left: 7px; top: 2px; font-size: 34px; color: var(--c-accent); }
 table th, table td { padding: 6px 10px; text-align: start; }
 table tbody tr:nth-child(even) { background: var(--c-surface-alt); }
 .app-content button[aria-expanded].text-button, summary { min-height: 44px; }

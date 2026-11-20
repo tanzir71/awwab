@@ -199,6 +199,7 @@ const savedRecords: Record<string, z.ZodTypeAny> = {
   })),
   "umrah-ask-settings": z.object({ variety: z.enum(askVarieties), voice: z.enum(askVoices), speaker: z.union([z.enum(askVoices), z.literal("")]), slow: z.boolean() }),
   "umrah-ask-volume-hint": z.boolean(),
+  "umrah-practice": z.object({ step: count.max(6), tawaf: count.max(7), sai: count.max(7), completed: z.array(count.max(6)).max(7) }),
   "umrah-custom-phrases": z.array(z.object({ id: z.string().uuid(), ar: z.string().trim().min(1).max(280), meaning: z.string().trim().min(1).max(280) })),
   settings: settingsSchema,
   "wording-suggestions": z.array(z.object({ language: languageSchema, page: z.string().max(160), original: z.string().max(500), proposed: z.string().max(500) })).max(300),
