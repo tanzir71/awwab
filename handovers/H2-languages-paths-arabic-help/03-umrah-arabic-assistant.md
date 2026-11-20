@@ -53,6 +53,8 @@ Run `node scripts/export-ask-review.mjs <new-directory>` to prepare the offline 
 
 English and Bangla meanings are bundled with the phrase data. The locale review export includes each phrase as `askPhrase-<id>` and each sign as `askSign-<id>`. Keep the ICU arguments for gate numbers, destinations and family members in the translation. The destination and family labels have their own catalogue entries.
 
+The Indonesian draft includes all 63 phrase meanings, the sign labels, helper directions, and the controls used by the phone and desktop phrase views. Review the meanings alongside the Arabic text in the existing phrase data. The emergency-card wording follows the regional numbers in the official Saudi guide. [Saudi emergency guide](https://apd.gov.sa/web/content/84584)
+
 The phone phrase cards, Show mode and desktop practice use the downloaded catalogue offline. Search matches the selected translation, English, Bangla, Arabic and transliteration. Arabic text, variant selections and audio filenames continue to come from the phrase data.
 
 ## Data model
