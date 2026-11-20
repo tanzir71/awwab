@@ -16,6 +16,7 @@
 @import "./umrah-ask.css";
 @import "./umrah-sai.css";
 @import "./umrah-walk.css";
+@import "./umrah-map.css";
 @import "./learning-paths.css";
 
 @tailwind base;
@@ -530,10 +531,6 @@ progress::-moz-progress-bar { background: var(--control-primary); }
 .umrah-tabs a[aria-current] { color: var(--c-on-night); }
 .umrah-tabs a[aria-current] > span { background: var(--c-overlay-on-night); }
 .umrah-tabs a:focus-visible { outline-color: var(--c-on-night); }
-.umrah-map { min-height: min(410px, 75vw); border-radius: var(--r-card); overflow: hidden; background: var(--c-tint); }
-.map-pin { border-radius: var(--r-pill); background: var(--c-night); color: var(--c-on-night); padding: 6px 10px; font: var(--type-small); min-height: 44px; }
-.map-pin-entry { background: var(--c-accent); color: var(--c-ink); }
-.compass-arrow { display: inline-block; justify-self: center; font-size: 3rem; line-height: 1; }
 .tawaf-diagram { margin: 0 auto; width: 150px; aspect-ratio: 1; display: grid; place-items: center; position: relative; border-radius: 50%; background: var(--c-overlay-on-night); }
 .tawaf-diagram > span { padding: 14px; color: var(--c-on-night); background: var(--c-ink); }
 .tawaf-diagram > i { position: absolute; left: 7px; top: 2px; font-size: 34px; color: var(--c-accent); }

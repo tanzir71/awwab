@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "source": "https://api.openstreetmap.org/api/0.6/map.json?bbox=39.603,24.460,39.625,24.473",
+  "attribution": "© OpenStreetMap contributors",
+  "license": "https://www.openstreetmap.org/copyright",
+  "pins": [
+    {
+      "osm": "way/461699097",
+      "id": "nabawi",
+      "title": "Prophet’s Mosque",
+      "point": {
+        "lat": 24.468944917094017,
+        "lon": 39.61114011623932
+      }
+    },
+    {
+      "osm": "node/4562374597",
+      "id": "gate-4562374597",
+      "title": "As-Salām Gate",
+      "number": "1",
+      "point": {
+        "lat": 24.4674402,
+        "lon": 39.6106629
+      }
+    },
+    {
+      "osm": "node/4562374598",
+      "id": "gate-4562374598",
+      "title": "Al-Baqīʿ Gate",
+      "number": "41",
+      "point": {
+        "lat": 24.4674505,
+        "lon": 39.611599
+      }
+    }
+  ]
+}

@@ -16,12 +16,13 @@ export async function cachedMapPack(region: MapRegion) {
 
 export async function saveMapPack(region: MapRegion, imported?: File) {
   const url = mapUrl(region);
-  const { FileSource, PMTiles } = await import("pmtiles");
+  const { FileSource, PMTiles, TileType } = await import("pmtiles");
   const response = imported ? new Response(imported) : await fetch(url, { signal: AbortSignal.timeout(90_000) });
   if (!response.ok) throw new Error("Map pack unavailable");
   const blob = await response.blob();
   const file = new File([blob], filename(region));
-  await new PMTiles(new FileSource(file)).getHeader();
+  const header = await new PMTiles(new FileSource(file)).getHeader();
+  if (header.tileType !== TileType.Mvt) throw new Error("The map requires a vector PMTiles pack");
   await (await caches.open(cacheName)).put(url, new Response(blob, { headers: { "Content-Type": "application/octet-stream" } }));
   return file;
 }

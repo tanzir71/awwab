@@ -267,6 +267,7 @@ Mosque {
   - **MapLibre GL JS + PMTiles** extract of Makkah and Madinah (OpenStreetMap, ODbL attribution), downloaded as a pack and cached by the service worker.
   - Pins: gates (numbers and names from OSM), Ṣafā/Marwah, Zamzam, wudu areas, Clock Tower, **hotel**, **meeting point**.
   - "Back to hotel": haversine distance, bearing and DeviceOrientation compass. Works with no network.
+  - The map shows straight-line distance and a direction line to the saved hotel. Named gates, water, wudu and OSM-listed toilets are searchable offline. The Makkah and Madinah terrain packs can be installed separately.
   - The figure in Figma is schematic. **Never hand-place coordinates**; trace them from OSM.
 
 ### 6.7 You (A19)

@@ -1,136 +1,112 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Compass, Download, MapPin, Search, Share2 } from "lucide-react";
-import { Map as MapLibre, Marker, NavigationControl, addProtocol, removeProtocol, setWorkerUrl } from "maplibre-gl";
-import { FileSource, PMTiles } from "pmtiles";
-import mapWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?url";
-import "maplibre-gl/dist/maplibre-gl.css";
-import { SectionNav } from "@/components/Surface";
+import { DesignIcon } from "@/components/DesignIcon";
+import { UmrahMapCanvas } from "@/components/UmrahMapCanvas";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { SHARE_URL } from "@/lib/config";
-import { bearing, distance, initialTrip, makkah, madinah, type Coord, type UmrahTripUpdater } from "@/lib/umrah";
-import { cachedMapPack, saveMapPack, type MapRegion } from "@/lib/umrahMapPack";
 import { useCopy } from "@/lib/copy";
+import { bearing, distance, type Coord, type UmrahTrip, type UmrahTripUpdater } from "@/lib/umrah";
+import { cachedMapPack, mapPacks, mapRegions, saveMapPack, type MapRegion } from "@/lib/umrahMapPack";
+import { mapPlaceMatches, mapPlaceNames, nearbyMapPoint, placeRegion, type UmrahPin } from "@/lib/umrahMapPlaces";
+import madinah from "../../public/data/umrah-madinah-v1.json";
 
-type Pin = { id: string; title: string; point: Coord };
-type Trip = typeof initialTrip;
-type Region = MapRegion;
+const cityLabels = { makkah: "umrahPrepMakkah", madinah: "umrahPrepMadinah" } as const;
+const defaultMakkah = new Set(["kaaba", "safa", "marwah", "zamzam", "clock-tower", "gate-3210622327", "gate-4755914231"]);
 type HeadingEvent = DeviceOrientationEvent & { webkitCompassHeading?: number };
 type Orientation = typeof DeviceOrientationEvent & { requestPermission?: () => Promise<"granted" | "denied"> };
 
-setWorkerUrl(mapWorkerUrl);
-
-function MapCanvas({ region, file, pins, user, entry, onPoint }: {
-  region: Region; file?: File; pins: Pin[]; user?: Coord; entry?: string; onPoint: (point: Coord) => void;
+export default function UmrahMap({ trip, point, points, locationError, save }: {
+  trip: UmrahTrip; point?: Coord; points: UmrahPin[]; locationError?: string; save: UmrahTripUpdater;
 }) {
-  const target = useRef<HTMLDivElement>(null);
-  const instance = useRef<MapLibre>();
-  const callback = useRef(onPoint);
-  const [error, setError] = useState("");
-  useEffect(() => { callback.current = onPoint; }, [onPoint]);
-  useEffect(() => {
-    const city = region === "makkah" ? makkah : madinah;
-    const root = getComputedStyle(document.documentElement);
-    const color = (name: string) => root.getPropertyValue(`--c-${name}`).trim();
-    const center: [number, number] = region === "makkah" && pins.length ? [pins[0].point.lon, pins[0].point.lat] : [city.longitude, city.latitude];
-    const archive = file ? new PMTiles(new FileSource(file)) : undefined;
-    addProtocol("awwabtiles", async (request, abort) => {
-      const match = request.url.match(/\/(\d+)\/(\d+)\/(\d+)$/);
-      if (!archive || !match) return { data: new ArrayBuffer(0) };
-      const [z, x, y] = match.slice(1).map(Number);
-      const tile = await archive.getZxy(z, x, y, abort.signal);
-      return { data: tile?.data ?? new ArrayBuffer(0) };
-    });
-    let map: MapLibre;
-    try {
-      const tileSource = file ? { base: { type: "vector" as const, tiles: ["awwabtiles://local/{z}/{x}/{y}"], maxzoom: 15, attribution: "© OpenStreetMap contributors · Protomaps" } } : {};
-      const tiles = [
-        { id: "landuse", type: "fill" as const, source: "base", "source-layer": "landuse", paint: { "fill-color": color("primary-soft") } },
-        { id: "water", type: "fill" as const, source: "base", "source-layer": "water", paint: { "fill-color": color("tint") } },
-        { id: "buildings", type: "fill" as const, source: "base", "source-layer": "buildings", paint: { "fill-color": color("line"), "fill-opacity": .85 } },
-        { id: "roads", type: "line" as const, source: "base", "source-layer": "roads", paint: { "line-color": color("surface"), "line-width": 3.5 } },
-      ];
-      map = new MapLibre({
-        container: target.current,
-        center, zoom: 16.2, maxZoom: 20,
-        style: { version: 8, sources: tileSource, layers: [
-          { id: "paper", type: "background", paint: { "background-color": color("bg") } },
-          ...(file ? tiles : []),
-        ] },
-      });
-      instance.current = map;
-      map.addControl(new NavigationControl({ visualizePitch: true }), "top-right");
-      map.on("click", event => callback.current({ lat: event.lngLat.lat, lon: event.lngLat.lng }));
-      map.on("error", event => {
-        if (!file) return;
-        console.warn("Awwab offline map could not render a tile.", event.error);
-        setError("Some map details could not be shown from this pack.");
-      });
-    } catch {
-      setError("This browser could not start the map. Saved places are listed below.");
-    }
-    return () => { map?.remove(); instance.current = undefined; removeProtocol("awwabtiles"); };
-    // Pins are updated below without recreating the map.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [region, file]);
-
-  useEffect(() => {
-    const map = instance.current;
-    if (!map) return;
-    const all = user ? [...pins, { id: "my-location", point: user, title: "Your location" }] : pins;
-    const markers = all.map(pin => {
-      const element = document.createElement("button");
-      element.className = pin.id === entry ? "map-pin map-pin-entry" : "map-pin";
-      element.textContent = pin.title;
-      element.setAttribute("aria-label", pin.title);
-      element.addEventListener("click", event => { event.stopPropagation(); callback.current(pin.point); });
-      return new Marker({ element }).setLngLat([pin.point.lon, pin.point.lat]).addTo(map);
-    });
-    return () => markers.forEach(marker => marker.remove());
-  }, [pins, region, file, user, entry]);
-
-  return <div className="compact-stack"><div className="umrah-map" ref={target} aria-label={`Map of ${region}`} />{error && <p className="muted small" role="status">{error}</p>}</div>;
-}
-
-export default function UmrahMap({ trip, point, points, save }: {
-  trip: Trip; point?: Coord; points: Pin[]; save: UmrahTripUpdater;
-}) {
-  const { t } = useCopy();
+  const { t, locale } = useCopy();
   const { hash } = useLocation();
-  const [region, setRegion] = useState<Region>("makkah");
-  const [pack, setPack] = useState<{ region: Region; file: File }>();
-  const [selection, select] = useState<Coord>();
+  const hotel = trip.hotel.point;
+  const hotelRegion = hotel ? placeRegion(hotel) : "makkah";
+  const [region, setRegion] = useState<MapRegion>(hotelRegion);
+  const [packs, setPacks] = useState<Partial<Record<MapRegion, File>>>({});
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [heading, setHeading] = useState<number>();
-  const [compass, setCompass] = useState(false);
+  const [savingPlace, setSavingPlace] = useState(false);
+  const [dialog, setDialog] = useState<"places" | "packs">();
+  const [selection, select] = useState<Coord>();
   const [query, setQuery] = useState("");
-  const file = pack?.region === region ? pack.file : undefined;
-  const entry = points.find(pin => pin.id === trip.gateMemory?.entry) ?? points.find(pin => pin.title === trip.gate);
-  const exit = points.find(pin => pin.id === trip.gateMemory?.exit);
-  const pins = [
-    ...(region === "makkah" ? points : []),
-    ...(trip.hotel.point && region === "makkah" ? [{ id: "hotel", title: trip.hotel.name || "Hotel", point: trip.hotel.point }] : []),
-    ...(trip.meeting && region === "makkah" ? [{ id: "meeting", title: "Meeting point", point: trip.meeting }] : []),
-  ];
-  const matches = pins.filter(pin => pin.title.toLowerCase().includes(query.trim().toLowerCase()));
-  const primaryPins = query.trim() ? matches : pins.filter(pin =>
-    !pin.id.startsWith("gate-") || pin.id === entry?.id || pin.id === exit?.id || /fahd|abdul aziz|marwah/i.test(pin.title));
-  useEffect(() => {
-    if (hash !== "#back-to-hotel") return;
-    const frame = requestAnimationFrame(() => document.getElementById("back-to-hotel")?.scrollIntoView());
-    return () => cancelAnimationFrame(frame);
-  }, [hash]);
+  const [notice, setNotice] = useState("");
+  const [shareFallback, setShareFallback] = useState("");
+  const [camera, setCamera] = useState<Coord[]>();
+  const [walking, setWalking] = useState(false);
+  const [heading, setHeading] = useState<number>();
+  const [compassDenied, setCompassDenied] = useState(false);
+  const placesButton = useRef<HTMLButtonElement>(null);
+  const packButton = useRef<HTMLButtonElement>(null);
+  const anchor = useRef<HTMLElement>(null);
+  const dialogContent = useRef<"places" | "packs">("places");
+  const city = t(cityLabels[region]);
+  const file = packs[region];
+  const user = nearbyMapPoint(point, region);
+  const activeHotel = hotelRegion === region ? hotel : undefined;
+  const meeting = trip.meeting && placeRegion(trip.meeting) === region ? trip.meeting : undefined;
+  const landmarks = region === "makkah" ? points : madinah.pins;
+  const entry = region === "makkah" ? points.find(pin => pin.id === trip.gateMemory?.entry)
+    ?? points.find(pin => pin.title === trip.gate) : undefined;
+  const exit = region === "makkah" ? points.find(pin => pin.id === trip.gateMemory?.exit) : undefined;
+  const entryLabel = region === "makkah" ? entry?.title || trip.gate : "";
+  const center = landmarks[0].point;
+
+  const places = useMemo(() => {
+    const list: UmrahPin[] = landmarks.map(pin => ({
+      ...pin, title: mapPlaceNames[pin.id] ? t(mapPlaceNames[pin.id]) : pin.title,
+    }));
+    if (activeHotel) list.push({ id: "hotel", title: trip.hotel.name
+      ? t("umrahMapHotelNamed", { name: trip.hotel.name }) : t("umrahMapHotel"), point: activeHotel });
+    if (meeting) list.push({ id: "meeting", title: t("umrahMapMeeting"), point: meeting });
+    return list;
+  }, [activeHotel, landmarks, meeting, t, trip.hotel.name]);
+  const curated = useMemo(() => places.filter(pin => region === "madinah" || pin.id === "hotel" || pin.id === "meeting"
+    || pin.id === entry?.id || pin.id === exit?.id || defaultMakkah.has(pin.id)), [entry, exit, places, region]);
+  const markerPins = useMemo(() => {
+    const list = curated.map(pin => pin.id === entry?.id
+      ? { ...pin, title: t("umrahMapYouEntered", { gate: pin.title }) } : pin);
+    const selected = places.find(pin => pin.point === selection);
+    if (selected && !list.some(pin => pin.id === selected.id)) list.push(selected);
+    if (user) list.push({ id: "my-location", title: t("umrahMapHere"), point: user });
+    return list;
+  }, [curated, entry, places, selection, t, user]);
+  const overview = useMemo(() => curated.map(pin => pin.point).filter(pin => distance(pin, center) < 2300), [center, curated]);
+  const guide = useMemo<[Coord, Coord] | undefined>(() => {
+    const origin = user ?? entry?.point;
+    return origin && activeHotel ? [origin, activeHotel] : undefined;
+  }, [activeHotel, entry, user]);
+  const matches = query.trim() ? places.filter(pin => {
+    const original = landmarks.find(item => item.id === pin.id) ?? pin;
+    const keywords = pin.id.startsWith("gate-") ? t("umrahMapGateKeyword")
+      : pin.id.startsWith("toilet-") ? t("umrahMapToiletKeyword") : "";
+    return mapPlaceMatches(original, query, [pin.title, keywords]);
+  }) : [];
+  const direction = user && activeHotel ? bearing(user, activeHotel) : undefined;
+  const meters = user && activeHotel ? distance(user, activeHotel) : undefined;
+  const distanceLabel = meters === undefined ? "" : meters < 1000 ? t("umrahMapDistanceM", { meters: Math.round(meters) })
+    : t("umrahMapDistanceKm", { kilometers: meters / 1000 });
+  const coordinates = new Intl.NumberFormat(locale, { maximumFractionDigits: 5, useGrouping: false });
+
   useEffect(() => {
     let active = true;
-    void cachedMapPack(region).then(local => {
-      if (local && active) setPack({ region, file: local });
-    }).catch(() => {});
+    for (const city of mapRegions) {
+      void cachedMapPack(city).then(cached => {
+        if (active && cached) setPacks(current => ({ ...current, [city]: current[city] ?? cached }));
+      }).catch(() => {});
+    }
     return () => { active = false; };
-  }, [region]);
+  }, []);
+
   useEffect(() => {
-    if (!compass) return;
+    if (hash !== "#back-to-hotel") return;
+    const frame = requestAnimationFrame(() => anchor.current?.scrollIntoView({ block: "nearest" }));
+    return () => cancelAnimationFrame(frame);
+  }, [hash]);
+
+  useEffect(() => {
+    if (!walking) return;
     const update = (event: HeadingEvent) => {
-      if (Number.isFinite(event.webkitCompassHeading)) setHeading(event.webkitCompassHeading);
+      if (Number.isFinite(event.webkitCompassHeading) && event.webkitCompassHeading >= 0) setHeading(event.webkitCompassHeading);
       else if (event.absolute && Number.isFinite(event.alpha)) setHeading((360 - event.alpha) % 360);
     };
     window.addEventListener("deviceorientationabsolute", update);
@@ -139,95 +115,198 @@ export default function UmrahMap({ trip, point, points, save }: {
       window.removeEventListener("deviceorientationabsolute", update);
       window.removeEventListener("deviceorientation", update);
     };
-  }, [compass]);
+  }, [walking]);
+
+  function changeCity(city: MapRegion) {
+    setRegion(city);
+    select(undefined);
+    setQuery("");
+    setNotice("");
+    setCamera(undefined);
+    setWalking(false);
+    setHeading(undefined);
+    setCompassDenied(false);
+  }
+
+  function choose(point?: Coord) {
+    select(point);
+    if (point) setCamera([point]);
+    setQuery("");
+    dialogContent.current = "places";
+    setDialog("places");
+  }
+
   async function loadPack(imported?: File) {
     setLoading(true);
-    setMessage("");
+    setNotice("");
     try {
-      const loaded = await saveMapPack(region, imported);
-      setPack({ region, file: loaded });
-      setMessage("Map pack saved for offline use.");
+      const file = await saveMapPack(region, imported);
+      setPacks(current => ({ ...current, [region]: file }));
+      setNotice(t("umrahMapPackSaved"));
+      setDialog(undefined);
     } catch {
-      setMessage("The map pack could not be loaded. Try again online or import a PMTiles extract.");
+      setNotice(t("umrahMapPackError"));
     } finally {
       setLoading(false);
     }
   }
-  async function allowCompass() {
+
+  async function toggleWalking() {
+    setWalking(!walking);
+    setHeading(undefined);
+    setCompassDenied(false);
+    if (walking) return;
+    if (user && activeHotel) setCamera([user, activeHotel]);
     try {
       const api = window.DeviceOrientationEvent as Orientation | undefined;
-      if (!api || (api.requestPermission && await api.requestPermission() !== "granted")) throw new Error();
-      setCompass(true);
-    } catch { setMessage("Compass permission is unavailable. You can still use distance and bearing."); }
+      if (!api || (api.requestPermission && await api.requestPermission() !== "granted")) setCompassDenied(true);
+    } catch { setCompassDenied(true); }
   }
+
   function saveCoordinates(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     const pin = { lat: Number(form.get("lat")), lon: Number(form.get("lon")) };
     if (Number.isFinite(pin.lat) && Number.isFinite(pin.lon)) select(pin);
   }
-  const hotel = trip.hotel.point;
-  const direction = point && hotel ? bearing(point, hotel) : null;
-  const meters = point && hotel ? distance(point, hotel) : null;
+
+  async function remember(kind: "hotel" | "meeting") {
+    if (!selection || savingPlace) return;
+    setSavingPlace(true);
+    const ok = await save(old => kind === "hotel" ? { ...old, hotel: { ...old.hotel, point: selection } } : { ...old, meeting: selection });
+    setSavingPlace(false);
+    if (!ok) return;
+    const city = placeRegion(selection);
+    if (city !== region) changeCity(city);
+    setCamera([selection]);
+    setDialog(undefined);
+    setNotice(t(kind === "hotel" ? "umrahMapHotelSaved" : "umrahMapMeetingSaved"));
+  }
+
   async function shareHotel() {
     if (!hotel) return;
+    setShareFallback("");
     const pin = `https://www.openstreetmap.org/?mlat=${hotel.lat}&mlon=${hotel.lon}#map=18/${hotel.lat}/${hotel.lon}`;
-    const text = `${trip.hotel.name || "Our hotel"} · ${pin}\nShared with awwab · ${SHARE_URL}`;
+    const title = trip.hotel.name || t("umrahMapHotel");
+    const text = `${title} · ${pin}\n${SHARE_URL}`;
     try {
-      if (navigator.share) await navigator.share({ title: trip.hotel.name || "Hotel pin", text, url: SHARE_URL });
-      else { await navigator.clipboard.writeText(text); setMessage("Hotel pin copied."); }
+      if (navigator.share) await navigator.share({ title, text, url: SHARE_URL });
+      else { await navigator.clipboard.writeText(text); setNotice(t("umrahMapCopied")); }
     } catch (error) {
-      if (!(error instanceof DOMException && error.name === "AbortError")) setMessage(pin);
+      if (!(error instanceof DOMException && error.name === "AbortError")) setShareFallback(pin);
     }
   }
-  return <>
-    <SectionNav title="Offline map" back="/umrah" />
-    <Link className="action soft" to="/umrah/ask?category=directions">{t("askEntry")}</Link>
-    {region === "makkah" && <label className="field"><span className="with-icon"><Search size={18} /> Search saved places and gates</span>
-      <input type="search" value={query} placeholder="Gate, Zamzam or wudu" onChange={event => setQuery(event.target.value)} /></label>}
-    <div className="equal-row">{(["makkah", "madinah"] as const).map(item => <button key={item} className={`action ${item === region ? "" : "light"}`}
-      disabled={loading} aria-pressed={item === region} onClick={() => { setRegion(item); select(undefined); setMessage(""); }}>{item === "makkah" ? "Makkah" : "Madinah"}</button>)}</div>
-    {!file && <section className="card stack">
-      <p>Download a map pack once to use it without a connection.</p>
-      <button className="action soft" disabled={loading} onClick={() => void loadPack()}><Download size={17} /> {loading ? "Preparing pack…" : "Download map pack"}</button>
-      <label className="field">Import a local PMTiles extract<input type="file" accept=".pmtiles" disabled={loading} onChange={event => {
-        const file = event.target.files?.[0];
-        if (file) void loadPack(file);
-      }} /></label>
-    </section>}
-    <MapCanvas region={region} file={file} pins={primaryPins} user={point} entry={entry?.id} onPoint={select} />
-    <a className="small muted" href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors · ODbL</a>
-    {message && <p role="status" className="card tint">{message}</p>}
-    {region === "makkah" && <section className="card stack">
-      <h2 className="with-icon"><MapPin size={18} /> Remember a place</h2>
-      {matches.length > 0 && <div className="chips">{(query.trim() ? matches : primaryPins).map(pin => <button key={pin.id} className="action light" onClick={() => select(pin.point)}>{pin.title}</button>)}</div>}
-      {query && !matches.length && <p className="muted" role="status">No saved places match this search.</p>}
-      <p className="muted">Tap a position on your map, use your current position, or enter coordinates.</p>
-      {point && <button className="action light" onClick={() => select(point)}>Use current position</button>}
-      <form className="stack" onSubmit={saveCoordinates}>
-        <div className="equal-row">
-          <label className="field">Latitude<input name="lat" type="number" step="any" min="-90" max="90" required /></label>
-          <label className="field">Longitude<input name="lon" type="number" step="any" min="-180" max="180" required /></label>
+
+  return <article className="umrah-map-view">
+    <h1 className="sr-only">{t("umrahMapTitle")}</h1>
+    <div className="umrah-map-stage">
+      <UmrahMapCanvas region={region} file={file} pins={markerPins} center={center} entry={entry?.id}
+        guide={guide} camera={camera ?? overview} label={t("umrahMapArea", { city })} onSelect={choose} />
+      <div className="umrah-map-overlay">
+        <div className="umrah-map-search">
+          <DesignIcon name="umrah-map-search" size={18} />
+          <input aria-label={t("umrahMapSearch")} placeholder={t("umrahMapSearch")} type="search" value={query}
+            onChange={event => setQuery(event.currentTarget.value)} onKeyDown={event => {
+              if (event.key === "Escape") setQuery("");
+              if (event.key === "Enter" && matches[0]) choose(matches[0].point);
+            }} />
         </div>
-        <button className="action light">Select coordinates</button>
-      </form>
-      {selection && <p className="small muted">Selected · {selection.lat.toFixed(5)}, {selection.lon.toFixed(5)}</p>}
-      <div className="equal-row">
-        <button className="action" disabled={!selection} onClick={() => void save(old => ({ ...old, hotel: { ...old.hotel, point: selection } }))}>Save hotel pin</button>
-        <button className="action soft" disabled={!selection} onClick={() => void save(old => ({ ...old, meeting: selection }))}>Save meeting point</button>
+        <div className="umrah-map-controls">
+          <div className="umrah-map-cities" role="group" aria-label={t("umrahMapCities")}>
+            {mapRegions.map(id => <button type="button" key={id} aria-pressed={id === region} disabled={loading}
+              onClick={() => changeCity(id)}>{t(cityLabels[id])}</button>)}
+          </div>
+          <button ref={packButton} type="button" className="umrah-map-pack-status" aria-haspopup="dialog" onClick={() => {
+            setNotice("");
+            dialogContent.current = "packs";
+            setDialog("packs");
+          }}>{file ? <><span aria-hidden="true">✓</span>{t("umrahMapOffline", { size: t("fileSizeMB", { size: file.size / 1_000_000 }) })}</> : t("umrahMapPacks")}</button>
+        </div>
+        {query.trim() && <section className="umrah-map-results card" aria-label={t("umrahMapResults")}>
+          {matches.map(pin => <button type="button" key={pin.id} onClick={() => choose(pin.point)}>{pin.title}</button>)}
+          {!matches.length && <p role="status" className="small muted">{t("umrahMapNoResults")}</p>}
+        </section>}
       </div>
-    </section>}
-    <section className="card stack" id="back-to-hotel">
-      <h2 className="with-icon"><Compass size={18} /> {t("umrahWalkHotel")}</h2>
-      {(entry || trip.gate) && <p className="small">{t("umrahWalkEntryGate", { gate: entry?.title ?? trip.gate })}</p>}
-      {exit && <p className="small">{t("umrahWalkExitGate", { gate: exit.title })}</p>}
-      {direction === null ? <p className="muted">Save your hotel pin and allow location to see direction and distance.</p> : <>
-        <p>{meters < 1000 ? `${Math.round(meters)} m` : `${(meters / 1000).toFixed(1)} km`} away · bearing {Math.round(direction)}°</p>
-        <span className="compass-arrow" aria-hidden="true" style={{ transform: `rotate(${direction - (heading ?? 0)}deg)` }}>↑</span>
-        {heading === undefined && <button className="action light" disabled={compass} onClick={() => void allowCompass()}>{compass ? "Waiting for compass…" : "Use device compass"}</button>}
-      </>}
-      {!trip.gps && <Link className="action soft" to="/umrah/location" state={{ from: "map" }}>{t("umrahLocationOptions")}</Link>}
-      {hotel && <button className="action light" onClick={() => void shareHotel()}><Share2 size={18} /> Share hotel pin</button>}
+      <button ref={placesButton} type="button" className="umrah-map-place-button action light" aria-haspopup="dialog"
+        onClick={() => choose()}>{t("umrahMapPlaces")}</button>
+      <p className="umrah-map-attribution"><a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>
+        {file && <> · <a href="https://protomaps.com/">Protomaps</a></>}
+      </p>
+    </div>
+    <section className="umrah-map-hotel-sheet" id="back-to-hotel" ref={anchor}>
+      <span className="umrah-map-handle" aria-hidden="true" />
+      <div className="umrah-map-hotel-summary"
+        style={direction === undefined ? undefined : { "--hotel-bearing": `${direction - (heading ?? 0)}deg` } as CSSProperties}>
+        <div className="umrah-map-compass">
+          <DesignIcon name="umrah-map-arrow" size={30} className="umrah-map-compass-arrow" />
+        </div>
+        <div>
+          <h2 className="caption">{t("umrahWalkHotel")}</h2>
+          {direction !== undefined && <p className="umrah-map-bearing">{t("umrahMapBearing", { distance: distanceLabel, bearing: Math.round(direction) % 360 })}</p>}
+          {entryLabel && <p className="small muted">{t("umrahWalkEntryGate", { gate: entryLabel })}</p>}
+          {exit && <p className="small muted">{t("umrahWalkExitGate", { gate: exit.title })}</p>}
+          <p className="small muted">{!hotel ? t("umrahMapFindHotel") : !activeHotel ? t("umrahMapShowCity", { city: t(cityLabels[hotelRegion]) })
+            : direction !== undefined ? t("umrahMapDirect") : t(trip.gps ? (locationError || "umrahMapWaiting") : "umrahMapLocationHint")}</p>
+        </div>
+      </div>
+      {compassDenied && walking && <p className="small muted" role="status">{t("umrahMapCompassError")}</p>}
+      <div className="equal-row umrah-map-hotel-actions">
+        {!hotel ? <button type="button" className="action" onClick={() => choose()}>{t("umrahMapEdit")}</button>
+          : hotelRegion !== region ? <button type="button" className="action" onClick={() => changeCity(hotelRegion)}>
+            {t("umrahMapShowCity", { city: t(cityLabels[hotelRegion]) })}
+          </button> : !trip.gps ? <Link className="action" to="/umrah/location" state={{ from: "map" }}>{t("umrahLocationOptions")}</Link>
+            : <button type="button" className="action" disabled={direction === undefined && !walking} onClick={() => void toggleWalking()}>
+              {t(walking ? "umrahMapStopWalking" : "umrahMapStartWalking")}
+            </button>}
+        <button type="button" className="action light" disabled={!hotel} onClick={() => void shareHotel()}>{t("umrahMapShareHotel")}</button>
+      </div>
+      {shareFallback && <p className="small"><a href={shareFallback}>{t("umrahMapShareHotel")}</a></p>}
+      {notice && dialog !== "packs" && <p className="small muted" role="status">{notice}</p>}
     </section>
-  </>;
+    <Dialog open={Boolean(dialog)} onOpenChange={open => { if (!open && !loading && !savingPlace) setDialog(undefined); }}>
+      <DialogContent className="umrah-map-dialog card" showCloseButton={false} onCloseAutoFocus={event => {
+        event.preventDefault();
+        const element = dialogContent.current === "packs" ? packButton.current : placesButton.current;
+        element?.focus({ preventScroll: true });
+      }}>
+        {dialogContent.current === "packs" ? <>
+          <DialogTitle>{t("umrahMapPacks")} · {city}</DialogTitle>
+          <DialogDescription className="small muted">{t("umrahMapPackHint")}</DialogDescription>
+          {file ? <p className="small">{t("umrahMapOffline", { size: t("fileSizeMB", { size: file.size / 1_000_000 }) })}</p>
+            : <button type="button" className="action" disabled={loading} onClick={() => void loadPack()}>
+              {loading ? t("umrahPrepDownloading") : t("umrahPrepDownloadMaps", { size: t("fileSizeMB", { size: mapPacks[region] / 1_000_000 }) })}
+            </button>}
+          <label className="field">{t("umrahMapImport")}<input type="file" accept=".pmtiles" disabled={loading} onChange={event => {
+            const chosen = event.currentTarget.files?.[0];
+            if (chosen) void loadPack(chosen);
+          }} /></label>
+          {notice && <p className="small muted" role="status">{notice}</p>}
+        </> : <>
+          <DialogTitle>{t("umrahMapEdit")}</DialogTitle>
+          <DialogDescription className="small muted">{t("umrahMapEditHint")}</DialogDescription>
+          {!selection && <div className="umrah-map-place-list">
+            {curated.map(pin => <button type="button" key={pin.id} className="action light" onClick={() => select(pin.point)}>{pin.title}</button>)}
+          </div>}
+          {user ? <button type="button" className="action light" disabled={savingPlace} onClick={() => select(user)}>{t("umrahMapUsePosition")}</button>
+            : !trip.gps && <Link className="action light" to="/umrah/location" state={{ from: "map" }}>{t("umrahLocationOptions")}</Link>}
+          <form className="compact-stack" onSubmit={saveCoordinates}>
+            <div className="equal-row">
+              <label className="field">{t("umrahMapLatitude")}<input name="lat" type="number" step="any" min="-90" max="90" required /></label>
+              <label className="field">{t("umrahMapLongitude")}<input name="lon" type="number" step="any" min="-180" max="180" required /></label>
+            </div>
+            <button type="submit" className="action light">{t("umrahMapSelectCoords")}</button>
+          </form>
+          {selection && <p className="small" role="status">{t("umrahMapSelected", {
+            latitude: coordinates.format(selection.lat), longitude: coordinates.format(selection.lon),
+          })}</p>}
+          <div className="equal-row">
+            <button type="button" className="action" disabled={!selection || savingPlace} onClick={() => void remember("hotel")}>{t("umrahMapSaveHotel")}</button>
+            <button type="button" className="action soft" disabled={!selection || savingPlace} onClick={() => void remember("meeting")}>{t("umrahMapSaveMeeting")}</button>
+          </div>
+          <Link className="text-button" to="/umrah/ask?category=directions">{t("askEntry")}</Link>
+        </>}
+        <DialogClose className="action light" disabled={loading || savingPlace}>{t("umrahSaiCancel")}</DialogClose>
+      </DialogContent>
+    </Dialog>
+  </article>;
 }

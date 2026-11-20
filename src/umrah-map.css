@@ -1,0 +1,70 @@
+.app-content:has(> .umrah-map-shell) { padding: 0 0 calc(106px + env(safe-area-inset-bottom)); }
+.umrah-map-view { min-width: 0; background: var(--c-surface-alt); }
+.umrah-map-stage { position: relative; min-height: max(390px, calc(100svh - 275px)); isolation: isolate; overflow: hidden; }
+.umrah-map-stage > .umrah-map-canvas { position: absolute; inset: 0; background: var(--c-surface-alt); }
+.umrah-map-overlay { position: absolute; inset: calc(16px + env(safe-area-inset-top)) 20px auto; display: grid; gap: 10px; pointer-events: none; }
+.umrah-map-overlay > * { pointer-events: auto; }
+.umrah-map-search { display: flex; align-items: center; gap: 8px; padding-inline: 14px; min-height: 46px; border-radius: var(--r-control); background: var(--c-surface); box-shadow: var(--shadow-card); }
+.umrah-map-search > img { flex: 0 0 18px; }
+.umrah-map-search input { background: transparent; border: 0; flex: 1; min-width: 0; min-height: 44px; color: var(--c-ink); }
+.umrah-map-search input:focus-visible { outline-offset: -2px; border-radius: var(--r-control); }
+.umrah-map-search input::placeholder { color: var(--c-ink-muted); opacity: 1; }
+.umrah-map-controls { display: flex; align-items: start; gap: 8px; flex-wrap: wrap; justify-self: start; }
+.umrah-map-cities { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); background: var(--c-surface); border-radius: var(--r-pill); padding: 3px; box-shadow: var(--shadow-card); }
+.umrah-map-cities button, .umrah-map-pack-status { border-radius: var(--r-pill); padding-inline: 12px; min-height: 44px; font: var(--type-small); }
+.umrah-map-cities button[aria-pressed="true"] { background: var(--control-primary); color: var(--c-on-primary); }
+.umrah-map-pack-status { display: inline-flex; align-items: center; gap: 5px; background: var(--c-primary-soft); color: var(--interactive-ink); }
+.umrah-map-results.card { padding: 8px; max-height: min(300px, 50svh); overflow: auto; box-shadow: var(--shadow-raised); }
+.umrah-map-results button { display: block; min-height: 44px; text-align: start; width: 100%; padding: 8px; border-radius: var(--r-control); }
+.umrah-map-results button:hover { background: var(--c-primary-soft); }
+.umrah-map-results p { padding: 8px; }
+.umrah-map-error.card { position: absolute; inset: auto 20px 80px; padding: 10px; }
+
+.umrah-map-marker {
+  min-height: 44px;
+  padding: 0 10px 0 7px;
+  position: absolute;
+  isolation: isolate;
+  max-width: min(260px, calc(100vw - 36px));
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--c-ink);
+  font: var(--type-small);
+  text-align: start;
+}
+.umrah-map-marker::before { content: ""; position: absolute; z-index: -1; inset: 6px 0; border-radius: var(--r-pill); background: var(--c-surface); box-shadow: var(--shadow-card); }
+.umrah-map-marker-icon { width: 21px; height: 21px; flex: 0 0 21px; display: grid; place-items: center; border-radius: var(--r-pill); background: var(--c-primary-soft); }
+.umrah-map-marker > span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.umrah-map-marker.map-pin-entry::before { background: var(--c-accent); }
+.umrah-map-marker.map-pin-entry .umrah-map-marker-icon,
+.umrah-map-marker[data-pin="hotel"] .umrah-map-marker-icon { background: transparent; }
+.umrah-map-marker[data-pin="hotel"] { color: var(--c-on-primary); }
+.umrah-map-marker[data-pin="hotel"]::before { background: var(--control-primary); }
+.umrah-map-marker[data-pin="my-location"] { width: 44px; justify-content: center; padding: 0; }
+.umrah-map-marker[data-pin="my-location"]::before { inset: 13px; background: var(--control-primary); box-shadow: 0 0 0 3px var(--c-surface); }
+.umrah-map-marker[data-pin="my-location"] > span:first-child { display: none; }
+.umrah-map-marker[data-compact="true"] { width: 44px; justify-content: center; padding: 0; }
+.umrah-map-marker[data-compact="true"] > span:last-child { position: absolute; width: 1px; height: 1px; clip-path: inset(50%); overflow: hidden; }
+.umrah-map-marker[hidden] { display: none; }
+.umrah-map-marker:focus-visible { z-index: 2; }
+.umrah-map-place-button.action { position: absolute; inset-block-end: 25px; inset-inline-start: 14px; font: var(--type-small); min-height: 44px; }
+.umrah-map-attribution { position: absolute; inset-block-end: 4px; inset-inline-start: 10px; display: flex; gap: 4px; align-items: center; font: var(--type-caption); background: var(--c-surface); padding: 2px 6px; border-radius: var(--r-pill); }
+.umrah-map-attribution a { color: var(--interactive-ink); }
+.umrah-map-view .maplibregl-ctrl-group { background: var(--c-surface); border-radius: var(--r-control); box-shadow: var(--shadow-card); }
+.umrah-map-view .maplibregl-ctrl-group button { width: 44px; height: 44px; }
+.umrah-map-view .maplibregl-ctrl-group button + button { border-top: 0; }
+
+.umrah-map-hotel-sheet { display: grid; gap: 10px; padding: 10px 20px 16px; border-radius: var(--r-sheet) var(--r-sheet) 0 0; background: var(--c-surface); box-shadow: var(--shadow-raised); position: relative; }
+.umrah-map-handle { border-radius: var(--r-pill); background: var(--c-line); width: 40px; height: 5px; }
+.umrah-map-hotel-summary { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 14px; align-items: center; }
+.umrah-map-hotel-summary > div:last-child { min-width: 0; display: grid; gap: 2px; }
+.umrah-map-compass { display: grid; place-items: center; width: 64px; height: 64px; border-radius: var(--r-pill); background: var(--control-primary); }
+.umrah-map-compass-arrow { transform: rotate(var(--hotel-bearing, 35deg)); }
+.umrah-map-bearing { font: var(--type-display-m); overflow-wrap: anywhere; }
+.umrah-map-hotel-actions .action { min-height: 50px; padding: 8px; font: var(--type-body-strong); }
+.umrah-map-dialog.card { width: min(calc(100% - 32px), 460px); max-height: calc(100svh - 28px); overflow: auto; border: 0; border-radius: var(--r-card); gap: 10px; }
+.umrah-map-dialog h2 { font: var(--type-title); }
+.umrah-map-dialog input { min-width: 0; }
+.umrah-map-place-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; max-height: 132px; overflow: auto; padding: 4px; }
+.umrah-map-place-list button { font: var(--type-small); }

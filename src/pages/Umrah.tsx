@@ -50,9 +50,10 @@ export function UmrahShell({ now, desktop }: { now: Date; desktop: boolean }) {
   const { pathname } = useLocation();
   const ask = pathname === "/umrah/ask" || pathname.startsWith("/umrah/ask/");
   const walkSetup = pathname === "/umrah/location";
+  const mapView = pathname === "/umrah/map";
   const showTabs = !walkSetup && (!ask || pathname === "/umrah/ask");
   const trip = useRecord("umrah", initialTrip);
-  const [point, setPoint] = useState<Coord>();
+  const [mapFix, setMapFix] = useState<{ point: Coord; at: number }>();
   const [saiFix, setSaiFix] = useState<{ point: Coord; at: number }>();
   const [locationError, setLocationError] = useState("");
   async function save(update: Parameters<UmrahTripUpdater>[0]) {
@@ -67,6 +68,7 @@ export function UmrahShell({ now, desktop }: { now: Date; desktop: boolean }) {
   const configured = Boolean(trip.start && trip.end);
   const saiGuide = pathname === "/umrah/rituals" && trip.step === saiStep;
   const saiPoint = trip.gps && saiFix && Date.now() - saiFix.at < 30_000 ? saiFix.point : undefined;
+  const mapPoint = trip.gps && mapFix && Date.now() - mapFix.at < 30_000 ? mapFix.point : undefined;
 
   useEffect(() => {
     if (desktop || !trip.gps) return;
@@ -80,8 +82,7 @@ export function UmrahShell({ now, desktop }: { now: Date; desktop: boolean }) {
       const location = { lat: position.coords.latitude, lon: position.coords.longitude };
       const precise = position.coords.accuracy <= 45;
       setSaiFix(precise ? { point: location, at: position.timestamp } : undefined);
-      if (position.coords.accuracy > 120) return;
-      setPoint(location);
+      setMapFix(position.coords.accuracy <= 120 ? { point: location, at: position.timestamp } : undefined);
       if (!precise || (last && position.timestamp - last.at < 2500)) return;
       if (last) {
         const seconds = (position.timestamp - last.at) / 1000;
@@ -115,12 +116,12 @@ export function UmrahShell({ now, desktop }: { now: Date; desktop: boolean }) {
           : { ...saved, state, step, sai, gateMemory };
       }).catch(() => setLocationError("umrahLocationProgressError"));
     }, error => {
-      setPoint(undefined);
+      setMapFix(undefined);
       setSaiFix(undefined);
       setLocationError(error.code === error.PERMISSION_DENIED ? "umrahWalkPermissionDenied" : "umrahLocationSignal");
     },
     { enableHighAccuracy: true, maximumAge: 8000, timeout: 18000 });
-    return () => { navigator.geolocation.clearWatch(watch); setPoint(undefined); setSaiFix(undefined); setLocationError(""); };
+    return () => { navigator.geolocation.clearWatch(watch); setMapFix(undefined); setSaiFix(undefined); setLocationError(""); };
   }, [desktop, trip.gps, trip.walkOptions?.remember]);
 
   if (desktop) return <UmrahPreparation trip={trip} gates={gateNames} />;
@@ -132,15 +133,15 @@ export function UmrahShell({ now, desktop }: { now: Date; desktop: boolean }) {
     { name: "askTab", path: "/umrah/ask", icon: saiGuide ? "umrah-live-ask" : "ask-speech" },
     { name: "askDuas", path: "/umrah/duas", icon: "ask-icon-hand" },
   ];
-  return <div className={ask ? "umrah-shell umrah-ask-shell" : `stack umrah-shell${saiGuide ? " umrah-sai-shell" : ""}`}>
-    {!ask && !saiGuide && !walkSetup && <><header className="row-between"><Link to="/plan" className="icon-button" aria-label={t("umrahBackToPlan")}><ArrowLeft className="icon-dir" size={20} /></Link>
+  return <div className={ask ? "umrah-shell umrah-ask-shell" : `stack umrah-shell${saiGuide ? " umrah-sai-shell" : ""}${mapView ? " umrah-map-shell" : ""}`}>
+    {!ask && !saiGuide && !walkSetup && !mapView && <><header className="row-between"><Link to="/plan" className="icon-button" aria-label={t("umrahBackToPlan")}><ArrowLeft className="icon-dir" size={20} /></Link>
       <div><p className="caption">{t("umrahPrepMakkah")} · {formatTime(now, makkah.timeZone, locale)}</p><h1>{t("umrah")}</h1></div>
       <Link className="icon-button" to="/umrah/location" state={{ from: pathname === "/umrah/rituals" ? "rituals" : undefined }}
         aria-label={t("umrahLocationOptions")}><Compass size={19} /></Link>
     </header>
     {!configured && <div className="card tint row-between"><p>{t("umrahSetTripHint")}</p><Link to="/umrah/plan" className="action soft">{t("umrahPlanTrip")}</Link></div>}
     {locationError && trip.gps && <p className="card tint small" role="status">{t(locationError)}</p>}</>}
-    <Outlet context={{ trip, now, point: trip.gps ? point : undefined, saiPoint, locationError, save }} />
+    <Outlet context={{ trip, now, point: mapPoint, saiPoint, locationError, save }} />
     {showTabs && <nav className="umrah-tabs" aria-label={t("askNav")}>
       {tabs.map(item => <NavLink key={item.path} to={item.path} end={item.path === "/umrah"}>
         <span><DesignIcon name={item.icon} size={22} /></span>{t(item.name)}
@@ -361,8 +362,9 @@ export function WalkWithMe() {
 }
 
 export function UmrahMapPage() {
-  const { trip, point, save } = useTrip();
-  return <Suspense fallback={<p role="status">Opening the offline map…</p>}>
-    <OfflineMap trip={trip} point={point} points={pins} save={save} />
+  const { t } = useCopy();
+  const { trip, point, locationError, save } = useTrip();
+  return <Suspense fallback={<p className="card small" role="status">{t("umrahMapOpening")}</p>}>
+    <OfflineMap trip={trip} point={point} points={pins} locationError={locationError} save={save} />
   </Suspense>;
 }

@@ -3,6 +3,7 @@ import { calculateZakat, gramsPerBhori, initialZakat, nisabWeight, paymentsForHa
   zakatHawl, zakatMoney, zakatPrices, zakatProfileTotals, type ZakatProfile } from "./zakat";
 import { advanceSai, bearing, correctSai, distance, emptyPreparation, initialSai, initialTrip, saiGuidePosition, saiLapEnds, tripDates } from "./umrah";
 import { observeHaramGate, type GateWatch, type HaramOutline } from "./umrahGateMemory";
+import { mapPlaceMatches, nearbyMapPoint, placeRegion } from "./umrahMapPlaces";
 import { addDays } from "./dates";
 import { baselineMonthStart, calendarDefaults, calendarEventById, dayDifference, eventDisplayDates, monthStartEvent } from "./hijri";
 import { eventReminders } from "./calendarFile";
@@ -262,6 +263,26 @@ describe("Haram gate memory", () => {
     expect(observeHaramGate(initial.watch, fix(-.0008, 20_000, 0, 45), outline, gates, undefined)).toEqual(initial);
     const threshold = observeHaramGate(initial.watch, fix(-.001, 12_000), outline, gates, undefined);
     expect(observeHaramGate(threshold.watch, fix(-.0007, 100_000, .0005), outline, gates, undefined).memory).toBeUndefined();
+  });
+});
+
+describe("offline map places", () => {
+  const gate = { id: "gate-3210622327", title: "King Fahd Gate - 79", point: { lat: 21.421232, lon: 39.8240461 } };
+  it("matches a real gate number in Latin, Bangla and Arabic digits without matching partial numbers", () => {
+    for (const query of ["gate 79", "ফটক ৭৯", "٧٩", "Fahd ۷۹"]) {
+      expect(mapPlaceMatches(gate, query, ["ফটক"])).toBe(true);
+    }
+    expect(mapPlaceMatches(gate, "7", ["ফটক"])).toBe(false);
+    expect(mapPlaceMatches({ ...gate, title: "As-Salām Gate", number: "1" }, "salam 1", [])).toBe(true);
+  });
+
+  it("keeps hotel guidance local to the city with a recent nearby fix", () => {
+    const nabawi = { lat: 24.4684, lon: 39.6111 };
+    expect(placeRegion(gate.point)).toBe("makkah");
+    expect(placeRegion(nabawi)).toBe("madinah");
+    expect(nearbyMapPoint(nabawi, "makkah")).toBeUndefined();
+    expect(nearbyMapPoint({ lat: 23.81, lon: 90.41 }, "madinah")).toBeUndefined();
+    expect(nearbyMapPoint(gate.point, "makkah")).toBe(gate.point);
   });
 });
 
