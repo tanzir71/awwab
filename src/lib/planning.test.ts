@@ -5,18 +5,34 @@ import { advanceSai, bearing, correctSai, distance, emptyPreparation, initialSai
   saiGuidePosition, saiLapEnds, tawafRounds, toggleUmrahDua, tripDates, umrahContext } from "./umrah";
 import { observeHaramGate, type GateWatch, type HaramOutline } from "./umrahGateMemory";
 import { mapPlaceMatches, nearbyMapPoint, placeRegion } from "./umrahMapPlaces";
-import { addDays } from "./dates";
-import { baselineMonthStart, calendarDefaults, calendarEventById, dayDifference, eventDisplayDates, monthStartEvent } from "./hijri";
+import { addDays, duration, formatTime } from "./dates";
+import { baselineMonthStart, calendarDefaults, calendarEventById, dayDifference, eventDisplayDates, hijriLabel, monthStartEvent } from "./hijri";
 import { eventReminders } from "./calendarFile";
-import { schedule } from "./prayerServices";
+import { prayerDay, schedule } from "./prayerServices";
 import { calendarDayEvents, calendarWeekStart, fridayMosque, gregorianMonthCells, readCalendarDay, readCalendarMonth, shiftPlanEvent } from "./plan-calendar";
 import { defaults, exportUmrahTrip, prayerStatistics, readUmrahTripFile } from "./storageService";
 import { askMeaning, askPhrase, askPhraseMatches, quickAsks, readGate, renderAsk, umrahPhrases } from "./umrahAsk";
 import { message } from "./copy";
 import { adjustQadaTotals, qadaBalances, qadaCountBetween, qadaDefaults, qadaForecast, recordQada } from "./qada";
-import { assignedMosque, mapMosque, mosqueCheckedAge, mosqueDefaults, mosqueTime, mosqueWeek, timetableNotice, weeklyMosque, type Mosque } from "./mosques";
+import { assignedMosque, jamaatForPrayer, mapMosque, mosqueCheckedAge, mosqueDefaults, mosqueTime, mosqueWeek, timetableNotice, weeklyMosque, type Mosque } from "./mosques";
 
 describe("Today summaries", () => {
+  it("honors the digit setting and formats Hijri months and countdown units for the active locale", () => {
+    const ms = 75 * 60_000;
+    expect(duration(ms)).toBe("1h 15m");
+    expect(duration(ms, "bn")).toBe("১ ঘণ্টা ১৫ মিনিট");
+    expect(duration(ms, "bn-u-nu-latn")).toBe("1 ঘণ্টা 15 মিনিট");
+    expect(duration(ms, "fr").replace(/\s/g, "")).toBe("1h15min");
+    const afternoon = new Date("2026-11-19T11:12:00Z");
+    expect(formatTime(afternoon, "Asia/Dhaka", "bn")).toBe("৫:১২ বিকাল");
+    expect(formatTime(afternoon, "Asia/Dhaka", "bn-u-nu-latn")).toBe("5:12 বিকাল");
+    expect(formatTime(afternoon, "Asia/Dhaka", "bn", true)).toBe("৫:১২");
+    const day = baselineMonthStart(1448, 9);
+    expect(hijriLabel(day, 0, [], "bn")).toBe("১ রমজান ১৪৪৮");
+    expect(hijriLabel(day, 0, [], "bn-u-nu-latn")).toBe("1 রমজান 1448");
+    expect(hijriLabel(day, 0, [], "ur")).toMatch(/\p{Script=Arabic}/u);
+  });
+
   it("shows both possible three-day White Days windows across a Gregorian month boundary", () => {
     expect(eventDisplayDates({
       id: "1448-6-11", title: "White days (Ayyām al-Bīḍ)", label: "13–15 every month", kind: "follows-month",
@@ -206,6 +222,19 @@ describe("mosque timetables", () => {
   const home: Mosque = { id: "home", name: "Home masjid", role: "home", jamaat: { dhuhr: "13:00" },
     jumuah: { khutbah: "12:45", prayer: "13:15" }, occasional: [], source: "visited", updatedAt: "2026-10-12T12:00:00Z" };
   const office: Mosque = { ...home, id: "office", name: "Office masjid", role: "office", jumuah: undefined };
+
+  it("formats both fixed and adhan-relative jamaat times without changing mosque assignments", () => {
+    const city = defaults.city;
+    const date = "2026-11-20";
+    const prayer = prayerDay(date, city, defaults.method, defaults.school, new Date(date)).find(item => item.id === "dhuhr");
+    const plan = { ...mosqueDefaults, mosques: [home], mapping: { "5-dhuhr": home.id } };
+    const copy = { locale: "bn", afterAdhan: "আজানের ৫ মিনিট পর" };
+    expect(jamaatForPrayer(prayer, city.timeZone, plan, copy)).toEqual({ id: home.id, mosque: home.name, time: "১৩:১৫" });
+    expect(jamaatForPrayer(prayer, city.timeZone, plan, { ...copy, locale: "bn-u-nu-latn" })?.time).toBe("13:15");
+    const relative = { ...plan, mosques: [{ ...home, jumuah: undefined, jamaat: { dhuhr: "adhan+5" } }] };
+    expect(jamaatForPrayer(prayer, city.timeZone, relative, copy)?.time).toMatch(/[০-৯]+:[০-৯]{2}/);
+    expect(jamaatForPrayer({ ...prayer, starts: new Date(NaN) }, city.timeZone, relative, copy)?.time).toBe(copy.afterAdhan);
+  });
 
   it("supports grouped assignments and changes to a single weekday without touching the other days", () => {
     let plan = { ...mosqueDefaults, mosques: [home, office] };

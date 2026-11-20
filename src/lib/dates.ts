@@ -24,16 +24,18 @@ export function formatDay(day: string, options?: Intl.DateTimeFormatOptions, lan
 }
 
 export function formatTime(date: Date, timeZone: string, language = "en", compact = false) {
-  const formatter = new Intl.DateTimeFormat(language, { timeZone, hour: "numeric", minute: "2-digit" });
+  const bangla = language === "bn" || language.startsWith("bn-");
+  const formatter = new Intl.DateTimeFormat(language, { timeZone, hour: "numeric", minute: "2-digit", dayPeriod: bangla ? "short" : undefined });
   return compact ? formatter.formatToParts(date).filter(part => part.type !== "dayPeriod").map(part => part.value).join("").trim() : formatter.format(date);
 }
 
 export function duration(ms: number, language = "en") {
   const minutes = Math.max(0, Math.ceil(ms / 60000));
   const hours = Math.floor(minutes / 60);
-  if (language === "bn" || language.startsWith("bn-")) {
-    const number = new Intl.NumberFormat(language);
-    return hours ? `${number.format(hours)} ঘণ্টা ${number.format(minutes % 60)} মিনিট` : `${number.format(minutes)} মিনিট`;
-  }
-  return hours ? `${hours}h ${minutes % 60}m` : `${minutes}m`;
+  if (language === "en") return hours ? `${hours}h ${minutes % 60}m` : `${minutes}m`;
+  const unitDisplay = language === "bn" || language.startsWith("bn-") ? "long" : "short";
+  const minute = new Intl.NumberFormat(language, { style: "unit", unit: "minute", unitDisplay }).format(minutes % 60);
+  if (!hours) return minute;
+  const hour = new Intl.NumberFormat(language, { style: "unit", unit: "hour", unitDisplay }).format(hours);
+  return `${hour} ${minute}`;
 }

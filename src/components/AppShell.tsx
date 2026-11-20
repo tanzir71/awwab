@@ -23,6 +23,7 @@ import { gregorianMonthBounds, readCalendarMonth } from "@/lib/plan-calendar";
 import { zakatHawl, type ZakatProfile } from "@/lib/zakat";
 import { initialTrip, tripDates } from "@/lib/umrah";
 import { formatLocale, languages } from "@/lib/languagePreferences";
+import { prayerCityLabel } from "@/lib/settings-copy";
 import { speakCourseTitle, speakSetupPath, speakUnit, speakUnitNumber, speakVarietyLabels } from "@/lib/speakCurriculum";
 import qaida from "../../docs/content/qaida-lessons.json";
 import surahs from "../../docs/content/surahs-for-salah.json";
@@ -107,6 +108,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
   const hawl = zakatHawl(day, zakat, settings.hijriAdjust, calendar.anchors);
   const locale = formatLocale(settings);
   const number = new Intl.NumberFormat(locale, { useGrouping: false });
+  const ratio = (count: number, total: number) => `${number.format(count)}/${number.format(total)}`;
   const zakatSubtitle = [
     hawl && t("zakatHawlHeader", { hijri: [number.format(hawl.day), planMonth(hawl.month, settings.language), number.format(hawl.year)].join(" "), days: hawl.daysUntil }),
     t("zakatAmountsIn", { currency: zakat?.currency ?? "BDT" }),
@@ -114,13 +116,13 @@ export function AppShell({ children, settings, now, desktop }: { children: React
   const stats = prayerStatistics(logs, day);
   const counts: Record<string, string> = {
     "/learn": due.length ? t("deskDueBadge", { count: dueSurahs || due.length }) : undefined,
-    "/learn/qaida": `${lessonProgress.length}/17`,
-    "/learn/surahs": `${Object.keys(reviews).filter(id => /^\d+$/.test(id)).length}/12`,
-    "/learn/words": String(countKnownQuranWords(familiar, vocabulary)),
-    "/learn/takhti": `${writing.length}/9`,
-    "/today": `${logs.filter(log => log.date === day).length}/5`,
-    "/return": String(stats.returns),
-    "/plan/mosques": String(mosques.mosques.length),
+    "/learn/qaida": ratio(lessonProgress.length, 17),
+    "/learn/surahs": ratio(Object.keys(reviews).filter(id => /^\d+$/.test(id)).length, 12),
+    "/learn/words": number.format(countKnownQuranWords(familiar, vocabulary)),
+    "/learn/takhti": ratio(writing.length, 9),
+    "/today": ratio(logs.filter(log => log.date === day).length, 5),
+    "/return": number.format(stats.returns),
+    "/plan/mosques": number.format(mosques.mosques.length),
     "/plan/zakat": hawl && t("zakatDayBadge", { days: hawl.daysUntil }),
   };
   const destinations = groups.flatMap(group => group.items);
@@ -258,10 +260,10 @@ export function AppShell({ children, settings, now, desktop }: { children: React
         <div>{today || learnWorkspace || zakatPage || planDesktop || mosquesDesktop || returnDesktop || guideDesktop || hadithDesktop || settingsDesktop || umrahDesktop ? <h1>{umrahDesktop ? t("umrahPrepare") : settingsDesktop ? t("settingsDeskTitle") : guideDesktop ? t("howToPray") : qaidaStudy ? t("qaidaDesktopTitle", { number: lesson.n }) : surahStudy ? t("surahsForSalah") : wordBankStudy ? t("wordBankName") : title}</h1> : <h2>{title}</h2>}
           <p className="small muted">{guideDesktop ? <>
             <Link to={`/you/prayer?${guideSettingsQuery}`}>{t(guideReference(settings) === "hanafi" ? "prayerGuideHanafi" : "prayerGuideFard")} · {t("prayerGuideSettings")}</Link> · {t("guideDesktopAnatomy")}
-          </> : spokenUnit ? <><Link to={speakSetupPath(spokenUnit.level, spokenUnit.variety)}>{t(speakVarietyLabels[spokenUnit.variety])}</Link> · {t("speakUnitNumber", { number: speakUnitNumber(spokenUnit) })}</> : <>{planSubtitle ?? (pathsHome ? t("pathsSubtitle") : umrahDesktop ? umrahSubtitle : settingsDesktop ? t("settingsDeskCaption") : hadithDesktop ? t("hadithDesktopIntro") : returnDesktop ? t("returnDeskSubtitle") : mosquesDesktop ? t("mosqueDeskCaption", { count: mosques.mosques.length }) : zakatPage ? zakatSubtitle : qaidaStudy ? qaidaSubtitle : surahStudy ? studySubtitle : wordBankStudy ? t("wordBankSubtitle") : date + " · " + hijriLabel(day, settings.hijriAdjust, calendar.anchors, locale))}{today && ` · ${settings.city.name}`}{studyHome && " · " + t("deskMinutesToday", { count: studyPlanMinutes(hidden) })}</>}</p></div>
+          </> : spokenUnit ? <><Link to={speakSetupPath(spokenUnit.level, spokenUnit.variety)}>{t(speakVarietyLabels[spokenUnit.variety])}</Link> · {t("speakUnitNumber", { number: speakUnitNumber(spokenUnit) })}</> : <>{planSubtitle ?? (pathsHome ? t("pathsSubtitle") : umrahDesktop ? umrahSubtitle : settingsDesktop ? t("settingsDeskCaption") : hadithDesktop ? t("hadithDesktopIntro") : returnDesktop ? t("returnDeskSubtitle") : mosquesDesktop ? t("mosqueDeskCaption", { count: mosques.mosques.length }) : zakatPage ? zakatSubtitle : qaidaStudy ? qaidaSubtitle : surahStudy ? studySubtitle : wordBankStudy ? t("wordBankSubtitle") : date + " · " + hijriLabel(day, settings.hijriAdjust, calendar.anchors, locale))}{today && ` · ${prayerCityLabel(settings.city, t)}`}{studyHome && " · " + t("deskMinutesToday", { count: studyPlanMinutes(hidden) })}</>}</p></div>
         <Link className="chip night" to="/today">{nextPrayer}</Link>
         {settings.mode === "adult" && <>
-          <Link className="action" to={reviewDestination(nextReview ?? due[0]?.[0])}><DesignIcon name="desk-play" size={14} />{t("startReview")}{due.length ? ` · ${studyHome ? dueSurahs || due.length : due.length}` : ""}</Link>
+          <Link className="action" to={reviewDestination(nextReview ?? due[0]?.[0])}><DesignIcon name="desk-play" size={14} />{t("startReview")}{due.length ? ` · ${number.format(studyHome ? dueSurahs || due.length : due.length)}` : ""}</Link>
           <Link className="action soft" to="/today?log=1"><DesignIcon name="desk-plus" size={14} />{t("logPrayer")}</Link>
           <ShareLink className="action light" to={today ? "/share?from=today" : umrahDesktop ? "/share?template=umrah&from=umrah" : returnDesktop ? "/share?template=return&from=return" : "/share?from=learn"}><DesignIcon name="desk-share" size={14} />{t("share")}</ShareLink>
         </>}

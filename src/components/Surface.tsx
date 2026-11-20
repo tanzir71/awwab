@@ -16,12 +16,14 @@ export function ListLink({ to, icon, title, detail }: {
 export function SectionNav({ title, back, backIcon, action }: { title: string; back: string; backIcon?: ReactNode; action?: ReactNode }) {
   const { t } = useCopy();
   return <header className="section-nav">
-    <Link to={back} className="icon-button" aria-label={t("back")}>{backIcon ?? <ChevronLeft size={22} />}</Link>
+    <Link to={back} className="icon-button" aria-label={t("back")}>{backIcon ?? <ChevronLeft size={22} className="icon-dir" />}</Link>
     <h1>{title}</h1>
     {action ?? <span className="w-11" />}
   </header>;
 }
 
-export function SectionHeading({ title, to, label }: { title: string; to?: string; label?: string }) {
-  return <div className="row-between"><h2>{title}</h2>{to && <Link to={to} className="text-button">{label}</Link>}</div>;
+export function SectionHeading({ title, to, label, arrow = false }: { title: string; to?: string; label?: string; arrow?: boolean }) {
+  return <div className="row-between"><h2>{title}</h2>{to && <Link to={to} className="text-button">
+    {label}{arrow && <span className="ms-1 inline-block icon-dir" aria-hidden="true">→</span>}
+  </Link>}</div>;
 }

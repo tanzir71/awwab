@@ -4,6 +4,7 @@ import source from "../../docs/content/islamic-events.json";
 export interface MonthAnchor { year: number; month: number; date: string; source: string }
 export const hijriMonths = ["Muharram", "Safar", "Rabi al-Awwal", "Rabi al-Akhir", "Jumada al-Ula", "Jumada al-Akhirah", "Rajab", "Shaʿban", "Ramadan", "Shawwal", "Dhu al-Qaʿdah", "Dhu al-Hijjah"];
 export const hijriMonthsBn = ["মুহাররম", "সফর", "রবিউল আউয়াল", "রবিউস সানি", "জমাদিউল আউয়াল", "জমাদিউস সানি", "রজব", "শাবান", "রমজান", "শাওয়াল", "জিলকদ", "জিলহজ"];
+const hijriMonthFormatters = new Map<string, Intl.DateTimeFormat>();
 const formatter = new Intl.DateTimeFormat("en-u-ca-islamic-umalqura", { timeZone: "UTC", day: "numeric", month: "numeric", year: "numeric" });
 const ordinal = (year: number, month: number) => year * 12 + month - 1;
 
@@ -62,11 +63,21 @@ export function hijriOn(day: string, adjust = 0, anchors: MonthAnchor[] = []) {
   return guess;
 }
 
+export function hijriMonthName(month: number, locale: string) {
+  if (locale === "bn" || locale.startsWith("bn-")) return hijriMonthsBn[month - 1];
+  if (locale === "en" || locale.startsWith("en-")) return hijriMonths[month - 1];
+  let format = hijriMonthFormatters.get(locale);
+  if (!format) {
+    format = new Intl.DateTimeFormat(locale, { month: "long", calendar: "islamic-umalqura", timeZone: "UTC" });
+    hijriMonthFormatters.set(locale, format);
+  }
+  return format.format(new Date(baselineMonthStart(1448, month) + "T12:00:00Z"));
+}
+
 export function hijriLabel(day: string, adjust = 0, anchors: MonthAnchor[] = [], locale = "en") {
   const hijri = hijriOn(day, adjust, anchors);
   const number = new Intl.NumberFormat(locale, { useGrouping: false });
-  const months = locale.startsWith("bn") ? hijriMonthsBn : hijriMonths;
-  return `${number.format(hijri.day)} ${months[hijri.month - 1]} ${number.format(hijri.year)}`;
+  return `${number.format(hijri.day)} ${hijriMonthName(hijri.month, locale)} ${number.format(hijri.year)}`;
 }
 
 export interface EventOverride { date?: string; source?: string; adjust: -1 | 0 | 1 }

@@ -5,6 +5,7 @@ import { duration, formatDay, formatTime } from "@/lib/dates";
 import { eventDisplayDates, type CalendarEvent, type CalendarSettings } from "@/lib/hijri";
 import { formatLocale } from "@/lib/languagePreferences";
 import { jamaatForPrayer, mosqueForPrayer, type MosquePlan } from "@/lib/mosques";
+import { planEventLabels } from "@/lib/plan-copy";
 import { prayerDay } from "@/lib/prayerServices";
 import { guideRakats } from "@/lib/prayerGuide";
 import { qadaBalances, qadaDefaults, qadaForecast } from "@/lib/qada";
@@ -70,7 +71,8 @@ export function TodayDashboard({ settings, now, day, prayers, current, next, log
   const { end: finish } = qadaForecast(day, balances, qada);
   const dueCount = Object.values(reviews).filter(review => isDue(review, now)).length;
   const headline = current ?? next;
-  const jamaat = jamaatForPrayer(headline, zone, mosques);
+  const jamaatCopy = { locale, afterAdhan: t("mosqueAdhanFiveLong") };
+  const jamaat = jamaatForPrayer(headline, zone, mosques, jamaatCopy);
   const countdown = timeAvailable(headline.starts) ? duration((current ? current.ends : next.starts).valueOf() - now.valueOf(), locale) : undefined;
   const missed = prayers.find(prayer => prayer.status === "missed");
   const history = stats.recent.slice(-7).map(({ day: date }) => ({ day: date, prayers: date === day ? prayers : prayerDay(date, settings.city, settings.method, settings.school, now, logs) }));
@@ -88,7 +90,7 @@ export function TodayDashboard({ settings, now, day, prayers, current, next, log
         <p className="daily-value">{t(headline.id)}{countdown && ` · ${countdown}`}</p>
         <p className="small muted">{t("atAdhan")} <PrayerTime value={headline.starts} settings={settings} />{jamaat && ` · ${t("jamaat", jamaat)}`}</p>
       </section>
-      <section className="card daily-stat"><h2 className="caption">{t("today")}</h2><p className="daily-value">{t("prayerCount", { count: stats.recent.at(-1).count })}</p>
+      <section className="card daily-stat"><h2 className="caption">{t("today")}</h2><p className="daily-value">{t("prayerCount", { count: stats.recent.at(-1).count, total: prayerIds.length })}</p>
         {missed && <p className="small muted">{t(missed.id)} · {t("missed")}</p>}
       </section>
       <section className="card daily-stat"><h2 className="caption">{t("consistencyThirty")}</h2><p className="daily-value">{percent.format(stats.consistency / 100)}</p>
@@ -102,20 +104,20 @@ export function TodayDashboard({ settings, now, day, prayers, current, next, log
     </div>
     <div className="daily-data-grid">
       <section className="card daily-schedule">
-        <SectionHeading title={t("todayPrayers")} to={`/today/guide/${headline.id}`} label={`${t("howToPray")} →`} />
+        <SectionHeading title={t("todayPrayers")} to={`/today/guide/${headline.id}`} label={t("howToPray")} arrow />
         <ScheduleBar prayers={prayers} now={now} settings={settings} />
         <div className="table-scroll" role="region" aria-label={t("todayPrayers")} tabIndex={0}>
           <table className="daily-prayer-table">
             <thead><tr>{["prayer", "atAdhan", "atJamaat", "where", "rakats", "status"].map(label => <th key={label} scope="col">{t(label)}</th>)}<th scope="col"><span className="sr-only">{t("prayerLogActions")}</span></th></tr></thead>
             <tbody>{prayers.map(prayer => {
               const mosque = mosqueForPrayer(day, prayer.id, mosques);
-              const time = jamaatForPrayer(prayer, zone, mosques)?.time;
+              const time = jamaatForPrayer(prayer, zone, mosques, jamaatCopy)?.time;
               const rakats = guideRakats(prayer.rakats, settings).map(item => {
                 const name = rakatLabel(settings, item.type);
                 return `${number.format(item.count)}${locale === "en" ? name[0] : ` ${name}`}`;
               }).join(" · ");
               return <tr key={prayer.id}><th scope="row">{t(prayer.id)}</th><td><PrayerTime value={prayer.starts} settings={settings} /></td>
-                <td>{time ?? "—"}</td><td>{mosque?.name ?? "—"}</td><td>{rakats}</td>
+                <td><bdi>{time ?? "—"}</bdi></td><td><bdi>{mosque?.name ?? "—"}</bdi></td><td>{rakats}</td>
                 <td><span className="daily-status" data-status={prayer.status}>{t(prayer.status === "missed" ? "prayerNotLogged" : prayer.status)}</span></td>
                 <td>{prayer.status !== "upcoming" && <button type="button" className="chip soft daily-log" onClick={() => onAction(prayer)} aria-label={`${t(prayer.status === "missed" ? "makeUp" : "logPrayer")} · ${t(prayer.id)}`}>{t(prayer.status === "missed" ? "makeUp" : "logNow")}</button>}</td>
               </tr>;
@@ -124,9 +126,9 @@ export function TodayDashboard({ settings, now, day, prayers, current, next, log
         </div>
       </section>
       <section className="card daily-history">
-        <SectionHeading title={t("lastSevenDays")} to="/today/week" label={t("fullPrayerHistory")} />
+        <SectionHeading title={t("lastSevenDays")} to="/today/week" label={t("fullPrayerHistory")} arrow />
         <table className="daily-history-table">
-          <thead><tr><td />{prayerIds.map(id => <th key={id} scope="col" title={t(id)}><span aria-hidden="true">{t(id).slice(0, 4)}</span><span className="sr-only">{t(id)}</span></th>)}</tr></thead>
+          <thead><tr><td />{prayerIds.map(id => <th key={id} scope="col" aria-label={t(id)}>{t(id === "maghrib" ? "historyMaghribShort" : id)}</th>)}</tr></thead>
           <tbody>{history.map(({ day, prayers }) => <tr key={day}><th scope="row"><time dateTime={day}>{formatDay(day, { weekday: "short", day: "numeric" }, locale)}</time></th>
             {prayers.map(prayer => <td key={prayer.id}><span className="history-cell" data-status={prayer.status} title={t(prayer.status)}><span className="sr-only">{t(prayer.status)}</span></span></td>)}
           </tr>)}</tbody>
@@ -137,20 +139,20 @@ export function TodayDashboard({ settings, now, day, prayers, current, next, log
     <div className="daily-detail-grid">
       <section className="card compact-stack"><SectionHeading title={t("todayFiveMinutes")} to="/learn" label={t("adjustPractice")} />
         {practice.map(item => <Link key={item.to} className="daily-practice-row" to={item.to}><span><strong>{item.title}</strong><small className="muted">{item.detail}</small></span><span className="chip">{t("studyMinutes", { count: item.minutes })}</span></Link>)}
-        <Link className="daily-practice-row" to="/return"><span><strong>Astaghfirullah</strong><small className="muted">{t("todayIstighfarProgress", { count: istighfar })}</small></span><span className="chip">{t("tapAction")}</span></Link>
+        <Link className="daily-practice-row" to="/return"><span><strong>{t("todayIstighfar")}</strong><small className="muted">{t("todayIstighfarProgress", { count: istighfar, target: 100 })}</small></span><span className="chip">{t("tapAction")}</span></Link>
       </section>
-      <section className="card compact-stack"><SectionHeading title={t("makeUpPrayers")} to="/return/qada" label={`${t("plan")} →`} />
+      <section className="card compact-stack"><SectionHeading title={t("makeUpPrayers")} to="/return/qada" label={t("plan")} arrow />
         <p className="daily-balance"><strong className="daily-value">{number.format(totalLeft)}</strong>{finish && <small className="muted">{t(qada.withEachPrayer ? "qadaProjectedDate" : "qadaTargetDate", { count: qada.dailyGoal, date: formatDay(finish, { month: "short", day: "numeric", year: "numeric" }, locale) })}</small>}</p>
         {prayerIds.map(id => <div className="daily-qada-row" key={id}><b>{t(id)}</b><progress max={Math.max(1, madeUp[id] + remaining[id])} value={madeUp[id]} aria-label={t(id)} /><small className="muted">{t("prayersLeft", { count: remaining[id] })}</small></div>)}
       </section>
-      <section className="card compact-stack"><SectionHeading title={t("comingUp")} to="/plan" label={`${t("calendar")} →`} />
+      <section className="card compact-stack"><SectionHeading title={t("comingUp")} to="/plan" label={t("calendar")} arrow />
         {events.map(event => <Link className="daily-event-row" to={`/plan?event=${event.id}`} key={event.id}>
-          <span><strong>{event.title}</strong><small className="muted">{eventDisplayDates(event, locale, t("dateOr"))}</small></span>
+          <span><strong>{planEventLabels(event, settings.language, t)[0]}</strong><small className="muted">{eventDisplayDates(event, locale, t("dateOr"))}</small></span>
           <span className={`chip${event.confirmed ? "" : " tint"}`}>{t(event.confirmed ? "confirmedDate" : "expectedDate")}</span>
         </Link>)}
         {hawl && <Link className="daily-event-row" to="/plan/zakat"><span><strong>{t("zakatDate")}</strong><small className="muted">{formatDay(hawl, dayStyle, locale)}</small></span><span className="chip">{t("yours")}</span></Link>}
       </section>
-      <section className="card compact-stack"><SectionHeading title={t("learning")} to="/learn" label={`${t("learn")} →`} />
+      <section className="card compact-stack"><SectionHeading title={t("learning")} to="/learn" label={t("learn")} arrow />
         {progress.map(item => <div className="daily-learning-row" key={item.key}>
           <div className="row-between"><b>{t(item.key)}</b><small className="muted">{number.format(item.count)} / {number.format(item.max)}</small></div>
           <progress max={item.max} value={Math.min(item.count, item.max)} aria-label={t(item.key)} />

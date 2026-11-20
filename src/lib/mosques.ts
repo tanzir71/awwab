@@ -90,11 +90,21 @@ export function mosqueCheckedAge(day: string, checked: string, language: string)
   return new Intl.RelativeTimeFormat(language, { numeric: span <= 1 ? "auto" : "always" }).format(Math.trunc(days / scale), unit);
 }
 
-export function jamaatForPrayer(prayer: Prayer, zone: string, plan: MosquePlan) {
+export function jamaatForPrayer(prayer: Prayer, zone: string, plan: MosquePlan, copy?: {
+  locale: string; afterAdhan: string;
+}) {
   const mosque = mosqueForPrayer(prayer.date, prayer.id, plan);
   const scheduled = mosqueTime(mosque, prayer.id, mosqueWeekday(prayer.date));
   if (!mosque || !scheduled) return null;
-  const time = scheduled === "adhan+5" ? Number.isFinite(prayer.starts.valueOf())
-    ? formatTime(new Date(prayer.starts.valueOf() + 300_000), zone) : "5 min after adhan" : scheduled;
+  let time = scheduled;
+  if (scheduled === "adhan+5") {
+    time = Number.isFinite(prayer.starts.valueOf())
+      ? formatTime(new Date(prayer.starts.valueOf() + 300_000), zone, copy?.locale) : copy?.afterAdhan ?? "5 min after adhan";
+  } else if (copy && copy.locale !== "en") {
+    const localTime = new Date(`2000-01-01T${scheduled}:00Z`);
+    if (Number.isFinite(localTime.valueOf())) time = new Intl.DateTimeFormat(copy.locale, {
+      timeZone: "UTC", hour: "2-digit", minute: "2-digit", hourCycle: "h23",
+    }).format(localTime);
+  }
   return { time, mosque: mosque.name, id: mosque.id };
 }

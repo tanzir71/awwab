@@ -1,18 +1,7 @@
 import type { MessageCatalog, useCopy } from "./copy";
-import { baselineMonthStart, hijriMonths, hijriMonthsBn, type CalendarEvent } from "./hijri";
+import { hijriMonthName, type CalendarEvent } from "./hijri";
 
-export const planMonthsBn = hijriMonthsBn;
-const monthNames = new Map<string, Intl.DateTimeFormat>();
-export function planMonth(month: number, language: string) {
-  if (language === "bn") return planMonthsBn[month - 1];
-  if (language === "en") return hijriMonths[month - 1];
-  let format = monthNames.get(language);
-  if (!format) {
-    format = new Intl.DateTimeFormat(language, { month: "long", calendar: "islamic-umalqura", timeZone: "UTC" });
-    monthNames.set(language, format);
-  }
-  return format.format(new Date(baselineMonthStart(1448, month) + "T12:00:00Z"));
-}
+export { hijriMonthName as planMonth, hijriMonthsBn as planMonthsBn } from "./hijri";
 
 export const planAuthorities = [
   { value: "National moon-sighting committee", label: "planNational" },
@@ -39,7 +28,7 @@ const eventCopyKeys: Record<string, [string, string, string?]> = {
 export function planEventLabels(event: CalendarEvent, language: string, t: ReturnType<typeof useCopy>["t"]) {
   const keys = eventCopyKeys[event.title];
   const { hijriDay: day } = event;
-  const month = planMonth(event.month, language);
+  const month = hijriMonthName(event.month, language);
   const values = { day, month, earlier: day - 1, end: day + 2 };
   if (keys) {
     const [title, detail, reminderNote] = keys;

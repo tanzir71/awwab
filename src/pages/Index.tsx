@@ -12,14 +12,17 @@ import { usePrayerLogs, useRecord } from "@/hooks/use-awwab";
 import { addDays, dateKey, duration, formatDay, formatTime } from "@/lib/dates";
 import { calendarDefaults, calendarEvents, eventDisplayDates, hijriLabel } from "@/lib/hijri";
 import { formatLocale } from "@/lib/languagePreferences";
-import { currentPrayerSchedule, methodNames, prayerDay } from "@/lib/prayerServices";
+import { currentPrayerSchedule, prayerDay } from "@/lib/prayerServices";
+import { hadithName, hadithNumberLabel, parseHadithId } from "@/lib/hadith";
 import { jamaatForPrayer, mosqueDefaults } from "@/lib/mosques";
+import { planEventLabels } from "@/lib/plan-copy";
+import { prayerCityLabel } from "@/lib/settings-copy";
 import { db, logPrayer, type Settings } from "@/lib/storageService";
 import { isDue, type Reviews } from "@/lib/reviews";
 import { message } from "@/lib/copy";
 import { guideRakats } from "@/lib/prayerGuide";
 import { studyNames } from "@/lib/study-copy";
-import { prayerStatusNames, type Prayer } from "@/types/Prayer";
+import type { Prayer } from "@/types/Prayer";
 import hadith from "../../docs/content/hadith-curated.json";
 import qaida from "../../docs/content/qaida-lessons.json";
 import surahs from "../../docs/content/surahs-for-salah.json";
@@ -27,7 +30,6 @@ import surahs from "../../docs/content/surahs-for-salah.json";
 const prayerArabic = { fajr: "الفجر", dhuhr: "الظهر", asr: "العصر", maghrib: "المغرب", isha: "العشاء" };
 const statusSaved = ["done", "late", "qada"];
 export const istighfar = "أَسْتَغْفِرُ ٱللَّهَ";
-const collectionNames = { bukhari: "Bukhari", muslim: "Muslim", tirmidhi: "Tirmidhi" };
 
 export default function Today({ settings, now, desktop }: { settings: Settings; now: Date; desktop: boolean }) {
   const logs = usePrayerLogs();
@@ -50,6 +52,7 @@ export default function Today({ settings, now, desktop }: { settings: Settings; 
   const language = settings.language;
   const locale = formatLocale(settings);
   const t = message.bind(null, settings);
+  const city = prayerCityLabel(settings.city, t);
   const mode = settings.mode;
   const maktabDesktop = mode === "maktab" && desktop;
   const group = mode === "maktab" ? "maktab-today" : "today";
@@ -57,7 +60,7 @@ export default function Today({ settings, now, desktop }: { settings: Settings; 
   const due = Object.entries(reviews).find(([id, review]) => /^\d+$/.test(id) && isDue(review, now));
   const dueSurah = surahs.surahs.find(item => item.number === Number(due?.[0])) ?? surahs.surahs.find(item => item.number === 103);
   const currentLesson = qaida.lessons.find(item => item.n === lesson) ?? qaida.lessons[0];
-  const jamaat = jamaatForPrayer(headline, zone, mosques);
+  const jamaat = jamaatForPrayer(headline, zone, mosques, { locale, afterAdhan: t("mosqueAdhanFiveLong") });
   const countdown = duration((current ? current.ends : next.starts).valueOf() - now.valueOf(), locale);
   const hasTimes = Number.isFinite(headline.starts.valueOf());
   const fard = headline.rakats.find(rakat => rakat.type === "fard");
@@ -97,10 +100,11 @@ export default function Today({ settings, now, desktop }: { settings: Settings; 
 
   const intro = <header className="prayer-intro row-between">
       <div className="today-greeting">
-        <p className="caption">{formatDay(day, dateStyle, locale)} · {hijriLabel(day, settings.hijriAdjust, calendar.anchors, locale)}{maktabDesktop && ` · ${settings.city.name}`}</p>
+        <p className="caption">{formatDay(day, dateStyle, locale)} · {hijriLabel(day, settings.hijriAdjust, calendar.anchors, locale)}{maktabDesktop && ` · ${city}`}</p>
         <h1>{t("greeting")}</h1>
         {!maktabDesktop && <Link className="small with-icon muted today-location" to="/you/prayer">
-          <DesignIcon size={14} name={`${group}-pin`} />{settings.city.name} · {methodNames[settings.method]} method · {settings.school === "hanafi" ? "Hanafi Asr" : "Standard Asr"}
+          <DesignIcon size={14} name={`${group}-pin`} />{t("todayPrayerContext", { city, method: t(`settingsMethod${settings.method}`),
+            asr: t(settings.school === "hanafi" ? "profileHanafiAsr" : "profileStandardAsr") })}
         </Link>}
       </div>
       {maktabDesktop ? <div className="equal-row today-print-actions">
@@ -137,21 +141,24 @@ export default function Today({ settings, now, desktop }: { settings: Settings; 
       <div className="card compact-stack today-istighfar">
         <div className="row-between"><Link className="with-icon" to="/return">
           {!maktabDesktop && <span className="icon-box"><DesignIcon name={`${group}-${mode === "maktab" ? "ret1" : "ret2"}`} size={20} /></span>}
-          <span><strong>Astaghfirullah</strong><small>{t("todayIstighfarProgress", { count: progress[day] ?? 0 })}</small></span>
+          <span><strong>{t("todayIstighfar")}</strong><small>{t("todayIstighfarProgress", { count: progress[day] ?? 0, target: 100 })}</small></span>
         </Link><ArabicText text={istighfar} /></div>
         <progress value={Math.min(100, progress[day] ?? 0)} max={100} aria-label={t("istighfarProgress")} />
       </div>
     </section>;
+  const narration = parseHadithId(`${daily.collection}:${daily.number}`);
   const hadithCard = <section className="card soft hadith-quote">
-      <a className="caption" href={daily.url}>{daily.grade} · {collectionNames[daily.collection]} {daily.number}</a>
-      <blockquote>{daily.summary.replace("He ﷺ", "The Prophet")}</blockquote>
+      <a className="caption" href={daily.url}>
+        {t(daily.grade === "Sahih" ? "hadithSahih" : "hadithHasan")} · {narration ? hadithName(narration.collection, language, true) : daily.collection} {hadithNumberLabel(daily.number, locale)}
+      </a>
+      <blockquote lang={language === "bn" ? "bn" : "en"}>{language === "bn" ? daily.summaryBn : daily.summary.replace("He ﷺ", "The Prophet")}</blockquote>
       {!maktabDesktop && <p className="small muted">{t("hadithEncouragement")}</p>}
     </section>;
   const upcoming = <section className="today-events compact-stack">
       <SectionHeading title={t("comingUp")} to="/plan" label={t("calendar")} />
       <div className="chips">
         {eventRange.map(event => <Link className="chip soft" key={event.id} to={`/plan?event=${event.id}`}>
-          {event.title} · {eventDisplayDates(event, language, t("dateOr"))}
+          {planEventLabels(event, language, t)[0]} · {eventDisplayDates(event, locale, t("dateOr"))}
         </Link>)}
       </div>
     </section>;
@@ -175,7 +182,9 @@ export default function Today({ settings, now, desktop }: { settings: Settings; 
       {selectedCurrent && <DialogContent className="awwab-dialog">
         <DialogTitle>{t(selectedCurrent.id)}</DialogTitle>
         <DialogDescription className="muted">{t(selectedCurrent.status)}</DialogDescription>
-        {Number.isFinite(selectedCurrent.starts.valueOf()) && <p className="muted">{formatTime(selectedCurrent.starts, zone, locale)} – {formatTime(selectedCurrent.ends, zone, locale)} · {settings.city.name}</p>}
+        {Number.isFinite(selectedCurrent.starts.valueOf()) && Number.isFinite(selectedCurrent.ends.valueOf()) && <p className="muted">{t("todayPrayerRange", {
+          start: formatTime(selectedCurrent.starts, zone, locale), end: formatTime(selectedCurrent.ends, zone, locale), city,
+        })}</p>}
         <Link className="action soft" to={`/today/guide/${selectedCurrent.id}`}>{t("howToPray")}</Link>
         {selectedCurrent.status === "now" && <div className="equal-row">
           <button className="action" onClick={() => void record(selectedCurrent, "log")}>{t("iPrayedShort")}</button>
@@ -191,17 +200,19 @@ export default function Today({ settings, now, desktop }: { settings: Settings; 
 export function PrayerWeek({ settings, now }: { settings: Settings; now: Date }) {
   const logs = usePrayerLogs();
   const today = dateKey(now, settings.city.timeZone);
+  const t = message.bind(null, settings);
+  const locale = formatLocale(settings);
   const [offset, setOffset] = useState(0);
-  return <div className="stack">
-    <SectionNav title="Week view" back="/today" />
+  return <div className="stack prayer-week">
+    <SectionNav title={t("weekView")} back="/today" />
     <div className="equal-row">
-      <button className="action soft" onClick={() => setOffset(value => value - 7)}>Previous week</button>
-      <button className="action soft" disabled={offset >= 0} onClick={() => setOffset(value => value + 7)}>Next week</button>
+      <button className="action soft" onClick={() => setOffset(value => value - 7)}>{t("previousPrayerWeek")}</button>
+      <button className="action soft" disabled={offset >= 0} onClick={() => setOffset(value => value + 7)}>{t("nextPrayerWeek")}</button>
     </div>
     {Array.from({ length: 7 }, (_, index) => addDays(today, offset + index - 6)).map(day => <section className="card compact-stack" key={day}>
-      <h2 className="with-icon"><CalendarDays size={20} />{formatDay(day)}</h2>
+      <h2 className="with-icon"><CalendarDays size={20} aria-hidden="true" /><time dateTime={day}>{formatDay(day, undefined, locale)}</time></h2>
       <div className="chips">{prayerDay(day, settings.city, settings.method, settings.school, now, logs).map(prayer =>
-        <span key={prayer.id} className="chip" title={prayerStatusNames[prayer.status]}>{prayer.name} · {prayerStatusNames[prayer.status]}</span>)}</div>
+        <span key={prayer.id} className="chip">{t(prayer.id)} · {t(prayer.status)}</span>)}</div>
     </section>)}
   </div>;
 }
