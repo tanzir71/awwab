@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { calculateZakat, gramsPerBhori, initialZakat, nisabWeight, paymentsForHawl,
   zakatHawl, zakatMoney, zakatPrices, zakatProfileTotals, type ZakatProfile } from "./zakat";
-import { advanceSai, bearing, correctSai, distance, emptyPreparation, initialSai, initialTrip, saiGuidePosition, saiLapEnds, tripDates } from "./umrah";
+import { advanceSai, bearing, correctSai, distance, emptyPreparation, initialSai, initialTrip,
+  saiGuidePosition, saiLapEnds, tawafRounds, toggleUmrahDua, tripDates } from "./umrah";
 import { observeHaramGate, type GateWatch, type HaramOutline } from "./umrahGateMemory";
 import { mapPlaceMatches, nearbyMapPoint, placeRegion } from "./umrahMapPlaces";
 import { addDays } from "./dates";
@@ -283,6 +284,25 @@ describe("offline map places", () => {
     expect(nearbyMapPoint(nabawi, "makkah")).toBeUndefined();
     expect(nearbyMapPoint({ lat: 23.81, lon: 90.41 }, "madinah")).toBeUndefined();
     expect(nearbyMapPoint(gate.point, "makkah")).toBe(gate.point);
+  });
+});
+
+describe("Haram focus", () => {
+  it("toggles only the selected request for the selected Makkah day", () => {
+    const past = "2026-11-19";
+    const today = "2026-11-20";
+    const other = { id: "b", name: "B", for: "Health", done: [] };
+    const original = [{ id: "a", name: "A", for: "Family", done: [past] }, other];
+    const marked = toggleUmrahDua(original, "a", today);
+    expect(marked[0].done).toEqual([past, today]);
+    expect(marked[1]).toBe(other);
+    expect(toggleUmrahDua(marked, "a", today)).toEqual(original);
+  });
+
+  it("bounds corrections between zero and seven rounds", () => {
+    expect(tawafRounds(0, -1)).toBe(0);
+    expect(tawafRounds(6, 1)).toBe(7);
+    expect(tawafRounds(7, 1)).toBe(7);
   });
 });
 

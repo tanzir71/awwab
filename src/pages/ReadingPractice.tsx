@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useParams, useSearchParams } from "react-router-dom";
 import { ArabicText, type WordDetail } from "@/components/ArabicText";
 import { DesignIcon } from "@/components/DesignIcon";
 import { LocalRecorder } from "@/components/LocalRecorder";
@@ -18,7 +18,7 @@ import { completedReadingChapters, emptyReadingPractice, firstUnreadAyah, practi
   recitationChecks, rootsFromKnownWords, teacherChecklistComplete, type PracticeMode, type ReadingMode, type ReadingPracticeProgress, type RecitationCheck } from "@/lib/readingPractice";
 import { getRecord, type Settings } from "@/lib/storageService";
 import { studyNames } from "@/lib/study-copy";
-import { markReadingPortion, setTeacherCheck } from "@/lib/studyMilestones";
+import { markReadingPortion, rememberFlowPlace, setTeacherCheck } from "@/lib/studyMilestones";
 import { splitArabicPhrase } from "@/lib/wordAnatomy";
 import audioCatalogue from "../../public/packs/audio/index.json";
 
@@ -40,6 +40,7 @@ function ReadingHeading({ title, subtitle, back }: { title: string; subtitle?: s
 
 function ChapterDirectory({ mode, progress, selected }: { mode: PracticeMode; progress: ReadingPracticeProgress; selected?: number }) {
   const { language, t, locale } = useCopy();
+  const { state } = useLocation();
   const overview = mode === "teacher" ? t("readingPreparedCount", { count: Object.values(progress.teacher).filter(teacherChecklistComplete).length })
     : t("readingSurahsProgress", { count: completedReadingChapters(mode, progress), total: practiceChapters[mode].length });
   const number = new Intl.NumberFormat(locale);
@@ -49,7 +50,8 @@ function ChapterDirectory({ mode, progress, selected }: { mode: PracticeMode; pr
       const read = mode === "teacher" ? [] : progress[mode][chapter.number] ?? [];
       const complete = mode === "teacher" ? teacherChecklistComplete(progress.teacher[chapter.number]) : new Set(read).size >= chapter.ayahs;
       const resume = mode === "teacher" ? undefined : firstUnreadAyah(chapter.ayahs, read);
-      return <li key={chapter.number}><Link to={practicePage(mode, chapter.number, resume)} aria-current={selected === chapter.number ? "page" : undefined}>
+      return <li key={chapter.number}><Link to={practicePage(mode, chapter.number, resume)} state={state}
+        aria-current={selected === chapter.number ? "page" : undefined}>
         <span className="caption">{number.format(chapter.number)}</span><strong>{studyNames.surah(language, chapter.number, chapter.title)}</strong>
         <small className="muted">{complete ? t("pathsDone") : mode !== "teacher" && read.length ? t("readingAyahsProgress", { count: new Set(read).size, total: chapter.ayahs }) : t("hifzAyahs", { count: chapter.ayahs })}</small>
       </Link></li>;
@@ -118,6 +120,7 @@ function GuidedRead({ chapter, title, mode, quran, progress, settings, now }: {
 }) {
   const { t } = useCopy();
   const [params] = useSearchParams();
+  const { state } = useLocation();
   const [script, setScript] = useState(settings.script);
   const [step, setStep] = useState<MeaningStep>("readingWordStep");
   const [revealEnglish, setRevealEnglish] = useState(false);
@@ -134,6 +137,9 @@ function GuidedRead({ chapter, title, mode, quran, progress, settings, now }: {
   // A save updates the directory and progress text. The reader stays on the same page until the user moves.
   const [initialAyah] = useState(() => firstUnreadAyah(chapter.ayahs, read));
   const requested = /^\d+$/.test(query ?? "") && Number(query) >= 1 && Number(query) <= chapter.ayahs ? Number(query) : initialAyah;
+  useEffect(() => {
+    if (mode === "flow") void rememberFlowPlace({ chapter: chapter.number, ayah: requested }).catch(() => {});
+  }, [chapter.number, mode, requested]);
   const pageIndex = Math.max(0, portions.findIndex(portion => portion.verses.some(verse => ayahNumber(verse) === requested)));
   const portion = portions[pageIndex];
   const previous = portions[pageIndex - 1];
@@ -180,8 +186,8 @@ function GuidedRead({ chapter, title, mode, quran, progress, settings, now }: {
     <button type="button" className="action" disabled={saving || saved} onClick={() => void save()}>{t(saved ? "readingSavedAyahs" : "readingSaveAyahs")}</button>
     {notice?.page === pageIndex && <p className="small muted" role={notice.message === "saveError" ? "alert" : "status"}>{t(notice.message)}</p>}
     <div className="equal-row">
-      {previous && <Link className="action light" to={practicePage(mode, chapter.number, ayahNumber(previous.verses[0]))}>{t("readingPrevAyahs")}</Link>}
-      <Link className="action light" to={next ? practicePage(mode, chapter.number, ayahNumber(next.verses[0])) : nextChapter ? practicePage(mode, nextChapter.number) : readingPracticePaths[mode]}>
+      {previous && <Link className="action light" state={state} to={practicePage(mode, chapter.number, ayahNumber(previous.verses[0]))}>{t("readingPrevAyahs")}</Link>}
+      <Link className="action light" state={state} to={next ? practicePage(mode, chapter.number, ayahNumber(next.verses[0])) : nextChapter ? practicePage(mode, nextChapter.number) : readingPracticePaths[mode]}>
         {t(next ? "readingNextAyahs" : nextChapter ? "readingNextSurah" : "readingChapters")}</Link>
     </div>
     <QuranStudySources script={script} morphology={Boolean(corpus && step === "readingWordStep")} />
@@ -231,6 +237,7 @@ function ChapterWorkspace({ chapter, mode, progress, settings, now }: {
   chapter: Chapter; mode: PracticeMode; progress: ReadingPracticeProgress; settings: Settings; now: Date;
 }) {
   const { t, language } = useCopy();
+  const { state } = useLocation();
   const [quran, setQuran] = useState<StudyQuran>();
   const [loadError, setLoadError] = useState(false);
   const [attempt, setAttempt] = useState(0);
@@ -243,7 +250,8 @@ function ChapterWorkspace({ chapter, mode, progress, settings, now }: {
   const verses = quran?.surahs[chapter.number];
 
   return <>
-    <ReadingHeading title={title} subtitle={t(modeTitles[mode])} back={readingPracticePaths[mode]} />
+    <ReadingHeading title={title} subtitle={t(modeTitles[mode])}
+      back={mode === "flow" && state?.from === "haram-focus" ? "/umrah/focus" : readingPracticePaths[mode]} />
     <div className="reading-active-grid">
       <ChapterDirectory mode={mode} progress={progress} selected={chapter.number} />
       {!verses?.length ? <section className="card compact-stack"><p className="small muted" role="status">{t(loadError ? "hifzUnavailable" : "hifzLoading")}</p>

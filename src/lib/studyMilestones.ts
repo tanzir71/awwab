@@ -5,7 +5,8 @@ import type { Grade } from "ts-fsrs";
 import { db, getRecord } from "./storageService";
 import { qaidaReviewId, qaidaRows } from "./qaidaPractice";
 import { juzs, ratePortion, rateRecitalPortion, type HifzPlans, type HifzPortion, type HifzReviews, type JuzRecitals } from "./hifz";
-import { emptyReadingPractice, practiceChapters, recitationChecks, teacherChecklistComplete, type ReadingMode, type RecitationCheck } from "./readingPractice";
+import { emptyReadingPractice, practiceChapters, readingFlowPlaceKey, recitationChecks, teacherChecklistComplete,
+  type ReadingFlowPlace, type ReadingMode, type RecitationCheck } from "./readingPractice";
 import { speakProgressKey, speakUnit } from "./speakCurriculum";
 import qaida from "../../docs/content/qaida-lessons.json";
 
@@ -82,6 +83,15 @@ export function saveJuzRecitalRating(juz: number, portions: HifzPortion[], porti
     if (!next) return;
     await db.records.put({ key: "hifz-juz-recitals", value: { ...recitals, [juz]: next } });
     await saveStudyDay(now, zone);
+  });
+}
+
+export function rememberFlowPlace(place: ReadingFlowPlace) {
+  return db.transaction("rw", db.records, async () => {
+    const before = await getRecord<ReadingFlowPlace | undefined>(readingFlowPlaceKey, undefined);
+    if (before?.chapter !== place.chapter || before.ayah !== place.ayah) {
+      await db.records.put({ key: readingFlowPlaceKey, value: place });
+    }
   });
 }
 

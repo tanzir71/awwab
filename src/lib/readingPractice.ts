@@ -15,6 +15,8 @@ export const recitationChecks = ["opening", "pauses", "letters", "length", "ques
 export type RecitationCheck = typeof recitationChecks[number];
 export type ReadingPracticeProgress = Record<ReadingMode, Record<number, number[]>> & { teacher: Record<number, RecitationCheck[]> };
 export const emptyReadingPractice: ReadingPracticeProgress = { flow: {}, meaning: {}, teacher: {} };
+export const readingFlowPlaceKey = "reading-flow-place";
+export type ReadingFlowPlace = { chapter: number; ayah: number };
 
 export const practiceChapters = {
   flow: juzAmma,
@@ -46,6 +48,18 @@ export function firstUnreadAyah(total: number, read: readonly number[]) {
 
 export function teacherChecklistComplete(checks: readonly RecitationCheck[] = []) {
   return recitationChecks.every(item => checks.includes(item));
+}
+
+export function resumeFlowReading(progress: ReadingPracticeProgress, place?: ReadingFlowPlace) {
+  const chapters = practiceChapters.flow;
+  const bookmarked = chapters.find(chapter => chapter.number === place?.chapter);
+  if (bookmarked && place && Number.isInteger(place.ayah) && place.ayah > 0 && place.ayah <= bookmarked.ayahs) {
+    return { chapter: bookmarked, ayah: place.ayah };
+  }
+  const partial = (chapter: typeof chapters[number]) => new Set(progress.flow[chapter.number]).size;
+  const chapter = chapters.find(item => partial(item) > 0 && partial(item) < item.ayahs)
+    ?? chapters.find(item => partial(item) < item.ayahs) ?? chapters[0];
+  return { chapter, ayah: firstUnreadAyah(chapter.ayahs, progress.flow[chapter.number] ?? []) };
 }
 
 export function rootsFromKnownWords(vocabulary: readonly Morphology[], known: ReadonlySet<string>) {

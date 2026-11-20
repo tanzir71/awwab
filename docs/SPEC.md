@@ -257,6 +257,7 @@ Mosque {
   - iqāmah countdown (approximate, configurable offsets);
   - dhikr counter, continue Quran, voluntary ṭawāf;
   - remembers the entry gate.
+  - Dhikr and duʿā requests share the Makkah-day record. The Quran link resumes a saved location in the offline reader. Voluntary ṭawāf has its own manual counter.
 - **Live guide (U04):**
   - The step advances on geofence entry.
   - **Saʿy auto-laps** come from alternating Ṣafā/Marwah geofence entries with hysteresis, and can be corrected.

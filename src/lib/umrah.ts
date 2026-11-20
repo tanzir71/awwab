@@ -25,13 +25,23 @@ export const initialTrip = {
   walk: 10, crowd: 20, iqamah: 15, gps: false, auto: false,
   walkOptions: undefined as { voice: boolean; remember: boolean } | undefined,
   gateMemory: undefined as GateMemory | undefined,
-  tawaf: 0, step: 0, sai: initialSai, saiPaused: false, dhikr: {} as Record<string, number>,
+  tawaf: 0, voluntaryTawaf: undefined as number | undefined, step: 0, sai: initialSai, saiPaused: false, dhikr: {} as Record<string, number>,
   juz: {} as Record<string, number>, haramPrayers: {} as Record<string, string[]>,
   requests: [] as { id: string; name: string; for: string; done: string[] }[],
   preparation: undefined as typeof emptyPreparation | undefined,
 };
 export type UmrahTrip = typeof initialTrip;
 export type UmrahTripUpdater = (update: (trip: UmrahTrip) => UmrahTrip) => Promise<boolean>;
+
+export function toggleUmrahDua(requests: UmrahTrip["requests"], id: string, day: string) {
+  return requests.map(request => request.id !== id ? request : {
+    ...request, done: request.done.includes(day) ? request.done.filter(date => date !== day) : [...request.done, day],
+  });
+}
+
+export function tawafRounds(count: number, change: number) {
+  return Math.max(0, Math.min(7, count + change));
+}
 
 export function maskedPhone(phone: string) {
   let digits = 0;

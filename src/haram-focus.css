@@ -1,0 +1,70 @@
+.app-main:has(.haram-focus-shell) { background: var(--c-night); }
+.app-content:has(> .haram-focus-shell) { padding: 0; }
+.haram-focus {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: calc(10px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom));
+}
+
+.haram-focus-heading h1.caption { font: var(--type-caption); letter-spacing: var(--tracking-caption); }
+.haram-focus-leave {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding-inline: 11px;
+  position: relative;
+  isolation: isolate;
+  font: var(--type-small);
+}
+.haram-focus-leave::before { content: ""; position: absolute; inset: 8px 0; z-index: -1; background: var(--c-overlay-on-night); border-radius: var(--r-pill); }
+.haram-focus-clock { text-align: center; display: grid; justify-items: center; gap: 2px; padding: 22px 0 10px; }
+.haram-focus-clock .haram-focus-time {
+  font: 600 clamp(2.7rem, 17.7vw, 4.5rem)/1 var(--font-display);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.02em;
+  white-space: normal;
+  max-width: 100%;
+}
+.haram-focus-clock p:last-child { padding-top: 3px; }
+
+.haram-focus-card, .haram-focus-tile { border-radius: var(--r-card); background: var(--c-overlay-on-night); }
+.haram-focus-dhikr { display: grid; justify-items: center; padding: 16px; gap: 4px; }
+.haram-focus-dhikr .action.gold { width: 100%; min-height: 50px; color: var(--c-ink); }
+.haram-focus-dhikr .arabic-text { font: var(--type-arabic-l); }
+.haram-focus-dhikr .arabic-line { justify-content: center; padding: 0; }
+.haram-focus-dhikr .word-chip > span { text-decoration: none; }
+.haram-focus-dhikr .word-chip:hover, .haram-focus-dhikr .word-chip:focus-visible { background: var(--c-overlay-on-night); color: var(--c-on-night); }
+.haram-focus-dhikr-meta { display: flex; justify-content: center; align-items: center; gap: 4px 12px; flex-wrap: wrap; }
+.haram-focus-dhikr-meta .haram-focus-source { display: inline-flex; align-items: center; min-height: 44px; color: var(--c-night-muted); text-decoration: underline; text-underline-offset: .2em; }
+
+.haram-focus .haram-focus-tile {
+  min-height: 96px;
+  display: grid;
+  justify-items: start;
+  align-content: start;
+  gap: 3px;
+  padding: 14px;
+  color: var(--c-on-night);
+  text-decoration: none;
+  text-align: start;
+}
+.haram-focus-tile strong { font: var(--type-body-strong); }
+.haram-focus-tile small { color: var(--c-night-muted); }
+.haram-focus-tile img { margin-bottom: 2px; }
+.haram-focus-tile:hover, .haram-focus-request:hover { background: color-mix(in srgb, var(--c-night) 78%, var(--c-on-night)); }
+
+.haram-focus-requests { display: grid; padding: 12px 16px 8px; }
+.haram-focus-requests h2 { font: var(--type-body-strong); margin: 0 0 3px; }
+.haram-focus-requests h2 a { min-height: 44px; display: flex; align-items: center; color: var(--c-on-night); text-decoration: none; }
+.haram-focus-request { display: flex; align-items: center; gap: 10px; min-height: 44px; text-align: start; border-radius: var(--r-control); }
+.haram-focus-request-check { width: 22px; height: 22px; flex: 0 0 22px; border-radius: var(--r-pill); display: grid; place-items: center; background: var(--c-overlay-on-night); }
+.haram-focus-request[aria-pressed="true"] { color: var(--c-night-muted); }
+.haram-focus-request[aria-pressed="true"] .haram-focus-request-check { background: var(--c-accent); }
+.haram-focus-request bdi { overflow-wrap: anywhere; }
+.haram-focus-requests .text-button { justify-self: start; color: var(--c-on-night); }
+.haram-focus-footer { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 2px 7px; margin-block-start: auto; text-align: center; }
+.haram-focus-footer a { color: var(--c-night-muted); display: inline-flex; align-items: center; min-height: 44px; text-decoration: underline; text-underline-offset: .2em; }
+.haram-focus-tawaf.card { width: min(calc(100% - 32px), 460px); border: 0; border-radius: var(--r-card); }
+.haram-focus-tawaf h2 { font: var(--type-title); }
+.haram-focus-tawaf .haram-focus-rounds { text-align: center; font: var(--type-numeral-l); }

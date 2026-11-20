@@ -17,6 +17,7 @@
 @import "./umrah-sai.css";
 @import "./umrah-walk.css";
 @import "./umrah-map.css";
+@import "./haram-focus.css";
 @import "./learning-paths.css";
 
 @tailwind base;

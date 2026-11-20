@@ -16,9 +16,11 @@ import { updateWordChoice } from "./storageService";
 import { reviewCard, type Reviews } from "./reviews";
 import { countKnownQuranWords } from "./quran";
 import { completeOnboarding, desktopPlacementPassed, placementLesson } from "./onboarding";
-import { finishQaidaLesson, finishSpeakUnit, markReadingPortion, rememberQaidaPlace, saveFluencyPractice, saveJuzRecitalRating, saveQaidaRowReview, saveSurahReview, saveTakhtiPractice, saveWordReview, setAyahFamiliar, setTeacherCheck, wordMilestones } from "./studyMilestones";
+import { finishQaidaLesson, finishSpeakUnit, markReadingPortion, rememberFlowPlace, rememberQaidaPlace, saveFluencyPractice,
+  saveJuzRecitalRating, saveQaidaRowReview, saveSurahReview, saveTakhtiPractice, saveWordReview, setAyahFamiliar, setTeacherCheck, wordMilestones } from "./studyMilestones";
 import { defaultSpeakVariety, speakCourseVariety, speakGoalsKey, speakProgressKey, speakVarietyKey } from "./speakCurriculum";
-import { completedReadingChapters, emptyReadingPractice, firstUnreadAyah, recitationChecks, teacherChecklistComplete } from "./readingPractice";
+import { completedReadingChapters, emptyReadingPractice, firstUnreadAyah, readingFlowPlaceKey, recitationChecks,
+  resumeFlowReading, teacherChecklistComplete } from "./readingPractice";
 import type { HifzPortion, JuzRecitals } from "./hifz";
 import { reviewDestination, reviewQueue, studyPlanMinutes } from "./studyDesk";
 import coreWords from "../../docs/content/core-quran-words.json";
@@ -381,7 +383,7 @@ describe("device prayer records", () => {
     const trip = {
       ...initialTrip, gps: true, auto: true, walkOptions: { voice: true, remember: true },
       gateMemory: { entry: "gate-3210622327", exit: "gate-4755914231" },
-      step: 5, saiPaused: true, sai: { count: 1, last: "marwah" as const, exited: false, detected: true },
+      step: 5, voluntaryTawaf: 4, saiPaused: true, sai: { count: 1, last: "marwah" as const, exited: false, detected: true },
     };
     await db.records.put({ key: "umrah", value: trip });
     const file = await backup();
@@ -389,9 +391,22 @@ describe("device prayer records", () => {
     await restoreBackup(file);
     expect(await getRecord("umrah", initialTrip)).toEqual(JSON.parse(JSON.stringify({ ...trip, gps: false, auto: false })));
     const plan = readUmrahTripFile(exportUmrahTrip(trip));
-    for (const key of ["gps", "auto", "walkOptions", "gateMemory", "saiPaused", "sai"]) {
+    for (const key of ["gps", "auto", "walkOptions", "gateMemory", "voluntaryTawaf", "saiPaused", "sai"]) {
       expect(plan).not.toHaveProperty(key);
     }
+  });
+
+  it("restores the reader bookmark and still resumes older progress without a bookmark", async () => {
+    const progress = { ...emptyReadingPractice, flow: { 113: [1, 2] } };
+    const legacy = resumeFlowReading(progress);
+    expect([legacy.chapter.number, legacy.ayah]).toEqual([113, 3]);
+    await rememberFlowPlace({ chapter: 114, ayah: 5 });
+    const file = await backup();
+    await db.records.clear();
+    await restoreBackup(file);
+    const place = await getRecord<{ chapter: number; ayah: number } | undefined>(readingFlowPlaceKey, undefined);
+    const resumed = resumeFlowReading(progress, place);
+    expect([resumed.chapter.number, resumed.ayah]).toEqual([114, 5]);
   });
 
   it("restores language preferences and suggestions together with a legacy-compatible settings record", async () => {

@@ -22,17 +22,17 @@ export function useQaidaPlace() {
   }), [], { lesson: 1, row: 0 });
 }
 
-export function useClock() {
+export function useClock(interval = 15_000) {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     const refresh = () => setNow(new Date());
-    const timer = window.setInterval(refresh, 15_000);
+    const timer = window.setInterval(refresh, interval);
     document.addEventListener("visibilitychange", refresh);
     return () => {
       window.clearInterval(timer);
       document.removeEventListener("visibilitychange", refresh);
     };
-  }, []);
+  }, [interval]);
   return now;
 }
 

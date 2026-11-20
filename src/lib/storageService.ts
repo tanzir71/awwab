@@ -9,7 +9,7 @@ import type { MosquePlan } from "./mosques";
 import { zakatBalances } from "./zakat";
 import { emptyPreparation, tripChecklist, type UmrahTrip } from "./umrah";
 import { askVarieties, askVoices } from "./umrahAsk";
-import { practiceChapters, recitationChecks } from "./readingPractice";
+import { practiceChapters, readingFlowPlaceKey, recitationChecks } from "./readingPractice";
 import { speakGoals, speakGoalsKey, speakProgressKey, speakVarieties, speakVarietyKey } from "./speakCurriculum";
 import { glossaryOptions, glossaryTerms, isAvailableLanguage, isBuiltIn, languages, textSizes, type AppLanguage, type GlossaryTerm, type WordChoices } from "./languagePreferences";
 import { loadLocalePack, localePackAsset } from "./localePacks";
@@ -185,6 +185,8 @@ const savedRecords: Record<string, z.ZodTypeAny> = {
   [speakVarietyKey]: z.enum(speakVarieties),
   "reading-practice": z.object({ flow: readingAyahProgress, meaning: readingAyahProgress,
     teacher: z.record(z.union([z.literal("1"), juzAmmaKey]), z.array(z.enum(recitationChecks)).max(recitationChecks.length)) }),
+  [readingFlowPlaceKey]: z.object({ chapter: count, ayah: count.min(1) })
+    .refine(place => practiceChapters.flow.some(chapter => chapter.number === place.chapter && place.ayah <= chapter.ayahs)),
   "hifz-plans": z.record(passageKey, z.object({ minutes: count.min(1).max(90), start: daySchema })),
   "hifz-current": passageKey,
   "path-placement": z.partialRecord(z.enum(["read", "memorise", "understand", "speak"]), z.object({ level: count.min(1).max(5), score: count, total: count, day: daySchema })),
@@ -259,7 +261,7 @@ const savedRecords: Record<string, z.ZodTypeAny> = {
     gps: z.boolean(), auto: z.boolean(),
     walkOptions: z.object({ voice: z.boolean(), remember: z.boolean() }).optional(),
     gateMemory: z.object({ entry: z.string().regex(/^gate-\d+$/).optional(), exit: z.string().regex(/^gate-\d+$/).optional() }).optional(),
-    tawaf: count.max(7), step: count.max(6), saiPaused: z.boolean().optional(),
+    tawaf: count.max(7), voluntaryTawaf: count.max(7).optional(), step: count.max(6), saiPaused: z.boolean().optional(),
     sai: z.object({ count: count.max(7), last: z.enum(["safa", "marwah"]).optional(), lastAt: count.optional(), exited: z.boolean(), detected: z.boolean().optional() }),
     dhikr: dateCounts, juz: dateCounts, haramPrayers: dateLists,
   }),
