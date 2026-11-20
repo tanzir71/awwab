@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Compass, Download, MapPin, Search, Share2 } from "lucide-react";
 import { Map as MapLibre, Marker, NavigationControl, addProtocol, removeProtocol, setWorkerUrl } from "maplibre-gl";
 import { FileSource, PMTiles } from "pmtiles";
@@ -7,7 +7,7 @@ import mapWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?url";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { SectionNav } from "@/components/Surface";
 import { SHARE_URL } from "@/lib/config";
-import { bearing, distance, initialTrip, makkah, madinah, type Coord } from "@/lib/umrah";
+import { bearing, distance, initialTrip, makkah, madinah, type Coord, type UmrahTripUpdater } from "@/lib/umrah";
 import { cachedMapPack, saveMapPack, type MapRegion } from "@/lib/umrahMapPack";
 import { useCopy } from "@/lib/copy";
 
@@ -19,7 +19,9 @@ type Orientation = typeof DeviceOrientationEvent & { requestPermission?: () => P
 
 setWorkerUrl(mapWorkerUrl);
 
-function MapCanvas({ region, file, pins, user, onPoint }: { region: Region; file?: File; pins: Pin[]; user?: Coord; onPoint: (point: Coord) => void }) {
+function MapCanvas({ region, file, pins, user, entry, onPoint }: {
+  region: Region; file?: File; pins: Pin[]; user?: Coord; entry?: string; onPoint: (point: Coord) => void;
+}) {
   const target = useRef<HTMLDivElement>(null);
   const instance = useRef<MapLibre>();
   const callback = useRef(onPoint);
@@ -77,22 +79,23 @@ function MapCanvas({ region, file, pins, user, onPoint }: { region: Region; file
     const all = user ? [...pins, { id: "my-location", point: user, title: "Your location" }] : pins;
     const markers = all.map(pin => {
       const element = document.createElement("button");
-      element.className = "map-pin";
+      element.className = pin.id === entry ? "map-pin map-pin-entry" : "map-pin";
       element.textContent = pin.title;
       element.setAttribute("aria-label", pin.title);
       element.addEventListener("click", event => { event.stopPropagation(); callback.current(pin.point); });
       return new Marker({ element }).setLngLat([pin.point.lon, pin.point.lat]).addTo(map);
     });
     return () => markers.forEach(marker => marker.remove());
-  }, [pins, region, file, user]);
+  }, [pins, region, file, user, entry]);
 
   return <div className="compact-stack"><div className="umrah-map" ref={target} aria-label={`Map of ${region}`} />{error && <p className="muted small" role="status">{error}</p>}</div>;
 }
 
 export default function UmrahMap({ trip, point, points, save }: {
-  trip: Trip; point?: Coord; points: Pin[]; save: (update: (old: Trip) => Trip) => Promise<void>;
+  trip: Trip; point?: Coord; points: Pin[]; save: UmrahTripUpdater;
 }) {
   const { t } = useCopy();
+  const { hash } = useLocation();
   const [region, setRegion] = useState<Region>("makkah");
   const [pack, setPack] = useState<{ region: Region; file: File }>();
   const [selection, select] = useState<Coord>();
@@ -102,6 +105,8 @@ export default function UmrahMap({ trip, point, points, save }: {
   const [compass, setCompass] = useState(false);
   const [query, setQuery] = useState("");
   const file = pack?.region === region ? pack.file : undefined;
+  const entry = points.find(pin => pin.id === trip.gateMemory?.entry) ?? points.find(pin => pin.title === trip.gate);
+  const exit = points.find(pin => pin.id === trip.gateMemory?.exit);
   const pins = [
     ...(region === "makkah" ? points : []),
     ...(trip.hotel.point && region === "makkah" ? [{ id: "hotel", title: trip.hotel.name || "Hotel", point: trip.hotel.point }] : []),
@@ -109,7 +114,12 @@ export default function UmrahMap({ trip, point, points, save }: {
   ];
   const matches = pins.filter(pin => pin.title.toLowerCase().includes(query.trim().toLowerCase()));
   const primaryPins = query.trim() ? matches : pins.filter(pin =>
-    !pin.id.startsWith("gate-") || /fahd|abdul aziz|marwah/i.test(pin.title));
+    !pin.id.startsWith("gate-") || pin.id === entry?.id || pin.id === exit?.id || /fahd|abdul aziz|marwah/i.test(pin.title));
+  useEffect(() => {
+    if (hash !== "#back-to-hotel") return;
+    const frame = requestAnimationFrame(() => document.getElementById("back-to-hotel")?.scrollIntoView());
+    return () => cancelAnimationFrame(frame);
+  }, [hash]);
   useEffect(() => {
     let active = true;
     void cachedMapPack(region).then(local => {
@@ -185,7 +195,7 @@ export default function UmrahMap({ trip, point, points, save }: {
         if (file) void loadPack(file);
       }} /></label>
     </section>}
-    <MapCanvas region={region} file={file} pins={primaryPins} user={point} onPoint={select} />
+    <MapCanvas region={region} file={file} pins={primaryPins} user={point} entry={entry?.id} onPoint={select} />
     <a className="small muted" href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors · ODbL</a>
     {message && <p role="status" className="card tint">{message}</p>}
     {region === "makkah" && <section className="card stack">
@@ -207,14 +217,16 @@ export default function UmrahMap({ trip, point, points, save }: {
         <button className="action soft" disabled={!selection} onClick={() => void save(old => ({ ...old, meeting: selection }))}>Save meeting point</button>
       </div>
     </section>}
-    <section className="card stack">
-      <h2 className="with-icon"><Compass size={18} /> Back to hotel</h2>
+    <section className="card stack" id="back-to-hotel">
+      <h2 className="with-icon"><Compass size={18} /> {t("umrahWalkHotel")}</h2>
+      {(entry || trip.gate) && <p className="small">{t("umrahWalkEntryGate", { gate: entry?.title ?? trip.gate })}</p>}
+      {exit && <p className="small">{t("umrahWalkExitGate", { gate: exit.title })}</p>}
       {direction === null ? <p className="muted">Save your hotel pin and allow location to see direction and distance.</p> : <>
         <p>{meters < 1000 ? `${Math.round(meters)} m` : `${(meters / 1000).toFixed(1)} km`} away · bearing {Math.round(direction)}°</p>
         <span className="compass-arrow" aria-hidden="true" style={{ transform: `rotate(${direction - (heading ?? 0)}deg)` }}>↑</span>
         {heading === undefined && <button className="action light" disabled={compass} onClick={() => void allowCompass()}>{compass ? "Waiting for compass…" : "Use device compass"}</button>}
       </>}
-      {!trip.gps && <Link className="action soft" to="/umrah/location">Location options</Link>}
+      {!trip.gps && <Link className="action soft" to="/umrah/location" state={{ from: "map" }}>{t("umrahLocationOptions")}</Link>}
       {hotel && <button className="action light" onClick={() => void shareHotel()}><Share2 size={18} /> Share hotel pin</button>}
     </section>
   </>;

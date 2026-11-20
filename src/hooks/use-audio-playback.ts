@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, type LocalAudio } from "@/lib/storageService";
 
@@ -11,6 +11,7 @@ export function useAudioPlayback(refs: string[], localSources?: Readonly<Record<
   const [elapsed, setElapsed] = useState(0);
   const [duration, setDuration] = useState(0);
   const [error, setError] = useState(false);
+  const [blocked, setBlocked] = useState(false);
 
   useEffect(() => {
     const player = element.current;
@@ -24,14 +25,19 @@ export function useAudioPlayback(refs: string[], localSources?: Readonly<Record<
     return Boolean(localSources?.[ref]) || clips.some(clip => clip?.ref === ref);
   }
 
-  function play(ref: string, speed = 1, loop = false) {
+  const pause = useCallback(() => {
+    element.current?.pause();
+    setPlaying(false);
+  }, []);
+
+  const play = useCallback((ref: string, speed = 1, loop = false) => {
     const clip = clips.find(item => item?.ref === ref);
     const localUrl = localSources?.[ref];
     const player = element.current;
     if (!player || (!clip && !localUrl)) return;
     const changing = source.current?.ref !== ref || source.current?.clip !== clip;
     if (!changing && !player.paused) {
-      player.pause();
+      pause();
       return;
     }
     if (changing) {
@@ -40,6 +46,7 @@ export function useAudioPlayback(refs: string[], localSources?: Readonly<Record<
       source.current = { ref, clip, url };
       player.src = url;
       setTrack(ref);
+      setPlaying(false);
       setElapsed(0);
       setDuration(0);
     }
@@ -47,14 +54,18 @@ export function useAudioPlayback(refs: string[], localSources?: Readonly<Record<
     player.playbackRate = speed;
     player.loop = loop;
     setError(false);
+    setBlocked(false);
     void player.play().catch((reason: unknown) => {
-      if (!(reason instanceof DOMException && reason.name === "AbortError")) setError(true);
+      if (reason instanceof DOMException && reason.name === "AbortError") return;
+      setPlaying(false);
+      setError(true);
+      setBlocked(reason instanceof DOMException && reason.name === "NotAllowedError");
     });
-  }
+  }, [clips, localSources, pause]);
 
   const events = {
-    onPlay: () => setPlaying(true),
-    onPause: () => setPlaying(false),
+    onPlay: () => setPlaying(element.current?.paused === false),
+    onPause: () => setPlaying(element.current?.paused === false),
     onEnded: () => setPlaying(false),
     onTimeUpdate: () => setElapsed(element.current?.currentTime ?? 0),
     onLoadedMetadata: () => {
@@ -63,5 +74,5 @@ export function useAudioPlayback(refs: string[], localSources?: Readonly<Record<
     },
   };
 
-  return { element, events, has, play, track, playing, elapsed, duration, error };
+  return { element, events, has, pause, play, track, playing, elapsed, duration, error, blocked };
 }

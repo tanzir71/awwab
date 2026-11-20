@@ -257,8 +257,10 @@ const savedRecords: Record<string, z.ZodTypeAny> = {
   umrah: umrahPlanSchema.extend({
     state: z.enum(["At the hotel", "Walking", "In the Haram", "Doing Umrah", "Resting", "Eating out"]),
     gps: z.boolean(), auto: z.boolean(),
-    tawaf: count.max(7), step: count.max(6),
-    sai: z.object({ count: count.max(7), last: z.enum(["safa", "marwah"]).optional(), lastAt: count.optional(), exited: z.boolean() }),
+    walkOptions: z.object({ voice: z.boolean(), remember: z.boolean() }).optional(),
+    gateMemory: z.object({ entry: z.string().regex(/^gate-\d+$/).optional(), exit: z.string().regex(/^gate-\d+$/).optional() }).optional(),
+    tawaf: count.max(7), step: count.max(6), saiPaused: z.boolean().optional(),
+    sai: z.object({ count: count.max(7), last: z.enum(["safa", "marwah"]).optional(), lastAt: count.optional(), exited: z.boolean(), detected: z.boolean().optional() }),
     dhikr: dateCounts, juz: dateCounts, haramPrayers: dateLists,
   }),
   reviews: z.record(z.string(), reviewSchema),

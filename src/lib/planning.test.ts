@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { calculateZakat, gramsPerBhori, initialZakat, nisabWeight, paymentsForHawl,
   zakatHawl, zakatMoney, zakatPrices, zakatProfileTotals, type ZakatProfile } from "./zakat";
 import { advanceSai, bearing, correctSai, distance, emptyPreparation, initialSai, initialTrip, saiGuidePosition, saiLapEnds, tripDates } from "./umrah";
+import { observeHaramGate, type GateWatch, type HaramOutline } from "./umrahGateMemory";
 import { addDays } from "./dates";
 import { baselineMonthStart, calendarDefaults, calendarEventById, dayDifference, eventDisplayDates, monthStartEvent } from "./hijri";
 import { eventReminders } from "./calendarFile";
@@ -231,6 +232,36 @@ describe("mosque timetables", () => {
     expect(mosqueCheckedAge("2026-11-19", "2026-08-14", "en")).toBe("3 months ago");
     expect(timetableNotice("2026-11-19", "2026-08-14", 11)).toBe("seasonal");
     expect(timetableNotice("2026-11-19", "2026-11-19", 11)).toBeUndefined();
+  });
+});
+
+describe("Haram gate memory", () => {
+  const outline: HaramOutline = [[[-.001, -.001], [-.001, .001], [.001, .001], [.001, -.001], [-.001, -.001]]];
+  const gates = [
+    { id: "gate-1", point: { lat: -.001, lon: 0 } },
+    { id: "gate-2", point: { lat: .001, lon: 0 } },
+  ];
+  const fix = (lat: number, at: number, lon = 0, accuracy = 6) => ({ point: { lat, lon }, at, accuracy });
+
+  it("records entry and exit at different gates and waits for a clear boundary crossing", () => {
+    let watch: GateWatch = {};
+    watch = observeHaramGate(watch, fix(-.0014, 1000), outline, gates, undefined).watch;
+    const threshold = observeHaramGate(watch, fix(-.001, 10_000), outline, gates, undefined);
+    expect(threshold.memory).toBeUndefined();
+    const entry = observeHaramGate(threshold.watch, fix(-.0008, 20_000), outline, gates, undefined);
+    expect(entry.memory).toEqual({ entry: "gate-1" });
+    expect(observeHaramGate(entry.watch, fix(.0012, 40_000), outline, gates, entry.memory).memory)
+      .toEqual({ entry: "gate-1", exit: "gate-2" });
+  });
+
+  it("skips poor, ambiguous, and stale fixes", () => {
+    const initial = observeHaramGate({}, fix(-.0014, 1000), outline, gates, undefined);
+    const other = { id: "gate-3", point: { lat: -.001, lon: .00002 } };
+    const uncertain = observeHaramGate(initial.watch, fix(-.001, 12_000), outline, [...gates, other], undefined);
+    expect(uncertain.watch.gate).toBeUndefined();
+    expect(observeHaramGate(initial.watch, fix(-.0008, 20_000, 0, 45), outline, gates, undefined)).toEqual(initial);
+    const threshold = observeHaramGate(initial.watch, fix(-.001, 12_000), outline, gates, undefined);
+    expect(observeHaramGate(threshold.watch, fix(-.0007, 100_000, .0005), outline, gates, undefined).memory).toBeUndefined();
   });
 });
 

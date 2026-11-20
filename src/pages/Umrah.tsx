@@ -9,20 +9,24 @@ import { ShareLink } from "@/components/ShareLink";
 import { UmrahPreparation } from "@/components/UmrahPreparation";
 import { UmrahGuideVoice } from "@/components/UmrahGuideVoice";
 import { UmrahSaiGuide } from "@/components/UmrahSaiGuide";
+import { UmrahWalkSetup } from "@/components/UmrahWalkSetup";
 import { UmrahTripForm, UmrahTripImport } from "@/components/UmrahTripForm";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu";
 import { useRecord } from "@/hooks/use-awwab";
+import { useUmrahVoice } from "@/hooks/use-umrah-voice";
 import { duration, formatTime } from "@/lib/dates";
 import { saveCalendar } from "@/lib/calendarFile";
 import { downloadFile } from "@/lib/download";
 import { useCopy } from "@/lib/copy";
 import { updateRecord } from "@/lib/storageService";
-import { advanceSai, distance, initialTrip, makkah, states, umrahContext, type Coord } from "@/lib/umrah";
+import { advanceSai, distance, initialTrip, makkah, states, umrahContext, type Coord, type UmrahTripUpdater } from "@/lib/umrah";
+import { observeHaramGate, type GateWatch } from "@/lib/umrahGateMemory";
 import { umrahStepNote, umrahStepTitle } from "@/lib/umrah-step-messages.mjs";
 import { prayerIds, prayerNames } from "@/types/Prayer";
 import ritual from "../../docs/content/umrah-steps.json";
 import duas from "../../docs/content/umrah-duas.json";
 import osm from "../../public/data/umrah-osm-v1.json";
+import outline from "../../public/data/umrah-haram-outline-v1.json";
 
 const OfflineMap = lazy(() => import("./UmrahMap"));
 type Point = { id: string; title: string; point: Coord; zone?: "safa" | "marwah" | "haram" | "mataf" };
@@ -35,10 +39,9 @@ const mataf = pins.find(item => item.zone === "mataf");
 const haram = pins.find(item => item.zone === "haram");
 const gates = pins.filter(item => item.id.startsWith("gate-"));
 const gateNames = gates.map(gate => gate.title);
+const gateTitle = (id?: string) => gates.find(gate => gate.id === id)?.title;
 type Trip = typeof initialTrip;
-type TripUpdater = (update: (trip: Trip) => Trip) => Promise<void>;
-
-interface UmrahContext { trip: Trip; now: Date; point?: Coord; saiPoint?: Coord; locationError?: string; save: TripUpdater }
+interface UmrahContext { trip: Trip; now: Date; point?: Coord; saiPoint?: Coord; locationError?: string; save: UmrahTripUpdater }
 const useTrip = () => useOutletContext<UmrahContext>();
 const localTime = (date: Date) => formatTime(date, makkah.timeZone);
 
@@ -46,14 +49,20 @@ export function UmrahShell({ now, desktop }: { now: Date; desktop: boolean }) {
   const { t, locale } = useCopy();
   const { pathname } = useLocation();
   const ask = pathname === "/umrah/ask" || pathname.startsWith("/umrah/ask/");
-  const showTabs = !ask || pathname === "/umrah/ask";
+  const walkSetup = pathname === "/umrah/location";
+  const showTabs = !walkSetup && (!ask || pathname === "/umrah/ask");
   const trip = useRecord("umrah", initialTrip);
   const [point, setPoint] = useState<Coord>();
   const [saiFix, setSaiFix] = useState<{ point: Coord; at: number }>();
   const [locationError, setLocationError] = useState("");
-  async function save(update: Parameters<TripUpdater>[0]) {
-    try { await updateRecord("umrah", initialTrip, update); }
-    catch { toast.error(t("umrahTripSaveError")); }
+  async function save(update: Parameters<UmrahTripUpdater>[0]) {
+    try {
+      await updateRecord("umrah", initialTrip, update);
+      return true;
+    } catch {
+      toast.error(t("umrahTripSaveError"));
+      return false;
+    }
   }
   const configured = Boolean(trip.start && trip.end);
   const saiGuide = pathname === "/umrah/rituals" && trip.step === saiStep;
@@ -65,6 +74,7 @@ export function UmrahShell({ now, desktop }: { now: Date; desktop: boolean }) {
     let last: { point: Coord; at: number } | undefined;
     let traveled = 0;
     let previousLapAt: number | undefined;
+    let gateWatch: GateWatch = {};
     const watch = navigator.geolocation.watchPosition(position => {
       setLocationError("");
       const location = { lat: position.coords.latitude, lon: position.coords.longitude };
@@ -93,12 +103,25 @@ export function UmrahShell({ now, desktop }: { now: Date; desktop: boolean }) {
           : saved.step === saiStep && sai.count === 7 && sai.count > saved.sai.count ? saiStep + 1 : saved.step;
         const state = near(haram, 220) && saved.state !== "Doing Umrah" ? "In the Haram"
           : saved.hotel.point && distance(saved.hotel.point, location) < 70 ? "At the hotel" : saved.state;
-        return state === saved.state && step === saved.step && sai === saved.sai ? saved : { ...saved, state, step, sai };
+        let gateMemory = saved.gateMemory;
+        if (saved.walkOptions?.remember) {
+          const observed = observeHaramGate(gateWatch, { point: location, accuracy: position.coords.accuracy, at: position.timestamp },
+            outline.rings, gates, gateMemory);
+          gateWatch = observed.watch;
+          gateMemory = observed.memory;
+        } else gateWatch = {};
+        return state === saved.state && step === saved.step && sai === saved.sai && gateMemory === saved.gateMemory
+          ? saved
+          : { ...saved, state, step, sai, gateMemory };
       }).catch(() => setLocationError("umrahLocationProgressError"));
-    }, () => { setSaiFix(undefined); setLocationError("umrahLocationSignal"); },
+    }, error => {
+      setPoint(undefined);
+      setSaiFix(undefined);
+      setLocationError(error.code === error.PERMISSION_DENIED ? "umrahWalkPermissionDenied" : "umrahLocationSignal");
+    },
     { enableHighAccuracy: true, maximumAge: 8000, timeout: 18000 });
     return () => { navigator.geolocation.clearWatch(watch); setPoint(undefined); setSaiFix(undefined); setLocationError(""); };
-  }, [desktop, trip.gps]);
+  }, [desktop, trip.gps, trip.walkOptions?.remember]);
 
   if (desktop) return <UmrahPreparation trip={trip} gates={gateNames} />;
 
@@ -110,9 +133,10 @@ export function UmrahShell({ now, desktop }: { now: Date; desktop: boolean }) {
     { name: "askDuas", path: "/umrah/duas", icon: "ask-icon-hand" },
   ];
   return <div className={ask ? "umrah-shell umrah-ask-shell" : `stack umrah-shell${saiGuide ? " umrah-sai-shell" : ""}`}>
-    {!ask && !saiGuide && <><header className="row-between"><Link to="/plan" className="icon-button" aria-label={t("umrahBackToPlan")}><ArrowLeft className="icon-dir" size={20} /></Link>
+    {!ask && !saiGuide && !walkSetup && <><header className="row-between"><Link to="/plan" className="icon-button" aria-label={t("umrahBackToPlan")}><ArrowLeft className="icon-dir" size={20} /></Link>
       <div><p className="caption">{t("umrahPrepMakkah")} · {formatTime(now, makkah.timeZone, locale)}</p><h1>{t("umrah")}</h1></div>
-      <Link className="icon-button" to="/umrah/location" aria-label={t("umrahLocationOptions")}><Compass size={19} /></Link>
+      <Link className="icon-button" to="/umrah/location" state={{ from: pathname === "/umrah/rituals" ? "rituals" : undefined }}
+        aria-label={t("umrahLocationOptions")}><Compass size={19} /></Link>
     </header>
     {!configured && <div className="card tint row-between"><p>{t("umrahSetTripHint")}</p><Link to="/umrah/plan" className="action soft">{t("umrahPlanTrip")}</Link></div>}
     {locationError && trip.gps && <p className="card tint small" role="status">{t(locationError)}</p>}</>}
@@ -170,7 +194,9 @@ export function UmrahNow() {
     </section>
     <section className="card compact-stack">
       <h2>{trip.state === "In the Haram" ? "In the Haram" : "Quiet moments"}</h2>
-      {trip.gate && <p className="muted">Entry gate · {trip.gate}</p>}
+      {(gateTitle(trip.gateMemory?.entry) || trip.gate) && <p className="muted">
+        {t("umrahWalkEntryGate", { gate: gateTitle(trip.gateMemory?.entry) ?? trip.gate })}
+      </p>}
       <div className="equal-row">
         <button className="action soft" onClick={() => void save(old => ({ ...old, dhikr: { ...old.dhikr, [context.day]: (old.dhikr[context.day] ?? 0) + 1 } }))}>Dhikr · {count}</button>
         <Link to="/learn/surahs" className="action light">Continue Quran</Link>
@@ -180,12 +206,16 @@ export function UmrahNow() {
         <Link to="/umrah/rituals" className="action light">Ṭawāf counter</Link>
       </div>
       <Link className="action soft" to="/umrah/focus">Open Haram focus</Link>
+      {trip.walkOptions?.remember && trip.hotel.point && <Link className="action soft" to="/umrah/map#back-to-hotel">
+        {t("umrahWalkHotel")}
+      </Link>}
     </section>
     <ShareLink className="action soft" to="/share?template=umrah&from=umrah">Share an Umrah card</ShareLink>
   </>;
 }
 
 export function HaramFocus() {
+  const { t } = useCopy();
   const { trip, now, save } = useTrip();
   const { day, current, iqamah, next } = umrahContext(now, trip);
   const count = trip.dhikr[day] ?? 0;
@@ -195,7 +225,9 @@ export function HaramFocus() {
       <p className="caption">{current?.name ?? next.name} · Makkah time</p>
       <h2>{iqamah && iqamah > now ? `Iqāmah in about ${duration(iqamah.valueOf() - now.valueOf())}` : `Next adhan · ${localTime(next.starts)}`}</h2>
       <p className="muted">Check the masjid announcements for the local iqāmah.</p>
-      {trip.gate && <p>Entry gate · {trip.gate}</p>}
+      {(gateTitle(trip.gateMemory?.entry) || trip.gate) && <p>
+        {t("umrahWalkEntryGate", { gate: gateTitle(trip.gateMemory?.entry) ?? trip.gate })}
+      </p>}
     </section>
     <button className="action" onClick={() => void save(old => ({ ...old, dhikr: { ...old.dhikr, [day]: (old.dhikr[day] ?? 0) + 1 } }))}>Count dhikr · {count}</button>
     <div className="equal-row"><Link className="action light" to="/learn/surahs">Continue Quran</Link><Link className="action soft" to="/umrah/duas">Duʿā requests</Link></div>
@@ -215,13 +247,15 @@ export function UmrahRituals() {
   const isSai = step.id === "sai";
   const count = trip.tawaf;
   useEffect(() => { window.scrollTo(0, 0); }, [step.id]);
-  const voice = <UmrahGuideVoice key={`${language}:${step.id}`} step={step} title={title} embedded={isSai} />;
+  const narration = useUmrahVoice(step.id, Boolean(trip.walkOptions?.voice), isSai && trip.saiPaused);
+  const voice = <UmrahGuideVoice key={`${language}:${step.id}`} step={step} title={title} voice={narration} embedded={isSai} />;
   const stepList = <div className="compact-stack">
     {ritual.steps.map((item, i) => <button className="list-row" key={item.id} aria-current={trip.step === i} onClick={() => void save(old => ({ ...old, step: i }))}>
       <span className="icon-box">{number.format(i + 1)}</span><span><strong>{t(umrahStepTitle(item.id))}</strong></span>
     </button>)}
   </div>;
   return <>
+    <audio ref={narration.player.element} className="umrah-ritual-player" preload="none" hidden {...narration.player.events} />
     {isSai ? <UmrahSaiGuide trip={trip} step={saiStep} total={total} course={saiCourse} point={saiPoint}
       save={save} note={t(umrahStepNote(step.id, 0))} locationError={locationError}>
       {voice}
@@ -308,35 +342,22 @@ export function UmrahDuas() {
 }
 
 export function UmrahPlan() {
+  const { t } = useCopy();
   const { trip } = useTrip();
   const navigate = useNavigate();
   return <>
     <SectionNav title="Your Umrah trip" back="/umrah" />
     <UmrahTripForm trip={trip} gates={gateNames} />
     <UmrahTripImport onImported={() => navigate("/umrah")} />
-    <Link className="action soft" to="/umrah/location">Walk with me</Link>
+    <Link className="action soft" to="/umrah/location" state={{ from: "plan" }}>{t("umrahWalkLink")}</Link>
   </>;
 }
 
 export function WalkWithMe() {
-  const { trip, save } = useTrip();
-  const fromRituals = useLocation().state?.from === "rituals";
-  const available = Boolean(safā && marwah);
-  return <>
-    <SectionNav title="Walk with me" back={fromRituals ? "/umrah/rituals" : "/umrah"} />
-    <section className="card stack">
-      <h2>Location stays on this device</h2>
-      <p className="muted">Allow location while Umrah mode is open to find your hotel or use the live guide. You can turn it off here any time.</p>
-      <button className="action" aria-pressed={trip.gps} onClick={() => void save(old => ({ ...old, gps: !old.gps }))}>{trip.gps ? "Turn off location" : "Allow location"}</button>
-      <label className="with-icon"><input type="checkbox" disabled={!trip.gps || !available} checked={trip.auto}
-        onChange={event => {
-          const auto = event.currentTarget.checked;
-          void save(old => ({ ...old, auto }));
-        }} /> Count saʿy laps automatically (beta)</label>
-      {!available && <p className="muted small">Manual lap counting is available while location data for the two ends is being prepared.</p>}
-      <p className="muted small">You can correct the lap count at any time. Ṭawāf rounds are counted by hand.</p>
-    </section>
-  </>;
+  const { trip, save, locationError } = useTrip();
+  const from = useLocation().state?.from;
+  const back = from === "rituals" || from === "plan" || from === "map" ? `/umrah/${from}` : "/umrah";
+  return <UmrahWalkSetup trip={trip} save={save} back={back} hasAuto={Boolean(saiCourse)} locationError={locationError} />;
 }
 
 export function UmrahMapPage() {

@@ -1,0 +1,37 @@
+.app-content:has(.umrah-walk) {
+  padding: calc(16px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
+}
+
+.umrah-walk {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: calc(100svh - 44px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+}
+
+.umrah-walk-intro {
+  display: grid;
+  gap: 16px;
+}
+
+.umrah-walk-emblem {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--r-pill);
+  background: var(--c-primary-soft);
+}
+
+.umrah-walk-choices { display: grid; gap: 14px; }
+.umrah-walk-switch.row-between { min-height: 44px; gap: 12px; width: 100%; text-align: start; }
+.umrah-walk-switch strong, .umrah-walk-switch small { display: block; }
+.umrah-walk-switch strong, .umrah-walk-privacy h2 { font: var(--type-body-strong); }
+.umrah-walk-switch .share-switch-track { background: var(--c-ink-muted); }
+.umrah-walk-switch[aria-checked="true"] .share-switch-track { justify-content: flex-end; background: var(--control-primary); }
+.umrah-walk-switch:disabled { cursor: default; color: var(--c-ink-muted); }
+.umrah-walk-switch:disabled .share-switch-track { opacity: .7; }
+.umrah-walk-privacy.card { box-shadow: none; }
+.umrah-walk-privacy h2 { margin: 0 0 6px; }
+.umrah-walk-actions { margin-block-start: auto; }
+.umrah-walk-actions .action { min-height: 50px; font: var(--type-body-strong); }

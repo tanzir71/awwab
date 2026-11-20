@@ -3,7 +3,8 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { addDays, formatDay } from "./dates";
 import { baselineMonthStart, calendarEventById, calendarEvents, hijriOn, monthStart, possibleMonthStarts } from "./hijri";
 import { cities, currentPrayerSchedule, prayerDay, schedule } from "./prayerServices";
-import { db, backup, defaults, getRecord, logPrayer, migrateLegacy, prayerStatistics, restoreBackup, updateSettings } from "./storageService";
+import { db, backup, defaults, exportUmrahTrip, getRecord, logPrayer, migrateLegacy, prayerStatistics, readUmrahTripFile, restoreBackup, updateSettings } from "./storageService";
+import { initialTrip } from "./umrah";
 import { initialZakat, type ZakatProfile } from "./zakat";
 import { calendarFile, eventReminders, prayerReminders } from "./calendarFile";
 import { estimateQada, finishQada, qadaDefaults } from "./qada";
@@ -374,6 +375,23 @@ describe("device prayer records", () => {
     await db.records.clear();
     await restoreBackup(file);
     expect((await db.records.get("settings")).value).toMatchObject({ school: "shafi", prayerGuide: "hanafi" });
+  });
+
+  it("restores Umrah choices and crossing history from a backup and keeps them out of the trip plan file", async () => {
+    const trip = {
+      ...initialTrip, gps: true, auto: true, walkOptions: { voice: true, remember: true },
+      gateMemory: { entry: "gate-3210622327", exit: "gate-4755914231" },
+      step: 5, saiPaused: true, sai: { count: 1, last: "marwah" as const, exited: false, detected: true },
+    };
+    await db.records.put({ key: "umrah", value: trip });
+    const file = await backup();
+    await db.records.clear();
+    await restoreBackup(file);
+    expect(await getRecord("umrah", initialTrip)).toEqual(JSON.parse(JSON.stringify({ ...trip, gps: false, auto: false })));
+    const plan = readUmrahTripFile(exportUmrahTrip(trip));
+    for (const key of ["gps", "auto", "walkOptions", "gateMemory", "saiPaused", "sai"]) {
+      expect(plan).not.toHaveProperty(key);
+    }
   });
 
   it("restores language preferences and suggestions together with a legacy-compatible settings record", async () => {

@@ -2,7 +2,7 @@ import { useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { useCopy } from "@/lib/copy";
-import { correctSai, saiGuidePosition, saiLapEnds, type Coord, type SaiCourse, type UmrahTrip } from "@/lib/umrah";
+import { correctSai, saiGuidePosition, saiLapEnds, type Coord, type SaiCourse, type UmrahTrip, type UmrahTripUpdater } from "@/lib/umrah";
 import { DesignIcon } from "./DesignIcon";
 
 const laps = [1, 2, 3, 4, 5, 6, 7];
@@ -10,7 +10,7 @@ const endNames = { safa: "umrahSaiSafa", marwah: "umrahSaiMarwah" } as const;
 
 export function UmrahSaiGuide({ trip, step, total, course, point, save, note, locationError, children }: {
   trip: UmrahTrip; step: number; total: number; course?: SaiCourse; point?: Coord; note: string; locationError?: string; children: ReactNode;
-  save: (update: (trip: UmrahTrip) => UmrahTrip) => Promise<void>;
+  save: UmrahTripUpdater;
 }) {
   const { t, locale } = useCopy();
   const navigate = useNavigate();

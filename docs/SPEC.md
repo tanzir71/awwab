@@ -243,6 +243,8 @@ Mosque {
 ### 6.6 Umrah mode (U01–U05)
 
 - **Activation:** Plan → Umrah → set trip dates, hotel and group, then optionally **"Walk with me"** (U05: location, auto saʿy laps (beta), voice guidance, hotel and gate memory).
+  - Location starts after saving the opt-in and requires fresh consent after a backup restore. Gate memory uses accurate fixes crossing the mapped Haram footprint near a named OpenStreetMap gate. It saves entry and exit gate IDs on the device, and the map shows them alongside the hotel pin.
+  - Voice guidance uses the downloaded narration and starts when the user plays a step. It can then follow step changes in the same session. Browser playback restrictions can still require another tap.
 - **Context engine** (on-device rules, no AI):
   - Inputs: Makkah time, the next prayer (adhan-js with the Umm al-Qura method and Makkah coordinates), the user's state chip ("At the hotel / Walking / In the Haram / Doing Umrah / Resting / Eating out"), auto-detected by geofence when location is on, and the trip plan.
   - Output: a "Next" card ("Leave by 4:55") plus today's timeline. Example rules:

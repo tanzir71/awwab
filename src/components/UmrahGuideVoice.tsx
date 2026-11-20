@@ -3,8 +3,8 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useCopy } from "@/lib/copy";
 import { downloadAudioPack } from "@/lib/audio";
 import { db } from "@/lib/storageService";
-import { umrahGuidePack, type UmrahGuidePack } from "@/lib/umrahGuideAudio";
-import { useAudioPlayback } from "@/hooks/use-audio-playback";
+import type { UmrahGuidePack } from "@/lib/umrahGuideAudio";
+import type { useUmrahVoice } from "@/hooks/use-umrah-voice";
 import { DesignIcon } from "./DesignIcon";
 import { VerseAudio } from "./VerseAudio";
 
@@ -42,25 +42,24 @@ export function UmrahGuideDownload({ pack }: { pack: UmrahGuidePack }) {
   </div>;
 }
 
-export function UmrahGuideVoice({ step, title, embedded = false }: {
-  step: { id: string; narration: { en: string; bn: string } }; title: string; embedded?: boolean;
+export function UmrahGuideVoice({ step, title, voice, embedded = false }: {
+  step: { id: string; narration: { en: string; bn: string } }; title: string;
+  voice: ReturnType<typeof useUmrahVoice>; embedded?: boolean;
 }) {
-  const { t, language } = useCopy();
-  const pack = umrahGuidePack(language);
-  const ref = `${pack.id}:${step.id}`;
-  const player = useAudioPlayback([ref]);
-  const hasAudio = player.has(ref);
+  const { t } = useCopy();
+  const { pack, player, available, active, error, automatic, following, listen, stopFollowing } = voice;
 
   return <section className={embedded ? "compact-stack umrah-guide-voice" : "card tint compact-stack umrah-guide-voice"} aria-label={t("umrahGuideVoice")}>
     {!embedded && <h2 className="with-icon"><DesignIcon name="umrah-prep-volume" size={16} />{t("umrahGuideVoice")}</h2>}
-    <audio ref={player.element} preload="none" hidden {...player.events} />
-    {hasAudio ? <>
+    {available ? <>
       <VoiceCredit pack={pack} />
-      <button className="action" type="button" onClick={() => player.play(ref)}>
-        {t(player.playing ? "umrahGuidePause" : "umrahGuideListen")}
+      {automatic && !following && <p className="small muted">{t("umrahWalkVoiceStart")}</p>}
+      <button className="action" type="button" onClick={listen}>
+        {t(active ? "umrahGuidePause" : "umrahGuideListen")}
       </button>
+      {automatic && following && <button className="text-button" type="button" onClick={stopFollowing}>{t("umrahWalkVoiceStop")}</button>}
     </> : <UmrahGuideDownload key={pack.id} pack={pack} />}
-    {player.error && <p role="alert" className="small">{t("askAudioError")}</p>}
+    {error && <p role="status" className="small">{t(player.blocked ? "umrahWalkVoiceBlocked" : "askAudioError")}</p>}
     <details className="small">
       <summary>{t("umrahGuideTranscript")}</summary>
       <p lang={pack.language}>{step.narration[pack.language]}</p>
