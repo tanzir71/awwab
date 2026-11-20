@@ -10,12 +10,27 @@ export function latinDigits(value: string, locale: string) {
   });
 }
 
-export function readLocalizedNumber(value: string, locale: string, decimals = 0) {
+function decimalSeparator(locale: string) {
+  return new Intl.NumberFormat(locale).formatToParts(1.5).find(part => part.type === "decimal")?.value ?? ".";
+}
+
+export function formatInputNumber(value: number, locale: string) {
+  const number = new Intl.NumberFormat(locale, { useGrouping: false });
+  const decimal = decimalSeparator(locale);
+  return String(value).replace(/[0-9.]/g, digit => digit === "." ? decimal : number.format(Number(digit)));
+}
+
+export function readLocalizedNumber(value: string, locale: string, decimals: number | "any" = 0) {
   let text = latinDigits(value.trim(), locale);
   if (decimals) {
     text = text.replace(/٫/g, ".");
-    const decimal = new Intl.NumberFormat(locale).formatToParts(1.5).find(part => part.type === "decimal")?.value;
-    if (decimal && decimal !== "." && !text.includes(".")) text = text.replace(decimal, ".");
+    const decimal = decimalSeparator(locale);
+    if (decimal !== "." && !text.includes(".")) text = text.replace(decimal, ".");
+  }
+  if (decimals === "any") {
+    if (!/^(?:\d+|\d*\.\d+)(?:e[+-]?\d+)?$/i.test(text)) return undefined;
+    const number = Number(text);
+    return Number.isFinite(number) ? number : undefined;
   }
   if (!/^(?:\d+|\d*\.\d+)$/.test(text)) return undefined;
   const [whole, fraction = ""] = text.split(".");

@@ -41,12 +41,12 @@ function NisabSwitch({ basis, desktop, select }: { basis: NisabBasis; desktop: b
 }
 
 function PaymentList({ payments, formatDate }: { payments: Payment[]; formatDate: (date: string) => string }) {
-  const { t, language } = useCopy();
+  const { t, locale } = useCopy();
   if (payments.length === 0) return <p className="small muted">{t("zakatNoPayments")}</p>;
   return <ul className="zakat-payment-list">
     {payments.map((item, i) => <li key={i}>
-      <span>{item.name && <strong>{item.name}</strong>}<small className="muted"><time dateTime={item.day}>{formatDate(item.day)}</time></small></span>
-      <strong>{zakatMoney(item.amount, item.currency, language, true)}</strong>
+      <span>{item.name && <strong><bdi>{item.name}</bdi></strong>}<small className="muted"><time dateTime={item.day}>{formatDate(item.day)}</time></small></span>
+      <strong><bdi>{zakatMoney(item.amount, item.currency, locale, true)}</bdi></strong>
     </li>)}
   </ul>;
 }
@@ -73,7 +73,7 @@ function Payments({ profile, hawl, due, money, formatDate, desktop }: {
 }
 
 export function Zakat({ settings, now, desktop }: { settings: Settings; now: Date; desktop: boolean }) {
-  const { t, language } = useCopy();
+  const { t, language, locale } = useCopy();
   const profile = useRecord("zakat", initialZakat);
   const calendar = useRecord("calendar", calendarDefaults);
   const fullDesktop = useDesktop(1280);
@@ -84,10 +84,11 @@ export function Zakat({ settings, now, desktop }: { settings: Settings; now: Dat
   const hawl = hawlOn(day, profile);
   const result = zakatProfileTotals(profile);
   const prices = zakatPrices(profile);
-  const number = new Intl.NumberFormat(language, { useGrouping: false });
-  const money: FormatMoney = value => value === undefined ? "—" : zakatMoney(value, profile.currency, language, desktop);
+  const number = new Intl.NumberFormat(locale, { useGrouping: false });
+  const rate = new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 1 }).format(.025);
+  const money: FormatMoney = value => value === undefined ? "—" : zakatMoney(value, profile.currency, locale, desktop);
   const hijriDate = (value: { day: number; month: number; year: number }) =>
-    number.format(value.day) + " " + planMonth(value.month, language) + " " + number.format(value.year);
+    number.format(value.day) + " " + planMonth(value.month, locale) + " " + number.format(value.year);
   const amount = (value: number | undefined, debt: boolean) => value === undefined ? "—" : (debt && value > 0 ? "− " : "") + money(value);
   const weight = (value: number, unit: "g" | "bhori") => t(unit === "g" ? "zakatGrams" : "zakatBhori", { count: Number(value.toFixed(3)) });
   const open = (value: ZakatEditor) => {
@@ -127,10 +128,10 @@ export function Zakat({ settings, now, desktop }: { settings: Settings; now: Dat
     ? t("zakatPriceNeeded", { metal: t(metalLabels[profile.basis]).toLocaleLowerCase(language) })
     : t(result.net >= result.nisab ? "zakatAbove" : "zakatBelow");
   const dateText = hawl ? t("zakatNextHawl", {
-    hijri: hijriDate(hawl), gregorian: formatDay(hawl.date, { weekday: "short", day: "numeric", month: "short" }, language), days: hawl.daysUntil,
+    hijri: hijriDate(hawl), gregorian: formatDay(hawl.date, { weekday: "short", day: "numeric", month: "short" }, locale), days: hawl.daysUntil,
   }) : t("zakatSetHawl");
   const sources = <p className="small zakat-sources">
-    {Object.entries(zakatSources).map(([key, href]) => <a key={key} href={href} rel="noreferrer">{t(key)}</a>)}
+    {Object.entries(zakatSources).map(([key, href]) => <a key={key} href={href} rel="noreferrer">{t(key, { ref: 1454 })}</a>)}
   </p>;
   const info = <><p>{t("zakatPriceNote")}</p><p className="muted">{t(desktop ? "zakatJewelleryNote" : "zakatWornNote")}</p>{sources}</>;
   const payments = <Payments profile={profile} hawl={hawl} due={result.due} money={money}
@@ -141,10 +142,10 @@ export function Zakat({ settings, now, desktop }: { settings: Settings; now: Dat
     <h2 className="caption">{t(desktop ? "zakatDue" : "zakatEstimated")}</h2>
     <div className="zakat-figure" aria-live="polite">
       <strong>{money(result.due)}</strong>
-      {!desktop && <span className="muted">{new Intl.NumberFormat(language, { style: "percent", maximumFractionDigits: 1 }).format(.025)}</span>}
+      {!desktop && <span className="muted">{rate}</span>}
     </div>
     {desktop ? <>
-      <p className="small muted">{result.net === undefined ? t("zakatRate") : t("zakatRateAmount", { net: money(result.net) })}</p>
+      <p className="small muted">{result.net === undefined ? t("zakatRate", { rate }) : t("zakatRateAmount", { rate, net: money(result.net) })}</p>
       {switcher}
       <dl className="zakat-breakdown">
         <div><dt>{t("zakatNisabLabel", { metal: t(metalLabels[profile.basis]) })}</dt><dd>{money(result.nisab)}</dd></div>
@@ -215,7 +216,7 @@ export function Zakat({ settings, now, desktop }: { settings: Settings; now: Dat
       {hawl?.shorterMonth && <p className="small muted">{t("zakatShortMonth")}</p>}
       <section className="zakat-nisab compact-stack">
         <h2>{t("zakatNisab")}</h2>{switcher}
-        <p className="small muted">{t(profile.basis === "silver" ? "zakatSilverNote" : "zakatGoldNote")}</p>
+        <p className="small muted">{t(profile.basis === "silver" ? "zakatSilverNote" : "zakatGoldNote", { weight: nisabWeight("gold", "g") })}</p>
         {result.nisab === undefined ? <button type="button" className="text-button" onClick={openSettings}>
           {t("zakatPriceNeeded", { metal: t(metalLabels[profile.basis]).toLocaleLowerCase(language) })}</button>
           : <p className="sr-only">{t("zakatThreshold", { amount: money(result.nisab) })}</p>}

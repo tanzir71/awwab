@@ -16,7 +16,7 @@ import { message } from "./copy";
 import { adjustQadaTotals, qadaBalances, qadaCountBetween, qadaDefaults, qadaForecast, recordQada } from "./qada";
 import { assignedMosque, jamaatForPrayer, mapMosque, mosqueCheckedAge, mosqueDefaults, mosqueInputClock, mosqueTime, mosqueWeek,
   parseMosqueClock, timetableNotice, weeklyMosque, type Mosque } from "./mosques";
-import { latinDigits, readLocalizedNumber } from "./localeNumbers";
+import { formatInputNumber, latinDigits, readLocalizedNumber } from "./localeNumbers";
 
 describe("localized number entry", () => {
   it("reads Bangla, Latin and locale-specific digits and decimal separators", () => {
@@ -35,6 +35,17 @@ describe("localized number entry", () => {
     }
     expect(readLocalizedNumber("১.২৫১", "bn", 2)).toBeUndefined();
     expect(readLocalizedNumber("١٫٢.٥", "ar", 2)).toBeUndefined();
+  });
+
+  it("keeps decimal precision and existing monetary values when editing with localized digits", () => {
+    const values = [0, .001, .0000003212345678, 1234567.123456789, 1e24];
+    for (const locale of ["bn", "bn-u-nu-latn", "fa", "fr", "en"]) {
+      for (const value of values) expect(readLocalizedNumber(formatInputNumber(value, locale), locale, "any")).toBe(value);
+    }
+    expect(formatInputNumber(1234.5678, "bn")).toBe("১২৩৪.৫৬৭৮");
+    expect(readLocalizedNumber("১২,৩৪৫.৬৭", "bn", "any")).toBeUndefined();
+    expect(readLocalizedNumber("1e309", "en", "any")).toBeUndefined();
+    expect(readLocalizedNumber("-৫", "bn", "any")).toBeUndefined();
   });
 });
 

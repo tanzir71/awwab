@@ -279,7 +279,7 @@ export function PrintSheet({ settings, now }: { settings: Settings; now: Date })
         {item.name && <> · <bdi>{item.name}</bdi></>} · <bdi>{zakatMoney(item.amount, item.currency, locale, true)}</bdi>
       </p>) : <p>{t("zakatNoPayments")}</p>}
       <p className="muted small">{t("zakatWornNote")}</p>
-      <p className="small zakat-sources">{Object.entries(zakatSources).map(([key, href]) => <a key={key} href={href} rel="noreferrer">{t(key)}</a>)}</p></>;
+      <p className="small zakat-sources">{Object.entries(zakatSources).map(([key, href]) => <a key={key} href={href} rel="noreferrer">{t(key, { ref: 1454 })}</a>)}</p></>;
   }
   return <div className="print-page stack" data-sheet={sheet}>
     <div className="no-print equal-row">
