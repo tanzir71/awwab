@@ -22,7 +22,7 @@
 .umrah-now-body { display: grid; gap: 16px; padding: 16px 20px 24px; }
 .umrah-now-state { display: grid; gap: 8px; }
 .umrah-now-state h2, .umrah-now-requests h2 { font: var(--type-body-strong); margin: 0; }
-.umrah-now-location { min-height: 34px; justify-self: start; font: var(--type-small); text-decoration: none; }
+.umrah-now-location { min-height: 44px; justify-self: start; font: var(--type-small); text-decoration: none; }
 .umrah-now-states { display: flex; flex-wrap: wrap; gap: 6px; }
 .umrah-now-states button {
   background: var(--c-surface);
@@ -31,7 +31,7 @@
   color: var(--c-ink);
   font: var(--type-small);
   padding: 6px 12px;
-  min-height: 30px;
+  min-height: 44px;
 }
 .umrah-now-states button[aria-pressed="true"] { background: var(--control-primary); color: var(--c-on-primary); }
 .umrah-now-next { display: grid; gap: 10px; border-radius: var(--r-card); padding: 16px; }
@@ -45,6 +45,7 @@
 .umrah-now-next .action.gold { padding: 10px 2px; }
 .umrah-now-next .action[aria-pressed="true"] { background: var(--c-primary-soft); color: var(--interactive-ink); }
 .umrah-now-plan { display: grid; gap: 8px; }
+.umrah-now-plan .text-button { min-width: 44px; justify-content: center; }
 .umrah-now-timeline { display: grid; margin: 0; padding: 0; list-style: none; }
 .umrah-now-timeline li { display: grid; grid-template-columns: minmax(0, 66px) minmax(0, 1fr); gap: 12px; padding-block: 8px; }
 .umrah-now-timeline time { font: var(--type-body-strong); color: var(--c-ink-muted); white-space: normal; }
