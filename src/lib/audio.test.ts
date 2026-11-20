@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import catalogue from "../../public/packs/audio/index.json";
 import onboarding from "../../docs/content/onboarding.json";
 import { quranText } from "./quran";
-import { askAudioPack, askClipIds, askPackPaths, packVoices } from "./umrahAskAudio";
+import { askAudioPack, askClipIds, askPackPaths, askPlaybackVoice, askVoiceInstalled, packVoices } from "./umrahAskAudio";
 import { askClipPath, askPhrase, renderAsk } from "./umrahAsk";
 import { asset } from "./config";
 import { speakCourses, speakLessonContent, speakUnitNumber } from "./speakCurriculum";
@@ -51,12 +51,14 @@ describe("Umrah phrase recordings", () => {
 
   it("defines all voice and gate files without duplicates", () => {
     const paths = askPackPaths();
+    expect(askAudioPack).toBeDefined();
+    expect(packVoices).toEqual(askAudioPack.version === 2 ? ["female", "male"] : ["female"]);
     expect(new Set(paths).size).toBe(paths.length);
     expect(paths.filter(path => /\/number-\d+\.opus$/.test(path))).toHaveLength(2 * 300 * packVoices.length);
   });
 
   it("checks the published recording files and pack size", () => {
-    let size = 0;
+    const bytes = { female: 0, male: 0 };
     for (const path of askPackPaths()) {
       const file = new URL(`../../public/${path}`, import.meta.url);
       const fd = openSync(file, "r");
@@ -64,10 +66,33 @@ describe("Umrah phrase recordings", () => {
         const header = Buffer.alloc(4);
         readSync(fd, header);
         expect(header.toString()).toBe("OggS");
-        size += statSync(file).size;
+        const voice = path.split("/")[3] as keyof typeof bytes;
+        bytes[voice] += statSync(file).size;
       } finally { closeSync(fd); }
     }
-    expect(size).toBe(askAudioPack?.bytes);
+    expect(bytes.female + bytes.male).toBe(askAudioPack?.bytes);
+    if (askAudioPack.version === 2) {
+      for (const voice of packVoices) {
+        expect(askAudioPack.credits[voice].bytes).toBe(bytes[voice]);
+        expect(askAudioPack.credits[voice].source).toMatch(/^https:\/\/huggingface\.co\//);
+      }
+      for (const variety of ["saudi", "msa"] as const) {
+        const female = readFileSync(new URL(`../../public/${askClipPath(variety, "female", "toilet")}`, import.meta.url));
+        const male = readFileSync(new URL(`../../public/${askClipPath(variety, "male", "toilet")}`, import.meta.url));
+        expect(male.equals(female)).toBe(false);
+      }
+    }
+  });
+
+  it("keeps the first download playable during the upgrade", () => {
+    expect(askVoiceInstalled(0, "female")).toBe(false);
+    expect(askVoiceInstalled(1, "female")).toBe(true);
+    expect(askVoiceInstalled(1, "male")).toBe(false);
+    expect(askPlaybackVoice(1, "male")).toBe("female");
+    const hasSecondVoice = askAudioPack.version === 2;
+    expect(askVoiceInstalled(2, "female")).toBe(hasSecondVoice);
+    expect(askVoiceInstalled(2, "male")).toBe(hasSecondVoice);
+    expect(askPlaybackVoice(2, "male")).toBe(hasSecondVoice ? "male" : "female");
   });
 });
 

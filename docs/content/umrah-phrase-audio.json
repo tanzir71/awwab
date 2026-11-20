@@ -1,10 +1,21 @@
 {
-  "version": 1,
-  "bytes": 4026492,
-  "attribution": "Piper · Emirati Arabic voice",
-  "source": "https://huggingface.co/vadimbelsky/arabic-emirati-female-piper/tree/cfe173969620e40be65b5dd8ed4d97d55a864325",
+  "version": 2,
+  "bytes": 11042742,
   "generated": true,
   "voices": [
-    "female"
-  ]
+    "female",
+    "male"
+  ],
+  "credits": {
+    "female": {
+      "name": "Emirati Piper",
+      "source": "https://huggingface.co/vadimbelsky/arabic-emirati-female-piper/tree/cfe173969620e40be65b5dd8ed4d97d55a864325",
+      "bytes": 4026492
+    },
+    "male": {
+      "name": "A3S",
+      "source": "https://huggingface.co/MahmoudIbrahim/A3S/tree/b6eb8229a94feb68887cb0ba926292921216cbd5",
+      "bytes": 7016250
+    }
+  }
 }

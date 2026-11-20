@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { ArabicText } from "./ArabicText";
-import { AskAudioButton, AskAudioPack } from "./AskAudio";
+import { AskAudioButton, AskAudioPack, AskVoicePicker } from "./AskAudio";
 import { DesignIcon } from "./DesignIcon";
 import { UmrahTripForm, UmrahTripImport } from "./UmrahTripForm";
 import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { downloadFile } from "@/lib/download";
 import { speakSetupPath } from "@/lib/speakCurriculum";
@@ -41,6 +42,8 @@ function PhraseLibrary() {
   const [variety, setVariety] = useState<Variety>("saudi");
   const [gate, setGate] = useState("79");
   const [active, setActive] = useState(hash.slice(1));
+  const [voiceError, setVoiceError] = useState(false);
+  const audioSettings = useRecord("umrah-ask-settings", askDefaults);
   const requestedGate = Math.max(1, Math.min(300, Math.floor(Number(gate)) || 79));
   const needle = query.trim().toLowerCase();
   const results = phrases.filter(phrase => [phrase.en, phrase[variety].ar, phrase[variety].tr, banglaPhrases[phrase.id]].some(value => value?.toLowerCase().includes(needle)));
@@ -61,13 +64,18 @@ function PhraseLibrary() {
       </select></label>
       <label className="field">{t("umrahPrepGateNumber")}<input type="number" min="1" max="300" value={gate}
         onChange={event => setGate(event.currentTarget.value)} onBlur={() => setGate(String(requestedGate))} /></label>
+      <AskVoicePicker preferred={audioSettings.voice} change={voice => {
+        setVoiceError(false);
+        void updateRecord("umrah-ask-settings", askDefaults, previous => ({ ...previous, voice })).catch(() => setVoiceError(true));
+      }} />
     </div>
+    {voiceError && <p className="small" role="alert">{t("askSaveIssue")}</p>}
     {!results.length && <p role="status" className="muted">{t("umrahPrepNoPhrases")}</p>}
     <AskAudioPack desktop />
     <ul className="umrah-phrase-results">{results.map(phrase => <li key={phrase.id} className="compact-stack">
       <PhraseText phrase={phrase} variety={variety} gate={requestedGate} />
-      {active === phrase.id ? <AskAudioButton key={`${phrase.id}:${variety}:${requestedGate}`} ids={askClipIds(phrase, { variety, gate: requestedGate })}
-        settings={{ ...askDefaults, variety }} label="askPlay" light /> : <button type="button" className="text-button" onClick={() => setActive(phrase.id)}>{t("practise")}</button>}
+      {active === phrase.id ? <AskAudioButton key={`${phrase.id}:${variety}:${requestedGate}:${audioSettings.voice}`} ids={askClipIds(phrase, { variety, gate: requestedGate })}
+        settings={{ ...askDefaults, variety, voice: audioSettings.voice }} label="askPlay" light /> : <button type="button" className="text-button" onClick={() => setActive(phrase.id)}>{t("practise")}</button>}
     </li>)}</ul>
   </section>;
 }

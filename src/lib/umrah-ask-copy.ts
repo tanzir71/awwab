@@ -42,6 +42,8 @@ export const askMessages: MessageCatalog = {
   askPlayShort: { en: "Play", bn: "বাজান" },
   askAudioPending: { en: "Reviewed recordings are pending.", bn: "পর্যালোচিত রেকর্ডিং এখনও পাওয়া যায়নি।" },
   askDownloadAudio: { en: "Download phrase audio", bn: "বাক্যের অডিও ডাউনলোড করুন" },
+  askDownloadSecondVoice: { en: "Download the second voice", bn: "দ্বিতীয় কণ্ঠ ডাউনলোড করুন" },
+  askGeneratedSpeech: { en: "Generated speech", bn: "তৈরি করা কণ্ঠ" },
   askRepairPack: { en: "Download again", bn: "আবার ডাউনলোড করুন" },
   askDownloadFirst: { en: "Download phrase audio on the Ask screen.", bn: "জিজ্ঞেস করুন পাতায় বাক্যের অডিও ডাউনলোড করুন।" },
   askAudioError: { en: "The recording is unavailable. Try downloading the pack again.", bn: "রেকর্ডিং পাওয়া যায়নি। প্যাকটি আবার ডাউনলোড করে দেখুন।" },

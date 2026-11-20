@@ -13,7 +13,7 @@ export const askHomePath = (desktop = false) => desktop ? "/umrah?view=phrases" 
 export const askPhrasePath = (id: string, desktop = false) =>
   desktop ? `${askHomePath(true)}#${id}` : `${askHomePath()}/phrase/${id}`;
 export const askClipPath = (variety: AskVariety, voice: AskVoice, id: string) => `packs/phrases/${variety}/${voice}/${id}.opus`;
-export const askDefaults = { variety: "saudi" as AskVariety, voice: "male" as AskVoice, speaker: "" as AskVoice | "", slow: false };
+export const askDefaults = { variety: "saudi" as AskVariety, voice: "female" as AskVoice, speaker: "" as AskVoice | "", slow: false };
 export const umrahPhrases = source.phrases;
 export const askPhrase = (id: string) => umrahPhrases.find(phrase => phrase.id === id);
 export const answerWords = ["right", "left", "straight on", "upstairs", "downstairs", "near", "far", "behind"].map(en => replies.words.find(word => word.en === en));

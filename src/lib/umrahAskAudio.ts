@@ -3,13 +3,26 @@ import { audioCache } from "./audio";
 import { hasSharedSpeakAudio } from "./speakAskAudio";
 import { askClipPath, askPlaces, askRelations, askVarieties, askVoices, umrahPhrases, type AskPhrase, type AskVariety, type AskVoice } from "./umrahAsk";
 
-type AudioManifest = { version: 1; bytes: number; attribution: string; source?: string; generated?: boolean; voices?: AskVoice[] };
+type VoiceCredit = { name: string; source: string; bytes: number };
+type AudioManifest = {
+  version: 1 | 2;
+  bytes: number;
+  attribution?: string;
+  source?: string;
+  generated?: boolean;
+  voices?: AskVoice[];
+  credits?: Partial<Record<AskVoice, VoiceCredit>>;
+};
+export const askAudioKey = "umrah-ask-audio";
 const manifests = import.meta.glob<AudioManifest>("../../docs/content/umrah-phrase-audio.json", { eager: true, import: "default" });
 const supplied = Object.values(manifests)[0];
-export const askAudioPack = supplied?.version === 1 && Number.isSafeInteger(supplied.bytes) && supplied.bytes > 0
-  && typeof supplied.attribution === "string" && supplied.attribution.trim()
+export const askAudioPack = (supplied?.version === 1 || supplied?.version === 2) && Number.isSafeInteger(supplied.bytes) && supplied.bytes > 0
   ? supplied : undefined;
 export const packVoices = askAudioPack?.voices ?? askVoices;
+export const askVoiceInstalled = (version: number, voice: AskVoice) => Boolean(askAudioPack && packVoices.includes(voice)
+  && (version === askAudioPack.version || (version === 1 && voice === "female")));
+export const askPlaybackVoice = (version: number, preferred: AskVoice) =>
+  askVoiceInstalled(version, preferred) ? preferred : packVoices.includes("female") ? "female" : packVoices[0];
 
 export function askClipIds(phrase: AskPhrase, options: { variety: AskVariety; speaker?: AskVoice | ""; toFemale?: boolean;
   gate?: number; place?: keyof typeof askPlaces; relation?: keyof typeof askRelations }) {

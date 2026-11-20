@@ -4,50 +4,68 @@ import { useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { hasSharedSpeakAudio } from "@/lib/speakAskAudio";
 import { updateRecord } from "@/lib/storageService";
-import { askAudioPack, downloadAskAudio, packVoices, playAskAudio } from "@/lib/umrahAskAudio";
-import type { askDefaults } from "@/lib/umrahAsk";
+import { askAudioKey, askAudioPack, askPlaybackVoice, askVoiceInstalled, downloadAskAudio, packVoices, playAskAudio } from "@/lib/umrahAskAudio";
+import type { askDefaults, AskVoice } from "@/lib/umrahAsk";
 
-const packKey = "umrah-ask-audio";
 const volumeKey = "umrah-ask-volume-hint";
 
 export function AskAudioPack({ desktop = false }: { desktop?: boolean }) {
   const { t } = useCopy();
-  const version = useRecord<number>(packKey, 0);
+  const version = useRecord<number>(askAudioKey, 0);
   const [progress, setProgress] = useState<{ done: number; total: number }>();
   const [failed, setFailed] = useState(false);
   const working = Boolean(progress);
   const ready = version === askAudioPack?.version;
   if (!askAudioPack) return desktop ? <span className="chip">{t("umrahPrepAudioPending")}</span> : null;
+  const upgrading = version === 1 && askAudioPack.version === 2;
+  const bytes = upgrading ? askAudioPack.credits?.male?.bytes ?? askAudioPack.bytes : askAudioPack.bytes;
 
   return <div className={desktop ? "ask-pack-desktop" : "card ask-pack compact-stack"}>
     {!desktop && <h2>{t("askHome")}</h2>}
-    <p className="small muted">{t("fileSizeMB", { size: askAudioPack.bytes / 1_000_000 })} · {askAudioPack.source
-      ? <a href={askAudioPack.source} rel="noreferrer">{askAudioPack.generated ? t("generatedSpeech") : askAudioPack.attribution}</a> : askAudioPack.attribution}</p>
+    <p className="small muted">{t("fileSizeMB", { size: bytes / 1_000_000 })}
+      {askAudioPack.generated && <> · {t("askGeneratedSpeech")}</>}
+      {askAudioPack.credits ? packVoices.map(voice => {
+        const credit = askAudioPack.credits[voice];
+        return credit && <span key={voice}> · <a href={credit.source} rel="noreferrer">{credit.name}</a></span>;
+      }) : askAudioPack.source && <> · <a href={askAudioPack.source} rel="noreferrer">{askAudioPack.attribution}</a></>}
+    </p>
     <button type="button" className="action soft" disabled={working} onClick={() => {
       if (working) return;
       setFailed(false);
       setProgress({ done: 0, total: 1 });
       void downloadAskAudio((done, total) => setProgress({ done, total })).then(() =>
-        updateRecord(packKey, 0, () => askAudioPack.version)).catch(() => setFailed(true)).finally(() => setProgress(undefined));
-    }}>{t(working ? "umrahPrepDownloading" : ready ? "askRepairPack" : "askDownloadAudio")}</button>
+        updateRecord(askAudioKey, 0, () => askAudioPack.version)).catch(() => setFailed(true)).finally(() => setProgress(undefined));
+    }}>{t(working ? "umrahPrepDownloading" : ready ? "askRepairPack" : upgrading ? "askDownloadSecondVoice" : "askDownloadAudio")}</button>
     {progress && <progress value={progress.done} max={progress.total} aria-label={t("umrahPrepDownloading")} />}
     {failed && <p className="small" role="alert">{t("askAudioError")}</p>}
   </div>;
 }
 
+export function AskVoicePicker({ preferred, change }: { preferred: AskVoice; change: (voice: AskVoice) => void }) {
+  const { t } = useCopy();
+  const version = useRecord<number>(askAudioKey, 0);
+  return <label className="field">{t("askVoice")}
+    <select value={askPlaybackVoice(version, preferred)} onChange={event => change(event.currentTarget.value as AskVoice)}>
+      {packVoices.map(voice => <option key={voice} value={voice} disabled={voice === "male" && !askVoiceInstalled(version, voice)}>
+        {t(voice === "male" ? "askMale" : "askFemale")}
+      </option>)}
+    </select>
+  </label>;
+}
+
 export function AskAudioButton({ ids, settings, label, icon = true, light = false }: { ids: string[];
   settings: typeof askDefaults; label: string; icon?: boolean; light?: boolean }) {
   const { t } = useCopy();
-  const version = useRecord<number>(packKey, 0);
+  const version = useRecord<number>(askAudioKey, 0);
   const used = useRecord(volumeKey, false);
   const current = useRef<AudioContext>();
   const [status, setStatus] = useState("");
   const [playing, setPlaying] = useState(false);
   const id = useId();
-  const voice = packVoices.includes(settings.voice) ? settings.voice : packVoices[0];
+  const voice = askPlaybackVoice(version, settings.voice);
   const shared = hasSharedSpeakAudio(ids, settings.variety, voice);
-  const pending = !shared && (!askAudioPack || version !== askAudioPack.version);
-  const description = status || (pending ? t(askAudioPack ? "askDownloadFirst" : "askAudioPending") : askAudioPack?.generated ? t("generatedSpeech") : "");
+  const pending = !shared && !askVoiceInstalled(version, voice);
+  const description = status || (pending ? t(askAudioPack ? "askDownloadFirst" : "askAudioPending") : askAudioPack?.generated ? t("askGeneratedSpeech") : "");
 
   useEffect(() => () => { if (current.current) void current.current.close().catch(() => {}); }, []);
 

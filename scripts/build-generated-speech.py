@@ -1,10 +1,11 @@
-"""Build the offline spoken Arabic clips with local Piper or Nabra models and FFmpeg."""
+"""Build the offline spoken Arabic clips with local speech models and FFmpeg."""
 
 import argparse
 from array import array
 import io
 import json
 from pathlib import Path
+import re
 import subprocess
 import wave
 
@@ -13,6 +14,7 @@ PHRASES = ROOT / "handovers/H2-languages-paths-arabic-help/data/umrah-phrases.js
 CONTENT = ROOT / "docs/content"
 OUTPUT = ROOT / "public/packs"
 MODEL = "https://huggingface.co/vadimbelsky/arabic-emirati-female-piper/tree/cfe173969620e40be65b5dd8ed4d97d55a864325"
+A3S = "https://huggingface.co/MahmoudIbrahim/A3S/tree/b6eb8229a94feb68887cb0ba926292921216cbd5"
 SPEAK_COURSES = ("saudi-a2", "saudi-b1", "gulf-a1", "umrah-hajj", "gulf-work")
 
 
@@ -46,19 +48,25 @@ def phrase_clips(phrases, variety):
 
 
 def encode(synthesize_wav, path, text):
-    path.parent.mkdir(parents=True, exist_ok=True)
     wav = io.BytesIO()
     with wave.open(wav, "wb") as stream:
         synthesize_wav(text, stream)
+    encode_wav(wav.getvalue(), path)
+
+
+def encode_wav(wav, path):
+    path.parent.mkdir(parents=True, exist_ok=True)
     result = subprocess.run(
         ["ffmpeg", "-nostdin", "-loglevel", "error", "-i", "pipe:0", "-af",
          "loudnorm=I=-16:TP=-1:LRA=7,adelay=150,apad=pad_dur=0.15", "-ac", "1", "-ar", "48000",
          "-c:a", "libopus", "-b:a", "32k", "-f", "ogg", "pipe:1"],
-        input=wav.getvalue(), stdout=subprocess.PIPE, check=True,
+        input=wav, stdout=subprocess.PIPE, check=True,
     )
     if len(result.stdout) <= 500:
         raise ValueError(f"Empty clip for {path.name}")
-    path.write_bytes(result.stdout)
+    temporary = path.with_suffix(".opus.part")
+    temporary.write_bytes(result.stdout)
+    temporary.replace(path)
 
 
 def course_clips(units):
@@ -102,11 +110,104 @@ def nabra_synthesizer(model_dir):
     return synthesize
 
 
+def gate_number_words(number):
+    ones = ("", "وَاحِد", "اِثْنَان", "ثَلَاثَة", "أَرْبَعَة", "خَمْسَة", "سِتَّة", "سَبْعَة", "ثَمَانِيَة", "تِسْعَة")
+    tens = ("", "عَشَرَة", "عِشْرُون", "ثَلَاثُون", "أَرْبَعُون", "خَمْسُون", "سِتُّون", "سَبْعُون", "ثَمَانُون", "تِسْعُون")
+    hundreds = ("", "مِئَة", "مِئَتَان", "ثَلَاثُمِئَة")
+    hundred, remainder = divmod(number, 100)
+    ten, one = divmod(remainder, 10)
+    if 11 <= remainder <= 19:
+        unit = {1: "أَحَدَ", 2: "اِثْنَا"}.get(one, ones[one])
+        rest = f"{unit} عَشَر"
+    else:
+        rest = " وَ".join(part for part in (ones[one], tens[ten]) if part)
+    return " وَ".join(part for part in (hundreds[hundred], rest) if part)
+
+
+def ask_clip_path(variety, voice, slug):
+    return OUTPUT / "phrases" / variety / voice / f"{slug}.opus"
+
+
+def write_ask_manifest(phrases):
+    voices = {}
+    for voice, name, source in (("female", "Emirati Piper", MODEL), ("male", "A3S", A3S)):
+        clips = [ask_clip_path(variety, voice, slug)
+                 for variety in ("saudi", "msa") for slug, _ in phrase_clips(phrases, variety)]
+        if all(path.is_file() for path in clips):
+            voices[voice] = {"name": name, "source": source, "bytes": sum(path.stat().st_size for path in clips)}
+    if "female" not in voices:
+        raise ValueError("Build the female Ask recordings before making the shared manifest.")
+    write(CONTENT / "umrah-phrase-audio.json", {
+        "version": len(voices),
+        "bytes": sum(voice["bytes"] for voice in voices.values()),
+        "generated": True,
+        "voices": list(voices),
+        "credits": voices,
+    })
+
+
+def build_male_ask(model_dir, phrases, resume):
+    import numpy as np
+    import soundfile
+    import torch
+    from qwen_tts import Qwen3TTSModel
+
+    torch.manual_seed(71)
+    device = "cuda:0" if torch.cuda.is_available() else "cpu"
+    model = Qwen3TTSModel.from_pretrained(
+        str(model_dir), device_map=device, dtype=torch.bfloat16 if device != "cpu" else torch.float32,
+        attn_implementation="sdpa", local_files_only=True,
+    )
+    def valid(samples):
+        return len(samples) and np.isfinite(samples).all() and np.max(np.abs(samples)) >= .02
+
+    batch_size = 12
+    for variety, speaker, language in (("saudi", "fahad", "arabic-sa"), ("msa", "omar", "auto")):
+        clips = []
+        for slug, text in phrase_clips(phrases, variety):
+            path = ask_clip_path(variety, "male", slug)
+            if resume and path.is_file() and path.stat().st_size > 500:
+                continue
+            if slug.startswith("number-"):
+                vocalized = gate_number_words(int(text))
+                bare = re.sub(r"[\u064b-\u065f]", "", vocalized)
+                candidates = (f"{bare}.", bare, vocalized)
+            elif slug == "gate-number" and variety == "saudi":
+                candidates = ("فِين بَاب رَقْم", text)
+            else:
+                candidates = (text, text.rstrip("؟?!.,،") + ".", text)
+            clips.append((path, candidates))
+        options = {"speaker": speaker, "language": language, "temperature": .65,
+                   "subtalker_temperature": .4, "max_new_tokens": 100}
+        for start in range(0, len(clips), batch_size):
+            batch = clips[start:start + batch_size]
+            audio, rate = model.generate_custom_voice(text=[candidates[0] for _, candidates in batch], **options)
+            for (path, candidates), samples in zip(batch, audio, strict=True):
+                for alternate in candidates[1:]:
+                    if valid(samples):
+                        break
+                    retry, rate = model.generate_custom_voice(text=alternate, **options)
+                    samples = retry[0]
+                if not valid(samples):
+                    raise ValueError(f"A3S produced empty speech for {variety}/{path.name}")
+                wav = io.BytesIO()
+                soundfile.write(wav, samples, rate, format="WAV", subtype="PCM_16")
+                encode_wav(wav.getvalue(), path)
+            print(f"Encoded {start + len(batch)}/{len(clips)} {variety} male clips", flush=True)
+    write_ask_manifest(phrases)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("model", type=Path, help="Emirati Piper ONNX model, or extracted Nabra INT8 directory for msa-a1")
-    parser.add_argument("--course", choices=(*SPEAK_COURSES, "msa-a1"), help="Only rebuild the selected Speak course")
+    parser.add_argument("model", type=Path, help="Emirati Piper ONNX file, Nabra INT8 directory for msa-a1, or A3S directory for --ask-male")
+    task = parser.add_mutually_exclusive_group()
+    task.add_argument("--course", choices=(*SPEAK_COURSES, "msa-a1"), help="Only rebuild the selected Speak course")
+    task.add_argument("--ask-male", action="store_true", help="Build the second Ask voice using A3S")
+    parser.add_argument("--resume", action="store_true", help="Reuse completed clips when resuming an A3S build")
     args = parser.parse_args()
+    if args.ask_male:
+        build_male_ask(args.model, read(PHRASES)["phrases"], args.resume)
+        return
     if args.course == "msa-a1":
         synthesize_wav = nabra_synthesizer(args.model)
         for slug, line in course_clips(read(CONTENT / "spoken-msa-a1.json")):
@@ -131,19 +232,17 @@ def main():
         encode(synthesize_wav, OUTPUT / "study-speech" / f"{slug}.opus", line)
 
     phrases = read(PHRASES)["phrases"]
-    bytes_total = 0
     for variety in ("saudi", "msa"):
         for slug, line in phrase_clips(phrases, variety):
-            path = OUTPUT / "phrases" / variety / "female" / f"{slug}.opus"
-            other = OUTPUT / "phrases" / "saudi" / "female" / path.name
+            path = ask_clip_path(variety, "female", slug)
+            other = ask_clip_path("saudi", "female", slug)
             if slug.startswith("number-") and variety == "msa":
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_bytes(other.read_bytes())
             else:
                 encode(synthesize_wav, path, line)
-            bytes_total += path.stat().st_size
         print(f"Encoded {variety} phrase clips", flush=True)
-    write(CONTENT / "umrah-phrase-audio.json", {"version": 1, "bytes": bytes_total, "attribution": "Piper · Emirati Arabic voice", "source": MODEL, "generated": True, "voices": ["female"]})
+    write_ask_manifest(phrases)
 
 
 if __name__ == "__main__":

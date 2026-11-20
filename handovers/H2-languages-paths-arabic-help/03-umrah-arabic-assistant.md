@@ -37,13 +37,13 @@ Phrases: [`data/umrah-phrases.json`](data/umrah-phrases.json) (63, Saudi Hijazi 
 - **Emergency:** 911 (unified emergency number in the Makkah and Madinah regions); elsewhere in Saudi Arabia 997 ambulance, 999 police. Cards never leave the device.
 
 ## Audio pack
-- Native **Saudi (Hijazi)** speakers record every Saudi line; an Arabic teacher records the formal lines. One male and one female voice per variety.
+- Generate a male and a female voice for both varieties. A native Saudi Hijazi speaker reviews the Saudi lines, and an Arabic teacher reviews the Modern Standard Arabic lines.
 - Format: Opus, mono, 48 kHz, 32 kbps; loudness −16 LUFS integrated, −1 dBTP peak; 150 ms head/tail silence; file path `phrases/<variety>/<voice>/<id>.opus`.
 - Slots: record "fēn bāb raqam" and number words 1–300 separately; concatenate at play time with 60 ms crossfade. Hotel names are not spoken (shown only), unless the user records their own clip.
 - Playback through Web Audio at full gain; show a one-time "turn your volume up" hint.
 - Custom phrases: users can add a phrase by pasting Arabic text and their own meaning. Played with the device's Arabic voice (`speechSynthesis`) if one is available offline, otherwise shown only, and labelled "device voice".
 
-Publish the reviewed Opus files under `public/packs/phrases/<variety>/<voice>/`. Use the phrase ID for standard clips, `gate-number.opus` for the gate prefix and `number-1.opus` through `number-300.opus` for the numbers. The bus and family phrases use complete clips with the slot appended to the ID, such as `bus-to-madinah.opus` and `lost-family-mother.opus`. Use `-speaker-female` or `-to-woman` for the corresponding alternative forms in the phrase data. Include `docs/content/umrah-phrase-audio.json` with `version: 1`, `bytes` for the combined size, and `attribution` when the recordings are approved and available. The app installs them on request and reads the saved files for offline playback.
+Publish the reviewed Opus files under `public/packs/phrases/<variety>/<voice>/`. Use the phrase ID for standard clips, `gate-number.opus` for the gate prefix and `number-1.opus` through `number-300.opus` for the numbers. The bus and family phrases use complete clips with the slot appended to the ID, such as `bus-to-madinah.opus` and `lost-family-mother.opus`. Use `-speaker-female` or `-to-woman` for the corresponding alternative forms in the phrase data. The version 2 manifest at `docs/content/umrah-phrase-audio.json` records the combined size and credits for each voice. Female clips from version 1 stay playable during the upgrade. The app installs recordings on request and reads the saved files for offline playback.
 
 ## Data model
 ```ts
