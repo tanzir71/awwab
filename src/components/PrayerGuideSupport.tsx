@@ -47,9 +47,9 @@ export function PrayerGuideLostCount({ desktop = false, hanafi = false, topic = 
   return <section className="card tint guide-lost" data-desktop={desktop}>
     <h2 className="with-icon">{!desktop && <DesignIcon name="guide-refresh" size={18} />}{t(topic ? "guideSahw" : desktop ? "guideLostShort" : "guideLostCount")}</h2>
     <p className={desktop ? "small reading-copy" : "small muted reading-copy"}>{t(desktop ? "guideLostDesktopHelp" : "guideLostCountHelp")}</p>
-    <a href={lostCount.url} className="guide-citation" aria-label={citation.full}>
+    <a href={lostCount.url} className="guide-citation">
       <span className="chip soft caption">{desktop ? citation.grade : t("hadithCitationGradeFirst", citation)}</span>
-      {desktop && <span className="small muted">{citation.reference}</span>}
+      {desktop && <> <span className="small muted">{citation.reference}</span></>}
     </a>
     {hanafi && <p className="small muted" lang={hanafiLanguage}>{notes.hanafiSahw[hanafiLanguage]} <a href={notes.hanafiSahw.url}>{notes.hanafiSahw.source}</a></p>}
   </section>;

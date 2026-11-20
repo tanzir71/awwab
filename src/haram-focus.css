@@ -30,7 +30,7 @@
 
 .haram-focus-card, .haram-focus-tile { border-radius: var(--r-card); background: var(--c-overlay-on-night); }
 .haram-focus-dhikr { display: grid; justify-items: center; padding: 16px; gap: 4px; }
-.haram-focus-dhikr .action.gold { width: 100%; min-height: 50px; color: var(--c-ink); }
+.haram-focus-dhikr .action.gold { width: 100%; min-height: 50px; }
 .haram-focus-dhikr .arabic-text { font: var(--type-arabic-l); }
 .haram-focus-dhikr .arabic-line { justify-content: center; padding: 0; }
 .haram-focus-dhikr .word-chip > span { text-decoration: none; }

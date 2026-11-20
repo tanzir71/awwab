@@ -42,7 +42,7 @@
   min-height: 50px;
   font: var(--type-body-strong);
 }
-.umrah-now-next .action.gold { color: var(--c-ink); padding: 10px 2px; }
+.umrah-now-next .action.gold { padding: 10px 2px; }
 .umrah-now-next .action[aria-pressed="true"] { background: var(--c-primary-soft); color: var(--interactive-ink); }
 .umrah-now-plan { display: grid; gap: 8px; }
 .umrah-now-timeline { display: grid; margin: 0; padding: 0; list-style: none; }

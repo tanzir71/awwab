@@ -72,7 +72,7 @@
 .umrah-practice-laps li[data-next="true"] { background: var(--c-on-night); color: var(--c-night); }
 .umrah-practice-count { text-align: center; }
 .umrah-practice-active .action { font: var(--type-body-strong); min-height: 50px; }
-.umrah-practice-active .action.gold { color: var(--c-ink); padding: 10px 8px; }
+.umrah-practice-active .action.gold { padding: 10px 8px; }
 .umrah-ritual-dua { display: grid; gap: 6px; background: var(--c-tint); border-radius: var(--r-card); padding: 16px; }
 .umrah-ritual-dua h2.caption { margin: 0; }
 .umrah-ritual-dua .arabic-line { padding: 0; }

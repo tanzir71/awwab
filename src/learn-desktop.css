@@ -73,7 +73,7 @@
   .desk-today-plan tbody tr:nth-child(odd) .chip:not([data-bucket="sabqi"]):not([data-bucket="manzil"]) { background: var(--c-surface); }
   .desk-today-plan .action { min-height: 26px; padding: 4px 10px; border-radius: 8px; font: 600 12px/16px var(--font-body); }
   .desk-plan-item { display: flex; align-items: center; flex-wrap: wrap; gap: 0 4px; }
-  .desk-plan-item .word-chip { font: 400 14px/20px var(--font-arabic); min-width: 12px; min-height: 24px; padding: 0 2px; }
+  .desk-plan-item .word-chip { font: 400 14px/20px var(--font-arabic); min-width: 24px; min-height: 24px; padding: 0 2px; }
   .desk-done { color: var(--c-primary); font-weight: 600; }
   .desk-plan-choices { display: grid; gap: 4px; }
   .desk-plan-choices label { display: flex; align-items: center; gap: 10px; min-height: 36px; }
@@ -115,8 +115,8 @@
   .desk-letter-grid > div { display: grid; place-items: center; border-radius: 10px; background: var(--c-surface-alt); }
   .desk-letter-grid [data-done="true"] { background: var(--c-primary-soft); }
   .desk-letter-grid [data-current="true"] { color: var(--c-on-night); background: var(--c-night); }
-  .desk-letter-grid .arabic-line { gap: 0; flex-wrap: nowrap; }
-  .desk-letter-grid .word-chip { color: inherit; font: 400 18px/28px var(--font-arabic); min-width: 0; min-height: 30px; padding: 0 1px; }
+  .desk-letter-grid .arabic-line { gap: 0; justify-content: center; padding: 0; }
+  .desk-letter-grid .word-chip { color: inherit; font: 400 18px/28px var(--font-arabic); min-width: 24px; min-height: 30px; padding: 0 1px; }
   .desk-letter-grid [data-current="true"] .word-chip:hover { color: var(--c-ink); }
   .desk-takhti > a:hover { text-decoration: underline; }
 

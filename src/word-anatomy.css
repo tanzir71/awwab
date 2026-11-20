@@ -28,7 +28,7 @@
   display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: var(--r-pill); background: var(--control-primary);
   color: var(--c-on-primary); font: 650 12px/15px var(--font-body);
 }
-.anatomy-heading .word-chip, .anatomy-prefixes .word-chip { font: 400 16px/22px var(--font-arabic); min-height: 24px; min-width: 16px; padding-inline: 1px; }
+.anatomy-heading .word-chip, .anatomy-prefixes .word-chip { font: 400 16px/22px var(--font-arabic); min-height: 24px; min-width: 24px; padding-inline: 1px; }
 .anatomy-heading small { color: var(--c-ink-muted); }
 .anatomy-content .anatomy-letter-tiles { gap: 4px; padding: 3px 0 6px; }
 .anatomy-letter-tiles .letter-tile {

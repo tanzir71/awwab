@@ -35,7 +35,7 @@
 .ask-card-links a { color: var(--c-ink); text-decoration: none; }
 .ask-card-links .arabic-text { justify-self: start; font: 400 16px/25px var(--font-arabic); }
 .ask-card-links .arabic-phrase-line { padding: 0; }
-.ask-card-links .word-chip { min-height: 25px; min-width: 0; padding: 0 1px; }
+.ask-card-links .word-chip { min-height: 25px; min-width: 24px; padding: 0 1px; }
 .ask-extras { padding-inline: 2px; }
 .ask-extras summary { cursor: pointer; }
 .ask-extras .list-row, .ask-home .list-row { overflow-wrap: anywhere; }

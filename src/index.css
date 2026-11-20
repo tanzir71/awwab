@@ -83,7 +83,8 @@ time { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .action:disabled { cursor: default; opacity: .65; }
 .action.soft { background: var(--c-primary-soft); color: var(--interactive-ink); }
 .action.light, .icon-button { background: var(--c-surface); color: var(--c-ink); box-shadow: var(--shadow-card); }
-.action.gold { background: var(--c-accent); color: var(--c-on-primary); font: var(--type-body-strong); padding: 14px 20px; }
+.action.gold { background: var(--c-accent); color: var(--c-ink); font: var(--type-body-strong); padding: 14px 20px; }
+.action.gold:hover { filter: none; text-decoration: underline; text-underline-offset: .16em; }
 .action.plain { background: transparent; color: inherit; }
 .icon-button { width: 44px; padding: 0; border-radius: var(--r-pill); flex: 0 0 auto; }
 .text-button { min-height: 44px; display: inline-flex; align-items: center; color: var(--interactive-ink); font: var(--type-small); text-decoration: none; }
@@ -170,15 +171,14 @@ progress::-moz-progress-bar { background: var(--control-primary); }
 .prayer-hero .jamaat span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .prayer-hero .jamaat img { flex: none; }
 .prayer-hero .action.light, .today-print .action.light, .today-print-actions .action { font: var(--type-body-strong); padding: 14px 20px; }
-.prayer-hero .action.gold, .prayer-hero .rakat-grid > [data-fard="true"] { color: var(--c-ink); }
 .rakat-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
 .rakat-grid[data-count="1"] { grid-template-columns: minmax(0, 1fr); }
 .rakat-grid > div { display: grid; padding: 10px 12px; background: var(--c-overlay-on-night); border-radius: var(--r-control); align-content: start; }
 .rakat-grid[data-count="3"] { grid-template-columns: repeat(3,minmax(0,1fr)); }
-.rakat-grid > [data-fard="true"] { background: var(--c-accent); color: var(--c-on-primary); }
+.rakat-grid > [data-fard="true"] { background: var(--c-accent); color: var(--c-ink); }
 .prayer-hero .rakat-grid strong { font: var(--type-small); }
 .prayer-hero .rakat-number { display: block; font: var(--type-display-m); }
-.prayer-hero .rakat-grid small { color: var(--c-night-muted); font: var(--type-caption); letter-spacing: var(--tracking-caption); text-transform: uppercase; }
+.prayer-hero .rakat-grid small { color: var(--c-on-night); font: var(--type-caption); letter-spacing: var(--tracking-caption); text-transform: uppercase; }
 .prayer-hero .rakat-grid [data-fard="true"] small { color: inherit; }
 .today-greeting { display: grid; align-content: start; gap: 4px; }
 .today-greeting .today-location { gap: 4px; }
@@ -213,8 +213,7 @@ progress::-moz-progress-bar { background: var(--control-primary); }
 .today-print { padding: 20px; }
 .today-print h2 { font: var(--type-body-strong); margin: 0; }
 @media (prefers-contrast: more) {
-  .action.gold, .rakat-grid > [data-fard="true"] { background: color-mix(in srgb, var(--c-accent) 57%, var(--c-ink)); }
-  .prayer-hero .action.gold, .prayer-hero .rakat-grid > [data-fard="true"] { color: var(--c-on-primary); }
+  .action.gold, .rakat-grid > [data-fard="true"] { background: color-mix(in srgb, var(--c-accent) 57%, var(--c-ink)); color: var(--c-on-primary); }
   .prayer-row[data-status="now"], .prayer-row[data-status="done"] .icon-box { background: var(--control-primary); }
   .prayer-row[data-status="missed"] small { color: var(--c-ink); }
 }
@@ -352,7 +351,7 @@ progress::-moz-progress-bar { background: var(--control-primary); }
 .guide-summary h2 { margin: 0; }
 .guide-summary > p { font: var(--type-small); opacity: .85; }
 .guide-summary .rakat-grid strong { font: var(--type-title); }
-.guide-summary .rakat-grid small { color: var(--c-night-muted); font: var(--type-caption); letter-spacing: var(--tracking-caption); text-transform: uppercase; }
+.guide-summary .rakat-grid small { color: var(--c-on-night); font: var(--type-caption); letter-spacing: var(--tracking-caption); text-transform: uppercase; }
 .guide-summary .rakat-grid [data-fard="true"] small { color: inherit; }
 .guide-reference { position: relative; display: flex; align-items: center; gap: 6px; min-height: 30px; color: var(--interactive-ink); }
 .guide-reference::before { content: ""; position: absolute; inset: -7px 0; }
@@ -500,6 +499,7 @@ progress::-moz-progress-bar { background: var(--control-primary); }
 .share-switch-track::before { content: ""; height: 100%; aspect-ratio: 1; border-radius: var(--r-pill); background: var(--c-on-primary); }
 .share-switch[aria-checked="true"] .share-switch-track { justify-content: flex-end; background: var(--control-primary); }
 .share-actions .action, .moment-actions .action { min-height: 50px; padding-block: 12px; font: var(--type-body-strong); }
+.share-actions .action:disabled { opacity: 1; background: var(--c-surface-alt); color: var(--c-ink-muted); }
 .share-actions { margin-top: 12px; }
 .share-privacy, .share-copy-status { text-align: center; }
 .share-copy-status { overflow-wrap: anywhere; }
@@ -517,9 +517,8 @@ progress::-moz-progress-bar { background: var(--control-primary); }
 .share-desktop-preview { display: grid; place-items: center; height: clamp(280px, calc(100svh - 142px), 500px); }
 .share-desktop-preview .share-artwork { width: auto; max-width: 100%; max-height: 100%; border-radius: var(--r-card); box-shadow: var(--shadow-card); }
 .share-desktop-gallery .share-dots { gap: 0; }
-.share-desktop-gallery .share-dots button { width: 12px; height: 22px; display: grid; place-items: center; border-radius: var(--r-pill); }
+.share-desktop-gallery .share-dots button { width: 26px; height: 28px; display: grid; place-items: center; border-radius: var(--r-pill); }
 .share-desktop-gallery .share-dots button::after { content: ""; width: 6px; height: 6px; border-radius: var(--r-pill); background: var(--c-surface); }
-.share-desktop-gallery .share-dots button[aria-pressed="true"] { width: 24px; }
 .share-desktop-gallery .share-dots button[aria-pressed="true"]::after { width: 18px; background: var(--control-primary); }
 .share-desktop-controls { display: flex; min-width: 0; flex-direction: column; gap: 16px; }
 .share-desktop-header { align-items: start; min-height: 28px; }

@@ -11,7 +11,7 @@
 .umrah-prep h2, .umrah-phrase-library h2 { font: var(--type-body-strong); margin-block: 0; }
 .umrah-prep .text-button, .umrah-phrase-library .text-button { min-height: 22px; padding-inline: 2px; font-weight: 600; text-align: end; }
 :root .app-content .umrah-prep button[aria-expanded].text-button { min-height: 22px; }
-.umrah-prep .text-button:disabled, .umrah-prep-download:disabled { opacity: .65; cursor: default; }
+.umrah-prep .text-button:disabled, .umrah-prep-pack-row .umrah-prep-download:disabled { color: var(--c-ink-muted); cursor: default; }
 .umrah-prep .row-between > small { color: var(--interactive-ink); }
 .umrah-prep-details > div, .umrah-prep-pack-row, .umrah-phrase-row { border-radius: var(--r-control); background: var(--c-surface-alt); }
 .umrah-prep-details > div { padding: 10px 12px; display: grid; align-content: start; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
@@ -25,6 +25,7 @@
 .umrah-prep-pack-row > .chip:not(.umrah-prep-download) { background: var(--c-bg); color: var(--c-ink-muted); }
 .umrah-prep-pack-row > .chip.soft { background: var(--c-primary-soft); color: var(--interactive-ink); }
 .umrah-prep-pack-row .umrah-prep-download { background: var(--control-primary); color: var(--c-on-primary); font-weight: 600; }
+.umrah-prep-pack-row .umrah-prep-download:disabled { background: var(--c-bg); }
 .umrah-prep-checks label { display: flex; align-items: center; gap: 8px; min-height: 24px; font-size: 13px; line-height: 18px; }
 .umrah-prep-checks label:has(:checked) { color: var(--c-ink-muted); }
 .umrah-prep-checks input {
@@ -40,7 +41,7 @@
 .umrah-phrase-link:hover { text-decoration: underline; }
 .umrah-phrase-row .arabic-text { flex: 0 1 150px; min-width: 0; font: 400 16px/29px var(--font-arabic); text-align: start; }
 .umrah-phrase-row .arabic-line.arabic-phrase-line { padding: 0; }
-.umrah-phrase-row .word-chip { font: inherit; min-height: 27px; min-width: 0; padding-inline: 1px; }
+.umrah-phrase-row .word-chip { font: inherit; min-height: 27px; min-width: 24px; padding-inline: 1px; }
 .umrah-phrase-results { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; }
 .umrah-phrase-results li { display: grid; }
 .umrah-phrase-library input[aria-invalid="true"] { outline: 2px solid var(--c-danger); outline-offset: -2px; }

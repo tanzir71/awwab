@@ -49,7 +49,7 @@
   .guide-desk-phrase .word-chip { min-width: 24px; min-height: 34px; padding: 0 1px; }
   .guide-desk-phrase .word-chip > span { text-decoration-thickness: 1px; text-underline-offset: 4px; }
   .guide-desk-phrase-meta { display: flex; align-items: center; justify-content: end; flex-wrap: wrap; gap: 0 8px; text-align: end; font: 400 12px/16px var(--font-body); color: var(--interactive-ink); }
-  .guide-desk-phrase-meta a { display: inline-flex; align-items: center; min-height: 17px; font-size: 10px; color: var(--c-ink-muted); }
+  .guide-desk-phrase-meta a { display: inline-flex; align-items: center; justify-content: end; min-width: 24px; min-height: 24px; font-size: 10px; color: var(--c-ink-muted); }
   .guide-desk-audio-bar { display: flex; gap: 8px 16px; justify-content: space-between; align-items: center; flex-wrap: wrap; padding: 4px 14px; border-radius: var(--r-control); }
   .guide-desk-audio-button, .guide-desk-next { display: inline-flex; gap: 6px; align-items: center; text-align: start; min-height: 30px; }
   .guide-desk-audio-button { color: var(--c-on-primary); }
@@ -60,6 +60,7 @@
   .guide-desk-glance dl > div { display: flex; gap: 6px 10px; align-items: baseline; justify-content: space-between; background: var(--c-surface-alt); padding: 5px 10px; border-radius: var(--r-control); font: 400 12px/16px var(--font-body); }
   .guide-desk-glance dt { font-weight: 600; }
   .guide-desk-glance dd { color: var(--c-ink-muted); text-align: end; }
+  .guide-desk-glance dd a { text-decoration: underline; text-underline-offset: .16em; }
   .guide-desk-word-info .action { min-height: 32px; font: 600 12px/16px var(--font-body); }
   .guide-desktop .guide-lost, .guide-desk-drawer .guide-lost { box-shadow: none; background: var(--c-tint); }
   .guide-desk-notes-trigger { grid-column: 1 / -1; justify-self: start; }

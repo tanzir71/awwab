@@ -178,7 +178,7 @@
 .roots-page .arabic-text .word-chip { min-width: 0; padding: 0 1px; }
 .roots-page .word-chip > span:first-child { text-decoration: none; }
 .roots-explanation .arabic-text { font-size: 1em; line-height: inherit; }
-.roots-explanation .arabic-text .word-chip { min-width: 16px; min-height: 24px; }
+.roots-explanation .arabic-text .word-chip { min-width: 24px; min-height: 24px; }
 .roots-patterns { list-style: none; margin: 0; display: grid; gap: 6px; }
 .roots-patterns li, .roots-option { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px; min-height: 48px; background: var(--c-surface-alt); border-radius: var(--r-control); padding: 4px 10px; }
 .roots-patterns .arabic-line { padding-block: 0; }
@@ -245,7 +245,7 @@
 .tajweed-letters { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .tajweed-letters .arabic-text { font-size: 18px; max-width: 100%; }
 .tajweed-letters .arabic-line { gap: 0; padding: 0; }
-.tajweed-letters .word-chip { min-width: 18px; padding-inline: 2px; }
+.tajweed-letters .word-chip { min-width: 24px; padding-inline: 2px; }
 .tajweed-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .tajweed-stage-heading { font: var(--type-title); }
 .tajweed-read-list { list-style: none; margin: 0; padding: 0; }
@@ -346,7 +346,7 @@
 button.speak-variety { display: grid; gap: 2px; text-align: start; }
 .speak-variety.selected, .speak-line[data-you="true"] { background: var(--c-primary-soft); box-shadow: none; }
 .speak-levels .card, .speak-packs .card { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; text-decoration: none; padding: 12px; }
-.speak-page .chip.active { background: var(--c-primary); color: var(--c-on-primary); }
+.speak-page .chip.active { background: var(--control-primary); color: var(--c-on-primary); }
 .speak-unit-list header { flex-wrap: wrap; gap: 4px 8px; }
 .speak-unit-list h2 { overflow-wrap: anywhere; }
 .speak-unit-list ol { margin: 8px 0 0; padding-inline-start: 22px; list-style: decimal; }

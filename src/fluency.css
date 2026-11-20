@@ -41,7 +41,7 @@
 .word-bank-table .arabic-text { font: 500 23px/36px var(--font-arabic); }
 .word-bank-table .arabic-compact { font: 400 17px/30px var(--font-arabic); }
 .word-bank-table .arabic-line { padding: 0; gap: 2px; justify-content: end; }
-.word-bank-table .word-chip { min-height: 38px; min-width: 0; padding-inline: 1px; }
+.word-bank-table .word-chip { min-height: 38px; min-width: 24px; padding-inline: 1px; }
 .word-bank-table progress { height: 6px; background: var(--c-surface-alt); width: 100%; min-width: 62px; margin: 0; vertical-align: middle; }
 .word-bank-table progress::-webkit-progress-bar { background: var(--c-line); }
 .word-bank-state { background: var(--c-surface-alt); color: var(--c-ink); min-height: 28px; padding: 3px 8px; border-radius: var(--r-pill); font: var(--type-small); white-space: nowrap; }
