@@ -4,6 +4,7 @@ import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
 import { askPhraseMessages } from "../src/lib/umrah-phrase-messages.mjs";
+import { landingCopyEntries } from "./landing-copy.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const sources = new Map();
@@ -107,6 +108,10 @@ for (const [key, translations] of Object.entries(askPhraseMessages)) {
   if (messages.has(key)) throw new Error(`Duplicate catalogue message: ${key}`);
   const line = phraseLines.get(key.slice(key.indexOf("-") + 1));
   messages.set(key, { ...translations, definition: { file: phraseSource, line }, references: [] });
+}
+for (const [key, entry] of landingCopyEntries()) {
+  if (messages.has(key)) throw new Error(`Duplicate catalogue message: ${key}`);
+  messages.set(key, entry);
 }
 
 const entries = [...messages.entries()].sort(([left], [right]) => left.localeCompare(right, "en"));

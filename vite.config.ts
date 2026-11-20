@@ -12,12 +12,17 @@ import onboarding from "./docs/content/onboarding.json";
 import { sharedSpeakClips } from "./src/lib/speakAskAudio";
 import { tajweedPrecache } from "./src/lib/tajweed";
 import { publishedLocales } from "./scripts/published-locales.mjs";
+import { landingPages } from "./scripts/landing-pages.mjs";
+import { landingLetterKeys } from "./scripts/landing-copy.mjs";
+import { SHARE_URL } from "./src/lib/config";
 
 const base = "/awwab/";
 
-export default defineConfig(({ mode }) => ({
+export default defineConfig(({ mode }) => {
+  const published = publishedLocales();
+  return {
   base,
-  define: { __AWWAB_PUBLISHED_LOCALES__: JSON.stringify(publishedLocales()) },
+  define: { __AWWAB_PUBLISHED_LOCALES__: JSON.stringify(published) },
   server: { host: "127.0.0.1", port: 8080 },
   resolve: { alias: { "@": resolve(__dirname, "src") } },
   build: {
@@ -51,13 +56,14 @@ export default defineConfig(({ mode }) => ({
         const tiles = wordAnatomy(anatomySample.word).letters.map(tile => renderToStaticMarkup(createElement("div", {
           className: "landing-letter-tile", "data-silent": tile.silent, style: { "--mark-color": `var(--c-${tile.color})` },
         }, createElement(ArabicText, { text: tile.glyph, compact: true, wordLink }),
-        createElement("small", { dir: "ltr" }, tile.name), createElement("small", { dir: "ltr" }, tile.mark))));
+        createElement("small", { dir: "auto", "data-landing-copy": landingLetterKeys[tile.name] }, tile.name),
+        createElement("small", { dir: "auto", "data-landing-copy": landingLetterKeys[tile.mark] }, tile.mark))));
         const asrWord = renderToStaticMarkup(createElement(ArabicText, { text: anatomySample.word, compact: true, wordLink }));
-        const content = html.replace("<!-- awwab-welcome-verse -->", verse)
+        return html.replace("<!-- awwab-welcome-verse -->", verse)
           .replace("<!-- awwab-letter-tiles -->", tiles.join("")).replace("<!-- awwab-asr-word -->", asrWord);
-        return mode === "preview" ? content.replaceAll(">Open awwab<", ">App preview<") : content;
       },
     },
+    landingPages({ base, publicUrl: SHARE_URL, mode, published }),
     react(),
     VitePWA({
       filename: "app/sw.js",
@@ -88,4 +94,5 @@ export default defineConfig(({ mode }) => ({
       },
     }),
   ],
-}));
+  };
+});

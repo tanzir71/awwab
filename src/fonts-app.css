@@ -1,3 +1,5 @@
+@import "./fonts-bengali.css";
+
 @font-face {
   font-family: "Noto Sans Variable";
   src: url("@fontsource-variable/noto-sans/files/noto-sans-latin-wght-normal.woff2") format("woff2");
@@ -8,20 +10,6 @@
 @font-face {
   font-family: "Noto Serif Variable";
   src: url("@fontsource-variable/noto-serif/files/noto-serif-latin-wght-normal.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 100 900;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Noto Sans Bengali Variable";
-  src: url("@fontsource-variable/noto-sans-bengali/files/noto-sans-bengali-bengali-wght-normal.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 100 900;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Noto Serif Bengali Variable";
-  src: url("@fontsource-variable/noto-serif-bengali/files/noto-serif-bengali-bengali-wght-normal.woff2") format("woff2");
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;

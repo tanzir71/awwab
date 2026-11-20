@@ -296,9 +296,9 @@ On a laptop awwab is a **study desk**. Prayer tracking is still there, but it's 
 ### 6.10 Landing page (L01, L02)
 
 **Routes** (paths below are relative to the Pages base `/awwab/`)
-- `/` is the marketing landing page. It is a static, prerendered HTML page (fast and SEO-friendly; Vite multi-page input `landing.html`) that loads no app JavaScript.
+- `/` is the English marketing landing page. Vite prerenders it and each published locale at `/lang/<locale>.html`. A small standalone script switches languages in place.
 - `/app/` is the PWA.
-- The service worker scope is `/app/` so the landing page stays lightweight. The "Open awwab" CTA goes to `/app/`; "Install the app" triggers `beforeinstallprompt` where supported and otherwise shows per-platform instructions.
+- The app service worker stays scoped to `/app/`. A separate landing worker caches the marketing pages and their assets for offline visits and language switching. The "Open awwab" CTA goes to `/app/`. "Install the app" triggers `beforeinstallprompt` where supported and otherwise shows per-platform instructions.
 
 **Sections, in order**
 1. Nav
