@@ -298,7 +298,7 @@ function MaktabLearn({ progress, settings, now }: { progress: DeskProgress; sett
             <ArabicText text={example} compact /></div>)}</div>
         </div>
         <div className="desk-lesson-actions">
-          <Link className="action" to={"/learn/qaida/" + lesson.n}><DesignIcon name="maktab-desk-play" size={16} />{t("studyResume", { duration: 3 })}</Link>
+          <Link className="action" to={"/learn/qaida/" + lesson.n}><DesignIcon name="maktab-desk-play" size={16} />{t("studyResume", { duration: deskMinutes.qaida })}</Link>
           <div className="desk-stars" aria-hidden="true">{Array.from({ length: 5 }, (_, index) => <DesignIcon key={index} name={index < stars ? "maktab-desk-star" : "maktab-desk-star1"} size={20} />)}</div>
           <small className="muted">{t("deskStars", { count: stars })}</small>
         </div>
