@@ -70,6 +70,8 @@ The export includes curated word meanings for Al-Fātiḥa, Al-ʿAsr, and Salah 
 
 The Bangla export fills the remaining study glosses from `drafts/bn.json`. Reviewers can find the new entries under `supplementalDraftKeys`. Each entry is paired with its English source so the export can omit it when that source changes.
 
+The Urdu draft starts with the landing page, onboarding, the language picker, and Today, including the shared navigation and prayer setup. Review these on a phone and desktop in the right-to-left layout. Check the prayer labels, date and time order, and the wording in both Adult and Maktab modes.
+
 The Indonesian draft covers all 4,005 messages in the current UI catalogue, including landing, onboarding, and the Adult and Maktab variants. The review export pairs them with the English source and links to screenshots for context. Publication requires two native reviewer sign-offs.
 
 The Indonesian draft also covers How to Pray, Return, and the make-up prayer and fasting planner. The locale export includes the existing Sayyid al-Istighfār meanings, the hope verse meaning, and the Hanafi note on sujūd al-sahw. Review these against the linked source content. The reader displays the citations alongside whichever language is available.
