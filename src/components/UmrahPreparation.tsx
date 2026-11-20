@@ -4,6 +4,7 @@ import { ArabicText } from "./ArabicText";
 import { AskAudioButton, AskAudioPack, AskVoicePicker } from "./AskAudio";
 import { DesignIcon } from "./DesignIcon";
 import { UmrahTripForm, UmrahTripImport } from "./UmrahTripForm";
+import { UmrahGuideDownload } from "./UmrahGuideVoice";
 import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
@@ -14,6 +15,7 @@ import { emptyPreparation, initialTrip, maskedPhone, tripChecklist, tripDates, t
 import { cachedMapPack, mapPacks, mapRegions, saveMapPack, type MapRegion } from "@/lib/umrahMapPack";
 import { askDefaults, askHomePath, askMeaning, askPhrase, askPhraseMatches, askPhrasePath, renderAsk, umrahPhrases as phrases, type AskPhrase } from "@/lib/umrahAsk";
 import { askClipIds } from "@/lib/umrahAskAudio";
+import { umrahGuidePack } from "@/lib/umrahGuideAudio";
 
 const samples = ["toilet", "gate-number", "take-me-hotel"].map(askPhrase);
 const checklistColumns = [tripChecklist.slice(0, 6), tripChecklist.slice(6)];
@@ -78,7 +80,7 @@ function PhraseLibrary() {
 }
 
 function OfflinePacks() {
-  const { t } = useCopy();
+  const { t, language } = useCopy();
   const [saved, setSaved] = useState<MapRegion[]>();
   const [working, setWorking] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -115,7 +117,7 @@ function OfflinePacks() {
         disabled={working || !saved} onClick={() => void download()}>{t(working ? "umrahPrepDownloading" : "umrahPrepDownload")}</button>}
     </div>
     <div className="umrah-prep-pack-row"><div><strong>{t("umrahPrepRitualPack")}</strong><small>{t("umrahPrepRitualHint")}</small></div>
-      <span className="chip">{t("umrahPrepAudioPending")}</span></div>
+      <UmrahGuideDownload key={language} pack={umrahGuidePack(language)} /></div>
     <div className="umrah-prep-pack-row"><div><strong>{t("umrahPrepAskPack")}</strong><small>{t("umrahPrepAskPackHint", { count: phrases.length })}</small></div>
       <AskAudioPack desktop /></div>
     {failed && <p role="status" className="small">{t("umrahPrepDownloadError")}</p>}

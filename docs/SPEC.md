@@ -259,7 +259,7 @@ Mosque {
   - The step advances on geofence entry.
   - **Saʿy auto-laps** come from alternating Ṣafā/Marwah geofence entries with hysteresis, and can be corrected.
   - Ṭawāf stays manual: GPS is unreliable near the Kaʿbah.
-  - Optional voice uses pre-recorded audio from an offline pack.
+  - Optional voice uses a downloadable offline pack with generated narration for all seven steps. English and Bangla editions show their spoken text and voice credits. Personal recordings can still be imported per step.
 - **Offline map (U02):**
   - **MapLibre GL JS + PMTiles** extract of Makkah and Madinah (OpenStreetMap, ODbL attribution), downloaded as a pack and cached by the service worker.
   - Pins: gates (numbers and names from OSM), Ṣafā/Marwah, Zamzam, wudu areas, Clock Tower, **hotel**, **meeting point**.

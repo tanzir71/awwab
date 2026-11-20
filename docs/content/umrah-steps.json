@@ -4,6 +4,11 @@
   {
    "id": "ihram",
    "title": "Iḥrām & intention",
+   "titleBn": "ইহরাম ও নিয়ত",
+   "narration": {
+    "en": "Ihram and intention. Check your miqat before arrival. If you are flying, listen for the airline's announcement.",
+    "bn": "ইহরাম ও নিয়ত। পৌঁছানোর আগে আপনার মিকাত জেনে নিন। বিমানে গেলে বিমান সংস্থার ঘোষণা শুনুন।"
+   },
    "trigger": "manual or flight reminder before mīqāt (airline announces)",
    "duas": [
     "talbiyah"
@@ -12,48 +17,93 @@
   {
    "id": "talbiyah",
    "title": "Talbiyah",
+   "titleBn": "তালবিয়া",
+   "narration": {
+    "en": "Talbiyah. This step follows the intention. The words of the Talbiyah are on the screen with their source.",
+    "bn": "তালবিয়া। এই ধাপ নিয়তের পর। তালবিয়ার শব্দ ও সূত্র পর্দায় দেওয়া আছে।"
+   },
    "trigger": "after niyyah until reaching the Kaʿbah"
   },
   {
    "id": "tawaf",
    "title": "Ṭawāf · 7 rounds",
+   "titleBn": "তাওয়াফ · সাত চক্কর",
+   "narration": {
+    "en": "Tawaf. Begin at the Black Stone line and keep the Kaaba on your left. Count seven rounds by hand. The guide shows the supplication for the stretch between the Yemeni Corner and the Black Stone.",
+    "bn": "তাওয়াফ। হাজরে আসওয়াদের রেখা থেকে শুরু করুন এবং কাবা আপনার বাঁ পাশে রাখুন। সাত চক্কর নিজে গুনুন। রুকনে ইয়ামানি ও হাজরে আসওয়াদের মাঝের দোয়া নির্দেশিকায় দেওয়া আছে।"
+   },
    "trigger": "geofence: haram_mataf (enter) → show counter",
    "counter": "manual",
    "notes": [
     "start at Black Stone line",
     "Kaʿbah on your left",
     "between Yemeni corner and Black Stone: Quran 2:201"
+   ],
+   "notesBn": [
+    "হাজরে আসওয়াদের রেখা থেকে শুরু করুন",
+    "কাবা আপনার বাঁ পাশে রাখুন",
+    "রুকনে ইয়ামানি ও হাজরে আসওয়াদের মাঝে পড়ুন: কুরআন ২:২০১"
    ]
   },
   {
    "id": "two_rakahs",
    "title": "Two rakʿahs",
+   "titleBn": "দুই রাকাত",
+   "narration": {
+    "en": "Two rakats. If you can, pray behind Maqam Ibrahim. If it is crowded, use another place in the mosque.",
+    "bn": "দুই রাকাত। সম্ভব হলে মাকামে ইবরাহিমের পেছনে নামাজ পড়ুন। ভিড় হলে মসজিদের অন্য জায়গায় পড়ুন।"
+   },
    "trigger": "after 7 rounds",
    "notes": [
     "behind Maqām Ibrāhīm if possible; anywhere in the masjid if crowded"
+   ],
+   "notesBn": [
+    "সম্ভব হলে মাকামে ইবরাহিমের পেছনে নামাজ পড়ুন। ভিড় হলে মসজিদের অন্য জায়গায় পড়ুন।"
    ]
   },
   {
    "id": "zamzam",
    "title": "Zamzam",
+   "titleBn": "জমজম",
+   "narration": {
+    "en": "Zamzam. This step comes before Sa'y. Continue when you're ready.",
+    "bn": "জমজম। এই ধাপ সাঈয়ের আগে। প্রস্তুত হলে পরের ধাপে যান।"
+   },
    "trigger": "manual"
   },
   {
    "id": "sai",
    "title": "Saʿy · 7 laps",
+   "titleBn": "সাঈ · সাত চক্কর",
+   "narration": {
+    "en": "Sa'y. One walk from Safa to Marwah counts as one lap. Alternate between the two ends and finish the seventh lap at Marwah. Men jog lightly between the green lights.",
+    "bn": "সাঈ। সাফা থেকে মারওয়া পর্যন্ত একবার গেলে এক চক্কর হয়। দুই প্রান্তের মধ্যে পালা করে হেঁটে সপ্তম চক্কর মারওয়ায় শেষ করুন। সবুজ বাতির মাঝের অংশে পুরুষেরা হালকা দৌড়াবেন।"
+   },
    "trigger": "geofence: masa_safa (enter)",
    "counter": "auto (beta) + manual",
    "notes": [
     "Ṣafā → Marwah = 1 lap; finish at Marwah",
     "men jog lightly between the green lights"
+   ],
+   "notesBn": [
+    "সাফা থেকে মারওয়া পর্যন্ত একবার গেলে এক চক্কর হয়। শেষ চক্কর মারওয়ায় শেষ করুন।",
+    "সবুজ বাতির মাঝের অংশে পুরুষেরা হালকা দৌড়াবেন"
    ]
   },
   {
    "id": "halq",
    "title": "Shave or trim",
+   "titleBn": "চুল মুণ্ডন বা ছাঁটা",
+   "narration": {
+    "en": "Shave or trim. Men can shave or trim their hair. Women trim about a fingertip's length.",
+    "bn": "চুল মুণ্ডন বা ছাঁটা। পুরুষেরা মাথা মুণ্ডন বা চুল ছাঁটতে পারেন। নারীরা আঙুলের ডগা পরিমাণ চুল ছাঁটবেন।"
+   },
    "trigger": "after lap 7 at Marwah",
    "notes": [
     "men shave or trim; women trim a fingertip’s length"
+   ],
+   "notesBn": [
+    "পুরুষেরা মাথা মুণ্ডন করবেন বা চুল ছাঁটবেন। নারীরা আঙুলের ডগা পরিমাণ চুল ছাঁটবেন।"
    ]
   }
  ],

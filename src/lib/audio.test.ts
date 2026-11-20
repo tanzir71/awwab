@@ -2,12 +2,37 @@ import { openSync, closeSync, readFileSync, readSync, statSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import catalogue from "../../public/packs/audio/index.json";
 import onboarding from "../../docs/content/onboarding.json";
+import rituals from "../../docs/content/umrah-steps.json";
 import { quranText } from "./quran";
 import { askAudioPack, askClipIds, askPackPaths, askPlaybackVoice, askVoiceInstalled, packVoices } from "./umrahAskAudio";
 import { askClipPath, askPhrase, renderAsk } from "./umrahAsk";
 import { asset } from "./config";
 import { speakCourses, speakLessonContent, speakUnitNumber } from "./speakCurriculum";
 import { hasSharedSpeakAudio, sharedSpeakClips } from "./speakAskAudio";
+import { umrahGuidePack, umrahGuidePacks } from "./umrahGuideAudio";
+
+describe("Generated Umrah narration", () => {
+  it("pairs all seven steps and transcripts with size-checked clips in both languages", () => {
+    expect(umrahGuidePacks.map(pack => pack.language)).toEqual(["en", "bn"]);
+    expect(rituals.steps).toHaveLength(7);
+    for (const pack of umrahGuidePacks) {
+      expect(pack.items.map(item => item.ref)).toEqual(rituals.steps.map(step => `${pack.id}:${step.id}`));
+      let bytes = 0;
+      for (const [index, step] of rituals.steps.entries()) {
+        const item = pack.items[index];
+        expect(item.path).toBe(`packs/audio/umrah-guide-v1/${pack.language}/${step.id}.mp3`);
+        const file = readFileSync(new URL(`../../public/${item.path}`, import.meta.url));
+        expect(file.subarray(0, 3).toString("ascii")).toBe("ID3");
+        expect(file.length).toBeGreaterThan(4096);
+        expect(step.narration[pack.language]).toBeTruthy();
+        expect(step.notesBn?.length ?? 0).toBe(step.notes?.length ?? 0);
+        bytes += file.length;
+      }
+      expect(bytes).toBe(pack.bytes);
+    }
+    expect(umrahGuidePack("ur").language).toBe("en");
+  });
+});
 
 describe("Bundled recitation packs", () => {
   it("has one attributed recording for the surah and every numbered ayah", () => {

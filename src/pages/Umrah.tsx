@@ -7,8 +7,8 @@ import { DesignIcon } from "@/components/DesignIcon";
 import { SectionNav } from "@/components/Surface";
 import { ShareLink } from "@/components/ShareLink";
 import { UmrahPreparation } from "@/components/UmrahPreparation";
+import { UmrahGuideVoice } from "@/components/UmrahGuideVoice";
 import { UmrahTripForm, UmrahTripImport } from "@/components/UmrahTripForm";
-import { VerseAudio } from "@/components/VerseAudio";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu";
 import { useRecord } from "@/hooks/use-awwab";
 import { duration, formatTime } from "@/lib/dates";
@@ -17,6 +17,7 @@ import { downloadFile } from "@/lib/download";
 import { useCopy } from "@/lib/copy";
 import { updateRecord } from "@/lib/storageService";
 import { advanceSai, correctSai, distance, initialTrip, makkah, states, umrahContext, type Coord } from "@/lib/umrah";
+import { umrahStepNote, umrahStepTitle } from "@/lib/umrah-step-messages.mjs";
 import { prayerIds, prayerNames } from "@/types/Prayer";
 import ritual from "../../docs/content/umrah-steps.json";
 import duas from "../../docs/content/umrah-duas.json";
@@ -39,7 +40,7 @@ const useTrip = () => useOutletContext<UmrahContext>();
 const localTime = (date: Date) => formatTime(date, makkah.timeZone);
 
 export function UmrahShell({ now, desktop }: { now: Date; desktop: boolean }) {
-  const { t } = useCopy();
+  const { t, locale } = useCopy();
   const { pathname } = useLocation();
   const ask = pathname === "/umrah/ask" || pathname.startsWith("/umrah/ask/");
   const showTabs = !ask || pathname === "/umrah/ask";
@@ -48,13 +49,13 @@ export function UmrahShell({ now, desktop }: { now: Date; desktop: boolean }) {
   const [locationError, setLocationError] = useState("");
   async function save(update: Parameters<TripUpdater>[0]) {
     try { await updateRecord("umrah", initialTrip, update); }
-    catch { toast.error("Your trip details could not be saved."); }
+    catch { toast.error(t("umrahTripSaveError")); }
   }
   const configured = Boolean(trip.start && trip.end);
 
   useEffect(() => {
     if (desktop || !trip.gps) return;
-    if (!navigator.geolocation) { setLocationError("Location is unavailable on this device."); return; }
+    if (!navigator.geolocation) { setLocationError("umrahLocationUnavailable"); return; }
     let last: { point: Coord; at: number } | undefined;
     let traveled = 0;
     const watch = navigator.geolocation.watchPosition(position => {
@@ -82,8 +83,8 @@ export function UmrahShell({ now, desktop }: { now: Date; desktop: boolean }) {
         const state = near(haram, 220) && saved.state !== "Doing Umrah" ? "In the Haram"
           : saved.hotel.point && distance(saved.hotel.point, location) < 70 ? "At the hotel" : saved.state;
         return state === saved.state && step === saved.step && sai === saved.sai ? saved : { ...saved, state, step, sai };
-      }).catch(() => setLocationError("Live progress could not be saved. Manual counting is available."));
-    }, () => setLocationError("Location signal unavailable. You can still use the manual guide."),
+      }).catch(() => setLocationError("umrahLocationProgressError"));
+    }, () => setLocationError("umrahLocationSignal"),
     { enableHighAccuracy: true, maximumAge: 8000, timeout: 18000 });
     return () => { navigator.geolocation.clearWatch(watch); setPoint(undefined); setLocationError(""); };
   }, [desktop, trip.gps]);
@@ -96,12 +97,12 @@ export function UmrahShell({ now, desktop }: { now: Date; desktop: boolean }) {
     { name: "askDuas", path: "/umrah/duas", icon: "ask-icon-hand" },
   ];
   return <div className={ask ? "umrah-shell umrah-ask-shell" : "stack umrah-shell"}>
-    {!ask && <><header className="row-between"><Link to="/plan" className="icon-button" aria-label="Back to Plan"><ArrowLeft size={20} /></Link>
-      <div><p className="caption">Makkah · {localTime(now)}</p><h1>Umrah mode</h1></div>
-      <Link className="icon-button" to="/umrah/location" aria-label="Location options"><Compass size={19} /></Link>
+    {!ask && <><header className="row-between"><Link to="/plan" className="icon-button" aria-label={t("umrahBackToPlan")}><ArrowLeft className="icon-dir" size={20} /></Link>
+      <div><p className="caption">{t("umrahPrepMakkah")} · {formatTime(now, makkah.timeZone, locale)}</p><h1>{t("umrah")}</h1></div>
+      <Link className="icon-button" to="/umrah/location" aria-label={t("umrahLocationOptions")}><Compass size={19} /></Link>
     </header>
-    {!configured && <div className="card tint row-between"><p>Set your trip dates and hotel before you go.</p><Link to="/umrah/plan" className="action soft">Plan trip</Link></div>}
-    {locationError && trip.gps && <p className="card tint small" role="status">{locationError}</p>}</>}
+    {!configured && <div className="card tint row-between"><p>{t("umrahSetTripHint")}</p><Link to="/umrah/plan" className="action soft">{t("umrahPlanTrip")}</Link></div>}
+    {locationError && trip.gps && <p className="card tint small" role="status">{t(locationError)}</p>}</>}
     <Outlet context={{ trip, now, point: trip.gps ? point : undefined, save }} />
     {showTabs && <nav className="umrah-tabs" aria-label={t("askNav")}>
       {tabs.map(item => <NavLink key={item.path} to={item.path} end={item.path === "/umrah"}>
@@ -191,41 +192,49 @@ export function HaramFocus() {
 }
 
 export function UmrahRituals() {
+  const { t, locale, language } = useCopy();
   const { trip, save } = useTrip();
   const step = ritual.steps[trip.step] ?? ritual.steps[0];
+  const title = t(umrahStepTitle(step.id));
+  const total = ritual.steps.length;
+  const number = new Intl.NumberFormat(locale);
   const isTawaf = step.id === "tawaf";
   const isSai = step.id === "sai";
   const count = isTawaf ? trip.tawaf : trip.sai.count;
   return <>
     <section className="card night stack">
-      <p className="caption">Step {trip.step + 1} of 7</p><h2>{step.title}</h2>
-      {step.notes?.map(note => <p className="muted" key={note}>{note}</p>)}
+      <p className="caption">{t("umrahGuideStep", { step: trip.step + 1, total })}</p><h2>{title}</h2>
+      {step.notes?.map((_, index) => {
+        const key = umrahStepNote(step.id, index);
+        return <p className="muted" key={key}>{t(key)}</p>;
+      })}
       {step.id === "talbiyah" && <><ArabicText text={duas.talbiyah.arabic} citation={duas.talbiyah.source} /><a className="caption" href={duas.talbiyah.url}>{duas.talbiyah.source}</a></>}
-      {isTawaf && <div className="tawaf-diagram" aria-label="Diagram of the Kaʿbah and tawaf direction" role="img"><span>Kaʿbah</span><i>↺</i></div>}
+      {isTawaf && <div className="tawaf-diagram" aria-label={t("umrahGuideDiagram")} role="img"><span>{t("umrahGuideKaaba")}</span><i>↺</i></div>}
       {(isTawaf || isSai) && <>
-        <div className="row-between"><strong className="numeral">{count} / 7</strong><span>{isTawaf ? "Rounds · manual" : trip.auto && trip.gps ? "Laps · walk with me" : "Laps · manual"}</span></div>
+        <div className="row-between"><strong className="numeral">{t("umrahGuideCount", { count, total: 7 })}</strong>
+          <span>{t(isTawaf ? "umrahGuideRounds" : trip.auto && trip.gps ? "umrahGuideLocationLaps" : "umrahGuideManualLaps")}</span></div>
         <div className="equal-row">
           <button className="action light" disabled={count <= 0} onClick={() => void save(old => isTawaf
             ? { ...old, tawaf: Math.max(0, old.tawaf - 1) }
-            : { ...old, sai: correctSai(old.sai, old.sai.count - 1, Date.now()) })}>Correct − 1</button>
+            : { ...old, sai: correctSai(old.sai, old.sai.count - 1, Date.now()) })}>{t("umrahGuideCorrect", { count: 1 })}</button>
           <button className="action gold" disabled={count >= 7} onClick={() => void save(old => isTawaf
             ? { ...old, tawaf: Math.min(7, old.tawaf + 1) }
-            : { ...old, sai: correctSai(old.sai, old.sai.count + 1, Date.now()) })}>Count + 1</button>
+            : { ...old, sai: correctSai(old.sai, old.sai.count + 1, Date.now()) })}>{t("umrahGuideCountLap", { count: 1 })}</button>
         </div>
       </>}
       <div className="equal-row">
-        <button className="action light" disabled={trip.step < 1} onClick={() => void save(old => ({ ...old, step: Math.max(0, old.step - 1) }))}>Previous step</button>
-        <button className="action soft" disabled={trip.step >= 6} onClick={() => void save(old => ({ ...old, step: Math.min(6, old.step + 1) }))}>Next step</button>
+        <button className="action light" disabled={trip.step < 1} onClick={() => void save(old => ({ ...old, step: Math.max(0, old.step - 1) }))}>{t("umrahGuidePrevious")}</button>
+        <button className="action soft" disabled={trip.step >= total - 1} onClick={() => void save(old => ({ ...old, step: Math.min(total - 1, old.step + 1) }))}>{t("umrahGuideNext")}</button>
       </div>
     </section>
+    <UmrahGuideVoice key={`${language}:${step.id}`} step={step} title={title} />
     <section className="compact-stack">
-      <h2>Seven steps</h2>
+      <h2>{t("umrahGuideSteps")}</h2>
       {ritual.steps.map((item, i) => <button className="list-row" key={item.id} aria-current={trip.step === i} onClick={() => void save(old => ({ ...old, step: i }))}>
-        <span className="icon-box">{i + 1}</span><span><strong>{item.title}</strong></span></button>)}
+        <span className="icon-box">{number.format(i + 1)}</span><span><strong>{t(umrahStepTitle(item.id))}</strong></span></button>)}
     </section>
-    <section className="card compact-stack"><h2>Voice guidance</h2><VerseAudio audioRef={`umrah:${step.id}`} label={step.title} /></section>
-    <p className="card tint muted">Scholars differ on some details. Ask your group’s guide or a scholar you trust.</p>
-    <Link to="/print/umrah-guide" className="action soft">Print Umrah guide</Link>
+    <p className="card tint muted">{t("umrahGuideScholars")}</p>
+    <Link to="/print/umrah-guide" className="action soft">{t("umrahGuidePrint")}</Link>
   </>;
 }
 

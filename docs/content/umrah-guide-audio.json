@@ -1,0 +1,85 @@
+{
+  "packs": [
+    {
+      "id": "umrah-guide-v1-en",
+      "language": "en",
+      "name": "English",
+      "speaker": "Piper LJSpeech",
+      "source": "https://huggingface.co/rhasspy/piper-voices/blob/b145f2ac26522d6a2ccde0164b7b0e48b1e3199c/en/en_US/ljspeech/medium/MODEL_CARD",
+      "licenseUrl": "https://keithito.com/LJ-Speech-Dataset/",
+      "attribution": "Generated speech · Piper LJSpeech",
+      "bytes": 346484,
+      "items": [
+        {
+          "ref": "umrah-guide-v1-en:ihram",
+          "path": "packs/audio/umrah-guide-v1/en/ihram.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-en:talbiyah",
+          "path": "packs/audio/umrah-guide-v1/en/talbiyah.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-en:tawaf",
+          "path": "packs/audio/umrah-guide-v1/en/tawaf.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-en:two_rakahs",
+          "path": "packs/audio/umrah-guide-v1/en/two_rakahs.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-en:zamzam",
+          "path": "packs/audio/umrah-guide-v1/en/zamzam.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-en:sai",
+          "path": "packs/audio/umrah-guide-v1/en/sai.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-en:halq",
+          "path": "packs/audio/umrah-guide-v1/en/halq.mp3"
+        }
+      ]
+    },
+    {
+      "id": "umrah-guide-v1-bn",
+      "language": "bn",
+      "name": "বাংলা",
+      "speaker": "Indic Tiny TTS Bengali",
+      "source": "https://huggingface.co/sulabhkatiyar/indic-tiny-tts-bengali/tree/a6bb92894272219d8d2bbd03cb1121a6be3164a8",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "attribution": "Generated speech · Indic Tiny TTS Bengali",
+      "bytes": 418052,
+      "items": [
+        {
+          "ref": "umrah-guide-v1-bn:ihram",
+          "path": "packs/audio/umrah-guide-v1/bn/ihram.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-bn:talbiyah",
+          "path": "packs/audio/umrah-guide-v1/bn/talbiyah.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-bn:tawaf",
+          "path": "packs/audio/umrah-guide-v1/bn/tawaf.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-bn:two_rakahs",
+          "path": "packs/audio/umrah-guide-v1/bn/two_rakahs.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-bn:zamzam",
+          "path": "packs/audio/umrah-guide-v1/bn/zamzam.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-bn:sai",
+          "path": "packs/audio/umrah-guide-v1/bn/sai.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-bn:halq",
+          "path": "packs/audio/umrah-guide-v1/bn/halq.mp3"
+        }
+      ],
+      "dataset": "https://huggingface.co/datasets/ai4bharat/Rasa"
+    }
+  ]
+}

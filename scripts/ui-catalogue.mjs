@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import ts from "typescript";
 import { askPhraseMessages } from "../src/lib/umrah-phrase-messages.mjs";
 import { landingCopyEntries } from "./landing-copy.mjs";
+import { umrahStepMessages } from "../src/lib/umrah-step-messages.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const sources = new Map();
@@ -112,6 +113,10 @@ for (const [key, translations] of Object.entries(askPhraseMessages)) {
 for (const [key, entry] of landingCopyEntries()) {
   if (messages.has(key)) throw new Error(`Duplicate catalogue message: ${key}`);
   messages.set(key, entry);
+}
+for (const [key, translations] of Object.entries(umrahStepMessages)) {
+  if (messages.has(key)) throw new Error(`Duplicate catalogue message: ${key}`);
+  messages.set(key, { ...translations, definition: { file: "docs/content/umrah-steps.json" }, references: [] });
 }
 
 const entries = [...messages.entries()].sort(([left], [right]) => left.localeCompare(right, "en"));

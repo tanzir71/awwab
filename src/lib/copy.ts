@@ -22,6 +22,7 @@ import { settingsMessages } from "./settings-copy";
 import { umrahPrepMessages } from "./umrah-prep-copy";
 import { askMessages } from "./umrah-ask-copy";
 import { askPhraseMessages } from "./umrah-phrase-messages.mjs";
+import { umrahStepMessages } from "./umrah-step-messages.mjs";
 import { pathsMessages } from "./paths-copy";
 import { tajweedMessages } from "./tajweed-copy";
 import { speakMessages } from "./speak-copy";
@@ -316,7 +317,7 @@ const navMessages: Record<string, string> = {
 const formats = new Map<string, IntlMessageFormat<Record<string, string | number>>>();
 export function message(settings: CopySettings, id: string, values?: Record<string, string | number>) {
   const language = settings.pseudoLocale ? "en" : settings.language;
-  const entry = messages[id] ?? askPhraseMessages[id];
+  const entry = messages[id] ?? askPhraseMessages[id] ?? umrahStepMessages[id];
   const draft = localeMessage(language, id, settings.mode) ?? entry?.[language] ?? entry?.en ?? id;
   const format = applyGlossary(typeof draft === "string" ? draft : draft[settings.mode === "maktab" ? 1 : 0], language, settings.wordChoices);
   const locale = formatLocale({ ...settings, language });

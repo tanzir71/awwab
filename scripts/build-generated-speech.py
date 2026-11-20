@@ -1,4 +1,4 @@
-"""Build the offline spoken Arabic clips with local speech models and FFmpeg."""
+"""Build offline speech clips with local models and FFmpeg."""
 
 import argparse
 from array import array
@@ -7,6 +7,8 @@ import json
 from pathlib import Path
 import re
 import subprocess
+import sys
+from tempfile import TemporaryDirectory
 import wave
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -16,6 +18,9 @@ OUTPUT = ROOT / "public/packs"
 MODEL = "https://huggingface.co/vadimbelsky/arabic-emirati-female-piper/tree/cfe173969620e40be65b5dd8ed4d97d55a864325"
 A3S = "https://huggingface.co/MahmoudIbrahim/A3S/tree/b6eb8229a94feb68887cb0ba926292921216cbd5"
 SPEAK_COURSES = ("saudi-a2", "saudi-b1", "gulf-a1", "umrah-hajj", "gulf-work")
+LJSPEECH = "https://huggingface.co/rhasspy/piper-voices/blob/b145f2ac26522d6a2ccde0164b7b0e48b1e3199c/en/en_US/ljspeech/medium/MODEL_CARD"
+INDIC_BENGALI = "https://huggingface.co/sulabhkatiyar/indic-tiny-tts-bengali/tree/a6bb92894272219d8d2bbd03cb1121a6be3164a8"
+RASA = "https://huggingface.co/datasets/ai4bharat/Rasa"
 
 
 def read(path):
@@ -56,17 +61,57 @@ def encode(synthesize_wav, path, text):
 
 def encode_wav(wav, path):
     path.parent.mkdir(parents=True, exist_ok=True)
+    codec, bitrate, container = ("libmp3lame", "48k", "mp3") if path.suffix == ".mp3" else ("libopus", "32k", "ogg")
+    filters = "loudnorm=I=-16:TP=-1:LRA=7,adelay=150,apad=pad_dur=0.15"
+    if container == "mp3":
+        filters += ",asetpts=N/SR/TB"
     result = subprocess.run(
-        ["ffmpeg", "-nostdin", "-loglevel", "error", "-i", "pipe:0", "-af",
-         "loudnorm=I=-16:TP=-1:LRA=7,adelay=150,apad=pad_dur=0.15", "-ac", "1", "-ar", "48000",
-         "-c:a", "libopus", "-b:a", "32k", "-f", "ogg", "pipe:1"],
+        ["ffmpeg", "-nostdin", "-loglevel", "error", "-i", "pipe:0", "-af", filters, "-ac", "1", "-ar", "48000",
+         "-c:a", codec, "-b:a", bitrate, "-f", container, "pipe:1"],
         input=wav, stdout=subprocess.PIPE, check=True,
     )
     if len(result.stdout) <= 500:
         raise ValueError(f"Empty clip for {path.name}")
-    temporary = path.with_suffix(".opus.part")
+    temporary = path.with_suffix(path.suffix + ".part")
     temporary.write_bytes(result.stdout)
     temporary.replace(path)
+
+
+def build_umrah_guide(model, piper, bangla_model):
+    sys.path.insert(0, str(bangla_model.resolve()))
+    from indic_tiny_tts import TinyTTSOnnx
+
+    bangla = TinyTTSOnnx(bangla_model, threads=2)
+    steps = read(CONTENT / "umrah-steps.json")["steps"]
+    clips = []
+    for language, name, speaker, source, license_url in (
+        ("en", "English", "Piper LJSpeech", LJSPEECH, "https://keithito.com/LJ-Speech-Dataset/"),
+        ("bn", "বাংলা", "Indic Tiny TTS Bengali", INDIC_BENGALI, "https://creativecommons.org/licenses/by/4.0/"),
+    ):
+        pack_id = f"umrah-guide-v1-{language}"
+        files = []
+        for step in steps:
+            ref = f"{pack_id}:{step['id']}"
+            relative = f"packs/audio/umrah-guide-v1/{language}/{step['id']}.mp3"
+            text = step["narration"][language]
+            with TemporaryDirectory() as directory:
+                target = Path(directory) / "clip.wav"
+                if language == "en":
+                    pronounced = text.replace("miqat", "mee-kaht").replace("Sa'y", "saa-ee")
+                    subprocess.run([piper, "--model", str(model), "--output_file", str(target)],
+                                   input=pronounced.encode("utf-8"), check=True)
+                else:
+                    bangla.tts_to_file(text, target, voice="female", speed=0.95, seed=0)
+                encode_wav(target.read_bytes(), ROOT / "public" / relative)
+            files.append({"ref": ref, "path": relative})
+        clips.append({
+            "id": pack_id, "language": language, "name": name, "speaker": speaker, "source": source,
+            "licenseUrl": license_url, "attribution": f"Generated speech · {speaker}",
+            "bytes": sum((ROOT / "public" / item["path"]).stat().st_size for item in files), "items": files,
+        })
+        if language == "bn":
+            clips[-1]["dataset"] = RASA
+    write(CONTENT / "umrah-guide-audio.json", {"packs": clips})
 
 
 def course_clips(units):
@@ -199,12 +244,20 @@ def build_male_ask(model_dir, phrases, resume):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("model", type=Path, help="Emirati Piper ONNX file, Nabra INT8 directory for msa-a1, or A3S directory for --ask-male")
+    parser.add_argument("model", type=Path, help="Piper ONNX file, Nabra INT8 directory for msa-a1, or A3S directory for --ask-male")
     task = parser.add_mutually_exclusive_group()
     task.add_argument("--course", choices=(*SPEAK_COURSES, "msa-a1"), help="Only rebuild the selected Speak course")
     task.add_argument("--ask-male", action="store_true", help="Build the second Ask voice using A3S")
+    task.add_argument("--umrah-guide", action="store_true", help="Build English and Bangla Umrah narration with Piper LJSpeech and Indic Tiny TTS")
+    parser.add_argument("--piper", default="piper", help="Piper executable for --umrah-guide")
+    parser.add_argument("--bangla-model", type=Path, help="Local Indic Tiny TTS Bengali model directory with code and ONNX graphs")
     parser.add_argument("--resume", action="store_true", help="Reuse completed clips when resuming an A3S build")
     args = parser.parse_args()
+    if args.umrah_guide:
+        if args.bangla_model is None:
+            parser.error("--umrah-guide requires --bangla-model")
+        build_umrah_guide(args.model, args.piper, args.bangla_model)
+        return
     if args.ask_male:
         build_male_ask(args.model, read(PHRASES)["phrases"], args.resume)
         return
