@@ -13,10 +13,9 @@ import { latinDigits } from "@/lib/localeNumbers";
 import { speakSetupPath } from "@/lib/speakCurriculum";
 import { updateRecord } from "@/lib/storageService";
 import { emptyPreparation, initialTrip, makkah, maskedPhone, type TripState, type UmrahTrip } from "@/lib/umrah";
-import { answerWords, arabicNumber, askCategories, askDefaults, askMeaning, askPhrase, askPhraseMatches, askPhrasePath as phraseLink, askPlaces, askRelations, askVarieties, askVoices, helperDirections,
+import { answerWords, arabicNumber, askCategories, askClipIds, askDefaults, askMeaning, askPhrase, askPhraseMatches, askPhrasePath as phraseLink, askPlaces, askRelations, askVarieties, askVoices, helperDirections,
   quickAsks, readGate, renderAsk, umrahPhrases, type AskPhrase, type AskVariety, type AskVoice, type CustomPhrase } from "@/lib/umrahAsk";
 import { askSignKey } from "@/lib/umrah-phrase-messages.mjs";
-import { askClipIds } from "@/lib/umrahAskAudio";
 
 const home = "/umrah/ask";
 const cards = `${home}/cards`;

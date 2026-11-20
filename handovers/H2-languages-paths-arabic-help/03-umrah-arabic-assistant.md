@@ -47,6 +47,8 @@ Publish the reviewed Opus files under `public/packs/phrases/<variety>/<voice>/`.
 
 The speech builder writes a checksum for every recording. Run `python scripts/build-generated-speech.py --ask-manifest` to regenerate the checksum index and manifest from existing audio. Keep both files with the matching clips. Download and repair verify the index and each clip. Repair keeps matching cached audio and fetches missing or changed clips.
 
+Run `node scripts/export-ask-review.mjs <new-directory>` to prepare the offline pronunciation review. Share the whole directory as a ZIP if needed. Open `index.html` in a browser after extracting it. The viewer shows the published Arabic, transliteration and English beside the generated recordings, including both audio segments for every gate from 1 to 300. Each reviewer exports their own decisions and notes. The review file identifies the exact text and recordings so corrections can be applied to the right revision.
+
 ## Phrase translations
 
 English and Bangla meanings are bundled with the phrase data. The locale review export includes each phrase as `askPhrase-<id>` and each sign as `askSign-<id>`. Keep the ICU arguments for gate numbers, destinations and family members in the translation. The destination and family labels have their own catalogue entries.

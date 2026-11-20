@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ask in Arabic pronunciation review</title>
+<style>
+  :root { color-scheme: light; font: 16px/1.5 system-ui, sans-serif; color: #172d27; background: #f2f6f3; }
+  body { max-width: 52rem; margin: auto; padding: 1.25rem; }
+  h1 { font-size: clamp(1.5rem, 5vw, 2.1rem); line-height: 1.2; }
+  h2 { margin-block-start: 0; }
+  main { display: grid; gap: 1rem; }
+  section { background: #fff; border-radius: .75rem; padding: 1rem; }
+  .fields { display: flex; flex-wrap: wrap; gap: .75rem; }
+  label { display: grid; gap: .2rem; flex: 1 1 10rem; }
+  input, select, textarea, button { font: inherit; }
+  input, select, textarea { min-width: 0; max-width: 100%; padding: .4rem; }
+  button { padding: .45rem .85rem; cursor: pointer; }
+  #entry, textarea { width: 100%; box-sizing: border-box; }
+  .actions { display: flex; gap: .75rem; flex-wrap: wrap; margin-block: 1rem; }
+  #arabic { font-size: 2rem; text-align: start; margin-block: .75rem; }
+  #audio { display: flex; flex-wrap: wrap; gap: 1rem; margin-block: 1rem; }
+  audio { display: block; width: min(100%, 19rem); }
+  #notice { min-height: 1.5em; color: #40574f; }
+  #entry-id { overflow-wrap: anywhere; }
+</style>
+<header>
+  <h1>Ask in Arabic pronunciation review</h1>
+  <p id="coverage"></p>
+  <p>Listen to the generated speech and compare it with the Arabic shown in the app. For gate entries, listen to the prefix and the number in order. Record pronunciation, dialect or text corrections in Notes.</p>
+</header>
+<main>
+  <section aria-label="Review settings">
+    <div class="fields">
+      <label>Reviewer name <input id="reviewer" required maxlength="100"></label>
+      <label><span id="variety-label">Variety</span> <select id="variety" aria-labelledby="variety-label">
+        <option value="saudi">Saudi Hijazi</option><option value="msa">Modern Standard Arabic</option>
+      </select></label>
+      <label><span id="voice-label">Voice</span> <select id="voice" aria-labelledby="voice-label"></select></label>
+    </div>
+    <p id="assignment"></p>
+    <label>Find an entry <input id="search" type="search" placeholder="Arabic, English or gate number"></label>
+    <p><label><span id="entry-label">Entry</span> <select id="entry" aria-labelledby="entry-label"></select></label></p>
+    <div class="actions"><button id="previous" type="button">Previous</button><button id="next" type="button">Next</button></div>
+    <p id="progress"></p>
+  </section>
+  <section id="entry-panel" aria-label="Selected recording">
+    <h2 id="entry-id"></h2>
+    <p lang="ar" dir="rtl" id="arabic"></p>
+    <p id="transliteration"></p>
+    <p id="meaning"></p>
+    <div id="audio"></div>
+    <div class="fields">
+      <label><span id="decision-label">Decision</span> <select id="decision" aria-labelledby="decision-label"><option value="">Pending</option><option value="approved">Approved</option>
+        <option value="needs-changes">Needs changes</option></select></label>
+      <label>Notes <textarea id="notes" rows="3" maxlength="2000"></textarea></label>
+    </div>
+  </section>
+  <section aria-label="Review file">
+    <p>Export your review before closing this page. Import that file to resume. Each reviewer should start with a fresh copy of the page and return their own review file.</p>
+    <div class="fields">
+      <button id="export" type="button">Export review</button>
+      <label>Import review <input id="import" type="file" accept=".json,application/json"></label>
+    </div>
+    <p id="notice" role="status"></p>
+  </section>
+</main>
+<script type="application/json" id="source">/* REVIEW SOURCE */</script>
+<script>
+  const byId = name => document.getElementById(name);
+  const source = JSON.parse(byId("source").textContent);
+  const variety = byId("variety");
+  const voice = byId("voice");
+  const entry = byId("entry");
+  const search = byId("search");
+  const decision = byId("decision");
+  const notes = byId("notes");
+  const reviewer = byId("reviewer");
+  const notice = byId("notice");
+  const rowsById = new Map(source.rows.map(row => [row.id, row]));
+  const allowedDecisions = new Set(["", "approved", "needs-changes"]);
+  const assignments = {
+    saudi: "Two native Saudi Hijazi reviewers are needed, including one living in Makkah.",
+    msa: "An Arabic teacher reviews the Modern Standard Arabic entries.",
+  };
+  let reviews = new Map();
+  let filtered = [];
+
+  byId("coverage").textContent = `Draft review · ${source.rows.length} entries · ${source.clipCount} recordings`;
+  for (const [id, credit] of Object.entries(source.voices)) {
+    voice.add(new Option(`${id === "female" ? "Female" : "Male"} · ${credit.name}`, id));
+  }
+
+  function progress() {
+    const decided = rows => rows.filter(row => reviews.get(row.id)?.decision).length;
+    byId("progress").textContent = `${decided(filtered)} of ${filtered.length} matching entries reviewed · ${decided(source.rows)} of ${source.rows.length} overall`;
+  }
+
+  function showEntry() {
+    const row = rowsById.get(entry.value);
+    const index = entry.selectedIndex;
+    byId("entry-panel").hidden = !row;
+    byId("previous").disabled = !row || index === 0;
+    byId("next").disabled = !row || index === filtered.length - 1;
+    const player = byId("audio");
+    for (const clip of player.querySelectorAll("audio")) clip.pause();
+    player.replaceChildren();
+    if (!row) return;
+    byId("entry-id").textContent = row.label;
+    byId("arabic").textContent = row.expected.ar;
+    byId("transliteration").textContent = row.expected.tr;
+    byId("meaning").textContent = row.expected.en;
+    for (const [index, clip] of row.recordings.entries()) {
+      const group = document.createElement("div");
+      const label = document.createElement("div");
+      label.textContent = row.recordings.length === 1 ? "Recording" : index === 0 ? "Gate prefix" : "Gate number";
+      const audio = document.createElement("audio");
+      audio.src = clip.path;
+      audio.controls = true;
+      audio.preload = "none";
+      audio.setAttribute("aria-label", label.textContent);
+      group.append(label, audio);
+      player.append(group);
+    }
+    decision.value = reviews.get(row.id)?.decision ?? "";
+    notes.value = reviews.get(row.id)?.notes ?? "";
+  }
+
+  function filterEntries() {
+    const selected = entry.value;
+    const query = search.value.trim().toLocaleLowerCase();
+    filtered = source.rows.filter(row => row.variety === variety.value && row.voice === voice.value &&
+      [row.label, row.expected.ar, row.expected.en, row.expected.tr].some(text => text.toLocaleLowerCase().includes(query)));
+    entry.replaceChildren(...filtered.map(row => new Option(row.label, row.id)));
+    if (filtered.some(row => row.id === selected)) entry.value = selected;
+    byId("assignment").textContent = assignments[variety.value];
+    showEntry();
+    progress();
+  }
+
+  function updateReview() {
+    if (!entry.value) return;
+    if (decision.value || notes.value.trim()) reviews.set(entry.value, { decision: decision.value, notes: notes.value });
+    else reviews.delete(entry.value);
+    progress();
+  }
+
+  for (const control of [variety, voice]) control.addEventListener("change", filterEntries);
+  search.addEventListener("input", filterEntries);
+  entry.addEventListener("change", showEntry);
+  decision.addEventListener("change", updateReview);
+  notes.addEventListener("input", updateReview);
+  byId("previous").addEventListener("click", () => { entry.selectedIndex--; showEntry(); });
+  byId("next").addEventListener("click", () => { entry.selectedIndex++; showEntry(); });
+
+  byId("export").addEventListener("click", () => {
+    if (!reviewer.reportValidity() || !reviewer.value.trim()) {
+      notice.textContent = "Enter your name to export your review.";
+      return;
+    }
+    if (!reviews.size) {
+      notice.textContent = "Add a decision or note before exporting.";
+      return;
+    }
+    const report = {
+      format: "awwab-ask-pronunciation-review",
+      reviewer: reviewer.value.trim(),
+      reviewSourceSha256: source.reviewSourceSha256,
+      entries: Object.fromEntries(reviews),
+    };
+    const url = URL.createObjectURL(new Blob([JSON.stringify(report, null, 2) + "\n"], { type: "application/json" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "awwab-ask-review.json";
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    notice.textContent = "Review file exported.";
+  });
+
+  byId("import").addEventListener("change", async event => {
+    const input = event.currentTarget;
+    const file = input.files[0];
+    if (!file) return;
+    try {
+      const report = JSON.parse(await file.text());
+      if (report.format !== "awwab-ask-pronunciation-review" || report.reviewSourceSha256 !== source.reviewSourceSha256 ||
+        typeof report.reviewer !== "string" || !report.reviewer.trim() || report.reviewer.length > 100) throw new Error();
+      const annotations = Object.entries(report.entries);
+      if (annotations.some(([id, review]) => !rowsById.has(id) || !allowedDecisions.has(review?.decision) ||
+        typeof review?.notes !== "string" || review.notes.length > 2000)) throw new Error();
+      reviewer.value = report.reviewer;
+      reviews = new Map(annotations);
+      filterEntries();
+      notice.textContent = "Review file loaded.";
+    } catch {
+      notice.textContent = "This file does not match the review package.";
+    } finally {
+      input.value = "";
+    }
+  });
+  filterEntries();
+</script>
+</html>

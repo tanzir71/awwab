@@ -16,8 +16,8 @@ import { speakSetupPath } from "@/lib/speakCurriculum";
 import { exportUmrahTrip, updateRecord } from "@/lib/storageService";
 import { emptyPreparation, initialTrip, maskedPhone, tripChecklist, tripDates, type TripCheck, type UmrahTrip } from "@/lib/umrah";
 import { cachedMapPack, mapPacks, mapRegions, saveMapPack, type MapRegion } from "@/lib/umrahMapPack";
-import { askDefaults, askHomePath, askMeaning, askPhrase, askPhraseMatches, askPhrasePath, readGate, renderAsk, umrahPhrases as phrases, type AskPhrase } from "@/lib/umrahAsk";
-import { askClipIds } from "@/lib/umrahAskAudio";
+import { askClipIds, askDefaults, askHomePath, askMeaning, askPhrase, askPhraseMatches, askPhrasePath, readGate, renderAsk, umrahPhrases as phrases,
+  type AskPhrase } from "@/lib/umrahAsk";
 import { umrahGuidePack } from "@/lib/umrahGuideAudio";
 
 const samples = ["toilet", "gate-number", "take-me-hotel"].map(askPhrase);

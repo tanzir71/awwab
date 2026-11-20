@@ -1,8 +1,7 @@
 import { asset } from "./config";
 import { audioCache } from "./audio";
 import { hasSharedSpeakAudio } from "./speakAskAudio";
-import { askClipPath, askGenderVariant, askPlaces, askRelations, askVarieties, askVoices, umrahPhrases,
-  type AskPhrase, type AskVariety, type AskVoice } from "./umrahAsk";
+import { askClipPath, askRecordingScenarios, askVarieties, askVoices, type AskVariety, type AskVoice } from "./umrahAsk";
 
 type VoiceCredit = { name: string; source: string; bytes: number };
 type AudioManifest = {
@@ -28,27 +27,10 @@ export const askVoiceInstalled = (version: number, voice: AskVoice) => Boolean(a
 export const askPlaybackVoice = (version: number, preferred: AskVoice) =>
   askVoiceInstalled(version, preferred) ? preferred : packVoices.includes("female") ? "female" : packVoices[0];
 
-export function askClipIds(phrase: AskPhrase, options: { variety: AskVariety; speaker?: AskVoice | ""; toFemale?: boolean;
-  gate?: number; place?: keyof typeof askPlaces; relation?: keyof typeof askRelations }) {
-  if (phrase.id === "gate-number") return [phrase.id, `number-${options.gate ?? 79}`];
-  if (phrase.id === "bus-to") return [`${phrase.id}-${options.place ?? "madinah"}`];
-  if (phrase.id === "lost-family") return [`${phrase.id}-${options.relation ?? "mother"}`];
-  const variant = askGenderVariant(phrase, options.variety, options);
-  return [variant ? `${phrase.id}-${variant.suffix}` : phrase.id];
-}
-
-function recordings(variety: AskVariety) {
-  return [...new Set([
-    ...umrahPhrases.flatMap(phrase => {
-      if (phrase.id === "bus-to") return Object.keys(askPlaces).map(place => `bus-to-${place}`);
-      if (phrase.id === "lost-family") return Object.keys(askRelations).map(relation => `lost-family-${relation}`);
-      return [phrase.id, ...askClipIds(phrase, { variety, speaker: "female" }), ...askClipIds(phrase, { variety, toFemale: true })];
-    }),
-    ...Array.from({ length: 300 }, (_, index) => `number-${index + 1}`),
-  ])];
-}
-
-export const askPackPaths = () => askVarieties.flatMap(variety => packVoices.flatMap(voice => recordings(variety).map(id => askClipPath(variety, voice, id))));
+export const askPackPaths = () => askVarieties.flatMap(variety => {
+  const clips = new Set(askRecordingScenarios(variety).flatMap(scenario => scenario.clips));
+  return packVoices.flatMap(voice => Array.from(clips, id => askClipPath(variety, voice, id)));
+});
 const absolute = (path: string) => new URL(asset(path), location.origin).href;
 
 async function verifiedBytes(response: Response | undefined, expected: string) {

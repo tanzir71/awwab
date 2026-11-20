@@ -1,5 +1,5 @@
-import source from "../../handovers/H2-languages-paths-arabic-help/data/umrah-phrases.json";
-import replies from "../../handovers/H2-languages-paths-arabic-help/data/reply-words.json";
+import source from "../../handovers/H2-languages-paths-arabic-help/data/umrah-phrases.json" with { type: "json" };
+import replies from "../../handovers/H2-languages-paths-arabic-help/data/reply-words.json" with { type: "json" };
 import type { TripState } from "./umrah";
 import { askPhraseKey } from "./umrah-phrase-messages.mjs";
 
@@ -63,6 +63,7 @@ export const askRelations = {
 
 type AskSlots = { gate?: number; place?: keyof typeof askPlaces; relation?: keyof typeof askRelations };
 type AskGender = { speaker?: AskVoice | ""; toFemale?: boolean };
+type RecordingOptions = AskSlots & AskGender;
 type Translate = (key: string, values?: Record<string, string | number>) => string;
 
 export function askGenderVariant(phrase: AskPhrase, variety: AskVariety, options: AskGender) {
@@ -70,6 +71,34 @@ export function askGenderVariant(phrase: AskPhrase, variety: AskVariety, options
   if (toWoman) return { text: toWoman, suffix: "to-woman" };
   const femaleSpeaker = options.speaker === "female" && phrase.gender?.speakerFemale?.[variety];
   if (femaleSpeaker) return { text: femaleSpeaker, suffix: "speaker-female" };
+}
+
+export function askClipIds(phrase: AskPhrase, options: RecordingOptions & { variety: AskVariety }) {
+  if (phrase.id === "gate-number") return [phrase.id, `number-${options.gate ?? 79}`];
+  if (phrase.id === "bus-to") return [`${phrase.id}-${options.place ?? "madinah"}`];
+  if (phrase.id === "lost-family") return [`${phrase.id}-${options.relation ?? "mother"}`];
+  const variant = askGenderVariant(phrase, options.variety, options);
+  return [variant ? `${phrase.id}-${variant.suffix}` : phrase.id];
+}
+
+export function askRecordingScenarios(variety: AskVariety) {
+  return umrahPhrases.flatMap(phrase => {
+    let choices: RecordingOptions[];
+    switch (phrase.id) {
+      case "gate-number": choices = Array.from({ length: 300 }, (_, index) => ({ gate: index + 1 })); break;
+      case "bus-to": choices = (Object.keys(askPlaces) as Array<keyof typeof askPlaces>).map(place => ({ place })); break;
+      case "lost-family": choices = (Object.keys(askRelations) as Array<keyof typeof askRelations>).map(relation => ({ relation })); break;
+      default: choices = [{}, { speaker: "female" }, { toFemale: true }];
+    }
+    const seen = new Set<string>();
+    return choices.flatMap(options => {
+      const clips = askClipIds(phrase, { ...options, variety });
+      const id = clips.at(-1);
+      if (seen.has(id)) return [];
+      seen.add(id);
+      return [{ id, phrase, options, clips }];
+    });
+  });
 }
 
 export function askMeaning(phrase: AskPhrase, t: Translate, { gate = 79, place = "madinah", relation = "mother" }: AskSlots = {}) {
@@ -81,7 +110,7 @@ export function askPhraseMatches(phrase: AskPhrase, needle: string, meaning: str
     .some(value => value.normalize().toLowerCase().includes(needle));
 }
 
-export function renderAsk(phrase: AskPhrase, variety: AskVariety, options: AskSlots & AskGender = {}) {
+export function renderAsk(phrase: AskPhrase, variety: AskVariety, options: RecordingOptions = {}) {
   const gate = options.gate ?? 79;
   const place = askPlaces[options.place] ?? askPlaces.madinah;
   const relation = askRelations[options.relation] ?? askRelations.mother;
