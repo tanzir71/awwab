@@ -1,9 +1,11 @@
 import { readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
+import { message } from "./copy";
 import { chapters, essentialPassages, getHifzPassage, groupPortions, juzs, maxPortionAyahs, maxPortionWords, nextPortion,
   passageLabel, portionBucket, portionPlan, ratePortion, rateRecitalPortion, recitalProgress, studyPhrases, verseText, type JuzRecital, type StudyQuran } from "./hifz";
 import { juzAmma, learnedSurahs, levels, patternPracticePath, patternReviewPrefix, tracks } from "./learningPaths";
+import { essentialPassageTitle } from "./paths-copy";
 import { parseCorpus } from "./morphology";
 import { reviewDestination } from "./studyDesk";
 import { normalizeWord, splitArabicWords } from "./wordAnatomy";
@@ -11,6 +13,7 @@ import content from "../../docs/content/roots-and-patterns.json";
 import grammar from "../../docs/content/grammar-foundations.json";
 import sentence from "../../docs/content/sentence-structure.json";
 import roots from "../../docs/content/roots-curriculum.json";
+import curriculum from "../../handovers/H2-languages-paths-arabic-help/data/learning-paths.json";
 import { speakCourses, speakLessonContent } from "./speakCurriculum";
 import { correctTajweedSamples, tajweedClip, tajweedDepthLessons, tajweedExcerpt, tajweedLessons, tajweedPracticeSamples, tajweedPrecache,
   tajweedProgress, tajweedReviewId, tajweedSampleKey } from "./tajweed";
@@ -220,6 +223,21 @@ describe("Learning path progress", () => {
     expect(tracks.map(track => levels[track].length)).toEqual([5, 5, 5, 5]);
     expect(juzAmma).toHaveLength(37);
     expect(juzAmma.map(chapter => chapter.words)).toEqual(juzAmma.map(chapter => chapter.words).sort((a, b) => a - b));
+  });
+
+  it("translates every level and essential passage name while preserving the English curriculum labels", () => {
+    const english = (key: string) => message({ language: "en", mode: "adult" }, key);
+    const bangla = (key: string) => message({ language: "bn", mode: "maktab" }, key);
+    for (const track of tracks) {
+      const { levels: planned } = curriculum.tracks[track];
+      const titles = track === "speak" ? [...planned, ...curriculum.tracks.speak.packs] : planned;
+      expect(levels[track].map(item => english(item.titleKey))).toEqual(titles.map(item => item.title));
+      for (const item of levels[track]) expect(bangla(item.titleKey)).toMatch(/\p{Script=Bengali}/u);
+    }
+    for (const passage of essentialPassages) {
+      expect(essentialPassageTitle(passage, english)).toBe(passage.title);
+      expect(essentialPassageTitle(passage, bangla)).toMatch(/\p{Script=Bengali}/u);
+    }
   });
 
   it("requires success on three different days and keeps a separate long-term schedule", () => {

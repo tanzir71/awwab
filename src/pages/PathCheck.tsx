@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { ArabicText } from "@/components/ArabicText";
 import { DesignIcon } from "@/components/DesignIcon";
 import { PlacementAudio } from "@/components/PlacementAudio";
+import { QuranStudySources } from "@/components/QuranStudySources";
 import { useCopy } from "@/lib/copy";
 import { dateKey } from "@/lib/dates";
 import { levels, pathUrl, tracks, type PathPlacement, type Track } from "@/lib/learningPaths";
@@ -64,13 +65,14 @@ function CheckRound({ track, settings, now }: { track: Track; settings: Settings
         {question.answer && (/\p{Script=Arabic}/u.test(question.answer)
           ? <ArabicText text={question.answer} citation={question.ref} preserveSeparators /> : <p lang="en">{question.answer}</p>)}
         {question.audio && <PlacementAudio key={question.audio} reference={question.audio} title={question.ref} />}
-        {question.ref && <small>{question.ref}</small>}</div>}
+        {question.ref && <small>{question.ref}</small>}
+        {track === "understand" && <QuranStudySources script="uthmani" english />}</div>}
       {!revealed ? <button className="action" type="button" onClick={() => reveal(true)}>{t("pathsCheckReveal")}</button>
         : <div className="equal-row"><button type="button" className="action light" disabled={pending} onClick={() => void grade(false)}>{t("forgot")}</button>
           <button type="button" className="action" disabled={pending} onClick={() => void grade(true)}>{t("got-it")}</button></div>}
       {error && <p role="alert">{t("hifzSaveError")}</p>}
     </section> : <section className="card compact-stack"><h2>{t("pathsCheckScore", { score, total: questions.length })}</h2>
-      <p>{t("pathsCheckLevel", { title: levels[track][level - 1].title })}</p>
+      <p>{t("pathsCheckLevel", { title: t(levels[track][level - 1].titleKey) })}</p>
       <div className="equal-row"><button className="action light" type="button" onClick={() => { setIndex(0); setScore(0); }}>{t("pathsCheckAgain")}</button>
         <Link className="action" to={pathUrl(track, level)}>{t("pathsStart")}</Link></div>
     </section>}

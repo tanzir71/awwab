@@ -1,21 +1,21 @@
 import { useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, Navigate, useLocation, useParams } from "react-router-dom";
 import { ArabicText } from "@/components/ArabicText";
 import { DesignIcon } from "@/components/DesignIcon";
-import { StudyText } from "@/components/StudyText";
 import { useQaidaPlace, useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { asset } from "@/lib/config";
 import { focusListItem } from "@/lib/focusListItem";
 import { chapters, essentialPassages, getHifzPassage, juzs, kursiOpening, passageLabel, studyChapters, type HifzReviews } from "@/lib/hifz";
 import { grammarReviewPrefix, juzAmma, learnedSurahs, levels, pathUrl, patternReviewPrefix, rootsReviewPrefix, salahChapters, sentenceReviewPrefix,
-  tracks, trackStatus, type PathLevel, type PathPlacement, type Track } from "@/lib/learningPaths";
+  tracks, type PathPlacement, type Track } from "@/lib/learningPaths";
+import { essentialPassageTitle } from "@/lib/paths-copy";
 import { countKnownQuranWords, quranText } from "@/lib/quran";
 import { studyNames } from "@/lib/study-copy";
 import type { Reviews } from "@/lib/reviews";
 import { tajweedDepthLessons, tajweedIndex, tajweedLessons, tajweedProgress } from "@/lib/tajweed";
 import { completedReadingChapters, emptyReadingPractice, practiceChapters, teacherChecklistComplete } from "@/lib/readingPractice";
-import { defaultSpeakVariety, speakCourses, speakCourseVariety, speakLevelLabels, speakPackDetails, speakPathCourses,
+import { defaultSpeakVariety, speakCourses, speakCourseVariety, speakPathCourses,
   speakProgressKey, speakVarietyKey, speakVarietyLabels, type SpeakVariety } from "@/lib/speakCurriculum";
 import grammar from "../../docs/content/grammar-foundations.json";
 import roots from "../../docs/content/roots-curriculum.json";
@@ -29,6 +29,11 @@ const blankHifz: HifzReviews = {};
 const blankPlacement: PathPlacement = {};
 const emptyStrings: string[] = [];
 const emptyNumbers: number[] = [];
+const memoriseSummaries = ["pathsEssentialSummary", "pathsFridayEidSummary", "pathsHifzSummary"];
+const outlines = {
+  read: { links: [["/learn/qaida", "nooraniQaida"], ["/learn/takhti", "takhti"]], units: ["pathsQaidaOutline"] },
+  understand: { links: [["/learn/words", "wordBankName"], ["/learn/salah", "understandSalah"]], units: ["pathsCoreWordsOutline", "pathsSalahOutline"] },
+};
 const rootsLessonTotal = roots.lessons.length + 1;
 const practiceLink = (id: string) => `/learn/hifz/${id}`;
 const levelLink = (track: Track, level: number) => track === "read" && level === 3 ? tajweedIndex : pathUrl(track, level);
@@ -91,11 +96,6 @@ function usePathState() {
   return { active, complete, completedQaida, learned, short, amma, known, current, placement, speakVariety, spokenCourses, spokenDone, grammarCount, rootsCount, sentenceCount, tajweed, tajweedDepth, fluent, understood, prepared };
 }
 
-function headingLevel(track: Track, active: number) { return levels[track][active - 1]; }
-function pathLevelTitle(track: Track, level: number, t: ReturnType<typeof useCopy>["t"]) {
-  const course = speakPathCourses[level - 1];
-  return track === "speak" && speakPackDetails[course] ? t(speakLevelLabels[course]) : headingLevel(track, level).title;
-}
 function levelDone(track: Track, level: number, state: ReturnType<typeof usePathState>) {
   return level <= state.complete[track] ||
     (track === "read" && level === 2 && state.fluent === juzAmma.length) ||
@@ -123,19 +123,19 @@ function contextLabel(track: Track, level: number, state: ReturnType<typeof useP
   if (track === "read" && level === 3) return t("pathsLessonProgress", { count: state.tajweed.completed, total: tajweedLessons.length });
   if (track === "read" && level === 4) return t("pathsLessonProgress", { count: state.tajweedDepth.completed, total: tajweedDepthLessons.length });
   if (track === "read" && level === 5) return t("readingPreparedCount", { count: state.prepared });
-  if (track === "memorise" && level === 1) return `${trackStatus.memorise[0]} · ${t("pathsSalahCount", { count: state.short, total: salahChapters.length })}`;
-  if (track === "memorise" && level === 2) return `${trackStatus.memorise[1]} · ${t("pathsAmmaCount", { count: state.amma })}`;
+  if (track === "memorise") {
+    if (level === 1) return t("pathsSalahProgress", { count: state.short, total: salahChapters.length });
+    if (level === 2) return t("pathsAmmaProgress", { count: state.amma });
+    return t(memoriseSummaries[level - 3]);
+  }
   if (track === "understand" && level === 1) return t("pathsCoreCount", { count: state.known });
   if (track === "understand" && level === 2) return t("pathsLessonProgress", { count: state.grammarCount, total: grammar.lessons.length });
   if (track === "understand" && level === 3) return t("pathsLessonProgress", { count: state.rootsCount, total: rootsLessonTotal });
   if (track === "understand" && level === 4) return t("readingSurahsProgress", { count: state.understood, total: juzAmma.length });
   if (track === "understand" && level === 5) return t("pathsLessonProgress", { count: state.sentenceCount, total: sentence.lessons.length });
   const course = state.spokenCourses[level - 1];
-  if (track === "speak" && course) {
-    const progress = t("pathsLessonProgress", { count: course.count, total: course.total });
-    return state.speakVariety === defaultSpeakVariety && course.variety === defaultSpeakVariety ? progress : `${t(speakVarietyLabels[course.variety])} · ${progress}`;
-  }
-  return trackStatus[track][level - 1];
+  const progress = t("pathsLessonProgress", { count: course.count, total: course.total });
+  return state.speakVariety === defaultSpeakVariety && course.variety === defaultSpeakVariety ? progress : `${t(speakVarietyLabels[course.variety])} · ${progress}`;
 }
 
 function LevelNumber({ level, done, active, desktop, tag }: { level: number; done: boolean; active: boolean; desktop: boolean; tag?: string }) {
@@ -151,8 +151,8 @@ function MobileTrackCard({ track, state }: { track: Track; state: ReturnType<typ
   return <Link className="card paths-mobile-track" to={pathUrl(track)}>
     <div className="with-icon"><PathIcon track={track} desktop={false} /><div><h2>{t(trackKeys[track])}</h2><p className="small muted">{t(`${trackKeys[track]}Overview`)}</p></div></div>
     <div className="equal-row paths-steps" aria-hidden="true">{levels[track].map((item, index) =>
-      <span key={item.id} data-state={levelDone(track, index + 1, state) ? "done" : index + 1 === level ? "current" : "open"} />)}</div>
-    <p className="small">{t("pathsLevelStatus", { number: level, title: pathLevelTitle(track, level, t) })}
+      <span key={item.titleKey} data-state={levelDone(track, index + 1, state) ? "done" : index + 1 === level ? "current" : "open"} />)}</div>
+    <p className="small">{t("pathsLevelStatus", { number: level, title: t(levels[track][level - 1].titleKey) })}
       {track === "memorise" && level === 2 && ` · ${t("pathsAmmaCount", { count: state.amma })}`}
       {track === "understand" && level === 1 && ` · ${t("pathsCoreCount", { count: state.known })}`}</p>
   </Link>;
@@ -165,12 +165,12 @@ function DesktopTrackCard({ track, state }: { track: Track; state: ReturnType<ty
     {levels[track].map((item, index) => {
       const isCurrent = index + 1 === state.active[track];
       const isDone = levelDone(track, index + 1, state);
-      return <Link className="paths-level-link" data-state={isDone ? "done" : isCurrent ? "current" : "open"} key={item.id} to={levelLink(track, index + 1)}>
-        <LevelNumber level={index + 1} done={isDone} active={isCurrent} tag={item.tag} desktop />
-        <div><strong>{pathLevelTitle(track, index + 1, t)}</strong><small>{contextLabel(track, index + 1, state, t)}</small></div>
+      return <Link className="paths-level-link" data-state={isDone ? "done" : isCurrent ? "current" : "open"} key={item.titleKey} to={levelLink(track, index + 1)}>
+        <LevelNumber level={index + 1} done={isDone} active={isCurrent} tag={item.tag && t(item.tag)} desktop />
+        <div><strong>{t(item.titleKey)}</strong><small>{contextLabel(track, index + 1, state, t)}</small></div>
       </Link>;
     })}
-    <Link className="action" to={levelLink(track, state.active[track])}>{t("pathsContinue", { track: t(trackKeys[track]).toLocaleLowerCase() })}</Link>
+    <Link className="action" to={levelLink(track, state.active[track])}>{t("pathsContinue", { track })}</Link>
   </section>;
 }
 
@@ -179,7 +179,7 @@ function PathsHome({ desktop = false }: { desktop?: boolean }) {
   const place = useQaidaPlace();
   const state = usePathState();
   const passage = getHifzPassage(state.current || (state.complete.memorise ? "ayat-al-kursi" : undefined));
-  const recommendation = passage ? { title: passage.title, detail: `${passageLabel(passage)} · ${t("hifzAyahs", { count: passage.ayahs })}`, href: practiceLink(passage.id),
+  const recommendation = passage ? { title: essentialPassageTitle(passage, t), detail: `${passageLabel(passage)} · ${t("hifzAyahs", { count: passage.ayahs })}`, href: practiceLink(passage.id),
     sample: passage.id === "ayat-al-kursi" ? kursiOpening : undefined, citation: "2:255" }
     : !state.complete.read ? { title: studyNames.lesson(language, place.lesson, "Qaida"), detail: t("pathsQaidaCount", { count: state.completedQaida.length }), href: `/learn/qaida/${place.lesson}` }
       : { title: studyNames.surah(language, 103, "Al-ʿAsr"), detail: t("listenReadRecall"), href: "/learn/surahs/103", sample: quranText[103][0].uthmani, citation: "103:1" };
@@ -251,10 +251,10 @@ function TrackLevels({ track }: { track: Track }) {
       const number = index + 1;
       const active = state.active[track] === number;
       const done = levelDone(track, number, state);
-      return <li key={item.id}>
+      return <li key={item.titleKey}>
         <LevelNumber level={number} active={active} done={done} desktop={false} />
         <Link className="card paths-level-mobile" data-state={done ? "done" : active ? "current" : "open"} to={levelLink(track, number)}>
-          <div className="row-between"><strong>{pathLevelTitle(track, number, t)}</strong><span className="chip caption">{done ? t("pathsDone") : active ? t("pathsInProgress") : item.tag ?? t("pathsLevel", { number })}</span></div>
+          <div className="row-between"><strong>{t(item.titleKey)}</strong><span className="chip caption">{done ? t("pathsDone") : active ? t("pathsInProgress") : item.tag ? t(item.tag) : t("pathsLevel", { number })}</span></div>
           <p className="small muted">{contextLabel(track, number, state, t)}</p>
           {active && track === "memorise" && number === 2 && <progress max={37} value={state.amma} aria-label={t("pathsAmmaCount", { count: state.amma })} />}
         </Link>
@@ -268,7 +268,7 @@ function TrackLevels({ track }: { track: Track }) {
 function PassageRow({ id, title, done = false }: { id: string; title?: string; done?: boolean }) {
   const { t } = useCopy();
   const passage = getHifzPassage(id);
-  return <Link className="list-row paths-passage" to={practiceLink(id)}><div><strong>{title ?? passage.title}</strong>
+  return <Link className="list-row paths-passage" to={practiceLink(id)}><div><strong>{title ?? essentialPassageTitle(passage, t)}</strong>
     <small><bdi>{passageLabel(passage)}</bdi> · {t("hifzAyahs", { count: passage.ayahs })}</small></div>{done && <span className="chip soft">{t("pathsDone")}</span>}</Link>;
 }
 
@@ -300,18 +300,13 @@ function MemoriseLevel({ number }: { number: number }) {
   </div>;
 }
 
-function Outline({ track, item, number }: { track: Track; item: PathLevel; number: number }) {
+function Outline({ track }: { track: keyof typeof outlines }) {
   const { t } = useCopy();
-  const links: Record<string, { to: string; label: string }[]> = {
-    read1: [{ to: "/learn/qaida", label: "nooraniQaida" }, { to: "/learn/takhti", label: "takhti" }],
-    understand1: [{ to: "/learn/words", label: "wordBankName" }, { to: "/learn/salah", label: "understandSalah" }],
-  };
-  const available = links[track + number];
-  const units = typeof item.units === "string" ? [trackStatus[track][number - 1]] : item.units;
+  const { links, units } = outlines[track];
   return <>
-    {available && <div className="compact-stack">{available.map(link => <Link key={link.to} className="action" to={link.to}>{t(link.label)}</Link>)}</div>}
-    <section className="card compact-stack"><h2>{t(available ? "pathsOutline" : "pathsOutlineDraft")}</h2>
-      <ul className="paths-outline-list">{units.map(unit => <li key={unit}><StudyText text={unit} /></li>)}</ul>
+    <div className="compact-stack">{links.map(([to, label]) => <Link key={to} className="action" to={to}>{t(label)}</Link>)}</div>
+    <section className="card compact-stack"><h2>{t("pathsOutline")}</h2>
+      <ul className="paths-outline-list">{units.map(key => <li key={key}>{t(key)}</li>)}</ul>
     </section>
   </>;
 }
@@ -319,14 +314,17 @@ function Outline({ track, item, number }: { track: Track; item: PathLevel; numbe
 export function Paths({ desktop }: { desktop: boolean }) {
   const { t } = useCopy();
   const { track: id, level } = useParams();
+  const { search } = useLocation();
   const track = tracks.find(candidate => candidate === id);
   const number = Number(level);
   const item = track && levels[track][number - 1];
   if (!track) return <PathsHome desktop={desktop} />;
   if (!item) return <TrackLevels track={track} />;
+  if (level !== String(number)) return <Navigate replace to={pathUrl(track, number) + search} />;
   return <div className="paths-page paths-levels">
-    <header className="hifz-heading"><PathsBack to={pathUrl(track)} /><div><h1>{item.title}</h1>
+    <header className="hifz-heading"><PathsBack to={pathUrl(track)} /><div><h1>{t(item.titleKey)}</h1>
       <p className="small muted">{t(trackKeys[track])} · {t("pathsLevel", { number })}</p></div></header>
-    {track === "memorise" ? <MemoriseLevel number={number} /> : <Outline track={track} item={item} number={number} />}
+    {track === "memorise" && <MemoriseLevel number={number} />}
+    {number === 1 && (track === "read" || track === "understand") && <Outline track={track} />}
   </div>;
 }

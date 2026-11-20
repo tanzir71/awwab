@@ -1,4 +1,3 @@
-import curriculum from "../../handovers/H2-languages-paths-arabic-help/data/learning-paths.json";
 import salah from "../../docs/content/surahs-for-salah.json";
 import { chapters, type HifzReviews } from "./hifz";
 import { type Reviews } from "./reviews";
@@ -6,21 +5,36 @@ import { type Reviews } from "./reviews";
 export const tracks = ["read", "memorise", "understand", "speak"] as const;
 export type Track = typeof tracks[number];
 export type PathPlacement = Partial<Record<Track, { level: number; score: number; total: number; day: string }>>;
-export type PathLevel = { id: string; title: string; units: string | string[]; tag?: string };
+type PathLevel = { titleKey: string; tag?: string };
 export const levels: Record<Track, PathLevel[]> = {
-  read: curriculum.tracks.read.levels.map(item => ({ ...item, id: String(item.n) })),
-  memorise: curriculum.tracks.memorise.levels.map(item => ({ ...item, id: String(item.n) })),
-  understand: curriculum.tracks.understand.levels.map(item => ({ ...item, id: String(item.n) })),
-  speak: [
-    ...curriculum.tracks.speak.levels.map((item, i) => ({ ...item, id: String(i + 1), tag: item.n })),
-    ...curriculum.tracks.speak.packs.map((item, i) => ({ id: String(i + 4), title: item.title, units: item.note, tag: "PACK" })),
+  read: [
+    { titleKey: "qaida" },
+    { titleKey: "readingFlow" },
+    { titleKey: "pathsTajweedEssentials" },
+    { titleKey: "tajweedDepthIndex" },
+    { titleKey: "readingTeacher" },
   ],
-};
-export const trackStatus = {
-  read: ["17 lessons", "Juz ʿAmma, speed and flow", "Nūn and mīm sākin, madd, qalqalah, stops", "Makhārij, ṣifāt, mushaf marks", "Record, compare, prepare for feedback"],
-  memorise: ["Al-Fātiḥa, short surahs and prayer recitations", "37 surahs, shortest first", "Āyat al-Kursī, Al-Mulk, Yā-Sīn, Al-Kahf and more", "Al-Kahf and surahs for Friday and Eid", "A juz at a time · sabaq, sabqi, manzil"],
-  understand: ["125 core words", "Nouns, verbs, particles and pronouns", "Verb forms and word families", "Juz ʿAmma, āyah by āyah", "Case endings and word order"],
-  speak: ["Greetings, numbers, directions, SIM cards", "Work, family, health, hotel", "Opinions, stories, problems", "Shared with Ask in Arabic", "Jobs, contracts, colleagues"],
+  memorise: [
+    { titleKey: "pathsSalahEssentials" },
+    { titleKey: "pathsIslandJuz" },
+    { titleKey: "pathsEssentialPassages" },
+    { titleKey: "pathsFridayEid" },
+    { titleKey: "pathsHifz" },
+  ],
+  understand: [
+    { titleKey: "pathsCoreWords" },
+    { titleKey: "grammarTitle" },
+    { titleKey: "rootsTitle" },
+    { titleKey: "readingMeaning" },
+    { titleKey: "sentenceTitle" },
+  ],
+  speak: [
+    { titleKey: "speakSurvival", tag: "A1" },
+    { titleKey: "speakEverydayLevel", tag: "A2" },
+    { titleKey: "speakConversation", tag: "B1" },
+    { titleKey: "speakUmrah", tag: "pathsPack" },
+    { titleKey: "speakWork", tag: "pathsPack" },
+  ],
 };
 export const salahChapters = salah.surahs.slice(0, 11).map(item => item.number);
 

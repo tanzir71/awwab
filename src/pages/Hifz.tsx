@@ -12,6 +12,7 @@ import { essentialPassages, getHifzPassage, groupPortions, nextPortion, passageL
   studyPhrases, studyQuran, verseText, type HifzPassage, type HifzPlans, type HifzPortion, type HifzReviews, type JuzRecital,
   type JuzRecitals, type StudyQuran } from "@/lib/hifz";
 import { showEnglishQuranMeaning } from "@/lib/languagePreferences";
+import { essentialPassageTitle } from "@/lib/paths-copy";
 import type { QuranVerse } from "@/lib/quran";
 import { saveHifzPlan, saveJuzRecitalRating, savePortionReview } from "@/lib/studyMilestones";
 import { studyNames } from "@/lib/study-copy";
@@ -181,7 +182,7 @@ function PassagePlan({ passage, portions, settings, now }: { passage: HifzPassag
     : essential?.source?.grade.startsWith("scholars differ") ? "hifzScholarsDiffer" : undefined;
   const number = new Intl.NumberFormat(locale, { useGrouping: false });
   const title = juz ? t("hifzJuz", { number: juz })
-    : passage.id.startsWith("surah-") ? studyNames.surah(language, passage.ranges[0].chapter, passage.title) : passage.title;
+    : passage.id.startsWith("surah-") ? studyNames.surah(language, passage.ranges[0].chapter, passage.title) : essentialPassageTitle(passage, t);
   const subtitle = [passageLabel(passage), t("hifzAyahs", { count: passage.ayahs }),
     essential?.level === 3 && t("hifzEssentialLabel")].filter(Boolean).join(" · ");
   const position = Number(portion);
@@ -265,7 +266,7 @@ export function Hifz({ settings, now }: { settings: Settings; now: Date }) {
   if (!passage) return <div className="hifz-page compact-stack"><PassageHeading title={t("pathsMemorise")} back="/learn/paths/memorise" /></div>;
   if (portions?.length) return <PassagePlan key={passage.id} passage={passage} portions={portions} settings={settings} now={now} />;
   return <div className="hifz-page compact-stack">
-    <PassageHeading title={passage.title} subtitle={passageLabel(passage)} back={`/learn/paths/memorise/${legacyLevel(passage)}`} />
+    <PassageHeading title={essentialPassageTitle(passage, t)} subtitle={passageLabel(passage)} back={`/learn/paths/memorise/${legacyLevel(passage)}`} />
     <p role="status" className="card">{t(error ? "hifzUnavailable" : "hifzLoading")}</p>
     {error && <button type="button" className="action light" onClick={() => { failed(false); retry(value => value + 1); }}>{t("pathsCheckAgain")}</button>}
   </div>;
