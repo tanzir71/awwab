@@ -125,6 +125,106 @@ def course_clips(units):
         yield f"sign-{slug}", unit.get("signSpeech", unit["sign"])
 
 
+# Piper's Arabic text frontend spells out isolated letters, even with vowel marks.
+# These Qaida drills model the spoken letter names or syllables directly.
+QAIDA_LETTERS = {
+    "ا": ("ʔ", "ʔalif"), "ب": ("b", "baːʔ"), "ت": ("t", "taːʔ"), "ث": ("θ", "θaːʔ"),
+    "ج": ("dʒ", "dʒiːm"), "ح": ("ħ", "ħaːʔ"), "خ": ("x", "xaːʔ"), "د": ("d", "daːl"),
+    "ذ": ("ð", "ðaːl"), "ر": ("r", "raːʔ"), "ز": ("z", "zaːj"), "س": ("s", "siːn"),
+    "ش": ("ʃ", "ʃiːn"), "ص": ("sˤ", "sˤaːd"), "ض": ("dˤ", "dˤaːd"), "ط": ("tˤ", "tˤaːʔ"),
+    "ظ": ("ðˤ", "ðˤaːʔ"), "ع": ("ʕ", "ʕajn"), "غ": ("ɣ", "ɣajn"), "ف": ("f", "faːʔ"),
+    "ق": ("q", "qaːf"), "ك": ("k", "kaːf"), "ل": ("l", "laːm"), "م": ("m", "miːm"),
+    "ن": ("n", "nuːn"), "ه": ("h", "haːʔ"), "و": ("w", "waːw"), "ي": ("j", "jaːʔ"),
+}
+QAIDA_MARKS = {"َ": "a", "ِ": "i", "ُ": "u", "ً": "an", "ٍ": "in", "ٌ": "un"}
+QAIDA_WORDS = {
+    "بَاب": "baːb", "جَبَل": "dʒabal", "قُلْ": "qul", "كَتَبَ": "kataba", "نَصَرَ": "nasˤara", "رَبِّ": "rabbi",
+    "بَابٌ": "baːbun", "قَلَمٌ": "qalamun", "كِتَابٌ": "kitaːbun",
+    "بَابًا": "baːban", "قَلَمٍ": "qalamin", "كِتَابٍ": "kitaːbin",
+    "بَا": "baː", "بِي": "biː", "بُو": "buː", "بَيْ": "baj", "بَوْ": "baw",
+}
+QAIDA_DRILL_LESSONS = (1, 2, 4, 5, 8)
+
+
+def qaida_phonemes(text, lesson):
+    if lesson in (1, 2):
+        return [QAIDA_LETTERS[letter][1] for letter in text]
+    if text in QAIDA_WORDS:
+        return [QAIDA_WORDS[text]]
+    letter, mark = text
+    return [QAIDA_LETTERS[letter][0] + QAIDA_MARKS[mark]]
+
+
+def build_qaida_placement(render):
+    for slug, text in (("bi", "بِ"), ("bu", "بُ")):
+        render(qaida_phonemes(text, 4), OUTPUT / "study-speech" / f"{slug}.opus")
+
+
+def qaida_renderer(voice):
+    from functools import cache
+    import numpy as np
+    from piper.config import SynthesisConfig
+
+    rate = voice.config.sample_rate
+    gap = bytes(round(rate * 0.18) * 2)
+    config = SynthesisConfig(noise_scale=0, noise_w_scale=0)
+
+    @cache
+    def phoneme_pcm(phonemes):
+        if unsupported := set(phonemes) - voice.config.phoneme_id_map.keys():
+            raise ValueError(f"The voice cannot generate phonemes {unsupported}")
+        audio = voice.phoneme_ids_to_audio(voice.phonemes_to_ids(list(phonemes)), config)
+        peak = np.max(np.abs(audio))
+        if peak < 0.005:
+            raise ValueError(f"Piper produced no speech for {phonemes}")
+        return (audio * (29490 / peak)).astype("<i2").tobytes()
+
+    def render(phonemes, path):
+        wav = io.BytesIO()
+        with wave.open(wav, "wb") as stream:
+            stream.setparams((1, 2, rate, 0, "NONE", "not compressed"))
+            stream.writeframes(gap.join(phoneme_pcm(part) if part else gap for part in phonemes))
+        encode_wav(wav.getvalue(), path)
+
+    return render
+
+
+def build_qaida(voice):
+    # Both the visible exercises and the generated clips use the same row data and saved recording keys.
+    query = """
+        import { qaidaAudioRef, qaidaHarakatExercise, qaidaHarakatExerciseRef, qaidaRows } from './src/lib/qaidaPractice.ts';
+        const drills = process.argv.slice(1).map(Number).map(lesson => ({
+            lesson, ref: qaidaAudioRef(lesson),
+            rows: qaidaRows(lesson).map((row, index) => ({ ref: qaidaAudioRef(lesson, index), text: row.flat() })),
+        }));
+        console.log(JSON.stringify({ drills, intro: { ref: qaidaHarakatExerciseRef, text: qaidaHarakatExercise.split(" ") } }));
+    """
+    data = json.loads(subprocess.check_output(
+        ["node", "--input-type=module", "-e", query, *map(str, QAIDA_DRILL_LESSONS)], cwd=ROOT, encoding="utf-8",
+    ))
+    render = qaida_renderer(voice)
+    items = {}
+
+    def clip(ref, ipa):
+        relative = f"packs/study-speech/{ref.replace(':', '-')}.opus"
+        render(ipa, ROOT / "public" / relative)
+        items[ref] = relative
+
+    for drill in data["drills"]:
+        lesson = drill["lesson"]
+        full = []
+        for row in drill["rows"]:
+            phonemes = [part for text in row["text"] for part in qaida_phonemes(text, lesson)]
+            clip(row["ref"], phonemes)
+            full.extend(phonemes + [""])
+        clip(drill["ref"], full[:-1])
+        print(f"Encoded {len(drill['rows'])} rows and a full exercise for lesson {lesson}", flush=True)
+    intro = data["intro"]
+    clip(intro["ref"], [part for text in intro["text"] for part in qaida_phonemes(text, 4)])
+    build_qaida_placement(render)
+    write(CONTENT / "qaida-audio.json", {"voice": "Emirati Piper", "source": MODEL, "lessons": QAIDA_DRILL_LESSONS, "items": items})
+
+
 def nabra_synthesizer(model_dir):
     import sherpa_onnx
 
@@ -249,6 +349,7 @@ def main():
     task.add_argument("--course", choices=(*SPEAK_COURSES, "msa-a1"), help="Only rebuild the selected Speak course")
     task.add_argument("--ask-male", action="store_true", help="Build the second Ask voice using A3S")
     task.add_argument("--umrah-guide", action="store_true", help="Build English and Bangla Umrah narration with Piper LJSpeech and Indic Tiny TTS")
+    task.add_argument("--qaida", action="store_true", help="Build Qaida drill audio and placement vowel clips with Emirati Piper")
     parser.add_argument("--piper", default="piper", help="Piper executable for --umrah-guide")
     parser.add_argument("--bangla-model", type=Path, help="Local Indic Tiny TTS Bengali model directory with code and ONNX graphs")
     parser.add_argument("--resume", action="store_true", help="Reuse completed clips when resuming an A3S build")
@@ -269,7 +370,11 @@ def main():
 
     from piper import PiperVoice
 
-    synthesize_wav = PiperVoice.load(args.model).synthesize_wav
+    voice = PiperVoice.load(args.model)
+    if args.qaida:
+        build_qaida(voice)
+        return
+    synthesize_wav = voice.synthesize_wav
     for course in (args.course,) if args.course else SPEAK_COURSES:
         for slug, line in course_clips(read(CONTENT / f"spoken-{course}.json")):
             encode(synthesize_wav, OUTPUT / "study-speech" / f"{slug}.opus", line)
@@ -277,7 +382,8 @@ def main():
         return
 
     units = read(CONTENT / "spoken-arabic.json")
-    prompts = {"ghayn": "غَيْن", "mim": "مِيم", "bi": "بِ", "bu": "بُ"}
+    prompts = {"ghayn": "غَيْن", "mim": "مِيم"}
+    build_qaida_placement(qaida_renderer(voice))
     prompts.update({f"sim-{i}": line["ar"] for i, line in enumerate(units["simDialogue"], start=1)})
     prompts.update({f"sim-word-{i}": line["ar"] for i, line in enumerate(units["simWords"], start=1)})
     prompts.update({f"sign-{unit['id']}": unit["sign"] for unit in units["units"]})

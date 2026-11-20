@@ -16,6 +16,7 @@ export const qaidaMessages: MessageCatalog = {
   qaidaEarlierRecording: { en: "Play earlier row {row, number} recording", bn: "আগের {row, number} নম্বর সারির রেকর্ডিং শুনুন" },
   qaidaHearAll: { en: "Hear all", bn: "সব শুনুন" },
   qaidaHearLesson: { en: "Hear lesson", bn: "পাঠ শুনুন" },
+  qaidaGeneratedAudio: { en: "{label} · generated practice audio by {voice}", bn: "{label} · {voice}-এর তৈরি অনুশীলনের অডিও" },
   qaidaWhichMi: { en: "Which one says “mi”?", bn: "কোনটি ‘মি’ বলে?" },
   qaidaRecordPrivate: { en: "Recordings stay on this device. Play yours and the reference side by side.", bn: "রেকর্ডিং এই ডিভাইসেই থাকে। আপনারটি আর উদাহরণেরটি মিলিয়ে শুনুন।" },
   qaidaEnglish: { en: "EN", bn: "EN" },

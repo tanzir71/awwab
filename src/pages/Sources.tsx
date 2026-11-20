@@ -8,6 +8,7 @@ import { formatQuranReference } from "@/lib/quran";
 import { useUi } from "@/lib/uiState";
 import { splitArabicWords } from "@/lib/wordAnatomy";
 import returnCopy from "../../docs/content/return.json";
+import qaidaAudio from "../../docs/content/qaida-audio.json";
 
 const welcome = returnCopy.welcome;
 const verseWords = splitArabicWords(welcome.arabic);
@@ -21,6 +22,7 @@ const sources = [
   { name: "Quranic Arabic Corpus", description: "sourcesCorpus", url: "https://corpus.quran.com/download/" },
   { name: "Hadith API", description: "sourcesHadith", url: "https://github.com/fawazahmed0/hadith-api" },
   { name: "Adhan JS", description: "sourcesAdhan", url: "https://github.com/batoulapps/adhan-js" },
+  { name: qaidaAudio.voice, description: "sourcesQaidaSpeech", url: qaidaAudio.source },
   { name: "OpenStreetMap & Protomaps", description: "sourcesMaps", url: "https://www.openstreetmap.org/copyright" },
   { name: "Fontsource", description: "sourcesFonts", url: asset("app/locale-font-notices.txt"), linkLabel: "sourcesReadFontLicences" },
 ] as const;

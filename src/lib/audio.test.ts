@@ -2,6 +2,7 @@ import { openSync, closeSync, readFileSync, readSync, statSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import catalogue from "../../public/packs/audio/index.json";
 import onboarding from "../../docs/content/onboarding.json";
+import qaidaAudio from "../../docs/content/qaida-audio.json";
 import rituals from "../../docs/content/umrah-steps.json";
 import { quranText } from "./quran";
 import { askAudioPack, askClipIds, askPackPaths, askPlaybackVoice, askVoiceInstalled, packVoices } from "./umrahAskAudio";
@@ -10,6 +11,22 @@ import { asset } from "./config";
 import { speakCourses, speakLessonContent, speakUnitNumber } from "./speakCurriculum";
 import { hasSharedSpeakAudio, placementSpeakPhraseIds, sharedSpeakClips } from "./speakAskAudio";
 import { umrahGuidePack, umrahGuidePacks } from "./umrahGuideAudio";
+import { qaidaAudioRef, qaidaHarakatExerciseRef, qaidaRows } from "./qaidaPractice";
+
+describe("Generated Qaida practice", () => {
+  it("includes a playable clip for every row and full exercise in the covered lessons", () => {
+    expect(qaidaAudio.lessons).toEqual([1, 2, 4, 5, 8]);
+    const expected = qaidaAudio.lessons.flatMap(lesson => [qaidaAudioRef(lesson), ...qaidaRows(lesson).map((_row, index) =>
+      qaidaAudioRef(lesson, index))]);
+    expect(Object.keys(qaidaAudio.items).sort()).toEqual([...expected, qaidaHarakatExerciseRef].sort());
+    for (const [ref, path] of Object.entries(qaidaAudio.items)) {
+      expect(path).toBe(`packs/study-speech/${ref.replace(/:/g, "-")}.opus`);
+      const clip = readFileSync(new URL(`../../public/${path}`, import.meta.url));
+      expect(clip.includes(Buffer.from("OpusHead")), path).toBe(true);
+      expect(clip.length, path).toBeGreaterThan(1000);
+    }
+  });
+});
 
 describe("Generated Umrah narration", () => {
   it("pairs all seven steps and transcripts with size-checked clips in both languages", () => {

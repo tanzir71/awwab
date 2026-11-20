@@ -9,8 +9,9 @@ import { LocalRecorder } from "@/components/LocalRecorder";
 import { PracticeHeader } from "@/components/PracticeHeader";
 import { SectionNav } from "@/components/Surface";
 import { useRecord } from "@/hooks/use-awwab";
-import { qaidaExamples, qaidaReviewId, qaidaRows, resolveQaidaRow } from "@/lib/qaidaPractice";
+import { qaidaAudioRef, qaidaExamples, qaidaHarakatExercise, qaidaHarakatExerciseRef, qaidaReviewId, qaidaRows, resolveQaidaRow } from "@/lib/qaidaPractice";
 import { useCopy } from "@/lib/copy";
+import { asset } from "@/lib/config";
 import { studyNames } from "@/lib/study-copy";
 import { db, type Settings } from "@/lib/storageService";
 import { finishQaidaLesson, momentPath, rememberQaidaPlace, saveQaidaRowReview } from "@/lib/studyMilestones";
@@ -18,6 +19,7 @@ import { qaidaGrades, type QaidaGrade, type Reviews } from "@/lib/reviews";
 import { wordAnatomy } from "@/lib/wordAnatomy";
 import { formatQuranReference, quranText } from "@/lib/quran";
 import alphabet from "../../docs/content/arabic-letters.json";
+import qaidaAudio from "../../docs/content/qaida-audio.json";
 import qaida from "../../docs/content/qaida-lessons.json";
 import { TakhtiPanel } from "./Takhti";
 
@@ -53,13 +55,17 @@ function LessonAudio({ audioRef, hearLabel, label, desk = false, simple = false 
   const { t } = useCopy();
   const clip = useLiveQuery(() => db.audio.get(audioRef), [audioRef]);
   const player = useRef<HTMLAudioElement>(null);
-  const [source, setSource] = useState("");
+  const [localSource, setLocalSource] = useState("");
   const [editing, setEditing] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const generatedPath = (qaidaAudio.items as Record<string, string>)[audioRef];
+  const usingGenerated = !localSource && Boolean(generatedPath);
+  const source = localSource || (generatedPath ? asset(generatedPath) : "");
   useEffect(() => {
-    if (!clip?.blob) { setSource(""); return; }
+    setPlaying(false);
+    if (!clip?.blob) { setLocalSource(""); return; }
     const url = URL.createObjectURL(clip.blob);
-    setSource(url);
+    setLocalSource(url);
     return () => URL.revokeObjectURL(url);
   }, [clip]);
 
@@ -85,7 +91,7 @@ function LessonAudio({ audioRef, hearLabel, label, desk = false, simple = false 
         actionLabel={t(desk ? "surahRecord" : "recordCompare")} icon={desk && <DesignIcon name="qaida-desk-headphones" size={14} />} />}
     </div>
     {source && <audio ref={player} src={source} preload="none" onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)}
-      onEnded={() => setPlaying(false)} aria-label={label} />}
+      onEnded={() => setPlaying(false)} aria-label={usingGenerated ? t("qaidaGeneratedAudio", { label, voice: qaidaAudio.voice }) : label} />}
     {source && !simple && <button className="text-button small" type="button" aria-expanded={editing} onClick={() => setEditing(value => !value)}>{t("replaceAudio")}</button>}
     {editing && <label className="field small">{t("chooseAudioFor", { name: label })}
       <input type="file" accept="audio/*" onChange={async event => {
@@ -252,9 +258,9 @@ function QaidaLesson({ lesson, settings, completed, desktop }: { lesson: Lesson;
   const traceLetter = alphabet.letters.find(item => item.letter === modelLetter) ?? alphabet.letters[0];
   const oldAudioRef = `qaida:${lesson.n}:${row + 1}`;
   const revisedVowelRows = lesson.n === 4 || lesson.n === 5;
-  const audioRef = revisedVowelRows ? oldAudioRef + ":v2" : oldAudioRef;
+  const audioRef = qaidaAudioRef(lesson.n, row);
   const introExercise = lesson.n === 4 && row === 0;
-  const exampleAudioRef = introExercise ? "qaida:4:examples" : audioRef;
+  const exampleAudioRef = introExercise ? qaidaHarakatExerciseRef : audioRef;
   const oldClip = useLiveQuery(() => revisedVowelRows ? db.audio.get(oldAudioRef) : undefined, [oldAudioRef, revisedVowelRows]);
   const rowLabel = t("rowLabel", { row: row + 1 });
   const gradeEntry = reviews[qaidaReviewId(lesson.n, row)]?.card.last_review;
@@ -315,11 +321,11 @@ function QaidaLesson({ lesson, settings, completed, desktop }: { lesson: Lesson;
       <section className="qaida-phone-read">
         <h2>{t("qaidaReadThese")}</h2>
         <LessonAudio key={exampleAudioRef} audioRef={exampleAudioRef} hearLabel={t("qaidaHearAll")} label={introExercise ? t("qaidaReadThese") : rowLabel} simple />
-        <ArabicText text={introExercise ? "تَ تِ جُ حَ حِ دُ" : rows[row].flat().join(" ")} />
+        <ArabicText text={introExercise ? qaidaHarakatExercise : rows[row].flat().join(" ")} />
       </section>
       <QaidaQuiz lesson={lesson.n} maktab={isMaktab} />
       <SpotInQuran lesson={lesson.n} maktab={isMaktab} />
-      <LessonAudio audioRef={`qaida:${lesson.n}:lesson`} hearLabel={t("qaidaHearLesson")} label={t("qaidaDesktopTitle", { number: lesson.n })} />
+      <LessonAudio audioRef={qaidaAudioRef(lesson.n)} hearLabel={t("qaidaHearLesson")} label={t("qaidaDesktopTitle", { number: lesson.n })} />
     </div></>}
     {desktop && <div className="qaida-workspace">
       <LessonList active={lesson.n} completed={completed} />

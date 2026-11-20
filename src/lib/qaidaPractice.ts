@@ -1,4 +1,4 @@
-import alphabet from "../../docs/content/arabic-letters.json";
+import alphabet from "../../docs/content/arabic-letters.json" with { type: "json" };
 
 const practiceWords = ["بَابٌ", "بِسْمِ", "قُلْ", "أَحَدٌ", "يَوْمٌ", "رَبِّ", "ٱلْعَصْرِ"];
 const exercises: Record<number, string[]> = {
@@ -28,6 +28,15 @@ export function qaidaExamples(lesson: number) {
   if (lesson === 4) return ["بَ", "بِ", "بُ"];
   if (lesson === 5) return ["بً", "بٍ", "بٌ"];
   return qaidaRows(lesson).flat(2).slice(0, 3);
+}
+
+export const qaidaHarakatExercise = "تَ تِ جُ حَ حِ دُ";
+export const qaidaHarakatExerciseRef = "qaida:4:examples";
+
+export function qaidaAudioRef(lesson: number, row?: number) {
+  if (row === undefined) return `qaida:${lesson}:lesson`;
+  const revision = lesson === 4 || lesson === 5 ? ":v2" : "";
+  return `qaida:${lesson}:${row + 1}${revision}`;
 }
 
 export function resolveQaidaRow(requested: string | null, saved: number, count: number) {
