@@ -86,7 +86,7 @@
 .plan-adjust button:last-child::before { border-radius: 0 var(--r-pill) var(--r-pill) 0; }
 .plan-adjust button[aria-pressed="true"] { color: var(--c-on-primary); }
 .plan-adjust button[aria-pressed="true"]::before { background: var(--control-primary); }
-.plan-tools .card { display: grid; gap: 6px; justify-items: start; align-content: start; padding: 14px 12px; color: var(--c-ink); }
+.plan-tools .card { display: grid; gap: 6px; justify-items: start; align-content: start; padding: 14px 12px; color: var(--c-ink); overflow-wrap: anywhere; }
 .plan-tools strong { font: var(--type-body-strong); }
 .plan-tools .icon-box { width: 36px; height: 36px; }
 .plan-more { flex-wrap: wrap; }

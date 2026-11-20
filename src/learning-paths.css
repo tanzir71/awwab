@@ -347,6 +347,8 @@ button.speak-variety { display: grid; gap: 2px; text-align: start; }
 .speak-variety.selected, .speak-line[data-you="true"] { background: var(--c-primary-soft); box-shadow: none; }
 .speak-levels .card, .speak-packs .card { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; text-decoration: none; padding: 12px; }
 .speak-page .chip.active { background: var(--c-primary); color: var(--c-on-primary); }
+.speak-unit-list header { flex-wrap: wrap; gap: 4px 8px; }
+.speak-unit-list h2 { overflow-wrap: anywhere; }
 .speak-unit-list ol { margin: 8px 0 0; padding-inline-start: 22px; list-style: decimal; }
 .speak-unit-list li::marker { font-size: 11px; color: var(--c-ink-muted); }
 .speak-unit-list a { display: flex; justify-content: space-between; gap: 4px; padding: 9px 8px; color: var(--c-ink); text-decoration: none; border-radius: var(--r-control); }

@@ -17,7 +17,7 @@
 .word-bank-controls { display: grid; gap: 8px; grid-template-columns: minmax(0,1fr) auto; align-items: center; }
 .word-bank-filters, .word-bank-search, .word-bank-sort select { min-width: 0; background: var(--c-surface-alt); color: var(--c-ink); border-radius: var(--r-control); }
 .word-bank-filters { grid-column: 1/-1; display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); padding: 2px; }
-.word-bank-filters button { border-radius: var(--r-control); padding: 3px 6px; color: var(--c-ink-muted); font: 500 12px/16px var(--font-body); min-height: 36px; }
+.word-bank-filters button { border-radius: var(--r-control); padding: 3px 6px; color: var(--c-ink-muted); font: 500 12px/16px var(--font-body); min-height: 36px; overflow-wrap: anywhere; }
 .word-bank-filters button[aria-pressed="true"] { background: var(--c-surface); color: var(--c-ink); font-weight: 700; }
 .word-bank-search { display: flex; align-items: center; gap: 6px; padding-inline: 10px; min-height: 36px; }
 .word-bank-search input { background: transparent; color: var(--c-ink); min-width: 0; width: 100%; min-height: 32px; padding-block: 4px; border: 0; font: var(--type-small); }
@@ -139,7 +139,7 @@
 @media (min-width: 1360px) {
   .app-content:not(.anatomy-open) .word-bank-layout { grid-template-columns: minmax(0,1fr) 360px; }
 }
-@media (min-width: 1024px) and (max-width: 1260px) {
+@media (min-width: 1024px) and (max-width: 1260px), (min-width: 1280px) and (max-width: 1359px) {
   .word-bank-controls { grid-template-columns: minmax(0,1fr) auto; }
   .word-bank-filters { grid-column: 1/-1; }
 }

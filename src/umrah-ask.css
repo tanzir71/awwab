@@ -45,9 +45,10 @@
 .ask-back-title h1 { font: var(--type-display-l); }
 .ask-inner { padding: calc(8px + env(safe-area-inset-top)) 20px calc(22px + env(safe-area-inset-bottom)); }
 .ask-inner.compact-stack { gap: 12px; }
-.ask-subheader { gap: 6px; }
-.ask-variety { flex: 0 0 auto; gap: 0; padding: 3px; background: var(--c-surface-alt); color: var(--c-ink-muted); border-radius: var(--r-pill); }
-.ask-variety button { min-height: 25px; padding: 2px 10px; border-radius: var(--r-pill); font: var(--type-small); }
+.ask-subheader { flex-wrap: wrap; gap: 6px; }
+.ask-subheader h1 { min-inline-size: 0; overflow-wrap: anywhere; }
+.ask-variety { flex: 0 0 auto; max-inline-size: 100%; gap: 0; padding: 3px; background: var(--c-surface-alt); color: var(--c-ink-muted); border-radius: var(--r-pill); }
+.ask-variety button { min-height: 25px; padding: 2px 10px; border-radius: var(--r-pill); font: var(--type-small); overflow-wrap: anywhere; }
 .ask-variety button[aria-pressed="true"] { color: var(--c-ink); background: var(--c-surface); box-shadow: var(--shadow-card); }
 .ask-phrase-card { text-align: center; }
 .ask-phrase-card.card { padding: 18px 12px 14px; gap: 5px; }
