@@ -1,6 +1,7 @@
 import { asset } from "./config";
 import { collectionIds, editionUrl, hadithArchiveVersion, hadithCollections, type HadithCollection, type HadithGrade, type HadithNarration } from "./hadith-catalogue";
 import { studySearchTerm } from "./study-copy";
+import type { useCopy } from "./copy";
 import curated from "../../docs/content/hadith-curated.json";
 
 export type CollectionScope = HadithCollection | "all" | "riyadussalihin";
@@ -97,6 +98,22 @@ export function hadithNumberLabel(number: string | number, language: string) {
 export function hadithName(collection: HadithCollection, language: string, short = false) {
   const names = hadithCollections[collection];
   return language === "bn" ? names.bn : short ? names.short : names.en;
+}
+
+export function hadithCitation({ source, url }: { source: string; url: string }, { language, locale, t }: ReturnType<typeof useCopy>) {
+  const [originalReference, originalGrade] = source.split(" · ", 2);
+  const id = /^https:\/\/sunnah\.com\/([^/?#]+)$/.exec(url)?.[1];
+  const parsed = id && parseHadithId(id);
+  const reference = parsed && language !== "en"
+    ? t("hadithCitationReference", {
+        collection: t(`hadithCollection-${parsed.collection}`),
+        number: hadithNumberLabel(parsed.number, locale),
+      })
+    : originalReference;
+  const annotation = /^(Sahih|Hasan)(?: \(([^)]+)\))?$/.exec(originalGrade ?? "");
+  const grade = annotation ? t(annotation[1] === "Sahih" ? "hadithSahih" : "hadithHasan") : originalGrade;
+  const displayGrade = annotation?.[2] ? t("hadithCitationGrader", { grade, grader: annotation[2] }) : grade;
+  return { reference, grade: displayGrade, full: displayGrade ? t("hadithCitationFull", { reference, grade: displayGrade }) : reference };
 }
 
 export function normalizeHadithSearch(text: string) {

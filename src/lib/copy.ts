@@ -16,7 +16,7 @@ import { planMessages } from "./plan-copy";
 import { mosqueMessages } from "./mosque-copy";
 import { zakatMessages } from "./zakat-copy";
 import { guideMessages } from "./guide-copy";
-import { applyGlossary, formatLocale, type BuiltInLanguage } from "./languagePreferences";
+import { applyGlossary, formatLocale, languages, type BuiltInLanguage } from "./languagePreferences";
 import { localeMessage } from "./localePacks";
 import { settingsMessages } from "./settings-copy";
 import { umrahPrepMessages } from "./umrah-prep-copy";
@@ -358,6 +358,7 @@ export function message(settings: CopySettings, id: string, values?: Record<stri
 export function useCopy() {
   const { mode, language, nativeDigits, wordChoices, pseudoLocale } = useContext(CopyContext);
   return useMemo(() => ({ language, locale: formatLocale({ language, nativeDigits }),
+    direction: pseudoLocale === "en-XB" || languages.some(item => item.code === language && item.dir === "rtl") ? "rtl" as const : "ltr" as const,
     t: message.bind(null, { mode, language, nativeDigits, wordChoices, pseudoLocale }),
   }), [mode, language, nativeDigits, wordChoices, pseudoLocale]);
 }

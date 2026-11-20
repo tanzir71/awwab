@@ -9,10 +9,6 @@
     "Bukhari 1503 · Sahih": 1,
     "Bukhari 953 · Sahih": 1
   },
-  "src/components/PrayerGuideSupport.tsx": {
-    "Muslim": 1,
-    "Muslim ${…}": 1
-  },
   "src/components/UmrahGuideVoice.tsx": {
     "AI4Bharat Rasa": 1
   },
@@ -62,10 +58,6 @@
   "src/pages/Qaida.tsx": {
     "Al-Baqara 2:1": 1,
     "Al-Ikhlāṣ 112:1": 1
-  },
-  "src/pages/Return.tsx": {
-    "Bukhari 6306": 1,
-    "· Sahih": 1
   },
   "src/pages/SalahWords.tsx": {
     "Quranic Arabic Corpus 0.4": 1

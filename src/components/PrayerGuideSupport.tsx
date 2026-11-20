@@ -1,10 +1,12 @@
 import { Link } from "react-router-dom";
+import { X } from "lucide-react";
 import { ArabicText } from "@/components/ArabicText";
 import { DesignIcon } from "@/components/DesignIcon";
 import { VerseAudio } from "@/components/VerseAudio";
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useCopy } from "@/lib/copy";
 import { guideTopics } from "@/lib/guide-copy";
+import { hadithCitation } from "@/lib/hadith";
 import type { PrayerGuideTopic } from "@/lib/prayerGuide";
 import { studyNames } from "@/lib/study-copy";
 import hadith from "../../docs/content/hadith-curated.json";
@@ -20,8 +22,10 @@ export function PrayerGuideAudio({ surahs, context, title, desktop = false }: {
     <DialogTrigger className={desktop ? "guide-desk-audio-button" : "action"}>
       {desktop && <DesignIcon name="desk-play" size={17} />}{title}
     </DialogTrigger>
-    <DialogContent className="awwab-dialog guide-audio">
-      <DialogTitle>{title}</DialogTitle>
+    <DialogContent className="awwab-dialog guide-audio" showCloseButton={false}>
+      <div className="row-between"><DialogTitle>{title}</DialogTitle>
+        <DialogClose className="icon-button" aria-label={t("qadaClose")}><X size={18} aria-hidden="true" /></DialogClose>
+      </div>
       <DialogDescription className="muted small">{t("guideAudioNote")}</DialogDescription>
       {surahs.map(item => {
         const label = studyNames.surah(language, item.number, item.transliteration);
@@ -36,21 +40,25 @@ export function PrayerGuideAudio({ surahs, context, title, desktop = false }: {
 }
 
 export function PrayerGuideLostCount({ desktop = false, hanafi = false, topic = false }: { desktop?: boolean; hanafi?: boolean; topic?: boolean }) {
-  const { language, t } = useCopy();
+  const copy = useCopy();
+  const { language, t } = copy;
+  const citation = hadithCitation({ url: lostCount.url, source: `Muslim ${lostCount.number} · ${lostCount.grade}` }, copy);
+  const hanafiLanguage = language === "bn" ? "bn" : "en";
   return <section className="card tint guide-lost" data-desktop={desktop}>
     <h2 className="with-icon">{!desktop && <DesignIcon name="guide-refresh" size={18} />}{t(topic ? "guideSahw" : desktop ? "guideLostShort" : "guideLostCount")}</h2>
     <p className={desktop ? "small" : "small muted"}>{t(desktop ? "guideLostDesktopHelp" : "guideLostCountHelp")}</p>
-    <a href={lostCount.url} className="guide-citation">
-      <span className="chip soft caption">{lostCount.grade}{!desktop && ` Muslim ${lostCount.number}`}</span>
-      {desktop && <span className="small muted">Muslim {lostCount.number}</span>}
+    <a href={lostCount.url} className="guide-citation" aria-label={citation.full}>
+      <span className="chip soft caption">{desktop ? citation.grade : t("hadithCitationGradeFirst", citation)}</span>
+      {desktop && <span className="small muted">{citation.reference}</span>}
     </a>
-    {hanafi && <p className="small muted">{notes.hanafiSahw[language]} <a href={notes.hanafiSahw.url}>{notes.hanafiSahw.source}</a></p>}
+    {hanafi && <p className="small muted" lang={hanafiLanguage}>{notes.hanafiSahw[hanafiLanguage]} <a href={notes.hanafiSahw.url}>{notes.hanafiSahw.source}</a></p>}
   </section>;
 }
 
-export function PrayerGuideTopicCard({ topic, hanafi }: { topic: PrayerGuideTopic; hanafi: boolean }) {
-  const { t } = useCopy();
-  if (topic === "sahw") return <PrayerGuideLostCount hanafi={hanafi} desktop topic />;
+export function PrayerGuideTopicCard({ topic, hanafi, desktop = false }: { topic: PrayerGuideTopic; hanafi: boolean; desktop?: boolean }) {
+  const copy = useCopy();
+  const { t } = copy;
+  if (topic === "sahw") return <PrayerGuideLostCount hanafi={hanafi} desktop={desktop} topic />;
   const detail = { witr: "guideWitrDetail", eid: "guideEidDetail", janazah: "guideJanazahDetail" }[topic];
   const source = topic === "witr" ? notes.qunut : notes[topic];
   return <section className="card guide-topic-card">
@@ -61,7 +69,7 @@ export function PrayerGuideTopicCard({ topic, hanafi }: { topic: PrayerGuideTopi
       <ArabicText text={notes.qunut.arabic} citation={source.source} />
       <p className="small" lang="ar-Latn">{notes.qunut.transliteration}</p>
     </>}
-    {topic === "eid" && <a className="small" href={notes.jumuah.url}>{notes.jumuah.source}</a>}
-    <a className="small" href={source.url}>{source.source}</a>
+    {topic === "eid" && <a className="small" href={notes.jumuah.url}>{hadithCitation(notes.jumuah, copy).full}</a>}
+    <a className="small" href={source.url}>{hadithCitation(source, copy).full}</a>
   </section>;
 }

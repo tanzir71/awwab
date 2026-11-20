@@ -14,6 +14,7 @@ export const guideMessages = {
   guideFardTitle: { en: "{name} · {count, number} Fard", bn: "{name} · {count, number} রাকাত ফরজ" },
   guideRakahAudio: { en: "Practise rakʿah {count, number} with audio", bn: "অডিও শুনে {count, number} নম্বর রাকাত অনুশীলন করুন" },
   guideAtAGlance: { en: "This prayer at a glance", bn: "এক নজরে এই সালাত" },
+  guideAyahReference: { en: "{surah, number}:{ayah, number}", bn: "{surah, number}:{ayah, number}" },
   guideBefore: { en: "Before", bn: "আগে" },
   guideAfter: { en: "After", bn: "পরে" },
   guideFard: { en: "Fard", bn: "ফরজ" },

@@ -8,6 +8,7 @@ import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from "
 import { useDesktop } from "@/hooks/use-awwab";
 import { rakatLabel, useCopy } from "@/lib/copy";
 import { guideTopics } from "@/lib/guide-copy";
+import { hadithCitation } from "@/lib/hadith";
 import { guidedPrayers, guideRakahIndex, guideReference, guideSource, prayerGuide, prayerGuideGroups, prayerGuideTopics,
   type GuidedPrayer, type PrayerGuideTopic } from "@/lib/prayerGuide";
 import { quranText } from "@/lib/quran";
@@ -74,18 +75,21 @@ function PrayerChoices({ settings }: { settings: Settings }) {
 }
 
 function StepPhrase({ phrase }: { phrase: GuidePhrase }) {
+  const copy = useCopy();
+  const [surah, ayah] = phrase.verse?.split(":").map(Number) ?? [];
+  const label = phrase.verse ? copy.t("guideAyahReference", { surah, ayah }) : hadithCitation(phrase, copy).full;
   return <div className="guide-desk-phrase">
     <ArabicText text={phrase.arabic} citation={phrase.source} verse={phrase.verse} />
     <div className="guide-desk-phrase-meta">
       <span lang="ar-Latn" dir="ltr">{phrase.transliteration}</span>
-      <a href={phrase.url} title={phrase.source} aria-label={phrase.source}>{phrase.source.replace(/ \(.+\)$/, "")}</a>
+      <a href={phrase.url} title={label} aria-label={label}>{label.replace(/ \(.+\)$/, "")}</a>
     </div>
   </div>;
 }
 
 function GuideRakahSteps({ step, context, friday }: { step: PrayerOutline["steps"][number]; context: string; friday: boolean }) {
-  const { language, t } = useCopy();
-  const number = new Intl.NumberFormat(language);
+  const { language, locale, t } = useCopy();
+  const number = new Intl.NumberFormat(locale);
   const addSurah = step.suggestion && studyNames.surah(language, step.suggestion.number, step.suggestion.transliteration);
   const steps = [
     { id: "start", title: "guideStand", detail: step.number === 1 ? "guideStartStanding" : "guideStandAgain", phrase: textFor(takbir, phrases.takbir) },
@@ -111,16 +115,17 @@ function GuideRakahSteps({ step, context, friday }: { step: PrayerOutline["steps
 function GuideRakahPanel({ prayer, outline, context, active, select }: {
   prayer: GuidedPrayer; outline: PrayerOutline; context: string; active: number; select: (next: string) => void;
 }) {
-  const { language, t } = useCopy();
+  const copy = useCopy();
+  const { direction, locale, t } = copy;
   const step = outline.steps[active];
   const tabRefs = useRef<HTMLButtonElement[]>([]);
-  const format = new Intl.NumberFormat(language);
+  const format = new Intl.NumberFormat(locale);
   const name = t(prayer === "jumuah" ? "guideJumuah" : prayer);
   const recitation = t(recitationCopy(step.recitation));
   const laterRange = outline.fardCount > guideSource.withAdditionalSurahThrough && (outline.fardCount === 3 ? format.format(3) : `${format.format(3)}–${format.format(outline.fardCount)}`);
   const audioSurahs = [{ number: 1, transliteration: "Al-Fātiḥa" }, ...(step.suggestion ? [step.suggestion] : [])];
 
-  return <Tabs.Root className="guide-desk-main" value={String(step.number)} onValueChange={select}>
+  return <Tabs.Root className="guide-desk-main" dir={direction} value={String(step.number)} onValueChange={select}>
     <header className="card guide-desk-heading">
       <div><h2>{t("guideFardTitle", { name, count: outline.fardCount })}</h2>
         <p className="small muted">{recitation}{laterRange && ` · ${t("guideLaterFatiha", { range: laterRange })}`}</p>
@@ -134,14 +139,14 @@ function GuideRakahPanel({ prayer, outline, context, active, select }: {
     </header>
     {outline.steps.map(({ number }) => <Tabs.Content value={String(number)} className="guide-desk-panel" key={number}>
       {number === step.number && <>
-      {prayer === "jumuah" && <p className="card small">{t("guideJumuahIntro")} <a href={notes.jumuah.url}>{notes.jumuah.source}</a></p>}
+      {prayer === "jumuah" && <p className="card small">{t("guideJumuahIntro")} <a href={notes.jumuah.url}>{hadithCitation(notes.jumuah, copy).full}</a></p>}
       <GuideRakahSteps step={step} context={context} friday={prayer === "jumuah"} />
       <div className="night guide-desk-audio-bar">
         <PrayerGuideAudio surahs={audioSurahs} context={context} title={t("guideRakahAudio", { count: step.number })} desktop />
         {step.number < outline.fardCount && <button className="guide-desk-next" type="button" onClick={() => {
           select(String(step.number + 1));
           tabRefs.current[active + 1]?.focus();
-        }}>{t("guideNextRakah", { count: step.number + 1 })} →</button>}
+        }}>{t("guideNextRakah", { count: step.number + 1 })} <span className="icon-dir" aria-hidden="true">→</span></button>}
       </div>
       </>}
     </Tabs.Content>)}
@@ -151,8 +156,9 @@ function GuideRakahPanel({ prayer, outline, context, active, select }: {
 function GuideDetails({ outline, settings, hanafi, context, lostCount }: {
   outline?: PrayerOutline; settings: Settings; hanafi: boolean; context: string; lostCount: boolean;
 }) {
-  const { language, t } = useCopy();
-  const number = new Intl.NumberFormat(language);
+  const copy = useCopy();
+  const { locale, t } = copy;
+  const number = new Intl.NumberFormat(locale);
   const at = outline?.groups.findIndex(group => group.type === "fard");
   const groupName = ({ count, type, emphasis }: PrayerOutline["groups"][number]) => emphasis === "ghayr-muakkadah"
     ? t("guideOptionalAsr", { count }) : `${number.format(count)} ${rakatLabel(settings, type)}`;
@@ -165,7 +171,7 @@ function GuideDetails({ outline, settings, hanafi, context, lostCount }: {
         {before.length > 0 && <div><dt>{t("guideBefore")}</dt><dd>{before.join(" · ")}</dd></div>}
         <div><dt>{t("guideFard")}</dt><dd>{number.format(outline.fardCount)} · {t(recitationCopy(outline.steps[0].recitation))}</dd></div>
         <div><dt>{t("guideSittings")}</dt><dd>{t(outline.fardCount > guideSource.firstSittingAfter ? "guideSittingsAfter" : "guideSittingAfter", { first: guideSource.firstSittingAfter, final: outline.fardCount })}</dd></div>
-        <div><dt>{t("guideAfter")}</dt><dd>{after.length > 0 && `${after.join(" · ")} · `}<a href={notes.dhikr.url} title={notes.dhikr.source}>{t("guideDhikr")}</a></dd></div>
+        <div><dt>{t("guideAfter")}</dt><dd>{after.length > 0 && `${after.join(" · ")} · `}<a href={notes.dhikr.url} title={hadithCitation(notes.dhikr, copy).full}>{t("guideDhikr")}</a></dd></div>
       </dl>
     </section>}
     {lostCount && <PrayerGuideLostCount desktop hanafi={hanafi} />}
@@ -198,7 +204,7 @@ export function DesktopPrayerGuide({ prayer, topic, settings, reviews }: {
 
   return <div className="guide-desktop" data-details={inline}>
     <PrayerChoices settings={settings} />
-    {outline ? <GuideRakahPanel prayer={prayer} outline={outline} active={active} select={selectRakah} context={context} /> : <PrayerGuideTopicCard topic={topic} hanafi={hanafi} />}
+    {outline ? <GuideRakahPanel prayer={prayer} outline={outline} active={active} select={selectRakah} context={context} /> : <PrayerGuideTopicCard topic={topic} hanafi={hanafi} desktop />}
     {inline ? details : <Dialog>
       <DialogTrigger className="action soft guide-desk-notes-trigger">{t("guidePrayerDetails")}</DialogTrigger>
       <DialogContent className="awwab-dialog desktop-detail-drawer guide-desk-drawer" overlayClassName="desktop-detail-overlay"

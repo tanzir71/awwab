@@ -10,6 +10,7 @@ import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from "
 import { useDesktop, usePrayerLogs, useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { addDays, dateKey, formatDay } from "@/lib/dates";
+import { hadithCitation } from "@/lib/hadith";
 import { qadaBalances, qadaDefaults } from "@/lib/qada";
 import { db, getRecord, prayerStatistics, type Settings, updateRecord } from "@/lib/storageService";
 import { useUi } from "@/lib/uiState";
@@ -18,6 +19,7 @@ import content from "../../docs/content/return.json";
 
 const steps = ["Stop", "Regret", "Resolve", "Repair"];
 const sayyidLines = content.sayyid.lines;
+const istighfarGoal = 100;
 
 type ReturnProps = { settings: Settings; now: Date };
 
@@ -26,11 +28,13 @@ export function ReturnPage({ settings, now, desktop }: ReturnProps & { desktop: 
 }
 
 function ReturnCounter({ settings, now, desktop = false }: ReturnProps & { desktop?: boolean }) {
-  const { locale, t } = useCopy();
+  const copy = useCopy();
+  const { locale, t } = copy;
   const number = new Intl.NumberFormat(locale);
   const day = dateKey(now, settings.city.timeZone);
   const counters = useRecord<Record<string, number>>("istighfar", {});
   const count = counters[day] ?? 0;
+  const citation = hadithCitation(content.istighfar, copy);
   const countOne = useCallback(async () => {
     try {
       const today = dateKey(new Date(), settings.city.timeZone);
@@ -57,13 +61,19 @@ function ReturnCounter({ settings, now, desktop = false }: ReturnProps & { deskt
 
   return <section className="return-counter night" aria-label={t("returnDailyGoal")}>
     {desktop && <h2 className="caption">{t("returnDeskIstighfar")}</h2>}
-    <div className="count-ring" style={{ "--count": Math.min(100, count) + "%" } as CSSProperties}>
-      <div className="count-window"><strong aria-live="polite">{number.format(count)}</strong><small>{t(desktop ? "returnDeskOfHundred" : "returnOfHundred")}</small></div>
+    <div className="count-ring" style={{ "--count": Math.min(100, count / istighfarGoal * 100) + "%" } as CSSProperties}>
+      <div className="count-window"><strong aria-live="polite">{number.format(count)}</strong><small>
+        {t(desktop ? "returnDeskOfHundred" : "returnOfHundred", { count: istighfarGoal })}
+      </small></div>
     </div>
     <div className="return-phrase"><ArabicText text={content.istighfar.arabic} citation={content.istighfar.source} /></div>
     {!desktop && <p className="muted small">{t("returnIstighfar")}</p>}
-    <button type="button" className="action return-count" aria-keyshortcuts={desktop ? "Space" : undefined} onClick={() => void countOne()}>{t(desktop ? "returnDeskCount" : "returnCount")}</button>
-    <a className="return-counter-source" href={content.istighfar.url}>{desktop ? content.istighfar.source : t("returnHadith", { source: content.istighfar.source })}</a>
+    <button type="button" className="action return-count" aria-keyshortcuts={desktop ? "Space" : undefined} onClick={() => void countOne()}>
+      {t(desktop ? "returnDeskCount" : "returnCount", { count: 1 })}
+    </button>
+    <a className="return-counter-source" href={content.istighfar.url}>
+      {desktop ? citation.full : t("returnHadith", { count: istighfarGoal, source: citation.full })}
+    </a>
   </section>;
 }
 
@@ -72,7 +82,8 @@ function sayyidMeaning(index: number, language: string) {
 }
 
 function MobileReturn({ settings, now }: ReturnProps) {
-  const { language, locale, t } = useCopy();
+  const copy = useCopy();
+  const { language, locale, t } = copy;
   const number = new Intl.NumberFormat(locale);
   const line = useRecord("sayyid-line", 0);
   const plan = useRecord("qada", qadaDefaults);
@@ -80,6 +91,7 @@ function MobileReturn({ settings, now }: ReturnProps) {
   const { madeUp, totalLeft } = qadaBalances(plan, logs);
   const totalMade = Object.values(madeUp).reduce((total, amount) => total + amount, 0);
   const icons = settings.mode === "maktab" ? "return-maktab" : "return";
+  const sayyid = hadithCitation(content.sayyid, copy);
 
   return <div className="return-page">
     <header className="return-heading">
@@ -90,20 +102,21 @@ function MobileReturn({ settings, now }: ReturnProps) {
     <ReturnCounter settings={settings} now={now} />
     <section className="card return-sayyid">
       <div className="return-source-row">
-        <a className="return-source-badge caption" href={content.sayyid.url} aria-label={content.sayyid.source}>Bukhari 6306</a>
-        <small className="muted">{t("sayyidNote")} · Sahih</small>
+        <a className="return-source-badge caption" href={content.sayyid.url} aria-label={sayyid.full}>{sayyid.reference}</a>
+        <small className="muted">{t("sayyidNote")} · {sayyid.grade}</small>
       </div>
       <h2>{t("sayyidTitle")}</h2>
       <div className="return-sayyid-arabic"><ArabicText text={sayyidLines.slice(0, 2).map(([arabic]) => arabic).join("\n")} citation={content.sayyid.source} /></div>
-      <p className="small">{sayyidMeaning(0, language)} {sayyidMeaning(1, language)}</p>
+      <p className="small" lang={language === "bn" ? "bn" : "en"}>{sayyidMeaning(0, language)} {sayyidMeaning(1, language)}</p>
       <Link to="/return/sayyid" className="list-row return-list-link">
         <span className="icon-box"><DesignIcon name={icons + "-book"} size={22} /></span>
-        <span><strong>{t(line > 0 ? "sayyidResume" : "sayyidStart")}</strong><small>{line > 0 ? t("sayyidLine", { line: line + 1, total: sayyidLines.length }) : t("sayyidDetails")}</small></span>
-        <DesignIcon name={icons + "-chevron"} size={20} />
+        <span><strong>{t(line > 0 ? "sayyidResume" : "sayyidStart")}</strong><small>{line > 0
+          ? t("sayyidLine", { line: line + 1, total: sayyidLines.length }) : t("sayyidDetails", { count: sayyidLines.length })}</small></span>
+        <DesignIcon name={icons + "-chevron"} className="icon-dir" size={20} />
       </Link>
     </section>
     <section className="return-steps compact-stack">
-      <h2>{t("returnSteps")}</h2>
+      <h2>{t("returnSteps", { count: steps.length })}</h2>
       <ol className="compact-stack">
         {steps.map((step, index) => <li className="list-row return-step" key={step}>
           <span className="icon-box" aria-hidden="true">{number.format(index + 1)}</span>
@@ -115,18 +128,18 @@ function MobileReturn({ settings, now }: ReturnProps) {
     <Link to="/return/qada" className="list-row return-list-link">
       <span className="icon-box"><DesignIcon name={icons + "-calendar"} size={22} /></span>
       <span><strong>{t("qadaTitle")}</strong><small>{t("qadaSummary", { left: totalLeft, made: totalMade, pace: plan.withEachPrayer ? t("qadaEach") : t("qadaPace", { count: plan.dailyGoal }) })}</small></span>
-      <DesignIcon name={icons + "-chevron"} size={20} />
+      <DesignIcon name={icons + "-chevron"} className="icon-dir" size={20} />
     </Link>
     <ShareLink to="/share?template=return&from=return" className="text-button return-share">{t("returnShare")}</ShareLink>
   </div>;
 }
 
 function ReturnHope() {
-  const { language } = useCopy();
+  const { language, t } = useCopy();
   return <section className="return-hope compact-stack">
     <ArabicText text={content.hope.arabic} citation={content.hope.source} />
-    <p>“{language === "bn" ? content.hope.meaningBn : content.hope.meaning}”</p>
-    <a className="caption" href={content.hope.url}>{content.hope.source}</a>
+    <p lang={language === "bn" ? "bn" : "en"}>“{language === "bn" ? content.hope.meaningBn : content.hope.meaning}”</p>
+    <a className="caption" href={content.hope.url}>{t("returnHopeSource", { name: t("returnHopeSurah"), surah: 39, ayah: 53 })}</a>
   </section>;
 }
 
@@ -255,7 +268,8 @@ function ReturnReflection({ day, stats: { returnDays, returns }, historyTrigger 
 }
 
 function SayyidPath({ selected }: { selected?: number }) {
-  const { language, t } = useCopy();
+  const copy = useCopy();
+  const { language, t } = copy;
   const line = useRecord("sayyid-line", 0);
   const current = selected ?? line;
   const reviewed = useRecord<number[] | null>("sayyid-reviewed", null);
@@ -274,12 +288,13 @@ function SayyidPath({ selected }: { selected?: number }) {
           : t("sayyidLineOnly", { line: index + 1 })}</span>
       </Link></li>;
     })}</ol>
-    <a className="small" href={content.sayyid.url}>{content.sayyid.source}</a>
+    <a className="small" href={content.sayyid.url}>{hadithCitation(content.sayyid, copy).full}</a>
   </section>;
 }
 
 export function Sayyid({ settings, desktop }: { settings: Settings; desktop: boolean }) {
-  const { language, t } = useCopy();
+  const copy = useCopy();
+  const { language, t } = copy;
   const index = useRecord("sayyid-line", 0);
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
@@ -317,8 +332,8 @@ export function Sayyid({ settings, desktop }: { settings: Settings; desktop: boo
       <div className="return-sayyid-arabic">
         <ArabicText text={sayyidLines[active][0]} citation={content.sayyid.source} />
       </div>
-      <p>{sayyidMeaning(active, language)}</p>
-      <a className="small" href={content.sayyid.url}>{content.sayyid.source}</a>
+      <p lang={language === "bn" ? "bn" : "en"}>{sayyidMeaning(active, language)}</p>
+      <a className="small" href={content.sayyid.url}>{hadithCitation(content.sayyid, copy).full}</a>
       <div className="equal-row">
         <button className="action light" disabled={active === 0 || saving} onClick={() => void go(active - 1, false)}>{t("sayyidPrevious")}</button>
         <button className="action" disabled={saving} onClick={() => void go(active + 1, true)}>{t(active + 1 < sayyidLines.length ? "sayyidNext" : "sayyidDone")}</button>

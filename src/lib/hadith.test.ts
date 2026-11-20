@@ -1,8 +1,10 @@
 import { readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
-import { curatedHadith, curatedHadithFor, desktopHadith, hadithId, hadithNumberLabel, hadithSource, parseHadithId, riyadSelections, searchHadith, topicMatches } from "./hadith";
+import { curatedHadith, curatedHadithFor, desktopHadith, hadithCitation, hadithId, hadithNumberLabel, hadithSource, parseHadithId, riyadSelections, searchHadith, topicMatches } from "./hadith";
 import { canonicalHadithNumber, collectionIds, hadithArchiveVersion, narrationGrade, type HadithNarration } from "./hadith-catalogue";
+import { message } from "./copy";
+import { formatLocale } from "./languagePreferences";
 
 const archive = collectionIds.flatMap(collection => {
   const file = new URL(`../../public/data/hadith-${collection}-v${hadithArchiveVersion}.json.gz`, import.meta.url);
@@ -31,6 +33,18 @@ describe("hadith editions", () => {
     ])).toBeUndefined();
     expect(byId.get("tirmidhi:3540")?.grade).toMatchObject({ tier: "hasan", label: "Hasan", grader: "Bashar Awad Maarouf" });
     expect(archive.filter(item => item.collection === "muslim").every(item => item.book > 0)).toBe(true);
+  });
+
+  it("localizes citation digits, collection and grade without dropping suffixes or grader attribution", () => {
+    const copy = (nativeDigits: boolean) => {
+      const settings = { language: "bn", mode: "adult", nativeDigits } as const;
+      return { language: settings.language, locale: formatLocale(settings), direction: "ltr" as const, t: message.bind(null, settings) };
+    };
+    const source = { source: "Muslim 571a · Sahih", url: "https://sunnah.com/muslim:571a" };
+    expect(hadithCitation(source, copy(true))).toEqual({ reference: "মুসলিম ৫৭১a", grade: "সহিহ", full: "মুসলিম ৫৭১a · সহিহ" });
+    expect(hadithCitation(source, copy(false)).full).toBe("মুসলিম 571a · সহিহ");
+    const graded = { source: "Abu Dawud 1151 · Hasan (Al-Albani)", url: "https://sunnah.com/abudawud:1151" };
+    expect(hadithCitation(graded, copy(true)).full).toBe("আবু দাউদ ১১৫১ · হাসান (Al-Albani)");
   });
 
   it("bundles the verified original references for every curated card and Riyad selection", () => {

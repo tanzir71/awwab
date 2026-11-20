@@ -5,8 +5,9 @@ import { SectionNav } from "@/components/Surface";
 import { PrayerGuideAudio, PrayerGuideLostCount, PrayerGuideTopicCard } from "@/components/PrayerGuideSupport";
 import { DesktopPrayerGuide } from "@/components/DesktopPrayerGuide";
 import { useRecord } from "@/hooks/use-awwab";
-import { message } from "@/lib/copy";
+import { useCopy } from "@/lib/copy";
 import { guideTopics } from "@/lib/guide-copy";
+import { hadithCitation } from "@/lib/hadith";
 import { guidedPrayers, guideReference, guideSource, prayerGuide, prayerGuideTopics } from "@/lib/prayerGuide";
 import type { Reviews } from "@/lib/reviews";
 import type { Settings } from "@/lib/storageService";
@@ -18,7 +19,8 @@ export function PrayerGuide({ settings, desktop }: { settings: Settings; desktop
   const reviews = useRecord<Reviews>("reviews", {});
   const prayer = guidedPrayers.find(item => item === id);
   const topic = prayerGuideTopics.find(item => item === id);
-  const t = message.bind(null, settings);
+  const copy = useCopy();
+  const { locale, t } = copy;
   const hanafi = guideReference(settings) === "hanafi";
   if (desktop && (prayer || topic)) return <DesktopPrayerGuide prayer={prayer} topic={topic} settings={settings} reviews={reviews} />;
   if (topic) return <div className="prayer-guide">
@@ -27,7 +29,7 @@ export function PrayerGuide({ settings, desktop }: { settings: Settings; desktop
   </div>;
   if (!prayer) return <Link className="action soft" to="/today">{t("today")}</Link>;
   const name = t(prayer === "jumuah" ? "guideJumuah" : prayer);
-  const number = new Intl.NumberFormat(settings.language);
+  const number = new Intl.NumberFormat(locale);
   const { groups, fardCount, total, steps } = prayerGuide(prayer, settings, reviews);
   const context = `fromPrayer=${prayer}`;
   const preferences = `/you/prayer?${context}`;
@@ -51,7 +53,7 @@ export function PrayerGuide({ settings, desktop }: { settings: Settings; desktop
         <span className="small muted">{t(hanafi ? "prayerGuideFollowing" : "prayerGuideShared")}</span>
       </Link>
       {groups.some(group => group.type === "witr") && <p className="small muted">{t("guideWitrDifference")}</p>}
-      {prayer === "jumuah" && <p className="small muted">{t("guideJumuahIntro")} <a href={notes.jumuah.url}>{notes.jumuah.source}</a></p>}
+      {prayer === "jumuah" && <p className="small muted">{t("guideJumuahIntro")} <a href={notes.jumuah.url}>{hadithCitation(notes.jumuah, copy).full}</a></p>}
       <section className="guide-rakahs" aria-labelledby="guide-rakahs-heading">
         <h2 id="guide-rakahs-heading">{t("guideStepHeading", { count: fardCount })}</h2>
         <ol className="compact-stack" role="list">
@@ -82,7 +84,10 @@ export function PrayerGuide({ settings, desktop }: { settings: Settings; desktop
         <Link className="action soft" to={`/learn/salah?${context}`}>{t("guideWordByWord")}</Link>
       </div>
       <nav className="guide-source-list small muted" aria-label={t("guideSources")}>
-        {sources.map(source => <a key={source.number} href={source.url}>{source.grade} {source.collection} {source.number}</a>)}
+        {sources.map(({ collection, number, grade, url }) => {
+          const citation = hadithCitation({ url, source: `${collection} ${number} · ${grade}` }, copy);
+          return <a key={number} href={url}>{t("hadithCitationGradeFirst", citation)}</a>;
+        })}
       </nav>
     </div>
   </div>;
