@@ -8,6 +8,7 @@ import { useShareCards } from "@/hooks/use-share-cards";
 import { message, useCopy } from "@/lib/copy";
 import { downloadFile } from "@/lib/download";
 import { languages } from "@/lib/languagePreferences";
+import { loadLocalePack } from "@/lib/localePacks";
 import { shareFooterLink, shareFormats, shareTemplates, shareUrl, type ShareFormat, type ShareModel, type TemplateId } from "@/lib/share";
 import { shareReturnPath } from "@/lib/shareNavigation";
 import type { Settings } from "@/lib/storageService";
@@ -40,7 +41,8 @@ export function Share({ settings, now, closeDialog }: { settings: Settings; now:
   const opener = useRef<HTMLElement>();
   const dialogTitle = useRef<HTMLHeadingElement>(null);
   const value = Number(params.get("value")) || undefined;
-  const imageLanguage = sameLanguage ? settings.language : settings.language === "en" ? "bn" : "en";
+  const alternateLanguage = settings.language === "en" ? "bn" : "en";
+  const imageLanguage = sameLanguage ? settings.language : alternateLanguage;
   const cards = useShareCards(settings, now, original.id, value, imageLanguage);
   const model = useMemo<ShareModel>(() => ({ template: id, language: imageLanguage, format, light, showPrayerNumbers: counts, card: cards[id] }),
     [id, imageLanguage, format, light, counts, cards]);
@@ -72,6 +74,10 @@ export function Share({ settings, now, closeDialog }: { settings: Settings; now:
     select(template);
     setLight(shareTemplates.find(item => item.id === template).theme === "light");
     setStatus("");
+  }
+  async function chooseImageLanguage(same: boolean) {
+    if (!same) await loadLocalePack(alternateLanguage).catch(() => false);
+    setSameLanguage(same);
   }
   async function copy(value: string, notice: string) {
     try {
@@ -164,7 +170,7 @@ export function Share({ settings, now, closeDialog }: { settings: Settings; now:
           <div className="card share-options">
             {switches}
             <ShareSwitch label={t("shareImageLanguage")} hint={sameLanguage ? t("shareImageSameLanguage", { language: nativeLanguage }) : nativeLanguage}
-              on={sameLanguage} change={setSameLanguage} />
+              on={sameLanguage} change={next => void chooseImageLanguage(next)} />
           </div>
           <div className="equal-row share-actions">
             {save}

@@ -21,7 +21,7 @@ Tier 1 covers the largest non-Arab Muslim populations (Indonesia, Pakistan, Indi
 - **Your words (A27):** Muslims say the same thing differently (namaz / salat / sholat / solat / sallah). Catalog strings reference terms (`{term_salah}`), and the user picks the option that sounds right. Terms and options are in [`data/glossary.json`](data/glossary.json).
 - **Reading help:** "Quran meanings in the app language" (on), "Show English under each line" (off; useful while a translation is in review), native digits toggle (e.g. Bangla ১২৩).
 - **Spelling style** stays separate: Ampara (বা যবর বা) or English (Bāʾ + fatha = ba). Later locales can add their own (e.g. Urdu: “ب زبر بَ”).
-- **Share cards** use the app language for titles, captions, numbers and the footer tagline. Export uses the same type and layout as the preview. The link stays fixed. Quotes use the sourced English meaning while local editions are pending, with the language and source identified on the card.
+- **Share cards** use the app language for titles, captions, numbers and the footer tagline. Export uses the same type and layout as the preview. The link stays fixed. Surah cards use the installed Quran edition for the selected card language when available. The quote identifies its āyah range, translator and language. Pickthall’s English meaning remains the fallback.
 
 ## 3. Architecture (offline, no backend)
 - **Library:** FormatJS (`react-intl`) with ICU MessageFormat. Source catalog `src/i18n/en.json`; compiled per locale to `public/locales/<code>.json`. No string concatenation; plurals, gender and selects in ICU.

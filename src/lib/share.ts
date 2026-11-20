@@ -275,7 +275,7 @@ function drawSurah(paint: Painter, card: ShareCard, compact: boolean) {
     const panelHeight = Math.max(140, quote.height + 52);
     tile(28, top, 304, panelHeight, 16);
     quote.draw(180, top + 16);
-    write(card.citation, 180, top + panelHeight - 27, 9, 700, { width: 268, color: "muted", letterSpacing: ".6px", maxLines: 1 });
+    write(card.citation, 180, top + panelHeight - 27, 9, 700, { width: 268, color: "muted", letterSpacing: ".6px", line: 11, maxLines: 2, fit: true });
     progressTop = Math.min(517, Math.max(progressTop, top + panelHeight + 34));
   }
   countBar(card.progress, progressTop, true);

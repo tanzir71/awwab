@@ -2,7 +2,8 @@ import { useMemo } from "react";
 import { message } from "@/lib/copy";
 import { addDays, dateKey } from "@/lib/dates";
 import { calendarDefaults, hijriOn, monthStart } from "@/lib/hijri";
-import { formatLocale, type AppLanguage } from "@/lib/languagePreferences";
+import { formatLocale, languages, type AppLanguage } from "@/lib/languagePreferences";
+import { localeQuranEdition } from "@/lib/localePacks";
 import { coreWordCoverage, coreWordTotal, countKnownQuranWords, quranText } from "@/lib/quran";
 import type { Reviews } from "@/lib/reviews";
 import type { ShareCard, TemplateId } from "@/lib/share";
@@ -37,6 +38,7 @@ export function useShareCards(settings: Settings, now: Date, template?: Template
   const knownVerses = useRecord<string[]>("words-known", []);
   const calendar = useRecord("calendar", calendarDefaults);
   const trip = useRecord("umrah", initialTrip);
+  const edition = localeQuranEdition(language);
 
   return useMemo(() => {
     const copy = { mode, language, nativeDigits, wordChoices };
@@ -51,6 +53,10 @@ export function useShareCards(settings: Settings, now: Date, template?: Template
     const title = studyNames.surah(language, chapter.number, chapter.number === 103 ? "Al-ʿAsr" : chapter.transliteration);
     const ayahNumber = (ref: string) => number.format(Number(ref.split(":")[1]));
     const reference = `${number.format(chapter.number)}:${ayahNumber(verses[0].ref)}${verses.length > 1 ? `–${ayahNumber(verses.at(-1).ref)}` : ""}`;
+    const localQuote = edition && verses.every(verse => edition.verses[verse.ref]);
+    const meaning = verses.map(verse => localQuote ? edition.verses[verse.ref] : verse.english).join(" ");
+    const citation = localQuote ? `${reference} · ${edition.credit} · ${languages.find(item => item.code === language).native}`
+      : englishCitation(`${reference} · M. M. Pickthall`);
     const words = template === "words" && earned.includes(value as WordMilestone) ? value : countKnownQuranWords(knownVerses, known);
     const selectedLesson = (template === "qaida" && lessons.lessons.find(item => item.n === value)) || lessons.lessons.find(item => item.n === completed.at(-1)) || lessons.lessons[3];
     const complete = lessons.lessons.filter(lesson => completed.includes(lesson.n)).length;
@@ -72,8 +78,7 @@ export function useShareCards(settings: Settings, now: Date, template?: Template
         tagline,
         badge: t(mastered ? "cardLearnedBadge" : "cardPracticeBadge"), title,
         detail: t(mastered ? "cardSurahDetail" : "cardSurahPractice", { number: chapter.number }), arabic: verses[0].uthmani,
-        meaning: verses.map(verse => verse.english).join(" "),
-        reference, citation: englishCitation(`${reference} · M. M. Pickthall`),
+        meaning, reference, citation,
         progress: { value: solid.length, total: shareChapters.length, label: t("cardSurahCount", { count: solid.length, total: shareChapters.length }) },
       },
       words: {
@@ -108,5 +113,5 @@ export function useShareCards(settings: Settings, now: Date, template?: Template
         tiles: alphabet.letters.map(item => ({ arabic: item.letter })),
       },
     } satisfies Record<TemplateId, ShareCard>;
-  }, [logs, day, makkahDay, reviews, completed, known, knownVerses, earned, calendar, trip.start, trip.end, mode, language, nativeDigits, wordChoices, template, value, hijriAdjust, spellStyle]);
+  }, [logs, day, makkahDay, reviews, completed, known, knownVerses, earned, calendar, trip.start, trip.end, mode, language, nativeDigits, wordChoices, template, value, hijriAdjust, spellStyle, edition]);
 }
