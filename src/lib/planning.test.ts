@@ -14,8 +14,29 @@ import { defaults, exportUmrahTrip, prayerStatistics, readUmrahTripFile } from "
 import { askMeaning, askPhrase, askPhraseMatches, quickAsks, readGate, renderAsk, umrahPhrases } from "./umrahAsk";
 import { message } from "./copy";
 import { adjustQadaTotals, qadaBalances, qadaCountBetween, qadaDefaults, qadaForecast, recordQada } from "./qada";
-import { assignedMosque, jamaatForPrayer, mapMosque, mosqueCheckedAge, mosqueDefaults, mosqueInputClock, mosqueInputDigits, mosqueTime, mosqueWeek,
+import { assignedMosque, jamaatForPrayer, mapMosque, mosqueCheckedAge, mosqueDefaults, mosqueInputClock, mosqueTime, mosqueWeek,
   parseMosqueClock, timetableNotice, weeklyMosque, type Mosque } from "./mosques";
+import { latinDigits, readLocalizedNumber } from "./localeNumbers";
+
+describe("localized number entry", () => {
+  it("reads Bangla, Latin and locale-specific digits and decimal separators", () => {
+    expect(readLocalizedNumber("০", "bn")).toBe(0);
+    expect(readLocalizedNumber(" ১২৩ ", "bn-u-nu-latn")).toBe(123);
+    expect(readLocalizedNumber("১.২৫", "bn", 2)).toBe(1.25);
+    expect(readLocalizedNumber(".25", "bn", 2)).toBe(0.25);
+    expect(readLocalizedNumber("١٫٢٥", "ar", 2)).toBe(1.25);
+    expect(readLocalizedNumber("1,25", "fr", 2)).toBe(1.25);
+    expect(readLocalizedNumber("१२", "hi-u-nu-deva")).toBe(12);
+  });
+
+  it("rejects blank, negative, malformed, unsafe and over-precise quantities", () => {
+    for (const value of ["", " ", "-১", "৩.৫", "3e2", "১,০০০", "0x01", "৯০০৭১৯৯২৫৪৭৪০৯৯২"]) {
+      expect(readLocalizedNumber(value, "bn")).toBeUndefined();
+    }
+    expect(readLocalizedNumber("১.২৫১", "bn", 2)).toBeUndefined();
+    expect(readLocalizedNumber("١٫٢.٥", "ar", 2)).toBeUndefined();
+  });
+});
 
 describe("Today summaries", () => {
   it("honors the digit setting and formats Hijri months and countdown units for the active locale", () => {
@@ -237,7 +258,7 @@ describe("mosque timetables", () => {
     for (const value of ["", "24:00", "12:60", "5:1", "05:17 PM", "12:30:00", "1e30"]) {
       expect(parseMosqueClock(value, "en")).toBeUndefined();
     }
-    expect(mosqueInputDigits("+880 ١۲৩", "bn")).toBe("+880 123");
+    expect(latinDigits("+880 ١۲৩", "bn")).toBe("+880 123");
   });
 
   it("formats both fixed and adhan-relative jamaat times without changing mosque assignments", () => {

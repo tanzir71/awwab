@@ -1,5 +1,6 @@
 import { addDays, formatTime } from "./dates";
 import { dayDifference } from "./hijri";
+import { latinDigits } from "./localeNumbers";
 import { type Prayer, type PrayerId } from "@/types/Prayer";
 
 export const mosqueRoles = ["home", "office", "jumuah", "eid", "hometown", "other"] as const;
@@ -49,20 +50,8 @@ export function mosqueInputClock(time: string, locale: string) {
     .format(new Date(`2000-01-01T${time}:00Z`));
 }
 
-export function mosqueInputDigits(value: string, locale: string) {
-  const number = new Intl.NumberFormat(locale, { useGrouping: false });
-  const local = Array.from({ length: 10 }, (_, digit) => number.format(digit));
-  const common = "0123456789০১২৩৪৫৬৭৮৯٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹";
-  return value.replace(/\p{Decimal_Number}/gu, digit => {
-    const index = local.indexOf(digit);
-    if (index !== -1) return String(index);
-    const fallback = common.indexOf(digit);
-    return fallback === -1 ? digit : String(fallback % 10);
-  });
-}
-
 export function parseMosqueClock(value: string, locale: string) {
-  const parts = /^(\d{1,2})[:.]?([0-5]\d)$/.exec(mosqueInputDigits(value.trim(), locale));
+  const parts = /^(\d{1,2})[:.]?([0-5]\d)$/.exec(latinDigits(value.trim(), locale));
   if (!parts || Number(parts[1]) > 23) return undefined;
   return parts[1].padStart(2, "0") + ":" + parts[2];
 }

@@ -2,7 +2,8 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { useCopy } from "@/lib/copy";
 import { addDays, formatDay } from "@/lib/dates";
-import { mosqueAdhanOffset, mosqueClock, mosqueInputClock, mosqueInputDigits, mosqueOccasions, mosquePhotoLimit, mosquePhotoTypes, mosqueRoles, mosqueSources, parseMosqueClock, weeklyMosque,
+import { latinDigits } from "@/lib/localeNumbers";
+import { mosqueAdhanOffset, mosqueClock, mosqueInputClock, mosqueOccasions, mosquePhotoLimit, mosquePhotoTypes, mosqueRoles, mosqueSources, parseMosqueClock, weeklyMosque,
   type Mosque, type MosqueOccasion, type MosquePlan } from "@/lib/mosques";
 import { mosqueOccasionLabel, mosqueRoleLabel, mosqueSourceLabel } from "@/lib/mosque-copy";
 import { prayerIds, type PrayerId } from "@/types/Prayer";
@@ -105,7 +106,7 @@ export function TimetableEditor({ mosque, save, cancel }: {
       await save({
         ...mosque, name, jamaat, role: read("role") as Mosque["role"], source: read("source") as Mosque["source"],
         jumuah: { khutbah: time("khutbah"), prayer: time("jumuah") },
-        contact: mosqueInputDigits(read("contact"), locale).replace(/\D/g, "").slice(0, 30),
+        contact: latinDigits(read("contact"), locale).replace(/\D/g, "").slice(0, 30),
         refreshMonth: Number(read("refreshMonth")) || undefined,
         location: lat && lon ? { lat: Number(lat), lon: Number(lon) } : undefined,
         updatedAt: new Date().toISOString(),
@@ -213,7 +214,7 @@ export function OccasionEditor({ mosques, initialMosque, initialType, yearNow, u
   const [time, setTime] = useState("");
   const [yearText, setYearText] = useState(() => number.format(yearNow));
   const [pending, setPending] = useState(false);
-  const year = Number(mosqueInputDigits(yearText.trim(), locale));
+  const year = Number(latinDigits(yearText.trim(), locale));
   const clock = parseMosqueClock(time, locale);
   const mosque = mosques.find(item => item.id === id);
   const records = mosque?.occasional.filter(item => item.type === type).sort((a, b) => b.year - a.year) ?? [];
@@ -240,7 +241,7 @@ export function OccasionEditor({ mosques, initialMosque, initialType, yearNow, u
         <label className="field">{t("mosqueYear")}<input type="text" inputMode="numeric" dir="ltr" value={yearText} maxLength={4} required
           onChange={event => {
             const value = event.currentTarget.value;
-            const valueYear = Number(mosqueInputDigits(value, locale));
+            const valueYear = Number(latinDigits(value, locale));
             event.currentTarget.setCustomValidity(Number.isInteger(valueYear) && valueYear >= 1900 && valueYear <= 2200
               ? "" : t("mosqueYearRange", { from: 1900, to: 2200 }));
             setYearText(value);

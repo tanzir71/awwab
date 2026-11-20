@@ -127,7 +127,7 @@ function MobileReturn({ settings, now }: ReturnProps) {
     <ReturnHope />
     <Link to="/return/qada" className="list-row return-list-link">
       <span className="icon-box"><DesignIcon name={icons + "-calendar"} size={22} /></span>
-      <span><strong>{t("qadaTitle")}</strong><small>{t("qadaSummary", { left: totalLeft, made: totalMade, pace: plan.withEachPrayer ? t("qadaEach") : t("qadaPace", { count: plan.dailyGoal }) })}</small></span>
+      <span><strong>{t("qadaTitle")}</strong><small>{t("qadaSummary", { left: totalLeft, made: totalMade, pace: plan.withEachPrayer ? t("qadaEach", { count: 1 }) : t("qadaPace", { count: plan.dailyGoal }) })}</small></span>
       <DesignIcon name={icons + "-chevron"} className="icon-dir" size={20} />
     </Link>
     <ShareLink to="/share?template=return&from=return" className="text-button return-share">{t("returnShare")}</ShareLink>

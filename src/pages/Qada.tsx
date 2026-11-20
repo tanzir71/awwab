@@ -9,6 +9,7 @@ import { usePrayerLogs, useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { addDays, dateKey, formatDay } from "@/lib/dates";
 import { calendarDefaults, calendarEvents } from "@/lib/hijri";
+import { readLocalizedNumber } from "@/lib/localeNumbers";
 import { calendarWeekStart } from "@/lib/plan-calendar";
 import { adjustQadaTotals, estimateQada, qadaBalances, qadaCountBetween, qadaDefaults, qadaForecast, recordQada, type QadaPlan } from "@/lib/qada";
 import { type Settings, updateRecord } from "@/lib/storageService";
@@ -18,6 +19,22 @@ type QadaPanel = "edit" | "estimate" | "fasts" | "pace";
 const panelTitles = { edit: "qadaEditTitle", estimate: "qadaEstimateTitle", fasts: "qadaFasts", pace: "qadaDailyGoals" };
 const panelHints = { edit: "qadaEditHint", estimate: "qadaEstimateHint", fasts: "qadaFastHint", pace: "qadaDeskPaceHint" };
 const totalOf = (values: QadaPlan["madeUp"]) => Object.values(values).reduce((total, count) => total + count, 0);
+
+function QadaNumber({ name, defaultValue, decimals = 0, max = Number.MAX_SAFE_INTEGER }: {
+  name: string; defaultValue?: number; decimals?: number; max?: number;
+}) {
+  const { language, locale, t } = useCopy();
+  const native = language === "en";
+  const display = native || defaultValue === undefined ? defaultValue
+    : new Intl.NumberFormat(locale, { useGrouping: false, maximumFractionDigits: decimals }).format(defaultValue);
+  return <input type={native ? "number" : "text"} name={name} dir="ltr" defaultValue={display}
+    inputMode={decimals ? "decimal" : "numeric"} min={native ? 0 : undefined} max={native ? max : undefined}
+    step={native ? 10 ** -decimals : undefined} data-qada-decimals={decimals} data-qada-max={max} required
+    onInput={event => event.currentTarget.setCustomValidity("")}
+    onInvalid={event => {
+      if (event.currentTarget.validity.valueMissing) event.currentTarget.setCustomValidity(t("qadaEnterNumber"));
+    }} />;
+}
 
 export function Qada({ settings, now, desktop = false, embedded = false }: {
   settings: Settings; now: Date; desktop?: boolean; embedded?: boolean;
@@ -45,7 +62,8 @@ export function Qada({ settings, now, desktop = false, embedded = false }: {
   const daysToRamadan = ramadan ? Math.max(0, Math.round((Date.parse(ramadan.dates[0]) - Date.parse(today)) / 86400000)) : undefined;
   const maktab = settings.mode === "maktab";
   const chevron = maktab ? "return-maktab-chevron" : "return-chevron";
-  const pace = plan.withEachPrayer ? t("qadaEach") : t("qadaPace", { count: plan.dailyGoal });
+  const eachPrayer = t("qadaEach", { count: 1 });
+  const pace = plan.withEachPrayer ? eachPrayer : t("qadaPace", { count: plan.dailyGoal });
 
   async function save(update: (previous: QadaPlan) => QadaPlan) {
     try {
@@ -65,7 +83,22 @@ export function Qada({ settings, now, desktop = false, embedded = false }: {
   async function savePanel(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!editor || saving) return;
-    const values = new FormData(event.currentTarget);
+    const form = event.currentTarget;
+    const values = new FormData(form);
+    const numbers: Record<string, number> = {};
+    for (const input of form.querySelectorAll<HTMLInputElement>("input[data-qada-decimals]")) {
+      const decimals = Number(input.dataset.qadaDecimals);
+      const max = Number(input.dataset.qadaMax);
+      const value = readLocalizedNumber(input.value, locale, decimals);
+      if (value === undefined || value > max) {
+        input.setCustomValidity(value === undefined
+          ? t(decimals ? "qadaEnterDecimal" : "qadaEnterWhole", { decimals })
+          : t("qadaNumberLimit", { max }));
+        input.reportValidity();
+        return;
+      }
+      numbers[input.name] = value;
+    }
     setSaving(true);
     const saved = await save(old => {
       switch (editor.panel) {
@@ -73,17 +106,17 @@ export function Qada({ settings, now, desktop = false, embedded = false }: {
           const estimated = { ...old.estimated };
           const madeUp = { ...old.madeUp };
           for (const id of prayerIds) {
-            const enteredEstimate = Number(values.get("estimated-" + id));
+            const enteredEstimate = numbers["estimated-" + id];
             if (enteredEstimate !== editor.initial.estimated[id]) estimated[id] = enteredEstimate;
-            const correction = Number(values.get("made-" + id)) - editor.initial.madeUp[id];
+            const correction = numbers["made-" + id] - editor.initial.madeUp[id];
             madeUp[id] = Math.max(0, madeUp[id] + correction);
           }
           return adjustQadaTotals(old, estimated, madeUp);
         }
         case "estimate":
-          return { ...old, estimated: estimateQada(Number(values.get("years")), Number(values.get("prayed"))) };
+          return { ...old, estimated: estimateQada(numbers.years, numbers.prayed) };
         case "fasts":
-          return { ...old, fasts: Number(values.get("fasts")) };
+          return { ...old, fasts: numbers.fasts };
         case "pace": {
           const pace = values.get("pace");
           return pace === "each" ? { ...old, withEachPrayer: true }
@@ -132,7 +165,7 @@ export function Qada({ settings, now, desktop = false, embedded = false }: {
           return <tr key={id}>
             <th scope="row">{t(id)}</th><td>{number.format(remaining[id])}</td><td>{number.format(madeUp[id])}</td>
             <td><progress value={Math.min(madeUp[id], total)} max={total || 1} aria-label={t("qadaBalanceProgress") + " · " + t(id)} /></td>
-            <td><button className="action soft qada-desk-log" type="button" onClick={() => void logPrayer(id)}>{t("qadaDeskLog")}
+            <td><button className="action soft qada-desk-log" type="button" onClick={() => void logPrayer(id)}>{t("qadaDeskLog", { count: 1 })}
               <span className="sr-only"> · {t("qadaAdd", { prayer: t(id) })}</span></button></td>
           </tr>;
         })}</tbody>
@@ -161,7 +194,7 @@ export function Qada({ settings, now, desktop = false, embedded = false }: {
         {[1, 3, 5].map(goal => <button className="qada-goal" key={goal} aria-pressed={!plan.withEachPrayer && plan.dailyGoal === goal}
           onClick={() => void save(old => ({ ...old, dailyGoal: goal, withEachPrayer: false }))}>{t("qadaGoal", { count: goal })}</button>)}
         <button className="qada-goal" aria-pressed={!!plan.withEachPrayer}
-          onClick={() => void save(old => ({ ...old, withEachPrayer: true }))}>{t("qadaEach")}</button>
+          onClick={() => void save(old => ({ ...old, withEachPrayer: true }))}>{eachPrayer}</button>
       </div>
       <section className="qada-by-prayer">
         <div className="row-between"><h2>{t("qadaByPrayer")}</h2><button className="text-button" onClick={event => open(event, "edit")} aria-haspopup="dialog">{t("qadaEdit")}</button></div>
@@ -178,13 +211,13 @@ export function Qada({ settings, now, desktop = false, embedded = false }: {
       <button className="list-row return-list-link" onClick={event => open(event, "estimate")} aria-haspopup="dialog">
         <span className="icon-box"><DesignIcon name="qada-list" size={22} /></span>
         <span><strong>{t("qadaEstimateTitle")}</strong><small>{t("qadaEstimateHint")}</small></span>
-        <DesignIcon name={chevron} size={20} />
+        <DesignIcon name={chevron} className="icon-dir" size={20} />
       </button>
       <button className="list-row return-list-link" onClick={event => open(event, "fasts")} aria-haspopup="dialog">
         <span className="icon-box"><DesignIcon name="qada-moon" size={22} /></span>
         <span><strong>{t("qadaFasts")} · {number.format(fastsLeft)}</strong>
           <small>{daysToRamadan === undefined ? t("qadaFastHint") : t(ramadan?.confirmed ? "qadaRamadan" : "qadaRamadanEstimate", { count: daysToRamadan })}</small></span>
-        <DesignIcon name={chevron} size={20} />
+        <DesignIcon name={chevron} className="icon-dir" size={20} />
       </button>
       <section className="qada-note">
         <p>{t("qadaEncourage")}</p>
@@ -204,17 +237,17 @@ export function Qada({ settings, now, desktop = false, embedded = false }: {
           {panel === "edit" && prayerIds.map(id => <fieldset className="card compact-stack qada-adjust" key={id}>
             <legend>{t(id)}</legend>
             <div className="equal-row">
-              <label className="field">{t("qadaEstimated")}<input type="number" name={"estimated-" + id} min="0" defaultValue={editor.initial.estimated[id]} required /></label>
-              <label className="field">{t("qadaManual")}<input type="number" name={"made-" + id} min="0" defaultValue={editor.initial.madeUp[id]} required /></label>
+              <label className="field">{t("qadaEstimated")}<QadaNumber name={"estimated-" + id} defaultValue={editor.initial.estimated[id]} /></label>
+              <label className="field">{t("qadaManual")}<QadaNumber name={"made-" + id} defaultValue={editor.initial.madeUp[id]} /></label>
             </div>
           </fieldset>)}
           {panel === "estimate" && <>
-            <label className="field">{t("qadaYears")}<input type="number" name="years" min="0" max="150" step=".01" required /></label>
-            <label className="field">{t("qadaPrayed")}<input type="number" name="prayed" min="0" max="300000" defaultValue="0" required /></label>
+            <label className="field">{t("qadaYears")}<QadaNumber name="years" max={150} decimals={2} /></label>
+            <label className="field">{t("qadaPrayed")}<QadaNumber name="prayed" max={300000} defaultValue={0} /></label>
           </>}
           {panel === "fasts" && <>
             <p aria-live="polite">{t("qadaLeft", { count: fastsLeft })} · {t("qadaMade", { count: plan.fastsMadeUp })}</p>
-            <label className="field">{t("qadaFastsTotal")}<input type="number" name="fasts" min="0" defaultValue={plan.fasts} required /></label>
+            <label className="field">{t("qadaFastsTotal")}<QadaNumber name="fasts" defaultValue={plan.fasts} /></label>
           </>}
           {panel === "pace" && <fieldset className="stack qada-desk-pace">
             <legend className="sr-only">{t("qadaDailyGoals")}</legend>
@@ -222,7 +255,7 @@ export function Qada({ settings, now, desktop = false, embedded = false }: {
               <input name="pace" type="radio" value={goal} required defaultChecked={!editor.initial.withEachPrayer && editor.initial.dailyGoal === goal} />
               {t("qadaGoal", { count: goal })}
             </label>)}
-            <label className="list-row"><input name="pace" type="radio" value="each" required defaultChecked={editor.initial.withEachPrayer} />{t("qadaEach")}</label>
+            <label className="list-row"><input name="pace" type="radio" value="each" required defaultChecked={editor.initial.withEachPrayer} />{eachPrayer}</label>
           </fieldset>}
           <button className="action" disabled={saving}>{t("qadaSave")}</button>
         </form>

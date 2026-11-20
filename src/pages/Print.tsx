@@ -265,7 +265,7 @@ export function PrintSheet({ settings, now }: { settings: Settings; now: Date })
       <th scope="col">{t("printQadaDone")}</th></tr></thead><tbody>
       {prayerIds.map(id => <tr key={id}><th scope="row">{t(id)}</th><td>{numbers.format(remaining[id])}</td><td>{numbers.format(madeUp[id])}</td></tr>)}
     </tbody></table>
-      <p>{t("printQadaGoal", { goal: qada.withEachPrayer ? t("qadaEach") : t("qadaPace", { count: qada.dailyGoal }) })}</p>
+      <p>{t("printQadaGoal", { goal: qada.withEachPrayer ? t("qadaEach", { count: 1 }) : t("qadaPace", { count: qada.dailyGoal }) })}</p>
       <p>{t("printFastsLeft", { count: Math.max(0, qada.fasts - qada.fastsMadeUp) })}</p></>;
   } else {
     const result = zakatProfileTotals(zakat);
