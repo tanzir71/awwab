@@ -158,8 +158,10 @@
 @media (min-width: 1024px) {
   [data-page="qaida-lesson"] .app-content { padding-top: 4px; }
   [data-page="takhti"] .app-content { padding-top: 10px; }
-  .qaida-workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(248px, 34%); align-items: start; gap: 16px; }
-  .qaida-lessons { grid-column: 1/-1; grid-row: 2; }
+  .qaida-workspace, .qaida-practice-tab, .qaida-writing-tab { display: grid; align-items: start; gap: 16px; }
+  .qaida-workspace { grid-template-columns: minmax(166px, 232px) minmax(0, 1fr) minmax(252px, 340px); }
+  .qaida-writing-tab { grid-template-columns: repeat(2, minmax(0, 1fr)); max-inline-size: 816px; }
+  .qaida-lesson-tab .qaida-lessons { max-inline-size: 420px; }
   .qaida-center, .qaida-board, .write-desktop-panel { display: grid; gap: 10px; min-width: 0; align-content: start; }
   .qaida-board-scroll { display: grid; align-content: start; gap: 10px; max-height: 622px; overflow: auto; scrollbar-width: thin; }
   .qaida-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
@@ -175,9 +177,9 @@
   .qaida-lessons > a > span { display: grid; justify-items: center; align-items: center; flex: 0 0 20px; height: 20px; border-radius: var(--r-pill); background: var(--c-surface-alt); font: 700 9px/14px var(--font-body); }
   .qaida-lessons > a:hover, .qaida-lessons > [aria-current="step"] { background: var(--c-primary-soft); color: var(--interactive-ink); }
   .qaida-lessons > [data-complete="true"] > span, .qaida-lessons > [aria-current="step"] > span { background: var(--control-primary); color: var(--c-on-primary); }
-  .qaida-row { display: grid; grid-template-columns: 54px minmax(0,1fr); align-items: stretch; gap: 5px; min-height: 69px; padding: 4px 5px 4px 0; border-radius: var(--r-control); }
+  .qaida-row { display: grid; grid-template-columns: 54px minmax(0,1fr); align-items: stretch; gap: 5px; min-height: 69px; padding-block: 4px; padding-inline-end: 5px; border-radius: var(--r-control); }
   .qaida-row[data-current="true"] { background: var(--c-tint); }
-  .qaida-row-label { padding-left: 6px; font: var(--type-caption); text-align: left; color: var(--c-ink-muted); }
+  .qaida-row-label { padding-inline-start: 6px; font: var(--type-caption); text-align: start; color: var(--c-ink-muted); }
   .qaida-row-label strong { display: block; text-transform: uppercase; }
   .qaida-row-label span { display: flex; align-items: center; gap: 2px; font: var(--type-small); }
   .qaida-tiles { display: grid; gap: 5px; min-width: 0; }
@@ -214,14 +216,7 @@
   .write-form-preview small { font: var(--type-caption); color: var(--c-ink-muted); text-transform: uppercase; }
   .qaida-bottom { max-width: 566px; }
   .anatomy-open .qaida-workspace { grid-template-columns: minmax(0,1fr); }
-  .anatomy-open .qaida-workspace .qaida-lessons { grid-row: auto; }
-}
-@media (min-width: 1280px) {
-  .app-content:not(.anatomy-open) .qaida-workspace { grid-template-columns: minmax(166px, 232px) minmax(0,1fr) minmax(252px, 340px); }
-  .app-content:not(.anatomy-open) .qaida-lessons { grid-column: auto; grid-row: auto; }
-}
-@media (min-width: 1024px) and (max-width: 1139px) {
-  .qaida-aux { grid-template-columns: minmax(0, 1fr); }
+  .anatomy-open .qaida-writing-tab, .anatomy-open .qaida-practice-tab .qaida-aux { grid-template-columns: minmax(0,1fr); }
 }
 @media (max-width: 359px) {
   .qaida-ampara-phone .row-between { align-items: start; }

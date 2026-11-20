@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import * as Tabs from "@radix-ui/react-tabs";
 import { ChevronRight, Check } from "lucide-react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -8,11 +9,12 @@ import { DesignIcon } from "@/components/DesignIcon";
 import { LocalRecorder } from "@/components/LocalRecorder";
 import { PracticeHeader } from "@/components/PracticeHeader";
 import { SectionNav } from "@/components/Surface";
-import { useRecord } from "@/hooks/use-awwab";
+import { useDesktop, useRecord } from "@/hooks/use-awwab";
 import { qaidaAudioRef, qaidaExamples, qaidaHarakatExercise, qaidaHarakatExerciseRef, qaidaReviewId, qaidaRowCitation, qaidaRows, resolveQaidaRow } from "@/lib/qaidaPractice";
 import { qaidaRecitationLessons, qaidaRecitations } from "@/lib/qaidaRecitation";
 import { useCopy } from "@/lib/copy";
 import { asset } from "@/lib/config";
+import { focusListItem } from "@/lib/focusListItem";
 import { studyNames } from "@/lib/study-copy";
 import { db, type Settings } from "@/lib/storageService";
 import { finishQaidaLesson, momentPath, rememberQaidaPlace, saveQaidaRowReview } from "@/lib/studyMilestones";
@@ -41,7 +43,7 @@ const desktopLessonNames: Record<number, string> = {
 function LessonList({ active, completed }: { active: number; completed: number[] }) {
   const { t, language, locale } = useCopy();
   const number = new Intl.NumberFormat(locale);
-  return <aside className="card qaida-lessons" aria-label={t("qaidaLessons")}>
+  return <aside className="card qaida-lessons" aria-label={t("qaidaLessons")} onKeyDown={focusListItem}>
     <div className="row-between"><h2>{t("qaidaLessonList")}</h2><strong>{number.format(qaida.lessons.length)}</strong></div>
     {qaida.lessons.map(item => <Link key={item.n} to={`/learn/qaida/${item.n}`}
       data-complete={completed.includes(item.n)} aria-current={item.n === active ? "step" : undefined}>
@@ -262,7 +264,10 @@ export function Qaida({ settings, desktop }: { settings: Settings; desktop: bool
 }
 
 function QaidaLesson({ lesson, settings, completed, desktop }: { lesson: Lesson; settings: Settings; completed: number[]; desktop: boolean }) {
-  const { t, language, locale } = useCopy();
+  const { t, language, locale, direction } = useCopy();
+  const wide = useDesktop(1280);
+  const compactDesktop = desktop && !wide;
+  const practiceModes = compactDesktop ? modes.filter(item => item !== "qaidaWrite") : modes;
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const explicit = params.get("row");
@@ -271,6 +276,8 @@ function QaidaLesson({ lesson, settings, completed, desktop }: { lesson: Lesson;
   const row = resolveQaidaRow(explicit, stored, rows.length);
   const reviews = useRecord<Reviews>("reviews", {});
   const [mode, setMode] = useState<typeof modes[number]>("read");
+  const practiceMode = compactDesktop && mode === "qaidaWrite" ? "read" : mode;
+  const [tab, setTab] = useState("practice");
   const [prefs, setPrefs] = useState({ qaidaColours: true, qaidaTranslit: true, qaidaBanglaNames: true });
   const [choice, setChoice] = useState<{ row: number; word: string }>();
   const [saving, setSaving] = useState(false);
@@ -301,8 +308,14 @@ function QaidaLesson({ lesson, settings, completed, desktop }: { lesson: Lesson;
     void rememberQaidaPlace(lesson.n, requested >= 0 ? requested : undefined).catch(() => toast.error(t("lessonSaveError")));
   }, [explicit, lesson.n, rows.length, t]);
   useEffect(() => {
-    if (row >= 8) activeRow.current?.scrollIntoView({ block: "nearest" });
-  }, [row, desktop, mode]);
+    if (row >= 8 && (!compactDesktop || tab === "practice")) activeRow.current?.scrollIntoView({ block: "nearest" });
+  }, [row, desktop, compactDesktop, mode, tab]);
+
+  function openMode(item: typeof modes[number]) {
+    setMode(item);
+    if (item === "qaidaWrite") traceTarget.current?.focus();
+    if (item === "qaidaSpell") spellTarget.current?.focus();
+  }
 
   function move(index: number) {
     if (index === row) return;
@@ -342,8 +355,91 @@ function QaidaLesson({ lesson, settings, completed, desktop }: { lesson: Lesson;
     {ratedRow === row && <small role="status">{t("qaidaGradeSaved")}</small>}
   </section>;
 
+  const practice = desktop && <div className="qaida-center">
+    <div className="card qaida-tools">
+      <div className="qaida-modes" role="group" aria-label={t("qaidaModes")}>{practiceModes.map(item =>
+        <button key={item} type="button" aria-pressed={practiceMode === item} onClick={() => openMode(item)}>{t(item)}</button>)}
+      </div>
+      {toggles.map(item => <button className="chip" type="button" aria-pressed={prefs[item]} key={item}
+        onClick={() => setPrefs(prev => ({ ...prev, [item]: !prev[item] }))}>{t(item)}</button>)}
+    </div>
+    {mode === "qaidaTest" ? <><QaidaQuiz lesson={lesson.n} maktab={isMaktab} /><SpotInQuran lesson={lesson.n} maktab={isMaktab} /></> :
+      <section className="card qaida-board" aria-label={t("lessonRows")} data-colour={prefs.qaidaColours}>
+        <div className="qaida-board-scroll" onKeyDown={event => focusListItem(event, ".qaida-row-label")}>
+          {rows.map((tiles, index) => {
+            const isRead = Boolean(reviews[qaidaReviewId(lesson.n, index)]?.card.last_review);
+            const future = index > row;
+            const rowCitation = qaidaRowCitation(lesson.n, index);
+            return <div className="qaida-row" ref={index === row ? activeRow : undefined} data-current={index === row} data-future={future} key={index}>
+              <button className="qaida-row-label" type="button" aria-pressed={index === row} onClick={() => move(index)}>
+                <strong>{t("qaidaRowNumber", { number: index + 1 })}</strong>
+                {index === row ? <span>{t("qaidaRowNow")}</span> : isRead ? <span>{t("qaidaRowRead")} <Check size={12} /></span> : null}
+              </button>
+              <div className="qaida-tiles" dir="rtl" style={{ gridTemplateColumns: `repeat(${tiles.length}, minmax(0,1fr))` }}>
+                {tiles.map((words, tile) => {
+                  const drill = wordAnatomy(words[0]);
+                  const anatomy = drill.letters[0];
+                  const actual = future && words.length > 1 ? [words[0]] : words;
+                  return <div className="qaida-tile" data-current={index === row && words.includes(selected)} key={tile}
+                    data-mark={vowelIds[["َ", "ِ", "ُ"].indexOf(anatomy?.details[0]?.mark)]}
+                    title={anatomy?.details.map(mark => language === "bn" ? mark.nameBn : mark.name).join(" · ") || undefined}>
+                    <ArabicText text={actual.join(" ")} compact citation={rowCitation ? formatQuranReference(rowCitation.verse, locale) : undefined}
+                      verse={rowCitation?.verse} positionOffset={rowCitation ? rowCitation.first - 1 : 0} onWordSelected={position => {
+                      if (index !== row) move(index);
+                      setChoice({ row: index, word: actual[position - (rowCitation?.first ?? 1)] ?? actual[0] });
+                    }} showGlosses={false} />
+                    {prefs.qaidaTranslit && <small dir="ltr">{drill.syllables.map(item => item.tr).join("")}</small>}
+                    {prefs.qaidaBanglaNames && <small lang="bn" className="qaida-bangla-name">{anatomy?.nameBn}</small>}
+                  </div>;
+                })}
+              </div>
+            </div>;
+          })}
+        </div>
+      </section>}
+    <div className="qaida-aux">
+      <section className="qaida-spell-focus" ref={spellTarget} tabIndex={-1}><SpellEquation text={selected} /></section>
+      {actions}
+    </div>
+  </div>;
+
+  const footer = <div className="qaida-bottom">
+    <div className="equal-row qaida-paging">
+      <button className="action light" type="button" disabled={row === 0} onClick={() => move(row - 1)}>{t("previousRow")}</button>
+      <button className="action soft" type="button" disabled={row === rows.length - 1} onClick={() => move(row + 1)}>{t("nextRow")}</button>
+    </div>
+    <p className="small muted qaida-row-status">{t("rowOf", { row: row + 1, total: rows.length })}{gradeEntry ? ` · ${t("qaidaRowRead")}` : ""}</p>
+    {!desktop && <div className="qaida-phone-extra">{actions}<Link to="/learn/takhti/boat" className="action soft">{t("takhtiWriting")}</Link></div>}
+    {finished ? <div className="equal-row">
+      <Link className="action" to={lesson.n < qaida.lessons.length ? `/learn/qaida/${lesson.n + 1}` : "/learn"}>{t("continueLearning")}</Link>
+      <Link className="action soft" to={momentPath("qaida", lesson.n)}>{t("shareMoment")}</Link>
+    </div> : <button className="action" type="button" disabled={saving} onClick={() => void finish()}>{t("saveLesson")}</button>}
+  </div>;
+
+  if (compactDesktop) return <div className="qaida-lesson">
+    <Tabs.Root className="workspace-tabs" dir={direction} value={tab} onValueChange={setTab}>
+      <Tabs.List className="study-tabs equal-row" aria-label={t("qaidaLessons")}>
+        <Tabs.Trigger value="practice">{t("practise")}</Tabs.Trigger>
+        <Tabs.Trigger value="write">{t("qaidaWrite")}</Tabs.Trigger>
+        <Tabs.Trigger value="lessons">{t("qaidaLessonList")}</Tabs.Trigger>
+      </Tabs.List>
+      <Tabs.Content className="qaida-practice-tab" value="practice" forceMount>{practice}{footer}</Tabs.Content>
+      <Tabs.Content className="qaida-writing-tab" value="write" forceMount>
+        <TakhtiPanel letter={traceLetter} panelRef={traceTarget} />
+        <SpellEquation text={selected} />
+      </Tabs.Content>
+      <Tabs.Content className="qaida-lesson-tab" value="lessons" forceMount>
+        <LessonList active={lesson.n} completed={completed} />
+      </Tabs.Content>
+    </Tabs.Root>
+  </div>;
+
   return <div className="qaida-lesson">
-    {!desktop && <><div className="qaida-phone-header">
+    {desktop ? <div className="qaida-workspace">
+      <LessonList active={lesson.n} completed={completed} />
+      {practice}
+      <TakhtiPanel letter={traceLetter} panelRef={traceTarget} />
+    </div> : <><div className="qaida-phone-header">
       <PracticeHeader title={t("qaidaScreenTitle", { number: lesson.n, total: qaida.lessons.length })} back="/learn/qaida" maktab={isMaktab} />
       <progress value={lesson.n} max={qaida.lessons.length} aria-label={t("qaidaLessons")} />
     </div>
@@ -362,72 +458,6 @@ function QaidaLesson({ lesson, settings, completed, desktop }: { lesson: Lesson;
       <LessonAudio audioRef={qaidaAudioRef(lesson.n)} hearLabel={t(letterNames ? "qaidaHearAllLetterNames" : "qaidaHearLesson")}
         label={t("qaidaDesktopTitle", { number: lesson.n })} />
     </div></>}
-    {desktop && <div className="qaida-workspace">
-      <LessonList active={lesson.n} completed={completed} />
-      <div className="qaida-center">
-        <div className="card qaida-tools">
-          <div className="qaida-modes" role="group" aria-label={t("qaidaModes")}>{modes.map(item =>
-            <button key={item} type="button" aria-pressed={mode === item} onClick={() => {
-              setMode(item);
-              if (item === "qaidaWrite") traceTarget.current?.focus();
-              if (item === "qaidaSpell") spellTarget.current?.focus();
-            }}>{t(item)}</button>)}
-          </div>
-          {toggles.map(item => <button className="chip" type="button" aria-pressed={prefs[item]} key={item}
-            onClick={() => setPrefs(prev => ({ ...prev, [item]: !prev[item] }))}>{t(item)}</button>)}
-        </div>
-        {mode === "qaidaTest" ? <><QaidaQuiz lesson={lesson.n} maktab={isMaktab} /><SpotInQuran lesson={lesson.n} maktab={isMaktab} /></> :
-          <section className="card qaida-board" aria-label={t("lessonRows")} data-colour={prefs.qaidaColours}>
-            <div className="qaida-board-scroll">
-              {rows.map((tiles, index) => {
-                const isRead = Boolean(reviews[qaidaReviewId(lesson.n, index)]?.card.last_review);
-                const future = index > row;
-                const rowCitation = qaidaRowCitation(lesson.n, index);
-                return <div className="qaida-row" ref={index === row ? activeRow : undefined} data-current={index === row} data-future={future} key={index}>
-                  <button className="qaida-row-label" type="button" aria-pressed={index === row} onClick={() => move(index)}>
-                    <strong>{t("qaidaRowNumber", { number: index + 1 })}</strong>
-                    {index === row ? <span>{t("qaidaRowNow")}</span> : isRead ? <span>{t("qaidaRowRead")} <Check size={12} /></span> : null}
-                  </button>
-                  <div className="qaida-tiles" dir="rtl" style={{ gridTemplateColumns: `repeat(${tiles.length}, minmax(0,1fr))` }}>
-                    {tiles.map((words, tile) => {
-                      const drill = wordAnatomy(words[0]);
-                      const anatomy = drill.letters[0];
-                      const actual = future && words.length > 1 ? [words[0]] : words;
-                      return <div className="qaida-tile" data-current={index === row && words.includes(selected)} key={tile}
-                        data-mark={vowelIds[["َ", "ِ", "ُ"].indexOf(anatomy?.details[0]?.mark)]}
-                        title={anatomy?.details.map(mark => language === "bn" ? mark.nameBn : mark.name).join(" · ") || undefined}>
-                        <ArabicText text={actual.join(" ")} compact citation={rowCitation ? formatQuranReference(rowCitation.verse, locale) : undefined}
-                          verse={rowCitation?.verse} positionOffset={rowCitation ? rowCitation.first - 1 : 0} onWordSelected={position => {
-                          if (index !== row) move(index);
-                          setChoice({ row: index, word: actual[position - (rowCitation?.first ?? 1)] ?? actual[0] });
-                        }} showGlosses={false} />
-                        {prefs.qaidaTranslit && <small dir="ltr">{drill.syllables.map(item => item.tr).join("")}</small>}
-                        {prefs.qaidaBanglaNames && <small lang="bn" className="qaida-bangla-name">{anatomy?.nameBn}</small>}
-                      </div>;
-                    })}
-                  </div>
-                </div>;
-              })}
-            </div>
-          </section>}
-        <div className="qaida-aux">
-          <section className="qaida-spell-focus" ref={spellTarget} tabIndex={-1}><SpellEquation text={selected} /></section>
-          {actions}
-        </div>
-      </div>
-      <TakhtiPanel letter={traceLetter} panelRef={traceTarget} />
-    </div>}
-    <div className="qaida-bottom">
-      <div className="equal-row qaida-paging">
-        <button className="action light" type="button" disabled={row === 0} onClick={() => move(row - 1)}>{t("previousRow")}</button>
-        <button className="action soft" type="button" disabled={row === rows.length - 1} onClick={() => move(row + 1)}>{t("nextRow")}</button>
-      </div>
-      <p className="small muted qaida-row-status">{t("rowOf", { row: row + 1, total: rows.length })}{gradeEntry ? ` · ${t("qaidaRowRead")}` : ""}</p>
-      {!desktop && <div className="qaida-phone-extra">{actions}<Link to="/learn/takhti/boat" className="action soft">{t("takhtiWriting")}</Link></div>}
-      {finished ? <div className="equal-row">
-        <Link className="action" to={lesson.n < qaida.lessons.length ? `/learn/qaida/${lesson.n + 1}` : "/learn"}>{t("continueLearning")}</Link>
-        <Link className="action soft" to={momentPath("qaida", lesson.n)}>{t("shareMoment")}</Link>
-      </div> : <button className="action" type="button" disabled={saving} onClick={() => void finish()}>{t("saveLesson")}</button>}
-    </div>
+    {footer}
   </div>;
 }
