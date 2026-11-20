@@ -26,6 +26,7 @@ export interface Settings {
   language: AppLanguage;
   nativeDigits?: boolean;
   urduNastaliq?: boolean;
+  tajweedHighlights?: boolean;
   quranMeanings?: boolean;
   englishMeaning?: boolean;
   textSize?: typeof textSizes[number];
@@ -134,6 +135,7 @@ const settingsSchema = z.object({
   language: languageSchema,
   nativeDigits: z.boolean().optional(),
   urduNastaliq: z.boolean().optional(),
+  tajweedHighlights: z.boolean().optional(),
   quranMeanings: z.boolean().optional(),
   englishMeaning: z.boolean().optional(),
   textSize: z.enum(textSizes).optional(),

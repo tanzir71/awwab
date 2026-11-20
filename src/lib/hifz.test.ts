@@ -8,7 +8,7 @@ import { juzAmma, learnedSurahs, levels, patternPracticePath, patternReviewPrefi
 import { essentialPassageTitle } from "./paths-copy";
 import { parseCorpus } from "./morphology";
 import { reviewDestination } from "./studyDesk";
-import { normalizeWord, splitArabicWords } from "./wordAnatomy";
+import { normalizeWord, splitArabicPhrase, splitArabicWords } from "./wordAnatomy";
 import content from "../../docs/content/roots-and-patterns.json";
 import grammar from "../../docs/content/grammar-foundations.json";
 import sentence from "../../docs/content/sentence-structure.json";
@@ -16,7 +16,7 @@ import roots from "../../docs/content/roots-curriculum.json";
 import curriculum from "../../handovers/H2-languages-paths-arabic-help/data/learning-paths.json";
 import { speakCourses, speakLessonContent } from "./speakCurriculum";
 import { correctTajweedSamples, tajweedClip, tajweedDepthLessons, tajweedExcerpt, tajweedLessons, tajweedPracticeSamples, tajweedPrecache,
-  tajweedProgress, tajweedReviewId, tajweedSampleKey } from "./tajweed";
+  tajweedProgress, tajweedReadingExamples, tajweedReference, tajweedReviewId, tajweedSampleKey } from "./tajweed";
 import { newReview } from "./reviews";
 import { practiceChapters, readingPortions } from "./readingPractice";
 import { formatQuranReference } from "./quran";
@@ -133,6 +133,27 @@ describe("Learning path progress", () => {
       const result = tajweedExcerpt(verse.uthmani, sample, true);
       expect(result.match(/[\u06d6-\u06db]/gu)?.join(""), verse.ref).toBe(marks[sample.rule]);
     }
+  });
+
+  it("marks only the lesson's word ranges in the reading display and keeps overlapping rules", () => {
+    for (const lesson of tajweedLessons.filter(item => item.id !== "waqf")) {
+      for (const sample of lesson.samples) {
+        const verse = quran.surahs[sample.chapter][sample.ayah - 1];
+        const notes = tajweedReadingExamples(tajweedReference(sample))!;
+        for (const script of ["indopak", "uthmani"] as const) {
+          const rendered = splitArabicPhrase(studyPhrases(verse, script, true)).filter(part => part.word).map(part => part.text);
+          expect(rendered, verse.ref).toEqual(splitArabicWords(verseText(verse, script).text));
+        }
+        for (let index = 0; index < notes.length; index++) {
+          const matches = lesson.samples.some(item => tajweedReference(item) === verse.ref &&
+            item.rule === sample.rule && index + 1 >= item.first && index + 1 <= item.last);
+          expect(Boolean(notes[index]?.some(note => note.lesson === lesson.id && note.rule === sample.rule))).toBe(matches);
+        }
+      }
+    }
+    const overlap = tajweedReadingExamples("106:4")?.[2];
+    expect(overlap?.map(note => note.rule)).toEqual(expect.arrayContaining(["ikhfa", "mim-merge"]));
+    expect(tajweedReadingExamples("2:255")).toBeUndefined();
   });
 
   it("resumes unfinished examples in short sessions and derives stars from distinct correct answers", () => {

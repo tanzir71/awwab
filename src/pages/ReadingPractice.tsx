@@ -16,9 +16,11 @@ import { coreWordKey, loadMorphology } from "@/lib/morphology";
 import { formatQuranReference, knownCoreQuranWords, type QuranVerse } from "@/lib/quran";
 import { completedReadingChapters, emptyReadingPractice, firstUnreadAyah, practiceChapters, practicePage, readingPortions, readingPracticePaths,
   recitationChecks, rootsFromKnownWords, teacherChecklistComplete, type PracticeMode, type ReadingMode, type ReadingPracticeProgress, type RecitationCheck } from "@/lib/readingPractice";
-import { getRecord, type Settings } from "@/lib/storageService";
+import { getRecord, updateSettings, type Settings } from "@/lib/storageService";
 import { studyNames } from "@/lib/study-copy";
 import { markReadingPortion, rememberFlowPlace, setTeacherCheck } from "@/lib/studyMilestones";
+import { tajweedLessonPath, tajweedReadingExamples } from "@/lib/tajweed";
+import { useUi } from "@/lib/uiState";
 import { splitArabicPhrase } from "@/lib/wordAnatomy";
 import audioCatalogue from "../../public/packs/audio/index.json";
 
@@ -90,8 +92,24 @@ function ReadingTimer() {
   </div>;
 }
 
-function ReadingVerse({ verse, script, step, corpus, knownRoots, english = false }: {
-  verse: QuranVerse; script: Settings["script"]; step?: MeaningStep; corpus?: Corpus; knownRoots?: ReadonlySet<string>; english?: boolean;
+function TajweedExamplesToggle({ enabled, pageHasExamples }: { enabled: boolean; pageHasExamples: boolean }) {
+  const { t } = useCopy();
+  const [error, setError] = useState(false);
+  return <div className="compact-stack reading-tajweed">
+    <button type="button" className="chip" aria-pressed={enabled} onClick={async () => {
+      setError(false);
+      try {
+        await updateSettings({ tajweedHighlights: !enabled });
+        if (enabled && useUi.getState().word?.annotation?.lessons) useUi.getState().selectWord();
+      } catch { setError(true); }
+    }}>{t("readingTajweedHighlights")}</button>
+    {enabled && <p className="small muted">{t(pageHasExamples ? "readingTajweedHint" : "readingTajweedNoExamples")}</p>}
+    {error && <p className="small" role="alert">{t("saveError")}</p>}
+  </div>;
+}
+
+function ReadingVerse({ verse, script, step, corpus, knownRoots, english = false, tajweed = false }: {
+  verse: QuranVerse; script: Settings["script"]; step?: MeaningStep; corpus?: Corpus; knownRoots?: ReadonlySet<string>; english?: boolean; tajweed?: boolean;
 }) {
   const { t, language, locale } = useCopy();
   const { opening, text } = verseText(verse, script);
@@ -104,6 +122,10 @@ function ReadingVerse({ verse, script, step, corpus, knownRoots, english = false
       const familiar = row.root && knownRoots?.has(row.root);
       return { root: row.root, gloss: gloss?.[language] ?? gloss?.en, glossLanguage: gloss?.[language] ? language : "en",
         annotation: familiar ? { tone: "soft", label: t("readingKnownRoot") } : undefined };
+    }) : tajweed ? tajweedReadingExamples(verse.ref)?.map(notes => {
+      const lessons = notes.map(note => ({ title: t(`tajweedRule-${note.rule}`), to: tajweedLessonPath(note.lesson) }));
+      const label = lessons.map(lesson => lesson.title).join(" · ");
+      return { annotation: { tone: notes[0].tone, label, lessons } };
     }) : undefined;
 
   return <article className="card compact-stack hifz-verse reading-verse">
@@ -147,6 +169,7 @@ function GuidedRead({ chapter, title, mode, quran, progress, settings, now }: {
   const ayahs = portion.verses.map(ayahNumber);
   const saved = ayahs.every(ayah => read.includes(ayah));
   const english = mode === "meaning" && step === "readingMeaningStep" && (showEnglishQuranMeaning(settings) || revealEnglish);
+  const tajweed = mode === "flow" && settings.tajweedHighlights === true;
 
   useEffect(() => {
     if (mode !== "meaning") return;
@@ -170,6 +193,8 @@ function GuidedRead({ chapter, title, mode, quran, progress, settings, now }: {
       <p className="small muted">{t("readingAyahsProgress", { count: new Set(read).size, total: chapter.ayahs })}</p>
       <ScriptSwitch script={script} change={setScript} />
       {mode === "flow" && <ReadingTimer key={pageIndex} />}
+      {mode === "flow" && quran.surahs[chapter.number].some(verse => tajweedReadingExamples(verse.ref)) &&
+        <TajweedExamplesToggle enabled={tajweed} pageHasExamples={portion.verses.some(verse => tajweedReadingExamples(verse.ref))} />}
       {mode === "meaning" && <>
         <div className="equal-row study-tabs" role="group" aria-label={t("readingMeaning")}>
           {meaningSteps.map(option => <button type="button" className="chip" key={option} aria-pressed={step === option} onClick={() => setStep(option)}>{t(option)}</button>)}
@@ -181,7 +206,7 @@ function GuidedRead({ chapter, title, mode, quran, progress, settings, now }: {
       </>}
     </div>
     {portion.verses.map(verse => <ReadingVerse key={verse.ref} verse={verse} script={script} step={mode === "meaning" ? step : undefined}
-      corpus={corpus} knownRoots={roots} english={english} />)}
+      corpus={corpus} knownRoots={roots} english={english} tajweed={tajweed} />)}
     <button type="button" className="action" disabled={saving || saved} onClick={() => void save()}>{t(saved ? "readingSavedAyahs" : "readingSaveAyahs")}</button>
     {notice?.page === pageIndex && <p className="small muted" role={notice.message === "saveError" ? "alert" : "status"}>{t(notice.message)}</p>}
     <div className="equal-row">
@@ -202,6 +227,8 @@ function TeacherPractice({ chapter, title, verses, checks, settings, now }: {
   const reference = `surah:${chapter.number}`;
   const hasPack = audioCatalogue.packs.some(pack => pack.items.some(item => item.ref === reference));
   const prepared = teacherChecklistComplete(checks);
+  const hasExamples = verses.some(verse => tajweedReadingExamples(verse.ref));
+  const tajweed = settings.tajweedHighlights === true;
 
   async function check(item: RecitationCheck, value: boolean) {
     setError(false);
@@ -226,8 +253,11 @@ function TeacherPractice({ chapter, title, verses, checks, settings, now }: {
       {error && <p className="small" role="alert">{t("saveError")}</p>}
       <Link className="text-button justify-self-start" to="/learn/paths/read/3/lessons">{t("tajweedLessons")}</Link>
     </fieldset>
-    <div className="card reading-controls"><ScriptSwitch script={script} change={setScript} /></div>
-    {verses.map(verse => <ReadingVerse key={verse.ref} verse={verse} script={script} />)}
+    <div className="card reading-controls compact-stack">
+      <ScriptSwitch script={script} change={setScript} />
+      {hasExamples && <TajweedExamplesToggle enabled={tajweed} pageHasExamples />}
+    </div>
+    {verses.map(verse => <ReadingVerse key={verse.ref} verse={verse} script={script} tajweed={tajweed} />)}
     <QuranStudySources script={script} />
   </section>;
 }

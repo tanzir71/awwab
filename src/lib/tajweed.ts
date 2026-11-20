@@ -23,10 +23,30 @@ export const tajweedReviewPrefix = "rule:";
 export const tajweedLessonPath = (id: string) => id === "nun" ? tajweedRoute :
   `${tajweedDepthLessons.some(lesson => lesson.id === id) ? tajweedDepthIndex : tajweedRoute}/${id}`;
 export const tajweedTitleKey = (id: string) => id === "nun" ? "tajweedNunTitle" : `tajweedTitle-${id}`;
+export const tajweedTones = ["neutral", "tint", "soft", "accent"] as const;
 export const tajweedIntroKey = (id: string) => id === "nun" ? "tajweedNunIntro" : `tajweedIntro-${id}`;
 export const tajweedReference = (sample: TajweedSample) => `${sample.chapter}:${sample.ayah}`;
 export const tajweedSampleKey = (sample: TajweedSample) => `${tajweedReference(sample)}:${sample.first}`;
 export const tajweedReviewId = (lesson: TajweedLesson, sample: TajweedSample) => `${tajweedReviewPrefix}${lesson.id}:${tajweedSampleKey(sample)}`;
+
+type ReadingExample = { rule: string; lesson: string; tone: typeof tajweedTones[number] };
+const readingExamples = new Map<string, ReadingExample[][]>();
+for (const lesson of tajweedLessons) {
+  if (lesson.id === "waqf") continue;
+  const rules = Object.keys(lesson.rules);
+  for (const sample of lesson.samples) {
+    const ref = tajweedReference(sample);
+    const words = readingExamples.get(ref) ?? [];
+    const tone = tajweedTones[rules.indexOf(sample.rule) % tajweedTones.length];
+    for (let index = sample.first - 1; index < sample.last; index++) {
+      const notes = words[index] ??= [];
+      if (!notes.some(note => note.rule === sample.rule)) notes.push({ rule: sample.rule, lesson: lesson.id, tone });
+    }
+    readingExamples.set(ref, words);
+  }
+}
+
+export const tajweedReadingExamples = (verse: string) => readingExamples.get(verse);
 
 const recitationClips = new Map(recitations.packs.flatMap(pack => pack.items.map(item => [item.ref, { item, pack }] as const)));
 export const tajweedClip = (sample: TajweedSample) => recitationClips.get(tajweedReference(sample));

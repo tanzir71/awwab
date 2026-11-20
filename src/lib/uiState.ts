@@ -11,7 +11,7 @@ export interface WordSelection {
   verse?: string;
   connected: boolean;
   automatic?: boolean;
-  annotation?: { label: string };
+  annotation?: { label: string; lessons?: { title: string; to: string }[] };
 }
 
 export const useUi = create<{

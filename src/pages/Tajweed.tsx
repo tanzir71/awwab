@@ -17,9 +17,8 @@ import type { Reviews } from "@/lib/reviews";
 import { getRecord, type Settings } from "@/lib/storageService";
 import { saveLearningReview } from "@/lib/studyMilestones";
 import { correctTajweedSamples, tajweedClip, tajweedDepthIndex, tajweedDepthLessons, tajweedExcerpt, tajweedIndex, tajweedIntroKey, tajweedLessonPath, tajweedLessons,
-  tajweedPracticeSamples, tajweedReference, tajweedReviewId, tajweedSampleKey, tajweedTitleKey, type TajweedLesson, type TajweedSample } from "@/lib/tajweed";
+  tajweedPracticeSamples, tajweedReference, tajweedReviewId, tajweedSampleKey, tajweedTitleKey, tajweedTones as tones, type TajweedLesson, type TajweedSample } from "@/lib/tajweed";
 
-const tones = ["neutral", "tint", "soft", "accent"] as const;
 const ruleSource = "https://qul.tarteel.ai/tajweed_words/85:13:3";
 const jazariSource = { title: "Ibn al-Jazarī · Al-Muqaddimah al-Jazariyyah", url: "https://mutun.al-asl.com/jazariyyah.html" };
 const scripts = [["indopak", "readingIndopak"], ["uthmani", "readingUthmani"]] as const;

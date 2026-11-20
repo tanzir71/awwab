@@ -28,6 +28,7 @@ The Bangla preview covers all 20 level names, level summaries, placement recomme
 ## Read
 - Tajweed lessons (A31) = rule card (what, letters, Quranic example, audio) → "spot the rule" drill → read 8 words → record & compare.
 - Colour-coded tajweed reading uses tokenised colours (never colour alone; the rule name is always available on tap). Tajweed annotation data: QUL tajweed layer (verify licence) or hand-authored for Juz ʿAmma.
+- Fluent reading and Recite with a teacher can mark selected examples from the bundled Tajweed Essentials lessons in both scripts. A double underline identifies a marked word. Its Word anatomy panel names the rules and links to the lessons. Full Juz ʿAmma coverage and scholar review are pending.
 - Level 5 never claims to certify. It prepares the user to recite to a local teacher.
 
 ## Understand

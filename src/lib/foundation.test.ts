@@ -456,7 +456,7 @@ describe("device prayer records", () => {
   });
 
   it("restores language preferences and suggestions together with a legacy-compatible settings record", async () => {
-    await updateSettings({ language: "bn", nativeDigits: false, englishMeaning: false, textSize: "large", urduNastaliq: true });
+    await updateSettings({ language: "bn", nativeDigits: false, englishMeaning: false, textSize: "large", urduNastaliq: true, tajweedHighlights: true });
     await Promise.all([updateWordChoice("bn", "salah", "সালাত"), updateWordChoice("bn", "dhuhr", "জোহর")]);
     const note = { language: "bn", page: "/today", original: "এখন", proposed: "এই সময়" };
     await db.records.put({ key: "wording-suggestions", value: [note] });
@@ -464,7 +464,7 @@ describe("device prayer records", () => {
     await db.records.clear();
     await restoreBackup(file);
     expect((await db.records.get("settings")).value).toMatchObject({ language: "bn", nativeDigits: false, englishMeaning: false, textSize: "large", urduNastaliq: true,
-      wordChoices: { bn: { salah: "সালাত", dhuhr: "জোহর" } } });
+      tajweedHighlights: true, wordChoices: { bn: { salah: "সালাত", dhuhr: "জোহর" } } });
     expect((await db.records.get("wording-suggestions")).value).toEqual([note]);
     await updateWordChoice("bn");
     expect((await db.records.get("settings")).value).toMatchObject({ wordChoices: {}, nativeDigits: false, urduNastaliq: true });

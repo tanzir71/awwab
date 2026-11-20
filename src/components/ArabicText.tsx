@@ -1,6 +1,6 @@
 import React, { type ReactNode } from "react";
 import { splitArabicPhrase, splitArabicWords, splitGraphemes, wordAnatomy } from "../lib/wordAnatomy";
-import { useUi } from "../lib/uiState";
+import { useUi, type WordSelection } from "../lib/uiState";
 import { useCopy } from "../lib/copy";
 
 type WordRecall = "read" | "hint" | "hidden";
@@ -17,7 +17,8 @@ function WordChip({ children, recall, href, selected, indicator, annotation, onS
 }) {
   if (href) return <a className="word-chip" href={href}>{children}</a>;
   return <button type="button" className="word-chip" data-recall={recall} data-learning={indicator?.state} aria-pressed={selected}
-    data-annotation={annotation?.tone} aria-description={annotation?.label} onClick={onSelect}>{children}</button>;
+    data-annotation={annotation?.tone} data-rule-example={annotation?.lessons ? "" : undefined}
+    aria-description={annotation?.label} onClick={onSelect}>{children}</button>;
 }
 
 export interface WordDetail {
@@ -27,7 +28,7 @@ export interface WordDetail {
   displayText?: string;
   root?: string;
   anatomyWord?: string;
-  annotation?: { tone: "accent" | "soft" | "tint" | "neutral"; label: string };
+  annotation?: WordSelection["annotation"] & { tone: "accent" | "soft" | "tint" | "neutral" };
 }
 
 export function ArabicText({ text, citation, words, recall = "read", mushaf, compact = false, verse, positionOffset = 0, wordLink,
