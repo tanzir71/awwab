@@ -134,7 +134,7 @@ const readingRows = juzAmma.flatMap(verse => {
         const lesson = tajweedLessons.find(item => item.id === note.lesson);
         for (const source of tajweedLessonSources(lesson, false)) sources.set(source.url, source);
         const rule = tajweedMessages[tajweedReadingRuleKey(note)].en;
-        return `${tajweedMessages[tajweedTitleKey(note.lesson)].en} · ${rule}${note.joining ? " when joining" : ""}`;
+        return `${tajweedMessages[tajweedTitleKey(note.lesson)].en} · ${rule}${note.condition ? ` when ${note.condition}` : ""}`;
       });
       fields.push({ label: `${name} word ${index + 1} · ${labels.join(" / ")}`, value: words[index], lang: "ar" });
     });

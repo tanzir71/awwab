@@ -268,7 +268,7 @@ describe("Learning path progress", () => {
 
     for (const script of ["uthmani", "indopak"] as const) {
       expect(notes(78, 1, 1, script)).toEqual(["ghunnah-mim"]);
-      expect(notes(78, 2, 2, script)).toEqual(["ghunnah-nun"]);
+      expect(notes(78, 2, 2, script)).toEqual(["lam-sun", "ghunnah-nun"]);
       expect(notes(78, 6, 2, script)).toEqual(["qalqalah-inside"]);
       expect(notes(97, 4, 7, script)).toEqual(["ikhfa"]);
       expect(notes(109, 4, 5, script)).not.toContain("qalqalah-inside");
@@ -288,10 +288,10 @@ describe("Learning path progress", () => {
     };
     for (const script of ["uthmani", "indopak"] as const) {
       const joined = (ref: string, position: number, rule: string) =>
-        expect(annotations(ref, position, script)).toContainEqual(expect.objectContaining({ rule, joining: true }));
+        expect(annotations(ref, position, script)).toContainEqual(expect.objectContaining({ rule, condition: "joining" }));
       joined("78:3", 2, "mim-clear");
-      expect(annotations("78:13", 2, script)).toContainEqual(expect.objectContaining({ rule: "idgham", joining: true, ghunnah: true }));
-      expect(annotations("78:36", 2, script)).toContainEqual(expect.objectContaining({ rule: "idgham", joining: true, ghunnah: false }));
+      expect(annotations("78:13", 2, script)).toContainEqual(expect.objectContaining({ rule: "idgham", condition: "joining", ghunnah: true }));
+      expect(annotations("78:36", 2, script)).toContainEqual(expect.objectContaining({ rule: "idgham", condition: "joining", ghunnah: false }));
       joined("78:16", 1, "izhar");
       joined("78:14", 4, "ikhfa");
       joined("79:14", 2, "mim-hide");
@@ -304,15 +304,46 @@ describe("Learning path progress", () => {
       expect(annotations("78:18", 2, script)).toContainEqual({ rule: "ikhfa", lesson: "nun", tone: "accent" });
       expect(annotations("97:4", 6, script)).not.toContainEqual(expect.objectContaining({ rule: "mim-merge" }));
       expect(annotations("83:26", 2, script)).not.toContainEqual(expect.objectContaining({ rule: "idgham" }));
-      expect(annotations("80:14", 2, script)).not.toContainEqual(expect.objectContaining({ joining: true }));
-      expect(annotations("78:2", 1, script)).not.toContainEqual(expect.objectContaining({ joining: true }));
+      expect(annotations("80:14", 2, script)).not.toContainEqual(expect.objectContaining({ condition: "joining" }));
+      expect(annotations("78:2", 1, script)).not.toContainEqual(expect.objectContaining({ condition: "joining" }));
+    }
+  });
+
+  it("matches every Juz Amma definite article against the bundled Quranic Arabic Corpus", () => {
+    const morphology = gunzipSync(readFileSync(new URL("../../public/data/qac-morphology-0.4.txt.gz", import.meta.url))).toString();
+    const expected = new Set([...morphology.matchAll(/^\((\d+:\d+:\d+):\d+\)\t[^\t]+\tDET\t/gm)]
+      .map(([, location]) => location).filter(location => Number(location.split(":")[0]) >= 78));
+    expect(expected.size).toBe(351);
+    const verses = Object.entries(quran.surahs).filter(([chapter]) => Number(chapter) >= 78).flatMap(([, ayahs]) => ayahs);
+    for (const script of ["uthmani", "indopak"] as const) {
+      const article = (chapter: number, ayah: number, position: number) =>
+        tajweedVerseExamples(quran.surahs[chapter][ayah - 1], script)?.[position - 1]?.find(note => note.lesson === "lam")?.rule;
+      expect(article(78, 2, 2)).toBe("lam-sun");
+      expect(article(78, 2, 3)).toBe("lam-moon");
+      expect(article(92, 1, 1)).toBe("lam-sun");
+      expect(article(93, 4, 1)).toBe("lam-moon");
+      expect(article(112, 1, 3)).toBeUndefined();
+      const marked = new Set(verses.flatMap(verse => tajweedVerseExamples(verse, script)?.flatMap((notes, index) =>
+        notes.some(note => note.lesson === "lam") ? [`${verse.ref}:${index + 1}`] : []) ?? []));
+      expect(marked).toEqual(expected);
+    }
+  });
+
+  it("distinguishes printed rāʾ vowels in continuing reading from stopping examples", () => {
+    for (const script of ["uthmani", "indopak"] as const) {
+      const notes = (chapter: number, ayah: number) => tajweedVerseExamples(quran.surahs[chapter][ayah - 1], script);
+      expect(notes(94, 1)?.at(-1)).toContainEqual(expect.objectContaining({ rule: "ra-heavy" }));
+      expect(notes(103, 1)?.[0]).toContainEqual(expect.objectContaining({ rule: "ra-light", condition: "continuing" }));
+      expect(notes(112, 1)?.[3]).toContainEqual(expect.objectContaining({ rule: "qalqalah-stop" }));
+      expect(notes(78, 39)?.[2]).toContainEqual(expect.objectContaining({ rule: "qalqalah-stop" }));
+      expect(notes(109, 4)?.[4] ?? []).not.toContainEqual(expect.objectContaining({ rule: "qalqalah-stop" }));
     }
   });
 
   it("keeps the expanded Tajweed annotations within the rendered WordChips in both scripts", () => {
     const juzAmma = Object.entries(quran.surahs).filter(([chapter]) => Number(chapter) >= 78).flatMap(([, verses]) => verses);
     expect(juzAmma).toHaveLength(564);
-    for (const [script, expected] of [["uthmani", 420], ["indopak", 417]] as const) {
+    for (const script of ["uthmani", "indopak"] as const) {
       const annotated = juzAmma.filter(verse => {
         const examples = tajweedVerseExamples(verse, script);
         if (!examples) return false;
@@ -320,7 +351,7 @@ describe("Learning path progress", () => {
         expect(examples.length, verse.ref).toBeLessThanOrEqual(rendered.length);
         return true;
       });
-      expect(annotated).toHaveLength(expected);
+      expect(annotated).toHaveLength(540);
     }
   });
 

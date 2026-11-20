@@ -28,6 +28,7 @@ export const readingMessages: MessageCatalog = {
   readingTajweedNoExamples: { en: "There are no marked examples on this page.", bn: "এই পাতায় চিহ্নিত উদাহরণ নেই।" },
   readingTajweedRule: { en: "{lesson} · {rule}", bn: "{lesson} · {rule}" },
   readingTajweedJoinedRule: { en: "{lesson} · {rule} when joining", bn: "{lesson} · মিলিয়ে পড়লে {rule}" },
+  readingTajweedContinuedRule: { en: "{lesson} · {rule} when continuing", bn: "{lesson} · পড়া চালিয়ে গেলে {rule}" },
   readingRootSource: { en: "Word forms and roots · Quranic Arabic Corpus", bn: "শব্দের রূপ ও মূল · কুরআনিক আরবি করপাস" },
   readingSaveAyahs: { en: "Mark these āyāt as read", bn: "এই আয়াতগুলো পড়া হয়েছে" },
   readingSavedAyahs: { en: "Reading saved on this device.", bn: "এই ডিভাইসে পড়ার অগ্রগতি সংরক্ষিত হয়েছে।" },

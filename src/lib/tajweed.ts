@@ -39,7 +39,10 @@ export const tajweedReference = (sample: TajweedSample) => `${sample.chapter}:${
 export const tajweedSampleKey = (sample: TajweedSample) => `${tajweedReference(sample)}:${sample.first}`;
 export const tajweedReviewId = (lesson: TajweedLesson, sample: TajweedSample) => `${tajweedReviewPrefix}${lesson.id}:${tajweedSampleKey(sample)}`;
 
-type ReadingExample = { rule: string; lesson: string; tone: typeof tajweedTones[number]; joining?: true; ghunnah?: boolean };
+type ReadingExample = {
+  rule: string; lesson: string; tone: typeof tajweedTones[number];
+  condition?: "joining" | "continuing"; ghunnah?: boolean;
+};
 
 export function tajweedReadingRuleKey(example: ReadingExample) {
   if (example.rule === "idgham" && example.ghunnah !== undefined) {
@@ -52,7 +55,7 @@ function addReadingExample(words: ReadingExample[][], index: number, example: Re
   const notes = words[index] ??= [];
   const existing = notes.findIndex(note => note.rule === example.rule);
   if (existing === -1) notes.push(example);
-  else if (example.joining) notes[existing] = example;
+  else if (example.condition) notes[existing] = example;
 }
 
 const ruleExamples = new Map(tajweedLessons.flatMap(lesson => Object.keys(lesson.rules).map((rule, index) =>
@@ -79,8 +82,12 @@ const pauseMarks: Record<string, string> = {
   "ۙ": "waqf-avoid", "ۚ": "waqf-choice", "ۛ": "waqf-pair",
 };
 const readingPauseMarks = /[\u0615\u0617\u06d6-\u06db]/gu;
+const stopSigns = /^[ۖۗۘۚ]$/u;
 const sukun = /[ْۡ]/u;
 const smallMim = /[ۭۢ]/u;
+const qalqalahLetters = /^[قطبجد]/u;
+const sunLetters = /^[تثدذرزسشصضطظلن]$/u;
+const moonLetters = /^[ءبجحخعغفقكمهوي]$/u;
 const nextNunRules = new Map(Object.entries(originalLesson.rules).flatMap(([rule, letters]) =>
   Array.from(letters.replace(/\s/gu, ""), letter => [letter, rule] as const)));
 
@@ -90,6 +97,33 @@ function followingConsonant(glyph: string) {
   if (/[ءأإآؤئ]/u.test(base) || (base === "ا" && /[َُِٰ]/u.test(glyph))) return "ء";
   if (/[ىی]/u.test(base)) return "ي";
   return /^[بتثجحخدذرزسشصضطظعغفقكلمنهوي]$/u.test(base) ? base : "";
+}
+
+function articleRule(letters: string[]) {
+  let index = /^[وف]/u.test(letters[0]) ? 1 : 0;
+  // The emphatic lām and the preposition bāʾ can both precede the article.
+  if (letters[index] === "لَ" && /^ب/u.test(letters[index + 1] ?? "")) index++;
+  if (/^[بكت]/u.test(letters[index] ?? "")) index++;
+  if (!/^(?:[ٱا]َ?|ل[َِ]ّ?)$/u.test(letters[index] ?? "")) return;
+
+  const article = letters[index + 1];
+  const following = letters[index + 2];
+  const after = letters[index + 3];
+  if (!article?.startsWith("ل") || !following) return;
+  // In al-layl the printed shaddah stands for the two lāms.
+  if (article.includes("ّ") && /^[يىی]/u.test(following) && after?.startsWith("ل")) return "lam-sun";
+  // The divine name has its own rules for lām and is not this article.
+  if (following.startsWith("ل") && after?.startsWith("ه")) return;
+  // Uthmani can print the hamzah on tatweel between lām and a long alif.
+  const next = article.includes("ٔ") && following.startsWith("ا") ? "ء" : followingConsonant(following);
+  if (sunLetters.test(next) && following.includes("ّ") && !article.includes("ّ")) return "lam-sun";
+  if (moonLetters.test(next) && sukun.test(article)) return "lam-moon";
+}
+
+function vowelledRaRule(glyph: string) {
+  if (!glyph.startsWith("ر")) return;
+  if (/[ًٌَُ]/u.test(glyph)) return "ra-heavy";
+  if (/[ٍِ]/u.test(glyph)) return "ra-light";
 }
 
 function adjacentSukunRule(glyph: string, next: string, joining: boolean) {
@@ -111,6 +145,8 @@ function adjacentSukunRule(glyph: string, next: string, joining: boolean) {
 
 function markedWordRules(letters: string[]) {
   const rules = new Set<string>();
+  const lam = articleRule(letters);
+  if (lam) rules.add(lam);
   letters.forEach((glyph, index) => {
     // A word-initial shaddah can come from joining to the previous word.
     if (index > 0 && glyph.includes("ّ")) {
@@ -119,7 +155,9 @@ function markedWordRules(letters: string[]) {
     }
     const next = letters[index + 1];
     if (!next) return;
-    if (/^[قطبجد].*[ْۡ]/u.test(glyph)) rules.add("qalqalah-inside");
+    if (qalqalahLetters.test(glyph) && sukun.test(glyph)) rules.add("qalqalah-inside");
+    const ra = vowelledRaRule(glyph);
+    if (ra) rules.add(ra);
     const rule = adjacentSukunRule(glyph, followingConsonant(next), false);
     if (rule) rules.add(rule);
   });
@@ -165,7 +203,21 @@ export function tajweedVerseExamples(verse: QuranVerse, script: "uthmani" | "ind
       const example = ruleExamples.get(rule);
       if (example && otherRules.has(rule)) addReadingExample(examples, index, example);
     }
-    if (pauses.length || other.pauses.length || index + 1 === uthmani.length) return;
+    const final = letters.at(-1) ?? "";
+    const otherFinal = other.letters.at(-1) ?? "";
+    const finalRa = vowelledRaRule(final);
+    if (finalRa && finalRa === vowelledRaRule(otherFinal) && (!localRules.has(finalRa) || !otherRules.has(finalRa))) {
+      const example = ruleExamples.get(finalRa);
+      if (example) addReadingExample(examples, index, { ...example, condition: "continuing" });
+    }
+    const endOfAyah = index + 1 === uthmani.length;
+    const printedStop = pauses.some(mark => stopSigns.test(mark)) &&
+      (script === "uthmani" || other.pauses.some(mark => stopSigns.test(mark)));
+    if ((endOfAyah || printedStop) && final[0] === otherFinal[0] && qalqalahLetters.test(final)
+      && !final.includes("ً") && !otherFinal.includes("ً")) {
+      addReadingExample(examples, index, { rule: "qalqalah-stop", lesson: "qalqalah", tone: "tint" });
+    }
+    if (pauses.length || other.pauses.length || endOfAyah) return;
     const next = followingConsonant(uthmani[index + 1].letters[0]);
     if (!next || next !== followingConsonant(indopak[index + 1].letters[0])) return;
     const rule = joinedWordRule(letters, next);
@@ -174,7 +226,7 @@ export function tajweedVerseExamples(verse: QuranVerse, script: "uthmani" | "ind
     if (example && (!localRules.has(rule) || !otherRules.has(rule))
       && rule === joinedWordRule(other.letters, next)) {
       const ghunnah = rule === "idgham" ? /[ينمو]/u.test(next) : undefined;
-      addReadingExample(examples, index, { ...example, joining: true, ghunnah });
+      addReadingExample(examples, index, { ...example, condition: "joining", ghunnah });
     }
   });
   return examples.length ? examples : undefined;

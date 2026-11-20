@@ -50,6 +50,10 @@
   },
   {
     "id": "lam",
+    "sources": [
+      { "title": "Quranic Universal Library · Sun and moon letters", "url": "https://qul.tarteel.ai/tajweed_rule/laam_shamsiyah" },
+      { "title": "Quranic Arabic Corpus · Definite article", "url": "https://corpus.quran.com/documentation/morphologicalfeatures.jsp" }
+    ],
     "rules": { "lam-sun": "ت ث د ذ ر ز س\nش ص ض ط ظ ل ن", "lam-moon": "ء ب ج ح خ ع غ\nف ق ك م ه و ي" },
     "samples": [
       { "rule": "lam-sun", "chapter": 113, "ayah": 4, "first": 3, "last": 3 },
@@ -64,6 +68,10 @@
   },
   {
     "id": "ra",
+    "sources": [
+      { "title": "About Tajweed · Heavy rāʾ", "url": "https://www.abouttajweed.com/tajweed-rules/53-tafkheem-and-tarqeeq/59-tafkheem-and-tarqeeq-part-3" },
+      { "title": "About Tajweed · Light rāʾ", "url": "https://www.abouttajweed.com/tajweed-rules/53-tafkheem-and-tarqeeq/60-tafkheem-and-tarqeeq-part-4" }
+    ],
     "rules": { "ra-heavy": "رَ رُ", "ra-light": "رِ" },
     "samples": [
       { "rule": "ra-heavy", "chapter": 1, "ayah": 2, "first": 3, "last": 3 },

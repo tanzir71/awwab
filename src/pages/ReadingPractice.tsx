@@ -28,6 +28,7 @@ import { splitArabicPhrase } from "@/lib/wordAnatomy";
 import audioCatalogue from "../../public/packs/audio/index.json";
 
 const modeTitles = { flow: "readingFlow", meaning: "readingMeaning", teacher: "readingTeacher" };
+const tajweedRuleLabels = { joining: "readingTajweedJoinedRule", continuing: "readingTajweedContinuedRule" } as const;
 const meaningSteps = ["readingWordStep", "readingPhraseStep", "readingMeaningStep"] as const;
 const emptyKeys: string[] = [];
 const ayahNumber = (verse: QuranVerse) => Number(verse.ref.split(":")[1]);
@@ -139,7 +140,7 @@ function ReadingVerse({ verse, script, settings, step, corpus, knownRoots, engli
         annotation: familiar ? { tone: "soft", label: t("readingKnownRoot") } : undefined };
     }) : tajweed ? tajweedVerseExamples(verse, script)?.map(notes => {
       const lessons = notes.map(note => ({
-        title: t(note.joining ? "readingTajweedJoinedRule" : "readingTajweedRule", {
+        title: t(note.condition ? tajweedRuleLabels[note.condition] : "readingTajweedRule", {
           lesson: t(tajweedTitleKey(note.lesson)), rule: t(tajweedReadingRuleKey(note)),
         }),
         to: tajweedLessonPath(note.lesson),
