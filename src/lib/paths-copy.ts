@@ -144,7 +144,6 @@ export const pathsMessages: MessageCatalog = {
   hifzRecitalAvailable: { en: "Next full check on {day}", bn: "পরের পুরো পারা যাচাই {day} তারিখে" },
   hifzTanzil: { en: "Tanzil Project · Uthmani text", bn: "তানজিল প্রকল্প · উসমানি পাঠ" },
   hifzIndopak: { en: "DigitalKhatt · IndoPak text", bn: "ডিজিটালখত · ইন্দোপাক পাঠ" },
-  hifzPickthall: { en: "Pickthall translation", bn: "পিকথলের অনুবাদ" },
   rootsTitle: { en: "Roots & patterns", bn: "শব্দমূল ও ছাঁচ" },
   rootsSubtitle: { en: "Understand · Level 3 · verbs and their families", bn: "বুঝুন · স্তর ৩ · ক্রিয়া ও তাদের শব্দপরিবার" },
   rootsLabel: { en: "Root", bn: "শব্দমূল" },

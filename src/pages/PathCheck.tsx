@@ -3,11 +3,11 @@ import { Link, useParams } from "react-router-dom";
 import { ArabicText } from "@/components/ArabicText";
 import { DesignIcon } from "@/components/DesignIcon";
 import { PlacementAudio } from "@/components/PlacementAudio";
-import { QuranStudySources } from "@/components/QuranStudySources";
+import { QuranStudySources, QuranVerseMeaning } from "@/components/QuranStudySources";
 import { useCopy } from "@/lib/copy";
 import { dateKey } from "@/lib/dates";
 import { levels, pathUrl, tracks, type PathPlacement, type Track } from "@/lib/learningPaths";
-import { quranText } from "@/lib/quran";
+import { formatQuranReference, quranText } from "@/lib/quran";
 import { placement, placementAudio } from "@/lib/onboarding";
 import { askMeaning, askPhrase, type AskPhrase } from "@/lib/umrahAsk";
 import { updateRecord, type Settings } from "@/lib/storageService";
@@ -27,7 +27,7 @@ const quiz: Record<Track, Prompt[]> = {
 };
 
 function CheckRound({ track, settings, now }: { track: Track; settings: Settings; now: Date }) {
-  const { t } = useCopy();
+  const { t, locale } = useCopy();
   const questions = quiz[track];
   const [index, setIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -64,11 +64,12 @@ function CheckRound({ track, settings, now }: { track: Track; settings: Settings
       <h2>{t(promptLabel[track])}</h2>
       {question.prompt ? <ArabicText text={question.prompt} citation={question.ref} /> : question.phrase && <p>{askMeaning(question.phrase, t)}</p>}
       {revealed && <div className="paths-reveal">{question.copy && <p>{t(question.copy)}</p>}
-        {question.answer && (/\p{Script=Arabic}/u.test(question.answer)
-          ? <ArabicText text={question.answer} citation={question.ref} preserveSeparators /> : <p lang="en">{question.answer}</p>)}
+        {question.answer && (track === "understand"
+          ? <QuranVerseMeaning text={question.answer} />
+          : <ArabicText text={question.answer} citation={question.ref} preserveSeparators />)}
         {question.audio && <PlacementAudio key={question.audio} reference={question.audio} title={question.ref} />}
-        {question.ref && <small>{question.ref}</small>}
-        {track === "understand" && <QuranStudySources script="uthmani" english />}</div>}
+        {question.ref && <small><bdi>{formatQuranReference(question.ref, locale)}</bdi></small>}
+        {track === "understand" && <QuranStudySources script="uthmani" />}</div>}
       {!revealed ? <button className="action" type="button" onClick={() => reveal(true)}>{t("pathsCheckReveal")}</button>
         : <div className="equal-row"><button type="button" className="action light" disabled={pending} onClick={() => void grade(false)}>{t("forgot")}</button>
           <button type="button" className="action" disabled={pending} onClick={() => void grade(true)}>{t("got-it")}</button></div>}

@@ -19,10 +19,17 @@ import { correctTajweedSamples, tajweedClip, tajweedDepthLessons, tajweedExcerpt
   tajweedProgress, tajweedReviewId, tajweedSampleKey } from "./tajweed";
 import { newReview } from "./reviews";
 import { practiceChapters, readingPortions } from "./readingPractice";
+import { formatQuranReference } from "./quran";
 
 const quran = JSON.parse(gunzipSync(readFileSync(new URL("../../public/data/quran-study-v1.json.gz", import.meta.url))).toString()) as StudyQuran;
 
 describe("Offline Quran study edition", () => {
+  it("formats chapter and āyah numbers without changing reference separators", () => {
+    expect(formatQuranReference("67:1–5 · 103:2", "bn")).toBe("৬৭:১–৫ · ১০৩:২");
+    expect(formatQuranReference("67:1–5", "bn-u-nu-latn")).toBe("67:1–5");
+    expect(formatQuranReference("103:2", "ar-u-nu-arab")).toBe("١٠٣:٢");
+  });
+
   it("includes every referenced āyah in both scripts and partitions all verses into 30 juzs", () => {
     expect(quran.notice).toContain("Tanzil Quran Text");
     expect(chapters).toHaveLength(114);

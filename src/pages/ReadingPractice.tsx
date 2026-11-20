@@ -4,7 +4,7 @@ import { Link, useLocation, useParams, useSearchParams } from "react-router-dom"
 import { ArabicText, type WordDetail } from "@/components/ArabicText";
 import { DesignIcon } from "@/components/DesignIcon";
 import { LocalRecorder } from "@/components/LocalRecorder";
-import { QuranStudySources } from "@/components/QuranStudySources";
+import { QuranStudySources, QuranVerseMeaning } from "@/components/QuranStudySources";
 import { VerseAudio } from "@/components/VerseAudio";
 import { useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
@@ -13,7 +13,7 @@ import { focusListItem } from "@/lib/focusListItem";
 import { studyPhrases, studyQuran, verseText, type StudyQuran } from "@/lib/hifz";
 import { showEnglishQuranMeaning } from "@/lib/languagePreferences";
 import { coreWordKey, loadMorphology } from "@/lib/morphology";
-import { knownCoreQuranWords, type QuranVerse } from "@/lib/quran";
+import { formatQuranReference, knownCoreQuranWords, type QuranVerse } from "@/lib/quran";
 import { completedReadingChapters, emptyReadingPractice, firstUnreadAyah, practiceChapters, practicePage, readingPortions, readingPracticePaths,
   recitationChecks, rootsFromKnownWords, teacherChecklistComplete, type PracticeMode, type ReadingMode, type ReadingPracticeProgress, type RecitationCheck } from "@/lib/readingPractice";
 import { getRecord, type Settings } from "@/lib/storageService";
@@ -93,7 +93,7 @@ function ReadingTimer() {
 function ReadingVerse({ verse, script, step, corpus, knownRoots, english = false }: {
   verse: QuranVerse; script: Settings["script"]; step?: MeaningStep; corpus?: Corpus; knownRoots?: ReadonlySet<string>; english?: boolean;
 }) {
-  const { t, language } = useCopy();
+  const { t, language, locale } = useCopy();
   const { opening, text } = verseText(verse, script);
   const rendered = step === "readingWordStep" ? text : studyPhrases(verse, script, true);
   const words: WordDetail[] | undefined = step === "readingWordStep" && corpus
@@ -107,11 +107,10 @@ function ReadingVerse({ verse, script, step, corpus, knownRoots, english = false
     }) : undefined;
 
   return <article className="card compact-stack hifz-verse reading-verse">
-    <bdi className="caption muted">{verse.ref}</bdi>
+    <bdi className="caption muted">{formatQuranReference(verse.ref, locale)}</bdi>
     {opening && <ArabicText text={opening} citation="1:1" verse="1:1" mushaf={script} preserveSeparators />}
     <ArabicText text={rendered} citation={verse.ref} verse={verse.ref} mushaf={script} words={words} preserveSeparators />
-    {english && <><p className="muted" lang="en" dir="ltr">{verse.english}</p>
-      <a className="small muted justify-self-start" href="https://tanzil.net/trans/en.pickthall" rel="noreferrer">{t("hifzPickthall")}</a></>}
+    {english && <QuranVerseMeaning text={verse.english} />}
   </article>;
 }
 

@@ -8,7 +8,8 @@ import { useCopy } from "@/lib/copy";
 import { isAvailableLanguage, languages } from "@/lib/languagePreferences";
 import { localePackAsset } from "@/lib/localePacks";
 import { completeOnboarding, desktopPlacement, desktopPlacementPassed, placement } from "@/lib/onboarding";
-import { quranText } from "@/lib/quran";
+import { formatQuranReference, quranText } from "@/lib/quran";
+import { QuranVerseMeaning } from "@/components/QuranStudySources";
 import { restoreBackup, selectAppLanguage, type Settings } from "@/lib/storageService";
 import { studyNames } from "@/lib/study-copy";
 import content from "../../docs/content/return.json";
@@ -67,7 +68,7 @@ function SetupProgress({ step }: { step: number }) {
 }
 
 export function Onboarding({ settings, desktop }: { settings: Settings; desktop: boolean }) {
-  const { language, t } = useCopy();
+  const { language, locale, t } = useCopy();
   const [step, setStep] = useState(0);
   const [desktopFlow] = useState(desktop);
   const [mode, setMode] = useState(settings.mode);
@@ -225,7 +226,7 @@ export function Onboarding({ settings, desktop }: { settings: Settings; desktop:
         <section className="card onboarding-question">
           <p className="caption">{t("pathsCheckQuestion", { number: question + 1, total: desktopPlacement.length })} · {t(sample.title)}</p>
           <ArabicText text={sample.arabic} citation={ref || undefined} verse={ref || undefined} />
-          {ref && <span className="caption muted">{ref}</span>}
+          {ref && <span className="caption muted"><bdi>{formatQuranReference(ref, locale)}</bdi></span>}
           <div className="setup-question-tools">
             <PlacementAudio key={sample.audioRef} reference={sample.audioRef} title={t(sample.title)} concise />
             <button className="chip soft" type="button" aria-expanded={showLetters} onClick={() => setShowLetters(value => !value)}>{t("setupShowLetters")}</button>
@@ -282,8 +283,9 @@ export function Onboarding({ settings, desktop }: { settings: Settings; desktop:
       </div>
       <section className="card onboarding-recognition">
         <h2><DesignIcon name="onboarding-sparkles" size={18} />{t("setupRecognise")}</h2>
-        <p className="small muted">{t(placementHints[index])}{verse && <> {t("setupVerseMeaning", { meaning: verse.english })}</>}</p>
-        {citation && <p className="small muted">{citation}</p>}
+        <p className="small muted">{t(placementHints[index])}</p>
+        {verse && <QuranVerseMeaning text={verse.english} />}
+        {citation && <p className="small muted"><bdi>{formatQuranReference(citation, locale)}</bdi></p>}
       </section>
       {notice && <p role="status" className="small muted">{t(notice)}</p>}
       <button className="text-button muted justify-self-end" type="button" disabled={saving} onClick={() => void finish(index)}>{t("skip")}</button>

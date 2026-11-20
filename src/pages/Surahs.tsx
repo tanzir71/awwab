@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { ArabicText } from "@/components/ArabicText";
 import { DesignIcon } from "@/components/DesignIcon";
 import { LocalRecorder } from "@/components/LocalRecorder";
+import { QuranVerseMeaning } from "@/components/QuranStudySources";
 import { ListLink, SectionNav } from "@/components/Surface";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useAudioPlayback } from "@/hooks/use-audio-playback";
@@ -12,7 +13,7 @@ import { useCopy } from "@/lib/copy";
 import { dateKey, formatDay } from "@/lib/dates";
 import { prayerGuidePath } from "@/lib/prayerGuide";
 import { parseQaidaReview } from "@/lib/qaidaPractice";
-import { quranText, type QuranVerse } from "@/lib/quran";
+import { formatQuranReference, quranText, type QuranVerse } from "@/lib/quran";
 import { showEnglishQuranMeaning } from "@/lib/languagePreferences";
 import { grades, isDue, reviewCard, type ReviewGrade, type Reviews } from "@/lib/reviews";
 import { updateRecord, type Settings } from "@/lib/storageService";
@@ -115,9 +116,11 @@ function ReviewQueue({ selected, reviews, now }: { selected: number; reviews: Re
   </aside>;
 }
 
-function elapsedTime(seconds: number) {
+function elapsedTime(seconds: number, locale: string) {
   const time = Math.floor(seconds);
-  return Math.floor(time / 60) + ":" + String(time % 60).padStart(2, "0");
+  const minutes = new Intl.NumberFormat(locale, { useGrouping: false });
+  const remainder = new Intl.NumberFormat(locale, { minimumIntegerDigits: 2, useGrouping: false });
+  return minutes.format(Math.floor(time / 60)) + ":" + remainder.format(time % 60);
 }
 
 export function SurahReader({ settings, now }: { settings: Settings; now: Date }) {
@@ -141,8 +144,10 @@ function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; set
   const adultDesk = desktop && settings.mode === "adult";
   const maktabDesk = desktop && settings.mode === "maktab";
   const mode = modes.find(value => value === params.get("mode")) ?? "read";
-  const [display, setDisplay] = useState({ translit: true, translation: true, word: adultDesk });
-  const options = [["translit", "surahTranslit"], ["translation", "surahTranslation"], ["word", "surahWordByWord"]] as const;
+  const [display, setDisplay] = useState({ translit: true, translation: undefined as boolean | undefined, word: adultDesk });
+  const enabled = { ...display, translation: display.translation ?? showEnglishQuranMeaning(settings) };
+  const options = [["translit", "surahTranslit"], ["translation", language === "en" ? "surahTranslation" : "surahEnglishTranslation"],
+    ["word", "surahWordByWord"]] as const;
   const [hints, setHints] = useState<Record<string, boolean>>({});
   const [loops, setLoops] = useState<Record<string, boolean>>({});
   const [speed, setSpeed] = useState(.75);
@@ -237,11 +242,11 @@ function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; set
 
   const segments = <ReaderModes selected={mode} change={changeMode} />;
   const help = <p className="surah-spell-note"><DesignIcon size={16} name={maktabDesk ? "surah-maktab-info" : "surah-mobile-info"} />
-    {t(maktabDesk ? "surahTapDesktop" : "spellOutHint")}{maktabDesk && " →"}</p>;
+    {t(maktabDesk ? "surahTapDesktop" : "spellOutHint")}{maktabDesk && <span className="icon-dir" aria-hidden="true">→</span>}</p>;
   const preferences = <div className="surah-preferences">
     <div className="surah-reader-options" role="group" aria-label={t("surahReaderOptions")}>
-      {options.map(([key, label]) => <button type="button" className="chip" key={key} aria-pressed={display[key]}
-        onClick={() => setDisplay(value => ({ ...value, [key]: !value[key] }))}>{t(label)}</button>)}
+      {options.map(([key, label]) => <button type="button" className="chip" key={key} aria-pressed={enabled[key]}
+        onClick={() => setDisplay(value => ({ ...value, [key]: !enabled[key] }))}>{t(label)}</button>)}
     </div>
     <label className="surah-speed"><span className={adultDesk ? "sr-only" : ""}>{t("surahSetRecitation")}</span>
       <select value={speed} onChange={event => chooseSpeed(Number(event.target.value))}>
@@ -260,7 +265,7 @@ function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; set
           <DialogContent className="awwab-dialog" aria-describedby={undefined}><DialogTitle>{t("surahReaderOptions")}</DialogTitle>{preferences}</DialogContent></Dialog>} />}
       {adultDesk ? <div className="card surah-toolbar">{segments}{preferences}</div> : maktabDesk ?
         <header className="surah-maktab-header"><div><p className="caption">{t("surahPosition", { number: chapters.indexOf(chapter) + 1, total: chapters.length })}</p>
-          <h1>{name} · {chapter.english}</h1></div>{segments}</header> : segments}
+          <h1>{name} · <bdi lang="en">{chapter.english}</bdi></h1></div>{segments}</header> : segments}
       {!desktop && <div className="surah-phone-status"><span className="chip caption" data-bucket={bucket}>{t(bucket)}</span>
         <span className="muted small">{t("chapterCounts", { verses: chapter.ayahs, words: chapter.words })}</span></div>}
       {!adultDesk && help}
@@ -277,14 +282,13 @@ function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; set
               mushaf={settings.script} words={verseWords(verse)} showGlosses={display.word}
               selectedPosition={word?.verse === verse.ref ? word.position : !word && index === 0 ? 1 : undefined} /> :
               <h2>{t("surahReciteMemory", { number: index + 1 })}</h2>}
-            <a className="surah-verse-number" href={"https://quran.com/" + verse.ref.replace(":", "/")} aria-label={verse.ref}>
+            <a className="surah-verse-number" href={"https://quran.com/" + verse.ref.replace(":", "/")}
+              aria-label={t("surahVerseSource", { reference: formatQuranReference(verse.ref, locale) })}>
               <span lang="ar" aria-hidden="true">{arabicNumber.format(index + 1)}</span></a>
           </div>
           <div className="surah-verse-foot">
-            <div>{!recalling && display.translit && <p className="surah-transliteration" lang="en">{verseTransliteration(verse, index)}</p>}
-              {display.translation && showEnglishQuranMeaning(settings) && <p className="muted" lang="en">
-                {recalling ? t("cue") + " · " : ""}{verse.english}
-              </p>}
+            <div>{!recalling && display.translit && <p className="surah-transliteration" lang="ar-Latn" dir="ltr">{verseTransliteration(verse, index)}</p>}
+              {enabled.translation && <QuranVerseMeaning text={verse.english} cue={recalling} />}
               {recalling && index > 1 && <button className="text-button surah-hint-control" type="button" aria-expanded={visible}
                 onClick={() => setHints(previous => ({ ...previous, [verse.ref]: !visible }))}>
                 <DesignIcon name="surah-mobile-eye" size={16} />{t(visible ? "hideInitials" : "showInitials")}</button>}
@@ -312,7 +316,7 @@ function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; set
           <Link className="surah-player-control" to={pack} aria-label={t("downloadRecitation")}><DesignIcon name="surah-adult-play2" size={16} /></Link>}
         <span>{playerLabel}</span>
         <progress max={audio.duration || 1} value={audio.elapsed} aria-label={t("surahProgress")} />
-        <small>{elapsedTime(audio.elapsed)} / {elapsedTime(audio.duration)}</small>
+        <small><bdi>{elapsedTime(audio.elapsed, locale)} / {elapsedTime(audio.duration, locale)}</bdi></small>
       </div>}
       {audio.error && <p className="small muted" role="status">{t("surahAudioError")}</p>}
       <section className="surah-grading">
@@ -324,7 +328,7 @@ function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; set
       </section>
       {chapter.number !== 1 && <p className="surah-suggestion small muted">{t("tryInMaghrib", { name })}</p>}
       <p className="surah-credit small muted"><a href={settings.script === "indopak" ? "https://digitalkhatt.org" : "https://tanzil.net/docs/text_license"}>
-        {t(settings.script === "indopak" ? "indopakCredit" : "tanzilCredit")}</a> · {t("englishTranslationCredit")}</p>
+        {t(settings.script === "indopak" ? "indopakCredit" : "tanzilCredit")}</a></p>
     </article>
   </div>;
 }

@@ -3,7 +3,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { Link, useParams } from "react-router-dom";
 import { ArabicText } from "@/components/ArabicText";
 import { DesignIcon } from "@/components/DesignIcon";
-import { QuranStudySources } from "@/components/QuranStudySources";
+import { QuranStudySources, QuranVerseMeaning } from "@/components/QuranStudySources";
 import { StudyText } from "@/components/StudyText";
 import { useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
@@ -13,7 +13,7 @@ import { essentialPassages, getHifzPassage, groupPortions, nextPortion, passageL
   type JuzRecitals, type StudyQuran } from "@/lib/hifz";
 import { showEnglishQuranMeaning } from "@/lib/languagePreferences";
 import { essentialPassageTitle } from "@/lib/paths-copy";
-import type { QuranVerse } from "@/lib/quran";
+import { formatQuranReference, type QuranVerse } from "@/lib/quran";
 import { saveHifzPlan, saveJuzRecitalRating, savePortionReview } from "@/lib/studyMilestones";
 import { studyNames } from "@/lib/study-copy";
 import type { ReviewGrade } from "@/lib/reviews";
@@ -40,12 +40,13 @@ function PassageHeading({ title, subtitle, back }: { title: string; subtitle?: s
 }
 
 function VerseRead({ verse, settings }: { verse: QuranVerse; settings: Settings }) {
+  const { locale } = useCopy();
   const { opening } = verseText(verse, settings.script);
   return <article className="card compact-stack hifz-verse">
-    <strong className="small" dir="ltr">{verse.ref}</strong>
-    {opening && <ArabicText text={opening} mushaf={settings.script} />}
+    <strong className="small"><bdi>{formatQuranReference(verse.ref, locale)}</bdi></strong>
+    {opening && <ArabicText text={opening} citation="1:1" verse="1:1" mushaf={settings.script} />}
     <ArabicText text={studyPhrases(verse, settings.script)} citation={verse.ref} verse={verse.ref} mushaf={settings.script} preserveSeparators />
-    {showEnglishQuranMeaning(settings) && <p className="muted" lang="en">{verse.english}</p>}
+    {showEnglishQuranMeaning(settings) && <QuranVerseMeaning text={verse.english} />}
   </article>;
 }
 
@@ -61,6 +62,7 @@ function StudyPortion({ item, position, title, passage, settings, now, minutes }
   const zone = settings.city.timeZone;
   const today = dateKey(now, zone);
   const bucket = portionBucket(progress, today);
+  const reference = formatQuranReference(item.ref, locale);
   async function rate(grade: ReviewGrade) {
     if (saving) return;
     markSaving(true);
@@ -70,7 +72,7 @@ function StudyPortion({ item, position, title, passage, settings, now, minutes }
     finally { markSaving(false); }
   }
   return <div className="hifz-page compact-stack">
-    <PassageHeading title={t("hifzPortionTitle", { number: position })} subtitle={`${title} · ${item.ref}`} back={base(passage.id)} />
+    <PassageHeading title={t("hifzPortionTitle", { number: position })} subtitle={`${title} · ${reference}`} back={base(passage.id)} />
     <section className="card compact-stack hifz-study-controls">
       <div className="row-between"><span className="chip soft">{t(bucketCopy[bucket])}</span><button className="text-button" type="button" aria-expanded={visible}
         onClick={() => show(!visible)}>{t(visible ? "hifzRepeat" : "hifzRead")}</button></div>
@@ -78,20 +80,20 @@ function StudyPortion({ item, position, title, passage, settings, now, minutes }
       {bucket === "manzil" && <p className="small muted">{t("hifzReviewDue", { day: formatDay(dateKey(new Date(progress.review.card.due), zone), dates, locale) })}</p>}
     </section>
     {visible && item.verses.map(verse => <VerseRead key={verse.ref} verse={verse} settings={settings} />)}
-    {!visible && <div className="card hifz-hidden"><strong dir="ltr">{item.ref}</strong><span className="small muted">{t("hifzRepeat")}</span></div>}
+    {!visible && <div className="card hifz-hidden"><strong><bdi>{reference}</bdi></strong><span className="small muted">{t("hifzRepeat")}</span></div>}
     <div className="equal-row hifz-grade-buttons" role="group" aria-label={t("hifzRepeat")}>
       {recordGrades.map(grade => <button type="button" key={grade} disabled={saving}
         className={`action${grade === "got-it" ? "" : " light"}`} onClick={() => void rate(grade)}>{t(grade)}</button>)}
     </div>
     {status && <p className="small muted" role="status">{status}</p>}
-    <QuranStudySources script={settings.script} english={showEnglishQuranMeaning(settings)} />
+    <QuranStudySources script={settings.script} />
   </div>;
 }
 
 function RecitalPrompt({ item, position, focus, settings, save }: {
   item: HifzPortion; position: number; focus: Ref<HTMLHeadingElement>; settings: Settings; save: (grade: ReviewGrade) => Promise<void>;
 }) {
-  const { t, language } = useCopy();
+  const { t, language, locale } = useCopy();
   const [visible, show] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(false);
@@ -108,7 +110,7 @@ function RecitalPrompt({ item, position, focus, settings, save }: {
   return <div className="compact-stack">
     <section className="card compact-stack hifz-recital-prompt">
       <h2 ref={focus} tabIndex={-1}>{t("hifzPortionTitle", { number: position })}</h2>
-      <p className="small muted">{studyNames.surah(language, chapter.number, chapter.title)} · <bdi>{item.ref}</bdi></p>
+      <p className="small muted">{studyNames.surah(language, chapter.number, chapter.title)} · <bdi>{formatQuranReference(item.ref, locale)}</bdi></p>
       <p>{t("hifzRecitalPrompt")}</p>
       <button className="action light" type="button" aria-expanded={visible} onClick={() => show(value => !value)}>
         {t(visible ? "hifzRecitalHide" : "hifzRecitalReveal")}
@@ -134,7 +136,7 @@ function WeeklyRecital({ juz, passage, title, portions, recital, settings, now }
   useEffect(() => { heading.current?.focus(); }, [item?.id]);
   const progress = t("hifzRecitalProgress", { count: state.count, total: portions.length });
   return <div className={`hifz-page compact-stack${item ? " hifz-recital-page" : ""}`}>
-    <PassageHeading title={t("hifzWeeklyRecital")} subtitle={`${title} · ${passageLabel(passage)}`} back={base(passage.id)} />
+    <PassageHeading title={t("hifzWeeklyRecital")} subtitle={`${title} · ${formatQuranReference(passageLabel(passage), locale)}`} back={base(passage.id)} />
     {item ? <div className="hifz-recital-grid">
       <section className="card compact-stack hifz-recital-summary">
         <h2>{t("hifzRecitalProgressTitle")}</h2>
@@ -154,7 +156,7 @@ function WeeklyRecital({ juz, passage, title, portions, recital, settings, now }
       {state.availableOn && <p className="small muted">{t("hifzRecitalAvailable", { day: formatDay(state.availableOn, dates, locale) })}</p>}
       <Link className="action light" to={base(passage.id)}>{t("hifzYourPlan")}</Link>
     </section>}
-    <QuranStudySources script={settings.script} english={showEnglishQuranMeaning(settings)} />
+    <QuranStudySources script={settings.script} />
   </div>;
 }
 
@@ -183,7 +185,7 @@ function PassagePlan({ passage, portions, settings, now }: { passage: HifzPassag
   const number = new Intl.NumberFormat(locale, { useGrouping: false });
   const title = juz ? t("hifzJuz", { number: juz })
     : passage.id.startsWith("surah-") ? studyNames.surah(language, passage.ranges[0].chapter, passage.title) : essentialPassageTitle(passage, t);
-  const subtitle = [passageLabel(passage), t("hifzAyahs", { count: passage.ayahs }),
+  const subtitle = [formatQuranReference(passageLabel(passage), locale), t("hifzAyahs", { count: passage.ayahs }),
     essential?.level === 3 && t("hifzEssentialLabel")].filter(Boolean).join(" · ");
   const position = Number(portion);
   const item = portions[position - 1];
@@ -234,7 +236,7 @@ function PassagePlan({ passage, portions, settings, now }: { passage: HifzPassag
         const state = entry === due ? "today" : review?.learnedOn ? "done" : "open";
         return <Link key={entry.id} className="hifz-portion-row" data-state={state} to={`${base(passage.id)}/${index + 1}`}
           onClick={() => { if (!stored[passage.id]) selectMinutes(minutes); }}>
-          <strong dir="ltr">{entry.ref}</strong><small>{review || state === "today" ? t(bucketCopy[bucket]) : formatDay(plan.dates[index].from, { month: "short", day: "numeric" }, locale)}</small>
+          <strong><bdi>{formatQuranReference(entry.ref, locale)}</bdi></strong><small>{review || state === "today" ? t(bucketCopy[bucket]) : formatDay(plan.dates[index].from, { month: "short", day: "numeric" }, locale)}</small>
           {(state !== "open" || entry === upcoming) && <span className="chip">{t(state === "today" ? "hifzToday" : state === "done" ? "pathsDone" : "hifzNext")}</span>}
         </Link>;
       })}
@@ -242,9 +244,9 @@ function PassagePlan({ passage, portions, settings, now }: { passage: HifzPassag
     </section>
     {due ? <Link className="action" to={`${base(passage.id)}/${dueIndex + 1}`}
       onClick={() => { if (!stored[passage.id]) selectMinutes(minutes); }}>
-      {t((reviews[due.id]?.learnedOn ? "hifzReview" : "hifzStart"), { number: dueIndex + 1, ref: due.ref })}
+      {t((reviews[due.id]?.learnedOn ? "hifzReview" : "hifzStart"), { number: dueIndex + 1, ref: formatQuranReference(due.ref, locale) })}
     </Link> : <p className="small muted" role="status">{t("hifzAllDone")}</p>}
-    <QuranStudySources script={settings.script} english={showEnglishQuranMeaning(settings)} />
+    <QuranStudySources script={settings.script} />
   </div>;
 }
 

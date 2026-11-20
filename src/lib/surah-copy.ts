@@ -16,6 +16,8 @@ export const surahMessages: MessageCatalog = {
   surahSetRecitation: { en: "Recitation speed", bn: "তিলাওয়াতের গতি" },
   surahTranslit: { en: "Translit", bn: "উচ্চারণ" },
   surahTranslation: { en: "Translation", bn: "অনুবাদ" },
+  surahEnglishTranslation: { en: "English translation", bn: "ইংরেজি অনুবাদ" },
+  surahVerseSource: { en: "Quran {reference}", bn: "কুরআন {reference}" },
   surahWordByWord: { en: "Word by word", bn: "শব্দ ধরে" },
   surahReaderOptions: { en: "Reader display", bn: "পাঠের চেহারা" },
   surahRecord: { en: "Record", bn: "রেকর্ড" },

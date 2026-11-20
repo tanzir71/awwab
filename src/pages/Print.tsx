@@ -20,7 +20,7 @@ import { studyNames } from "@/lib/study-copy";
 import { showEnglishQuranMeaning } from "@/lib/languagePreferences";
 import type { Settings } from "@/lib/storageService";
 import { prayerIds } from "@/types/Prayer";
-import { quranText } from "@/lib/quran";
+import { quranMeaningSource, quranText } from "@/lib/quran";
 import { splitArabicWords, wordAnatomy } from "@/lib/wordAnatomy";
 import surahs from "../../docs/content/surahs-for-salah.json";
 import ritual from "../../docs/content/umrah-steps.json";
@@ -238,7 +238,7 @@ export function PrintSheet({ settings, now }: { settings: Settings; now: Date })
         </section>;
       })}</div>
       <p className="paper-note">{t(settings.script === "indopak" ? "printIndopakCredit" : "printUthmaniCredit")}
-        {english && <> · {t("printPickthallCredit")}</>} · {t("printBrandCredit")}</p>
+        {english && <> · <a href={quranMeaningSource} rel="noreferrer">{t("printPickthallCredit")}</a></>} · {t("printBrandCredit")}</p>
     </>;
   } else if (sheet === "umrah-guide") {
     heading = t("umrahPracticePocket");

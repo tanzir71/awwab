@@ -3,12 +3,13 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { ArabicText } from "@/components/ArabicText";
 import { DesignIcon } from "@/components/DesignIcon";
+import { QuranVerseMeaning } from "@/components/QuranStudySources";
 import { SectionNav } from "@/components/Surface";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { prayerGuidePath } from "@/lib/prayerGuide";
-import { coreWordCoverage, coreWordSource, coreWordTotal, countKnownQuranWords, fatihaMorphology, quranText } from "@/lib/quran";
+import { coreWordCoverage, coreWordSource, coreWordTotal, countKnownQuranWords, fatihaMorphology, formatQuranReference, quranText } from "@/lib/quran";
 import { showEnglishQuranMeaning } from "@/lib/languagePreferences";
 import type { Settings } from "@/lib/storageService";
 import { momentPath, setAyahFamiliar } from "@/lib/studyMilestones";
@@ -33,6 +34,7 @@ export function SalahWords({ settings }: { settings: Settings }) {
   const knownVerses = useRecord<string[]>("words-known", []);
   const knownVocabulary = useRecord<string[]>("word-bank-known", []);
   const verse = fatiha[ayah - 1];
+  const reference = formatQuranReference(verse.ref, locale);
   const known = knownVerses.includes(verse.ref);
   const words = splitArabicWords(verse.uthmani);
   const notes = verseNotes[verse.ref];
@@ -77,16 +79,17 @@ export function SalahWords({ settings }: { settings: Settings }) {
               <button type="button" className="action soft" onClick={() => void toggleFamiliar()}>
                 {t(known ? "salahRemoveFamiliarAyah" : "salahFamiliarAyah", { number: ayah })}
               </button>
-              <a className="text-button" href={`https://quran.com/${verse.ref.replace(":", "/")}`}>{verse.ref}</a>
+              <a className="text-button" href={`https://quran.com/${verse.ref.replace(":", "/")}`}><bdi>{reference}</bdi></a>
             </DialogContent>
           </Dialog>
           <span className="chip soft caption">{t("salahEveryRakah")}</span>
         </div>
         <ArabicText text={lines.join("\n")} citation={verse.ref} verse={verse.ref} selectedPosition={position} onWordSelected={selectPosition}
           words={words.map((_, index) => ({ gloss: notes.glosses[index], root: fatihaMorphology[`${verse.ref}:${index + 1}`]?.root }))} />
-        <p className="small muted" lang="en">{notes.transliteration && `${notes.transliteration} · `}
-          {showEnglishQuranMeaning(settings) && `“${verse.english}” `}<a href={`https://quran.com/${verse.ref.replace(":", "/")}`}>{verse.ref}</a>
+        <p className="small muted">{notes.transliteration && <><bdi lang="ar-Latn">{notes.transliteration}</bdi> · </>}
+          <a href={`https://quran.com/${verse.ref.replace(":", "/")}`}><bdi>{reference}</bdi></a>
         </p>
+        {showEnglishQuranMeaning(settings) && <QuranVerseMeaning text={verse.english} />}
         <div className="salah-root small">
           <ArabicText text={words[position - 1]} compact citation={verse.ref} verse={verse.ref} positionOffset={position - 1} />
           <span lang="en">{notes.glosses[position - 1]}</span>
@@ -128,7 +131,7 @@ export function SalahWords({ settings }: { settings: Settings }) {
         <div className="row-between"><Link className="salah-progress-link" to="/learn/words">{t("salahCoreLearned")}</Link><strong>{number.format(studied)} / {number.format(coreWordTotal)}</strong></div>
         <progress value={studied} max={coreWordTotal} aria-label={t("salahCoreLearned")} />
         <p className="small muted">{t("salahCoreCoverage", { coverage })}</p>
-        <div className="salah-source-links small"><a href={coreWordSource}>Quranic Arabic Corpus 0.4</a><a href="https://tanzil.net/docs/text_license">{t("tanzilCredit")}</a><span className="muted">{t("englishTranslationCredit")}</span></div>
+        <div className="salah-source-links small"><a href={coreWordSource}>Quranic Arabic Corpus 0.4</a><a href="https://tanzil.net/docs/text_license">{t("tanzilCredit")}</a></div>
       </section>
     </div>
   </div>;

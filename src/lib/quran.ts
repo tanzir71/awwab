@@ -9,6 +9,13 @@ export interface QuranVerse {
 }
 
 export const quranText: Record<string, QuranVerse[]> = data.surahs;
+export const quranMeaningSource = "https://tanzil.net/trans/en.pickthall";
+
+export function formatQuranReference(reference: string, locale: string) {
+  const number = new Intl.NumberFormat(locale, { useGrouping: false });
+  return reference.replace(/\d+/g, part => number.format(Number(part)));
+}
+
 export const coreWordTotal = vocabulary.words.length;
 export const coreWordCoverage = vocabulary.occurrences / vocabulary.corpusWords;
 export const coreWordSource = vocabulary.sourceUrl;

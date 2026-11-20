@@ -32,6 +32,9 @@
 .surah-verse-foot p { font: 500 13px/18px var(--font-body); }
 .surah-verse-foot .surah-transliteration { color: var(--c-ink); font: var(--type-body-strong); }
 .surah-verse-foot p + p { margin-top: 4px; }
+.quran-verse-meaning { display: grid; gap: 2px; }
+.quran-verse-meaning > a { justify-self: start; text-underline-offset: .18em; }
+.surah-verse-foot .quran-verse-meaning { margin-block-start: 3px; }
 .surah-hint-control { gap: 6px; min-height: 30px; }
 .surah-grading { display: grid; gap: 10px; }
 .surah-grading h2 { margin: 0; font: var(--type-body-strong); }

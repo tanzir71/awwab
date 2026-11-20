@@ -65,7 +65,6 @@ export const onboardingMessages: MessageCatalog = {
   setupHarakatHint: { en: "Look at the little mark below the letter. It adds an i sound.", bn: "হরফের নিচে ছোট চিহ্নটি দেখুন। এটি ই আওয়াজ যোগ করে।" },
   setupWordsHint: { en: "These words open Al-Ikhlāṣ. Try them one at a time.", bn: "এই শব্দগুলো সূরা আল-ইখলাসের শুরুতে আছে। একটি করে পড়ে দেখুন।" },
   setupAyahHint: { en: "This is the second āyah of Al-ʿAsr. Try reading it all the way through.", bn: "এটি সূরা আল-আসরের দ্বিতীয় আয়াত। শুরু থেকে শেষ পর্যন্ত পড়ে দেখুন।" },
-  setupVerseMeaning: { en: "Meaning: {meaning}", bn: "ইংরেজি অর্থ · {meaning}" },
   setupPassed: { en: "{name} · confident", bn: "{name} · স্বচ্ছন্দ" },
   setupRestoreOpen: { en: "Restoring your backup…", bn: "ব্যাকআপের তথ্য ফিরিয়ে আনা হচ্ছে…" },
 };
