@@ -14,17 +14,6 @@ const prayerSectionTitles: Record<string, string> = {
   "Ṣalawāt": "দরুদ",
 };
 
-const wordKinds: Record<string, string> = {
-  Noun: "বিশেষ্য", Verb: "ক্রিয়া", Adjective: "বিশেষণ", "Proper noun": "নামবাচক বিশেষ্য",
-  Pronoun: "সর্বনাম", Preposition: "সম্বন্ধসূচক অব্যয়", Conjunction: "সংযোজক অব্যয়",
-  Negation: "নেতিবাচক অব্যয়", "Relative pronoun": "সম্বন্ধসূচক সর্বনাম", Demonstrative: "নির্দেশক শব্দ",
-  "Place adverb": "স্থানবাচক ক্রিয়াবিশেষণ", "Time adverb": "কালবাচক ক্রিয়াবিশেষণ",
-  "Accusative particle": "কর্মকারকসূচক অব্যয়", "Subordinating conjunction": "অধীনতাসূচক সংযোজক",
-  "Restriction particle": "সীমাবাচক অব্যয়", "Particle of certainty": "নিশ্চয়তাসূচক অব্যয়",
-  "Conditional particle": "শর্তবাচক অব্যয়", "Amendment particle": "সংশোধনসূচক অব্যয়",
-  "Retraction particle": "প্রত্যাহারসূচক অব্যয়", "Interrogative particle": "প্রশ্নসূচক অব্যয়",
-};
-
 function studyName(language: Language, key: string, fallback: string) {
   const localized = localeMessage(language, key, "adult") ?? (language === "bn" ? studyMessages[key]?.bn : undefined);
   return typeof localized === "string" ? localized : fallback;
@@ -35,7 +24,7 @@ export const studyNames = {
   lesson: (language: Language, number: number, fallback: string) => studyName(language, `studyQaida${number}`, fallback),
   family: (language: Language, id: string, fallback: string) => studyName(language, `studyTakhti-${id}`, fallback),
   prayerSection: (language: Language, title: string) => (language === "bn" ? prayerSectionTitles[title] : undefined) ?? title,
-  wordKind: (language: Language, kind: string) => (language === "bn" ? wordKinds[kind] : undefined) ?? kind,
+  wordKind: (language: Language, kind: string) => studyName(language, `studyWordKind-${kind.toLowerCase().replaceAll(" ", "-")}`, kind),
 };
 
 export function studySearchTerm(text: string) {
@@ -44,6 +33,26 @@ export function studySearchTerm(text: string) {
 }
 
 export const studyMessages = {
+  "studyWordKind-noun": { en: "Noun", bn: "বিশেষ্য" },
+  "studyWordKind-verb": { en: "Verb", bn: "ক্রিয়া" },
+  "studyWordKind-adjective": { en: "Adjective", bn: "বিশেষণ" },
+  "studyWordKind-proper-noun": { en: "Proper noun", bn: "নামবাচক বিশেষ্য" },
+  "studyWordKind-pronoun": { en: "Pronoun", bn: "সর্বনাম" },
+  "studyWordKind-preposition": { en: "Preposition", bn: "সম্বন্ধসূচক অব্যয়" },
+  "studyWordKind-conjunction": { en: "Conjunction", bn: "সংযোজক অব্যয়" },
+  "studyWordKind-negation": { en: "Negation", bn: "নেতিবাচক অব্যয়" },
+  "studyWordKind-relative-pronoun": { en: "Relative pronoun", bn: "সম্বন্ধসূচক সর্বনাম" },
+  "studyWordKind-demonstrative": { en: "Demonstrative", bn: "নির্দেশক শব্দ" },
+  "studyWordKind-place-adverb": { en: "Place adverb", bn: "স্থানবাচক ক্রিয়াবিশেষণ" },
+  "studyWordKind-time-adverb": { en: "Time adverb", bn: "কালবাচক ক্রিয়াবিশেষণ" },
+  "studyWordKind-accusative-particle": { en: "Accusative particle", bn: "কর্মকারকসূচক অব্যয়" },
+  "studyWordKind-subordinating-conjunction": { en: "Subordinating conjunction", bn: "অধীনতাসূচক সংযোজক" },
+  "studyWordKind-restriction-particle": { en: "Restriction particle", bn: "সীমাবাচক অব্যয়" },
+  "studyWordKind-particle-of-certainty": { en: "Particle of certainty", bn: "নিশ্চয়তাসূচক অব্যয়" },
+  "studyWordKind-conditional-particle": { en: "Conditional particle", bn: "শর্তবাচক অব্যয়" },
+  "studyWordKind-amendment-particle": { en: "Amendment particle", bn: "সংশোধনসূচক অব্যয়" },
+  "studyWordKind-retraction-particle": { en: "Retraction particle", bn: "প্রত্যাহারসূচক অব্যয়" },
+  "studyWordKind-interrogative-particle": { en: "Interrogative particle", bn: "প্রশ্নসূচক অব্যয়" },
   studySurah1: { en: "Al-Fātiḥa", bn: "আল-ফাতিহা" },
   studySurah2: { en: "Al-Baqarah", bn: "আল-বাকারা" },
   studySurah17: { en: "Al-Isrāʾ", bn: "আল-ইসরা" },

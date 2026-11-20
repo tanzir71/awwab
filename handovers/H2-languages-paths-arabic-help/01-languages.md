@@ -82,7 +82,9 @@ The Urdu reader draft includes Hadith search and citation controls, Surah reader
 
 The Urdu learning paths draft covers the four paths, placement, the Maktab map, and memorisation plans, portions, and weekly checks. It includes the eight passage notes with their existing hadith references and grades. Review the Urdu terminology for sabaq, sabqi, and manzil throughout the plan and review screens.
 
-The Indonesian draft covers all 4,005 messages in the current UI catalogue, including landing, onboarding, and the Adult and Maktab variants. The review export pairs them with the English source and links to screenshots for context. Publication requires two native reviewer sign-offs.
+The Urdu vocabulary and Qaida draft covers all 125 core Word Bank glosses, the word-type labels, related modern Arabic examples, all 17 Qaida lesson titles, and the nine Takhti letter families. Review the short glosses alongside their Arabic forms and the Quranic Arabic Corpus credit. Check the Adult and Maktab harakat explanations, the recording and playback controls, and the printed writing guides.
+
+The Indonesian draft covers all 4,025 messages in the current UI catalogue, including landing, onboarding, and the Adult and Maktab variants. The review export pairs them with the English source and links to screenshots for context. Publication requires two native reviewer sign-offs.
 
 The Indonesian draft also covers How to Pray, Return, and the make-up prayer and fasting planner. The locale export includes the existing Sayyid al-Istighfār meanings, the hope verse meaning, and the Hanafi note on sujūd al-sahw. Review these against the linked source content. The reader displays the citations alongside whichever language is available.
 
