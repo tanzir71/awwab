@@ -1,0 +1,76 @@
+{
+  "speaker": "Aaqib Azeez",
+  "clips": [
+    {
+      "ref": "2:5",
+      "path": "packs/audio/aaqib-azeez/2-5.mp3",
+      "source": "https://commons.wikimedia.org/wiki/File:Chapter_2%2C_Al-Baqarah_%28Murattal%29_-_Recitation_of_the_Holy_Qur%27an.mp3",
+      "media": "https://upload.wikimedia.org/wikipedia/commons/4/4f/Chapter_2%2C_Al-Baqarah_%28Murattal%29_-_Recitation_of_the_Holy_Qur%27an.mp3",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "range": "bytes=0-13500000",
+      "sha256": "c47894571bb2eacae9c9121445a05aa874cd76d6172b22b627c3a6ab5d7877ae",
+      "startMs": 58950,
+      "endMs": 72430
+    },
+    {
+      "ref": "28:24",
+      "path": "packs/audio/aaqib-azeez/28-24.mp3",
+      "source": "https://commons.wikimedia.org/wiki/File:Chapter_28%2C_Al-Qasas_%28Murattal%29_-_Recitation_of_the_Holy_Qur%27an.mp3",
+      "media": "https://upload.wikimedia.org/wikipedia/commons/c/ca/Chapter_28%2C_Al-Qasas_%28Murattal%29_-_Recitation_of_the_Holy_Qur%27an.mp3",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "range": "bytes=0-13500000",
+      "sha256": "ddb279f20858488ac5cac84c1fddf44cd4c3aa4308274066c65437380e023721",
+      "startMs": 608260,
+      "endMs": 629030
+    },
+    {
+      "ref": "37:1",
+      "path": "packs/audio/aaqib-azeez/37-1.mp3",
+      "source": "https://commons.wikimedia.org/wiki/File:Chapter_37%2C_As-Saaffat_%28Murattal%29_-_Recitation_of_the_Holy_Qur%27an.mp3",
+      "media": "https://upload.wikimedia.org/wikipedia/commons/f/f2/Chapter_37%2C_As-Saaffat_%28Murattal%29_-_Recitation_of_the_Holy_Qur%27an.mp3",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "range": "bytes=0-13500000",
+      "sha256": "113dcb20eb6875c87496e6971030ec5ae716e0420c41bcbcac67a73a96b9fb60",
+      "startMs": 6590,
+      "endMs": 12830
+    },
+    {
+      "ref": "86:1",
+      "path": "packs/audio/aaqib-azeez/86-1.mp3",
+      "source": "https://commons.wikimedia.org/wiki/File:Chapter_86%2C_At-Tariq_%28Murattal%29_-_Recitation_of_the_Holy_Qur%27an.mp3",
+      "media": "https://upload.wikimedia.org/wikipedia/commons/d/df/Chapter_86%2C_At-Tariq_%28Murattal%29_-_Recitation_of_the_Holy_Qur%27an.mp3",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "810e8ac43ee97676eb6f8325e64d3281db14ef36e8ce39580b5506ce86ded39e",
+      "startMs": 7140,
+      "endMs": 12630
+    },
+    {
+      "ref": "88:21",
+      "throughAyah": 22,
+      "path": "packs/audio/aaqib-azeez/88-21-22.mp3",
+      "source": "https://commons.wikimedia.org/wiki/File:Chapter_88%2C_Al-Ghashiyah_%28Murattal%29_-_Recitation_of_the_Holy_Qur%27an.mp3",
+      "media": "https://upload.wikimedia.org/wikipedia/commons/5/52/Chapter_88%2C_Al-Ghashiyah_%28Murattal%29_-_Recitation_of_the_Holy_Qur%27an.mp3",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "sha256": "7b758dcef2ef3e9a006ba70e9feaccf725d23373a8f342fc7d2c72177a107bcd",
+      "startMs": 117280,
+      "endMs": 129830
+    },
+    {
+      "ref": "98:4",
+      "throughAyah": 5,
+      "path": "packs/audio/aaqib-azeez/98-4-5.mp3",
+      "source": "https://commons.wikimedia.org/wiki/File:Chapter_98%2C_Al-Bayyina_%28Murattal%29_v2-_Recitation_of_the_Holy_Qur%27an.mp3",
+      "media": "https://upload.wikimedia.org/wikipedia/commons/8/8e/Chapter_98%2C_Al-Bayyina_%28Murattal%29_v2-_Recitation_of_the_Holy_Qur%27an.mp3",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "sha256": "f4b335b1cebc6c8f5cfb2b319029bd5252359e453187c361cb892157cf7f6e6c",
+      "startMs": 38090,
+      "endMs": 79970
+    }
+  ]
+}

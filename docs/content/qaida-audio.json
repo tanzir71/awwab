@@ -108,6 +108,7 @@
     "qaida:13:3": "packs/study-speech/qaida-13-3.opus",
     "qaida:13:4": "packs/study-speech/qaida-13-4.opus",
     "qaida:13:lesson": "packs/study-speech/qaida-13-lesson.opus",
-    "qaida:4:examples": "packs/study-speech/qaida-4-examples.opus"
+    "qaida:4:examples": "packs/study-speech/qaida-4-examples.opus",
+    "qaida:16:1": "packs/study-speech/qaida-16-1.opus"
   }
 }

@@ -149,6 +149,7 @@ QAIDA_WORDS = {
     "ٱلْحَمْدُ": "ʔalħamdu", "نَعْبُدُ": "naʕbudu", "ٱهْدِنَا": "ʔihdinaː",
     "رَبَّ": "rabːa", "إِنَّ": "ʔinːa", "أُمُّ": "ʔumːu", "حَقٌّ": "ħaqːun",
     "ٱلضُّحَىٰ": "ʔadˤːuħaː", "ٱلنَّاسِ": "ʔanːaːsi", "ٱلصَّمَدُ": "ʔasˤːamadu",
+    "مِنْ": "min",
 }
 QAIDA_DRILL_LESSONS = tuple(range(1, 14))
 
@@ -206,7 +207,10 @@ def build_qaida(voice, resume):
             lesson, ref: qaidaAudioRef(lesson),
             rows: qaidaRows(lesson).map((row, index) => ({ ref: qaidaAudioRef(lesson, index), text: row.flat() })),
         }));
-        console.log(JSON.stringify({ drills, intro: { ref: qaidaHarakatExerciseRef, text: qaidaHarakatExercise.split(" ") } }));
+        console.log(JSON.stringify({
+            drills, intro: { ref: qaidaHarakatExerciseRef, text: qaidaHarakatExercise.split(" ") },
+            isolatedNun: { ref: qaidaAudioRef(16, 0), text: qaidaRows(16)[0][0][0] },
+        }));
     """
     data = json.loads(subprocess.check_output(
         ["node", "--input-type=module", "-e", query, *map(str, QAIDA_DRILL_LESSONS)], cwd=ROOT, encoding="utf-8",
@@ -232,6 +236,8 @@ def build_qaida(voice, resume):
         print(f"Encoded {len(drill['rows'])} rows and a full exercise for lesson {lesson}", flush=True)
     intro = data["intro"]
     clip(intro["ref"], [part for text in intro["text"] for part in qaida_phonemes(text, 4)])
+    isolated_nun = data["isolatedNun"]
+    clip(isolated_nun["ref"], qaida_phonemes(isolated_nun["text"], 16))
     build_qaida_placement(render, resume)
     write(CONTENT / "qaida-audio.json", {"voice": "Emirati Piper", "source": MODEL, "lessons": QAIDA_DRILL_LESSONS, "items": items})
 

@@ -33,13 +33,17 @@ export function qaidaExamples(lesson: number) {
 export const qaidaHarakatExercise = "تَ تِ جُ حَ حِ دُ";
 export const qaidaHarakatExerciseRef = "qaida:4:examples";
 
-const citedRows: Record<number, string[]> = {
-  3: ["2:1", "36:1", "26:1", "20:1", "19:1"],
-  17: ["112:1", "112:2", "112:3"],
+const citedRows: Record<number, ([verse: string, first: number] | undefined)[]> = {
+  3: [["2:1", 1], ["36:1", 1], ["26:1", 1], ["20:1", 1], ["19:1", 1]],
+  14: [["1:7", 9], ["37:1", 1], ["88:21", 1]],
+  15: [["110:1", 2], ["108:1", 1], ["86:1", 1]],
+  16: [undefined, ["1:7", 3], ["2:5", 4], ["28:24", 13], ["98:4", 7]],
+  17: [["112:1", 1], ["112:2", 1], ["112:3", 1]],
 };
 
-export function qaidaRowVerse(lesson: number, row: number) {
-  return citedRows[lesson]?.[row];
+export function qaidaRowCitation(lesson: number, row: number) {
+  const citation = citedRows[lesson]?.[row];
+  return citation ? { verse: citation[0], first: citation[1] } : undefined;
 }
 
 export function qaidaAudioRef(lesson: number, row?: number) {

@@ -1,9 +1,10 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, rmdir, writeFile } from "node:fs/promises";
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
+import { tmpdir } from "node:os";
 
 const contentDir = process.env.AWWAB_CONTENT_DIR;
 const fromLocal = process.argv.includes("--from-local");
@@ -23,13 +24,43 @@ const names = [
   [111, "Al-Masad", ""], [112, "Al-Ikhlas", ""], [113, "Al-Falaq", " v2"], [114, "Al-Nas", " v2"],
 ] as const;
 
-async function request(url: string) {
+async function request(url: string, range?: string) {
   const response = await fetch(url, {
     signal: AbortSignal.timeout(60000),
-    headers: { "User-Agent": "Awwab build (https://github.com/tanzir71/awwab)" },
+    headers: { "User-Agent": "Awwab build (https://github.com/tanzir71/awwab)", ...(range ? { Range: range } : {}) },
   });
   if (!response.ok) throw new Error(`HTTP ${response.status} from ${url}`);
   return response;
+}
+
+if (process.argv.includes("--qaida")) {
+  const { clips } = JSON.parse(await readFile(new URL("../docs/content/qaida-recitations.json", import.meta.url), "utf8")) as {
+    clips: { ref: string; throughAyah?: number; media: string; range?: string; sha256: string; startMs: number; endMs: number }[];
+  };
+  await mkdir(dir, { recursive: true });
+  const workingDir = await mkdtemp(join(tmpdir(), "awwab-qaida-recitations-"));
+  const recording = join(workingDir, "source.mp3");
+  try {
+    for (const clip of clips) {
+      if (!/^\d+:\d+$/.test(clip.ref) || clip.startMs < 0 || clip.endMs <= clip.startMs) throw new Error(`Invalid clip ${clip.ref}`);
+      const name = clip.ref.replace(":", "-") + (clip.throughAyah ? `-${clip.throughAyah}` : "");
+      const bytes = fromLocal && contentDir
+        ? await readFile(join(contentDir, `${name}.mp3`))
+        : Buffer.from(await (await request(clip.media, clip.range)).arrayBuffer());
+      if (createHash("sha256").update(bytes).digest("hex") !== clip.sha256) throw new Error(`The source for ${clip.ref} has changed.`);
+      await writeFile(recording, bytes);
+      const { stdout } = await run("ffmpeg", ["-nostdin", "-v", "error", "-ss", String(clip.startMs / 1000), "-i", recording,
+        "-t", String((clip.endMs - clip.startMs) / 1000), "-map_metadata", "-1", "-ac", "1",
+        "-c:a", "libmp3lame", "-b:a", "96k", "-f", "mp3", "pipe:1"], { encoding: "buffer" });
+      if (stdout.length < 1000) throw new Error(`Empty Qaida clip for ${clip.ref}`);
+      await writeFile(new URL(`${name}.mp3`, dir), stdout);
+      console.log(`Built Qaida āyah audio ${clip.ref}`);
+    }
+  } finally {
+    await rm(recording, { force: true });
+    await rmdir(workingDir);
+  }
+  process.exit(0);
 }
 
 async function getRecording(number: number, name: string, version: string) {

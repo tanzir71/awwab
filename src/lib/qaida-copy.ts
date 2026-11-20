@@ -19,6 +19,8 @@ export const qaidaMessages: MessageCatalog = {
   qaidaHearLetterNames: { en: "Hear the letter names", bn: "হরফের নাম শুনুন" },
   qaidaHearAllLetterNames: { en: "Hear all the letter names", bn: "সব হরফের নাম শুনুন" },
   qaidaHearAyah: { en: "Hear āyah {reference}", bn: "{reference} আয়াত শুনুন" },
+  qaidaHearAyahs: { en: "Hear āyāt {reference}", bn: "{reference} আয়াতগুলো শুনুন" },
+  qaidaHearVerses: { en: "Hear the practice verses", bn: "অনুশীলনের আয়াতগুলো শুনুন" },
   qaidaHearIkhlas: { en: "Hear Al-Ikhlāṣ", bn: "সূরা আল-ইখলাস শুনুন" },
   qaidaGeneratedAudio: { en: "{label} · generated practice audio by {voice}", bn: "{label} · {voice}-এর তৈরি অনুশীলনের অডিও" },
   qaidaWhichMi: { en: "Which one says “mi”?", bn: "কোনটি ‘মি’ বলে?" },

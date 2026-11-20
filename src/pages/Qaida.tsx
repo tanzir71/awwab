@@ -9,8 +9,8 @@ import { LocalRecorder } from "@/components/LocalRecorder";
 import { PracticeHeader } from "@/components/PracticeHeader";
 import { SectionNav } from "@/components/Surface";
 import { useRecord } from "@/hooks/use-awwab";
-import { qaidaAudioRef, qaidaExamples, qaidaHarakatExercise, qaidaHarakatExerciseRef, qaidaReviewId, qaidaRows, qaidaRowVerse, resolveQaidaRow } from "@/lib/qaidaPractice";
-import { qaidaRecitations, qaidaReciter } from "@/lib/qaidaRecitation";
+import { qaidaAudioRef, qaidaExamples, qaidaHarakatExercise, qaidaHarakatExerciseRef, qaidaReviewId, qaidaRowCitation, qaidaRows, resolveQaidaRow } from "@/lib/qaidaPractice";
+import { qaidaRecitationLessons, qaidaRecitations } from "@/lib/qaidaRecitation";
 import { useCopy } from "@/lib/copy";
 import { asset } from "@/lib/config";
 import { studyNames } from "@/lib/study-copy";
@@ -59,16 +59,19 @@ function LessonAudio({ audioRef, hearLabel, label, desk = false, simple = false 
   const [localSource, setLocalSource] = useState("");
   const [editing, setEditing] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const [track, setTrack] = useState(0);
   const generatedPath = (qaidaAudio.items as Record<string, string>)[audioRef];
-  const recitation = localSource ? undefined : qaidaRecitations[audioRef];
-  const builtInPath = recitation?.path ?? generatedPath;
+  const playlist = localSource ? undefined : qaidaRecitationLessons[audioRef];
+  const recitation = localSource ? undefined : playlist?.[track] ?? qaidaRecitations[audioRef];
+  const builtInPath = playlist?.[0]?.path ?? recitation?.path ?? generatedPath;
   const source = localSource || (builtInPath ? asset(builtInPath) : "");
-  const audioLabel = recitation
-    ? recitation.ref === "surah:112" ? t("qaidaHearIkhlas") : t("qaidaHearAyah", { reference: formatQuranReference(recitation.ref, locale) })
-    : hearLabel;
+  const reference = recitation ? formatQuranReference(recitation.ref + (recitation.throughAyah ? `–${recitation.throughAyah}` : ""), locale) : "";
+  const audioLabel = !recitation ? hearLabel : recitation.ref === "surah:112" ? t("qaidaHearIkhlas")
+    : t(recitation.throughAyah ? "qaidaHearAyahs" : "qaidaHearAyah", { reference });
   const playerLabel = !localSource && generatedPath ? t("qaidaGeneratedAudio", { label, voice: qaidaAudio.voice }) : recitation ? audioLabel : label;
   useEffect(() => {
     setPlaying(false);
+    setTrack(0);
     if (!clip?.blob) { setLocalSource(""); return; }
     const url = URL.createObjectURL(clip.blob);
     setLocalSource(url);
@@ -87,20 +90,36 @@ function LessonAudio({ audioRef, hearLabel, label, desk = false, simple = false 
     } catch { toast.error(t("recordingUnavailable")); }
   }
 
+  async function advance() {
+    const next = playlist?.[track + 1];
+    const audio = player.current;
+    if (!next || !audio) {
+      if (playlist && audio) audio.src = source;
+      setTrack(0);
+      setPlaying(false);
+      return;
+    }
+    setTrack(track + 1);
+    audio.src = asset(next.path);
+    try { await audio.play(); }
+    catch { toast.error(t("recordingUnavailable")); setPlaying(false); }
+  }
+
   return <div className={`qaida-audio ${simple ? "qaida-audio-simple" : ""}`}>
     <div className={simple ? undefined : "equal-row"}>
       <button className={simple ? "text-button" : desk ? "action" : "action light"} type="button"
         aria-expanded={source ? undefined : editing} onClick={() => void hear()}>
-        {desk && <DesignIcon name="qaida-desk-volume" size={14} />}{playing ? t("qaidaPause") : audioLabel}
+        {desk && <DesignIcon name="qaida-desk-volume" size={14} />}{playing ? t("qaidaPause") : playlist ? t("qaidaHearVerses") : audioLabel}
       </button>
       {!simple && <LocalRecorder key={audioRef} compact label={label} actionClass={desk ? "action soft" : "action"}
         actionLabel={t(desk ? "surahRecord" : "recordCompare")} icon={desk && <DesignIcon name="qaida-desk-headphones" size={14} />} />}
     </div>
-    {source && <audio ref={player} src={source} preload="none" onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)}
-      onEnded={() => setPlaying(false)} aria-label={playerLabel} />}
+    {source && <audio ref={player} src={source} preload="none" onPlay={() => setPlaying(true)} onPause={() => setPlaying(player.current?.paused === false)}
+      onEnded={() => void advance()} aria-label={playerLabel} />}
     {recitation && <small className="muted">
-      <a href={qaidaReciter.source} lang="en">{qaidaReciter.speaker}</a>{" · "}
-      <a href={qaidaReciter.licenseUrl} lang="en">{qaidaReciter.attribution.split(" · ")[1]}</a>
+      {playlist && <><bdi>{reference}</bdi>{" · "}</>}
+      <a href={recitation.source} lang="en">{recitation.speaker}</a>{" · "}
+      <a href={recitation.licenseUrl} lang="en">{recitation.license}</a>
     </small>}
     {source && !simple && <button className="text-button small" type="button" aria-expanded={editing} onClick={() => setEditing(value => !value)}>{t("replaceAudio")}</button>}
     {editing && <label className="field small">{t("chooseAudioFor", { name: label })}
@@ -271,7 +290,7 @@ function QaidaLesson({ lesson, settings, completed, desktop }: { lesson: Lesson;
   const audioRef = qaidaAudioRef(lesson.n, row);
   const introExercise = lesson.n === 4 && row === 0;
   const exampleAudioRef = introExercise ? qaidaHarakatExerciseRef : audioRef;
-  const rowVerse = qaidaRowVerse(lesson.n, row);
+  const citation = qaidaRowCitation(lesson.n, row);
   const letterNames = lesson.n === 3;
   const oldClip = useLiveQuery(() => revisedVowelRows ? db.audio.get(oldAudioRef) : undefined, [oldAudioRef, revisedVowelRows]);
   const rowLabel = t("rowLabel", { row: row + 1 });
@@ -335,7 +354,8 @@ function QaidaLesson({ lesson, settings, completed, desktop }: { lesson: Lesson;
         <LessonAudio key={exampleAudioRef} audioRef={exampleAudioRef} hearLabel={t(letterNames ? "qaidaHearLetterNames" : "qaidaHearAll")}
           label={introExercise ? t("qaidaReadThese") : rowLabel} simple />
         <ArabicText text={introExercise ? qaidaHarakatExercise : rows[row].flat().join(" ")}
-          citation={rowVerse ? formatQuranReference(rowVerse, locale) : undefined} verse={rowVerse} />
+          citation={citation ? formatQuranReference(citation.verse, locale) : undefined}
+          verse={citation?.verse} positionOffset={citation ? citation.first - 1 : 0} />
       </section>
       <QaidaQuiz lesson={lesson.n} maktab={isMaktab} />
       <SpotInQuran lesson={lesson.n} maktab={isMaktab} />
@@ -362,7 +382,7 @@ function QaidaLesson({ lesson, settings, completed, desktop }: { lesson: Lesson;
               {rows.map((tiles, index) => {
                 const isRead = Boolean(reviews[qaidaReviewId(lesson.n, index)]?.card.last_review);
                 const future = index > row;
-                const verse = qaidaRowVerse(lesson.n, index);
+                const rowCitation = qaidaRowCitation(lesson.n, index);
                 return <div className="qaida-row" ref={index === row ? activeRow : undefined} data-current={index === row} data-future={future} key={index}>
                   <button className="qaida-row-label" type="button" aria-pressed={index === row} onClick={() => move(index)}>
                     <strong>{t("qaidaRowNumber", { number: index + 1 })}</strong>
@@ -376,9 +396,10 @@ function QaidaLesson({ lesson, settings, completed, desktop }: { lesson: Lesson;
                       return <div className="qaida-tile" data-current={index === row && words.includes(selected)} key={tile}
                         data-mark={vowelIds[["َ", "ِ", "ُ"].indexOf(anatomy?.details[0]?.mark)]}
                         title={anatomy?.details.map(mark => language === "bn" ? mark.nameBn : mark.name).join(" · ") || undefined}>
-                        <ArabicText text={actual.join(" ")} compact citation={verse ? formatQuranReference(verse, locale) : undefined} verse={verse} onWordSelected={position => {
+                        <ArabicText text={actual.join(" ")} compact citation={rowCitation ? formatQuranReference(rowCitation.verse, locale) : undefined}
+                          verse={rowCitation?.verse} positionOffset={rowCitation ? rowCitation.first - 1 : 0} onWordSelected={position => {
                           if (index !== row) move(index);
-                          setChoice({ row: index, word: actual[position - 1] ?? actual[0] });
+                          setChoice({ row: index, word: actual[position - (rowCitation?.first ?? 1)] ?? actual[0] });
                         }} showGlosses={false} />
                         {prefs.qaidaTranslit && <small dir="ltr">{drill.syllables.map(item => item.tr).join("")}</small>}
                         {prefs.qaidaBanglaNames && <small lang="bn" className="qaida-bangla-name">{anatomy?.nameBn}</small>}
