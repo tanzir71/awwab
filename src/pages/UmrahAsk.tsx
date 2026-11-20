@@ -8,6 +8,8 @@ import { useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { dateKey, formatTime } from "@/lib/dates";
 import { dayDifference } from "@/lib/hijri";
+import { formatLocale } from "@/lib/languagePreferences";
+import { latinDigits } from "@/lib/localeNumbers";
 import { speakSetupPath } from "@/lib/speakCurriculum";
 import { updateRecord } from "@/lib/storageService";
 import { emptyPreparation, initialTrip, makkah, maskedPhone, type TripState, type UmrahTrip } from "@/lib/umrah";
@@ -181,10 +183,11 @@ export function UmrahAskHome() {
 }
 
 function GateNumber({ gate, change }: { gate: number; change: (value: string) => void }) {
-  const { t, locale } = useCopy();
+  const { t, locale, language } = useCopy();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState(false);
-  return <div className="ask-gate"><span>{t("umrahPrepGateNumber")}</span><strong>{new Intl.NumberFormat(locale).format(gate)}</strong>
+  const localGate = new Intl.NumberFormat(locale).format(gate);
+  return <div className="ask-gate"><span>{t("umrahPrepGateNumber")}</span><strong>{localGate}</strong>
     <bdi lang="ar">{arabicNumber.format(gate)}</bdi>
     <Dialog open={open} onOpenChange={value => { setOpen(value); setError(false); }}>
       <DialogTrigger asChild><button type="button" className="chip soft">{t("askChange")}</button></DialogTrigger>
@@ -192,12 +195,14 @@ function GateNumber({ gate, change }: { gate: number; change: (value: string) =>
         <DialogTitle>{t("umrahPrepGateNumber")}</DialogTitle>
         <form className="compact-stack" onSubmit={event => {
           event.preventDefault();
-          const value = readGate(String(new FormData(event.currentTarget).get("gate")));
+          const digits = String(new FormData(event.currentTarget).get("gate"));
+          const value = readGate(latinDigits(digits, formatLocale({ language })));
           if (!value) { setError(true); return; }
           change(String(value)); setOpen(false);
         }}>
-          <input className="input" name="gate" aria-label={t("umrahPrepGateNumber")} inputMode="numeric" defaultValue={gate} autoComplete="off" maxLength={5} />
-          {error && <p role="alert">{t("askGateInvalid")}</p>}
+          <input className="input" name="gate" aria-label={t("umrahPrepGateNumber")} inputMode="numeric" dir="ltr"
+            defaultValue={localGate} autoComplete="off" maxLength={5} aria-invalid={error || undefined} />
+          {error && <p role="alert">{t("askGateInvalid", { min: 1, max: 300 })}</p>}
           <button className="action">{t("askChange")}</button>
         </form>
       </DialogContent>

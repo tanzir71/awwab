@@ -1,6 +1,12 @@
 .umrah-prep-region { container-type: inline-size; }
 .umrah-prep { display: grid; grid-template-columns: minmax(0, 1.87fr) minmax(0, 1fr); gap: 16px; align-items: start; }
-.umrah-prep > .umrah-prep-column { min-width: 0; gap: 16px; }
+.umrah-prep-column, .umrah-prep-tab-panel { min-width: 0; }
+.umrah-prep-column { gap: 16px; }
+.umrah-prep.umrah-prep-compact { grid-template-columns: minmax(0, 1fr); }
+.umrah-prep-tabs { max-inline-size: 480px; padding: 4px; gap: 4px; border-radius: var(--r-control); background: var(--c-surface-alt); }
+.umrah-prep-tabs button { min-width: 0; min-height: 44px; padding: 6px 12px; border-radius: var(--r-control); color: var(--c-ink-muted); font: var(--type-body-strong); }
+.umrah-prep-tabs button[data-state="active"] { color: var(--c-ink); background: var(--c-surface); box-shadow: var(--shadow-card); }
+.umrah-prep-tab-panel[data-state="inactive"] { display: none; }
 .umrah-prep .card, .umrah-phrase-library.card { gap: 10px; padding: 14px 16px 16px; }
 .umrah-prep h2, .umrah-phrase-library h2 { font: var(--type-body-strong); margin-block: 0; }
 .umrah-prep .text-button, .umrah-phrase-library .text-button { min-height: 22px; padding-inline: 2px; font-weight: 600; text-align: end; }
@@ -37,6 +43,7 @@
 .umrah-phrase-row .word-chip { font: inherit; min-height: 27px; min-width: 0; padding-inline: 1px; }
 .umrah-phrase-results { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; }
 .umrah-phrase-results li { display: grid; }
+.umrah-phrase-library input[aria-invalid="true"] { outline: 2px solid var(--c-danger); outline-offset: -2px; }
 .umrah-prep .night .action { min-height: 34px; padding: 7px 6px; font-size: 12px; line-height: 17px; }
 .umrah-prep .night .action.light { color: var(--interactive-ink); }
 .umrah-prep .umrah-prep-print { background: var(--c-overlay-on-night); color: var(--c-on-night); }
@@ -44,6 +51,9 @@
 .umrah-trip-form input[lang="ar"] { font-family: var(--font-arabic); }
 .umrah-prep-edit .umrah-trip-form { padding: 0; box-shadow: none; background: transparent; }
 
+@container (min-width: 681px) {
+  .umrah-prep > .umrah-prep-tools { position: sticky; inset-block-start: 76px; }
+}
 @container (max-width: 840px) {
   .umrah-prep { grid-template-columns: minmax(0, 1.5fr) minmax(260px, 1fr); }
   .umrah-phrase-row .arabic-text { flex-basis: 105px; }

@@ -62,7 +62,7 @@ export const askMessages: MessageCatalog = {
   askTapped: { en: "They said: {direction}", bn: "তাঁরা বললেন: {direction}" },
   askSign: { en: "Look for this sign: “{sign}”", bn: "এই চিহ্নটি খুঁজুন: “{sign}”" },
   askChange: { en: "Change", bn: "বদলান" },
-  askGateInvalid: { en: "Enter a gate number from 1 to 300.", bn: "১ থেকে ৩০০-এর মধ্যে ফটকের নম্বর দিন।" },
+  askGateInvalid: { en: "Enter a gate number from {min, number} to {max, number}.", bn: "{min, number} থেকে {max, number}-এর মধ্যে ফটকের নম্বর দিন।" },
   askPreviewGate: { en: "Where is gate {n, number}?", bn: "{n, number} নম্বর ফটক কোথায়?" },
   askDestination: { en: "Destination", bn: "গন্তব্য" },
   askRelative: { en: "Family member", bn: "পরিবারের সদস্য" },

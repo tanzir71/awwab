@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import * as Tabs from "@radix-ui/react-tabs";
+import { useEffect, useId, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { ArabicText } from "./ArabicText";
 import { AskAudioButton, AskAudioPack, AskVoicePicker } from "./AskAudio";
@@ -6,14 +7,16 @@ import { DesignIcon } from "./DesignIcon";
 import { UmrahTripForm, UmrahTripImport } from "./UmrahTripForm";
 import { UmrahGuideDownload } from "./UmrahGuideVoice";
 import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from "./ui/dialog";
-import { useRecord } from "@/hooks/use-awwab";
+import { useDesktop, useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { downloadFile } from "@/lib/download";
+import { formatLocale } from "@/lib/languagePreferences";
+import { latinDigits } from "@/lib/localeNumbers";
 import { speakSetupPath } from "@/lib/speakCurriculum";
 import { exportUmrahTrip, updateRecord } from "@/lib/storageService";
 import { emptyPreparation, initialTrip, maskedPhone, tripChecklist, tripDates, type TripCheck, type UmrahTrip } from "@/lib/umrah";
 import { cachedMapPack, mapPacks, mapRegions, saveMapPack, type MapRegion } from "@/lib/umrahMapPack";
-import { askDefaults, askHomePath, askMeaning, askPhrase, askPhraseMatches, askPhrasePath, renderAsk, umrahPhrases as phrases, type AskPhrase } from "@/lib/umrahAsk";
+import { askDefaults, askHomePath, askMeaning, askPhrase, askPhraseMatches, askPhrasePath, readGate, renderAsk, umrahPhrases as phrases, type AskPhrase } from "@/lib/umrahAsk";
 import { askClipIds } from "@/lib/umrahAskAudio";
 import { umrahGuidePack } from "@/lib/umrahGuideAudio";
 
@@ -35,15 +38,20 @@ function PhraseText({ phrase, variety = "saudi", gate = 79, link = false }: { ph
 }
 
 function PhraseLibrary() {
-  const { t } = useCopy();
+  const { t, language, locale } = useCopy();
   const { hash } = useLocation();
+  const gateInputId = useId();
+  const gateErrorId = `${gateInputId}-error`;
   const [query, search] = useState("");
   const [variety, setVariety] = useState<Variety>("saudi");
-  const [gate, setGate] = useState("79");
+  const [gate, setGate] = useState(79);
+  const [gateInput, setGateInput] = useState<string>();
   const [active, setActive] = useState(hash.slice(1));
   const [voiceError, setVoiceError] = useState(false);
   const audioSettings = useRecord("umrah-ask-settings", askDefaults);
-  const requestedGate = Math.max(1, Math.min(300, Math.floor(Number(gate)) || 79));
+  const typedGate = gateInput === undefined ? gate : readGate(latinDigits(gateInput, formatLocale({ language })));
+  const requestedGate = typedGate ?? gate;
+  const invalidGate = typedGate === undefined;
   const needle = query.trim().normalize().toLowerCase();
   const results = needle ? phrases.filter(phrase => askPhraseMatches(phrase, needle, askMeaning(phrase, t, { gate: requestedGate }))) : phrases;
   useEffect(() => {
@@ -61,8 +69,17 @@ function PhraseLibrary() {
       <label className="field">{t("umrahPrepVariety")}<select aria-label={t("umrahPrepVariety")} value={variety} onChange={event => setVariety(event.currentTarget.value as Variety)}>
         <option value="saudi">{t("umrahPrepSaudi")}</option><option value="msa">{t("umrahPrepFormal")}</option>
       </select></label>
-      <label className="field">{t("umrahPrepGateNumber")}<input type="number" min="1" max="300" value={gate}
-        onChange={event => setGate(event.currentTarget.value)} onBlur={() => setGate(String(requestedGate))} /></label>
+      <div className="field">
+        <label htmlFor={gateInputId}>{t("umrahPrepGateNumber")}</label>
+        <input id={gateInputId} type="text" inputMode="numeric" dir="ltr" value={gateInput ?? new Intl.NumberFormat(locale).format(gate)}
+          aria-invalid={invalidGate || undefined} aria-describedby={invalidGate ? gateErrorId : undefined}
+          onChange={event => setGateInput(event.currentTarget.value)} onBlur={() => {
+            if (typedGate === undefined) return;
+            setGate(typedGate);
+            setGateInput(undefined);
+          }} />
+        {invalidGate && <small id={gateErrorId}>{t("askGateInvalid", { min: 1, max: 300 })}</small>}
+      </div>
       <AskVoicePicker preferred={audioSettings.voice} change={voice => {
         setVoiceError(false);
         void updateRecord("umrah-ask-settings", askDefaults, previous => ({ ...previous, voice })).catch(() => setVoiceError(true));
@@ -71,11 +88,16 @@ function PhraseLibrary() {
     {voiceError && <p className="small" role="alert">{t("askSaveIssue")}</p>}
     {!results.length && <p role="status" className="muted">{t("umrahPrepNoPhrases")}</p>}
     <AskAudioPack desktop />
-    <ul className="umrah-phrase-results">{results.map(phrase => <li key={phrase.id} className="compact-stack">
-      <PhraseText phrase={phrase} variety={variety} gate={requestedGate} />
-      {active === phrase.id ? <AskAudioButton key={`${phrase.id}:${variety}:${requestedGate}:${audioSettings.voice}`} ids={askClipIds(phrase, { variety, gate: requestedGate })}
-        settings={{ ...askDefaults, variety, voice: audioSettings.voice }} label="askPlay" light /> : <button type="button" className="text-button" onClick={() => setActive(phrase.id)}>{t("practise")}</button>}
-    </li>)}</ul>
+    <ul className="umrah-phrase-results">{results.map(phrase => {
+      const isGate = phrase.id === "gate-number";
+      return <li key={phrase.id} className="compact-stack">
+        <PhraseText phrase={phrase} variety={variety} gate={requestedGate} />
+        {active === phrase.id && !(isGate && invalidGate) ?
+          <AskAudioButton key={`${variety}:${isGate ? requestedGate : ""}:${audioSettings.voice}`} ids={askClipIds(phrase, { variety, gate: requestedGate })}
+            settings={{ ...askDefaults, variety, voice: audioSettings.voice }} label="askPlay" light /> :
+          <button type="button" className="text-button" disabled={isGate && invalidGate} onClick={() => setActive(phrase.id)}>{t("practise")}</button>}
+      </li>;
+    })}</ul>
   </section>;
 }
 
@@ -125,8 +147,10 @@ function OfflinePacks() {
 }
 
 export function UmrahPreparation({ trip, gates }: { trip: UmrahTrip; gates: string[] }) {
-  const { t, locale } = useCopy();
+  const { t, locale, direction } = useCopy();
+  const fullDesktop = useDesktop(1280);
   const [params] = useSearchParams();
+  const [tab, setTab] = useState("trip");
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState("");
   const prep = trip.preparation ?? emptyPreparation;
@@ -151,7 +175,7 @@ export function UmrahPreparation({ trip, gates }: { trip: UmrahTrip; gates: stri
   }
 
   if (params.get("view") === "phrases") return <PhraseLibrary />;
-  return <div className="umrah-prep-region"><div className="umrah-prep">
+  const tripPlan = (
     <div className="compact-stack umrah-prep-column">
       <section className="card compact-stack">
         <header className="row-between"><h2>{t("umrahPrepTrip")}</h2>
@@ -184,7 +208,9 @@ export function UmrahPreparation({ trip, gates }: { trip: UmrahTrip; gates: stri
         {error && <p role="status" className="small">{error}</p>}
       </section>
     </div>
-    <div className="compact-stack umrah-prep-column">
+  );
+  const tools = (
+    <div className="compact-stack umrah-prep-column umrah-prep-tools">
       <section className="card compact-stack"><header className="row-between"><h2>{t("umrahPrepPractise")}</h2>
         <Link className="text-button" to={askHomePath(true)}>{t("umrahPrepPhrases")}</Link></header>
         {samples.map(phrase => <PhraseText key={phrase.id} phrase={phrase} link />)}
@@ -197,5 +223,16 @@ export function UmrahPreparation({ trip, gates }: { trip: UmrahTrip; gates: stri
         <Link className="action light" to="/plan/umrah-guide" state={{ from: "umrah-preparation" }}>{t("umrahPracticeOpen")}</Link>
       </section>
     </div>
-  </div></div>;
+  );
+  return <div className="umrah-prep-region">
+    {fullDesktop ? <div className="umrah-prep">{tripPlan}{tools}</div> :
+      <Tabs.Root className="umrah-prep umrah-prep-compact" dir={direction} value={tab} onValueChange={setTab}>
+        <Tabs.List className="equal-row umrah-prep-tabs" aria-label={t("umrahPrepare")}>
+          <Tabs.Trigger value="trip">{t("umrahPrepTrip")}</Tabs.Trigger>
+          <Tabs.Trigger value="practice">{t("umrahPrepPracticeExport")}</Tabs.Trigger>
+        </Tabs.List>
+        <Tabs.Content className="umrah-prep-tab-panel" value="trip" forceMount>{tripPlan}</Tabs.Content>
+        <Tabs.Content className="umrah-prep-tab-panel" value="practice" forceMount>{tools}</Tabs.Content>
+      </Tabs.Root>}
+  </div>;
 }

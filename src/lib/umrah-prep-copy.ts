@@ -201,6 +201,7 @@ export const umrahPrepMessages: MessageCatalog = {
   umrahPrepChecklist: { en: "Checklist", bn: "প্রস্তুতির তালিকা" },
   umrahPrepChecklistCount: { en: "{count, number} of {total, number}", bn: "{total, number}টির মধ্যে {count, number}টি" },
   umrahPrepPractise: { en: "Practise asking in Arabic", bn: "আরবিতে প্রশ্ন করার অনুশীলন" },
+  umrahPrepPracticeExport: { en: "Practice & export", bn: "অনুশীলন ও এক্সপোর্ট" },
   umrahPrepPhrases: { en: "All phrases", bn: "সব বাক্য" },
   umrahPrepPhraseReview: { en: "Draft phrases for reading practice. Recordings are pending review.", bn: "পড়ার অনুশীলনের জন্য খসড়া বাক্য। রেকর্ডিং পর্যালোচনার অপেক্ষায়।" },
   umrahPrepVariety: { en: "Arabic variety", bn: "আরবির ধরন" },
