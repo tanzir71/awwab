@@ -27,6 +27,7 @@ import { askMessages } from "./umrah-ask-copy";
 import { askPhraseMessages } from "./umrah-phrase-messages.mjs";
 import { umrahStepMessages } from "./umrah-step-messages.mjs";
 import { ayahGlossKey, studyGlossMessages } from "./study-gloss-messages.mjs";
+import { prayerSourceMessages } from "./prayer-source-messages.mjs";
 import { pathsMessages } from "./paths-copy";
 import { tajweedMessages } from "./tajweed-copy";
 import { speakMessages } from "./speak-copy";
@@ -351,7 +352,7 @@ const formats = new Map<string, IntlMessageFormat<Record<string, string | number
 export function message(settings: CopySettings, id: string, values?: Record<string, string | number>) {
   const language = settings.pseudoLocale ? "en" : settings.language;
   const entry = messages[id] ?? askPhraseMessages[id] ?? umrahStepMessages[id] ?? speakLessonMessages[id]
-    ?? grammarLessonMessages[id] ?? fluencyLessonMessages[id] ?? wordGlossMessages[id] ?? studyGlossMessages[id];
+    ?? grammarLessonMessages[id] ?? fluencyLessonMessages[id] ?? wordGlossMessages[id] ?? studyGlossMessages[id] ?? prayerSourceMessages[id];
   const installed = localeMessage(language, id, settings.mode);
   const draft = installed ?? entry?.[language] ?? entry?.en ?? id;
   const text = typeof draft === "string" ? draft : draft[settings.mode === "maktab" ? 1 : 0];
@@ -375,11 +376,16 @@ export function useCopy() {
       const glossLanguage = !pseudoLocale && localeMessage(language, key, mode) !== undefined ? language : "en";
       return { gloss: t(key), glossLanguage };
     }
+    function prayerSourceText(key: string) {
+      const hasTranslation = prayerSourceMessages[key]?.[language] !== undefined || localeMessage(language, key, mode) !== undefined;
+      return { text: t(key), language: pseudoLocale ?? (hasTranslation ? language : "en") };
+    }
     return {
       language, locale: formatLocale({ language, nativeDigits }),
       direction: pseudoLocale === "en-XB" || languages.some(item => item.code === language && item.dir === "rtl") ? "rtl" as const : "ltr" as const,
       t,
       studyGloss,
+      prayerSourceText,
       quranWordGloss(verse: string, position: number, script: Settings["script"]) {
         return (pseudoLocale ? undefined : localeQuranWordGloss(language, verse, position, script)) ?? studyGloss(ayahGlossKey(verse, position));
       },

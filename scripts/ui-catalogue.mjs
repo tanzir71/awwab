@@ -10,6 +10,7 @@ import { speakLessonMessages } from "../src/lib/speak-lesson-messages.mjs";
 import { grammarLessonMessages } from "../src/lib/grammar-lesson-messages.mjs";
 import { fluencyLessonMessages, wordGlossMessages } from "../src/lib/fluency-messages.mjs";
 import { studyGlossMessages } from "../src/lib/study-gloss-messages.mjs";
+import { prayerSourceMessages } from "../src/lib/prayer-source-messages.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const { terms: glossary } = JSON.parse(readFileSync(resolve(root, "handovers/H2-languages-paths-arabic-help/data/glossary.json"), "utf8"));
@@ -129,6 +130,7 @@ for (const [catalogue, ...files] of [
   [fluencyLessonMessages, "src/pages/Fluency.tsx", "src/components/FluencyCards.tsx", "src/pages/WordBank.tsx"],
   [wordGlossMessages, "src/pages/WordBank.tsx", "src/pages/ReadingPractice.tsx"],
   [studyGlossMessages, "src/pages/SalahWords.tsx", "src/pages/Surahs.tsx", "src/components/WordPanel.tsx", "src/pages/Print.tsx"],
+  [prayerSourceMessages, "src/pages/Return.tsx", "src/components/PrayerGuideSupport.tsx"],
 ]) {
   for (const [key, entry] of Object.entries(catalogue)) {
     if (messages.has(key)) throw new Error(`Duplicate catalogue message: ${key}`);

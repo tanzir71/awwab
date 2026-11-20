@@ -11,6 +11,7 @@ import { useDesktop, usePrayerLogs, useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { addDays, dateKey, formatDay } from "@/lib/dates";
 import { hadithCitation } from "@/lib/hadith";
+import { sayyidMeaningKey } from "@/lib/prayer-source-messages.mjs";
 import { qadaBalances, qadaDefaults } from "@/lib/qada";
 import { db, getRecord, prayerStatistics, type Settings, updateRecord } from "@/lib/storageService";
 import { useUi } from "@/lib/uiState";
@@ -77,13 +78,9 @@ function ReturnCounter({ settings, now, desktop = false }: ReturnProps & { deskt
   </section>;
 }
 
-function sayyidMeaning(index: number, language: string) {
-  return language === "bn" ? content.sayyid.meaningsBn[index] : sayyidLines[index][1];
-}
-
 function MobileReturn({ settings, now }: ReturnProps) {
   const copy = useCopy();
-  const { language, locale, t } = copy;
+  const { locale, prayerSourceText, t } = copy;
   const number = new Intl.NumberFormat(locale);
   const line = useRecord("sayyid-line", 0);
   const plan = useRecord("qada", qadaDefaults);
@@ -92,6 +89,8 @@ function MobileReturn({ settings, now }: ReturnProps) {
   const totalMade = Object.values(madeUp).reduce((total, amount) => total + amount, 0);
   const icons = settings.mode === "maktab" ? "return-maktab" : "return";
   const sayyid = hadithCitation(content.sayyid, copy);
+  const first = prayerSourceText(sayyidMeaningKey(0));
+  const second = prayerSourceText(sayyidMeaningKey(1));
 
   return <div className="return-page">
     <header className="return-heading">
@@ -107,7 +106,7 @@ function MobileReturn({ settings, now }: ReturnProps) {
       </div>
       <h2>{t("sayyidTitle")}</h2>
       <div className="return-sayyid-arabic"><ArabicText text={sayyidLines.slice(0, 2).map(([arabic]) => arabic).join("\n")} citation={content.sayyid.source} /></div>
-      <p className="small" lang={language === "bn" ? "bn" : "en"}>{sayyidMeaning(0, language)} {sayyidMeaning(1, language)}</p>
+      <p className="small"><span lang={first.language}>{first.text}</span> <span lang={second.language}>{second.text}</span></p>
       <Link to="/return/sayyid" className="list-row return-list-link">
         <span className="icon-box"><DesignIcon name={icons + "-book"} size={22} /></span>
         <span><strong>{t(line > 0 ? "sayyidResume" : "sayyidStart")}</strong><small>{line > 0
@@ -135,10 +134,11 @@ function MobileReturn({ settings, now }: ReturnProps) {
 }
 
 function ReturnHope() {
-  const { language, t } = useCopy();
+  const { prayerSourceText, t } = useCopy();
+  const meaning = prayerSourceText("returnHopeMeaning");
   return <section className="return-hope compact-stack">
     <ArabicText text={content.hope.arabic} citation={content.hope.source} />
-    <p lang={language === "bn" ? "bn" : "en"}>“{language === "bn" ? content.hope.meaningBn : content.hope.meaning}”</p>
+    <p lang={meaning.language}>“{meaning.text}”</p>
     <a className="caption" href={content.hope.url}>{t("returnHopeSource", { name: t("returnHopeSurah"), surah: 39, ayah: 53 })}</a>
   </section>;
 }
@@ -269,7 +269,7 @@ function ReturnReflection({ day, stats: { returnDays, returns }, historyTrigger 
 
 function SayyidPath({ selected }: { selected?: number }) {
   const copy = useCopy();
-  const { language, t } = copy;
+  const { t } = copy;
   const line = useRecord("sayyid-line", 0);
   const current = selected ?? line;
   const reviewed = useRecord<number[] | null>("sayyid-reviewed", null);
@@ -283,7 +283,7 @@ function SayyidPath({ selected }: { selected?: number }) {
       return <li key={arabic}><Link to={`/return/sayyid?line=${index + 1}`} aria-current={current === index ? "step" : undefined}>
         <span className="return-desk-line-dot" data-reviewed={done} aria-hidden="true" />
         <span className={done ? "muted" : undefined}>{current === index
-          ? t("sayyidCurrent", { meaning: sayyidMeaning(index, language) })
+          ? t("sayyidCurrent", { meaning: t(sayyidMeaningKey(index)) })
           : done ? <><span className="sr-only">{t("sayyidLineOnly", { line: index + 1 })} · </span>{t("sayyidReviewed")}</>
           : t("sayyidLineOnly", { line: index + 1 })}</span>
       </Link></li>;
@@ -294,7 +294,7 @@ function SayyidPath({ selected }: { selected?: number }) {
 
 export function Sayyid({ settings, desktop }: { settings: Settings; desktop: boolean }) {
   const copy = useCopy();
-  const { language, t } = copy;
+  const { prayerSourceText, t } = copy;
   const index = useRecord("sayyid-line", 0);
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
@@ -302,6 +302,7 @@ export function Sayyid({ settings, desktop }: { settings: Settings; desktop: boo
   const active = Number.isInteger(selected) && selected >= 1 && selected <= sayyidLines.length ? selected - 1 : index;
   const [saving, setSaving] = useState(false);
   const progress = t("sayyidLine", { line: active + 1, total: sayyidLines.length });
+  const meaning = prayerSourceText(sayyidMeaningKey(active));
   useEffect(() => { useUi.getState().selectWord(); }, [active]);
   async function go(next: number, reviewed: boolean) {
     setSaving(true);
@@ -332,7 +333,7 @@ export function Sayyid({ settings, desktop }: { settings: Settings; desktop: boo
       <div className="return-sayyid-arabic">
         <ArabicText text={sayyidLines[active][0]} citation={content.sayyid.source} />
       </div>
-      <p lang={language === "bn" ? "bn" : "en"}>{sayyidMeaning(active, language)}</p>
+      <p lang={meaning.language}>{meaning.text}</p>
       <a className="small" href={content.sayyid.url}>{hadithCitation(content.sayyid, copy).full}</a>
       <div className="equal-row">
         <button className="action light" disabled={active === 0 || saving} onClick={() => void go(active - 1, false)}>{t("sayyidPrevious")}</button>

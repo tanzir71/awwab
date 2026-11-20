@@ -41,9 +41,9 @@ export function PrayerGuideAudio({ surahs, context, title, desktop = false }: {
 
 export function PrayerGuideLostCount({ desktop = false, hanafi = false, topic = false }: { desktop?: boolean; hanafi?: boolean; topic?: boolean }) {
   const copy = useCopy();
-  const { language, t } = copy;
+  const { prayerSourceText, t } = copy;
   const citation = hadithCitation({ url: lostCount.url, source: `Muslim ${lostCount.number} · ${lostCount.grade}` }, copy);
-  const hanafiLanguage = language === "bn" ? "bn" : "en";
+  const hanafiNote = hanafi ? prayerSourceText("guideHanafiSahwDetail") : undefined;
   return <section className="card tint guide-lost" data-desktop={desktop}>
     <h2 className="with-icon">{!desktop && <DesignIcon name="guide-refresh" size={18} />}{t(topic ? "guideSahw" : desktop ? "guideLostShort" : "guideLostCount")}</h2>
     <p className={desktop ? "small reading-copy" : "small muted reading-copy"}>{t(desktop ? "guideLostDesktopHelp" : "guideLostCountHelp")}</p>
@@ -51,7 +51,7 @@ export function PrayerGuideLostCount({ desktop = false, hanafi = false, topic = 
       <span className="chip soft caption">{desktop ? citation.grade : t("hadithCitationGradeFirst", citation)}</span>
       {desktop && <> <span className="small muted">{citation.reference}</span></>}
     </a>
-    {hanafi && <p className="small muted" lang={hanafiLanguage}>{notes.hanafiSahw[hanafiLanguage]} <a href={notes.hanafiSahw.url}>{notes.hanafiSahw.source}</a></p>}
+    {hanafiNote && <p className="small muted" lang={hanafiNote.language}>{hanafiNote.text} <a href={notes.hanafiSahw.url} lang="en">{notes.hanafiSahw.source}</a></p>}
   </section>;
 }
 

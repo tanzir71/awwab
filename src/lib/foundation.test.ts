@@ -14,6 +14,7 @@ import { applyGlossary, formatLocale, glossaryValue, isBuiltIn, languageMatches,
 import * as localePacks from "./localePacks";
 import { planMonth } from "./plan-copy";
 import { message } from "./copy";
+import { prayerSourceMessages } from "./prayer-source-messages.mjs";
 import { updateWordChoice } from "./storageService";
 import { reviewCard, type Reviews } from "./reviews";
 import { countKnownQuranWords } from "./quran";
@@ -343,6 +344,14 @@ describe("prayer guide", () => {
 });
 
 describe("language settings", () => {
+  it("keeps the English and Bangla prayer sources available to locale catalogues", () => {
+    expect(Object.keys(prayerSourceMessages)).toHaveLength(9);
+    for (const [key, source] of Object.entries(prayerSourceMessages)) {
+      expect(message({ mode: "adult", language: "en" }, key)).toBe(source.en);
+      expect(message({ mode: "maktab", language: "bn" }, key)).toBe(source.bn);
+      expect(source.definition.file).toMatch(/^docs\/content\//);
+    }
+  });
   it("matches regional language preferences and keeps planned languages out of the selectable set", () => {
     expect(suggestedLanguage(["ja-JP", "bn-BD"])?.code).toBe("bn");
     expect(suggestedLanguage(["pa-Arab-PK"])?.code).toBe("pa-Arab");
