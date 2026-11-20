@@ -1,11 +1,6 @@
-.word-bank, .word-bank-layout, .word-bank-aside, .fluency-page, .fluency-layout, .fluency-main, .fluency-aside, .vocabulary-tabs {
+.word-bank, .word-bank-layout, .word-bank-aside, .fluency-page, .fluency-layout, .fluency-main, .fluency-aside {
   display: grid; gap: 16px; min-width: 0; align-content: start;
 }
-.vocabulary-tabs .study-tabs { max-inline-size: 480px; }
-.vocabulary-tabs [role="tab"] { min-width: 0; min-height: 44px; padding: 6px 12px; border-radius: var(--r-control); color: var(--c-ink-muted); font: var(--type-body-strong); }
-.vocabulary-tabs [role="tab"][data-state="active"] { color: var(--c-ink); background: var(--c-surface); box-shadow: var(--shadow-card); }
-.vocabulary-tabs > [role="tabpanel"] { min-width: 0; }
-.vocabulary-tabs > [role="tabpanel"][data-state="inactive"] { display: none; }
 .vocabulary-tabs :is(.word-bank-aside, .fluency-aside) { grid-template-columns: repeat(2, minmax(0,1fr)); align-items: start; }
 .vocabulary-tabs .fluency-aside { grid-template-areas: "root signs" "root action"; }
 .vocabulary-tabs .fluency-daily { grid-area: root; }

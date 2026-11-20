@@ -148,7 +148,7 @@ function Main() {
         <Route path="/learn/salah" element={<SalahWords settings={settings} />} />
         <Route path="/learn/fluency" element={<Fluency settings={settings} now={now} desktop={desktop} />} />
         <Route path="/learn/words" element={<WordBank settings={settings} desktop={desktop} now={now} />} />
-        <Route path="/learn/takhti/:family?" element={<Takhti />} />
+        <Route path="/learn/takhti/:family?" element={<Takhti desktop={desktop} />} />
         <Route path="/learn/hadith" element={<Hadith desktop={desktop} />} />
         <Route path="/return" element={<ReturnPage settings={settings} now={now} desktop={desktop} />} />
         <Route path="/return/sayyid" element={<Sayyid settings={settings} desktop={desktop} />} />

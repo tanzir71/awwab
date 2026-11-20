@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState, type PointerEvent, type RefObject } from "react";
+import * as Tabs from "@radix-ui/react-tabs";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { ArabicText } from "@/components/ArabicText";
 import { DesignIcon } from "@/components/DesignIcon";
 import { PracticeHeader } from "@/components/PracticeHeader";
-import { useSettings } from "@/hooks/use-awwab";
+import { useDesktop, useRecord, useSettings } from "@/hooks/use-awwab";
 import { asset } from "@/lib/config";
 import { useCopy } from "@/lib/copy";
+import { focusListItem } from "@/lib/focusListItem";
 import { studyNames } from "@/lib/study-copy";
 import { saveTakhtiPractice } from "@/lib/studyMilestones";
 import { compareTakhti, families, letterForms, lettersForFamily, tracingModel, type LetterForm, type TakhtiLetter, type TracePoint } from "@/lib/takhti";
@@ -15,7 +17,18 @@ const formLabels = { isolated: "writeAlone", initial: "writeStart", medial: "wri
 const resultLabels = { empty: "writeEmpty", match: "writeMatched", shape: "writeShape", dots: "writeDots" } as const;
 const nameOf = (letter: TakhtiLetter, language: string) => language === "bn" ? letter.nameBn : letter.name;
 
-function TraceBoard({ letter, form, glyph, desk }: { letter: TakhtiLetter; form: LetterForm; glyph: string; desk?: boolean }) {
+function StrokeInstructions({ letter, form }: { letter: TakhtiLetter; form: LetterForm }) {
+  const { t } = useCopy();
+  const ra = letter.family === "ra" && form === "isolated";
+  const hasDots = Boolean(tracingModel(letter, form, false).dots.length);
+  const steps = ra ? ["writeRaStart", "writeRaCurve", "writeRaTail"]
+    : ["writeStartCue", hasDots ? "writeFollowCue" : "writeFollowShape"];
+  return <ol className="write-steps">{steps.map(step => <li key={step}>{t(step)}</li>)}</ol>;
+}
+
+function TraceBoard({ letter, form, glyph, desk, separateGuide = false }: {
+  letter: TakhtiLetter; form: LetterForm; glyph: string; desk?: boolean; separateGuide?: boolean;
+}) {
   const { language, t } = useCopy();
   const settings = useSettings();
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -27,10 +40,14 @@ function TraceBoard({ letter, form, glyph, desk }: { letter: TakhtiLetter; form:
   const model = tracingModel(letter, form, !desk);
   const name = nameOf(letter, language);
   const ba = !desk && letter.letter === "ب" && form === "isolated";
-  const ra = desk && letter.family === "ra" && form === "isolated";
+  const ra = desk && !separateGuide && letter.family === "ra" && form === "isolated";
   const prefix = settings?.mode === "maktab" ? "takhti-maktab" : "takhti-phone";
   const start = model.paths[0][0];
   const feedback = result && t(result === "match" && ba ? "writeNice" : resultLabels[result]);
+  const outline = <>
+    {model.paths.map((path, i) => <polyline key={i} points={path.map(point => point.join(",")).join(" ")} />)}
+    {model.dots.map(([x, y]) => <circle key={x + "," + y} cx={x} cy={y} r="5" />)}
+  </>;
 
   useEffect(() => {
     const context = canvas.current?.getContext("2d");
@@ -94,15 +111,13 @@ function TraceBoard({ letter, form, glyph, desk }: { letter: TakhtiLetter; form:
   return <div className="write-board-stack">
     <div className={`write-board ${desk ? "write-board-desk" : "write-board-phone"}`}>
       {!desk && <p className="write-cue">{t(ba ? "writeBoatCue" : "writeStartCue")}</p>}
-      <div className="write-ghost" aria-hidden="true" ref={node => node?.setAttribute("inert", "")}><ArabicText text={glyph} compact /></div>
+      {separateGuide ? <svg className="write-model-ghost" viewBox="0 0 320 200" preserveAspectRatio="none" aria-hidden="true">{outline}</svg> :
+        <div className="write-ghost" aria-hidden="true" ref={node => node?.setAttribute("inert", "")}><ArabicText text={glyph} compact /></div>}
       {desk ? <div className="write-rules" aria-hidden="true"><i /><i /><i /></div> :
         <DesignIcon className="write-baseline" name={prefix + "-line"} size={300} height={2} />}
       {(show || ra && !hasInk) && (ra ? <DesignIcon className="write-ra-guide" name="qaida-desk-strokeguide" size={80} height={110} /> :
         ba ? <DesignIcon className="write-ba-guide" name={prefix + "-frame"} size={250} height={140} /> :
-        <svg className="write-model" viewBox="0 0 320 200" preserveAspectRatio="none" aria-hidden="true">
-          {model.paths.map((path, i) => <polyline key={i} points={path.map(point => point.join(",")).join(" ")} />)}
-          {model.dots.map(([x, y]) => <circle key={x + "," + y} cx={x} cy={y} r="5" />)}
-        </svg>)}
+        <svg className="write-model" viewBox="0 0 320 200" preserveAspectRatio="none" aria-hidden="true">{outline}</svg>)}
       {ra ? <span className="write-ra-start" aria-hidden="true"><DesignIcon name="qaida-desk-ellipse" size={22} /><b>1</b></span> :
         <span className="write-guide-dot" style={{ left: `${start[0] / 3.2}%`, top: `${start[1] / 2}%` }} aria-hidden="true">1</span>}
       {ba && <span className="write-ba-dot" aria-hidden="true"><img src={asset(`design/${prefix}-ellipse.png`)} width={18} height={18} alt="" /><b>2</b></span>}
@@ -110,14 +125,14 @@ function TraceBoard({ letter, form, glyph, desk }: { letter: TakhtiLetter; form:
         onPointerDown={begin} onPointerMove={draw} onPointerUp={draw}
         onPointerCancel={() => { pointer.current = undefined; }} onLostPointerCapture={() => { pointer.current = undefined; }} />
     </div>
-    {desk && <ol className="write-steps">
-      {(ra ? ["writeRaStart", "writeRaCurve", "writeRaTail"] : ["writeStartCue", "writeFollowCue"]).map(key => <li key={key}>{t(key)}</li>)}
-    </ol>}
-    {desk && <p className="caption">{t("writeForms")}<span className="sr-only"> {name}</span></p>}
-    {desk && <div className="write-form-preview" dir="rtl">{letterForms(letter).map(item => <div key={item.key}>
-      <ArabicText text={item.text} compact /><small dir="auto">{t(formLabels[item.key])}</small>
-    </div>)}</div>}
-    {desk && !letter.joinsNext && <p className="small">{t("writeNonJoining", { name })}</p>}
+    {desk && !separateGuide && <>
+      <StrokeInstructions letter={letter} form={form} />
+      <p className="caption">{t("writeForms")}<span className="sr-only"> {name}</span></p>
+      <div className="write-form-preview" dir="rtl">{letterForms(letter).map(item => <div key={item.key}>
+        <ArabicText text={item.text} compact /><small dir="auto">{t(formLabels[item.key])}</small>
+      </div>)}</div>
+      {!letter.joinsNext && <p className="small">{t("writeNonJoining", { name })}</p>}
+    </>}
     <div className="equal-row write-actions">
       <button className={`action ${desk ? "soft" : "light"}`} onClick={clear} disabled={!hasInk}>{t(desk ? "writeClear" : "washTakhti")}</button>
       {desk && <button className="action soft" onClick={() => setShow(value => !value)} aria-pressed={show}>{t(show ? "writeHide" : "writeShow")}</button>}
@@ -127,7 +142,7 @@ function TraceBoard({ letter, form, glyph, desk }: { letter: TakhtiLetter; form:
       <strong>{result === "match" && <DesignIcon name={prefix + "-check"} size={18} />}{feedback}</strong>
       <p>{t(ba ? "writeBoatTip" : "writeTraceTip")}</p>
     </div>}
-    {desk && <p className="small muted">{t("writeInputs")}</p>}
+    {desk && !separateGuide && <p className="small muted">{t("writeInputs")}</p>}
   </div>;
 }
 
@@ -141,9 +156,13 @@ export function TakhtiPanel({ letter, panelRef }: { letter: TakhtiLetter; panelR
   </aside>;
 }
 
-export function Takhti() {
-  const { language, t } = useCopy();
+export function Takhti({ desktop }: { desktop: boolean }) {
+  const { language, locale, direction, t } = useCopy();
   const settings = useSettings();
+  const practised = useRecord<string[]>("takhti-practised", []);
+  const wide = useDesktop(1280);
+  const [tab, setTab] = useState("write");
+  const writeTab = useRef<HTMLButtonElement>(null);
   const { family } = useParams();
   const selected = families.find(item => item.id === family) ?? families[0];
   const letters = lettersForFamily(selected.id);
@@ -151,11 +170,11 @@ export function Takhti() {
   const letter = letters.find(item => item.letter === params.get("letter")) ?? letters[0];
   const forms = letterForms(letter);
   const active = forms.find(item => item.key === params.get("form")) ?? forms[0];
-  return <div className="write-standalone">
-    <PracticeHeader title={t("writeLabel")} back="/learn" maktab={settings?.mode === "maktab"} />
-    <section className="card write-family">
+  const name = nameOf(letter, language);
+  const familyHeading = selected.id === "boat" ? t("writeBoatFamily") : studyNames.family(language, selected.id, selected.title);
+  const letterPicker = <section className={desktop ? "write-family" : "card write-family"}>
       <p className="caption">{t("writeFamily", { number: families.indexOf(selected) + 1, total: families.length })}</p>
-      <h2>{selected.id === "boat" ? t("writeBoatFamily") : studyNames.family(language, selected.id, selected.title)}</h2>
+      <h2>{familyHeading}</h2>
       <div className="equal-row write-letter-picks" role="group" aria-label={t("chooseLetter")} dir="rtl">
         {letters.map(item => <div key={item.letter} data-current={item === letter}><ArabicText text={item.letter} selectedPosition={item === letter ? 1 : 0}
           onWordSelected={() => {
@@ -164,8 +183,8 @@ export function Takhti() {
             return false;
           }} /></div>)}
       </div>
-    </section>
-    <div className="equal-row write-form-picks" dir="rtl" role="group" aria-label={t("writeForms")}>
+    </section>;
+  const formPicker = <div className="equal-row write-form-picks" dir="rtl" role="group" aria-label={t("writeForms")}>
       {forms.map(item => <div data-current={item === active} key={item.key}>
         <ArabicText text={item.text} selectedPosition={item === active ? 1 : 0} onWordSelected={() => {
           if (item === active) return;
@@ -174,13 +193,66 @@ export function Takhti() {
         }} />
         <span dir="auto">{t(formLabels[item.key])}</span>
       </div>)}
-    </div>
-    <TraceBoard key={letter.letter + active.key} letter={letter} form={active.key} glyph={active.text} />
-    {selected.id === "boat" && <section className="card write-word">
+    </div>;
+  const wholeWord = selected.id === "boat" && <section className="card write-word">
       <h2>{t("writeWholeWord")}</h2>
       <div dir="rtl"><ArabicText text="بـ" compact /><span>+</span><ArabicText text="ـيـ" compact /><span>+</span><ArabicText text="ـت" compact /><span>=</span><strong><ArabicText text="بَيْت" compact /></strong></div>
       <p className="small muted">{t("writeBayt")}</p>
-    </section>}
+    </section>;
+
+  if (desktop) {
+    const numbers = new Intl.NumberFormat(locale);
+    const directory = <section className="card takhti-directory">
+      <h2>{t("letterFamilies")}</h2>
+      <nav aria-label={t("letterFamilies")} onKeyDown={event => focusListItem(event)}>
+        {families.map((item, index) => <Link key={item.id} to={`/learn/takhti/${item.id}`}
+          aria-current={item === selected ? "page" : undefined} data-practised={practised.includes(item.id)}
+          onClick={() => {
+            if (wide) return;
+            setTab("write");
+            writeTab.current?.focus();
+          }}>
+          <span className="takhti-family-number">{numbers.format(index + 1)}</span>
+          <span>{studyNames.family(language, item.id, item.title)}</span>
+          {practised.includes(item.id) && <span className="sr-only">{t("practised")}</span>}
+        </Link>)}
+      </nav>
+    </section>;
+    const board = <section className="card takhti-practice" aria-label={t("writeLetter", { name })}>
+      <header className="row-between">
+        <h2>{t("writeLetter", { name })}</h2>
+        <Link className="text-button" to={`/print/takhti/${selected.id}`}>{t("writePrint")}</Link>
+      </header>
+      {letterPicker}
+      {formPicker}
+      <TraceBoard key={letter.letter + active.key} letter={letter} form={active.key} glyph={active.text} desk separateGuide />
+    </section>;
+    const reference = <aside className="takhti-reference">
+      <section className="card compact-stack">
+        <h2>{t("writeGuide")}</h2>
+        <StrokeInstructions letter={letter} form={active.key} />
+        {!letter.joinsNext && <p className="small">{t("writeNonJoining", { name })}</p>}
+        <p className="small muted">{t("writeInputs")}</p>
+      </section>
+      {wholeWord}
+    </aside>;
+    return wide ? <div className="takhti-desktop takhti-workspace">{directory}{board}{reference}</div> :
+      <Tabs.Root className="takhti-desktop workspace-tabs" dir={direction} value={tab} onValueChange={setTab}>
+        <Tabs.List className="study-tabs equal-row" aria-label={t("takhtiWorkspace")}>
+          <Tabs.Trigger value="write" ref={writeTab}>{t("qaidaWrite")}</Tabs.Trigger>
+          <Tabs.Trigger value="guide">{t("writeGuide")}</Tabs.Trigger>
+        </Tabs.List>
+        <Tabs.Content value="write" forceMount>{board}</Tabs.Content>
+        <Tabs.Content className="takhti-guide-tab" value="guide" forceMount>{directory}{reference}</Tabs.Content>
+      </Tabs.Root>;
+  }
+
+  return <div className="write-standalone">
+    <PracticeHeader title={t("writeLabel")} back="/learn" maktab={settings?.mode === "maktab"} />
+    {letterPicker}
+    {formPicker}
+    <TraceBoard key={letter.letter + active.key} letter={letter} form={active.key} glyph={active.text} />
+    {wholeWord}
     <details className="write-family-links">
       <summary>{t("letterFamilies")}</summary>
       <nav className="chips" aria-label={t("letterFamilies")}>{families.map(item => <Link key={item.id} className={`chip ${item === selected ? "soft" : ""}`}

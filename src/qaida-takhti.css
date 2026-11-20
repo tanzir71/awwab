@@ -1,5 +1,5 @@
 [data-page="qaida-lesson"] .app-content, [data-page="takhti"] .app-content { padding-top: env(safe-area-inset-top); }
-:root[data-mode="maktab"] :is(.qaida-lesson, .write-standalone) {
+:root[data-mode="maktab"] :is(.qaida-lesson, .write-standalone, .takhti-desktop) {
   --control-primary: color-mix(in srgb, var(--c-primary) 79%, var(--c-ink));
 }
 .qaida-lesson, .qaida-phone, .qaida-bottom, .write-standalone, .write-board-stack { display: grid; gap: 16px; min-width: 0; }
@@ -11,7 +11,7 @@
 .qaida-phone-header progress::-webkit-progress-bar { border-radius: var(--r-pill); background: var(--c-surface-alt); }
 .qaida-phone-header progress::-webkit-progress-value { border-radius: var(--r-pill); background: var(--c-primary); }
 .qaida-phone-header progress::-moz-progress-bar { border-radius: var(--r-pill); background: var(--c-primary); }
-.qaida-lesson .word-chip > span:first-child, .write-standalone .word-chip > span:first-child, .write-desktop-panel .word-chip > span:first-child { text-decoration: none; }
+.qaida-lesson .word-chip > span:first-child, .write-standalone .word-chip > span:first-child, .write-desktop-panel .word-chip > span:first-child, .takhti-desktop .word-chip > span:first-child { text-decoration: none; }
 :is(.qaida-lesson, .write-standalone) .card { padding: 16px; }
 .qaida-intro { display: grid; gap: 12px; }
 .qaida-intro h2 { font: var(--type-display-l); letter-spacing: var(--tracking-display-l); }
@@ -90,9 +90,11 @@
 .write-board { position: relative; isolation: isolate; border-radius: var(--r-card); }
 .write-board-phone { height: 300px; color: var(--c-on-night); background: var(--c-night); }
 .write-board-desk { height: 250px; color: var(--c-primary); background: var(--c-surface-alt); }
-.write-board canvas, .write-board .write-model, .write-rules { position: absolute; inset: 0; width: 100%; height: 100%; }
+.write-board canvas, .write-board :is(.write-model, .write-model-ghost), .write-rules { position: absolute; inset: 0; width: 100%; height: 100%; }
 .write-board canvas { touch-action: none; cursor: crosshair; z-index: 2; }
 .write-board .write-model { stroke: currentColor; stroke-width: 2.5; opacity: .55; fill: none; stroke-dasharray: 4 4; }
+.write-model-ghost { opacity: .12; fill: none; stroke: currentColor; stroke-width: 12; stroke-linecap: round; stroke-linejoin: round; }
+.write-model-ghost circle { fill: currentColor; stroke-width: 4; }
 .write-rules { pointer-events: none; }
 .write-rules i { position: absolute; inset-inline: 0; height: 1px; background: var(--c-line); }
 .write-rules i:first-child { top: 28%; }
@@ -129,11 +131,33 @@
 .write-word > div > .arabic-text { color: var(--c-ink-muted); }
 .write-family-links summary { color: var(--interactive-ink); font: var(--type-body-strong); }
 .write-family-links .chips { padding-bottom: 10px; }
+.takhti-workspace, .takhti-practice, .takhti-guide-tab, .takhti-reference {
+  display: grid; min-width: 0; gap: 16px; align-items: start; align-content: start;
+}
+.takhti-workspace { grid-template-columns: minmax(172px, 210px) minmax(0,1fr) minmax(248px, 29%); }
+.takhti-guide-tab { grid-template-columns: repeat(2, minmax(0,1fr)); }
+.takhti-directory, .takhti-directory nav { display: grid; gap: 4px; }
+.takhti-directory h2 { margin-bottom: 6px; font: var(--type-body-strong); }
+.takhti-directory nav > a {
+  display: grid; grid-template-columns: auto minmax(0,1fr); gap: 8px; align-items: center;
+  min-height: 36px; padding: 4px 8px; border-radius: var(--r-control); font: var(--type-small);
+}
+.takhti-directory nav > :is(a:hover, [aria-current="page"]) { background: var(--c-primary-soft); color: var(--interactive-ink); }
+.takhti-family-number {
+  display: grid; place-items: center; min-inline-size: 22px; min-height: 22px;
+  border-radius: var(--r-pill); padding-inline: 4px; font: var(--type-caption); background: var(--c-surface-alt);
+}
+.takhti-directory :is([data-practised="true"], [aria-current="page"]) .takhti-family-number { color: var(--c-on-primary); background: var(--control-primary); }
+.takhti-practice header { gap: 8px; flex-wrap: wrap; }
+.takhti-practice header h2 { font: var(--type-display-m); }
+.takhti-practice .write-board-desk { height: auto; inline-size: min(100%, 640px); aspect-ratio: 8 / 5; justify-self: center; }
+.takhti-practice .write-actions .action { min-height: 44px; min-width: 0; padding-inline: 8px; }
+.takhti-reference h2 { font: var(--type-body-strong); }
+.anatomy-open .takhti-workspace { grid-template-columns: minmax(148px, 180px) minmax(0,1fr); }
+.anatomy-open .takhti-workspace .takhti-reference { grid-column: 2; }
 @media (min-width: 1024px) {
   [data-page="qaida-lesson"] .app-content { padding-top: 4px; }
-  .write-standalone { max-width: 430px; }
   [data-page="takhti"] .app-content { padding-top: 10px; }
-  .write-standalone .practice-header { display: none; }
   .qaida-workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(248px, 34%); align-items: start; gap: 16px; }
   .qaida-lessons { grid-column: 1/-1; grid-row: 2; }
   .qaida-center, .qaida-board, .write-desktop-panel { display: grid; gap: 10px; min-width: 0; align-content: start; }

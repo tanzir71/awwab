@@ -86,7 +86,7 @@ export function Fluency({ settings, now, desktop }: { settings: Settings; now: D
         <div className="fluency-main">{comparisons}{signPractice}</div>
         {dailyRoot}
       </div> :
-      <Tabs.Root className="vocabulary-tabs" dir={direction} defaultValue="comparisons">
+      <Tabs.Root className="workspace-tabs vocabulary-tabs" dir={direction} defaultValue="comparisons">
         <Tabs.List className="study-tabs equal-row" aria-label={t("fluency")}>
           <Tabs.Trigger value="comparisons">{t("fluencySameWord")}</Tabs.Trigger>
           <Tabs.Trigger value="practice">{t("practise")}</Tabs.Trigger>

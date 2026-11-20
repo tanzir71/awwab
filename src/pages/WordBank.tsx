@@ -245,7 +245,7 @@ export function WordBank({ settings, desktop, now }: { settings: Settings; deskt
         <p className="small muted">{metric.hint}</p>
       </section>)}
     </div>
-    {compactDesktop ? <Tabs.Root className="vocabulary-tabs" dir={direction} value={tab} onValueChange={setTab}>
+    {compactDesktop ? <Tabs.Root className="workspace-tabs vocabulary-tabs" dir={direction} value={tab} onValueChange={setTab}>
       <Tabs.List className="study-tabs equal-row" aria-label={t("wordBankName")}>
         <Tabs.Trigger value="words">{t("frequentWords")}</Tabs.Trigger>
         <Tabs.Trigger value="roots" ref={rootTab}>{t("rootExplorer")}</Tabs.Trigger>
