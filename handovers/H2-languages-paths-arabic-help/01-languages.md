@@ -60,6 +60,8 @@ Show the translation's name and source under every translated āyah (principle: 
 4. In-app "Suggest a better wording" (long-press) stores suggestions on the device and exports them as a file. No backend.
 5. The figures in Figma are layout tests with draft translations (label on the page says so).
 
+Generate the Tier 1 UI review files with `node scripts/export-locale-review.mjs <review-directory>`. The export includes the English ICU messages, Adult and Maktab variants, source locations, references in the app, and an index of available screenshots. Every locale file is marked as a draft. Use the English source fingerprint to match translations to the same set of messages. Choose a fresh directory for each export to preserve work in earlier drafts.
+
 ## 6. Acceptance
 - Every route passes `en-XA` at 360px and 1280px with no clipped text; `en-XB` and `ur` mirror correctly.
 - Language switch updates text, numbers, dates, Hijri months and share cards without reload, offline after first download.
