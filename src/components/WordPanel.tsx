@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { X } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { toast } from "sonner";
@@ -205,21 +205,42 @@ function Anatomy({ selection, settings, layout }: { selection: WordSelection; se
   </div>;
 }
 
-export function WordPanel({ desktop, settings, reader = false }: { desktop: boolean; settings: Settings; reader?: boolean }) {
+export function WordPanel({ presentation = "sheet", settings, reader = false }: {
+  presentation?: "inline" | "drawer" | "sheet"; settings: Settings; reader?: boolean;
+}) {
   const word = useUi(state => state.word);
   const selectWord = useUi(state => state.selectWord);
+  const previousFocus = useRef<HTMLElement>();
   const t = message.bind(null, settings);
   const key = word ? [word.verse, word.position, word.word].join(":") : "";
-  if (desktop) return word ? <aside className={reader ? "word-side anatomy-reader-panel" : "word-side card"} aria-label={t("wordAnatomy")}
+  if (presentation === "inline") return word ? <aside className={reader ? "word-side anatomy-reader-panel" : "word-side card"} aria-label={t("wordAnatomy")}
     onKeyDown={event => { if (event.key === "Escape") selectWord(); }}>
     {!reader && <button className="icon-button anatomy-close" aria-label={t("closeWordAnatomy")} onClick={() => selectWord()}><X size={20} /></button>}
     <Anatomy key={key} selection={word} settings={settings} layout={reader ? settings.mode === "maktab" ? "maktab-reader" : "adult-reader" : "side"} />
   </aside> : null;
-  return <Dialog open={Boolean(word)} onOpenChange={open => { if (!open) selectWord(); }}>
-    {word && <DialogContent className="awwab-dialog word-sheet" aria-describedby={undefined} showCloseButton={false}>
+  const drawer = presentation === "drawer";
+  const selected = word && !word.automatic ? word : undefined;
+  return <Dialog open={Boolean(selected)} onOpenChange={open => { if (!open) selectWord(); }}>
+    {selected && <DialogContent className={drawer ? "awwab-dialog desktop-detail-drawer word-anatomy-drawer" : "awwab-dialog word-sheet"}
+      overlayClassName={drawer ? "desktop-detail-overlay" : undefined} aria-describedby={undefined} showCloseButton={false}
+      onOpenAutoFocus={() => {
+        const active = document.activeElement;
+        previousFocus.current = active instanceof HTMLElement && active !== document.body ? active : undefined;
+      }}
+      onCloseAutoFocus={event => {
+        const trigger = previousFocus.current;
+        previousFocus.current = undefined;
+        const target = trigger?.isConnected ? trigger : document.getElementById("app-main");
+        if (target) {
+          event.preventDefault();
+          target.focus({ preventScroll: true });
+        }
+      }}>
       <DialogTitle className="sr-only">{t("wordAnatomy")}</DialogTitle>
-      <DialogClose asChild><button type="button" className="anatomy-grip" aria-label={t("shareClose")} /></DialogClose>
-      <Anatomy key={key} selection={word} settings={settings} layout="sheet" />
+      <DialogClose asChild>{drawer
+        ? <button type="button" className="icon-button anatomy-close" aria-label={t("closeWordAnatomy")}><X size={20} /></button>
+        : <button type="button" className="anatomy-grip" aria-label={t("shareClose")} />}</DialogClose>
+      <Anatomy key={key} selection={selected} settings={settings} layout={drawer ? "side" : "sheet"} />
     </DialogContent>}
   </Dialog>;
 }

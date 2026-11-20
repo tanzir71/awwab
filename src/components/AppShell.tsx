@@ -4,7 +4,7 @@ import { DesignIcon, Wordmark } from "./DesignIcon";
 import { ShareLink } from "./ShareLink";
 import { WordPanel } from "./WordPanel";
 import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
-import { useRecord, usePrayerLogs } from "@/hooks/use-awwab";
+import { useDesktop, useRecord, usePrayerLogs } from "@/hooks/use-awwab";
 import { dateKey, duration, formatDay } from "@/lib/dates";
 import { calendarDefaults, hijriLabel, hijriOn } from "@/lib/hijri";
 import { currentPrayerSchedule } from "@/lib/prayerServices";
@@ -80,6 +80,7 @@ function Tabs({ settings, umrahGuide }: { settings: Settings; umrahGuide: boolea
 }
 
 export function AppShell({ children, settings, now, desktop }: { children: ReactNode; settings: Settings; now: Date; desktop: boolean }) {
+  const inlineAnatomy = useDesktop(1280);
   const t = message.bind(null, settings);
   const location = useLocation();
   const word = useUi(state => state.word);
@@ -270,8 +271,8 @@ export function AppShell({ children, settings, now, desktop }: { children: React
         <Link className="icon-button" to="/you/reminders" aria-label={t("reminders")}><DesignIcon name="desk-bell" size={18} /></Link>
       </header>}
       <div className="workspace">
-        <div className={`app-content${umrahAsk ? " umrah-ask-content" : ""}${word && desktop ? " anatomy-open" : ""}`}>{children}</div>
-        <WordPanel desktop={desktop} settings={settings} reader={surahStudy} />
+        <div className={`app-content${umrahAsk ? " umrah-ask-content" : ""}${word && inlineAnatomy ? " anatomy-open" : ""}`}>{children}</div>
+        <WordPanel presentation={inlineAnatomy ? "inline" : desktop ? "drawer" : "sheet"} settings={settings} reader={surahStudy} />
       </div>
     </main>
     {!fullscreen && !prayerGuide && !languageFlow && <Tabs settings={settings} umrahGuide={umrahGuide} />}

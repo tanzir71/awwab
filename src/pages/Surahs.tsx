@@ -141,6 +141,7 @@ function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; set
   const { t, language, locale } = useCopy();
   const navigate = useNavigate();
   const desktop = useDesktop();
+  const inlineAnatomy = useDesktop(1280);
   const adultDesk = desktop && settings.mode === "adult";
   const maktabDesk = desktop && settings.mode === "maktab";
   const mode = modes.find(value => value === params.get("mode")) ?? "read";
@@ -190,7 +191,7 @@ function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; set
         return;
       }
     }
-    if (!desktop) {
+    if (!inlineAnatomy) {
       if (selected?.automatic) selectWord();
       return;
     }
@@ -198,7 +199,7 @@ function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; set
     const first = verses[0];
     const [detail] = verseWords(first);
     selectWord({ word: detail.anatomyWord, gloss: detail.gloss, citation: first.ref, verse: first.ref, position: 1, connected: false, automatic: true });
-  }, [anatomyRef, desktop, selectWord, verses]);
+  }, [anatomyRef, inlineAnatomy, selectWord, verses]);
 
   function changeMode(next: StudyMode) {
     if (next === mode) return;

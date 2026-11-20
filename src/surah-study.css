@@ -105,9 +105,9 @@
   .surah-workspace[data-layout="adult"] .surah-verse-line .word-chip small { line-height: 16px; }
   .surah-workspace[data-layout="adult"] .surah-grading .action { padding: 5px 6px; min-height: 50px; font: 650 13px/16px var(--font-body); }
 
-  [data-mode="maktab"] [data-page="surah-reader"] .workspace { min-height: 100svh; padding: 0 0 0 clamp(22px, 3vw, 40px); gap: 28px; align-items: stretch; }
+  [data-mode="maktab"] [data-page="surah-reader"] .workspace { min-height: 100svh; padding-inline-start: clamp(22px, 3vw, 40px); gap: 28px; align-items: stretch; }
   [data-mode="maktab"] [data-page="surah-reader"] .workspace .app-content { padding: 36px 0 26px; }
-  [data-mode="maktab"] [data-page="surah-reader"] .workspace:not(:has(.word-side)) .app-content { padding-right: 28px; }
+  [data-mode="maktab"] [data-page="surah-reader"] .workspace:not(:has(.word-side)) .app-content { padding-inline-end: 28px; }
   .surah-workspace[data-layout="maktab"] .surah-reading { gap: 20px; }
   .surah-maktab-header { display: flex; align-items: start; justify-content: space-between; gap: 14px; }
   .surah-maktab-header h1 { font: 600 26px/30px var(--font-display); }
@@ -121,7 +121,7 @@
   :root[data-mode="maktab"] :is(.surah-workspace, .anatomy-content) { --control-primary: color-mix(in srgb, var(--c-primary) 79%, var(--c-ink)); }
 }
 
-@media (min-width: 1024px) and (max-width: 1280px) {
+@media (1024px <= width < 1280px) {
   [data-page="surah-reader"] .workspace { padding-inline: 16px; gap: 12px; }
   .surah-workspace[data-layout="adult"] { grid-template-columns: minmax(0, 1fr); }
   .surah-workspace[data-layout="adult"] .surah-reading { grid-row: 1; }

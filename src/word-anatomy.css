@@ -8,6 +8,7 @@
 .anatomy-grip::before { content: ""; display: block; width: 40px; height: 5px; border-radius: var(--r-pill); background: var(--c-line); }
 .anatomy-content { display: grid; align-content: start; min-width: 0; gap: 16px; }
 .anatomy-content[data-layout="side"] { padding-top: 20px; }
+.word-anatomy-drawer .anatomy-content[data-layout="side"] { padding-block-start: 44px; }
 .anatomy-content [hidden] { display: none; }
 .anatomy-header { gap: 10px; min-width: 0; }
 .anatomy-header > div:first-child { min-width: 0; }
@@ -126,9 +127,4 @@
   .anatomy-content[data-layout="maktab-reader"] .anatomy-spellings > .soft { background: var(--c-surface-alt); }
   .anatomy-content[data-layout="maktab-reader"] .anatomy-modern-sentence { color: var(--c-ink-muted); }
   .anatomy-content[data-layout="maktab-reader"] .anatomy-modern-sentence .word-chip { font-size: 15px; }
-}
-
-@media (min-width: 1024px) and (max-width: 1280px) {
-  [data-page="surah-reader"] .anatomy-reader-panel { flex-basis: min(44%, 345px); padding-inline: 12px; }
-  [data-mode="maktab"] [data-page="surah-reader"] .anatomy-reader-panel { flex-basis: min(43%, 340px); padding-inline: 14px; }
 }

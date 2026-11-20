@@ -96,7 +96,9 @@ function Main() {
   const t = message.bind(null, settings ?? { ...defaults, language, pseudoLocale });
   if (storage === "error") return <main className="app-content stack"><h1>{t("noStorage")}</h1><p>{t("allowStorage")}</p></main>;
   if (!settings || storage === "loading" || restoringLocale) return <main className="app-content"><p role="status">{t("opening")}</p></main>;
-  if (!settings.onboarded && pathname !== "/install" && pathname !== "/sources") return <CopyContext.Provider value={settings}><Onboarding settings={settings} desktop={desktop} /><WordPanel desktop={false} settings={settings} /></CopyContext.Provider>;
+  if (!settings.onboarded && pathname !== "/install" && pathname !== "/sources") return <CopyContext.Provider value={settings}>
+    <Onboarding settings={settings} desktop={desktop} /><WordPanel presentation={desktop ? "drawer" : "sheet"} settings={settings} />
+  </CopyContext.Provider>;
   const shareDialog = desktop && pathname === "/share";
   const shareBackground = (location.state as ShareRouteState | null)?.shareBackground;
   const shareBack = shareDialog ? shareReturnPath(new URLSearchParams(search)) : "";
