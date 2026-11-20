@@ -88,6 +88,8 @@ The Indonesian Speak draft covers the shared course interface and all A1 lessons
 
 The Indonesian Umrah draft covers desktop trip preparation and print, the phone itinerary and Haram focus, the seven ritual steps, and offline map controls and search terms. Review the ritual descriptions with the sources shown in the guide, and check that the trip file and saved counters work across app languages.
 
+The Indonesian settings and sharing draft covers the profile, display and prayer preferences, glossary choices and wording suggestions, backup and restore, and source credits. Review the milestone and card text in both the preview and the saved image. Where a card includes a Quran meaning, check the translation credit and fallback language alongside the verse reference.
+
 After native review, record the reviewers in the catalogue’s `reviewers` array and set `_status` to `reviewed`. Use `node scripts/build-locale-pack.mjs <source-ui.json> <reviewed-catalogue.json> <output-directory>` to produce the UI catalogue. The build checks the source fingerprint, message coverage, mode variants, and ICU arguments. The review file retains the reviewer names.
 
 For a static build, set the compiler’s output directory to `public/locales`. The app installer lists the compiled files that match the current English catalogue. Selecting one in Settings or onboarding downloads it from the same origin and verifies it before saving the language preference. Installed catalogues are available offline on later visits. When a new build changes a pack, selecting that language again installs the matching revision.

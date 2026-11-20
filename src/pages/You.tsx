@@ -121,7 +121,7 @@ export function SettingsPage({ settings, now, panel, desktop }: { settings: Sett
       </label>
       <label className="field">{t("spellingStyle")}
         <select value={settings.spellStyle} onChange={event => void save({ spellStyle: event.target.value as Settings["spellStyle"] })}>
-          <option value="en" lang="en">English</option><option value="ampara-bn">{t("banglaAmpara")}</option>
+          <option value="en">{t("settingsSpellingEnglish")}</option><option value="ampara-bn">{t("banglaAmpara")}</option>
         </select>
       </label>
       {!desktop && <Link className="list-row" to="/you/language/picker">
