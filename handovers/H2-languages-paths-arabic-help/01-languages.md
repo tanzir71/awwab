@@ -82,6 +82,8 @@ The Indonesian Qaida and Takhti draft covers all 17 lesson titles, practice and 
 
 The Indonesian learning paths draft covers the path hub, placement prompts, Maktab map, and memorisation plans and reviews. The Indonesian and Bangla exports include the eight cited notes shown on memorisation passage pages. Review each note against the linked handover source and the displayed hadith reference and grade.
 
+The Indonesian reading draft covers Fluent Reading, Read with Meaning, Recite with a Teacher, Tajweed Essentials, and Tajweed in Depth. It includes the 125 core-word glosses. Review the tajwid explanations with their cited examples and recording credits, and check the glosses in the context of each āyah.
+
 After native review, record the reviewers in the catalogue’s `reviewers` array and set `_status` to `reviewed`. Use `node scripts/build-locale-pack.mjs <source-ui.json> <reviewed-catalogue.json> <output-directory>` to produce the UI catalogue. The build checks the source fingerprint, message coverage, mode variants, and ICU arguments. The review file retains the reviewer names.
 
 For a static build, set the compiler’s output directory to `public/locales`. The app installer lists the compiled files that match the current English catalogue. Selecting one in Settings or onboarding downloads it from the same origin and verifies it before saving the language preference. Installed catalogues are available offline on later visits. When a new build changes a pack, selecting that language again installs the matching revision.
