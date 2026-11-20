@@ -21,12 +21,12 @@ import { grades, isDue, reviewCard, type ReviewGrade, type Reviews } from "@/lib
 import { updateRecord, type Settings } from "@/lib/storageService";
 import { isSurahStudyReview, reviewDestination } from "@/lib/studyDesk";
 import { studyNames } from "@/lib/study-copy";
+import { ayahGlossKey } from "@/lib/study-gloss-messages.mjs";
 import { momentPath, saveSurahReview } from "@/lib/studyMilestones";
 import { useUi } from "@/lib/uiState";
 import { splitArabicWords, splitGraphemes, wordAnatomy } from "@/lib/wordAnatomy";
 import chaptersSource from "../../docs/content/surahs-for-salah.json";
 import printTransliteration from "../../docs/content/print-surah-transliteration.json";
-import studyWords from "../../docs/content/surah-study-words.json";
 
 const chapters = chaptersSource.surahs.slice(0, 12);
 type Chapter = typeof chapters[number];
@@ -38,14 +38,9 @@ function chapterName(chapter: Chapter, language: string) {
   return studyNames.surah(language, chapter.number, ordinaryNames[chapter.number] ?? chapter.transliteration);
 }
 
-function verseWords(verse: QuranVerse) {
-  const glosses: string[] = studyWords.glosses[verse.ref] ?? [];
-  return splitArabicWords(verse.uthmani).map((anatomyWord, index) => ({ anatomyWord, gloss: glosses[index] }));
-}
-
 function verseTransliteration(verse: QuranVerse, index: number) {
   return (printTransliteration[verse.ref.split(":")[0]] as string | undefined)?.split(" · ")[index] ??
-    verseWords(verse).map(({ anatomyWord }, position) => wordAnatomy(anatomyWord, position > 0).syllables.map(syllable => syllable.tr).join("")).join(" ");
+    splitArabicWords(verse.uthmani).map((word, position) => wordAnatomy(word, position > 0).syllables.map(syllable => syllable.tr).join("")).join(" ");
 }
 
 function lineBreaks(text: string, wide: boolean) {
@@ -147,7 +142,7 @@ export function SurahReader({ settings, now }: { settings: Settings; now: Date }
 
 function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; settings: Settings; reviews: Reviews; now: Date }) {
   const [params, setParams] = useSearchParams();
-  const { t, language, locale, direction } = useCopy();
+  const { t, language, locale, direction, studyGloss } = useCopy();
   const navigate = useNavigate();
   const desktop = useDesktop();
   const inlineAnatomy = useDesktop(1280);
@@ -203,9 +198,9 @@ function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; set
     if (anatomyRef) {
       const [surah, ayah, position] = anatomyRef.split(":").map(Number);
       const verse = verses.find(item => item.ref === `${surah}:${ayah}`);
-      const detail = verse && verseWords(verse)[position - 1];
-      if (detail) {
-        selectWord({ word: detail.anatomyWord, gloss: detail.gloss, citation: verse.ref, verse: verse.ref, position, connected: position > 1 });
+      const word = verse && splitArabicWords(verse.uthmani)[position - 1];
+      if (word) {
+        selectWord({ word, citation: verse.ref, verse: verse.ref, position, connected: position > 1 });
         return;
       }
     }
@@ -215,8 +210,8 @@ function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; set
     }
     if (selected) return;
     const first = verses[0];
-    const [detail] = verseWords(first);
-    selectWord({ word: detail.anatomyWord, gloss: detail.gloss, citation: first.ref, verse: first.ref, position: 1, connected: false, automatic: true });
+    const [word] = splitArabicWords(first.uthmani);
+    selectWord({ word, citation: first.ref, verse: first.ref, position: 1, connected: false, automatic: true });
   }, [anatomyRef, inlineAnatomy, selectWord, verses]);
 
   function changeMode(next: StudyMode) {
@@ -296,7 +291,10 @@ function SurahStudy({ chapter, settings, reviews, now }: { chapter: Chapter; set
         return <section className="card surah-verse" data-hidden={!visible} key={verse.ref}>
           <div className="surah-verse-line">
             {visible ? <ArabicText text={lineBreaks(verse[settings.script], wideVerse)} citation={verse.ref} verse={verse.ref} recall={optionsForVerse}
-              mushaf={settings.script} words={verseWords(verse)} showGlosses={display.word}
+              mushaf={settings.script} showGlosses={display.word}
+              words={splitArabicWords(verse.uthmani).map((anatomyWord, index) => ({
+                anatomyWord, ...studyGloss(ayahGlossKey(verse.ref, index + 1)),
+              }))}
               selectedPosition={word?.verse === verse.ref ? word.position : !word && index === 0 ? 1 : undefined} /> :
               <h2>{t("surahReciteMemory", { number: index + 1 })}</h2>}
             <a className="surah-verse-number" href={"https://quran.com/" + verse.ref.replace(":", "/")}

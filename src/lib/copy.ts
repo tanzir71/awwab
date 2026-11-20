@@ -26,6 +26,7 @@ import { printMessages } from "./print-copy";
 import { askMessages } from "./umrah-ask-copy";
 import { askPhraseMessages } from "./umrah-phrase-messages.mjs";
 import { umrahStepMessages } from "./umrah-step-messages.mjs";
+import { studyGlossMessages } from "./study-gloss-messages.mjs";
 import { pathsMessages } from "./paths-copy";
 import { tajweedMessages } from "./tajweed-copy";
 import { speakMessages } from "./speak-copy";
@@ -350,7 +351,7 @@ const formats = new Map<string, IntlMessageFormat<Record<string, string | number
 export function message(settings: CopySettings, id: string, values?: Record<string, string | number>) {
   const language = settings.pseudoLocale ? "en" : settings.language;
   const entry = messages[id] ?? askPhraseMessages[id] ?? umrahStepMessages[id] ?? speakLessonMessages[id]
-    ?? grammarLessonMessages[id] ?? fluencyLessonMessages[id] ?? wordGlossMessages[id];
+    ?? grammarLessonMessages[id] ?? fluencyLessonMessages[id] ?? wordGlossMessages[id] ?? studyGlossMessages[id];
   const installed = localeMessage(language, id, settings.mode);
   const draft = installed ?? entry?.[language] ?? entry?.en ?? id;
   const text = typeof draft === "string" ? draft : draft[settings.mode === "maktab" ? 1 : 0];
@@ -367,10 +368,19 @@ export function message(settings: CopySettings, id: string, values?: Record<stri
 
 export function useCopy() {
   const { mode, language, nativeDigits, wordChoices, pseudoLocale } = useContext(CopyContext);
-  return useMemo(() => ({ language, locale: formatLocale({ language, nativeDigits }),
-    direction: pseudoLocale === "en-XB" || languages.some(item => item.code === language && item.dir === "rtl") ? "rtl" as const : "ltr" as const,
-    t: message.bind(null, { mode, language, nativeDigits, wordChoices, pseudoLocale }),
-  }), [mode, language, nativeDigits, wordChoices, pseudoLocale]);
+  return useMemo(() => {
+    const t = message.bind(null, { mode, language, nativeDigits, wordChoices, pseudoLocale });
+    return {
+      language, locale: formatLocale({ language, nativeDigits }),
+      direction: pseudoLocale === "en-XB" || languages.some(item => item.code === language && item.dir === "rtl") ? "rtl" as const : "ltr" as const,
+      t,
+      studyGloss(key: string) {
+        if (!studyGlossMessages[key]?.en) return undefined;
+        const glossLanguage = !pseudoLocale && localeMessage(language, key, mode) !== undefined ? language : "en";
+        return { gloss: t(key), glossLanguage };
+      },
+    };
+  }, [mode, language, nativeDigits, wordChoices, pseudoLocale]);
 }
 
 export function navigationLabel(settings: Settings, title: string) {

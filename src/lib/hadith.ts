@@ -99,7 +99,7 @@ export function hadithName(collection: HadithCollection, language: string, short
 }
 
 export function hadithReferenceLabel(collection: HadithCollection | "riyadussalihin", number: string | number,
-  { language, locale, t }: ReturnType<typeof useCopy>, short = false) {
+  { language, locale, t }: Pick<ReturnType<typeof useCopy>, "language" | "locale" | "t">, short = false) {
   const name = collection === "riyadussalihin" ? t("hadithRiyad")
     : language === "bn" || language === "en" ? hadithName(collection, language, short) : t(`hadithCollection-${collection}`);
   return t("hadithCitationReference", { collection: name, number: hadithNumberLabel(number, locale) });
@@ -124,7 +124,7 @@ export function hadithGradeLabel(grade: HadithGrade, { t }: Pick<ReturnType<type
   return grade.grader ? t("hadithCitationGrader", { grade: label, grader: grade.grader }) : label;
 }
 
-export function hadithCitation({ source, url }: { source: string; url: string }, { language, locale, t }: ReturnType<typeof useCopy>) {
+export function hadithCitation({ source, url }: { source: string; url: string }, { language, locale, t }: Pick<ReturnType<typeof useCopy>, "language" | "locale" | "t">) {
   const [originalReference, originalGrade] = source.split(" · ", 2);
   const id = /^https:\/\/sunnah\.com\/([^/?#]+)$/.exec(url)?.[1];
   const parsed = id && parseHadithId(id);

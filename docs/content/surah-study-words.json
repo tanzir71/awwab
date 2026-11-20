@@ -1,8 +1,9 @@
 {
   "_source": "Awwab Figma, DA2 Surah study workspace (41:851) and word-anatomy.sample.json.",
+  "_note": "Glosses follow Quran word positions. Null positions have no curated gloss.",
   "glosses": {
     "103:1": ["by time"],
     "103:2": ["indeed", "mankind", "surely in", "loss"],
-    "103:3": ["except", "those who", "believed", "and did", "righteous deeds"]
+    "103:3": ["except", "those who", "believed", "and did", "righteous deeds", null, null, null, null]
   }
 }

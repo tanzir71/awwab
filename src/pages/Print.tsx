@@ -17,7 +17,8 @@ import { qadaBalances, qadaDefaults } from "@/lib/qada";
 import { families, letterForms, lettersForFamily } from "@/lib/takhti";
 import { initialZakat, metalLabels, zakatMoney, zakatProfileTotals, zakatSources } from "@/lib/zakat";
 import { studyNames } from "@/lib/study-copy";
-import { quranMeaningPreferences } from "@/lib/languagePreferences";
+import { languages, quranMeaningPreferences } from "@/lib/languagePreferences";
+import { anatomyGlossKey } from "@/lib/study-gloss-messages.mjs";
 import type { Settings } from "@/lib/storageService";
 import { prayerIds } from "@/types/Prayer";
 import { quranMeaningSource, quranText } from "@/lib/quran";
@@ -63,7 +64,7 @@ export function PrintHub() {
 }
 
 export function WordPrintSheet() {
-  const { t, language } = useCopy();
+  const { t, language, studyGloss } = useCopy();
   const [params] = useSearchParams();
   const word = splitArabicWords(params.get("word")?.slice(0, 64) ?? "")[0];
   const back = params.get("back");
@@ -71,15 +72,19 @@ export function WordPrintSheet() {
   if (!word) return <Link className="action light" to={returnPath}>{t("continueLearning")}</Link>;
   const source = params.get("source")?.slice(0, 80);
   const { letters, syllables, curated, modern } = wordAnatomy(word);
+  const requestedMeaning = params.get("meaning")?.slice(0, 120);
+  const requestedLanguage = params.get("meaningLanguage");
+  const meaning = requestedMeaning
+    ? { gloss: requestedMeaning, glossLanguage: languages.find(item => item.code === requestedLanguage)?.code ?? "en" }
+    : curated ? studyGloss(anatomyGlossKey("meaning")) : undefined;
   return <div className="print-page stack" data-sheet="word-card">
     <div className="equal-row no-print"><Link className="action light" to={returnPath}>{t("back")}</Link>
       <button className="action" type="button" onClick={() => void printPaper()}><Printer size={18} />{t("anatomyPrintWord")}</button></div>
     <header className="paper-header row-between"><div><h1>{t("anatomyWordCard")}</h1><p className="paper-note">{source}</p></div><Wordmark print /></header>
     <section className="card stack">
-      <ArabicText text={word} citation={source} />
+      <ArabicText text={word} citation={source} words={[meaning]} showGlosses={false} />
       <p lang="ar-Latn" dir="ltr">{curated?.translit ?? syllables.map(item => item.tr).join(" · ")}</p>
-      {(curated?.meaning || params.get("meaning")) && <p className="muted" lang={curated ? "en" : undefined} dir="auto">
-        {curated?.meaning ?? params.get("meaning")?.slice(0, 120)}</p>}
+      {meaning && <p className="muted" lang={meaning.glossLanguage} dir="auto">{meaning.gloss}</p>}
       <h2>{t("lettersRtl")}</h2>
       <div className="paper-word-letters" dir="rtl">{letters.map((letter, index) => <div className="card soft" key={index}>
         <ArabicText text={letter.glyph} compact /><small dir="auto">

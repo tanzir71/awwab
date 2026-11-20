@@ -12,8 +12,9 @@ import { useUi, type WordSelection } from "@/lib/uiState";
 import { lookupMorphology } from "@/lib/morphology";
 import { reviewCard, type Reviews } from "@/lib/reviews";
 import { updateRecord, type Settings } from "@/lib/storageService";
-import { message } from "@/lib/copy";
+import { message, useCopy } from "@/lib/copy";
 import { studyNames } from "@/lib/study-copy";
+import { anatomyGlossKey, ayahGlossKey } from "@/lib/study-gloss-messages.mjs";
 import { families, lettersForFamily } from "@/lib/takhti";
 import { quranText } from "@/lib/quran";
 
@@ -31,7 +32,7 @@ function AnatomyHeading({ number, children, label }: { number: number; children:
 }
 
 function Anatomy({ selection, settings, layout }: { selection: WordSelection; settings: Settings; layout: PanelLayout }) {
-  const t = message.bind(null, settings);
+  const { t, studyGloss } = useCopy();
   const maktab = settings.mode === "maktab";
   const ampara = settings.spellStyle === "ampara-bn";
   const { letters, syllables, joining, curated, modern } = wordAnatomy(selection.word, selection.connected);
@@ -72,17 +73,26 @@ function Anatomy({ selection, settings, layout }: { selection: WordSelection; se
   }, [spelling, step, letters.length]);
 
   const pronunciation = selection.transliteration ?? curated?.translit ?? syllables.map(item => item.tr).join("-");
-  const gloss = selection.gloss ?? curated?.meaning;
+  const verseMeaning = verseRef && selection.position ? studyGloss(ayahGlossKey(verseRef, selection.position)) : undefined;
+  const meaning = selection.gloss === undefined
+    ? verseMeaning ?? (curated ? studyGloss(anatomyGlossKey("meaning")) : undefined)
+    : { gloss: selection.gloss, glossLanguage: selection.glossLanguage ?? "en" };
   const root = curated?.root.letters.join(" ") ?? selection.root ?? (morphology?.root ? Array.from(morphology.root).join(" ") : "");
   const traceFamily = families.find(family => lettersForFamily(family.id).some(letter => letter.letter === letters[0]?.base));
   const tracePath = traceFamily ? "/learn/takhti/" + traceFamily.id + "?letter=" + encodeURIComponent(letters[0].base) : "/learn/takhti";
   const print = new URLSearchParams({ word: selection.word, back: pathname + search });
   if (selection.citation) print.set("source", selection.citation);
-  if (gloss) print.set("meaning", gloss);
+  if (meaning?.gloss) {
+    print.set("meaning", meaning.gloss);
+    print.set("meaningLanguage", meaning.glossLanguage);
+  }
   const compact = layout === "adult-reader" || layout === "maktab-reader";
-  const rootItems = layout === "maktab-reader" && curated ? curated.root.family.slice(1) : curated?.root.family;
-  const modernExamples = layout === "maktab-reader" ? curated?.modern.examples.slice(1, 2) :
-    layout === "adult-reader" && curated ? [curated.modern.examples[1], curated.modern.examples[0]] : curated?.modern.examples;
+  const rootMeaning = curated && studyGloss(anatomyGlossKey("root"));
+  const family = curated?.root.family.map((item, index) => ({ ...item, ...studyGloss(anatomyGlossKey("family", index)) }));
+  const rootItems = layout === "maktab-reader" ? family?.slice(1) : family;
+  const examples = curated?.modern.examples.map((item, index) => ({ ...item, ...studyGloss(anatomyGlossKey("modern", index)) }));
+  const modernExamples = layout === "maktab-reader" ? examples?.slice(1, 2) :
+    layout === "adult-reader" && examples ? [examples[1], examples[0]] : examples;
   const nonJoiners = [...new Set(letters.filter((tile, index) => index + 1 < letters.length && !tile.joinsNext).map(tile => tile.base))].join(" ");
   const pronunciationLabel = t(playback.playing ? "surahPause" : wholeVerse || audioRef === wordRef ? "anatomyHear" : "anatomyHearVerse");
 
@@ -107,14 +117,15 @@ function Anatomy({ selection, settings, layout }: { selection: WordSelection; se
     <header className="row-between anatomy-header">
       <div>{layout !== "adult-reader" && <p className="caption">{t(maktab && layout === "sheet" ? "anatomySpellIt" : "wordAnatomy")}</p>}
         <h2>{pronunciation || t("spellItOut")}</h2>
-        <p className="muted small">{gloss && <span lang={selection.glossLanguage ?? "en"}>“{gloss}”</span>}{gloss && selection.citation && " · "}{selection.citation}</p>
+        <p className="muted small">{meaning?.gloss && <bdi lang={meaning.glossLanguage}>“{meaning.gloss}”</bdi>}
+          {meaning?.gloss && selection.citation && " · "}{selection.citation}</p>
         {selection.annotation?.lessons ? <ul className="compact-stack anatomy-rule-links">
           {selection.annotation.lessons.map(({ title, to }) => <li className="small" key={title}>
             <Link className="text-button" to={to}>{title}</Link>
           </li>)}
         </ul> : selection.annotation && <p className="small">{selection.annotation.label}</p>}</div>
       <div className="anatomy-title"><ArabicText text={selection.word} citation={selection.citation} verse={verseRef}
-        positionOffset={(selection.position ?? 1) - 1} words={[{ transliteration: pronunciation, root, gloss }]} showGlosses={false} /></div>
+        positionOffset={(selection.position ?? 1) - 1} words={[{ transliteration: pronunciation, root, ...meaning }]} showGlosses={false} /></div>
     </header>
     {shouldHear && <div className="equal-row anatomy-audio">
       {canPlay ? <button className="action soft" type="button" onClick={() => playback.play(audioRef)}>
@@ -167,15 +178,20 @@ function Anatomy({ selection, settings, layout }: { selection: WordSelection; se
       {!compact && <div className="anatomy-joined-example"><ArabicText text={selection.word} compact /></div>}
       {curated?.prefixes.length && layout === "adult-reader" ? <div className="anatomy-prefixes">
         <strong className="caption">{t("anatomyPrefixes")}</strong>
-        {curated.prefixes.map(item => <span key={item.ar} className="with-icon"><ArabicText text={item.ar} compact /><small>{item.meaning}</small></span>)}
+        {curated.prefixes.map((item, index) => {
+          const prefix = studyGloss(anatomyGlossKey("prefix", index));
+          return <span key={item.ar} className="with-icon"><ArabicText text={item.ar} compact />
+            <small lang={prefix?.glossLanguage} dir="auto">{prefix?.gloss}</small></span>;
+        })}
       </div> : null}
     </section>
     {root && <section className="anatomy-section anatomy-root">
       <AnatomyHeading number={4} label={t("rootFamily")}>{t("root")} <ArabicText text={root} compact />
-        {compact && curated && <small>{curated.root.meaning}</small>}</AnatomyHeading>
-      {!compact && <p className="small muted">{curated?.root.meaning && curated.root.meaning + " · "}{t("anatomyFamilyHint")}</p>}
+        {compact && rootMeaning && <small lang={rootMeaning.glossLanguage} dir="auto">{rootMeaning.gloss}</small>}</AnatomyHeading>
+      {!compact && <p className="small muted">{rootMeaning && <><bdi lang={rootMeaning.glossLanguage}>{rootMeaning.gloss}</bdi> · </>}{t("anatomyFamilyHint")}</p>}
       {rootItems && <div className="anatomy-family">{rootItems.map(item => <div className="anatomy-family-entry" key={item.ar}>
-        <div><strong>{item.tr}</strong><small className="muted">{item.en}</small></div><ArabicText text={item.ar} compact words={[{ transliteration: item.tr, gloss: item.en }]} showGlosses={false} />
+        <div><strong>{item.tr}</strong><small className="muted" lang={item.glossLanguage} dir="auto">{item.gloss}</small></div>
+        <ArabicText text={item.ar} compact words={[{ transliteration: item.tr, gloss: item.gloss, glossLanguage: item.glossLanguage }]} showGlosses={false} />
       </div>)}</div>}
       {!curated && morphology?.family.slice(0, 4).map(item => <div className="anatomy-family-entry" key={item.verse + ":" + item.position}>
         <div><strong>{studyNames.wordKind(settings.language, item.type)}</strong><small>{item.verse}</small></div>
@@ -196,7 +212,7 @@ function Anatomy({ selection, settings, layout }: { selection: WordSelection; se
         {layout !== "maktab-reader" && <h4>{t("anatomyEveryday")}</h4>}
         {modernExamples.map(item => <div key={item.ar} className="anatomy-modern-sentence">
           <ArabicText text={item.ar} compact />
-          <div>{!compact && <strong>{item.tr}</strong>}<p>{item.en}</p></div>
+          <div>{!compact && <strong>{item.tr}</strong>}<p lang={item.glossLanguage} dir="auto">{item.gloss}</p></div>
         </div>)}
       </div> : null}
     </section>

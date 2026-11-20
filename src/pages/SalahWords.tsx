@@ -13,18 +13,19 @@ import { coreWordCoverage, coreWordSource, coreWordTotal, countKnownQuranWords, 
 import type { Settings } from "@/lib/storageService";
 import { momentPath, setAyahFamiliar } from "@/lib/studyMilestones";
 import { studyNames } from "@/lib/study-copy";
+import { ayahGlossKey, salahGlossKey, salahPreviewKey } from "@/lib/study-gloss-messages.mjs";
 import { splitArabicWords } from "@/lib/wordAnatomy";
 import content from "../../docs/content/salah-words.json";
 
 const previews = ["salahTakbir", "salahBowing", "salahProstration", "salahRising"].flatMap(id => {
-  const entry = content.sections.find(section => section.preview?.id === id);
-  return entry ? [entry] : [];
+  const index = content.sections.findIndex(section => section.preview?.id === id);
+  return index < 0 ? [] : [{ section: content.sections[index], index }];
 });
 const fatiha = quranText[1];
 const verseNotes: Record<string, { glosses: string[]; transliteration?: string }> = content.fatiha;
 
 export function SalahWords({ settings }: { settings: Settings }) {
-  const { language, locale, t } = useCopy();
+  const { language, locale, t, studyGloss } = useCopy();
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const [ayah, selectAyah] = useState(2);
@@ -37,7 +38,11 @@ export function SalahWords({ settings }: { settings: Settings }) {
   const known = knownVerses.includes(verse.ref);
   const words = splitArabicWords(verse.uthmani);
   const notes = verseNotes[verse.ref];
-  const selected = fatihaMorphology[`${verse.ref}:${position}`];
+  const details = words.map((_, index) => ({
+    ...studyGloss(ayahGlossKey(verse.ref, index + 1)),
+    root: fatihaMorphology[`${verse.ref}:${index + 1}`]?.root,
+  }));
+  const selected = details[position - 1];
   const studied = countKnownQuranWords(knownVerses, knownVocabulary);
   const number = new Intl.NumberFormat(locale);
   const coverage = new Intl.NumberFormat(locale, { style: "percent" }).format(coreWordCoverage);
@@ -84,14 +89,15 @@ export function SalahWords({ settings }: { settings: Settings }) {
           <span className="chip soft caption">{t("salahEveryRakah")}</span>
         </div>
         <ArabicText text={lines.join("\n")} citation={verse.ref} verse={verse.ref} selectedPosition={position} onWordSelected={selectPosition}
-          words={words.map((_, index) => ({ gloss: notes.glosses[index], root: fatihaMorphology[`${verse.ref}:${index + 1}`]?.root }))} />
+          words={details} />
         <p className="small muted">{notes.transliteration && <><bdi lang="ar-Latn">{notes.transliteration}</bdi> · </>}
           <a href={`https://quran.com/${verse.ref.replace(":", "/")}`}><bdi>{reference}</bdi></a>
         </p>
         <QuranVerseMeaning verse={verse} settings={settings} />
         <div className="salah-root small">
-          <ArabicText text={words[position - 1]} compact citation={verse.ref} verse={verse.ref} positionOffset={position - 1} />
-          <span lang="en">{notes.glosses[position - 1]}</span>
+          <ArabicText text={words[position - 1]} compact citation={verse.ref} verse={verse.ref} positionOffset={position - 1}
+            words={[selected]} showGlosses={false} />
+          <bdi lang={selected?.glossLanguage}>{selected?.gloss}</bdi>
           {selected?.root && <div className="with-icon">{t("root")}
             <ArabicText text={[...selected.root].join(" ")} compact citation={verse.ref} />
           </div>}
@@ -104,25 +110,27 @@ export function SalahWords({ settings }: { settings: Settings }) {
             <DialogContent className="awwab-dialog salah-practice">
               <DialogTitle>{t("salahPracticePositions")}</DialogTitle>
               <DialogDescription className="small muted">{t("prayerPositionNote")}</DialogDescription>
-              {content.sections.map(section => <section className="card compact-stack" key={section.url + section.title}>
+              {content.sections.map((section, sectionIndex) => <section className="card compact-stack" key={section.url + section.title}>
                 <h2>{studyNames.prayerSection(language, section.title)}</h2>
                 <a href={section.url} className="caption">{section.source}</a>
-                {section.lines.map(([arabic, gloss], index) => <ArabicText key={index} text={String(arabic)} citation={section.source}
-                  words={(gloss as string[]).map(gloss => ({ gloss }))} />)}
+                {section.lines.map(([arabic, glosses], lineIndex) => <ArabicText key={lineIndex} text={String(arabic)} citation={section.source}
+                  words={(glosses as string[]).map((_, index) => studyGloss(salahGlossKey(sectionIndex, lineIndex, index)))} />)}
               </section>)}
             </DialogContent>
           </Dialog>
         </div>
-        <div className="compact-stack">{previews.map(section => {
-          const [arabic, gloss] = section.lines[0];
+        <div className="compact-stack">{previews.map(({ section, index }) => {
+          const [arabic, glosses] = section.lines[0];
+          const meaning = studyGloss(salahPreviewKey(section.preview.id));
           return <article className="card salah-position" key={section.preview.id}>
             <div className="row-between">
               <div className="salah-position-label"><h3 className="caption">{t(section.preview.id)}</h3>
                 <a className="small muted" href={section.url}>{section.source}</a>
               </div>
-              <ArabicText text={String(arabic)} citation={section.source} words={(gloss as string[]).map(gloss => ({ gloss }))} showGlosses={false} />
+              <ArabicText text={String(arabic)} citation={section.source}
+                words={(glosses as string[]).map((_, wordIndex) => studyGloss(salahGlossKey(index, 0, wordIndex)))} showGlosses={false} />
             </div>
-            <p lang="en">{section.preview.meaning}</p>
+            <p lang={meaning?.glossLanguage} dir="auto">{meaning?.gloss}</p>
           </article>;
         })}</div>
       </section>

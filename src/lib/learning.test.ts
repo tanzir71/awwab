@@ -8,6 +8,8 @@ import { splitArabicPhrase, splitArabicWords } from "./wordAnatomy";
 import { coreVocabulary, parseCorpus } from "./morphology";
 import snapshot from "../../docs/content/core-quran-words.json";
 import salah from "../../docs/content/salah-words.json";
+import surahStudy from "../../docs/content/surah-study-words.json";
+import { ayahGlossKey, studyGlossMessages } from "./study-gloss-messages.mjs";
 import { message } from "./copy";
 import { studyNames, studySearchTerm } from "./study-copy";
 import { parseQaidaReview, qaidaRows, resolveQaidaRow } from "./qaidaPractice";
@@ -78,6 +80,28 @@ describe("Word anatomy", () => {
 });
 
 describe("Bundled Quran", () => {
+  it("keeps contextual glosses aligned with both bundled scripts", () => {
+    const glossesByVerse = {
+      ...surahStudy.glosses,
+      ...Object.fromEntries(Object.entries(salah.fatiha).map(([ref, { glosses }]) => [ref, glosses])),
+    };
+    for (const [reference, glosses] of Object.entries(glossesByVerse)) {
+      const [chapter, ayah] = reference.split(":").map(Number);
+      const verse = quranText[chapter][ayah - 1];
+      expect(splitArabicWords(verse.uthmani), reference).toHaveLength(glosses.length);
+      expect(splitArabicWords(verse.indopak), reference).toHaveLength(glosses.length);
+      glosses.forEach((gloss, index) => {
+        const key = ayahGlossKey(reference, index + 1);
+        if (gloss === null) expect(studyGlossMessages[key]).toBeUndefined();
+        else {
+          expect(message({ mode: "adult", language: "en" }, key)).toBe(gloss);
+          expect(message({ mode: "maktab", language: "ur" }, key)).toBe(gloss);
+        }
+      });
+      expect(studyGlossMessages[ayahGlossKey(reference, glosses.length + 1)]).toBeUndefined();
+    }
+  });
+
   it("keeps the numbered Fātiḥa basmala and aligns opening verse positions across scripts", () => {
     expect(quranText[1][0].ref).toBe("1:1");
     expect(splitArabicWords(quranText[1][0].uthmani)).toHaveLength(4);

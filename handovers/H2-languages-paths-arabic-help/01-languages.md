@@ -66,6 +66,8 @@ Generate the Tier 1 UI review files with `node scripts/export-locale-review.mjs 
 
 Keep the glossary arguments already present in source messages, and use the export’s `glossary` entries to add other terms to app copy where they fit. Use each as a plain ICU argument, such as `{term_wudu}`. The app fills it with the user's saved choice or the glossary default. The fingerprint includes the options in `data/glossary.json` so a change to the glossary requires a new review export.
 
+The export includes curated word meanings for Al-Fātiḥa, Al-ʿAsr, and Salah practice, plus the translations and definitions used in the Word Anatomy example. Each gloss belongs to its source word or example. The app uses the sourced English wording until a reviewed locale supplies that key. Full word-by-word coverage still requires a reviewed, redistributable source.
+
 After native review, record the reviewers in the catalogue’s `reviewers` array and set `_status` to `reviewed`. Use `node scripts/build-locale-pack.mjs <source-ui.json> <reviewed-catalogue.json> <output-directory>` to produce the UI catalogue. The build checks the source fingerprint, message coverage, mode variants, and ICU arguments. The review file retains the reviewer names.
 
 For a static build, set the compiler’s output directory to `public/locales`. The app installer lists the compiled files that match the current English catalogue. Selecting one in Settings or onboarding downloads it from the same origin and verifies it before saving the language preference. Installed catalogues are available offline on later visits. When a new build changes a pack, selecting that language again installs the matching revision.
