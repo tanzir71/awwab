@@ -4,6 +4,7 @@ export const tajweedMessages: MessageCatalog = {
   tajweedTitle: { en: "Tajweed · Level 3", bn: "তাজবিদ · তৃতীয় ধাপ" },
   tajweedDepthTitle: { en: "Tajweed · Level 4", bn: "তাজবিদ · চতুর্থ ধাপ" },
   tajweedDepthIndex: { en: "Tajweed in depth", bn: "তাজবিদের গভীর পাঠ" },
+  tajweedLessonPractice: { en: "Lesson & practice", bn: "পাঠ ও অনুশীলন" },
   tajweedFocusLetter: { en: "Focus on", bn: "যে হরফটি লক্ষ করবেন" },
   tajweedArticulationPoints: { en: "Explore the 17 articulation points", bn: "১৭টি মাখরাজ দেখুন" },
   "tajweedTitle-makharij": { en: "Makhārij · where letters come from", bn: "মাখরাজ · হরফ কোথা থেকে বের হয়" },

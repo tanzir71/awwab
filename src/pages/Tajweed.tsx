@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import * as Tabs from "@radix-ui/react-tabs";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ArabicText } from "@/components/ArabicText";
@@ -6,6 +7,7 @@ import { DesignIcon } from "@/components/DesignIcon";
 import { LocalRecorder } from "@/components/LocalRecorder";
 import { QuranStudySources } from "@/components/QuranStudySources";
 import { StudyText } from "@/components/StudyText";
+import { useDesktop } from "@/hooks/use-awwab";
 import { useAudioPlayback } from "@/hooks/use-audio-playback";
 import { asset } from "@/lib/config";
 import { useCopy } from "@/lib/copy";
@@ -22,6 +24,26 @@ import { correctTajweedSamples, tajweedClip, tajweedDepthIndex, tajweedDepthLess
 const ruleSource = "https://qul.tarteel.ai/tajweed_words/85:13:3";
 const jazariSource = { title: "Ibn al-Jazarī · Al-Muqaddimah al-Jazariyyah", url: "https://mutun.al-asl.com/jazariyyah.html" };
 const scripts = [["indopak", "readingIndopak"], ["uthmani", "readingUthmani"]] as const;
+
+function LessonList({ lessons, reviews, current }: { lessons: readonly TajweedLesson[]; reviews: Reviews; current?: string }) {
+  const { t, locale } = useCopy();
+  const number = new Intl.NumberFormat(locale);
+  return <ol className="paths-level-list" onKeyDown={focusListItem}>{lessons.map((lesson, index) => {
+    const count = correctTajweedSamples(lesson, reviews);
+    const done = count === lesson.samples.length;
+    const active = lesson.id === current;
+    const state = active ? "current" : done ? "done" : "open";
+    const card = <><strong>{t(tajweedTitleKey(lesson.id))}</strong>
+      <small>{t("tajweedExamplesProgress", { count, total: lesson.samples.length })}</small></>;
+    return <li key={lesson.id}>
+      <span className="paths-level-number" data-state={state} aria-hidden="true">
+        {done ? <DesignIcon name="paths-phone-check" size={16} /> : number.format(index + 1)}
+      </span>
+      {active ? <div className="card paths-level-mobile" data-state={state} aria-current="page">{card}</div> :
+        <Link className="card paths-level-mobile" to={tajweedLessonPath(lesson.id)} data-state={state}>{card}</Link>}
+    </li>;
+  })}</ol>;
+}
 
 function TajweedHeading({ title, back, depth }: { title: string; back: string; depth: boolean }) {
   const { t } = useCopy();
@@ -42,18 +64,21 @@ function ArticulationPoints({ regions }: { regions: NonNullable<TajweedLesson["a
   </details>;
 }
 
-function RuleLesson({ settings, now, lesson, reviews, depth, nextLesson }: {
+function RuleLesson({ settings, now, lesson, reviews, depth, nextLesson, practice, requested }: {
   settings: Settings; now: Date; lesson: TajweedLesson; reviews: Reviews; depth: boolean; nextLesson?: TajweedLesson;
+  practice: boolean; requested?: TajweedSample;
 }) {
-  const { t, locale } = useCopy();
-  const [params] = useSearchParams();
+  const { t, locale, direction } = useCopy();
+  const desktop = useDesktop();
+  const wide = useDesktop(1280);
+  const compactDesktop = desktop && !wide;
+  const [tab, setTab] = useState("lesson");
+  const suspended = compactDesktop && tab !== "lesson";
   const route = tajweedLessonPath(lesson.id);
   const overview = depth ? tajweedDepthIndex : tajweedIndex;
   const overviewLabel = depth ? "tajweedDepthIndex" : "tajweedLessons";
   const compareScripts = lesson.id === "mushaf-marks";
   const script = lesson.id === "waqf" ? "uthmani" : settings.script;
-  const requested = lesson.samples.find(sample => tajweedSampleKey(sample) === params.get("review"));
-  const practice = params.has("practice") || Boolean(requested);
   const includesReading = !depth && !requested;
   const [verses, setVerses] = useState(quranText);
   const [loadError, setLoadError] = useState(false);
@@ -74,6 +99,7 @@ function RuleLesson({ settings, now, lesson, reviews, depth, nextLesson }: {
   }));
   const exampleRefs = Object.keys(sources);
   const player = useAudioPlayback(exampleRefs, sources);
+  const { pause } = player;
   const activeRef = practice && example && !player.playing ? tajweedReference(example) : player.track ?? exampleRefs[0];
   const activeSample = lesson.samples.find(sample => tajweedReference(sample) === activeRef);
   const recording = activeSample && tajweedClip(activeSample);
@@ -91,6 +117,7 @@ function RuleLesson({ settings, now, lesson, reviews, depth, nextLesson }: {
   useEffect(() => {
     if (practice && !example) stageHeading.current?.focus();
   }, [practice, example, readAloud]);
+  useEffect(() => { if (suspended) pause(); }, [pause, suspended]);
 
   function excerpt(sample: TajweedSample, showAnswer: boolean, script: Settings["script"]) {
     const verse = verses[sample.chapter]?.[sample.ayah - 1];
@@ -124,9 +151,7 @@ function RuleLesson({ settings, now, lesson, reviews, depth, nextLesson }: {
     finally { setSaving(false); }
   }
 
-  return <div className="paths-page tajweed-page" data-compare={compareScripts || undefined}>
-    <TajweedHeading title={t(tajweedTitleKey(lesson.id))} back={practice ? route : overview} depth={depth} />
-    <audio ref={player.element} preload="none" {...player.events} />
+  const content = <div className="paths-page tajweed-main">
     {player.error && <p role="status">{t("surahAudioError")}</p>}
     {!practice ? <>
       <p className="muted"><StudyText text={t(tajweedIntroKey(lesson.id))} /></p>
@@ -149,7 +174,7 @@ function RuleLesson({ settings, now, lesson, reviews, depth, nextLesson }: {
         aria-pressed={player.playing && player.track === ref} onClick={() => player.play(ref)}><bdi>{formatQuranReference(ref, locale)}</bdi></button>)}</div>
         : <p className="small muted">{t("tajweedPendingAudio")}</p>}
       {lesson.articulation && <ArticulationPoints regions={lesson.articulation} />}
-      <Link className="action light" to={overview}>{t(overviewLabel)}</Link>
+      {!desktop && <Link className="action light" to={overview}>{t(overviewLabel)}</Link>}
     </> : example ? <section className="card compact-stack paths-question">
       <p className="caption">{t("pathsCheckQuestion", { number: index + 1, total: samples.length })} · <bdi>{formatQuranReference(tajweedReference(example), locale)}</bdi></p>
       <h2>{t(depth ? `tajweedQuestion-${lesson.id}` : lesson.id === "waqf" ? "tajweedDrillMark" : "tajweedChoose")}</h2>
@@ -164,7 +189,7 @@ function RuleLesson({ settings, now, lesson, reviews, depth, nextLesson }: {
       {selection && <div className="compact-stack" key={tajweedSampleKey(example)}>
         <p role="status">{t("tajweedFeedback", { rule: t(`tajweedRule-${example.rule}`) })}</p>
         {depth && <p className="small muted"><StudyText text={t(`tajweedHint-${example.rule}`)} /></p>}
-        {!includesReading && <LocalRecorder />}
+        {!includesReading && <LocalRecorder suspended={suspended} />}
         <button className="action" type="button" onClick={() => { player.pause(); setSelection(undefined); setIndex(index + 1); }}>
           {t(index + 1 < samples.length ? "hifzNext" : includesReading ? "tajweedReadAloud" : "pathsDone")}</button>
       </div>}
@@ -186,7 +211,7 @@ function RuleLesson({ settings, now, lesson, reviews, depth, nextLesson }: {
           </button>}
         </li>;
       })}</ol>
-      <LocalRecorder maxSeconds={settings.mode === "maktab" ? 30 : 90} />
+      <LocalRecorder maxSeconds={settings.mode === "maktab" ? 30 : 90} suspended={suspended} />
       <button className="action" type="button" onClick={() => {
         player.pause();
         setReadAloudComplete(true);
@@ -206,30 +231,43 @@ function RuleLesson({ settings, now, lesson, reviews, depth, nextLesson }: {
     </footer>
     {(depth || readAloud) && <QuranStudySources script={compareScripts ? "both" : script} />}
   </div>;
+
+  const directory = desktop && <nav className="card compact-stack tajweed-directory" aria-label={t(overviewLabel)}>
+    <h2>{t(overviewLabel)}</h2>
+    <LessonList lessons={depth ? tajweedDepthLessons : tajweedLessons} reviews={reviews} current={lesson.id} />
+  </nav>;
+  return <div className="paths-page tajweed-page" data-compare={compareScripts || undefined}>
+    <TajweedHeading title={t(tajweedTitleKey(lesson.id))} back={practice ? route : overview} depth={depth} />
+    <audio hidden ref={player.element} preload="none" {...player.events} />
+    {compactDesktop ? <Tabs.Root className="workspace-tabs" dir={direction} value={tab} onValueChange={setTab}>
+      <Tabs.List className="study-tabs equal-row" aria-label={t(tajweedTitleKey(lesson.id))}>
+        <Tabs.Trigger value="lesson">{t("tajweedLessonPractice")}</Tabs.Trigger>
+        <Tabs.Trigger value="lessons">{t(overviewLabel)}</Tabs.Trigger>
+      </Tabs.List>
+      <Tabs.Content className="tajweed-practice-tab" value="lesson" forceMount>{content}</Tabs.Content>
+      <Tabs.Content className="tajweed-lessons-tab" value="lessons">{directory}</Tabs.Content>
+    </Tabs.Root> : desktop ? <div className="tajweed-workspace">{directory}{content}</div> : content}
+  </div>;
 }
 
 export function Tajweed({ settings, now, depth = false }: { settings: Settings; now: Date; depth?: boolean }) {
-  const { t, locale } = useCopy();
+  const { t } = useCopy();
   const { unit } = useParams();
+  const [params] = useSearchParams();
   const reviews = useLiveQuery(() => getRecord<Reviews>("reviews", {}));
   const lessons = depth ? tajweedDepthLessons : tajweedLessons;
   const lesson = lessons.find(item => item.id === (unit ?? (depth ? undefined : "nun")));
   if (!reviews) return <p className="small muted" role="status">{t("hifzLoading")}</p>;
-  if (lesson) return <RuleLesson lesson={lesson} reviews={reviews} settings={settings} now={now} depth={depth} nextLesson={lessons[lessons.indexOf(lesson) + 1]} />;
+  if (lesson) {
+    const requested = lesson.samples.find(sample => tajweedSampleKey(sample) === params.get("review"));
+    const practice = params.has("practice") || Boolean(requested);
+    const key = `${lesson.id}:${requested ? tajweedSampleKey(requested) : practice ? "practice" : "lesson"}`;
+    return <RuleLesson key={key} lesson={lesson} reviews={reviews} settings={settings} now={now} depth={depth}
+      nextLesson={lessons[lessons.indexOf(lesson) + 1]} practice={practice} requested={requested} />;
+  }
 
-  return <div className="paths-page paths-levels tajweed-page">
+  return <div className="paths-page paths-levels tajweed-page tajweed-course-index">
     <TajweedHeading title={t(depth ? "tajweedDepthIndex" : "tajweedLessons")} back={pathUrl("read")} depth={depth} />
-    <ol className="paths-level-list" onKeyDown={focusListItem}>{lessons.map((item, index) => {
-      const count = correctTajweedSamples(item, reviews);
-      const done = count === item.samples.length;
-      return <li key={item.id}>
-        <span className="paths-level-number" data-state={done ? "done" : "open"} aria-hidden="true">
-          {done ? <DesignIcon name="paths-phone-check" size={16} /> : new Intl.NumberFormat(locale).format(index + 1)}
-        </span>
-        <Link className="card paths-level-mobile" to={tajweedLessonPath(item.id)} data-state={done ? "done" : "open"}>
-          <strong>{t(tajweedTitleKey(item.id))}</strong><small>{t("tajweedExamplesProgress", { count, total: item.samples.length })}</small>
-        </Link>
-      </li>;
-    })}</ol>
+    <LessonList lessons={lessons} reviews={reviews} />
   </div>;
 }

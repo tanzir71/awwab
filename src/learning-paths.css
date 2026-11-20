@@ -269,6 +269,24 @@
 }
 @media (min-width: 1024px) {
   .tajweed-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tajweed-course-index { width: min(100%, 1060px); margin-inline: 0; }
+  .tajweed-course-index .paths-level-list, .tajweed-lessons-tab .paths-level-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tajweed-course-index .paths-level-mobile { height: 100%; }
+  .tajweed-practice-tab, .tajweed-lessons-tab { max-inline-size: 880px; }
+  .tajweed-main > .paths-question { max-inline-size: 760px; }
+  .tajweed-directory h2 { font: var(--type-body-strong); }
+  .tajweed-directory .paths-level-list { gap: 6px; }
+  .tajweed-directory li { grid-template-columns: 24px minmax(0, 1fr); align-items: center; gap: 6px; }
+  .tajweed-directory .paths-level-number { min-width: 24px; min-height: 24px; }
+  .tajweed-directory .paths-level-mobile { min-height: 44px; padding: 7px 8px; gap: 3px; }
+  .tajweed-directory .paths-level-mobile strong { font: var(--type-small); font-weight: 650; }
+  .tajweed-directory .paths-level-mobile:is(a:hover, [aria-current="page"]) { background: var(--c-primary-soft); box-shadow: none; }
+}
+@media (min-width: 1280px) {
+  .tajweed-workspace { display: grid; grid-template-columns: minmax(200px, 252px) minmax(0, 1fr); align-items: start; gap: 16px; }
+  .tajweed-workspace .tajweed-directory { position: sticky; inset-block-start: 16px; }
+  .anatomy-open .tajweed-workspace { grid-template-columns: minmax(0, 1fr); }
+  .anatomy-open .tajweed-workspace .tajweed-directory { display: none; }
 }
 
 .speak-page h2, .speak-page h3 { font: var(--type-body-strong); }
