@@ -1,6 +1,6 @@
-import recitations from "../../public/packs/audio/index.json";
-import qaida from "../../docs/content/qaida-recitations.json";
-import tajweed from "../../docs/content/tajweed-recitations.json";
+import recitations from "../../public/packs/audio/index.json" with { type: "json" };
+import qaida from "../../docs/content/qaida-recitations.json" with { type: "json" };
+import tajweed from "../../docs/content/tajweed-recitations.json" with { type: "json" };
 
 export type StudyRecitation = {
   ref: string;

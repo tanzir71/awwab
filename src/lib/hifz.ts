@@ -1,7 +1,7 @@
 import index from "../../public/data/quran-study-index-v1.json";
-import catalogue from "../../handovers/H2-languages-paths-arabic-help/data/essential-passages.json";
 import { asset } from "./config";
 import { addDays } from "./dates";
+import { essentialStudyPassage } from "./essentialPassages";
 import { dayDifference } from "./hijri";
 import type { QuranVerse } from "./quran";
 import { splitUthmaniOpening } from "./quranOpening";
@@ -12,7 +12,7 @@ export const chapters = index.chapters;
 export const studyChapters = new Map(chapters.map(chapter => [chapter.number, chapter]));
 export const juzs = index.juzs;
 export const kursiOpening = index.kursi;
-export const essentialPassages = catalogue.passages;
+export { essentialPassages } from "./essentialPassages";
 
 export const maxPortionAyahs = 5;
 export const maxPortionWords = 40;
@@ -56,18 +56,8 @@ function chapterRanges(from: number, to: number) {
 }
 
 export function getHifzPassage(id: string): HifzPassage | undefined {
-  const custom = essentialPassages.find(item => item.id === id);
-  if (custom) {
-    const ranges = custom.ref.split(" · ").map(part => {
-      const [number, ayahs] = part.split(":");
-      const chapter = studyChapters.get(Number(number));
-      const [first, last] = (ayahs ?? `1-${chapter.ayahs}`).split("-");
-      return { chapter: chapter.number, from: Number(first), to: Number(last ?? first) };
-    });
-    // Show the handover's categorical grades with their references. Uncertain and missing gradings have no virtue card.
-    const source = custom.source && ["sahih", "hasan"].includes(custom.source.grade) ? custom.source : undefined;
-    return { id, title: custom.title, ranges, ayahs: ranges.reduce((sum, range) => sum + range.to - range.from + 1, 0), source, why: source ? custom.why : undefined };
-  }
+  const custom = essentialStudyPassage(id);
+  if (custom) return custom;
   const match = id?.match(/^(surah|juz)-(\d{1,3})$/);
   if (!match) return undefined;
   const number = Number(match[2]);

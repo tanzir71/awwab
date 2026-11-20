@@ -35,6 +35,8 @@ Placement checks show the selected Quran script and cite each displayed āyah. T
 - Fluent reading and Recite with a teacher can mark selected examples from the bundled Tajweed Essentials lessons in both scripts. A double underline identifies a marked word. Its Word anatomy panel names the rules and links to the lessons. Full Juz ʿAmma coverage and scholar review are pending.
 - Level 5 never claims to certify. It prepares the user to recite to a local teacher.
 
+Run `node scripts/export-scholar-review.mjs <new-directory>` to package the current Tajweed lessons and memorisation passages for scholar review. Open `index.html` offline to compare both Quran scripts, the app’s explanations, recitations and attribution. The memorisation entries show the current virtue-card visibility, the handover wording, and matching narrations from the bundled Hadith edition. Review files identify the exact revision of the material.
+
 ## Understand
 
 - Locale review exports include Grammar Foundations, Roots & Patterns, and Sentence Structure lesson text, examples, and drill questions. Keep `{arabic}` and `{reference}` in the translated messages that use them. Awwab inserts the original Arabic and formats the cited āyah using the reader’s digit preference.

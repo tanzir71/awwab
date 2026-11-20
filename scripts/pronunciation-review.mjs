@@ -20,8 +20,11 @@ export function pronunciationReview() {
   function recording(path, reviewPath, expectedDigest) {
     if (!assets.has(path)) {
       const bytes = readFileSync(new URL(path, publicRoot));
-      if (bytes.subarray(0, 4).toString() !== "OggS" || !bytes.subarray(0, 95).includes("OpusHead")) {
-        throw new Error(`The recording at ${path} must use Opus.`);
+      const opus = path.endsWith(".opus") && bytes.subarray(0, 4).toString() === "OggS" && bytes.subarray(0, 95).includes("OpusHead");
+      const mp3 = path.endsWith(".mp3") && (bytes.subarray(0, 3).toString() === "ID3" ||
+        (bytes[0] === 0xff && (bytes[1] & 0xe0) === 0xe0));
+      if (!opus && !mp3) {
+        throw new Error(`The recording at ${path} must match its Opus or MP3 format.`);
       }
       assets.set(path, { bytes, path: reviewPath, sha256: digest(bytes) });
     }

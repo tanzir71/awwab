@@ -24,11 +24,15 @@
   #entry-id { overflow-wrap: anywhere; }
   #dialogue li { margin-block: .5rem; }
   #dialogue [aria-current="true"] { font-weight: bold; }
+  #fields-list dd, #notice-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+  #fields-list dt { font-weight: bold; }
+  #fields-list dd { margin: 0 0 .75rem; }
 </style>
 <header>
   <h1 id="title">Pronunciation review</h1>
   <p id="coverage"></p>
   <p id="instructions"></p>
+  <details id="edition" hidden><summary>Quran editions and attribution</summary><p id="notice-text"></p></details>
 </header>
 <main>
   <section aria-label="Review settings">
@@ -43,10 +47,12 @@
     <div class="actions"><button id="previous" type="button">Previous</button><button id="next" type="button">Next</button></div>
     <p id="progress"></p>
   </section>
-  <section id="entry-panel" aria-label="Selected recording">
+  <section id="entry-panel" aria-label="Selected entry">
     <h2 id="entry-id"></h2>
     <p id="role"></p>
+    <p id="primary-script" hidden>Uthmani</p>
     <p lang="ar" dir="rtl" id="arabic"></p>
+    <div id="other-script" hidden>IndoPak <p lang="ar" dir="rtl" id="indopak"></p></div>
     <p id="transliteration"></p>
     <p id="meaning"></p>
     <p id="bangla" lang="bn" dir="auto"></p>
@@ -56,6 +62,8 @@
       <ol id="dialogue"></ol>
     </details>
     <div id="audio"></div>
+    <dl id="fields-list" hidden></dl>
+    <ul id="source-links" hidden></ul>
     <div class="fields">
       <label><span id="decision-label">Decision</span> <select id="decision" aria-labelledby="decision-label"><option value="">Pending</option><option value="approved">Approved</option>
         <option value="needs-changes">Needs changes</option></select></label>
@@ -92,7 +100,10 @@
   document.title = source.title;
   byId("title").textContent = source.title;
   byId("instructions").textContent = source.instructions;
+  byId("variety-label").textContent = source.varietyLabel ?? "Variety";
   byId("group-label").textContent = source.groupLabel;
+  byId("edition").hidden = !source.editionNotice;
+  byId("notice-text").textContent = source.editionNotice ?? "";
   byId("coverage").textContent = `Draft review · ${source.rows.length} entries · ${source.clipCount} recordings`;
   for (const [id, item] of Object.entries(source.varieties)) {
     variety.add(new Option(item.label, id));
@@ -116,10 +127,15 @@
     byId("entry-id").textContent = row.label;
     byId("role").textContent = row.role ?? "";
     byId("role").hidden = !row.role;
-    byId("arabic").textContent = row.expected.ar;
-    byId("transliteration").textContent = row.expected.tr;
+    byId("arabic").textContent = row.expected.ar ?? "";
+    byId("arabic").hidden = !row.expected.ar;
+    byId("primary-script").hidden = !row.expected.indopak;
+    byId("other-script").hidden = !row.expected.indopak;
+    byId("indopak").textContent = row.expected.indopak ?? "";
+    byId("transliteration").textContent = row.expected.tr ?? "";
     byId("transliteration").hidden = !row.expected.tr;
-    byId("meaning").textContent = row.expected.en;
+    byId("meaning").textContent = row.expected.en ?? "";
+    byId("meaning").hidden = !row.expected.en;
     byId("bangla").textContent = row.expected.bn ?? "";
     byId("bangla").hidden = !row.expected.bn;
     byId("spoken-arabic").textContent = row.expected.spoken ?? "";
@@ -150,6 +166,31 @@
       group.append(label, audio);
       player.append(group);
     }
+    const fields = byId("fields-list");
+    fields.hidden = !row.fields?.length;
+    fields.replaceChildren();
+    for (const field of row.fields ?? []) {
+      const term = document.createElement("dt");
+      const value = document.createElement("dd");
+      term.textContent = field.label;
+      value.textContent = field.value;
+      value.dir = "auto";
+      if (field.lang) value.lang = field.lang;
+      fields.append(term, value);
+    }
+    const sources = byId("source-links");
+    sources.hidden = !row.sources?.length;
+    sources.replaceChildren();
+    for (const source of row.sources ?? []) {
+      const item = document.createElement("li");
+      const link = document.createElement("a");
+      link.href = source.url;
+      link.textContent = source.title;
+      link.rel = "noreferrer";
+      link.target = "_blank";
+      item.append(link);
+      sources.append(item);
+    }
     decision.value = reviews.get(row.id)?.decision ?? "";
     notes.value = reviews.get(row.id)?.notes ?? "";
   }
@@ -158,7 +199,8 @@
     const selected = entry.value;
     const query = search.value.trim().toLocaleLowerCase();
     filtered = source.rows.filter(row => row.variety === variety.value && groupOf(row) === group.value &&
-      [row.label, ...Object.values(row.expected)].some(text => text.toLocaleLowerCase().includes(query)));
+      [row.label, ...Object.values(row.expected), ...(row.fields ?? []).map(field => field.value)]
+        .some(text => text.toLocaleLowerCase().includes(query)));
     entry.replaceChildren(...filtered.map(row => new Option(row.label, row.id)));
     if (filtered.some(row => row.id === selected)) entry.value = selected;
     byId("assignment").textContent = source.varieties[variety.value].assignment;

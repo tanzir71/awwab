@@ -1,9 +1,9 @@
-import originalLesson from "../../docs/content/tajweed-nun.json";
-import essentials from "../../docs/content/tajweed-essentials.json";
-import depth from "../../docs/content/tajweed-in-depth.json";
-import { splitArabicPhrase, splitArabicWords } from "./wordAnatomy";
+import originalLesson from "../../docs/content/tajweed-nun.json" with { type: "json" };
+import essentials from "../../docs/content/tajweed-essentials.json" with { type: "json" };
+import depth from "../../docs/content/tajweed-in-depth.json" with { type: "json" };
+import { splitArabicPhrase, splitArabicWords } from "./wordAnatomy.ts";
 import type { Reviews } from "./reviews";
-import { studyRecitation } from "./studyRecitations";
+import { studyRecitation } from "./studyRecitations.ts";
 
 export type TajweedSample = { rule: string; chapter: number; ayah: number; first: number; last: number; target?: string };
 export type TajweedLesson = {
@@ -25,6 +25,14 @@ export const tajweedLessonPath = (id: string) => id === "nun" ? tajweedRoute :
 export const tajweedTitleKey = (id: string) => id === "nun" ? "tajweedNunTitle" : `tajweedTitle-${id}`;
 export const tajweedTones = ["neutral", "tint", "soft", "accent"] as const;
 export const tajweedIntroKey = (id: string) => id === "nun" ? "tajweedNunIntro" : `tajweedIntro-${id}`;
+export function tajweedLessonSources(lesson: TajweedLesson, advanced: boolean) {
+  return lesson.sources ?? [advanced
+    ? { title: "Ibn al-Jazarī · Al-Muqaddimah al-Jazariyyah", url: "https://mutun.al-asl.com/jazariyyah.html" }
+    : {
+      url: lesson.source ?? "https://qul.tarteel.ai/tajweed_words/85:13:3",
+      title: lesson.id === "waqf" ? "Quranic Arabic Corpus · Pause marks" : "Quranic Universal Library · Tajweed",
+    }];
+}
 export const tajweedReference = (sample: TajweedSample) => `${sample.chapter}:${sample.ayah}`;
 export const tajweedSampleKey = (sample: TajweedSample) => `${tajweedReference(sample)}:${sample.first}`;
 export const tajweedReviewId = (lesson: TajweedLesson, sample: TajweedSample) => `${tajweedReviewPrefix}${lesson.id}:${tajweedSampleKey(sample)}`;

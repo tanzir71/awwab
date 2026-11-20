@@ -19,10 +19,8 @@ import type { Reviews } from "@/lib/reviews";
 import { getRecord, type Settings } from "@/lib/storageService";
 import { saveLearningReview } from "@/lib/studyMilestones";
 import { correctTajweedSamples, tajweedClip, tajweedDepthIndex, tajweedDepthLessons, tajweedExcerpt, tajweedIndex, tajweedIntroKey, tajweedLessonPath, tajweedLessons,
-  tajweedPracticeSamples, tajweedReference, tajweedReviewId, tajweedSampleKey, tajweedTitleKey, tajweedTones as tones, type TajweedLesson, type TajweedSample } from "@/lib/tajweed";
+  tajweedLessonSources, tajweedPracticeSamples, tajweedReference, tajweedReviewId, tajweedSampleKey, tajweedTitleKey, tajweedTones as tones, type TajweedLesson, type TajweedSample } from "@/lib/tajweed";
 
-const ruleSource = "https://qul.tarteel.ai/tajweed_words/85:13:3";
-const jazariSource = { title: "Ibn al-Jazarī · Al-Muqaddimah al-Jazariyyah", url: "https://mutun.al-asl.com/jazariyyah.html" };
 const scripts = [["indopak", "readingIndopak"], ["uthmani", "readingUthmani"]] as const;
 
 function LessonList({ lessons, reviews, current }: { lessons: readonly TajweedLesson[]; reviews: Reviews; current?: string }) {
@@ -104,10 +102,7 @@ function RuleLesson({ settings, now, lesson, reviews, depth, nextLesson, practic
   const activeSample = lesson.samples.find(sample => tajweedReference(sample) === activeRef);
   const recording = activeSample && tajweedClip(activeSample);
   const totalCorrect = correctTajweedSamples(lesson, reviews);
-  const credits = lesson.sources ?? [depth ? jazariSource : {
-    url: lesson.source ?? ruleSource,
-    title: lesson.id === "waqf" ? "Quranic Arabic Corpus · Pause marks" : "Quranic Universal Library · Tajweed",
-  }];
+  const credits = tajweedLessonSources(lesson, depth);
 
   useEffect(() => {
     let active = true;
