@@ -53,7 +53,7 @@
   width: 100%;
   min-width: 0;
   color: var(--c-ink);
-  text-align: left;
+  text-align: start;
   background: var(--c-surface);
 }
 .hadith-list-item:hover { background: var(--c-primary-soft); }
@@ -80,6 +80,10 @@
 .hadith-detail.awwab-dialog { max-width: min(565px, calc(100% - 32px)); }
 .hadith-detail > .equal-row { align-items: stretch; }
 .hadith-detail-meta { justify-content: start; }
+.hadith-detail > .row-between > .icon-button { flex-shrink: 0; }
+.hadith-meaning { display: grid; gap: 4px; }
+.hadith-meaning > .caption { color: var(--c-ink-muted); }
+.hadith-english-disclosure > summary { display: list-item; cursor: pointer; align-content: center; }
 .hadith-translation { display: grid; gap: 8px; overflow-wrap: anywhere; }
 .hadith-translation .arabic-text { display: inline-flex; max-width: 100%; vertical-align: baseline; margin-inline: 2px; }
 .hadith-translation .arabic-line { gap: 1px; padding: 0; }

@@ -10,7 +10,7 @@ import { Dialog, DialogClose, DialogContent, DialogTitle } from "@/components/ui
 import { useDesktop } from "@/hooks/use-awwab";
 import { useHadithEditions, useHadithNarration } from "@/hooks/use-hadith";
 import { useCopy } from "@/lib/copy";
-import { curatedGrade, curatedHadithFor, desktopHadith, featuredArabic, hadithId, hadithName, hadithNumberLabel, hadithSource,
+import { curatedGrade, curatedHadithFor, desktopHadith, featuredArabic, hadithGradeLabel, hadithId, hadithName, hadithReferenceLabel, hadithSource, hadithSummary,
   hadithTopics, searchHadith, topicMatches, type CollectionScope, type CuratedNarration, type HadithTopic } from "@/lib/hadith";
 import { collectionIds, editionUrl, type HadithGrade } from "@/lib/hadith-catalogue";
 import { useUi } from "@/lib/uiState";
@@ -21,14 +21,14 @@ const topicLabels: Record<HadithTopic, string> = { all: "hadithAll", prayer: "ha
 const collectionChoices: CollectionScope[] = ["all", "bukhari", "muslim", "tirmidhi", "abudawud", "ibnmajah", "nasai", "riyadussalihin"];
 const grades = ["sahih", "hasan"] as const;
 type GradeTier = HadithGrade["tier"];
-type Result = { id: string; grade: HadithGrade; citation: string; text: string; lang: string; seed?: CuratedNarration };
+type Result = { id: string; grade: HadithGrade; citation: string; text: string; lang: "bn" | "en"; seed?: CuratedNarration };
 
 function HadithFilters({ results, topic, onTopic, scope, onScope, selectedGrades, onGrade }: {
   results: Result[]; topic: HadithTopic; onTopic: (value: HadithTopic) => void; scope: CollectionScope; onScope: (value: CollectionScope) => void;
   selectedGrades: GradeTier[]; onGrade: (value: GradeTier) => void;
 }) {
-  const { language, t } = useCopy();
-  const number = new Intl.NumberFormat(language);
+  const { language, locale, t } = useCopy();
+  const number = new Intl.NumberFormat(locale);
   return <aside className="card hadith-desk-filters" aria-label={t("hadithFilter")}>
     <h2>{t("hadithFilter")}</h2>
     <fieldset><legend className="caption">{t("hadithGrade")}</legend>
@@ -62,22 +62,28 @@ function moveResults(event: KeyboardEvent<HTMLUListElement>) {
 function DesktopHadithReading({ id, inDrawer, onShare, onWord }: {
   id: string; inDrawer?: boolean; onShare: (data: HadithShareData, trigger: HTMLElement) => void; onWord: () => void;
 }) {
-  const { language, t } = useCopy();
+  const labels = useCopy();
+  const { language, t } = labels;
   const { actual, ref, seed, related, narration, status } = useHadithNarration(id);
   const [reference, setReference] = useState("");
   const [fullText, setFullText] = useState(false);
-  const title = related ? `${t("hadithRiyad")} ${hadithNumberLabel(related.number, language)}`
-    : ref ? `${hadithName(ref.collection, language, true)} ${hadithNumberLabel(ref.number, language)}` : t("hadithRead");
-  const collection = ref && `${hadithName(ref.collection, language)} ${hadithNumberLabel(ref.number, language)}`;
+  const title = related ? hadithReferenceLabel("riyadussalihin", related.number, labels)
+    : ref ? hadithReferenceLabel(ref.collection, ref.number, labels, true) : t("hadithRead");
+  const collection = ref && hadithReferenceLabel(ref.collection, ref.number, labels);
   const grade = narration?.grade ?? (seed && curatedGrade(seed));
-  const gradeText = grade && (grade.grader ? `${grade.label} (${grade.grader})` : grade.label);
+  const gradeText = grade && hadithGradeLabel(grade, labels);
   const originalSource = seed?.url ?? (narration && hadithSource(narration));
   const source = related?.url ?? originalSource;
   const citation = [collection, gradeText].filter(Boolean).join(" · ");
   const excerpt = seed?.excerptAr ?? (actual === "bukhari:1" ? featuredArabic : undefined);
   const arabic = !fullText && excerpt ? excerpt : narration?.arabic;
   const firstWord = arabic && splitArabicWords(arabic)[0];
-  const english = !fullText && seed?.excerptEn ? seed.excerptEn : narration?.text;
+  const summaryItem = related ?? seed;
+  const summary = summaryItem && hadithSummary(summaryItem, language);
+  const banglaSummary = summary?.language === "bn" ? summary.text : undefined;
+  const showingSummary = !fullText && Boolean(banglaSummary);
+  const englishExcerpt = !fullText && seed?.excerptEn;
+  const translation = showingSummary ? banglaSummary : englishExcerpt || narration?.text;
   const narrator = seed?.narrator ?? /^Narrated\s+([^:\n]{2,70}):/i.exec(narration?.text ?? "")?.[1];
   const topic = seed && (seed.qudsi ? t("hadithRepentanceHope")
     : hadithTopics.slice(1).map(value => topicMatches(value, seed) ? t(topicLabels[value]) : undefined).filter(Boolean).join(" · "));
@@ -91,14 +97,12 @@ function DesktopHadithReading({ id, inDrawer, onShare, onWord }: {
 
   function share(event: MouseEvent<HTMLButtonElement>) {
     if (!canShare) return;
-    const summary = seed ? (language === "bn" ? seed.summaryBn : seed.summary).replace(/^Ḥadīth qudsī: /, "").replace("He ﷺ", "The Prophet")
-      : related ? (language === "bn" ? related.summaryBn : related.summary) : undefined;
     const useExcerpt = language === "en" && Boolean(seed?.excerptEn);
     const translation = narration?.text.replace(/(?:\p{Script=Arabic}\p{M}*)+/gu, "").replace(/\s+/g, " ").trim();
     const quote = translation?.length > 260 ? translation.slice(0, 260).replace(/\s+\S*$/, "") + "…" : translation;
-    const text = useExcerpt ? seed.excerptEn : summary ?? quote;
+    const text = useExcerpt ? seed.excerptEn : summary?.text ?? quote;
     onShare({ title, reference: citation, source, text, arabic: useExcerpt ? excerpt : undefined,
-      textLanguage: language === "bn" && summary ? "bn" : "en", summary: !useExcerpt && Boolean(summary) }, event.currentTarget);
+      textLanguage: useExcerpt ? "en" : summary?.language ?? "en", summary: !useExcerpt && Boolean(summary) }, event.currentTarget);
   }
 
   return <section className="card hadith-desk-reading" aria-label={title}>
@@ -112,9 +116,10 @@ function DesktopHadithReading({ id, inDrawer, onShare, onWord }: {
     {related && <small className="muted"><a href={related.url}>{t("hadithRiyadDetail", { source: collection })}</a></small>}
     {arabic && <div className="hadith-desk-arabic"><ArabicText text={arabic} citation={citation} onWordSelected={onWord} /></div>}
     {narration && !arabic && <p className="small muted">{t("hadithArabicUnavailable")}</p>}
-    {english ? <div>
-      <HadithTranslation text={english} source={citation} close={onWord} />
-      {!fullText && seed?.excerptEn && <small className="muted">{t(seed.qudsi ? "hadithQudsiExcerpt" : "hadithExcerpt")}</small>}
+    {translation ? <div className="hadith-meaning">
+      {language !== "en" && <p className="caption">{t(showingSummary ? "hadithBanglaSummary" : englishExcerpt ? "hadithEnglishExcerpt" : "hadithEnglishTranslation")}</p>}
+      <HadithTranslation text={translation} source={citation} close={onWord} language={showingSummary ? "bn" : "en"} />
+      {!showingSummary && englishExcerpt && <small className="muted">{t(seed.qudsi ? "hadithQudsiExcerpt" : "hadithExcerpt")}</small>}
     </div> : <p role="status" className="small muted">{t(status === "missing" ? "hadithNotFound" : status === "unavailable" ? "collectionUnavailable" : "openingCollection")}</p>}
     {source && grade && <>
       <dl className="hadith-desk-metadata">
@@ -136,15 +141,18 @@ function DesktopHadithReading({ id, inDrawer, onShare, onWord }: {
     </>}
     <p className="small muted">{t("hadithVerifyHint")}</p>
     <div className="hadith-desk-reading-links">
-      {(excerpt || seed?.excerptEn) && narration && <button className="text-button" type="button" aria-expanded={fullText}
-        onClick={() => setFullText(value => !value)}>{t(fullText ? "hadithReadExcerpt" : "hadithRead")}</button>}
+      {(banglaSummary || excerpt || seed?.excerptEn) && narration && <button className="text-button" type="button" aria-expanded={fullText}
+        onClick={() => setFullText(value => !value)}>{t(fullText
+          ? banglaSummary ? "hadithShowBanglaSummary" : "hadithReadExcerpt"
+          : banglaSummary ? "hadithReadEnglish" : "hadithRead")}</button>}
       {ref && source && <a className="text-button hadith-desk-edition" href={editionUrl(ref.collection)}>{t("hadithOpenEdition")}</a>}
     </div>
   </section>;
 }
 
 export function DesktopHadith() {
-  const { language, t } = useCopy();
+  const labels = useCopy();
+  const { language, t } = labels;
   const [params, setParams] = useSearchParams();
   const requested = params.get("read");
   const [topicChoice, setTopic] = useState<HadithTopic>(() => requested ? "all" : undefined);
@@ -168,22 +176,26 @@ export function DesktopHadith() {
     if (!data || !archiveActive) return;
     return search || scope === "riyadussalihin" ? searchHadith(search, data.items, scope) : { matches: data.items, riyad: [] };
   }, [data, scope, search, archiveActive]);
-  const asReference = (collection: Parameters<typeof hadithName>[0], number: string | number) => `${hadithName(collection, language, true)} ${hadithNumberLabel(number, language)}`;
-
   const candidates: Result[] = archiveActive ? [
-    ...(archived?.riyad.map(item => ({ id: hadithId("riyadussalihin", item.number), grade: item.grade,
-      citation: `${t("hadithRiyad")} ${hadithNumberLabel(item.number, language)}`, text: language === "bn" ? item.summaryBn : item.summary,
-      lang: language, seed: curatedHadithFor(item.original) })) ?? []),
+    ...(archived?.riyad.map(item => {
+      const preview = hadithSummary(item, language);
+      return { id: hadithId("riyadussalihin", item.number), grade: item.grade,
+        citation: hadithReferenceLabel("riyadussalihin", item.number, labels), text: preview.text,
+        lang: preview.language, seed: curatedHadithFor(item.original) };
+    }) ?? []),
     ...(archived?.matches.map(item => {
       const id = hadithId(item.collection, item.number);
       const seed = curatedHadithFor(id);
-      return { id, grade: item.grade, citation: asReference(item.collection, item.number), text: language === "bn" && seed ? seed.summaryBn : seed?.excerptEn ?? seed?.summary ?? item.text,
-        lang: seed && language === "bn" ? "bn" : "en", seed };
+      const preview = seed ? hadithSummary(seed, language) : { text: item.text, language: "en" as const };
+      return { id, grade: item.grade, citation: hadithReferenceLabel(item.collection, item.number, labels, true),
+        text: preview.language === "en" ? seed?.excerptEn ?? preview.text : preview.text, lang: preview.language, seed };
     }) ?? []),
-  ] : desktopHadith.map(seed => ({
-    id: hadithId(seed.collection, seed.number), grade: curatedGrade(seed), citation: asReference(seed.collection, seed.number), lang: language, seed,
-    text: language === "bn" ? seed.summaryBn : seed.excerptEn ?? seed.summary,
-  }));
+  ] : desktopHadith.map(seed => {
+    const preview = hadithSummary(seed, language);
+    return { id: hadithId(seed.collection, seed.number), grade: curatedGrade(seed),
+      citation: hadithReferenceLabel(seed.collection, seed.number, labels, true), lang: preview.language, seed,
+      text: preview.language === "en" ? seed.excerptEn ?? preview.text : preview.text };
+  });
   const graded = candidates.filter(item => selectedGrades.includes(item.grade.tier));
   const entries = graded.filter(item => topicMatches(topic, item.seed));
   const selected = requested || entries[0]?.id;

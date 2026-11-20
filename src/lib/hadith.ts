@@ -100,6 +100,25 @@ export function hadithName(collection: HadithCollection, language: string, short
   return language === "bn" ? names.bn : short ? names.short : names.en;
 }
 
+export function hadithReferenceLabel(collection: HadithCollection | "riyadussalihin", number: string | number,
+  { language, locale, t }: ReturnType<typeof useCopy>, short = false) {
+  const name = collection === "riyadussalihin" ? t("hadithRiyad")
+    : language === "bn" || language === "en" ? hadithName(collection, language, short) : t(`hadithCollection-${collection}`);
+  return t("hadithCitationReference", { collection: name, number: hadithNumberLabel(number, locale) });
+}
+
+export function hadithSummary(item: { summary: string; summaryBn?: string }, language: string) {
+  if (language === "bn" && item.summaryBn?.trim()) return { text: item.summaryBn, language: "bn" as const };
+  return { text: item.summary.replace(/^Ḥadīth qudsī: /, "").replace("He ﷺ", "The Prophet"), language: "en" as const };
+}
+
+export function hadithGradeLabel(grade: HadithGrade, { t }: Pick<ReturnType<typeof useCopy>, "t">) {
+  const normalized = grade.label.toLowerCase();
+  const label = normalized === "sahih" || normalized === "hasan"
+    ? t(normalized === "sahih" ? "hadithSahih" : "hadithHasan") : grade.label;
+  return grade.grader ? t("hadithCitationGrader", { grade: label, grader: grade.grader }) : label;
+}
+
 export function hadithCitation({ source, url }: { source: string; url: string }, { language, locale, t }: ReturnType<typeof useCopy>) {
   const [originalReference, originalGrade] = source.split(" · ", 2);
   const id = /^https:\/\/sunnah\.com\/([^/?#]+)$/.exec(url)?.[1];

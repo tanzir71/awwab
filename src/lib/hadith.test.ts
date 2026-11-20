@@ -1,7 +1,8 @@
 import { readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
-import { curatedHadith, curatedHadithFor, desktopHadith, hadithCitation, hadithId, hadithNumberLabel, hadithSource, parseHadithId, riyadSelections, searchHadith, topicMatches } from "./hadith";
+import { curatedHadith, curatedHadithFor, desktopHadith, hadithCitation, hadithGradeLabel, hadithId, hadithNumberLabel, hadithReferenceLabel, hadithSource,
+  hadithSummary, parseHadithId, riyadSelections, searchHadith, topicMatches } from "./hadith";
 import { canonicalHadithNumber, collectionIds, hadithArchiveVersion, narrationGrade, type HadithNarration } from "./hadith-catalogue";
 import { message } from "./copy";
 import { formatLocale } from "./languagePreferences";
@@ -45,6 +46,17 @@ describe("hadith editions", () => {
     expect(hadithCitation(source, copy(false)).full).toBe("মুসলিম 571a · সহিহ");
     const graded = { source: "Abu Dawud 1151 · Hasan (Al-Albani)", url: "https://sunnah.com/abudawud:1151" };
     expect(hadithCitation(graded, copy(true)).full).toBe("আবু দাউদ ১১৫১ · হাসান (Al-Albani)");
+    expect(hadithReferenceLabel("muslim", "571a", copy(true))).toBe("সহিহ মুসলিম ৫৭১a");
+    expect(hadithReferenceLabel("riyadussalihin", 14, copy(false))).toBe("রিয়াদুস সালিহিন 14");
+    expect(hadithGradeLabel({ tier: "hasan", label: "Hasan", grader: "Al-Albani" }, copy(true))).toBe("হাসান (Al-Albani)");
+    expect(hadithGradeLabel({ tier: "hasan", label: "Hasan lighairihi", grader: "Al-Albani" }, copy(true))).toBe("Hasan lighairihi (Al-Albani)");
+  });
+
+  it("identifies curated Bangla summaries and English fallback text separately", () => {
+    const first = desktopHadith[0];
+    expect(hadithSummary(first, "bn")).toEqual({ text: first.summaryBn, language: "bn" });
+    expect(hadithSummary(first, "tr")).toEqual({ text: first.summary.replace(/^Ḥadīth qudsī: /, ""), language: "en" });
+    expect(hadithSummary({ summary: "He ﷺ said", summaryBn: " " }, "bn")).toEqual({ text: "The Prophet said", language: "en" });
   });
 
   it("bundles the verified original references for every curated card and Riyad selection", () => {
