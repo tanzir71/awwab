@@ -208,7 +208,7 @@ The ten French Gulf workplace lessons cover applying for work, shifts, contracts
 
 The French Saudi Speak draft also covers all 14 A2 and 12 B1 lessons, including the dialogues, vocabulary, signs and replies. Review the wording alongside the spoken Arabic, including the conversations about health, faith, and work.
 
-The Malay draft covers the landing page, navigation, metadata and image descriptions. Review the terms for solat, qada, cerapan anak bulan and sa‘i in context. The local review page is `/awwab/lang/ms.html` and uses `ms.draft.json` from the review export.
+The Malay draft covers all 4,042 messages in the current UI catalogue, including the landing page, navigation, metadata and image descriptions. Review the terms for solat, qada, cerapan anak bulan and sa‘i in context. The local review page is `/awwab/lang/ms.html` and uses `ms.draft.json` from the review export.
 
 The Malay setup draft includes the welcome screens, the Adult and Maktab choices, the placement questions and audio controls, and the prayer setup form. Review the wording for the prayer guide and the separate Asar calculation setting. The Malaysian calculation method proposed in the locale inventory still needs local verification and implementation.
 
@@ -253,6 +253,8 @@ The Malay speaking draft covers course selection, the twelve Saudi Hijazi A1 les
 The Malay A1 draft also covers the twelve Emirati Gulf lessons and the twelve Modern Standard Arabic lessons. Compare the Malay dialogues, vocabulary and signs with the recordings for each variety.
 
 The Malay Gulf workplace draft covers ten lessons about applying for work, contracts, shifts, pay, leave, safety and asking about rights. Review the terms for clauses, deductions and interpreters in the context of the Emirati dialogues.
+
+The Malay Saudi speaking draft includes all fourteen A2 and twelve B1 lessons. Review the dialogue, vocabulary, signs and reply choices alongside the generated recordings, including the conversations about health, faith and work.
 
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
