@@ -311,7 +311,7 @@ const backupSchema = z.object({
     ref: z.string().min(1).max(80),
     title: z.string().max(256),
     attribution: z.string().max(1000).optional(),
-    type: z.string().regex(/^audio\/[\w.+-]+$/i),
+    type: z.string().regex(/^audio\/[\w.+-]+ *(?:;[ -~]*)?$/i),
     bytes: z.string().max(16_000_000).regex(/^[A-Za-z0-9+/]*={0,2}$/),
   })).optional(),
 });

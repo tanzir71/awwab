@@ -561,16 +561,21 @@ describe("device prayer records", () => {
 
   it("round trips local audio and rejects a backup with unsupported record values", async () => {
     await db.audio.put({ ref: "103:1", title: "Reference", blob: new Blob([new Uint8Array([73, 68, 51])], { type: "audio/mpeg" }) });
+    const narrated = new Uint8Array([79, 103, 103, 83]);
+    await db.audio.put({ ref: "qaida:4:6:v2", title: "Practice audio", blob: new Blob([narrated], { type: 'audio/ogg; codecs="opus"' }) });
     const saved = await backup();
     const invalid = JSON.parse(saved);
     invalid.records.push({ key: "qaida-current", value: -1 });
     await expect(restoreBackup(JSON.stringify(invalid))).rejects.toThrow();
-    expect(await db.audio.count()).toBe(1);
+    expect(await db.audio.count()).toBe(2);
     await db.audio.clear();
     await restoreBackup(saved);
     const clip = await db.audio.get("103:1");
     expect(clip.blob.type).toBe("audio/mpeg");
     expect(new Uint8Array(await clip.blob.arrayBuffer())).toEqual(new Uint8Array([73, 68, 51]));
+    const practice = await db.audio.get("qaida:4:6:v2");
+    expect(practice.blob.type).toBe('audio/ogg; codecs="opus"');
+    expect(new Uint8Array(await practice.blob.arrayBuffer())).toEqual(narrated);
   });
 
   it("restores new and older timetable photos as local blobs with the mappings intact", async () => {
