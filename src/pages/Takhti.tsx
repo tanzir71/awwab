@@ -37,6 +37,7 @@ function TraceBoard({ letter, form, glyph, desk, separateGuide = false }: {
   const [show, setShow] = useState(false);
   const [result, setResult] = useState<ReturnType<typeof compareTakhti>>();
   const [hasInk, setHasInk] = useState(false);
+  const [saving, setSaving] = useState(false);
   const model = tracingModel(letter, form, !desk);
   const name = nameOf(letter, language);
   const ba = !desk && letter.letter === "ب" && form === "isolated";
@@ -84,7 +85,7 @@ function TraceBoard({ letter, form, glyph, desk, separateGuide = false }: {
   }
 
   function begin(event: PointerEvent<HTMLCanvasElement>) {
-    if (pointer.current !== undefined || event.button !== 0 || strokes.current.length >= 32) return;
+    if (saving || pointer.current !== undefined || event.button !== 0 || strokes.current.length >= 32) return;
     const context = canvas.current?.getContext("2d");
     if (!context) return;
     const styles = getComputedStyle(event.currentTarget);
@@ -97,15 +98,17 @@ function TraceBoard({ letter, form, glyph, desk, separateGuide = false }: {
     draw(event);
   }
 
-  function check() {
+  async function check() {
     const comparison = compareTakhti(strokes.current, model);
-    setResult(comparison);
-    if (comparison === "empty") return;
-    setShow(true);
-    const family = families.find(item => item.shapes.includes(letter.family));
-    if (comparison === "match" && family && settings) {
-      void saveTakhtiPractice(family.id, new Date(), settings.city.timeZone).catch(() => toast.error(t("saveError")));
+    if (comparison !== "empty") setShow(true);
+    const family = comparison === "match" && families.find(item => item.shapes.includes(letter.family));
+    if (family && settings) {
+      setSaving(true);
+      try { await saveTakhtiPractice(family.id, new Date(), settings.city.timeZone); }
+      catch { toast.error(t("saveError")); }
+      finally { setSaving(false); }
     }
+    setResult(comparison);
   }
 
   return <div className="write-board-stack">
@@ -134,9 +137,9 @@ function TraceBoard({ letter, form, glyph, desk, separateGuide = false }: {
       {!letter.joinsNext && <p className="small">{t("writeNonJoining", { name })}</p>}
     </>}
     <div className="equal-row write-actions">
-      <button className={`action ${desk ? "soft" : "light"}`} onClick={clear} disabled={!hasInk}>{t(desk ? "writeClear" : "washTakhti")}</button>
+      <button className={`action ${desk ? "soft" : "light"}`} onClick={clear} disabled={!hasInk || saving}>{t(desk ? "writeClear" : "washTakhti")}</button>
       {desk && <button className="action soft" onClick={() => setShow(value => !value)} aria-pressed={show}>{t(show ? "writeHide" : "writeShow")}</button>}
-      <button className="action" onClick={check}>{t(desk ? "writeCompare" : "writeCheck")}</button>
+      <button className="action" onClick={() => void check()} disabled={saving}>{t(desk ? "writeCompare" : "writeCheck")}</button>
     </div>
     {feedback && <div className="write-feedback" data-matched={result === "match"} role="status">
       <strong>{result === "match" && <DesignIcon name={prefix + "-check"} size={18} />}{feedback}</strong>
