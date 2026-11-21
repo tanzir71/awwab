@@ -270,6 +270,8 @@ The Persian Word Bank draft covers all 125 core glosses, word types and examples
 
 The Persian planning draft covers Hijri date confirmations, mosque timetables, weekly mosque assignments and the Eid and Tarawih records. Review the words for estimated and confirmed dates with the calendar export. Check the WhatsApp questions with mosque and occasion names filled in.
 
+The Persian zakat draft covers assets, nisab, hawl, payments and the print sheets. The calculator accepts Iranian rials (IRR) and Afghan afghanis (AFN). Review the wording about worn jewellery and the choice of nisab against the cited sources. Compare the saved currency and totals with the printed summary. [ISO 4217 currency list](https://www.six-group.com/dam/download/financial-information/data-center/iso-currrency/lists/list-one.xml).
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
