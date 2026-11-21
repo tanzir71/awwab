@@ -602,6 +602,33 @@ describe("Learning path progress", () => {
     expect(nextPortion(portions, reviews, now, today)).toBe(sabaq);
   });
 
+  it("finishes the day's reviews when Sabaq graduates on the third day", () => {
+    const portions = groupPortions(getHifzPassage("al-mulk"), quran).slice(0, 4);
+    const [manzil, sabqi, sabaq, later] = portions;
+    const today = "2026-11-29";
+    const time = (day: string) => new Date(`${day}T09:00:00Z`);
+    const old = ratePortion(undefined, "got-it", time("2026-11-20"), "2026-11-20");
+    const firstDay = ratePortion(undefined, "got-it", time("2026-11-27"), "2026-11-27");
+    const secondDay = ratePortion(firstDay, "got-it", time("2026-11-28"), "2026-11-28");
+    const reviews: HifzReviews = {
+      [manzil.id]: { ...old, learnedOn: "2026-11-20" },
+      [sabqi.id]: { ...old, lastDay: "2026-11-25", learnedOn: "2026-11-25" },
+      [sabaq.id]: secondDay,
+    };
+    expect(nextPortion(portions, reviews, time(today), today)).toBe(sabaq);
+
+    reviews[sabaq.id] = ratePortion(secondDay, "got-it", time(today), today);
+    expect(reviews[sabaq.id].learnedOn).toBe(today);
+    expect(nextPortion(portions, reviews, time(today), today)).toBe(sabqi);
+
+    reviews[sabqi.id] = ratePortion(reviews[sabqi.id], "got-it", time(today), today);
+    expect(nextPortion(portions, reviews, time(today), today)).toBe(manzil);
+
+    reviews[manzil.id] = ratePortion(reviews[manzil.id], "got-it", time(today), today);
+    expect(nextPortion(portions, reviews, time(today), today)).toBe(later);
+    expect(nextPortion(portions, reviews, time("2026-11-30"), "2026-11-30")).toBe(later);
+  });
+
   it("resumes a full-juz recital in order and reopens seven days after completion", () => {
     const portions = groupPortions(getHifzPassage("juz-2"), quran);
     const start = "2026-11-19";
