@@ -224,6 +224,8 @@ The Malay Qaida and Takhti draft covers all 17 lesson titles, practice and recor
 
 The Malay Word Bank draft covers all 125 core glosses, word types, and the examples that connect Quranic and everyday Arabic. Compare the glosses with their original words and the Quranic Arabic Corpus credit. Check that the saved review state and the meanings shown during review use the same terms as the table.
 
+The Malay prayer guide draft covers each rakaat, the lost-count guidance, and the Jumaat, Eid, funeral and Witr topics. Review the wording against the linked sources and the prayer outline selected in settings. The Umrah practice draft includes separate counts for tawaf rounds and sa‘i journeys.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
