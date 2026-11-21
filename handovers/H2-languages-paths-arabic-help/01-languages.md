@@ -214,6 +214,8 @@ The Malay setup draft includes the welcome screens, the Adult and Maktab choices
 
 The Malay Today draft includes the prayer countdown, prayer logging and weekly history, the daily study plan, Qaida lesson titles and upcoming Hijri events. Review Subuh, Zohor, Asar, Maghrib and Isyak alongside the saved prayer status and local jemaah time. Check the translated event descriptions against their cited guidance.
 
+The Malay settings draft includes the profile, display, reading help, terminology choices, wording suggestions, backups, reminders and source credits. Review the warning about replacing on-device records during restore and the prayer names in the exported calendar file.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
