@@ -154,7 +154,7 @@ The Turkish Umrah preparation draft covers trip details, the 12-item checklist, 
 
 The Turkish live Umrah draft covers the daily plan, Harem focus, the seven ritual steps, the pocket guide, the installed map, and the sa‘y counter and location options. Review the ritual wording with the cited sources and test corrections as the route alternates between Safâ and Merve. The preview uses the English narration pack for Turkish.
 
-The Turkish Speak draft covers course selection and all 12 Saudi A1 lessons. Review the lesson wording alongside the Arabic phrases, particularly the SIM dialogue, vocabulary and sign. Check that opening the vocabulary in Word Anatomy or practising it in review keeps the Turkish meaning.
+The Turkish Speak draft covers course selection, all 12 Saudi A1 lessons, and the nine Umrah and Hajj practice lessons. Review the lesson wording alongside the Arabic phrases, particularly the SIM dialogue, vocabulary and sign. Check that opening vocabulary in Word Anatomy or practising it in review keeps the Turkish meaning. The 18 phrases shared with Ask in Arabic use the same Turkish wording in both places.
 
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
