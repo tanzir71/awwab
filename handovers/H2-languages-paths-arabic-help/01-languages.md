@@ -122,7 +122,7 @@ The Indonesian Understand draft covers all 22 grammar lessons, the word-by-word 
 
 The final Indonesian draft entries cover the study desk, Today, search, Surahs, Word Bank, Fluency, the Hadith interface, and print and audio controls. Review the Indonesian Hadith labels alongside the original reference and grade. The language catalogue and a translated Hadith edition go through separate review and licensing checks.
 
-The Turkish draft covers the landing page, onboarding, placement, prayer setup, and Today in Adult and Maktab modes. It includes the prayer log, weekly history, calendar event labels, and all 17 Elifba lesson titles. Check the prayer method and school labels alongside the suggestions, and review the Qur’an terminology with the placement and lesson examples.
+The Turkish draft covers all 4,042 messages in the current UI catalogue. Review the landing page, onboarding, placement, prayer setup, and Today in Adult and Maktab modes. Check the prayer method and school labels alongside the suggestions, and review the Qur’an terminology with the placement and Elifba lesson examples.
 
 The Turkish settings draft includes reading and display preferences, your words, backup and restore, reminders, and source credits. Review the calendar file labels and the backup and glossary controls alongside the screens that use those preferences.
 
@@ -157,6 +157,8 @@ The Turkish live Umrah draft covers the daily plan, Harem focus, the seven ritua
 The Turkish Speak draft covers course selection, all 36 Saudi, Emirati Gulf, and Modern Standard Arabic A1 lessons, and the nine Umrah and Hajj practice lessons. Review the lesson wording alongside the spoken Arabic, particularly the SIM dialogues, vocabulary and signs. Check that opening vocabulary in Word Anatomy or practising it in review keeps the Turkish meaning. The 18 phrases shared with Ask in Arabic use the same Turkish wording in both places.
 
 The ten Turkish Gulf workplace lessons cover applications, shifts, contracts, pay, leave, safety and asking about workplace rights. Review workplace vocabulary with the spoken Emirati dialogues, particularly the terms for contract clauses, payroll deductions, and interpreters.
+
+The Turkish Saudi Speak draft covers all 14 A2 and 12 B1 lessons, including the dialogues, vocabulary, signs, and reply choices. Review the A2 travel and services vocabulary and the B1 conversations about opinions, health, faith, and work alongside the spoken Arabic.
 
 The Turkish desktop study draft includes the Adult plan customiser, Maktab study and sticker labels, and study history. It also covers install help, audio catalogue states, and reference recording controls. Review the browser menu labels on the platforms named in the install instructions.
 
