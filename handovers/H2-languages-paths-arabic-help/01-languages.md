@@ -210,6 +210,8 @@ The French Saudi Speak draft also covers all 14 A2 and 12 B1 lessons, including 
 
 The Malay draft covers the landing page, navigation, metadata and image descriptions. Review the terms for solat, qada, cerapan anak bulan and sa‘i in context. The local review page is `/awwab/lang/ms.html` and uses `ms.draft.json` from the review export.
 
+The Malay setup draft includes the welcome screens, the Adult and Maktab choices, the placement questions and audio controls, and the prayer setup form. Review the wording for the prayer guide and the separate Asar calculation setting. The Malaysian calculation method proposed in the locale inventory still needs local verification and implementation.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
