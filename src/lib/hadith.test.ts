@@ -3,7 +3,7 @@ import { gunzipSync } from "node:zlib";
 import { describe, expect, it, vi } from "vitest";
 import { curatedHadith, curatedHadithFor, desktopHadith, hadithCitation, hadithGradeLabel, hadithId, hadithNumberLabel, hadithReferenceLabel, hadithSource,
   hadithSummary, localHadithMeaning, parseHadithId, riyadSelections, searchHadith, topicMatches } from "./hadith";
-import { canonicalHadithNumber, collectionIds, hadithArchiveVersion, narrationGrade, type HadithNarration } from "./hadith-catalogue";
+import { canonicalHadithNumber, collectionIds, hadithArchiveVersion, narrationGrade, parseHadithReference, type HadithNarration } from "./hadith-catalogue";
 import { message } from "./copy";
 import { formatLocale } from "./languagePreferences";
 import * as localePacks from "./localePacks";
@@ -17,6 +17,14 @@ const archive = collectionIds.flatMap(collection => {
 const byId = new Map(archive.map(item => [hadithId(item.collection, item.number), item]));
 
 describe("hadith editions", () => {
+  it("resolves numbered handover references to the cited collections", () => {
+    const citation = parseHadithReference("Abu Dawud 1400");
+    expect(citation).toEqual({ collection: "abudawud", number: "1400" });
+    expect(hadithSource(citation!)).toBe("https://sunnah.com/abudawud:1400");
+    expect(parseHadithReference("al-Hakim 1400")).toBeUndefined();
+    expect(parseHadithReference("Muslim")).toBeUndefined();
+  });
+
   it("preserves edition numbering and turns Muslim variants into their canonical suffixes", () => {
     expect(canonicalHadithNumber("muslim", "2702.01")).toBe("2702a");
     expect(canonicalHadithNumber("muslim", "52.10")).toBe("52j");

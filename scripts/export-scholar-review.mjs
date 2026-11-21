@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
 import { essentialPassages, essentialStudyPassage } from "../src/lib/essentialPassages.ts";
-import { hadithArchiveVersion, hadithCollections, hadithSource } from "../src/lib/hadith-catalogue.ts";
+import { hadithArchiveVersion, hadithCollections, hadithSource, parseHadithReference } from "../src/lib/hadith-catalogue.ts";
 import { splitUthmaniOpening } from "../src/lib/quranOpening.ts";
 import { tajweedMessages } from "../src/lib/tajweed-copy.ts";
 import { tajweedClip, tajweedDepthLessons, tajweedExcerpt, tajweedIntroKey, tajweedLessons, tajweedLessonSources, tajweedNunLetter,
@@ -64,31 +64,30 @@ function tajweedRows(lesson, advanced) {
   return [overview, ...samples];
 }
 
-const collectionByName = new Map(Object.entries(hadithCollections).map(([id, item]) => [item.short, id]));
 const archives = new Map();
 function citationDetails(reference) {
-  const match = /^(.+) ([1-9]\d*)$/u.exec(reference);
-  const collection = match && collectionByName.get(match[1]);
-  if (!collection) return { fields: [], sources: [] };
+  const parsed = parseHadithReference(reference);
+  if (!parsed) return { fields: [], sources: [] };
+  const { collection, number } = parsed;
+  const { short } = hadithCollections[collection];
   if (!archives.has(collection)) archives.set(collection, read(`hadith-${collection}-v${hadithArchiveVersion}.json.gz`).items);
-  const number = match[2];
   const matches = archives.get(collection).filter(item => item.number === number ||
     (item.number.length === number.length + 1 && item.number.startsWith(number) && /[a-z]$/u.test(item.number)));
   if (!matches.length) {
     return {
       fields: [{ label: reference, value: "Unavailable in the bundled Hadith edition." }],
-      sources: [{ title: reference, url: hadithSource({ collection, number }) }],
+      sources: [{ title: reference, url: hadithSource(parsed) }],
     };
   }
   const fields = matches.flatMap(item => {
-    const title = `${match[1]} ${item.number}`;
+    const title = `${short} ${item.number}`;
     const grade = [item.grade.label, item.grade.grader].filter(Boolean).join(" · ");
     return [
       { label: `${title} · ${grade}`, value: item.text, lang: "en" },
       ...(item.arabic ? [{ label: title, value: item.arabic, lang: "ar" }] : []),
     ];
   });
-  return { fields, sources: matches.map(item => ({ title: `${match[1]} ${item.number}`, url: hadithSource(item) })) };
+  return { fields, sources: matches.map(item => ({ title: `${short} ${item.number}`, url: hadithSource(item) })) };
 }
 
 function passageRow(entry) {

@@ -11,6 +11,8 @@ import { useCopy } from "@/lib/copy";
 import { dateKey, formatDay } from "@/lib/dates";
 import { hifzVirtueKey } from "@/lib/essentialPassages";
 import { focusListItem } from "@/lib/focusListItem";
+import { hadithReferenceLabel } from "@/lib/hadith";
+import { hadithSource, parseHadithReference } from "@/lib/hadith-catalogue";
 import { essentialPassages, getHifzPassage, groupPortions, nextPortion, passageLabel, portionBucket, portionPlan, recitalProgress, studyChapters,
   studyPhrases, studyQuran, verseText, type HifzPassage, type HifzPlans, type HifzPortion, type HifzReviews, type JuzRecital,
   type JuzRecitals, type StudyQuran } from "@/lib/hifz";
@@ -267,7 +269,15 @@ function PassagePlan({ passage, portions, settings, now }: { passage: HifzPassag
     </section>}
     {passage.source && <section className="card compact-stack hifz-why"><h2>{t("hifzWhy")}</h2>
       {passage.why && <p lang={virtueLanguage} dir="auto"><StudyText text={t(virtue)} honorificsOnly /></p>}
-      <p className="small muted"><span className="chip soft">{t(passage.source.grade === "hasan" ? "hifzHasan" : "hifzSahih")}</span> {passage.source.ref}</p>
+      <p className="small muted">
+        <span className="chip soft">{t(passage.source.grade === "hasan" ? "hifzHasan" : "hifzSahih")}</span>{" "}
+        {passage.source.ref.split(" · ").map((reference, index) => {
+          const citation = parseHadithReference(reference);
+          return <span key={reference}>{index > 0 && " · "}{citation
+            ? <a href={hadithSource(citation)} target="_blank" rel="noreferrer"><bdi>{hadithReferenceLabel(citation.collection, citation.number, { language, locale, t }, true)}</bdi></a>
+            : <bdi>{reference}</bdi>}</span>;
+        })}
+      </p>
     </section>}
   </>;
   const roster = <section className="card compact-stack hifz-portions">

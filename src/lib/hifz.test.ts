@@ -3,6 +3,7 @@ import { gunzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 import { message } from "./copy";
 import { hifzVirtueKey, hifzVirtueMessages } from "./essentialPassages";
+import { parseHadithReference } from "./hadith-catalogue";
 import { chapters, essentialPassages, getHifzPassage, groupPortions, juzs, maxPortionAyahs, maxPortionWords, nextPortion,
   passageLabel, portionBucket, portionPlan, ratePortion, rateRecitalPortion, recitalProgress, studyPhrases, verseText, type HifzReviews, type JuzRecital, type StudyQuran } from "./hifz";
 import { juzAmma, learnedSurahs, levels, patternPracticePath, patternReviewPrefix, placementStartingLevel, qaidaIslandProgress, tracks } from "./learningPaths";
@@ -118,6 +119,9 @@ describe("Offline Quran study edition", () => {
       const virtue = hifzVirtueMessages[hifzVirtueKey(entry.id)];
       expect(virtue?.en).toBe(passage.why);
       if (virtue) expect(message({ mode: "adult", language: "en" }, hifzVirtueKey(entry.id))).toBe(passage.why);
+      for (const reference of passage.source?.ref.split(" · ") ?? []) {
+        expect(parseHadithReference(reference), reference).toBeDefined();
+      }
       const portions = groupPortions(passage, quran);
       expect(portions.flatMap(portion => portion.verses)).toHaveLength(passage.ayahs);
       for (const portion of portions) {

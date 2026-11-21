@@ -53,6 +53,13 @@ export function editionUrl(collection: HadithCollection, language: "eng" | "ara"
   return `${hadithEditionBase}/${language}-${collection}.min.json`;
 }
 
+export function parseHadithReference(reference: string) {
+  const match = /^(.+) ([1-9]\d*)$/u.exec(reference);
+  if (!match) return undefined;
+  const collection = collectionIds.find(id => hadithCollections[id].short === match[1]);
+  return collection && { collection, number: match[2] };
+}
+
 export function hadithSource({ collection, number }: Pick<HadithNarration, "collection" | "number">) {
   return number.includes(".") ? editionUrl(collection) : `https://sunnah.com/${collection}:${number}`;
 }
