@@ -276,6 +276,8 @@ The Persian prayer guide draft includes the rakʿah steps, the lost-count guidan
 
 The Persian Return draft covers the istighfar counter, return history, all seven Sayyid al-Istighfār lines, and the makeup prayer and fasting forms. Review the lines alongside the cited Arabic. Check the distinction between an estimate and a saved balance, and review the note on differing scholarly views about deliberately missed prayers.
 
+The Persian Word Anatomy and prayer study draft covers the Al-ʿAsr example, the curated Al-Fātiḥah and Al-ʿAsr glosses, and the word-by-word meanings of common prayer phrases. Review the glosses against the matching Arabic words, including phrases whose order differs in Persian. Check the examples that connect Quranic roots to everyday Arabic.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
