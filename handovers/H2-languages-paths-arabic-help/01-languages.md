@@ -122,7 +122,7 @@ The Indonesian Understand draft covers all 22 grammar lessons, the word-by-word 
 
 The final Indonesian draft entries cover the study desk, Today, search, Surahs, Word Bank, Fluency, the Hadith interface, and print and audio controls. Review the Indonesian Hadith labels alongside the original reference and grade. The language catalogue and a translated Hadith edition go through separate review and licensing checks.
 
-The Turkish draft covers the landing page, including the phone and desktop variants, image descriptions, page metadata, and the FAQ. Review the terms for prayer, recitation, and Umrah in context. App messages are still being drafted.
+The Turkish draft covers the landing page, onboarding, placement, prayer setup, and Today in Adult and Maktab modes. It includes the prayer log, weekly history, calendar event labels, and all 17 Elifba lesson titles. Check the prayer method and school labels alongside the suggestions, and review the Qur’an terminology with the placement and lesson examples.
 
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
