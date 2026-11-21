@@ -26,7 +26,10 @@ export type TodayPracticeItem = { to: string; title: string; detail: string; ico
 
 function PrayerTime({ value, settings }: { value: Date; settings: Settings }) {
   const locale = formatLocale(settings);
-  return timeAvailable(value) ? <time dateTime={value.toISOString()} aria-label={formatTime(value, settings.city.timeZone, locale)}>{formatTime(value, settings.city.timeZone, locale, true)}</time> : <span className="muted">—</span>;
+  return timeAvailable(value) ? <time dateTime={value.toISOString()}>
+    <span aria-hidden="true">{formatTime(value, settings.city.timeZone, locale, true)}</span>
+    <span className="sr-only">{formatTime(value, settings.city.timeZone, locale)}</span>
+  </time> : <span className="muted">—</span>;
 }
 
 function ScheduleBar({ prayers, now, settings }: { prayers: Prayer[]; now: Date; settings: Settings }) {
@@ -85,7 +88,7 @@ export function TodayDashboard({ settings, now, day, prayers, current, next, log
   ];
 
   return <div className="prayer-dashboard">
-    <div className="daily-stats" aria-label={t("prayers")}>
+    <div className="daily-stats" role="group" aria-label={t("prayers")}>
       <section className="card night daily-stat"><h2 className="caption">{t(current ? "now" : "prayerTimes")}</h2>
         <p className="daily-value">{t(headline.id)}{countdown && ` · ${countdown}`}</p>
         <p className="small muted">{t("atAdhan")} <PrayerTime value={headline.starts} settings={settings} />{jamaat && ` · ${t("jamaat", jamaat)}`}</p>

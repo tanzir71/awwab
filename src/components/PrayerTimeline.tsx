@@ -52,7 +52,10 @@ export default function PrayerTimeline({ prayers, settings, now, mosques, onActi
             {number.format(rakat.count)} {rakatLabel(settings, rakat.type)}
           </Fragment>)}
         </small></span>
-        {available ? <time dateTime={prayer.starts.toISOString()} aria-label={formatTime(prayer.starts, zone, locale)}>{formatTime(prayer.starts, zone, locale, true)}</time> : <small>{t("unavailable")}</small>}
+        {available ? <time dateTime={prayer.starts.toISOString()}>
+          <span aria-hidden="true">{formatTime(prayer.starts, zone, locale, true)}</span>
+          <span className="sr-only">{formatTime(prayer.starts, zone, locale)}</span>
+        </time> : <small>{t("unavailable")}</small>}
       </button>;
     })}
   </div>;

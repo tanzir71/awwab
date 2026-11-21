@@ -202,7 +202,10 @@ export function UmrahNowPanel({ trip, now, save, gate, detected, locationError }
         <ol className="umrah-now-timeline">
           {events.map(event => <li key={event.title}>
             <time dateTime={event.time.toISOString()} title={at(event.time)}>
-              {event.label ?? <bdi aria-label={at(event.time)}>{formatTime(event.time, makkah.timeZone, locale, true)}</bdi>}
+              {event.label ?? <bdi>
+                <span aria-hidden="true">{formatTime(event.time, makkah.timeZone, locale, true)}</span>
+                <span className="sr-only">{at(event.time)}</span>
+              </bdi>}
             </time>
             <div className="umrah-now-event" data-highlight={event.highlight || undefined}>
               {event.path ? <Link to={event.path}>{event.title}</Link>

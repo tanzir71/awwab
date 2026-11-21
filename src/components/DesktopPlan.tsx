@@ -258,8 +258,9 @@ export function DesktopPlan({ today, now, settings, config, mosques, hawl, saved
       <div className="plan-desk-month">
         {Array.from({ length: 7 }, (_, i) => {
           const day = addDays("2026-11-15", (firstWeekday + i) % 7);
-          return <span className="caption" key={day} aria-label={formatDay(day, { weekday: "long" }, locale)}>
-            {formatDay(day, { weekday: "short" }, locale)}
+          return <span className="caption" key={day}>
+            <span aria-hidden="true">{formatDay(day, { weekday: "short" }, locale)}</span>
+            <span className="sr-only">{formatDay(day, { weekday: "long" }, locale)}</span>
           </span>;
         })}
         {cells.map(cell => <div key={cell.day} className="plan-desk-cell" data-adjacent={cell.adjacent} data-today={cell.day === today}

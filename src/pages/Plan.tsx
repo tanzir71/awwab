@@ -165,8 +165,9 @@ export function Plan({ settings, now, desktop }: { settings: Settings; now: Date
       <div className="month-grid">
         {Array.from({ length: 7 }, (_, i) => {
           const weekday = addDays("2026-11-15", i);
-          return <small key={weekday} className="plan-weekday muted" aria-label={formatDay(weekday, { weekday: "long" }, locale)}>
-            {formatDay(weekday, { weekday: "narrow" }, locale)}
+          return <small key={weekday} className="plan-weekday muted">
+            <span aria-hidden="true">{formatDay(weekday, { weekday: "narrow" }, locale)}</span>
+            <span className="sr-only">{formatDay(weekday, { weekday: "long" }, locale)}</span>
           </small>;
         })}
         {Array.from({ length: before }, (_, i) => <span key={i} />)}
