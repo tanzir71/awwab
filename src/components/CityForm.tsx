@@ -2,16 +2,19 @@ import { useState, type FormEvent } from "react";
 import { cities, methodNames, type City, type PrayerMethod } from "@/lib/prayerServices";
 import { dateKey } from "@/lib/dates";
 import { useCopy } from "@/lib/copy";
+import { readCoordinatePair } from "@/lib/localeNumbers";
 import { guideReference } from "@/lib/prayerGuide";
 import { prayerCityLabel } from "@/lib/settings-copy";
 import type { Settings } from "@/lib/storageService";
+import { CoordinateInput } from "./CoordinateInput";
 
 export function CityForm({ initial, save, submitLabel = "settingsPrayerSave", saving = false, suggestion, onBack }: {
   initial: Settings; save: (patch: Partial<Settings>) => Promise<void>; submitLabel?: string; saving?: boolean;
   suggestion?: Pick<Settings, "method" | "school">; onBack?: () => void;
 }) {
-  const { t } = useCopy();
-  const [preset, setPreset] = useState(cities.some(item => item.name === initial.city.name && item.latitude === initial.city.latitude) ? initial.city.name : "");
+  const { t, locale } = useCopy();
+  const [preset, setPreset] = useState(() => cities.find(item => item.name === initial.city.name && item.latitude === initial.city.latitude
+    && item.longitude === initial.city.longitude && item.timeZone === initial.city.timeZone)?.name ?? "");
   const [city, setCity] = useState(initial.city);
   const [method, setMethod] = useState(initial.method);
   const [school, setSchool] = useState(initial.school);
@@ -20,11 +23,14 @@ export function CityForm({ initial, save, submitLabel = "settingsPrayerSave", sa
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
+    const coordinates = preset ? { lat: city.latitude, lon: city.longitude }
+      : readCoordinatePair(String(data.get("lat") ?? ""), String(data.get("lon") ?? ""), locale);
+    if (!coordinates) return;
     try {
       if (!city.name.trim()) { setError(t("setupCityNameMissing")); return; }
       dateKey(new Date(), city.timeZone);
       setError("");
-      void save({ city: { ...city, name: city.name.trim() }, method, school,
+      void save({ city: { ...city, name: city.name.trim(), latitude: coordinates.lat, longitude: coordinates.lon }, method, school,
         prayerGuide: data.get("prayerGuide") === "hanafi" ? "hanafi" : "fard" });
     } catch {
       setError(t("settingsTimeZoneError"));
@@ -45,8 +51,8 @@ export function CityForm({ initial, save, submitLabel = "settingsPrayerSave", sa
     {!preset && <>
       <label className="field">{t("settingsCityName")}<input value={city.name} required maxLength={100} onChange={event => patch({ name: event.target.value })} /></label>
       <div className="equal-row">
-        <label className="field">{t("settingsLatitude")}<input type="number" step="any" min="-90" max="90" required value={Number.isFinite(city.latitude) ? city.latitude : ""} onChange={event => patch({ latitude: event.target.valueAsNumber })} /></label>
-        <label className="field">{t("settingsLongitude")}<input type="number" step="any" min="-180" max="180" required value={Number.isFinite(city.longitude) ? city.longitude : ""} onChange={event => patch({ longitude: event.target.valueAsNumber })} /></label>
+        <label className="field">{t("settingsLatitude")}<CoordinateInput name="lat" value={city.latitude} required /></label>
+        <label className="field">{t("settingsLongitude")}<CoordinateInput name="lon" value={city.longitude} required /></label>
       </div>
       <label className="field">{t("settingsTimeZone")}<input value={city.timeZone} required onChange={event => patch({ timeZone: event.target.value.trim() })} /></label>
     </>}

@@ -16,7 +16,7 @@ import { message } from "./copy";
 import { adjustQadaTotals, qadaBalances, qadaCountBetween, qadaDefaults, qadaForecast, recordQada } from "./qada";
 import { assignedMosque, jamaatForPrayer, mapMosque, mosqueCheckedAge, mosqueDefaults, mosqueInputClock, mosqueTime, mosqueWeek,
   parseMosqueClock, timetableNotice, weeklyMosque, type Mosque } from "./mosques";
-import { formatInputNumber, latinDigits, readLocalizedNumber } from "./localeNumbers";
+import { formatInputNumber, latinDigits, readCoordinatePair, readLocalizedNumber } from "./localeNumbers";
 
 describe("localized number entry", () => {
   it("reads Bangla, Latin and locale-specific digits and decimal separators", () => {
@@ -48,6 +48,16 @@ describe("localized number entry", () => {
     expect(readLocalizedNumber("১২,৩৪৫.৬৭", "bn", "any")).toBeUndefined();
     expect(readLocalizedNumber("1e309", "en", "any")).toBeUndefined();
     expect(readLocalizedNumber("-৫", "bn", "any")).toBeUndefined();
+  });
+
+  it("reads both signed coordinates with localized decimals, including copied right-to-left signs", () => {
+    expect(readCoordinatePair("\u200e−۲۱٫۴۲۲۵", "+۳۹٫۸۲۶۲", "fa")).toEqual({ lat: -21.4225, lon: 39.8262 });
+    expect(readCoordinatePair("-২৩.৮১০৩", "০", "bn-u-nu-latn")).toEqual({ lat: -23.8103, lon: 0 });
+    expect(readCoordinatePair("48,8566", "−2,3522", "fr")).toEqual({ lat: 48.8566, lon: -2.3522 });
+    expect(readCoordinatePair("-90", "1.8e2", "en")).toEqual({ lat: -90, lon: 180 });
+    for (const [lat, lon] of [["", "0"], ["0", ""], ["91", "0"], ["0", "-180.1"], ["1e309", "0"], ["0x10", "0"], ["--1", "0"]]) {
+      expect(readCoordinatePair(lat, lon, "en")).toBeUndefined();
+    }
   });
 });
 

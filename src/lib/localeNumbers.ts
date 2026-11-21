@@ -38,3 +38,20 @@ export function readLocalizedNumber(value: string, locale: string, decimals: num
   const number = Number(text);
   return number <= Number.MAX_SAFE_INTEGER ? number : undefined;
 }
+
+export const coordinateLimits = { lat: 90, lon: 180 } as const;
+
+export function readSignedNumber(value: string, locale: string) {
+  // Copied RTL coordinates may include a direction mark next to the sign.
+  const text = value.trim().replace(/^[\u061c\u200e\u200f]+|[\u061c\u200e\u200f]+$/gu, "");
+  const magnitude = readLocalizedNumber(text.replace(/^[+−-]/u, ""), locale, "any");
+  if (magnitude === undefined) return undefined;
+  return /^[-−]/u.test(text) ? -magnitude : magnitude;
+}
+
+export function readCoordinatePair(latitude: string, longitude: string, locale: string) {
+  const lat = readSignedNumber(latitude, locale);
+  const lon = readSignedNumber(longitude, locale);
+  if (lat === undefined || lon === undefined || Math.abs(lat) > coordinateLimits.lat || Math.abs(lon) > coordinateLimits.lon) return undefined;
+  return { lat, lon };
+}

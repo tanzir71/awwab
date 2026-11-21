@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { CoordinateInput } from "@/components/CoordinateInput";
 import { DesignIcon } from "@/components/DesignIcon";
 import { UmrahMapCanvas } from "@/components/UmrahMapCanvas";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { SHARE_URL } from "@/lib/config";
 import { useCopy } from "@/lib/copy";
+import { readCoordinatePair } from "@/lib/localeNumbers";
 import { bearing, distance, type Coord, type UmrahTrip, type UmrahTripUpdater } from "@/lib/umrah";
 import { cachedMapPack, mapPacks, mapRegions, saveMapPack, type MapRegion } from "@/lib/umrahMapPack";
 import { mapPlaceMatches, mapPlaceNames, nearbyMapPoint, placeRegion, type UmrahPin } from "@/lib/umrahMapPlaces";
@@ -175,8 +177,8 @@ export default function UmrahMap({ trip, point, points, locationError, save }: {
   function saveCoordinates(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    const pin = { lat: Number(form.get("lat")), lon: Number(form.get("lon")) };
-    if (Number.isFinite(pin.lat) && Number.isFinite(pin.lon)) select(pin);
+    const pin = readCoordinatePair(String(form.get("lat") ?? ""), String(form.get("lon") ?? ""), locale);
+    if (pin) select(pin);
   }
 
   async function remember(kind: "hotel" | "meeting") {
@@ -305,8 +307,8 @@ export default function UmrahMap({ trip, point, points, locationError, save }: {
             : !trip.gps && <Link className="action light" to="/umrah/location" state={{ from: "map" }}>{t("umrahLocationOptions")}</Link>}
           <form className="compact-stack" onSubmit={saveCoordinates}>
             <div className="equal-row">
-              <label className="field">{t("umrahMapLatitude")}<input name="lat" type="number" step="any" min="-90" max="90" required /></label>
-              <label className="field">{t("umrahMapLongitude")}<input name="lon" type="number" step="any" min="-180" max="180" required /></label>
+              <label className="field">{t("umrahMapLatitude")}<CoordinateInput name="lat" required /></label>
+              <label className="field">{t("umrahMapLongitude")}<CoordinateInput name="lon" required /></label>
             </div>
             <button type="submit" className="action light">{t("umrahMapSelectCoords")}</button>
           </form>

@@ -2,11 +2,12 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { useCopy } from "@/lib/copy";
 import { addDays, formatDay } from "@/lib/dates";
-import { latinDigits } from "@/lib/localeNumbers";
+import { latinDigits, readCoordinatePair } from "@/lib/localeNumbers";
 import { mosqueAdhanOffset, mosqueClock, mosqueInputClock, mosqueOccasions, mosquePhotoLimit, mosquePhotoTypes, mosqueRoles, mosqueSources, parseMosqueClock, weeklyMosque,
   type Mosque, type MosqueOccasion, type MosquePlan } from "@/lib/mosques";
 import { mosqueOccasionLabel, mosqueRoleLabel, mosqueSourceLabel } from "@/lib/mosque-copy";
 import { prayerIds, type PrayerId } from "@/types/Prayer";
+import { CoordinateInput } from "./CoordinateInput";
 
 export type MosquePanel = { kind: "timetable"; mosque: Mosque }
   | { kind: "photo"; id: string }
@@ -97,7 +98,8 @@ export function TimetableEditor({ mosque, save, cancel }: {
     const name = read("name");
     if (!name) { toast.error(t("mosqueNameError")); return; }
     const lat = read("lat"), lon = read("lon");
-    if (Boolean(lat) !== Boolean(lon)) { toast.error(t("mosqueCoordError")); return; }
+    const location = readCoordinatePair(lat, lon, locale);
+    if ((lat || lon) && !location) { toast.error(t("mosqueCoordError")); return; }
     const time = (key: string) => parseMosqueClock(read(key), locale) ?? "";
     const jamaat = Object.fromEntries(prayerIds.map(id => [id, time(id)]).filter(([, value]) => value));
     if (relativeMaghrib) jamaat.maghrib = "adhan+5";
@@ -108,7 +110,7 @@ export function TimetableEditor({ mosque, save, cancel }: {
         jumuah: { khutbah: time("khutbah"), prayer: time("jumuah") },
         contact: latinDigits(read("contact"), locale).replace(/\D/g, "").slice(0, 30),
         refreshMonth: Number(read("refreshMonth")) || undefined,
-        location: lat && lon ? { lat: Number(lat), lon: Number(lon) } : undefined,
+        location,
         updatedAt: new Date().toISOString(),
       });
     } finally {
@@ -146,8 +148,8 @@ export function TimetableEditor({ mosque, save, cancel }: {
         </select></label>
         <label className="field">{t("mosqueContact")}<input type="tel" name="contact" maxLength={36} defaultValue={mosque.contact} /></label>
         <div className="equal-row">
-          <label className="field">{t("mosqueLat")}<input name="lat" type="number" step="any" min="-90" max="90" defaultValue={mosque.location?.lat} /></label>
-          <label className="field">{t("mosqueLon")}<input name="lon" type="number" step="any" min="-180" max="180" defaultValue={mosque.location?.lon} /></label>
+          <label className="field">{t("mosqueLat")}<CoordinateInput name="lat" value={mosque.location?.lat} /></label>
+          <label className="field">{t("mosqueLon")}<CoordinateInput name="lon" value={mosque.location?.lon} /></label>
         </div>
       </div>
     </details>
