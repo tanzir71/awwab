@@ -16,7 +16,7 @@ export const wordGlosses: Record<string, Gloss & { tr?: string }> = glosses;
 export function wordBankSearch(text: string) {
   const term = studySearchTerm(text);
   if (/\p{Script=Arabic}/u.test(term)) {
-    return normalizeWord(term).replace(/[أإآ]/g, "ا").replace(/ى/g, "ي").replace(/\s+/g, "");
+    return normalizeWord(term).replace(/[أإآ]/g, "ا").replace(/[ىی]/g, "ي").replace(/ک/g, "ك").replace(/\s+/g, "");
   }
   return term.normalize("NFD").replace(/(\p{Script=Latin})\p{M}+/gu, "$1").normalize("NFC");
 }

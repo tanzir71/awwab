@@ -174,6 +174,7 @@ describe("Core Quran words", () => {
   it("searches vowelled Arabic, spaced roots, Latin diacritics and Bangla glosses", () => {
     expect(wordBankSearch("عَ لَ مَ")).toBe("علم");
     expect(wordBankSearch("كِتَاب")).toBe("كتاب");
+    expect(wordBankSearch("کریم")).toBe(wordBankSearch("كَرِيم"));
     expect(wordBankSearch("ʿAlīm")).toBe("ʿalim");
     expect(wordBankSearch("  প্রভু  ")).toBe("প্রভু");
     expect(matchingReadingWord("الْمَسْجِدِ", new Set(["مسجد"]))).toBe(true);
