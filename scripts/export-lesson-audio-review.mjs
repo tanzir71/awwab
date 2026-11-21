@@ -6,6 +6,7 @@ import qaida from "../docs/content/qaida-lessons.json" with { type: "json" };
 import umrahAudio from "../docs/content/umrah-guide-audio.json" with { type: "json" };
 import umrah from "../docs/content/umrah-steps.json" with { type: "json" };
 import persian from "../handovers/H2-languages-paths-arabic-help/drafts/fa.json" with { type: "json" };
+import hausa from "../handovers/H2-languages-paths-arabic-help/drafts/ha.json" with { type: "json" };
 import french from "../handovers/H2-languages-paths-arabic-help/drafts/fr.json" with { type: "json" };
 import malay from "../handovers/H2-languages-paths-arabic-help/drafts/ms.json" with { type: "json" };
 import urdu from "../handovers/H2-languages-paths-arabic-help/drafts/ur.json" with { type: "json" };
@@ -115,6 +116,7 @@ function qaidaEntries(lesson) {
 const ritualDrafts = {
   fa: { name: "Persian", messages: persian.messages },
   fr: { name: "French", messages: french.messages },
+  ha: { name: "Hausa", messages: hausa.messages },
   ms: { name: "Malay", messages: malay.messages },
   ur: { name: "Urdu", messages: urdu.messages },
 };
@@ -140,6 +142,7 @@ const ritualEntries = umrahAudio.packs.flatMap(pack => {
         ...(step.notes ? [{ label: "English on-screen notes", value: step.notes.join("\n"), lang: "en" }] : []),
         ...(step.notesBn ? [{ label: "Bangla on-screen notes", value: step.notesBn.join("\n"), lang: "bn" }] : []),
         ...(draft ? [
+          ...(pack.language !== "ur" ? [{ label: `${draft.name} narration transcript`, value: step.narration[pack.language], lang: pack.language }] : []),
           { label: `${draft.name} on-screen title`, value: draft.messages[umrahStepTitle(step.id)].text, lang: pack.language },
           { label: `${draft.name} on-screen summary`, value: draft.messages[umrahStepSummary(step.id)].text, lang: pack.language },
           ...(step.notes ?? []).map((_, noteIndex) => ({
@@ -183,6 +186,7 @@ review.write(output, {
     "umrah-fr": { label: "Umrah French narration", assignment: "A French speaker checks wording and pronunciation. A scholar checks the instructions against the cited sources." },
     "umrah-ms": { label: "Umrah Malay narration", assignment: "A Malay speaker checks wording and pronunciation. A scholar checks the instructions against the cited sources." },
     "umrah-fa": { label: "Umrah Persian narration", assignment: "Persian and Dari reviewers check wording and pronunciation. A scholar checks the instructions against the cited sources." },
+    "umrah-ha": { label: "Umrah Hausa narration", assignment: "Hausa speakers check the wording, pace and pronunciation. A scholar checks the instructions against the cited sources." },
   },
   varietyLabel: "Material",
   groupLabel: "Lesson or guide",

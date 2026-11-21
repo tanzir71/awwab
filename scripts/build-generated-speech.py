@@ -27,6 +27,8 @@ SIWIS = "https://huggingface.co/rhasspy/piper-voices/blob/0c9c5d340496a47205a799
 SIWIS_DATA = "https://doi.org/10.7488/ds/1705"
 SUARIFY_YATI = "https://huggingface.co/Suarify/kecil-tts-yati-v0.3/tree/dcb1efaaaccdfc53b4b0cdbfad190e86ddeac68b"
 PIPER_GANJI = "https://huggingface.co/rhasspy/piper-voices/blob/661e39caff61dcfcbbd2178a7c2dd0144b858b0e/fa/fa_IR/ganji/medium/MODEL_CARD"
+HANWA = "https://huggingface.co/Afrilab/HanwaTTS/tree/4aae520bb96292e06a8b88a2d5b1b8f8457605af"
+HANWA_LICENSE = "https://huggingface.co/Afrilab/HanwaTTS/blob/4aae520bb96292e06a8b88a2d5b1b8f8457605af/LICENSE"
 
 
 def read(path):
@@ -196,6 +198,40 @@ def build_umrah_guide_persian(model):
 
     pack = umrah_guide_pack("fa", "فارسی", "Piper · Ganji", PIPER_GANJI,
                             "https://opensource.org/license/mit", persian)
+    write_umrah_guide_packs([pack])
+
+
+def build_umrah_guide_hausa(model, vocoder_path):
+    import numpy as np
+    import soundfile as sf
+    import torch
+    from transformers import SpeechT5ForTextToSpeech, SpeechT5HifiGan, SpeechT5Processor
+
+    sample_rate = 16000
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    processor = SpeechT5Processor.from_pretrained(model, local_files_only=True)
+    voice = SpeechT5ForTextToSpeech.from_pretrained(model, use_safetensors=True, local_files_only=True).to(device).eval()
+    vocoder = SpeechT5HifiGan.from_pretrained(vocoder_path, local_files_only=True).to(device).eval()
+    speaker_path = model / "embeddings/afr_3572_speaker_embedding.pt"
+    speaker = torch.load(speaker_path, map_location="cpu", weights_only=True)
+    if not isinstance(speaker, torch.Tensor) or speaker.shape not in ((512,), (1, 512)):
+        raise ValueError(f"Expected a 512-element HanwaTTS speaker embedding in {speaker_path}")
+    speaker = speaker.reshape(1, 512).to(device=device, dtype=torch.float32)
+    silence = np.zeros(int(sample_rate * 0.18), dtype=np.float32)
+
+    def hausa(text, target):
+        torch.manual_seed(0)
+        chunks = []
+        for sentence in re.split(r"(?<=[.!?])\s+", text):
+            ids = processor(text=sentence, return_tensors="pt").input_ids.to(device)
+            with torch.inference_mode():
+                audio = voice.generate_speech(ids, speaker, vocoder=vocoder).cpu().numpy()
+            if audio.size < sample_rate // 4 or not np.isfinite(audio).all():
+                raise ValueError(f"HanwaTTS did not generate valid narration for {sentence!r}")
+            chunks.extend((audio, silence))
+        sf.write(target, np.concatenate(chunks[:-1]), sample_rate, subtype="PCM_16")
+
+    pack = umrah_guide_pack("ha", "Hausa", "HanwaTTS · Afrilab AI Hub", HANWA, HANWA_LICENSE, hausa)
     write_umrah_guide_packs([pack])
 
 
@@ -467,9 +503,11 @@ def main():
     task.add_argument("--umrah-guide-french", action="store_true", help="Build French Umrah narration with local Piper SIWIS weights")
     task.add_argument("--umrah-guide-malay", action="store_true", help="Build Malay Umrah narration with local Kecil-TTS Yati weights")
     task.add_argument("--umrah-guide-persian", action="store_true", help="Build Persian Umrah narration with local Piper Ganji weights")
+    task.add_argument("--umrah-guide-hausa", action="store_true", help="Build Hausa Umrah narration with local HanwaTTS weights")
     task.add_argument("--qaida", action="store_true", help="Build Qaida drill audio and placement vowel clips with Emirati Piper")
     parser.add_argument("--piper", default="piper", help="Piper executable for --umrah-guide")
     parser.add_argument("--bangla-model", type=Path, help="Local Indic Tiny TTS Bengali model directory with code and ONNX graphs")
+    parser.add_argument("--hausa-vocoder", type=Path, help="Local SpeechT5 HiFi-GAN vocoder directory for --umrah-guide-hausa")
     parser.add_argument("--resume", action="store_true", help="Reuse completed clips when extending a Qaida or A3S build")
     args = parser.parse_args()
     if args.ask_manifest:
@@ -493,6 +531,11 @@ def main():
         return
     if args.umrah_guide_persian:
         build_umrah_guide_persian(args.model)
+        return
+    if args.umrah_guide_hausa:
+        if args.hausa_vocoder is None:
+            parser.error("--umrah-guide-hausa requires --hausa-vocoder")
+        build_umrah_guide_hausa(args.model, args.hausa_vocoder)
         return
     if args.ask_male:
         build_male_ask(args.model, read(PHRASES)["phrases"], args.resume)
