@@ -154,7 +154,7 @@ The Turkish Umrah preparation draft covers trip details, the 12-item checklist, 
 
 The Turkish live Umrah draft covers the daily plan, Harem focus, the seven ritual steps, the pocket guide, the installed map, and the sa‘y counter and location options. Review the ritual wording with the cited sources and test corrections as the route alternates between Safâ and Merve. The preview uses the English narration pack for Turkish.
 
-The Turkish Speak draft covers course selection, all 12 Saudi A1 lessons, all 12 Modern Standard Arabic A1 lessons, and the nine Umrah and Hajj practice lessons. Review the lesson wording alongside the spoken Arabic, particularly the SIM dialogues, vocabulary and signs. Check that opening vocabulary in Word Anatomy or practising it in review keeps the Turkish meaning. The 18 phrases shared with Ask in Arabic use the same Turkish wording in both places.
+The Turkish Speak draft covers course selection, all 36 Saudi, Emirati Gulf, and Modern Standard Arabic A1 lessons, and the nine Umrah and Hajj practice lessons. Review the lesson wording alongside the spoken Arabic, particularly the SIM dialogues, vocabulary and signs. Check that opening vocabulary in Word Anatomy or practising it in review keeps the Turkish meaning. The 18 phrases shared with Ask in Arabic use the same Turkish wording in both places.
 
 The Turkish desktop study draft includes the Adult plan customiser, Maktab study and sticker labels, and study history. It also covers install help, audio catalogue states, and reference recording controls. Review the browser menu labels on the platforms named in the install instructions.
 
