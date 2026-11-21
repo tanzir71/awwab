@@ -24,7 +24,7 @@ export const studyNames = {
   lesson: (language: Language, number: number, fallback: string) => studyName(language, `studyQaida${number}`, fallback),
   family: (language: Language, id: string, fallback: string) => studyName(language, `studyTakhti-${id}`, fallback),
   prayerSection: (language: Language, title: string) => (language === "bn" ? prayerSectionTitles[title] : undefined) ?? title,
-  wordKind: (language: Language, kind: string) => studyName(language, `studyWordKind-${kind.toLowerCase().replaceAll(" ", "-")}`, kind),
+  wordKind: (language: Language, kind: string) => studyName(language, `studyWordKind-${kind.toLowerCase().replace(/ /g, "-")}`, kind),
 };
 
 export function studySearchTerm(text: string) {
