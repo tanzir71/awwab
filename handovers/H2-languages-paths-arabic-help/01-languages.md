@@ -128,6 +128,8 @@ The Turkish settings draft includes reading and display preferences, your words,
 
 The Turkish planning draft covers the Hijri calendar and local moon-sighting confirmation, as well as mosque timetables, source labels, weekly assignments, and Eid records. Review the expected and confirmed dates in the calendar and the exported reminders. Check the WhatsApp wording with actual mosque names.
 
+The Turkish zakat draft includes asset and payment entry, the Hijri anniversary, and print and export labels. The calculator accepts TRY and displays amounts with Turkish separators. Review the nisab and jewellery wording beside the cited guidance and check the printed totals against the saved figures.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
