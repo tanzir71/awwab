@@ -5,6 +5,7 @@ import qaidaAudio from "../docs/content/qaida-audio.json" with { type: "json" };
 import qaida from "../docs/content/qaida-lessons.json" with { type: "json" };
 import umrahAudio from "../docs/content/umrah-guide-audio.json" with { type: "json" };
 import umrah from "../docs/content/umrah-steps.json" with { type: "json" };
+import french from "../handovers/H2-languages-paths-arabic-help/drafts/fr.json" with { type: "json" };
 import urdu from "../handovers/H2-languages-paths-arabic-help/drafts/ur.json" with { type: "json" };
 import { qaidaAudioRef, qaidaHarakatExercise, qaidaHarakatExerciseRef, qaidaRowCitation, qaidaRows } from "../src/lib/qaidaPractice.ts";
 import { qaidaRecitationLessons, qaidaRecitations } from "../src/lib/qaidaRecitation.ts";
@@ -109,8 +110,14 @@ function qaidaEntries(lesson) {
   return entries;
 }
 
+const ritualDrafts = {
+  fr: { name: "French", messages: french.messages },
+  ur: { name: "Urdu", messages: urdu.messages },
+};
+
 const ritualEntries = umrahAudio.packs.flatMap(pack => {
   if (pack.items.length !== umrah.steps.length) throw new Error(`Expected one recording per ritual in ${pack.id}.`);
+  const draft = ritualDrafts[pack.language];
   return umrah.steps.map((step, index) => {
     const item = pack.items[index];
     if (item.ref !== `${pack.id}:${step.id}` || !step.narration[pack.language]) {
@@ -128,13 +135,13 @@ const ritualEntries = umrahAudio.packs.flatMap(pack => {
         { label: "Bangla on-screen summary", value: step.summaryBn, lang: "bn" },
         ...(step.notes ? [{ label: "English on-screen notes", value: step.notes.join("\n"), lang: "en" }] : []),
         ...(step.notesBn ? [{ label: "Bangla on-screen notes", value: step.notesBn.join("\n"), lang: "bn" }] : []),
-        ...(pack.language === "ur" ? [
-          { label: "Urdu on-screen title", value: urdu.messages[umrahStepTitle(step.id)].text, lang: "ur" },
-          { label: "Urdu on-screen summary", value: urdu.messages[umrahStepSummary(step.id)].text, lang: "ur" },
+        ...(draft ? [
+          { label: `${draft.name} on-screen title`, value: draft.messages[umrahStepTitle(step.id)].text, lang: pack.language },
+          { label: `${draft.name} on-screen summary`, value: draft.messages[umrahStepSummary(step.id)].text, lang: pack.language },
           ...(step.notes ?? []).map((_, noteIndex) => ({
-            label: "Urdu on-screen note",
-            value: urdu.messages[umrahStepNote(step.id, noteIndex)].text,
-            lang: "ur",
+            label: `${draft.name} on-screen note`,
+            value: draft.messages[umrahStepNote(step.id, noteIndex)].text,
+            lang: pack.language,
           })),
         ] : []),
       ],
@@ -143,7 +150,7 @@ const ritualEntries = umrahAudio.packs.flatMap(pack => {
         ...step.sources.map(source => ({ title: source.label, url: source.url })),
         { title: pack.speaker, url: pack.source },
         { title: "Recording source terms", url: pack.licenseUrl },
-        ...(pack.dataset ? [{ title: "Training dataset", url: pack.dataset }] : []),
+        ...(pack.dataset ? [{ title: pack.datasetName ?? "Training dataset", url: pack.dataset }] : []),
       ],
     };
   });
@@ -169,6 +176,7 @@ review.write(output, {
     "umrah-en": { label: "Umrah English narration", assignment: "An English speaker checks pronunciation. A scholar checks the instructions against the cited sources." },
     "umrah-bn": { label: "Umrah Bangla narration", assignment: "A Bangla speaker checks wording and pronunciation. A scholar checks the instructions against the cited sources." },
     "umrah-ur": { label: "Umrah Urdu narration", assignment: "An Urdu speaker checks wording and pronunciation. A scholar checks the instructions against the cited sources." },
+    "umrah-fr": { label: "Umrah French narration", assignment: "A French speaker checks wording and pronunciation. A scholar checks the instructions against the cited sources." },
   },
   varietyLabel: "Material",
   groupLabel: "Lesson or guide",

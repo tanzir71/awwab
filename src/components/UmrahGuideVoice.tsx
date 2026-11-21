@@ -12,7 +12,7 @@ function VoiceCredit({ pack }: { pack: UmrahGuidePack }) {
   const { t } = useCopy();
   return <p className="small muted">
     <bdi lang={pack.language}>{pack.name}</bdi> · {t("askGeneratedSpeech")} · <a href={pack.source} rel="noreferrer">{pack.speaker}</a>
-    {pack.dataset && <> · <a href={pack.dataset} rel="noreferrer">AI4Bharat Rasa</a></>}
+    {pack.dataset && pack.datasetName && <> · <a href={pack.dataset} rel="noreferrer">{pack.datasetName}</a></>}
   </p>;
 }
 

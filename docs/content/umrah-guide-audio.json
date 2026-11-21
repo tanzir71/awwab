@@ -79,7 +79,8 @@
           "path": "packs/audio/umrah-guide-v1/bn/halq.mp3"
         }
       ],
-      "dataset": "https://huggingface.co/datasets/ai4bharat/Rasa"
+      "dataset": "https://huggingface.co/datasets/ai4bharat/Rasa",
+      "datasetName": "AI4Bharat Rasa"
     },
     {
       "id": "umrah-guide-v1-ur",
@@ -120,6 +121,48 @@
           "path": "packs/audio/umrah-guide-v1/ur/halq.mp3"
         }
       ]
+    },
+    {
+      "id": "umrah-guide-v1-fr",
+      "language": "fr",
+      "name": "Français",
+      "speaker": "Piper · SIWIS",
+      "source": "https://huggingface.co/rhasspy/piper-voices/blob/0c9c5d340496a47205a799eb046aab69334a88e9/fr/fr_FR/siwis/medium/MODEL_CARD",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "attribution": "Generated speech · Piper · SIWIS",
+      "bytes": 334676,
+      "items": [
+        {
+          "ref": "umrah-guide-v1-fr:ihram",
+          "path": "packs/audio/umrah-guide-v1/fr/ihram.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-fr:talbiyah",
+          "path": "packs/audio/umrah-guide-v1/fr/talbiyah.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-fr:tawaf",
+          "path": "packs/audio/umrah-guide-v1/fr/tawaf.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-fr:two_rakahs",
+          "path": "packs/audio/umrah-guide-v1/fr/two_rakahs.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-fr:zamzam",
+          "path": "packs/audio/umrah-guide-v1/fr/zamzam.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-fr:sai",
+          "path": "packs/audio/umrah-guide-v1/fr/sai.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-fr:halq",
+          "path": "packs/audio/umrah-guide-v1/fr/halq.mp3"
+        }
+      ],
+      "dataset": "https://doi.org/10.7488/ds/1705",
+      "datasetName": "SIWIS French Speech Synthesis Database"
     }
   ]
 }

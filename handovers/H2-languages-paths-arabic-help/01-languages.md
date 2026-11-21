@@ -198,7 +198,7 @@ The French Umrah preparation draft covers trip details, the 12-item checklist, o
 
 The French Ask in Arabic draft includes all 63 phrase meanings, the full-screen helper replies, hotel and lost cards, and the emergency panel. Review the variable phrases with the Arabic and generated recordings, including the gate number, destination, and family member. Compare the emergency labels with the official guide. [Saudi emergency numbers](https://apd.gov.sa/web/content/84584).
 
-The French live Umrah draft covers the daily plan, Haram focus, the ritual steps and pocket guide, offline maps, and the saʿy counter. Review the wording with the cited sources and check the directions between Ṣafā and Marwa. The preview uses the generated English narration pack for French.
+The French live Umrah draft covers the daily plan, Haram focus, the ritual steps and pocket guide, offline maps, and the saʿy counter. Review the wording with the cited sources and check the directions between Ṣafā and Marwa. The preview offers a downloadable French narration pack with generated speech for all seven steps. Use the lesson audio review export to check the transcripts and pronunciation alongside the cited sources.
 
 The French desktop study draft includes the plan customiser, Maktab stickers, study history, the install instructions, and reference recording controls. Check the browser menu labels on the platforms named in the install instructions.
 
