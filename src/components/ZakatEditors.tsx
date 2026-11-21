@@ -9,7 +9,7 @@ import { updateRecord } from "@/lib/storageService";
 import { initialZakat, balanceLabels, metalKinds, metalLabels, unitGrams, zakatBalances, zakatPrices, type MetalUnit, type NisabBasis,
   type ZakatAsset, type ZakatBalance, type ZakatProfile } from "@/lib/zakat";
 
-const currencies = ["BDT", "SAR", "USD", "GBP", "EUR", "TRY", "INR", "PKR", "IDR", "MYR", "AED", "CAD", "AUD", "IRR", "AFN"];
+const currencies = ["BDT", "SAR", "USD", "GBP", "EUR", "TRY", "INR", "PKR", "IDR", "MYR", "AED", "CAD", "AUD", "IRR", "AFN", "NGN", "XOF"];
 
 export type ZakatEditor =
   | { type: "settings" }
