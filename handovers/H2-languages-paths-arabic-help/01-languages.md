@@ -292,6 +292,8 @@ The Persian share draft includes milestone text, templates, image sizes and the 
 
 The Persian Umrah preparation draft covers the trip details, 12-item checklist, offline pack labels and trip file transfer. Review the wording for the Arabic hotel fields and the import warning about replacing the trip details and duʿā request list.
 
+The Persian live Umrah draft covers the itinerary, Haram focus, printed guide, offline maps and saʿy counter. Review the distinction between a tawaf round and a saʿy journey, the labels for each direction, and the wording about optional location access.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
