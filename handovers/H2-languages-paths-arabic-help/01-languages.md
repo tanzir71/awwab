@@ -248,6 +248,8 @@ The Malay Ask in Arabic draft includes all 63 phrase meanings, helper replies, h
 
 The Malay desktop study draft includes the plan customiser, Maktab stickers, study history, reference recording controls and installation instructions. Check the browser menu wording on the platforms named in the instructions.
 
+The Malay speaking draft covers course selection, the twelve Saudi Hijazi A1 lessons and the nine Umrah and Hajj lessons. Check the dialogue, vocabulary and signs against the Arabic recordings. Eighteen lines in the pilgrimage lessons reuse the same meanings as Ask in Arabic.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
