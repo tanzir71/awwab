@@ -338,6 +338,8 @@ The Hausa Umrah preparation draft covers trip details, the 12-item checklist, of
 
 The Hausa live Umrah draft covers the itinerary, Haram focus, printed guide, offline maps and the sa’ayi counter. Check the wording for optional location access, the directions between Safa and Marwa, and the distinction between a tawaf round and a sa’ayi journey.
 
+The Hausa Ask in Arabic draft covers all 63 phrase meanings, full-screen replies, hotel and lost cards, and the emergency panel. Check place and family terms in the sentence they complete. Compare the health phrases with the Arabic and the emergency labels with the official Saudi guidance. [Saudi emergency guide](https://apd.gov.sa/web/content/84584).
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
