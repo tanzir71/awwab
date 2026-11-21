@@ -27,7 +27,7 @@ import { newReview } from "./reviews";
 import { practiceChapters, readingPortions } from "./readingPractice";
 import { formatQuranReference } from "./quran";
 import { checkQuranWordEdition } from "../../scripts/quran-word-edition.mjs";
-import { parseNumberedQuranMeanings } from "../../scripts/quran-meaning-edition.mjs";
+import { checkQuranMeaningEdition, parseNumberedQuranMeanings, parseQuranEncMeanings } from "../../scripts/quran-meaning-edition.mjs";
 
 const quran = JSON.parse(gunzipSync(readFileSync(new URL("../../public/data/quran-study-v1.json.gz", import.meta.url))).toString()) as StudyQuran;
 
@@ -174,6 +174,24 @@ describe("Offline Quran study edition", () => {
     expect(result.sourceNotice).toBe("# Edition notice");
     expect(() => parseNumberedQuranMeanings(text + "\n1|1|Duplicate")).toThrow(/Duplicate Quran meaning at 1:1/);
     expect(() => parseNumberedQuranMeanings(text.replace("114|6|", "114|7|"))).toThrow(/every canonical ayah/);
+  });
+
+  it("retains QuranEnc notices and multiline footnotes with their original ayah", () => {
+    const sourceNotice = "Translation Info:\r\n# Last update: 2025-08-13 14:37:29 (v1.1.3-csv.1)";
+    const rows = Object.values(quran.surahs).flat().map(({ ref }, i) =>
+      `${i + 1},${ref.replace(":", ",")},"Meaning, with punctuation",${i ? "" : '"A quoted ""note""\r\nSecond line"'}`);
+    const csv = [`"${sourceNotice}",,,,`, "id,sura,aya,translation,footnotes", ...rows].join("\r\n");
+    const parsed = parseQuranEncMeanings(csv);
+    expect(parsed.sourceNotice).toBe(sourceNotice);
+    expect(parsed.sourceVersion).toBe("v1.1.3-csv.1");
+    expect(parsed.verses["1:1"]).toBe("Meaning, with punctuation");
+    expect(parsed.footnotes).toEqual({ "1:1": 'A quoted "note"\r\nSecond line' });
+    expect(() => parseQuranEncMeanings(csv.replace("v1.1.3-csv.1", ""))).toThrow(/original notice/);
+    const edition = { ...parsed, credit: "Candidate edition", source: "https://example.com/quran",
+      license: "Test terms", licenseUrl: "https://example.com/terms" };
+    expect(checkQuranMeaningEdition(edition, "ur")).toEqual(edition);
+    expect(() => checkQuranMeaningEdition({ ...edition, footnotes: { "114:7": "Wrong verse" } }, "ur")).toThrow(/canonical ayah/);
+    expect(() => checkQuranMeaningEdition({ ...edition, footnotes: undefined }, "ur")).toThrow(/original notice and footnotes/);
   });
 
   it("breaks āyat al-Kursī on waqf for practice while keeping its review as one āyah", () => {

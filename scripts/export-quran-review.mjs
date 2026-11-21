@@ -4,7 +4,7 @@ import { dirname, resolve } from "node:path";
 import { gunzipSync } from "node:zlib";
 import { splitUthmaniOpening } from "../src/lib/quranOpening.ts";
 import { pronunciationReview } from "./pronunciation-review.mjs";
-import { parseNumberedQuranMeanings } from "./quran-meaning-edition.mjs";
+import { parseNumberedQuranMeanings, parseQuranEncMeanings } from "./quran-meaning-edition.mjs";
 import { https, present } from "./translation-attribution.mjs";
 
 const [manifestPath, output] = process.argv.slice(2);
@@ -21,22 +21,28 @@ const quran = JSON.parse(gunzipSync(readFileSync(new URL("quran-study-v1.json.gz
 const sourceDirectory = dirname(resolve(manifestPath));
 const seen = new Set();
 
-const candidates = manifest.map(({ locale, file, credit, source, terms }) => {
+const candidates = manifest.map(({ locale, file, credit, source, terms, format = "numbered" }) => {
   const language = locales.find(item => item.code === locale);
   if (!language || seen.has(locale) || !present(file) || !present(credit) || !https(source) || !https(terms)) {
     throw new Error(`Candidate ${locale} needs a unique supported locale, file, translator credit, source and terms links.`);
   }
+  if (format !== "quranenc-csv" && format !== "numbered") throw new Error(`Unknown Quran edition format ${format}.`);
   seen.add(locale);
   const bytes = readFileSync(resolve(sourceDirectory, file));
-  const { verses, sourceNotice } = parseNumberedQuranMeanings(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
+  const text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  const edition = format === "quranenc-csv" ? parseQuranEncMeanings(text) : parseNumberedQuranMeanings(text);
+  if (format === "quranenc-csv" && edition.sourceNotice.match(/^# URL: (\S+)\r?$/m)?.[1] !== source) {
+    throw new Error(`QuranEnc candidate ${locale} must use the edition URL printed in the source notice.`);
+  }
   const sourceSha256 = createHash("sha256").update(bytes).digest("hex");
-  return { language, credit, source, terms, sourceSha256, sourceNotice, verses };
+  return { language, credit: edition.sourceVersion ? `${credit} · QuranEnc ${edition.sourceVersion}` : credit,
+    source, terms, sourceSha256, ...edition };
 });
 
 const directory = resolve(output);
 mkdirSync(directory);
 for (const candidate of candidates) {
-  const { language, credit, source, terms, sourceSha256, sourceNotice, verses } = candidate;
+  const { language, credit, source, terms, sourceSha256, sourceNotice, sourceVersion, verses, footnotes } = candidate;
   const groups = { edition: "Edition information" };
   const rows = [{
     id: "edition", variety: "quran", group: "edition", label: "Translator, source and permissions",
@@ -44,6 +50,7 @@ for (const candidate of candidates) {
     fields: [
       { label: "Translator or institution", value: credit },
       { label: "Imported verses", value: String(Object.keys(verses).length) },
+      ...(footnotes ? [{ label: "Verses with source footnotes", value: String(Object.keys(footnotes).length) }] : []),
       { label: "Source file SHA-256", value: sourceSha256 },
       { label: "Redistribution", value: "Confirmation pending" },
       ...(sourceNotice ? [{ label: "Source file notice", value: sourceNotice }] : []),
@@ -57,6 +64,7 @@ for (const candidate of candidates) {
       rows.push({
         id: verse.ref, variety: "quran", group, label: verse.ref,
         expected: { ar: splitUthmaniOpening(verse.uthmani, verse.ref).text, translation: verses[verse.ref], en: verse.english },
+        ...(footnotes?.[verse.ref] && { fields: [{ label: "Source footnotes", value: footnotes[verse.ref], lang: language.code }] }),
         recordings: [], sources: [{ title: `Quran ${verse.ref}`, url: `https://quran.com/${verse.ref.replace(":", "/")}` }],
       });
     }
@@ -73,7 +81,7 @@ for (const candidate of candidates) {
     varietyLabel: "Edition", groupLabel: "Surah", groups,
   }, rows);
   const draft = { _status: "draft", locale: language.code, credit, source, license: null, licenseUrl: null,
-    sourceSha256, sourceTerms: terms, sourceNotice, verses };
+    sourceSha256, sourceTerms: terms, sourceNotice, sourceVersion, verses, footnotes };
   writeFileSync(resolve(target, "edition.draft.json"), JSON.stringify(draft, null, 2) + "\n", { flag: "wx" });
 }
 
