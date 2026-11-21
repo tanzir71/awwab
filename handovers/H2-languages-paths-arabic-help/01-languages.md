@@ -186,6 +186,8 @@ The French Word Anatomy and Fluency draft includes letter sounds, joining forms,
 
 The French reader draft covers the Qur’an reader and recitation controls, preparation for reciting with a teacher, and Hadith search and attribution. Review Hadith collection names with copied references and the displayed grades. Full Qur’an meanings and Hadith translations in the preview use the attributed English editions while French editions await review and redistribution permission.
 
+The French learning paths draft covers placement, the Maktab learning map, and the memorisation plan and weekly recitation check. Review the 15 passage titles and the eight passage notes alongside their cited Hadith and grades. Check the wording for the Sabaq, Sabqi and Manzil review stages.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
