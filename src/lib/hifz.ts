@@ -131,7 +131,9 @@ export function portionPlan(portions: HifzPortion[], minutes: number, start: str
 export function ratePortion(previous: PortionReview | undefined, grade: ReviewGrade, now: Date, day: string): PortionReview {
   const correctDays = previous?.correctDays ?? [];
   const next = grade === "got-it" && correctDays.length < 3 && !correctDays.includes(day) ? [...correctDays, day] : correctDays;
-  return { review: reviewCard(previous?.review, grade, now), correctDays: next, lastDay: day,
+  // Older records can have a rating today without its first-attempt result.
+  const priorResultUnknown = previous?.lastDay === day && previous.review.firstTries?.[day] === undefined;
+  return { review: reviewCard(previous?.review, grade, now, priorResultUnknown ? undefined : day), correctDays: next, lastDay: day,
     learnedOn: previous?.learnedOn ?? (next.length === 3 ? day : undefined) };
 }
 

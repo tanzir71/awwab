@@ -1,4 +1,4 @@
-import { addDays, dateKey } from "./dates";
+import { dateKey } from "./dates";
 import { countKnownQuranWords } from "./quran";
 import { grades, qaidaGrades, reviewWithRating, type QaidaGrade, type ReviewGrade, type Reviews } from "./reviews";
 import type { Grade } from "ts-fsrs";
@@ -121,36 +121,33 @@ export function setTeacherCheck(chapter: number, item: RecitationCheck, checked:
   });
 }
 
-async function writeReview(id: string, grade: Grade, recalled: boolean, now: Date, zone: string) {
+async function writeReview(id: string, grade: Grade, now: Date, zone: string) {
   const reviews = await getRecord<Reviews>("reviews", {});
   const previous = reviews[id];
-  const next = reviewWithRating(previous, grade, now);
-  const today = dateKey(now, zone);
-  const firstTries = Object.fromEntries(Object.entries(previous?.firstTries ?? {}).filter(([day]) => day >= addDays(today, -29)));
-  next.firstTries = { [today]: recalled, ...firstTries };
+  const next = reviewWithRating(previous, grade, now, dateKey(now, zone));
   await db.records.put({ key: "reviews", value: { ...reviews, [id]: next } });
   await saveStudyDay(now, zone);
   return previous?.bucket !== "manzil" && next.bucket === "manzil";
 }
 
 export function saveSurahReview(id: number, grade: ReviewGrade, now: Date, zone: string) {
-  return db.transaction("rw", db.records, () => writeReview(String(id), grades[grade], grade === "got-it", now, zone));
+  return db.transaction("rw", db.records, () => writeReview(String(id), grades[grade], now, zone));
 }
 
 export function saveWordReview(id: string, grade: ReviewGrade, now: Date, zone: string) {
   return db.transaction("rw", db.records, async () => {
-    await writeReview(id, grades[grade], grade === "got-it", now, zone);
+    await writeReview(id, grades[grade], now, zone);
     return grade === "got-it" ? await setFamiliar("word-bank-known", id, true) : undefined;
   });
 }
 
 export function saveLearningReview(id: string, grade: ReviewGrade, now: Date, zone: string) {
-  return db.transaction("rw", db.records, () => writeReview(id, grades[grade], grade === "got-it", now, zone));
+  return db.transaction("rw", db.records, () => writeReview(id, grades[grade], now, zone));
 }
 
 export function saveQaidaRowReview(lesson: number, row: number, grade: QaidaGrade, now: Date, zone: string) {
   if (!Number.isInteger(row) || !qaidaRows(lesson)[row]) throw new RangeError("Unknown Qaida row.");
-  return db.transaction("rw", db.records, () => writeReview(qaidaReviewId(lesson, row), qaidaGrades[grade], grade !== "hard", now, zone));
+  return db.transaction("rw", db.records, () => writeReview(qaidaReviewId(lesson, row), qaidaGrades[grade], now, zone));
 }
 
 export function saveTakhtiPractice(family: string, now: Date, zone: string) {

@@ -4,7 +4,7 @@ import { dailyPortions, getHifzPassage, groupPortions, portionBucket,
 import { grammarPath, grammarReviewPrefix, patternPracticePath, patternReviewPrefix, phraseReviewPrefix,
   rootsPath, rootsReviewPrefix, sentenceReviewPrefix, sentenceStructurePath } from "./learningPaths";
 import { tajweedReviewDestination, tajweedReviewPrefix } from "./tajweed";
-import { isDue, type Bucket, type Reviews } from "./reviews";
+import { firstTryTotals, isDue, type Bucket, type Reviews } from "./reviews";
 import { parseQaidaReview } from "./qaidaPractice";
 import surahs from "../../docs/content/surahs-for-salah.json";
 
@@ -20,7 +20,7 @@ export function studyPlanMinutes(hidden: DeskActivity[], memoriseMinutes = 0) {
 
 type MemorisePlan = { passage: HifzPassage; portions: HifzPortion[]; minutes: number; start?: string };
 type MemoriseItem = { passage: HifzPassage; portion: HifzPortion; position: number; minutes: number; bucket: Bucket; to: string };
-export type MemoriseDesk = { due: MemoriseItem[]; forecast: Map<string, number> };
+export type MemoriseDesk = { due: MemoriseItem[]; forecast: Map<string, number>; attempts: number; correct: number };
 
 export function memorisePlans(plans: HifzPlans, current: string, quran: StudyQuran): MemorisePlan[] {
   return [...new Set([current, ...Object.keys(plans)])].flatMap(id => {
@@ -63,7 +63,8 @@ export function memoriseDesk(plans: MemorisePlan[], reviews: HifzReviews, now: D
     forecast.set(next, (forecast.get(next) ?? 0) + 1);
   }
   const order: Bucket[] = ["sabaq", "sabqi", "manzil"];
-  return { due: [...due.values()].sort((a, b) => order.indexOf(a.bucket) - order.indexOf(b.bucket)), forecast };
+  return { due: [...due.values()].sort((a, b) => order.indexOf(a.bucket) - order.indexOf(b.bucket)), forecast,
+    ...firstTryTotals(Object.values(reviews).map(({ review }) => review), today) };
 }
 
 export function isPathReview(id: string) {
@@ -76,27 +77,19 @@ export function isSurahStudyReview(id: string) {
 
 export function reviewQueue(reviews: Reviews, now: Date, zone: string) {
   const today = dateKey(now, zone);
-  const recallWindowStart = addDays(today, -29);
   const due = Object.entries(reviews).filter(([, review]) => isDue(review, now));
   const history = new Map<string, number>();
-  let correct = 0;
-  let attempts = 0;
   for (const review of Object.values(reviews)) {
     if (!isDue(review, now)) {
       const day = dateKey(new Date(review.card.due), zone);
       history.set(day, (history.get(day) ?? 0) + 1);
-    }
-    for (const [day, remembered] of Object.entries(review.firstTries ?? {})) {
-      if (day < recallWindowStart || day > today) continue;
-      attempts++;
-      if (remembered) correct++;
     }
   }
   const forecast = Array.from({ length: 7 }, (_, index) => {
     const day = addDays(today, index);
     return { day, count: (history.get(day) ?? 0) + (index === 0 ? due.length : 0) };
   });
-  return { due, forecast, attempts, correct };
+  return { due, forecast, ...firstTryTotals(Object.values(reviews), today) };
 }
 
 export function reviewDestination(id?: string) {

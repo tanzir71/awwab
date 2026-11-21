@@ -22,12 +22,13 @@ import { reviewCard, type Reviews } from "./reviews";
 import { countKnownQuranWords } from "./quran";
 import { completeOnboarding, desktopPlacementPassed, placementLesson, prayerSetupSuggestion } from "./onboarding";
 import { finishQaidaLesson, finishSpeakUnit, markReadingPortion, rememberFlowPlace, rememberQaidaPlace, saveFluencyPractice,
-  saveJuzRecitalRating, saveQaidaRowReview, saveSurahReview, saveTakhtiPractice, saveWordReview, setAyahFamiliar, setTeacherCheck, wordMilestones } from "./studyMilestones";
+  saveJuzRecitalRating, savePortionReview, saveQaidaRowReview, saveSurahReview, saveTakhtiPractice, saveWordReview, setAyahFamiliar,
+  setTeacherCheck, wordMilestones } from "./studyMilestones";
 import { defaultSpeakVariety, speakCourseVariety, speakGoalsKey, speakProgressKey, speakVarietyKey } from "./speakCurriculum";
 import { completedReadingChapters, emptyReadingPractice, firstUnreadAyah, readingFlowPlaceKey, recitationChecks,
   resumeFlowReading, teacherChecklistComplete } from "./readingPractice";
-import type { HifzPortion, JuzRecitals } from "./hifz";
-import { isSurahStudyReview, reviewDestination, reviewQueue, studyPlanMinutes } from "./studyDesk";
+import type { HifzPortion, HifzReviews, JuzRecitals } from "./hifz";
+import { isSurahStudyReview, memoriseDesk, reviewDestination, reviewQueue, studyPlanMinutes } from "./studyDesk";
 import coreWords from "../../docs/content/core-quran-words.json";
 import qaida from "../../docs/content/qaida-lessons.json";
 
@@ -269,6 +270,32 @@ describe("saved study milestones", () => {
     const reviews = await getRecord<Reviews>("reviews", {});
     expect(reviewQueue(reviews, times.asr, dhaka.timeZone)).toMatchObject({ attempts: 2, correct: 1 });
     expect(reviewQueue(reviews, new Date("2026-12-22T12:00:00Z"), dhaka.timeZone)).toMatchObject({ attempts: 0, correct: 0 });
+  });
+
+  it("keeps first tries for Memorise across repeats, overlapping plans and backup restore", async () => {
+    const legacy = "67:4-67:7";
+    const first = "67:1-67:3";
+    const second = "67:8-67:9";
+    const today = times.asr;
+    const zone = dhaka.timeZone;
+    await db.records.put({ key: "hifz-portions", value: {
+      [legacy]: { review: reviewCard(undefined, "shaky", today), correctDays: [], lastDay: day },
+    } });
+    await savePortionReview("al-mulk", legacy, "got-it", today, zone, 7);
+    await savePortionReview("al-mulk", first, "shaky", today, zone, 7);
+    await savePortionReview("surah-67", first, "got-it", today, zone, 7);
+    await savePortionReview("al-mulk", second, "got-it", today, zone, 7);
+    const tomorrow = new Date("2026-11-20T09:00:00Z");
+    await savePortionReview("al-mulk", legacy, "got-it", tomorrow, zone, 7);
+
+    const file = await backup();
+    await db.records.clear();
+    await restoreBackup(file);
+    const portions = await getRecord<HifzReviews>("hifz-portions", {});
+    expect(portions[first].review.firstTries).toEqual({ [day]: false });
+    expect(portions[legacy].review.firstTries).toEqual({ "2026-11-20": true });
+    expect(memoriseDesk([], portions, tomorrow, zone)).toMatchObject({ attempts: 3, correct: 2 });
+    expect(memoriseDesk([], portions, new Date("2026-12-19T09:00:00Z"), zone)).toMatchObject({ attempts: 1, correct: 1 });
   });
 
   it("puts overdue reviews on today's bar and keeps customised plan minutes in sync", () => {

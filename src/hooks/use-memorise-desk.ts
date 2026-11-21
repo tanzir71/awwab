@@ -4,7 +4,7 @@ import { studyQuran, type HifzPlans, type HifzReviews, type StudyQuran } from "@
 import { db, getRecord } from "@/lib/storageService";
 import { memoriseDesk, memorisePlans, type MemoriseDesk } from "@/lib/studyDesk";
 
-const empty: MemoriseDesk = { due: [], forecast: new Map() };
+const empty: MemoriseDesk = { due: [], forecast: new Map(), attempts: 0, correct: 0 };
 
 export function useMemoriseDesk(enabled: boolean, now: Date, zone: string) {
   const state = useLiveQuery(() => enabled ? db.transaction("r", db.records, () => Promise.all([
@@ -20,6 +20,6 @@ export function useMemoriseDesk(enabled: boolean, now: Date, zone: string) {
   }, [edition, needsEdition]);
   const [plans, current, reviews] = state ?? [];
   const passages = useMemo(() => edition && plans ? memorisePlans(plans, current, edition) : [], [edition, plans, current]);
-  return useMemo(() => enabled && reviews && passages.length ? memoriseDesk(passages, reviews, now, zone) : empty,
+  return useMemo(() => enabled && reviews ? memoriseDesk(passages, reviews, now, zone) : empty,
     [enabled, passages, reviews, now, zone]);
 }

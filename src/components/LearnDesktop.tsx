@@ -136,7 +136,9 @@ function AdultLearn({ progress, settings, now, memorise }: { progress: DeskProgr
   const { date, lesson, row, rows, completed, activeDays, writing, reviews, known } = progress;
   const hidden = useRecord<DeskActivity[]>("study-plan-hidden", []);
   const queue = reviewQueue(reviews, now, settings.city.timeZone);
-  const { due, attempts, correct } = queue;
+  const { due } = queue;
+  const attempts = queue.attempts + memorise.attempts;
+  const correct = queue.correct + memorise.correct;
   const forecast = queue.forecast.map(({ day, count }) => ({ day, count: count + (memorise.forecast.get(day) ?? 0) }));
   const dueCount = due.length + memorise.due.length;
   const nextPortion = memorise.due[0];
