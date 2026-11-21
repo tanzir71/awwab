@@ -182,6 +182,8 @@ The French Qaida and takhti draft covers 17 lesson titles, the Adult and Maktab 
 
 The French Word Bank draft covers all 125 core Qur’an glosses, grammatical categories, the root explorer, and the review controls. Search accepts uppercase input without accents. Review each gloss alongside its Arabic lemma and the cited corpus, and compare the examples in Qur’anic and modern Arabic.
 
+The French Word Anatomy and Fluency draft includes letter sounds, joining forms, roots, the Al-Fātiḥa and Al-ʿAṣr glosses, and word-by-word prayer practice. Check the glosses beside the aligned Arabic and the cited sources, especially where the word order differs in French.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
