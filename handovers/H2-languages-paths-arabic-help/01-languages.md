@@ -230,6 +230,8 @@ The Malay Return draft covers the istighfar counter, all seven Sayyidul Istighfa
 
 The Malay Word Anatomy and prayer study draft includes the Al-ʿAsr word example, the curated Al-Fātiḥah and Al-ʿAsr glosses, and word-by-word meanings for common prayer phrases. Review the glosses in Arabic reading order, including the phrases that span several words. Check the distinction between connected letter forms and modern examples.
 
+The Malay Quran and Hadith reader draft covers searches, source labels, Qur’an reading and review, and the teacher preparation checklist. Compare the labels with the verse and narration references. The preview retains the attributed English editions for full translations while local editions await clearance and review.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
