@@ -238,6 +238,8 @@ The Malay tajwid draft covers the basic and advanced lessons, all 17 makhraj des
 
 The Malay grammar draft covers all 22 lessons for grammar foundations, roots and patterns, and sentence structure. Review the terminology for Arabic verb forms and i‘rab alongside the cited examples. Compare the Al-Kawthar note with the linked attribution to Ibn Kathīr.
 
+The Malay share draft covers milestones, card templates, image formats and the prayer-count setting. Review the text in each image size with the numbers hidden by default. Check the translator credit, verse range and Awwab link on the surah card.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
