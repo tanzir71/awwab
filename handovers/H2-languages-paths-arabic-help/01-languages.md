@@ -162,7 +162,7 @@ The Turkish Saudi Speak draft covers all 14 A2 and 12 B1 lessons, including the 
 
 The Turkish desktop study draft includes the Adult plan customiser, Maktab study and sticker labels, and study history. It also covers install help, audio catalogue states, and reference recording controls. Review the browser menu labels on the platforms named in the install instructions.
 
-The French landing draft covers the full page, including the calendar, offline privacy, sources, and ʿumra. Review the learning and pilgrimage terms at phone and desktop widths, including the short labels beside the ticks. Open `/awwab/lang/fr.html` in a French review build.
+The French draft covers all 4,042 messages in the current UI catalogue, including the landing page. Review the learning and pilgrimage terms at phone and desktop widths, including the short labels beside the ticks. Open `/awwab/lang/fr.html` in a French review build.
 
 The French first-run draft also covers both learning modes, the reading placement, and prayer setup. Compare the welcome verse wording with the Arabic and citation. Check the city names, calculation method labels, and the distinction between the prayer guide reference and ʿAṣr calculation.
 
@@ -205,6 +205,8 @@ The French desktop study draft includes the plan customiser, Maktab stickers, st
 The French Speak draft includes course selection, all 36 Saudi, Emirati Gulf, and Modern Standard Arabic A1 lessons, and the nine Umrah and Hajj practice lessons. The 18 lines shared with Ask in Arabic use the same French meanings. Review the dialogue, vocabulary and signs alongside the generated Arabic audio.
 
 The ten French Gulf workplace lessons cover applying for work, shifts, contracts, pay, leave, safety, and asking about workplace rights. Compare the terms for contract clauses, payroll deductions, and interpreters with the Emirati dialogues.
+
+The French Saudi Speak draft also covers all 14 A2 and 12 B1 lessons, including the dialogues, vocabulary, signs and replies. Review the wording alongside the spoken Arabic, including the conversations about health, faith, and work.
 
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
