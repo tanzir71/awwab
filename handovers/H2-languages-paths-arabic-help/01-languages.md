@@ -282,6 +282,8 @@ The Persian Umrah narration draft includes all seven generated tracks and their 
 
 The Persian Quran and Hadith reader draft covers search, source labels, reading and review controls, and the teacher preparation checklist. Check collection names and references with Persian digits. The preview uses the attributed English editions for full translations while local editions await clearance and review.
 
+The Persian learning paths draft includes placement, the Maktab map, memorisation plans and weekly recitation checks. Review all 15 passage names and eight passage notes alongside their references and grades. Compare the labels for Sabaq, Sabqi and Manzil as a portion moves through review.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
