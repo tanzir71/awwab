@@ -260,6 +260,8 @@ The Persian landing draft covers all 214 landing messages, including navigation,
 
 The Persian setup draft covers the welcome text, Adult and Maktab choices, all eight placement questions, and the prayer setup form. Review the Persian numerals, the Al-Isrāʾ excerpt, and the distinction between the prayer guide and the method used to calculate Asr. The proposed Jaʿfari scope requires the separate decision in §3.
 
+The Persian Today draft covers prayer times, logging and weekly history, the daily study plan, all 17 Qaida lesson names, and upcoming Hijri events. Review the wording for prayers read in time, prayers read later and makeup prayers. Compare the Hijri event descriptions with the cited guidance in the planning views.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
