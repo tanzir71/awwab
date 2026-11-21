@@ -5,7 +5,7 @@ import { ListLink } from "@/components/Surface";
 import { useQaidaPlace, useRecord } from "@/hooks/use-awwab";
 import { useCopy } from "@/lib/copy";
 import { isDue, type Reviews } from "@/lib/reviews";
-import { isPathReview, reviewDestination } from "@/lib/studyDesk";
+import { isPathReview, reviewDestination, type MemoriseDesk } from "@/lib/studyDesk";
 import type { Settings } from "@/lib/storageService";
 import { studyNames } from "@/lib/study-copy";
 import { MaktabMap, Paths } from "./Paths";
@@ -46,8 +46,10 @@ function LearnMobile({ settings, now }: { settings: Settings; now: Date }) {
   </div>;
 }
 
-export function Learn({ settings, desktop, now, tools = false }: { settings: Settings; desktop: boolean; now: Date; tools?: boolean }) {
+export function Learn({ settings, desktop, now, memorise, tools = false }: {
+  settings: Settings; desktop: boolean; now: Date; memorise: MemoriseDesk; tools?: boolean;
+}) {
   if (tools) return <LearnMobile settings={settings} now={now} />;
-  if (desktop) return <LearnDesktop settings={settings} now={now} />;
+  if (desktop) return <LearnDesktop settings={settings} now={now} memorise={memorise} />;
   return settings.mode === "maktab" ? <MaktabMap /> : <Paths desktop={false} />;
 }

@@ -140,13 +140,18 @@ export function portionBucket(record: PortionReview | undefined, today: string):
   return dayDifference(today, record.learnedOn) <= 7 ? "sabqi" : "manzil";
 }
 
-export function nextPortion(portions: HifzPortion[], reviews: HifzReviews, now: Date, today: string) {
+export function dailyPortions(portions: HifzPortion[], reviews: HifzReviews, now: Date, today: string) {
   const sabaq = portions.find(portion => !reviews[portion.id]?.learnedOn);
   const graduatedToday = portions.some(({ id }) => reviews[id]?.learnedOn === today);
-  if (sabaq && !graduatedToday && (reviews[sabaq.id]?.lastDay ?? "") < today) return sabaq;
+  const learning = sabaq && !graduatedToday && (reviews[sabaq.id]?.lastDay ?? "") < today ? [sabaq] : [];
+  const sabqi = portions.filter(({ id }) => portionBucket(reviews[id], today) === "sabqi" && reviews[id].lastDay < today);
+  const manzil = portions.filter(({ id }) => portionBucket(reviews[id], today) === "manzil" && isDue(reviews[id].review, now));
+  return { due: [...learning, ...sabqi, ...manzil], sabaq };
+}
 
-  const sabqi = portions.find(({ id }) => portionBucket(reviews[id], today) === "sabqi" && reviews[id].lastDay < today);
-  return sabqi ?? portions.find(({ id }) => portionBucket(reviews[id], today) === "manzil" && isDue(reviews[id].review, now)) ?? sabaq;
+export function nextPortion(portions: HifzPortion[], reviews: HifzReviews, now: Date, today: string) {
+  const { due, sabaq } = dailyPortions(portions, reviews, now, today);
+  return due[0] ?? sabaq;
 }
 
 export function recitalProgress(portions: HifzPortion[], recital: JuzRecital | undefined, today: string) {

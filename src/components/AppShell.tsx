@@ -16,7 +16,7 @@ import { isDue, type Reviews } from "@/lib/reviews";
 import { mosqueDefaults } from "@/lib/mosques";
 import { message, navigationLabel } from "@/lib/copy";
 import { countKnownQuranWords } from "@/lib/quran";
-import { isSurahStudyReview, reviewDestination, studyPlanMinutes, type DeskActivity } from "@/lib/studyDesk";
+import { isSurahStudyReview, reviewDestination, studyPlanMinutes, type DeskActivity, type MemoriseDesk } from "@/lib/studyDesk";
 import { studyNames } from "@/lib/study-copy";
 import { qaidaRows, resolveQaidaRow } from "@/lib/qaidaPractice";
 import { planMonth } from "@/lib/plan-copy";
@@ -116,7 +116,9 @@ function Tabs({ settings, umrahGuide }: { settings: Settings; umrahGuide: boolea
   </nav>;
 }
 
-export function AppShell({ children, settings, now, desktop }: { children: ReactNode; settings: Settings; now: Date; desktop: boolean }) {
+export function AppShell({ children, settings, now, desktop, memorise }: {
+  children: ReactNode; settings: Settings; now: Date; desktop: boolean; memorise: MemoriseDesk;
+}) {
   const inlineAnatomy = useDesktop(1280);
   const t = message.bind(null, settings);
   const location = useLocation();
@@ -142,6 +144,8 @@ export function AppShell({ children, settings, now, desktop }: { children: React
   const due = Object.entries(reviews).filter(([, review]) => isDue(review, now));
   const nextReview = due.find(([id]) => /^\d+$/.test(id))?.[0];
   const dueSurahs = due.filter(([id]) => /^\d+$/.test(id)).length;
+  const memoriseNext = memorise.due[0];
+  const deskDue = (dueSurahs || due.length) + memorise.due.length;
   const { day, next } = currentPrayerSchedule(settings.city, settings.method, settings.school, now, logs);
   const zakat = useRecord<ZakatProfile | null>("zakat", null);
   const zakatPage = location.pathname === "/plan/zakat";
@@ -158,7 +162,7 @@ export function AppShell({ children, settings, now, desktop }: { children: React
   ].filter(Boolean).join(" · ");
   const stats = prayerStatistics(logs, day);
   const counts: Record<string, string> = {
-    "/learn": due.length ? t("deskDueBadge", { count: dueSurahs || due.length }) : undefined,
+    "/learn": deskDue ? t("deskDueBadge", { count: deskDue }) : undefined,
     "/learn/qaida": ratio(lessonProgress.length, 17),
     "/learn/surahs": ratio(Object.keys(reviews).filter(id => /^\d+$/.test(id)).length, 12),
     "/learn/words": number.format(countKnownQuranWords(familiar, vocabulary)),
@@ -203,6 +207,8 @@ export function AppShell({ children, settings, now, desktop }: { children: React
   const fullscreen = shareSheet || shareMoment || (umrahRoute && !desktop) || location.pathname.startsWith("/print/");
   const today = location.pathname === "/today";
   const studyHome = desktop && location.pathname === "/learn";
+  const reviewCount = studyHome ? deskDue : due.length + memorise.due.length;
+  const reviewPath = memoriseNext && (studyHome || !due.length) ? memoriseNext.to : reviewDestination(nextReview ?? due[0]?.[0]);
   const pathsHome = desktop && location.pathname === "/learn/paths";
   const chapter = location.pathname.startsWith("/learn/surahs/") ? surahs.surahs.slice(0, 12).find(item => String(item.number) === location.pathname.split("/").at(-1)) : undefined;
   const surahStudy = desktop && Boolean(chapter);
@@ -330,10 +336,10 @@ export function AppShell({ children, settings, now, desktop }: { children: React
         <div>{today || learnWorkspace || zakatPage || planDesktop || mosquesDesktop || returnDesktop || guideDesktop || hadithDesktop || settingsDesktop || umrahDesktop ? <h1>{umrahDesktop ? t("umrahPrepare") : settingsDesktop ? t("settingsDeskTitle") : guideDesktop ? t("howToPray") : qaidaStudy ? t("qaidaDesktopTitle", { number: lesson.n }) : surahStudy ? t("surahsForSalah") : wordBankStudy ? t("wordBankName") : title}</h1> : <h2>{title}</h2>}
           <p className="small muted">{guideDesktop ? <>
             <Link to={`/you/prayer?${guideSettingsQuery}`}>{t(guideReference(settings) === "hanafi" ? "prayerGuideHanafi" : "prayerGuideFard")} · {t("prayerGuideSettings")}</Link> · {t("guideDesktopAnatomy")}
-          </> : spokenUnit ? <><Link to={speakSetupPath(spokenUnit.level, spokenUnit.variety)}>{t(speakVarietyLabels[spokenUnit.variety])}</Link> · {t("speakUnitNumber", { number: speakUnitNumber(spokenUnit) })}</> : <>{planSubtitle ?? (pathsHome ? t("pathsSubtitle") : umrahDesktop ? umrahSubtitle : settingsDesktop ? t("settingsDeskCaption") : hadithDesktop ? t("hadithDesktopIntro") : returnDesktop ? t("returnDeskSubtitle") : mosquesDesktop ? t("mosqueDeskCaption", { count: mosques.mosques.length }) : zakatPage ? zakatSubtitle : qaidaStudy ? qaidaSubtitle : surahStudy ? studySubtitle : wordBankStudy ? t("wordBankSubtitle") : date + " · " + hijriLabel(day, settings.hijriAdjust, calendar.anchors, locale))}{today && ` · ${prayerCityLabel(settings.city, t)}`}{studyHome && " · " + t("deskMinutesToday", { count: studyPlanMinutes(hidden) })}</>}</p></div>
+          </> : spokenUnit ? <><Link to={speakSetupPath(spokenUnit.level, spokenUnit.variety)}>{t(speakVarietyLabels[spokenUnit.variety])}</Link> · {t("speakUnitNumber", { number: speakUnitNumber(spokenUnit) })}</> : <>{planSubtitle ?? (pathsHome ? t("pathsSubtitle") : umrahDesktop ? umrahSubtitle : settingsDesktop ? t("settingsDeskCaption") : hadithDesktop ? t("hadithDesktopIntro") : returnDesktop ? t("returnDeskSubtitle") : mosquesDesktop ? t("mosqueDeskCaption", { count: mosques.mosques.length }) : zakatPage ? zakatSubtitle : qaidaStudy ? qaidaSubtitle : surahStudy ? studySubtitle : wordBankStudy ? t("wordBankSubtitle") : date + " · " + hijriLabel(day, settings.hijriAdjust, calendar.anchors, locale))}{today && ` · ${prayerCityLabel(settings.city, t)}`}{studyHome && " · " + t("deskMinutesToday", { count: studyPlanMinutes(hidden, memoriseNext?.minutes) })}</>}</p></div>
         <Link className="chip night" to="/today">{nextPrayer}</Link>
         {settings.mode === "adult" && <>
-          <Link className="action" to={reviewDestination(nextReview ?? due[0]?.[0])}><DesignIcon name="desk-play" size={14} />{t("startReview")}{due.length ? ` · ${number.format(studyHome ? dueSurahs || due.length : due.length)}` : ""}</Link>
+          <Link className="action" to={reviewPath}><DesignIcon name="desk-play" size={14} />{t("startReview")}{reviewCount ? ` · ${number.format(reviewCount)}` : ""}</Link>
           <Link className="action soft" to="/today?log=1"><DesignIcon name="desk-plus" size={14} />{t("logPrayer")}</Link>
           <ShareLink className="action light" to={today ? "/share?from=today" : umrahDesktop ? "/share?template=umrah&from=umrah" : returnDesktop ? "/share?template=return&from=return" : "/share?from=learn"}><DesignIcon name="desk-share" size={14} />{t("share")}</ShareLink>
         </>}

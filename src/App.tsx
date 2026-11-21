@@ -7,6 +7,7 @@ import { SettingsWorkspace } from "@/components/SettingsWorkspace";
 import type { ShareRouteState } from "@/components/ShareLink";
 import { WordingSuggestionLayer } from "@/components/WordingSuggestions";
 import { useClock, useDesktop, useSettings } from "@/hooks/use-awwab";
+import { useMemoriseDesk } from "@/hooks/use-memorise-desk";
 import { defaults, migrateLegacy } from "@/lib/storageService";
 import { CopyContext, message } from "@/lib/copy";
 import { isBuiltIn, languages } from "@/lib/languagePreferences";
@@ -61,6 +62,7 @@ function Main() {
   const settings = useMemo(() => saved && { ...saved, language, pseudoLocale }, [saved, language, pseudoLocale]);
   const desktop = useDesktop();
   const now = useClock();
+  const memorise = useMemoriseDesk(desktop && settings?.mode === "adult", now, settings?.city.timeZone ?? defaults.city.timeZone);
   const location = useLocation();
   const navigate = useNavigate();
   const { pathname, search } = location;
@@ -118,13 +120,13 @@ function Main() {
 
   return <CopyContext.Provider value={settings}>
     <Routes location={background}>
-      <Route element={<AppShell settings={settings} now={now} desktop={desktop}><Outlet /></AppShell>}>
+      <Route element={<AppShell settings={settings} now={now} desktop={desktop} memorise={memorise}><Outlet /></AppShell>}>
         <Route path="/" element={<Navigate replace to={desktop ? "/learn" : "/today"} />} />
         <Route path="/today" element={<Today settings={settings} now={now} desktop={desktop} />} />
         <Route path="/today/guide/:id" element={<PrayerGuide settings={settings} desktop={desktop} />} />
         <Route path="/today/week" element={<PrayerWeek settings={settings} now={now} />} />
-        <Route path="/learn" element={<Learn settings={settings} desktop={desktop} now={now} />} />
-        <Route path="/learn/tools" element={<Learn settings={settings} desktop={desktop} now={now} tools />} />
+        <Route path="/learn" element={<Learn settings={settings} desktop={desktop} now={now} memorise={memorise} />} />
+        <Route path="/learn/tools" element={<Learn settings={settings} desktop={desktop} now={now} memorise={memorise} tools />} />
         <Route path="/learn/paths/check/:track?" element={<PathCheck settings={settings} now={now} />} />
         <Route path="/learn/paths/understand/3" element={<RootsPatterns settings={settings} now={now} />} />
         <Route path="/learn/paths/understand/3/:unit" element={<Grammar course="roots" settings={settings} now={now} />} />

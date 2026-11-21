@@ -9,12 +9,13 @@ import { useCopy } from "@/lib/copy";
 import { addDays, dateKey, formatDay, formatTime } from "@/lib/dates";
 import { calendarDefaults, hijriOn, hijriMonthName } from "@/lib/hijri";
 import { currentPrayerSchedule } from "@/lib/prayerServices";
+import { essentialPassageTitle } from "@/lib/paths-copy";
 import { qaidaExamples, qaidaRows, parseQaidaReview } from "@/lib/qaidaPractice";
-import { coreWordCoverage, coreWordTotal, knownCoreQuranWords, quranText } from "@/lib/quran";
+import { coreWordCoverage, coreWordTotal, formatQuranReference, knownCoreQuranWords, quranText } from "@/lib/quran";
 import { isDue, type Reviews } from "@/lib/reviews";
 import { prayerStatistics, updateRecord, type Settings } from "@/lib/storageService";
 import { studyNames } from "@/lib/study-copy";
-import { deskActivities, deskMinutes, isPathReview, reviewQueue, type DeskActivity } from "@/lib/studyDesk";
+import { deskActivities, deskMinutes, isPathReview, reviewQueue, type DeskActivity, type MemoriseDesk } from "@/lib/studyDesk";
 import { families, lettersForFamily } from "@/lib/takhti";
 import alphabet from "../../docs/content/arabic-letters.json";
 import qaida from "../../docs/content/qaida-lessons.json";
@@ -98,11 +99,12 @@ function WordSamples({ maktab, known }: { maktab: boolean; known: Set<string> })
   </div>;
 }
 
-function CustomisePlan({ hidden, items }: { hidden: DeskActivity[]; items: Record<DeskActivity, string> }) {
+function CustomisePlan({ activities, hidden, items }: { activities: DeskActivity[]; hidden: DeskActivity[]; items: Record<DeskActivity, string> }) {
   const { t } = useCopy();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<DeskActivity[]>([]);
   const [saving, setSaving] = useState(false);
+  const hasActivity = activities.some(activity => !draft.includes(activity));
   async function apply() {
     setSaving(true);
     try {
@@ -117,23 +119,28 @@ function CustomisePlan({ hidden, items }: { hidden: DeskActivity[]; items: Recor
       <DialogTitle>{t("deskCustomisePlan")}</DialogTitle>
       <DialogDescription className="muted">{t("deskChooseActivities")}</DialogDescription>
       <div className="desk-plan-choices">
-        {deskActivities.map(activity => <label key={activity}><input type="checkbox" checked={!draft.includes(activity)}
+        {activities.map(activity => <label key={activity}><input type="checkbox" checked={!draft.includes(activity)}
           onChange={event => setDraft(previous => event.target.checked ? previous.filter(item => item !== activity) : [...previous, activity])} />
           {items[activity]}</label>)}
       </div>
-      {draft.length === deskActivities.length && <p role="status">{t("deskChooseOne")}</p>}
-      <button className="action" type="button" disabled={saving || draft.length === deskActivities.length} onClick={() => void apply()}>{t("deskSavePlan")}</button>
+      {!hasActivity && <p role="status">{t("deskChooseOne")}</p>}
+      <button className="action" type="button" disabled={saving || !hasActivity} onClick={() => void apply()}>{t("deskSavePlan")}</button>
     </DialogContent>
   </Dialog>;
 }
 
-function AdultLearn({ progress, settings, now }: { progress: DeskProgress; settings: Settings; now: Date }) {
+function AdultLearn({ progress, settings, now, memorise }: { progress: DeskProgress; settings: Settings; now: Date; memorise: MemoriseDesk }) {
   const { t, language, locale } = useCopy();
   const number = new Intl.NumberFormat(locale);
   const percentage = new Intl.NumberFormat(locale, { style: "percent" });
   const { date, lesson, row, rows, completed, activeDays, writing, reviews, known } = progress;
   const hidden = useRecord<DeskActivity[]>("study-plan-hidden", []);
-  const { due, forecast, attempts, correct } = reviewQueue(reviews, now, settings.city.timeZone);
+  const queue = reviewQueue(reviews, now, settings.city.timeZone);
+  const { due, attempts, correct } = queue;
+  const forecast = queue.forecast.map(({ day, count }) => ({ day, count: count + (memorise.forecast.get(day) ?? 0) }));
+  const dueCount = due.length + memorise.due.length;
+  const nextPortion = memorise.due[0];
+  const activities = deskActivities.filter(activity => activity !== "memorise" || nextPortion);
   const dueSurahs = due.filter(([id]) => chapters.some(item => item.number === Number(id)));
   const dueLetters = due.filter(([id]) => id.startsWith("letter:") || parseQaidaReview(id)).length;
   const dueExercises = due.filter(([id]) => isPathReview(id)).length;
@@ -153,13 +160,20 @@ function AdultLearn({ progress, settings, now }: { progress: DeskProgress; setti
   const weekday = new Date(date + "T00:00:00Z").getUTCDay();
   const monday = addDays(date, -((weekday + 6) % 7));
   const focus = lesson.n === 4 ? progress.focus + " · " + t("deskAboutRow", { row, total: rows }) : progress.focus;
+  const passage = nextPortion?.passage;
+  const passageName = passage?.id.startsWith("juz-") ? t("hifzJuz", { number: Number(passage.id.slice(4)) })
+    : passage?.id.startsWith("surah-") ? studyNames.surah(language, passage.ranges[0].chapter, passage.title)
+    : passage ? essentialPassageTitle(passage, t) : t("pathsMemorise");
   const labels = { recall: t("deskRecallWords", { name: chapterName(recall), count: recall.words }),
     qaida: t(row < rows ? "deskQaidaRows" : "deskQaidaRow", { number: lesson.n, start: row, end: rows, row }),
+    memorise: nextPortion ? `${passageName} · ${formatQuranReference(nextPortion.portion.ref, locale)}` : passageName,
     salah: t("understandSalah"), manzil: t("deskRecite", { name: chapterName(kept) }), takhti: t("deskFamilyPosition", { number: familyNumber }),
     fluency: t("deskThreeSentences") };
   const plan = {
     recall: { type: "sabqi", method: t("deskRecallHints"), path: "/learn/surahs/" + recall.number + "?mode=recall", done: recordedToday(recall.number) },
     qaida: { type: "sabaq", method: t("spellThenRead"), path: "/learn/qaida/" + lesson.n, done: completed.includes(lesson.n) },
+    memorise: nextPortion && { type: nextPortion.bucket, method: t(nextPortion.bucket === "sabaq" ? "readThenCheck" : "hifzRepeat"),
+      path: nextPortion.to, done: false },
     salah: { type: "words", method: t("wordAnatomy"), path: "/learn/salah", done: false },
     manzil: { type: "manzil", method: t("deskListenRecall"), path: "/learn/surahs/" + kept.number + "?mode=listen", done: recordedToday(kept.number) },
     takhti: { type: "takhti", method: t("traceThenWrite"), path: "/learn/takhti/" + family.id, done: false },
@@ -182,26 +196,28 @@ function AdultLearn({ progress, settings, now }: { progress: DeskProgress; setti
         <span key={day} data-done={activeDays.includes(day)} title={formatDay(day, { weekday: "long", month: "short", day: "numeric" }, locale)}>
           {formatDay(day, { weekday: "narrow" }, locale)}</span>)}</div>
     </section>
-    <section className="card desk-metric"><p className="caption">{t("dueForReview")}</p><h2>{t("studyItems", { count: due.length })}</h2>
-      <p className="muted">{due.length ? t("deskReviewEstimate", { minutes: due.length + dueSurahs.length + 2 * dueLetters,
+    <section className="card desk-metric"><p className="caption">{t("dueForReview")}</p><h2>{t("studyItems", { count: dueCount })}</h2>
+      <p className="muted">{dueCount ? t("deskReviewEstimate", { minutes: due.length + dueSurahs.length + 2 * dueLetters +
+        memorise.due.reduce((minutes, item) => minutes + item.minutes, 0),
         surahs: dueSurahs.length, letters: dueLetters, words: due.length - dueSurahs.length - dueLetters - dueExercises,
-        exercises: dueExercises }) : t("deskNoReviews")}</p>
+        exercises: dueExercises + memorise.due.length }) : t("deskNoReviews")}</p>
       <div className="equal-row desk-buckets">{(["sabaq", "sabqi", "manzil"] as const).map(bucket =>
-        <div className="counter-tile" data-bucket={bucket} key={bucket}><strong>{number.format(due.filter(([, review]) => review.bucket === bucket).length)}</strong>
+        <div className="counter-tile" data-bucket={bucket} key={bucket}><strong>{number.format(due.filter(([, review]) => review.bucket === bucket).length +
+          memorise.due.filter(item => item.bucket === bucket).length)}</strong>
           <small className="caption">{t(bucket).split(" · ")[0]}</small></div>)}</div>
     </section>
     <section className="card desk-span-2 desk-today-plan">
-      <div className="row-between desk-heading"><h2>{t("todayStudyPlan")}</h2><CustomisePlan hidden={hidden} items={labels} /></div>
+      <div className="row-between desk-heading"><h2>{t("todayStudyPlan")}</h2><CustomisePlan activities={activities} hidden={hidden} items={labels} /></div>
       <div className="table-scroll"><table>
         <thead><tr><th scope="col"><span className="sr-only">{t("status")}</span></th>
           {["studyType", "studyItem", "studyMethod", "studyTime", "studyOpen"].map(key => <th scope="col" key={key}>{key === "studyOpen" ? <span className="sr-only">{t(key)}</span> : t(key)}</th>)}</tr></thead>
-        <tbody>{deskActivities.filter(activity => !hidden.includes(activity)).map(activity => {
+        <tbody>{activities.filter(activity => !hidden.includes(activity)).map(activity => {
           const item = plan[activity];
           return <tr key={activity}><td>{item.done && <DesignIcon name="desk-check" size={14} />}</td>
             <td><span className="chip" data-bucket={item.type}>{t(item.type).split(" · ")[0]}</span></td>
             <td><div className="desk-plan-item">{labels[activity]}{activity === "salah" && <ArabicText text={quranText[1][1].uthmani.split(/\s+/)[0]} citation="1:2" verse="1:2" compact />}
               {activity === "takhti" && <ArabicText text={exampleLetters} compact />}</div></td>
-            <td className="muted">{item.method}</td><td className="muted">{t("studyMinutes", { count: deskMinutes[activity] })}</td>
+            <td className="muted">{item.method}</td><td className="muted">{t("studyMinutes", { count: activity === "memorise" ? nextPortion.minutes : deskMinutes[activity] })}</td>
             <td>{item.done ? <span className="desk-done">{t("deskComplete")}</span> : <Link className="action soft" to={item.path}
               aria-label={t("startStudyItem", { name: labels[activity] })}>{t("studyStart")}</Link>}</td></tr>;
         })}</tbody>
@@ -338,8 +354,8 @@ function MaktabLearn({ progress, settings, now }: { progress: DeskProgress; sett
   </div>;
 }
 
-export function LearnDesktop({ settings, now }: { settings: Settings; now: Date }) {
+export function LearnDesktop({ settings, now, memorise }: { settings: Settings; now: Date; memorise: MemoriseDesk }) {
   const progress = useDeskProgress(settings, now);
   return settings.mode === "maktab" ? <MaktabLearn progress={progress} settings={settings} now={now} /> :
-    <AdultLearn progress={progress} settings={settings} now={now} />;
+    <AdultLearn progress={progress} settings={settings} now={now} memorise={memorise} />;
 }

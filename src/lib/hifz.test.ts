@@ -10,7 +10,7 @@ import { chapters, essentialPassages, getHifzPassage, groupPortions, juzs, maxPo
 import { juzAmma, learnedSurahs, levels, patternPracticePath, patternReviewPrefix, placementStartingLevel, qaidaIslandProgress, tracks } from "./learningPaths";
 import { essentialPassageTitle } from "./paths-copy";
 import { parseCorpus } from "./morphology";
-import { reviewDestination } from "./studyDesk";
+import { memoriseDesk, memorisePlans, reviewDestination } from "./studyDesk";
 import { normalizeWord, splitArabicPhrase, splitArabicWords, splitGraphemes } from "./wordAnatomy";
 import content from "../../docs/content/roots-and-patterns.json";
 import grammar from "../../docs/content/grammar-foundations.json";
@@ -627,6 +627,29 @@ describe("Learning path progress", () => {
     reviews[manzil.id] = ratePortion(reviews[manzil.id], "got-it", time(today), today);
     expect(nextPortion(portions, reviews, time(today), today)).toBe(later);
     expect(nextPortion(portions, reviews, time("2026-11-30"), "2026-11-30")).toBe(later);
+  });
+
+  it("shows each due portion once on the desk and forecasts later reviews by local day", () => {
+    const today = "2026-11-29";
+    const now = new Date(`${today}T06:00:00Z`);
+    const recorded = ratePortion(undefined, "got-it", new Date("2026-11-18T06:00:00Z"), "2026-11-18");
+    const plans = memorisePlans({ "al-mulk": { start: "2026-11-18", minutes: 7 }, "surah-67": { start: "2026-11-18", minutes: 10 } }, "surah-67", quran);
+    const [sabaq, sabqi, manzil, later] = plans[0].portions;
+    const stable = { ...recorded, learnedOn: "2026-11-18" };
+    const schedule = memoriseDesk(plans, {
+      [sabqi.id]: { ...recorded, learnedOn: "2026-11-25", lastDay: "2026-11-28" },
+      [manzil.id]: stable,
+      [later.id]: { ...stable, review: { ...stable.review, card: { ...stable.review.card, due: new Date("2026-11-30T19:00:00Z") } } },
+    }, now, "Asia/Dhaka");
+
+    expect(schedule.due.map(item => [item.portion.id, item.bucket, item.to, item.minutes])).toEqual([
+      [sabaq.id, "sabaq", "/learn/hifz/surah-67/1", 10],
+      [sabqi.id, "sabqi", "/learn/hifz/surah-67/2", 2],
+      [manzil.id, "manzil", "/learn/hifz/surah-67/3", 1],
+    ]);
+    expect(schedule.forecast.get(today)).toBe(3);
+    expect(schedule.forecast.get("2026-12-01")).toBe(1);
+    expect(schedule.forecast.size).toBe(2);
   });
 
   it("resumes a full-juz recital in order and reopens seven days after completion", () => {
