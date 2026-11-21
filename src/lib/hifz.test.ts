@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
@@ -27,7 +28,7 @@ import { newReview } from "./reviews";
 import { practiceChapters, readingPortions } from "./readingPractice";
 import { formatQuranReference } from "./quran";
 import { checkQuranWordEdition } from "../../scripts/quran-word-edition.mjs";
-import { checkQuranMeaningEdition, parseNumberedQuranMeanings, parseQuranEncMeanings } from "../../scripts/quran-meaning-edition.mjs";
+import { checkQuranMeaningEdition, parseNumberedQuranMeanings, parseQuranEncMeanings, verifyQuranEncEdition } from "../../scripts/quran-meaning-edition.mjs";
 
 const quran = JSON.parse(gunzipSync(readFileSync(new URL("../../public/data/quran-study-v1.json.gz", import.meta.url))).toString()) as StudyQuran;
 
@@ -177,7 +178,8 @@ describe("Offline Quran study edition", () => {
   });
 
   it("retains QuranEnc notices and multiline footnotes with their original ayah", () => {
-    const sourceNotice = "Translation Info:\r\n# Last update: 2025-08-13 14:37:29 (v1.1.3-csv.1)";
+    const source = "https://quranenc.com/en/browse/urdu_junagarhi";
+    const sourceNotice = `Translation Info:\r\n# URL: ${source}\r\n# Last update: 2025-08-13 14:37:29 (v1.1.3-csv.1)`;
     const rows = Object.values(quran.surahs).flat().map(({ ref }, i) =>
       `${i + 1},${ref.replace(":", ",")},"Meaning, with punctuation",${i ? "" : '"A quoted ""note""\r\nSecond line"'}`);
     const csv = [`"${sourceNotice}",,,,`, "id,sura,aya,translation,footnotes", ...rows].join("\r\n");
@@ -187,11 +189,21 @@ describe("Offline Quran study edition", () => {
     expect(parsed.verses["1:1"]).toBe("Meaning, with punctuation");
     expect(parsed.footnotes).toEqual({ "1:1": 'A quoted "note"\r\nSecond line' });
     expect(() => parseQuranEncMeanings(csv.replace("v1.1.3-csv.1", ""))).toThrow(/original notice/);
-    const edition = { ...parsed, credit: "Candidate edition", source: "https://example.com/quran",
+    const edition = { ...parsed, credit: "Candidate edition", source,
       license: "Test terms", licenseUrl: "https://example.com/terms" };
     expect(checkQuranMeaningEdition(edition, "ur")).toEqual(edition);
     expect(() => checkQuranMeaningEdition({ ...edition, footnotes: { "114:7": "Wrong verse" } }, "ur")).toThrow(/canonical ayah/);
     expect(() => checkQuranMeaningEdition({ ...edition, footnotes: undefined }, "ur")).toThrow(/original notice and footnotes/);
+
+    const bytes = Buffer.from(csv);
+    const sha256 = createHash("sha256").update(bytes).digest("hex");
+    const draft = { ...edition, locale: "ur", sourceSha256: sha256 };
+    const listing = { key: "urdu_junagarhi", language_iso_code: "ur", version: "1.1.3" };
+    expect(verifyQuranEncEdition(draft, bytes, { translations: [listing] })).toEqual({ key: listing.key, version: listing.version, sha256 });
+    expect(() => verifyQuranEncEdition({ ...draft, footnotes: {} }, bytes, { translations: [listing] })).toThrow(/footnotes field/);
+    expect(() => verifyQuranEncEdition(draft, Buffer.from(csv + "\n"), { translations: [listing] })).toThrow(/file used for review/);
+    expect(() => verifyQuranEncEdition(draft, bytes, { translations: [{ ...listing, version: "1.1.4" }] })).toThrow(/publisher catalogue lists urdu_junagarhi 1.1.4/);
+    expect(() => verifyQuranEncEdition(draft, bytes, { translations: [] })).toThrow(/publisher catalogue must list/);
   });
 
   it("breaks āyat al-Kursī on waqf for practice while keeping its review as one āyah", () => {

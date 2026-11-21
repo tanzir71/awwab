@@ -364,6 +364,8 @@ For an original QuranEnc CSV, set `format` to `quranenc-csv` and use the edition
 
 Set `AWWAB_REVIEW_QURAN` to a matching `edition.draft.json` in the local review environment to read the edition in the preview app. Source footnotes open under their āyah. Sources shows the publisher notice and terms, and pocket-card printouts include the corresponding footnotes and publisher notice. Share images use the attributed English meaning when the selected local edition requires carrying a notice or the selected āyāt have footnotes. Review previews flag draft packs and only build them in review mode.
 
+Before publishing a QuranEnc edition, download a fresh copy of the [public publisher catalogue](https://quranenc.com/api/v1/translations/list) as JSON. Run `node scripts/check-quranenc-edition.mjs <reviewed-edition.json> <original.csv> <publisher-catalogue.json>`. It checks the source hash, every meaning and footnote, the edition notice and link, and the catalogue version. If the publisher lists a newer version, export the new CSV for review before compiling the pack.
+
 | Locale | QuranEnc review candidate | CSV version |
 |---|---|---|
 | Urdu | [Muhammad Ibrahim Junagarhi](https://quranenc.com/en/browse/urdu_junagarhi) | `v1.1.3-csv.1` |
@@ -373,7 +375,7 @@ Set `AWWAB_REVIEW_QURAN` to a matching `edition.draft.json` in the local review 
 | Indonesian | [Ministry of Religious Affairs](https://quranenc.com/en/browse/indonesian_affairs) | `v1.0.1-csv.1` |
 | Turkish | [Rowwad Translation Center](https://quranenc.com/en/browse/turkish_rwwad) | `v1.0.4-csv.1` |
 
-The Bangla and Malay QuranEnc bulk exports returned empty files on 21 November 2026. Their Tanzil review drafts are available with the separate permission check above. [Bangla edition](https://quranenc.com/en/browse/bengali_rwwad) · [Malay edition](https://quranenc.com/en/browse/malay_basumayyah)
+On 21 November 2026, the public QuranEnc download catalogue listed the six candidate versions above. It omitted the Bangla and Malay editions, and their bulk download links returned empty files. Their Tanzil review drafts remain available for review while redistribution permission is checked. [Publisher catalogue](https://quranenc.com/api/v1/translations/list)
 
 Use `--quran-words <reviewed-quran-words.json>` to add a reviewed word-by-word edition with the same locale and attribution fields. Put the approved glosses in `words` as a flat object keyed by `surah:ayah:word`, using 1-based positions in the bundled Uthmani text. A reviewed subset is valid. For 37:130 and 72:16, where the scripts divide words differently, provide separately reviewed IndoPak positions in the optional `indopak` object. Other positions reuse the Uthmani keys. Verify each word against its source when editions differ in spelling or word boundaries. The compiler checks references against the bundled text, and the reader credits the installed edition beside its meanings and in Sources. QUL currently lists no copyright information for the [English](https://qul.tarteel.ai/resources/translation/92/licence), [Urdu](https://qul.tarteel.ai/resources/translation/93/licence), [Bangla](https://qul.tarteel.ai/resources/translation/94/licence) and [Indonesian](https://qul.tarteel.ai/resources/translation/96/licence) candidates. Confirm redistribution permission before publishing an edition.
 
