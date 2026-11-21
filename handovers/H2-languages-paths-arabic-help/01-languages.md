@@ -302,6 +302,8 @@ The Persian Speak draft includes the shared lesson controls, 12 Saudi A1 lessons
 
 The Persian draft covers all 4,042 entries in the current UI catalogue. In Speak, compare everyday expressions across the 24 Gulf and Modern Standard A1 lessons. Review shifts, contracts, pay and workplace rights in the ten Working in the Gulf lessons. In the 26 A2 and B1 lessons, compare the sermon and news vocabulary, reply choices and Quran root references with the Arabic text and audio.
 
+The Hausa draft includes all 214 landing-page entries, including navigation, image descriptions and metadata. Open `/awwab/lang/ha.html` in a review build using `ha.draft.json`. Check the hooked letters ɓ, ɗ and ƙ at phone and desktop widths and review the terms for sallah, ramuwa, alwala and Umara in context.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
