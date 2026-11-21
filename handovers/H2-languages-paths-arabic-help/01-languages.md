@@ -300,7 +300,7 @@ The Persian study draft covers the desktop plan customiser, Maktab stickers, stu
 
 The Persian Speak draft includes the shared lesson controls, 12 Saudi A1 lessons and nine Umrah and Hajj lessons. Review the vocabulary alongside the generated Arabic, including the 18 lines shared with Ask in Arabic. Check the difference between the labels for the saʿy and tawaf areas on the signs.
 
-The Persian draft also includes 24 Gulf and Modern Standard A1 lessons and all ten Working in the Gulf lessons. Compare everyday expressions across the varieties and review the vocabulary for shifts, contracts, pay and workplace rights against the Arabic dialogues.
+The Persian draft covers all 4,042 entries in the current UI catalogue. In Speak, compare everyday expressions across the 24 Gulf and Modern Standard A1 lessons. Review shifts, contracts, pay and workplace rights in the ten Working in the Gulf lessons. In the 26 A2 and B1 lessons, compare the sermon and news vocabulary, reply choices and Quran root references with the Arabic text and audio.
 
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
