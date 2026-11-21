@@ -194,6 +194,8 @@ The French grammar draft covers all 22 lessons in Grammar Foundations, Roots & P
 
 The French sharing draft covers milestones, card templates, image formats, and the prayer-count setting. Review the image text at all three sizes. Check that a card with a Qur’an meaning keeps the translator credit, language label, and fixed Awwab link.
 
+The French Umrah preparation draft covers trip details, the 12-item checklist, offline packs, and trip file transfer. Review the wording for replacing a saved trip, including its list of invocation requests, when importing a file.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
