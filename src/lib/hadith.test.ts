@@ -84,6 +84,21 @@ describe("hadith editions", () => {
     expect(searchHadith("999999999", archive, "all")).toEqual({ matches: [], riyad: [] });
   });
 
+  it("finds references using collection names from the installed UI language", () => {
+    const names: Record<string, string> = {
+      "hadithCollection-bukhari": "Buhârî",
+      "hadithCollection-tirmidhi": "Tirmizî",
+      hadithRiyad: "Riyâzü’s-Sâlihîn",
+    };
+    const installed = vi.spyOn(localePacks, "localeMessage").mockImplementation((code, key) => code === "tr" ? names[key] : undefined);
+    try {
+      expect(searchHadith("Buhârî 1", archive, "all", "tr").matches.map(item => hadithId(item.collection, item.number))).toEqual(["bukhari:1"]);
+      expect(searchHadith("Tirmizi 3540", archive, "all", "tr").matches.map(item => hadithId(item.collection, item.number))).toEqual(["tirmidhi:3540"]);
+      expect(searchHadith("Tirmizî", [byId.get("tirmidhi:3540")!], "all", "tr").matches).toHaveLength(1);
+      expect(searchHadith("Riyâzü’s-Sâlihîn 14", archive, "riyadussalihin", "tr").riyad.map(item => item.original)).toEqual(["muslim:2702b"]);
+    } finally { installed.mockRestore(); }
+  });
+
   it("searches and attributes installed translation text under the original collection and suffix", () => {
     const original = byId.get("muslim:2702b");
     const text = "آزمائشی عبارت قربت";
