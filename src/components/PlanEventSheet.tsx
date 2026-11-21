@@ -5,10 +5,17 @@ import { toast } from "sonner";
 import { Dialog, DialogClose, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useCopy } from "@/lib/copy";
 import { addDays, formatDay } from "@/lib/dates";
+import { hadithCitation } from "@/lib/hadith";
 import { eventMoonReminder, monthStart, moonWatchDay, type CalendarEvent, type CalendarSettings } from "@/lib/hijri";
 import { planAuthorities, planEventLabels, planMonth } from "@/lib/plan-copy";
-import { mosqueDefaults, type Mosque, type MosquePlan } from "@/lib/mosques";
+import { mosqueDefaults, mosqueInputClock, parseMosqueClock, type Mosque, type MosquePlan } from "@/lib/mosques";
+import { prayerCityLabel } from "@/lib/settings-copy";
 import { type Settings, updateRecord } from "@/lib/storageService";
+
+const eidSources = [
+  { source: "Bukhari 1503 · Sahih", url: "https://sunnah.com/bukhari:1503" },
+  { source: "Bukhari 953 · Sahih", url: "https://sunnah.com/bukhari:953" },
+];
 
 export function SightingOptions({ source, setSource, district }: { source: string; setSource: (source: string) => void; district: boolean }) {
   const { t } = useCopy();
@@ -41,15 +48,13 @@ function EidJamaat({ event, mosques, city }: { event: CalendarEvent; mosques: Mo
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!editor || saving) return;
-    const raw = String(new FormData(event.currentTarget).get("times") ?? "")
-      .replace(/[০-৯]/g, digit => String(digit.charCodeAt(0) - 0x09e6));
-    const times = raw.split(/[,،]/).map(time => time.trim());
-    if (!times.every(time => /^(?:[01]?\d|2[0-3]):[0-5]\d$/.test(time))) {
+    const raw = String(new FormData(event.currentTarget).get("times") ?? "");
+    const times = raw.split(/[,،]/u).map(time => parseMosqueClock(time, locale));
+    if (!times.every(time => time !== undefined)) {
       toast.error(t("planEidTimesInvalid"));
       return;
     }
-    const normalized = [...new Set(times.map(time => time.padStart(5, "0")))].sort();
-    const entry: Mosque["occasional"][number] = { type, year, times: normalized };
+    const entry: Mosque["occasional"][number] = { type, year, times: [...new Set(times)].sort() };
     setSaving(true);
     try {
       await updateRecord("mosques", mosqueDefaults, old => ({
@@ -79,15 +84,16 @@ function EidJamaat({ event, mosques, city }: { event: CalendarEvent; mosques: Mo
       const current = mosque.occasional.find(item => item.type === type && item.year === year);
       const previous = mosque.occasional.find(item => item.type === type && item.year === year - 1);
       const times = current?.times ?? previous?.times ?? [];
-      const number = new Intl.NumberFormat(locale, { useGrouping: false });
-      const visibleTimes = times.map(time => time.replace(/^0/, "").replace(/\d/g, digit => number.format(Number(digit))));
+      const visibleTimes = times.map(time => mosqueInputClock(time, locale));
       return <div className="card plan-eid-mosque" key={mosque.id}>
-        <div className="row-between"><strong>{mosque.name}</strong>{visibleTimes.length > 0 && <b>{visibleTimes.join(" · ")}</b>}</div>
+        <div className="row-between"><strong>{mosque.name}</strong>{visibleTimes.length > 0 && <b><bdi dir="ltr">{visibleTimes.join(" · ")}</bdi></b>}</div>
         <div className="row-between"><small className="muted">{t(current ? "planEidThisYear" : previous ? "planEidLastYear" : "planEidUnrecorded")}</small>
           <button className="text-button" onClick={() => setEditor({ mosque, times })} aria-expanded={editingId === mosque.id}>{t(current ? "qadaEdit" : "planEidConfirmTime")}</button>
         </div>
         {editingId === mosque.id && <form className="compact-stack" onSubmit={save}>
-          <label className="field">{t("planEidTimes")}<input type="text" name="times" defaultValue={editor?.times.join(", ")} placeholder="08:00, 09:30" required /></label>
+          <label className="field">{t("planEidTimes")}<input type="text" name="times" dir="ltr"
+            defaultValue={editor?.times.map(time => mosqueInputClock(time, locale)).join(", ")}
+            placeholder={["08:00", "09:30"].map(time => mosqueInputClock(time, locale)).join(", ")} required /></label>
           <p className="muted small">{t("planEidTimesHelp")}</p>
           <div className="equal-row"><button className="action light" type="button" disabled={saving} onClick={() => setEditor(undefined)}>{t("planClose")}</button>
             <button className="action" disabled={saving}>{t("planEidSaveTime")}</button></div>
@@ -175,10 +181,12 @@ export function EventSheet({ event, settings, config, mosques, onConfirm, onMoon
             }} disabled={saving}>{t("planMoonAlarmHint", { date: dateLabel(moon) })}</PlanSwitch>
           </>}
         </section>}
-      {event.title.startsWith("Eid") && <EidJamaat event={event} mosques={mosques} city={settings.city.name} />}
+      {event.title.startsWith("Eid") && <EidJamaat event={event} mosques={mosques} city={prayerCityLabel(settings.city, t)} />}
       {event.title === "Eid al-Fitr" && <section className="card plan-eid-note">
         <h3>{t("planBeforeEid")}</h3><p className="muted small">{t("planBeforeFitr")}</p>
-        <p className="small"><a href="https://sunnah.com/bukhari:1503">Bukhari 1503 · Sahih</a> · <a href="https://sunnah.com/bukhari:953">Bukhari 953 · Sahih</a></p>
+        <p className="small">{eidSources.map((source, index) => <span key={source.url}>
+          {index > 0 && " · "}<a href={source.url}>{hadithCitation(source, { language, locale, t }).full}</a>
+        </span>)}</p>
       </section>}
   </>;
   if (presentation === "panel") return <section className="card plan-event-panel compact-stack" aria-label={title}

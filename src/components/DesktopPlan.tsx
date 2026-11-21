@@ -6,7 +6,7 @@ import { useCopy } from "@/lib/copy";
 import { addDays, formatDay, formatTime } from "@/lib/dates";
 import { focusListItem } from "@/lib/focusListItem";
 import { calendarEventById, calendarEvents, eventDisplayDates, hijriOn, monthStartEvent, moonWatchDay, type CalendarEvent, type CalendarSettings } from "@/lib/hijri";
-import { mosqueClock, mosqueWeekday, type MosquePlan } from "@/lib/mosques";
+import { mosqueClock, mosqueInputClock, mosqueWeekday, type MosquePlan } from "@/lib/mosques";
 import { calendarDayEvents, calendarMonthOn, calendarWeekStart, fridayMosque, gregorianMonthBounds, gregorianMonthCells,
   monthStartsInRange, readCalendarDay, readCalendarMonth, shiftPlanEvent } from "@/lib/plan-calendar";
 import { planAuthorities, planEventLabels, planMonth } from "@/lib/plan-copy";
@@ -109,7 +109,7 @@ function EidCard({ event, mosques, open }: { event?: CalendarEvent; mosques: Mos
       <button type="button" className="text-button" onClick={trigger => open(trigger, event)}>{t("qadaEdit")}</button>}</div>
     {options.length > 0 ? <ul className="plan-desk-list" onKeyDown={focusListItem}>{options.map(({ mosque, entry, current }) => <li key={mosque.id}>
       <button className="plan-desk-row" type="button" onClick={trigger => open(trigger, event)}>
-        <span><strong>{mosque.name}</strong><small className="muted">{entry.times.map(time => mosqueClock(time, locale, true)).join(" · ")}
+        <span><strong>{mosque.name}</strong><small className="muted"><bdi dir="ltr">{entry.times.map(time => mosqueInputClock(time, locale)).join(" · ")}</bdi>
           {" · "}{t(current ? "planEidThisYear" : "planEidLastYear")}</small></span>
       </button>
     </li>)}</ul> : <p className="small muted">{t("planDeskEidPending")}</p>}
