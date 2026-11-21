@@ -196,6 +196,8 @@ The French sharing draft covers milestones, card templates, image formats, and t
 
 The French Umrah preparation draft covers trip details, the 12-item checklist, offline packs, and trip file transfer. Review the wording for replacing a saved trip, including its list of invocation requests, when importing a file.
 
+The French Ask in Arabic draft includes all 63 phrase meanings, the full-screen helper replies, hotel and lost cards, and the emergency panel. Review the variable phrases with the Arabic and generated recordings, including the gate number, destination, and family member. Compare the emergency labels with the official guide. [Saudi emergency numbers](https://apd.gov.sa/web/content/84584).
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
