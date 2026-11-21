@@ -111,8 +111,8 @@ export function groupPortions(passage: HifzPassage, quran: StudyQuran, limits = 
 export function studyPhrases(verse: QuranVerse, script: Script, includeShortVerses = false) {
   const rendered = verseText(verse, script).text;
   if (!includeShortVerses && splitArabicWords(verseText(verse, "uthmani").text).length <= maxPortionWords) return rendered;
-  // Keep the waqf signs and split the reading display, not the review item.
-  return rendered.replace(/([ۖۗۘۚۛؕؗ])\s+/g, "$1\n");
+  // A paired mark offers a choice of stop, so neither mark creates a line break.
+  return rendered.replace(/(\S*[ۖۗۘۚؕؗ])\s+/gu, (boundary, word: string) => word.includes("ۛ") ? boundary : `${word}\n`);
 }
 
 export function portionPlan(portions: HifzPortion[], minutes: number, start: string) {

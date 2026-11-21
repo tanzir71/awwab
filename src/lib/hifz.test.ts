@@ -207,9 +207,11 @@ describe("Learning path progress", () => {
       expect(portions.every(part => part.verses.length <= 3 && (part.words <= 22 || part.verses.length === 1))).toBe(true);
     }
     const verse = quran.surahs[2][1];
-    const phrases = studyPhrases(verse, "uthmani", true).split("\n");
-    expect(phrases).toHaveLength(3);
-    expect(phrases.join(" ")).toBe(verseText(verse, "uthmani").text);
+    for (const script of ["uthmani", "indopak"] as const) {
+      const text = verseText(verse, script).text;
+      expect(text.match(/ۛ/gu)).toHaveLength(2);
+      expect(studyPhrases(verse, script, true)).toBe(text);
+    }
   });
   it("keeps Tajweed and grammar excerpts inside the cited ayah in each script", () => {
     const excerpt = (chapter: number, ayah: number, first: number, last: number, script: "indopak" | "uthmani") =>

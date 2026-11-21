@@ -23,7 +23,7 @@ Placement checks show the selected Quran script and cite each displayed āyah. T
 ## Memorise
 - **Essential passages** (A30): Āyat al-Kursī, last two āyāt of Al-Baqarah, Al-Mulk, As-Sajdah, first ten of Al-Kahf, end of Āl ʿImrān, Yā-Sīn, Ar-Raḥmān, Al-Wāqiʿah, end of Al-Ḥashr.
 - **Virtues rule:** show a "Why this surah" card only with a ṣaḥīḥ or ḥasan source (collection, number, grade). Where narrations are weak (Yā-Sīn, Al-Wāqiʿah …) say so and show none.
-- **Portioning:** split a surah into portions of ≤ 5 āyāt or ≤ 40 words, never splitting an āyah. Very long āyāt (e.g. 2:255) are learned in phrase chunks at waqf marks but reviewed whole.
+- **Portioning:** split a surah into portions of ≤ 5 āyāt or ≤ 40 words, never splitting an āyah. Very long āyāt (e.g. 2:255) are learned in phrase chunks at waqf marks but reviewed whole. The practice layout keeps paired pause alternatives together. [Quranic Arabic Corpus pause guide](https://corpus.quran.com/documentation/pausemarks.jsp).
 - **Plan:** user chooses minutes per day; the app proposes portions per N days and an end date (A30: Al-Mulk = 6 portions, ~3 weeks at 7 min/day).
 - **Daily review (maktab method + SRS):** Sabaq (today's new portion) → Sabqi (portions from the last 7 days) → Manzil (older portions, FSRS-due). A portion graduates from Sabaq after "Got it" on 3 different days.
 
