@@ -29,7 +29,7 @@ Phrases: [`data/umrah-phrases.json`](data/umrah-phrases.json) (63, Saudi Hijazi 
 - Light, high-contrast, huge Arabic (52) with a polite opener (لو سمحت), the place name, and small transliteration + English for the user.
 - Slots: gate number entry shows the number in **Arabic-Indic digits** (79 → ٧٩), which is also how it appears on many signs; "Change" opens a number pad.
 - **Helper taps the answer:** a night panel says اضغط على الاتجاه ("tap the direction") with 5 big Arabic buttons (يمين · سيده · يسار · فوق · تحت). The tap shows the user the meaning in the app language and logs nothing.
-- Keep the screen on with the **Screen Wake Lock API**; prefer landscape-friendly layout. (A PWA cannot set brightness; the white high-contrast layout is the substitute.)
+- Show mode uses a white, high-contrast layout that works in landscape. Brightness follows the device setting. The app requests a screen wake lock when a card is visible and reacquires it after the user returns to the page. [Screen Wake Lock API](https://www.w3.org/TR/screen-wake-lock/).
 
 **U09 My cards**
 - **Hotel card:** the hotel's Arabic name and address, entered by the user (copied from the booking or the hotel's card; the app does not translate names), plus "Take me to this hotel" audio (`take-me-hotel`) and a show mode.

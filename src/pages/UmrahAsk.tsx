@@ -301,27 +301,38 @@ export function UmrahAskPhrase() {
   </section>;
 }
 
-function useKeepScreenOn() {
+function useKeepScreenOn(enabled: boolean) {
   useEffect(() => {
-    if (!navigator.wakeLock) return;
+    if (!enabled || !navigator.wakeLock) return;
     let current: WakeLockSentinel | undefined;
     let active = true;
     let requesting = false;
+    let retryOnReturn = false;
     async function request() {
-      if (!active || requesting || document.visibilityState !== "visible" || (current && !current.released)) return;
+      if (!active || document.visibilityState !== "visible" || (current && !current.released)) return;
+      if (requesting) {
+        retryOnReturn = true;
+        return;
+      }
       requesting = true;
       try {
         const lock = await navigator.wakeLock.request("screen");
         if (active) current = lock;
         else await lock.release();
       } catch { /* The device controls availability. */ }
-      finally { requesting = false; }
+      finally {
+        requesting = false;
+        if (retryOnReturn) {
+          retryOnReturn = false;
+          void request();
+        }
+      }
     }
     function visible() { void request(); }
     visible();
     document.addEventListener("visibilitychange", visible);
     return () => { active = false; document.removeEventListener("visibilitychange", visible); void current?.release().catch(() => {}); };
-  }, []);
+  }, [enabled]);
 }
 
 const phoneHref = (phone: string) => {
@@ -335,7 +346,6 @@ export function UmrahAskShow() {
   const { trip } = useOutletContext<{ trip: UmrahTrip }>();
   const item = usePhrase(id);
   const [reply, setReply] = useState("");
-  useKeepScreenOn();
   const { settings } = item;
   const hotel = id === "hotel-card";
   const lost = id === "lost-card";
@@ -350,6 +360,7 @@ export function UmrahAskShow() {
   const address = hotel ? prep.hotelAddress : gateSign;
   const back = hotel || lost ? cards : phraseLink(id) + item.suffix;
   const display = lost ? `${main.ar}. ${callNumber.ar}.` : hotel ? [main.ar, prep.hotelArabic].filter(Boolean).join("\n") : item.custom?.ar ?? main?.ar;
+  useKeepScreenOn(Boolean(display));
   if (!display) return <div className="ask-inner"><Back to={home}>{t("askHome")}</Back></div>;
 
   return <section className="ask-show" aria-label={t("askShow")}>

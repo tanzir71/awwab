@@ -60,5 +60,5 @@ No backend · fully offline after first load (language packs and audio packs are
 - Switching language changes every visible string, number, date and Hijri month without reload; RTL locales mirror the shell; Arabic content components never mirror.
 - Pseudo-locale (`en-XA`, +40% length) passes with no clipped text at 360px and 1280px.
 - Paths: progress, SRS and placement work offline; every surah/passage shows its source and āyah range.
-- Ask in Arabic: all phrases play offline from the pack; show mode stays awake (Wake Lock) at max brightness; helper answers translate into the app language.
+- Ask in Arabic plays all phrases offline from the pack. Show mode uses the high-contrast layout and Screen Wake Lock described in the [Arabic assistant handover](03-umrah-arabic-assistant.md). Helper answers appear in the app language.
 - Native-speaker review signed off for each shipped locale and for the Saudi phrase set; scholar review for tajweed, passages' virtues (hadith grades) and glossary terms.
