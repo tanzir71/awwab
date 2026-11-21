@@ -202,7 +202,7 @@ The French live Umrah draft covers the daily plan, Haram focus, the ritual steps
 
 The French desktop study draft includes the plan customiser, Maktab stickers, study history, the install instructions, and reference recording controls. Check the browser menu labels on the platforms named in the install instructions.
 
-The French Speak draft includes course selection, all 12 Saudi A1 lessons, and the nine Umrah and Hajj practice lessons. The 18 lines shared with Ask in Arabic use the same French meanings. Review the dialogue, vocabulary and signs alongside the generated Arabic audio.
+The French Speak draft includes course selection, all 36 Saudi, Emirati Gulf, and Modern Standard Arabic A1 lessons, and the nine Umrah and Hajj practice lessons. The 18 lines shared with Ask in Arabic use the same French meanings. Review the dialogue, vocabulary and signs alongside the generated Arabic audio.
 
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
