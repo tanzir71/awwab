@@ -342,6 +342,8 @@ The Hausa Ask in Arabic draft covers all 63 phrase meanings, full-screen replies
 
 The Hausa Speak draft includes the shared lesson controls, 12 Saudi A1 lessons and nine Umrah and Hajj lessons. Review the vocabulary alongside the generated Arabic recordings, including the 18 lines shared with Ask in Arabic. Compare the signs and directions for the sa’ayi and tawaf areas.
 
+The Hausa draft also includes all 24 Gulf and Modern Standard A1 lessons. Compare the two varieties in everyday situations, including greetings, asking for directions, shopping and paying. Check the wording for singular and plural forms of address.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
