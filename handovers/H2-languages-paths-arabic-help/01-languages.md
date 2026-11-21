@@ -304,6 +304,8 @@ The Persian draft covers all 4,042 entries in the current UI catalogue. In Speak
 
 The Hausa draft includes all 214 landing-page entries, including navigation, image descriptions and metadata. Open `/awwab/lang/ha.html` in a review build using `ha.draft.json`. Check the hooked letters ɓ, ɗ and ƙ at phone and desktop widths and review the terms for sallah, ramuwa, alwala and Umara in context.
 
+The Hausa onboarding draft covers the welcome screen, learning mode, placement check, prayer setup and backup restore. Review the Ka’ida vocabulary and the wording for choosing a calculation method and entering a city, including the labels for Asuba, La’asar and Lisha.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
