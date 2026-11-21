@@ -15,7 +15,9 @@
     "fr": "Iḥrām et intention. Repérez votre mīqāt avant d’y arriver. Si vous voyagez en avion, écoutez l’annonce de la compagnie aérienne.",
     "ms": "Ihram dan niat. Ketahui lokasi miqat anda sebelum tiba. Jika menaiki pesawat, dengar pengumuman syarikat penerbangan.",
     "fa": "احرام و نیت. پیش از رسیدن، میقات خود را مشخص کنید. اگر با هواپیما سفر می‌کنید، به اعلام شرکت هواپیمایی گوش دهید.",
-    "ha": "Ihrami da niyya. San inda miƙatinka yake kafin ka isa. Idan kana cikin jirgin sama, ka saurari sanarwar kamfanin jirgin."
+    "ha": "Ihrami da niyya. San inda miƙatinka yake kafin ka isa. Idan kana cikin jirgin sama, ka saurari sanarwar kamfanin jirgin.",
+    "id": "Ihram dan niat. Ketahui miqat Anda sebelum tiba. Jika Anda naik pesawat, dengarkan pengumuman dari maskapai.",
+    "tr": "İhram ve niyet. Varmadan önce mîkatınızı öğrenin. Uçakla gidiyorsanız hava yolunun anonsunu dinleyin."
    },
    "trigger": "manual or flight reminder before mīqāt (airline announces)",
    "duas": [
@@ -36,7 +38,9 @@
     "fr": "Talbiya. Cette étape suit l’intention. Les paroles de la talbiya et leur source sont affichées à l’écran.",
     "ms": "Talbiah. Baca talbiah selepas berniat. Anda boleh melihat lafaz dan rujukannya pada skrin.",
     "fa": "تلبیه. این مرحله بعد از نیت است. کلمات تلبیه و منبع آن را روی صفحه می‌بینید.",
-    "ha": "Talbiya. Wannan matakin yana bayan yin niyya. A kan allo za ka ga lafazin talbiya da madogararsa."
+    "ha": "Talbiya. Wannan matakin yana bayan yin niyya. A kan allo za ka ga lafazin talbiya da madogararsa.",
+    "id": "Talbiah. Langkah ini dilakukan setelah berniat. Lafal talbiah dan sumbernya ditampilkan di layar.",
+    "tr": "Telbiye. Bu adım niyetten sonra gelir. Telbiyenin sözlerini ve kaynağını ekranda görebilirsiniz."
    },
    "trigger": "after niyyah until reaching the Kaʿbah"
   },
@@ -54,7 +58,9 @@
     "fr": "Ṭawāf. Commencez à la hauteur de la Pierre noire en gardant la Kaʿba à votre gauche. Comptez les sept tours à la main. Le guide affiche l’invocation pour le parcours entre l’angle yéménite et la Pierre noire.",
     "ms": "Tawaf. Mulakan pada garisan Hajar Aswad dengan Kaabah di sebelah kiri anda. Kira sendiri sehingga cukup tujuh pusingan. Panduan menunjukkan doa untuk laluan antara Rukun Yamani dengan Hajar Aswad.",
     "fa": "طواف. از خط روبه‌روی حجرالاسود شروع کنید و کعبه را در سمت چپ خود نگه دارید. هفت دور را خودتان بشمارید. دعای مسیر میان رکن یمانی و حجرالاسود در راهنما آمده است.",
-    "ha": "Ɗawafi. Fara daga layin Baƙin Dutse, Ka’aba tana gefen hagunka. Ƙidaya zagaye bakwai da kanka. Jagorar tana nuna addu’ar da ake yi tsakanin Kusurwar Yaman da Baƙin Dutse."
+    "ha": "Ɗawafi. Fara daga layin Baƙin Dutse, Ka’aba tana gefen hagunka. Ƙidaya zagaye bakwai da kanka. Jagorar tana nuna addu’ar da ake yi tsakanin Kusurwar Yaman da Baƙin Dutse.",
+    "id": "Tawaf. Mulailah dari garis Hajar Aswad dengan Ka'bah di sebelah kiri Anda. Hitung sendiri tujuh putaran. Panduan ini menampilkan doa yang dibaca di antara Rukun Yamani dan Hajar Aswad.",
+    "tr": "Tavaf. Hacerülesved hizasından başlayın ve Kâbe solunuzda kalsın. Yedi turu kendiniz sayın. Yemen köşesi ile Hacerülesved arasında okunacak duayı rehberde görebilirsiniz."
    },
    "trigger": "geofence: haram_mataf (enter) → show counter",
    "counter": "manual",
@@ -83,7 +89,9 @@
     "fr": "Deux rakʿāt. Si vous le pouvez, priez derrière le Maqām Ibrāhīm. S’il y a trop de monde, priez ailleurs dans la mosquée.",
     "ms": "Dua rakaat. Jika boleh, solat di belakang Maqam Ibrahim. Jika tempat itu sesak, solat di bahagian lain dalam masjid.",
     "fa": "دو رکعت نماز. اگر می‌توانید، پشت مقام ابراهیم نماز بخوانید. اگر آنجا شلوغ است، در جای دیگری از مسجد نماز بخوانید.",
-    "ha": "Raka’a biyu. Idan zai yiwu, yi salla bayan Maƙamin Ibrahim. Idan wurin ya yi cunkoso, ka yi sallar a wani wuri a cikin masallacin."
+    "ha": "Raka’a biyu. Idan zai yiwu, yi salla bayan Maƙamin Ibrahim. Idan wurin ya yi cunkoso, ka yi sallar a wani wuri a cikin masallacin.",
+    "id": "Dua rakaat. Jika memungkinkan, salatlah di belakang Maqam Ibrahim. Jika ramai, salatlah di bagian lain masjid.",
+    "tr": "İki rekât namaz. Mümkünse Makâm-ı İbrâhim’in arkasında kılın. Orası kalabalıksa mescidin başka bir yerinde kılın."
    },
    "trigger": "after 7 rounds",
    "notes": [
@@ -107,7 +115,9 @@
     "fr": "Zamzam. Cette étape précède le saʿy. Continuez quand vous êtes prêt.",
     "ms": "Zamzam. Minum air Zamzam sebelum sa‘i. Teruskan apabila anda bersedia.",
     "fa": "آب زمزم. این مرحله پیش از سعی است. هر وقت آماده شدید به مرحلهٔ بعد بروید.",
-    "ha": "Zamzam. Wannan matakin yana kafin sa’ayi. Ka ci gaba idan ka shirya."
+    "ha": "Zamzam. Wannan matakin yana kafin sa’ayi. Ka ci gaba idan ka shirya.",
+    "id": "Zamzam. Langkah ini dilakukan sebelum sai. Lanjutkan saat Anda siap.",
+    "tr": "Zemzem. Bu adım sa‘y ibadetinden önce gelir. Hazır olduğunuzda devam edin."
    },
    "trigger": "manual"
   },
@@ -125,7 +135,9 @@
     "fr": "Saʿy. Aller de Ṣafā à Marwa compte pour un trajet. Alternez entre les deux extrémités et terminez le septième trajet à Marwa. Les hommes trottinent entre les feux verts.",
     "ms": "Sa‘i. Berjalan dari Safa ke Marwah dikira satu perjalanan. Berjalan berselang-seli antara kedua-dua hujung. Akhiri di Marwah selepas perjalanan ketujuh. Lelaki berlari anak di antara lampu hijau.",
     "fa": "سعی. راهِ صفا تا مروه یک مسیر حساب می‌شود. سپس از مروه به صفا برگردید و هر بار به سوی طرف دیگر بروید. مسیر هفتم را در مروه تمام کنید. مردان میان چراغ‌های سبز آهسته بدوند.",
-    "ha": "Sa’ayi. Tafiya ɗaya daga Safa zuwa Marwa zango ɗaya ne. Komo daga Marwa zuwa Safa, sai ka riƙa tafiya daga gefe ɗaya zuwa ɗayan. Ƙare zango na bakwai a Marwa. Maza su yi ɗan takun gudu tsakanin fitilun kore."
+    "ha": "Sa’ayi. Tafiya ɗaya daga Safa zuwa Marwa zango ɗaya ne. Komo daga Marwa zuwa Safa, sai ka riƙa tafiya daga gefe ɗaya zuwa ɗayan. Ƙare zango na bakwai a Marwa. Maza su yi ɗan takun gudu tsakanin fitilun kore.",
+    "id": "Sai. Berjalan dari Safa ke Marwah dihitung satu lintasan. Berjalanlah bolak-balik antara keduanya dan akhiri lintasan ketujuh di Marwah. Pria berlari-lari kecil di antara lampu hijau.",
+    "tr": "Sa‘y ibadeti. Safâ’dan Merve’ye yürümek bir tur sayılır. İki uç arasında gidip gelin ve yedinci turu Merve’de bitirin. Erkekler yeşil ışıklar arasında hafifçe koşar."
    },
    "trigger": "geofence: masa_safa (enter)",
    "counter": "auto (beta) + manual",
@@ -155,7 +167,9 @@
     "fr": "Raser ou raccourcir les cheveux. Les hommes peuvent se raser la tête ou raccourcir leurs cheveux. Les femmes coupent environ la longueur du bout d’un doigt.",
     "ms": "Bercukur atau bergunting. Lelaki boleh mencukur kepala atau menggunting rambut. Wanita menggunting rambut kira-kira sepanjang hujung jari.",
     "fa": "تراشیدن یا کوتاه کردن مو. مردان می‌توانند سر را بتراشند یا مو را کوتاه کنند. زنان حدود یک بند انگشت از موی خود را کوتاه کنند.",
-    "ha": "Aski ko rage gashi. Maza za su iya aske ko rage gashinsu. Mata su rage gashinsu da kusan tsawon kan yatsa."
+    "ha": "Aski ko rage gashi. Maza za su iya aske ko rage gashinsu. Mata su rage gashinsu da kusan tsawon kan yatsa.",
+    "id": "Cukur atau pendekkan rambut. Pria boleh mencukur atau memendekkan rambut. Wanita memotong rambut kira-kira sepanjang ujung jari.",
+    "tr": "Saçı tıraş etme veya kısaltma. Erkekler saçlarını tıraş edebilir veya kısaltabilir. Kadınlar saç uçlarından yaklaşık bir parmak ucu kadar keser."
    },
    "trigger": "after lap 7 at Marwah",
    "notes": [

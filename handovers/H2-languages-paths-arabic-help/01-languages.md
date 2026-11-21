@@ -114,7 +114,7 @@ The Indonesian reading draft covers Fluent Reading, Read with Meaning, Recite wi
 
 The Indonesian Speak draft covers the shared interface and all 81 lessons across the seven courses. The pilgrimage lessons reuse the existing Indonesian Ask in Arabic meanings where the Arabic phrases are shared. Review the translated dialogues, vocabulary, and signs alongside the recordings, including the workplace scenarios in Working in the Gulf.
 
-The Indonesian Umrah draft covers desktop trip preparation and print, the phone itinerary and Haram focus, the seven ritual steps, and offline map controls and search terms. Review the ritual descriptions with the sources shown in the guide, and check that the trip file and saved counters work across app languages.
+The Indonesian Umrah draft covers desktop trip preparation and print, the phone itinerary and Haram focus, the seven ritual steps, and offline map controls and search terms. The review build offers seven generated tracks with transcripts. Compare the recordings and ritual descriptions with the sources shown in the guide. Listen for miqat and Maqam Ibrahim, and check that the trip file and saved counters work across app languages.
 
 The Indonesian settings and sharing draft covers the profile, display and prayer preferences, glossary choices and wording suggestions, backup and restore, and source credits. Review the milestone and card text in both the preview and the saved image. Where a card includes a Quran meaning, check the translation credit and fallback language alongside the verse reference.
 
@@ -152,7 +152,7 @@ The Turkish sharing draft includes progress milestones, card templates, image fo
 
 The Turkish Umrah preparation draft covers trip details, the 12-item checklist, and the controls for offline packs and trip transfer. Ask in Arabic includes Turkish meanings for all 63 phrases and covers full-screen cards, directions, and the emergency panel. Review the phrasing with the spoken Arabic, especially when changing a gate number, destination, or family member. The emergency panel links to the official numbers. [Saudi emergency contacts](https://my.gov.sa/en/emergency-contact).
 
-The Turkish live Umrah draft covers the daily plan, Harem focus, the seven ritual steps, the pocket guide, the installed map, and the sa‘y counter and location options. Review the ritual wording with the cited sources and test corrections as the route alternates between Safâ and Merve. The preview uses the English narration pack for Turkish.
+The Turkish live Umrah draft covers the daily plan, Harem focus, the seven ritual steps, the pocket guide, the installed map, and the sa‘y counter and location options. The review build offers seven generated tracks with transcripts. Review the wording against the cited sources and test corrections as the route alternates between Safâ and Merve. Automated transcription misheard the sa‘y and two-rakʿah headings, which need a native listening check.
 
 The Turkish Speak draft covers course selection, all 36 Saudi, Emirati Gulf, and Modern Standard Arabic A1 lessons, and the nine Umrah and Hajj practice lessons. Review the lesson wording alongside the spoken Arabic, particularly the SIM dialogues, vocabulary and signs. Check that opening vocabulary in Word Anatomy or practising it in review keeps the Turkish meaning. The 18 phrases shared with Ask in Arabic use the same Turkish wording in both places.
 

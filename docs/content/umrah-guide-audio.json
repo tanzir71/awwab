@@ -283,6 +283,86 @@
           "path": "packs/audio/umrah-guide-v1/ha/halq.mp3"
         }
       ]
+    },
+    {
+      "id": "umrah-guide-v1-id",
+      "language": "id",
+      "name": "Bahasa Indonesia",
+      "speaker": "Supertonic 3 · F1",
+      "source": "https://huggingface.co/supertone-oss-archive/supertonic-3/tree/aafc6e32416a594460b32413efc49d7fe4ce6d46",
+      "licenseUrl": "https://huggingface.co/supertone-oss-archive/supertonic-3/blob/aafc6e32416a594460b32413efc49d7fe4ce6d46/LICENSE",
+      "attribution": "Generated speech · Supertonic 3 · F1",
+      "bytes": 456932,
+      "items": [
+        {
+          "ref": "umrah-guide-v1-id:ihram",
+          "path": "packs/audio/umrah-guide-v1/id/ihram.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-id:talbiyah",
+          "path": "packs/audio/umrah-guide-v1/id/talbiyah.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-id:tawaf",
+          "path": "packs/audio/umrah-guide-v1/id/tawaf.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-id:two_rakahs",
+          "path": "packs/audio/umrah-guide-v1/id/two_rakahs.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-id:zamzam",
+          "path": "packs/audio/umrah-guide-v1/id/zamzam.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-id:sai",
+          "path": "packs/audio/umrah-guide-v1/id/sai.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-id:halq",
+          "path": "packs/audio/umrah-guide-v1/id/halq.mp3"
+        }
+      ]
+    },
+    {
+      "id": "umrah-guide-v1-tr",
+      "language": "tr",
+      "name": "Türkçe",
+      "speaker": "Supertonic 3 · F1",
+      "source": "https://huggingface.co/supertone-oss-archive/supertonic-3/tree/aafc6e32416a594460b32413efc49d7fe4ce6d46",
+      "licenseUrl": "https://huggingface.co/supertone-oss-archive/supertonic-3/blob/aafc6e32416a594460b32413efc49d7fe4ce6d46/LICENSE",
+      "attribution": "Generated speech · Supertonic 3 · F1",
+      "bytes": 452036,
+      "items": [
+        {
+          "ref": "umrah-guide-v1-tr:ihram",
+          "path": "packs/audio/umrah-guide-v1/tr/ihram.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-tr:talbiyah",
+          "path": "packs/audio/umrah-guide-v1/tr/talbiyah.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-tr:tawaf",
+          "path": "packs/audio/umrah-guide-v1/tr/tawaf.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-tr:two_rakahs",
+          "path": "packs/audio/umrah-guide-v1/tr/two_rakahs.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-tr:zamzam",
+          "path": "packs/audio/umrah-guide-v1/tr/zamzam.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-tr:sai",
+          "path": "packs/audio/umrah-guide-v1/tr/sai.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-tr:halq",
+          "path": "packs/audio/umrah-guide-v1/tr/halq.mp3"
+        }
+      ]
     }
   ]
 }

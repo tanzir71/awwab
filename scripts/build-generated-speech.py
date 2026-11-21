@@ -29,6 +29,8 @@ SUARIFY_YATI = "https://huggingface.co/Suarify/kecil-tts-yati-v0.3/tree/dcb1efaa
 PIPER_GANJI = "https://huggingface.co/rhasspy/piper-voices/blob/661e39caff61dcfcbbd2178a7c2dd0144b858b0e/fa/fa_IR/ganji/medium/MODEL_CARD"
 HANWA = "https://huggingface.co/Afrilab/HanwaTTS/tree/4aae520bb96292e06a8b88a2d5b1b8f8457605af"
 HANWA_LICENSE = "https://huggingface.co/Afrilab/HanwaTTS/blob/4aae520bb96292e06a8b88a2d5b1b8f8457605af/LICENSE"
+SUPERTONIC_REPO = "https://huggingface.co/supertone-oss-archive/supertonic-3"
+SUPERTONIC_REVISION = "aafc6e32416a594460b32413efc49d7fe4ce6d46"
 
 
 def read(path):
@@ -232,6 +234,29 @@ def build_umrah_guide_hausa(model, vocoder_path):
         sf.write(target, np.concatenate(chunks[:-1]), sample_rate, subtype="PCM_16")
 
     pack = umrah_guide_pack("ha", "Hausa", "HanwaTTS · Afrilab AI Hub", HANWA, HANWA_LICENSE, hausa)
+    write_umrah_guide_packs([pack])
+
+
+def build_umrah_guide_supertonic(model, language):
+    import numpy as np
+    from supertonic import TTS
+
+    voice = TTS(model="supertonic-3", model_dir=model, auto_download=False)
+    style = voice.get_voice_style("F1")
+
+    def synthesize(text, target):
+        if language == "tr":
+            # The model reads the transliteration mark as a vowel here.
+            text = text.replace("Sa‘y", "Say").replace("sa‘y", "say")
+        np.random.seed(0)
+        audio, _ = voice.synthesize(text, style, lang=language, speed=0.95, max_chunk_length=170)
+        if audio.size < voice.sample_rate // 4 or not np.isfinite(audio).all() or not audio.any():
+            raise ValueError(f"Supertonic did not generate valid {language} narration for {text!r}")
+        voice.save_audio(audio, str(target))
+
+    name = {"id": "Bahasa Indonesia", "tr": "Türkçe"}[language]
+    pack = umrah_guide_pack(language, name, "Supertonic 3 · F1", f"{SUPERTONIC_REPO}/tree/{SUPERTONIC_REVISION}",
+                            f"{SUPERTONIC_REPO}/blob/{SUPERTONIC_REVISION}/LICENSE", synthesize)
     write_umrah_guide_packs([pack])
 
 
@@ -504,6 +529,7 @@ def main():
     task.add_argument("--umrah-guide-malay", action="store_true", help="Build Malay Umrah narration with local Kecil-TTS Yati weights")
     task.add_argument("--umrah-guide-persian", action="store_true", help="Build Persian Umrah narration with local Piper Ganji weights")
     task.add_argument("--umrah-guide-hausa", action="store_true", help="Build Hausa Umrah narration with local HanwaTTS weights")
+    task.add_argument("--umrah-guide-supertonic", choices=("id", "tr"), help="Build Indonesian or Turkish Umrah narration with local Supertonic 3 weights")
     task.add_argument("--qaida", action="store_true", help="Build Qaida drill audio and placement vowel clips with Emirati Piper")
     parser.add_argument("--piper", default="piper", help="Piper executable for --umrah-guide")
     parser.add_argument("--bangla-model", type=Path, help="Local Indic Tiny TTS Bengali model directory with code and ONNX graphs")
@@ -536,6 +562,9 @@ def main():
         if args.hausa_vocoder is None:
             parser.error("--umrah-guide-hausa requires --hausa-vocoder")
         build_umrah_guide_hausa(args.model, args.hausa_vocoder)
+        return
+    if args.umrah_guide_supertonic:
+        build_umrah_guide_supertonic(args.model, args.umrah_guide_supertonic)
         return
     if args.ask_male:
         build_male_ask(args.model, read(PHRASES)["phrases"], args.resume)

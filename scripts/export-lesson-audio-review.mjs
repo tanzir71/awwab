@@ -8,7 +8,9 @@ import umrah from "../docs/content/umrah-steps.json" with { type: "json" };
 import persian from "../handovers/H2-languages-paths-arabic-help/drafts/fa.json" with { type: "json" };
 import hausa from "../handovers/H2-languages-paths-arabic-help/drafts/ha.json" with { type: "json" };
 import french from "../handovers/H2-languages-paths-arabic-help/drafts/fr.json" with { type: "json" };
+import indonesian from "../handovers/H2-languages-paths-arabic-help/drafts/id.json" with { type: "json" };
 import malay from "../handovers/H2-languages-paths-arabic-help/drafts/ms.json" with { type: "json" };
+import turkish from "../handovers/H2-languages-paths-arabic-help/drafts/tr.json" with { type: "json" };
 import urdu from "../handovers/H2-languages-paths-arabic-help/drafts/ur.json" with { type: "json" };
 import { qaidaAudioRef, qaidaHarakatExercise, qaidaHarakatExerciseRef, qaidaRowCitation, qaidaRows } from "../src/lib/qaidaPractice.ts";
 import { qaidaRecitationLessons, qaidaRecitations } from "../src/lib/qaidaRecitation.ts";
@@ -117,7 +119,9 @@ const ritualDrafts = {
   fa: { name: "Persian", messages: persian.messages },
   fr: { name: "French", messages: french.messages },
   ha: { name: "Hausa", messages: hausa.messages },
+  id: { name: "Indonesian", messages: indonesian.messages },
   ms: { name: "Malay", messages: malay.messages },
+  tr: { name: "Turkish", messages: turkish.messages },
   ur: { name: "Urdu", messages: urdu.messages },
 };
 
@@ -187,6 +191,8 @@ review.write(output, {
     "umrah-ms": { label: "Umrah Malay narration", assignment: "A Malay speaker checks wording and pronunciation. A scholar checks the instructions against the cited sources." },
     "umrah-fa": { label: "Umrah Persian narration", assignment: "Persian and Dari reviewers check wording and pronunciation. A scholar checks the instructions against the cited sources." },
     "umrah-ha": { label: "Umrah Hausa narration", assignment: "Hausa speakers check the wording, pace and pronunciation. A scholar checks the instructions against the cited sources." },
+    "umrah-id": { label: "Umrah Indonesian narration", assignment: "Indonesian speakers check the wording, pace and pronunciation. A scholar checks the instructions against the cited sources." },
+    "umrah-tr": { label: "Umrah Turkish narration", assignment: "Turkish speakers check the wording, pace and pronunciation. A scholar checks the instructions against the cited sources." },
   },
   varietyLabel: "Material",
   groupLabel: "Lesson or guide",
