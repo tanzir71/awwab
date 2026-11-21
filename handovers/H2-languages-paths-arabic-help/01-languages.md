@@ -168,6 +168,8 @@ The French first-run draft also covers both learning modes, the reading placemen
 
 The French Today draft covers the current prayer, the prayer log and weekly history, calendar event labels, and all 17 Qaida lesson titles. Review prayer names and status labels against the selected glossary, and check the difference between a late prayer and a make-up prayer in the log.
 
+The French prayer guide draft covers the rakʿa instructions, the notes on losing count, and guidance for Friday, Eid, funeral and Witr prayers. It also covers the controls and counters for Umrah practice. Check the notes against the displayed sources and the prayer guide reference selected in Settings.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
