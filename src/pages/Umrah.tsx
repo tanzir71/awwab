@@ -1,5 +1,6 @@
 import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate, useOutletContext } from "react-router-dom";
+import { useLiveQuery } from "dexie-react-hooks";
 import { ArrowLeft, Compass, Download, Heart, MapPin, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { DesignIcon } from "@/components/DesignIcon";
@@ -12,12 +13,11 @@ import { UmrahRitualDua, UmrahRitualSources, UmrahTawafDiagram } from "@/compone
 import { UmrahSaiGuide } from "@/components/UmrahSaiGuide";
 import { UmrahWalkSetup } from "@/components/UmrahWalkSetup";
 import { UmrahTripForm, UmrahTripImport } from "@/components/UmrahTripForm";
-import { useRecord } from "@/hooks/use-awwab";
 import { useUmrahVoice } from "@/hooks/use-umrah-voice";
 import { dateKey, formatTime } from "@/lib/dates";
 import { downloadFile } from "@/lib/download";
 import { useCopy } from "@/lib/copy";
-import { updateRecord } from "@/lib/storageService";
+import { getRecord, updateRecord } from "@/lib/storageService";
 import { advanceSai, distance, initialTrip, makkah, tawafRounds, toggleUmrahDua, type Coord, type UmrahTripUpdater } from "@/lib/umrah";
 import { observeHaramGate, type GateWatch } from "@/lib/umrahGateMemory";
 import { umrahStepNote, umrahStepTitle } from "@/lib/umrah-step-messages.mjs";
@@ -50,7 +50,7 @@ export function UmrahShell({ now, desktop }: { now: Date; desktop: boolean }) {
   const focusView = pathname === "/umrah/focus";
   const nowView = pathname === "/umrah";
   const showTabs = !walkSetup && !focusView && (!ask || pathname === "/umrah/ask");
-  const trip = useRecord("umrah", initialTrip);
+  const trip = useLiveQuery(() => getRecord("umrah", initialTrip));
   const [mapFix, setMapFix] = useState<{ point: Coord; at: number }>();
   const [saiFix, setSaiFix] = useState<{ point: Coord; at: number }>();
   const [locationError, setLocationError] = useState("");
@@ -63,13 +63,8 @@ export function UmrahShell({ now, desktop }: { now: Date; desktop: boolean }) {
       return false;
     }
   }
-  const configured = Boolean(trip.start && trip.end);
-  const saiGuide = pathname === "/umrah/rituals" && trip.step === saiStep;
-  const saiPoint = trip.gps && saiFix && Date.now() - saiFix.at < 30_000 ? saiFix.point : undefined;
-  const mapPoint = trip.gps && mapFix && Date.now() - mapFix.at < 30_000 ? mapFix.point : undefined;
-
   useEffect(() => {
-    if (desktop || !trip.gps) return;
+    if (desktop || !trip?.gps) return;
     if (!navigator.geolocation) { setLocationError("umrahLocationUnavailable"); return; }
     let last: { point: Coord; at: number } | undefined;
     let traveled = 0;
@@ -130,10 +125,15 @@ export function UmrahShell({ now, desktop }: { now: Date; desktop: boolean }) {
     },
     { enableHighAccuracy: true, maximumAge: 8000, timeout: 18000 });
     return () => { navigator.geolocation.clearWatch(watch); setMapFix(undefined); setSaiFix(undefined); setLocationError(""); };
-  }, [desktop, trip.gps, trip.walkOptions?.remember]);
+  }, [desktop, trip?.gps, trip?.walkOptions?.remember]);
 
+  if (!trip) return null;
   if (desktop) return <UmrahPreparation trip={trip} gates={gateNames} />;
 
+  const configured = Boolean(trip.start && trip.end);
+  const saiGuide = pathname === "/umrah/rituals" && trip.step === saiStep;
+  const saiPoint = trip.gps && saiFix && Date.now() - saiFix.at < 30_000 ? saiFix.point : undefined;
+  const mapPoint = trip.gps && mapFix && Date.now() - mapFix.at < 30_000 ? mapFix.point : undefined;
   const tabs = [
     { name: "askNow", path: "/umrah", icon: nowView ? "umrah-now-clock" : "ask-icon-clock" },
     { name: "askRituals", path: "/umrah/rituals", icon: saiGuide ? "umrah-live-rituals" : "ask-icon-cube" },

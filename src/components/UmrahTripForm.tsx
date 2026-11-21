@@ -2,33 +2,68 @@ import { useState, type FormEvent } from "react";
 import { CalendarDays } from "lucide-react";
 import { toast } from "sonner";
 import { useCopy } from "@/lib/copy";
+import { formatInputNumber, readLocalizedNumber } from "@/lib/localeNumbers";
 import { readUmrahTripFile, updateRecord } from "@/lib/storageService";
 import { emptyPreparation, initialTrip, tripDates, type UmrahTrip } from "@/lib/umrah";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from "./ui/dialog";
 
+const tripNumberFields = {
+  makkahNights: { label: "umrahPrepMakkahNights", max: 90, required: false },
+  madinahNights: { label: "umrahPrepMadinahNights", max: 90, required: false },
+  walk: { label: "umrahTripWalk", max: 120, required: true },
+  crowd: { label: "umrahTripCrowd", max: 90, required: true },
+  iqamah: { label: "umrahTripIqamah", max: 90, required: true },
+} as const;
+type TripNumberField = keyof typeof tripNumberFields;
+const tripNumberNames = Object.keys(tripNumberFields) as TripNumberField[];
+
 export function UmrahTripForm({ trip, gates, onSaved }: { trip: UmrahTrip; gates: string[]; onSaved?: () => void }) {
-  const { t } = useCopy();
+  const { t, locale, language } = useCopy();
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const preparation = trip.preparation ?? emptyPreparation;
+  const nativeNumber = language === "en";
+
+  function numberField(name: TripNumberField, value?: number) {
+    const { label, max, required } = tripNumberFields[name];
+    return <label className="field">{t(label)}<input type={nativeNumber ? "number" : "text"} name={name} dir="ltr" inputMode="numeric"
+      min={nativeNumber ? 0 : undefined} max={nativeNumber ? max : undefined} required={required}
+      defaultValue={value === undefined ? undefined : formatInputNumber(value, locale)}
+      onInput={event => event.currentTarget.setCustomValidity("")} /></label>;
+  }
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (saving) return;
     const values = new FormData(event.currentTarget);
     const text = (key: string) => String(values.get(key) ?? "").trim();
-    const nights = (key: string) => text(key) === "" ? undefined : Number(text(key));
     const start = text("start");
     const end = text("end");
     setError("");
     if (end < start) { setError(t("umrahTripDateError")); return; }
+    const numbers = { walk: trip.walk, crowd: trip.crowd, iqamah: trip.iqamah,
+      makkahNights: emptyPreparation.makkahNights, madinahNights: emptyPreparation.madinahNights };
+    for (const name of tripNumberNames) {
+      const { max, required } = tripNumberFields[name];
+      const input = event.currentTarget.elements.namedItem(name) as HTMLInputElement;
+      const raw = text(name);
+      if (!raw && !required) continue;
+      const value = nativeNumber ? input.valueAsNumber : readLocalizedNumber(raw, locale, "any");
+      if (value === undefined || !Number.isInteger(value) || value < 0 || value > max) {
+        input.setCustomValidity(value !== undefined && value > max ? t("zakatAmountMax", { max }) : t("qadaEnterWhole"));
+        input.reportValidity();
+        return;
+      }
+      numbers[name] = value;
+    }
     setSaving(true);
     try {
       await updateRecord("umrah", initialTrip, old => ({
         ...old, start, end, group: text("group"), gate: text("gate"),
         hotel: { ...old.hotel, name: text("hotel"), room: text("room") },
-        walk: Number(text("walk")), crowd: Number(text("crowd")), iqamah: Number(text("iqamah")),
+        walk: numbers.walk, crowd: numbers.crowd, iqamah: numbers.iqamah,
         preparation: { ...preparation, completed: old.preparation?.completed ?? [], hotelArabic: text("hotelArabic"), hotelAddress: text("hotelAddress"),
-          leader: text("leader"), phone: text("phone"), makkahNights: nights("makkahNights"), madinahNights: nights("madinahNights") },
+          leader: text("leader"), phone: text("phone"), makkahNights: numbers.makkahNights, madinahNights: numbers.madinahNights },
       }));
       toast(t("umrahTripSaved"));
       onSaved?.();
@@ -45,8 +80,8 @@ export function UmrahTripForm({ trip, gates, onSaved }: { trip: UmrahTrip; gates
       <label className="field">{t("umrahTripEnd")}<input name="end" type="date" required defaultValue={trip.end} /></label>
     </div>
     <div className="equal-row">
-      <label className="field">{t("umrahPrepMakkahNights")}<input name="makkahNights" type="number" min="0" max="90" defaultValue={preparation.makkahNights} /></label>
-      <label className="field">{t("umrahPrepMadinahNights")}<input name="madinahNights" type="number" min="0" max="90" defaultValue={preparation.madinahNights} /></label>
+      {numberField("makkahNights", preparation.makkahNights)}
+      {numberField("madinahNights", preparation.madinahNights)}
     </div>
     <label className="field">{t("umrahTripHotelName")}<input name="hotel" defaultValue={trip.hotel.name} maxLength={120} /></label>
     <label className="field">{t("umrahTripHotelArabic")}<input name="hotelArabic" lang="ar" dir="rtl" defaultValue={preparation.hotelArabic} maxLength={120} /></label>
@@ -60,9 +95,9 @@ export function UmrahTripForm({ trip, gates, onSaved }: { trip: UmrahTrip; gates
     <label className="field">{t("umrahTripGate")}<input name="gate" defaultValue={trip.gate} list="haram-gates" maxLength={120} /></label>
     <datalist id="haram-gates">{gates.map(gate => <option key={gate} value={gate} />)}</datalist>
     <div className="form-grid">
-      <label className="field">{t("umrahTripWalk")}<input type="number" name="walk" min="0" max="120" required defaultValue={trip.walk} /></label>
-      <label className="field">{t("umrahTripCrowd")}<input type="number" name="crowd" min="0" max="90" required defaultValue={trip.crowd} /></label>
-      <label className="field">{t("umrahTripIqamah")}<input type="number" name="iqamah" min="0" max="90" required defaultValue={trip.iqamah} /></label>
+      {numberField("walk", trip.walk)}
+      {numberField("crowd", trip.crowd)}
+      {numberField("iqamah", trip.iqamah)}
     </div>
     {error && <p role="alert">{error}</p>}
     <button className="action" disabled={saving}><CalendarDays size={18} />{t("umrahTripSave")}</button>
