@@ -10,7 +10,8 @@
    "sources": [{ "label": "Bukhari 1524 · Sahih", "url": "https://sunnah.com/bukhari:1524" }],
    "narration": {
     "en": "Ihram and intention. Check your miqat before arrival. If you are flying, listen for the airline's announcement.",
-    "bn": "ইহরাম ও নিয়ত। পৌঁছানোর আগে আপনার মিকাত জেনে নিন। বিমানে গেলে বিমান সংস্থার ঘোষণা শুনুন।"
+    "bn": "ইহরাম ও নিয়ত। পৌঁছানোর আগে আপনার মিকাত জেনে নিন। বিমানে গেলে বিমান সংস্থার ঘোষণা শুনুন।",
+    "ur": "احرام اور نیت۔ پہنچنے سے پہلے اپنا میقات معلوم کر لیں۔ اگر آپ ہوائی سفر کر رہے ہیں تو فضائی کمپنی کا اعلان سنیں۔"
    },
    "trigger": "manual or flight reminder before mīqāt (airline announces)",
    "duas": [
@@ -26,7 +27,8 @@
    "sources": [{ "label": "Bukhari 1549 · Sahih", "url": "https://sunnah.com/bukhari:1549" }],
    "narration": {
     "en": "Talbiyah. This step follows the intention. The words of the Talbiyah are on the screen with their source.",
-    "bn": "তালবিয়া। এই ধাপ নিয়তের পর। তালবিয়ার শব্দ ও সূত্র পর্দায় দেওয়া আছে।"
+    "bn": "তালবিয়া। এই ধাপ নিয়তের পর। তালবিয়ার শব্দ ও সূত্র পর্দায় দেওয়া আছে।",
+    "ur": "تلبیہ۔ یہ مرحلہ نیت کے بعد آتا ہے۔ تلبیہ کے الفاظ اور ان کا حوالہ اسکرین پر موجود ہیں۔"
    },
    "trigger": "after niyyah until reaching the Kaʿbah"
   },
@@ -39,7 +41,8 @@
    "sources": [{ "label": "Muslim 1218a · Sahih", "url": "https://sunnah.com/muslim:1218a" }],
    "narration": {
     "en": "Tawaf. Begin at the Black Stone line and keep the Kaaba on your left. Count seven rounds by hand. The guide shows the supplication for the stretch between the Yemeni Corner and the Black Stone.",
-    "bn": "তাওয়াফ। হাজরে আসওয়াদের রেখা থেকে শুরু করুন এবং কাবা আপনার বাঁ পাশে রাখুন। সাত চক্কর নিজে গুনুন। রুকনে ইয়ামানি ও হাজরে আসওয়াদের মাঝের দোয়া নির্দেশিকায় দেওয়া আছে।"
+    "bn": "তাওয়াফ। হাজরে আসওয়াদের রেখা থেকে শুরু করুন এবং কাবা আপনার বাঁ পাশে রাখুন। সাত চক্কর নিজে গুনুন। রুকনে ইয়ামানি ও হাজরে আসওয়াদের মাঝের দোয়া নির্দেশিকায় দেওয়া আছে।",
+    "ur": "طواف۔ حجر اسود کے سامنے والی لکیر سے شروع کریں اور کعبہ کو اپنے بائیں طرف رکھیں۔ سات چکر خود گنیں۔ رکن یمانی اور حجر اسود کے درمیان پڑھی جانے والی دعا رہنما میں دی گئی ہے۔"
    },
    "trigger": "geofence: haram_mataf (enter) → show counter",
    "counter": "manual",
@@ -63,7 +66,8 @@
    "sources": [{ "label": "Muslim 1218a · Sahih", "url": "https://sunnah.com/muslim:1218a" }],
    "narration": {
     "en": "Two rakats. If you can, pray behind Maqam Ibrahim. If it is crowded, use another place in the mosque.",
-    "bn": "দুই রাকাত। সম্ভব হলে মাকামে ইবরাহিমের পেছনে নামাজ পড়ুন। ভিড় হলে মসজিদের অন্য জায়গায় পড়ুন।"
+    "bn": "দুই রাকাত। সম্ভব হলে মাকামে ইবরাহিমের পেছনে নামাজ পড়ুন। ভিড় হলে মসজিদের অন্য জায়গায় পড়ুন।",
+    "ur": "دو رکعت۔ اگر ممکن ہو تو مقام ابراہیم کے پیچھے نماز پڑھیں۔ اگر وہاں بھیڑ ہو تو مسجد میں کسی اور جگہ پڑھ لیں۔"
    },
    "trigger": "after 7 rounds",
    "notes": [
@@ -82,7 +86,8 @@
    "sources": [{ "label": "Bukhari 1637 · Sahih", "url": "https://sunnah.com/bukhari:1637" }],
    "narration": {
     "en": "Zamzam. This step comes before Sa'y. Continue when you're ready.",
-    "bn": "জমজম। এই ধাপ সাঈয়ের আগে। প্রস্তুত হলে পরের ধাপে যান।"
+    "bn": "জমজম। এই ধাপ সাঈয়ের আগে। প্রস্তুত হলে পরের ধাপে যান۔",
+    "ur": "زمزم۔ یہ مرحلہ سعی سے پہلے آتا ہے۔ جب آپ تیار ہوں تو آگے بڑھیں۔"
    },
    "trigger": "manual"
   },
@@ -95,7 +100,8 @@
    "sources": [{ "label": "Muslim 1218a · Sahih", "url": "https://sunnah.com/muslim:1218a" }],
    "narration": {
     "en": "Sa'y. One walk from Safa to Marwah counts as one lap. Alternate between the two ends and finish the seventh lap at Marwah. Men jog lightly between the green lights.",
-    "bn": "সাঈ। সাফা থেকে মারওয়া পর্যন্ত একবার গেলে এক চক্কর হয়। দুই প্রান্তের মধ্যে পালা করে হেঁটে সপ্তম চক্কর মারওয়ায় শেষ করুন। সবুজ বাতির মাঝের অংশে পুরুষেরা হালকা দৌড়াবেন।"
+    "bn": "সাঈ। সাফা থেকে মারওয়া পর্যন্ত একবার গেলে এক চক্কর হয়। দুই প্রান্তের মধ্যে পালা করে হেঁটে সপ্তম চক্কর মারওয়ায় শেষ করুন। সবুজ বাতির মাঝের অংশে পুরুষেরা হালকা দৌড়াবেন।",
+    "ur": "سعی۔ صفا سے مروہ تک ایک بار جانا ایک پھیرا شمار ہوتا ہے۔ دونوں سروں کے درمیان باری باری جائیں اور ساتواں پھیرا مروہ پر ختم کریں۔ سبز روشنیوں کے درمیان مرد ہلکی دوڑ لگائیں۔"
    },
    "trigger": "geofence: masa_safa (enter)",
    "counter": "auto (beta) + manual",
@@ -120,7 +126,8 @@
    ],
    "narration": {
     "en": "Shave or trim. Men can shave or trim their hair. Women trim about a fingertip's length.",
-    "bn": "চুল মুণ্ডন বা ছাঁটা। পুরুষেরা মাথা মুণ্ডন বা চুল ছাঁটতে পারেন। নারীরা আঙুলের ডগা পরিমাণ চুল ছাঁটবেন।"
+    "bn": "চুল মুণ্ডন বা ছাঁটা। পুরুষেরা মাথা মুণ্ডন বা চুল ছাঁটতে পারেন। নারীরা আঙুলের ডগা পরিমাণ চুল ছাঁটবেন।",
+    "ur": "سر منڈوانا یا بال ترشوانا۔ مرد سر منڈوا سکتے ہیں یا بال ترشوا سکتے ہیں۔ خواتین تقریباً انگلی کے سرے کے برابر بال کاٹیں۔"
    },
    "trigger": "after lap 7 at Marwah",
    "notes": [

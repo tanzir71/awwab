@@ -1,7 +1,7 @@
 import source from "../../docs/content/umrah-guide-audio.json";
 import type { AudioPack } from "./audio";
 
-export type UmrahGuidePack = AudioPack & { language: "en" | "bn"; dataset?: string };
+export type UmrahGuidePack = AudioPack & { language: "en" | "bn" | "ur"; dataset?: string };
 export const umrahGuidePacks = source.packs as UmrahGuidePack[];
 
 export function umrahGuidePack(language: string) {

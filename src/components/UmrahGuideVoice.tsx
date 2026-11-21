@@ -43,7 +43,7 @@ export function UmrahGuideDownload({ pack }: { pack: UmrahGuidePack }) {
 }
 
 export function UmrahGuideVoice({ step, title, voice, embedded = false }: {
-  step: { id: string; narration: { en: string; bn: string } }; title: string;
+  step: { id: string; narration: Record<UmrahGuidePack["language"], string> }; title: string;
   voice: ReturnType<typeof useUmrahVoice>; embedded?: boolean;
 }) {
   const { t } = useCopy();
@@ -62,7 +62,7 @@ export function UmrahGuideVoice({ step, title, voice, embedded = false }: {
     {error && <p role="status" className="small">{t(player.blocked ? "umrahWalkVoiceBlocked" : "askAudioError")}</p>}
     <details className="small">
       <summary>{t("umrahGuideTranscript")}</summary>
-      <p lang={pack.language}>{step.narration[pack.language]}</p>
+      <p lang={pack.language} dir="auto">{step.narration[pack.language]}</p>
     </details>
     <details className="small">
       <summary>{t("umrahGuidePersonalAudio")}</summary>

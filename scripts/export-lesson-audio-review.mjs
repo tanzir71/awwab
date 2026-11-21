@@ -5,9 +5,11 @@ import qaidaAudio from "../docs/content/qaida-audio.json" with { type: "json" };
 import qaida from "../docs/content/qaida-lessons.json" with { type: "json" };
 import umrahAudio from "../docs/content/umrah-guide-audio.json" with { type: "json" };
 import umrah from "../docs/content/umrah-steps.json" with { type: "json" };
+import urdu from "../handovers/H2-languages-paths-arabic-help/drafts/ur.json" with { type: "json" };
 import { qaidaAudioRef, qaidaHarakatExercise, qaidaHarakatExerciseRef, qaidaRowCitation, qaidaRows } from "../src/lib/qaidaPractice.ts";
 import { qaidaRecitationLessons, qaidaRecitations } from "../src/lib/qaidaRecitation.ts";
 import { splitUthmaniOpening } from "../src/lib/quranOpening.ts";
+import { umrahStepNote, umrahStepSummary, umrahStepTitle } from "../src/lib/umrah-step-messages.mjs";
 import { pronunciationReview } from "./pronunciation-review.mjs";
 
 const [output] = process.argv.slice(2);
@@ -126,6 +128,15 @@ const ritualEntries = umrahAudio.packs.flatMap(pack => {
         { label: "Bangla on-screen summary", value: step.summaryBn, lang: "bn" },
         ...(step.notes ? [{ label: "English on-screen notes", value: step.notes.join("\n"), lang: "en" }] : []),
         ...(step.notesBn ? [{ label: "Bangla on-screen notes", value: step.notesBn.join("\n"), lang: "bn" }] : []),
+        ...(pack.language === "ur" ? [
+          { label: "Urdu on-screen title", value: urdu.messages[umrahStepTitle(step.id)].text, lang: "ur" },
+          { label: "Urdu on-screen summary", value: urdu.messages[umrahStepSummary(step.id)].text, lang: "ur" },
+          ...(step.notes ?? []).map((_, noteIndex) => ({
+            label: "Urdu on-screen note",
+            value: urdu.messages[umrahStepNote(step.id, noteIndex)].text,
+            lang: "ur",
+          })),
+        ] : []),
       ],
       recordings: [clip(item.path, pack.speaker)],
       sources: [
@@ -157,6 +168,7 @@ review.write(output, {
     "qaida-recitation": { label: "Qaida Quran recitations", assignment: "A Quran teacher checks the recited verses, citation and whether the clip demonstrates the drill." },
     "umrah-en": { label: "Umrah English narration", assignment: "An English speaker checks pronunciation. A scholar checks the instructions against the cited sources." },
     "umrah-bn": { label: "Umrah Bangla narration", assignment: "A Bangla speaker checks wording and pronunciation. A scholar checks the instructions against the cited sources." },
+    "umrah-ur": { label: "Umrah Urdu narration", assignment: "An Urdu speaker checks wording and pronunciation. A scholar checks the instructions against the cited sources." },
   },
   varietyLabel: "Material",
   groupLabel: "Lesson or guide",

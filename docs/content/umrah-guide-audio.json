@@ -80,6 +80,46 @@
         }
       ],
       "dataset": "https://huggingface.co/datasets/ai4bharat/Rasa"
+    },
+    {
+      "id": "umrah-guide-v1-ur",
+      "language": "ur",
+      "name": "اردو",
+      "speaker": "Libra TTS · Aliya",
+      "source": "https://huggingface.co/Ekam/Libra-TTS/tree/f8f945e21862cb4a9cf7c8408acffecd9d78c9b4",
+      "licenseUrl": "https://www.apache.org/licenses/LICENSE-2.0",
+      "attribution": "Generated speech · Libra TTS · Aliya",
+      "bytes": 521444,
+      "items": [
+        {
+          "ref": "umrah-guide-v1-ur:ihram",
+          "path": "packs/audio/umrah-guide-v1/ur/ihram.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-ur:talbiyah",
+          "path": "packs/audio/umrah-guide-v1/ur/talbiyah.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-ur:tawaf",
+          "path": "packs/audio/umrah-guide-v1/ur/tawaf.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-ur:two_rakahs",
+          "path": "packs/audio/umrah-guide-v1/ur/two_rakahs.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-ur:zamzam",
+          "path": "packs/audio/umrah-guide-v1/ur/zamzam.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-ur:sai",
+          "path": "packs/audio/umrah-guide-v1/ur/sai.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-ur:halq",
+          "path": "packs/audio/umrah-guide-v1/ur/halq.mp3"
+        }
+      ]
     }
   ]
 }

@@ -59,6 +59,7 @@
     <p id="english-credit" hidden></p>
     <p id="meaning"></p>
     <p id="bangla" lang="bn" dir="auto"></p>
+    <p id="urdu" lang="ur" dir="auto"></p>
     <p id="spoken">Text used for speech <bdi lang="ar" dir="rtl" id="spoken-arabic"></bdi></p>
     <details id="context">
       <summary>Full lesson dialogue</summary>
@@ -149,6 +150,8 @@
     byId("meaning").hidden = !row.expected.en;
     byId("bangla").textContent = row.expected.bn ?? "";
     byId("bangla").hidden = !row.expected.bn;
+    byId("urdu").textContent = row.expected.ur ?? "";
+    byId("urdu").hidden = !row.expected.ur;
     byId("spoken-arabic").textContent = row.expected.spoken ?? "";
     byId("spoken").hidden = !row.expected.spoken;
     const dialogue = byId("dialogue");

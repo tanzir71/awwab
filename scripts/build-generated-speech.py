@@ -21,6 +21,7 @@ A3S = "https://huggingface.co/MahmoudIbrahim/A3S/tree/b6eb8229a94feb68887cb0ba92
 SPEAK_COURSES = ("saudi-a2", "saudi-b1", "gulf-a1", "umrah-hajj", "gulf-work")
 LJSPEECH = "https://huggingface.co/rhasspy/piper-voices/blob/b145f2ac26522d6a2ccde0164b7b0e48b1e3199c/en/en_US/ljspeech/medium/MODEL_CARD"
 INDIC_BENGALI = "https://huggingface.co/sulabhkatiyar/indic-tiny-tts-bengali/tree/a6bb92894272219d8d2bbd03cb1121a6be3164a8"
+LIBRA_URDU = "https://huggingface.co/Ekam/Libra-TTS/tree/f8f945e21862cb4a9cf7c8408acffecd9d78c9b4"
 RASA = "https://huggingface.co/datasets/ai4bharat/Rasa"
 
 
@@ -78,41 +79,66 @@ def encode_wav(wav, path):
     temporary.replace(path)
 
 
+def write_umrah_guide_packs(packs):
+    manifest = CONTENT / "umrah-guide-audio.json"
+    previous = read(manifest)["packs"] if manifest.exists() else []
+    by_language = {pack["language"]: pack for pack in (*previous, *packs)}
+    write(manifest, {"packs": list(by_language.values())})
+
+
+def umrah_guide_pack(language, name, speaker, source, license_url, synthesize):
+    pack_id = f"umrah-guide-v1-{language}"
+    files = []
+    for step in read(CONTENT / "umrah-steps.json")["steps"]:
+        ref = f"{pack_id}:{step['id']}"
+        relative = f"packs/audio/umrah-guide-v1/{language}/{step['id']}.mp3"
+        with TemporaryDirectory() as directory:
+            target = Path(directory) / "clip.wav"
+            synthesize(step["narration"][language], target)
+            encode_wav(target.read_bytes(), ROOT / "public" / relative)
+        files.append({"ref": ref, "path": relative})
+        print(ref, flush=True)
+    return {
+        "id": pack_id, "language": language, "name": name, "speaker": speaker, "source": source,
+        "licenseUrl": license_url, "attribution": f"Generated speech · {speaker}",
+        "bytes": sum((ROOT / "public" / item["path"]).stat().st_size for item in files), "items": files,
+    }
+
+
 def build_umrah_guide(model, piper, bangla_model):
     sys.path.insert(0, str(bangla_model.resolve()))
     from indic_tiny_tts import TinyTTSOnnx
 
     bangla = TinyTTSOnnx(bangla_model, threads=2)
-    steps = read(CONTENT / "umrah-steps.json")["steps"]
-    clips = []
-    for language, name, speaker, source, license_url in (
-        ("en", "English", "Piper LJSpeech", LJSPEECH, "https://keithito.com/LJ-Speech-Dataset/"),
-        ("bn", "বাংলা", "Indic Tiny TTS Bengali", INDIC_BENGALI, "https://creativecommons.org/licenses/by/4.0/"),
-    ):
-        pack_id = f"umrah-guide-v1-{language}"
-        files = []
-        for step in steps:
-            ref = f"{pack_id}:{step['id']}"
-            relative = f"packs/audio/umrah-guide-v1/{language}/{step['id']}.mp3"
-            text = step["narration"][language]
-            with TemporaryDirectory() as directory:
-                target = Path(directory) / "clip.wav"
-                if language == "en":
-                    pronounced = text.replace("miqat", "mee-kaht").replace("Sa'y", "saa-ee")
-                    subprocess.run([piper, "--model", str(model), "--output_file", str(target)],
-                                   input=pronounced.encode("utf-8"), check=True)
-                else:
-                    bangla.tts_to_file(text, target, voice="female", speed=0.95, seed=0)
-                encode_wav(target.read_bytes(), ROOT / "public" / relative)
-            files.append({"ref": ref, "path": relative})
-        clips.append({
-            "id": pack_id, "language": language, "name": name, "speaker": speaker, "source": source,
-            "licenseUrl": license_url, "attribution": f"Generated speech · {speaker}",
-            "bytes": sum((ROOT / "public" / item["path"]).stat().st_size for item in files), "items": files,
-        })
-        if language == "bn":
-            clips[-1]["dataset"] = RASA
-    write(CONTENT / "umrah-guide-audio.json", {"packs": clips})
+
+    def english(text, target):
+        pronounced = text.replace("miqat", "mee-kaht").replace("Sa'y", "saa-ee")
+        subprocess.run([piper, "--model", str(model), "--output_file", str(target)],
+                       input=pronounced.encode("utf-8"), check=True)
+
+    def bengali(text, target):
+        bangla.tts_to_file(text, target, voice="female", speed=0.95, seed=0)
+
+    en = umrah_guide_pack("en", "English", "Piper LJSpeech", LJSPEECH,
+                          "https://keithito.com/LJ-Speech-Dataset/", english)
+    bn = umrah_guide_pack("bn", "বাংলা", "Indic Tiny TTS Bengali", INDIC_BENGALI,
+                          "https://creativecommons.org/licenses/by/4.0/", bengali)
+    bn["dataset"] = RASA
+    write_umrah_guide_packs([en, bn])
+
+
+def build_umrah_guide_urdu(model):
+    from libra_tts import LibraTTS
+
+    voice = LibraTTS(model=str(model.resolve()), backend="cuda", compile=False)
+
+    def urdu(text, target):
+        speech = voice.synthesize(text, voice="aliya", lang="ur", style="calm", pace="slow", seed=0)
+        voice.save(str(target), speech)
+
+    pack = umrah_guide_pack("ur", "اردو", "Libra TTS · Aliya", LIBRA_URDU,
+                            "https://www.apache.org/licenses/LICENSE-2.0", urdu)
+    write_umrah_guide_packs([pack])
 
 
 def course_clips(units):
@@ -373,12 +399,13 @@ def build_male_ask(model_dir, phrases, resume):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("model", type=Path, nargs="?", help="Piper ONNX file, Nabra INT8 directory for msa-a1, or A3S directory for --ask-male")
+    parser.add_argument("model", type=Path, nargs="?", help="Local weights for the selected speech model")
     task = parser.add_mutually_exclusive_group()
     task.add_argument("--course", choices=(*SPEAK_COURSES, "msa-a1"), help="Only rebuild the selected Speak course")
     task.add_argument("--ask-male", action="store_true", help="Build the second Ask voice using A3S")
     task.add_argument("--ask-manifest", action="store_true", help="Index the existing Ask recordings without rebuilding speech")
     task.add_argument("--umrah-guide", action="store_true", help="Build English and Bangla Umrah narration with Piper LJSpeech and Indic Tiny TTS")
+    task.add_argument("--umrah-guide-urdu", action="store_true", help="Build Urdu Umrah narration with local Libra TTS weights")
     task.add_argument("--qaida", action="store_true", help="Build Qaida drill audio and placement vowel clips with Emirati Piper")
     parser.add_argument("--piper", default="piper", help="Piper executable for --umrah-guide")
     parser.add_argument("--bangla-model", type=Path, help="Local Indic Tiny TTS Bengali model directory with code and ONNX graphs")
@@ -393,6 +420,9 @@ def main():
         if args.bangla_model is None:
             parser.error("--umrah-guide requires --bangla-model")
         build_umrah_guide(args.model, args.piper, args.bangla_model)
+        return
+    if args.umrah_guide_urdu:
+        build_umrah_guide_urdu(args.model)
         return
     if args.ask_male:
         build_male_ask(args.model, read(PHRASES)["phrases"], args.resume)
