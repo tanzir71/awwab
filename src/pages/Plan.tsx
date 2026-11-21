@@ -12,8 +12,8 @@ import { useCopy } from "@/lib/copy";
 import { addDays, dateKey, formatDay } from "@/lib/dates";
 import { calendarDefaults, calendarEventById, calendarEvents, dayDifference, hijriOn, monthStart,
   moonWatchDay, possibleMonthStarts, type CalendarEvent, type CalendarSettings, type MonthAnchor } from "@/lib/hijri";
-import { mosqueDefaults } from "@/lib/mosques";
-import { shiftPlanEvent } from "@/lib/plan-calendar";
+import { mosqueDefaults, mosqueWeekday } from "@/lib/mosques";
+import { calendarWeekStart, shiftPlanEvent } from "@/lib/plan-calendar";
 import { planAuthorities, planEventLabels, planMonth } from "@/lib/plan-copy";
 import { getRecord, updateRecord, type Settings } from "@/lib/storageService";
 import { zakatHawl, type ZakatProfile } from "@/lib/zakat";
@@ -55,7 +55,8 @@ export function Plan({ settings, now, desktop }: { settings: Settings; now: Date
   const displayStart = monthStart(displayYear, displayMonth, adjustment, config.anchors);
   const displayNext = monthStart(Math.floor((displayedOrdinal + 1) / 12), (displayedOrdinal + 1) % 12 + 1, adjustment, config.anchors);
   const displayLength = displayNext.confirmed ? dayDifference(displayNext.date, displayStart.date) : 30;
-  const before = new Date(displayStart.date + "T12:00:00Z").getUTCDay();
+  const firstWeekday = calendarWeekStart(language, settings.city.timeZone, navigator.languages);
+  const before = (mosqueWeekday(displayStart.date) + 7 - firstWeekday) % 7;
   const monthTitle = `${planMonth(displayMonth, language)} ${number.format(displayYear)}`;
   const displayEnd = addDays(displayStart.date, displayLength - 1);
   const monthLabel = displayStart.date.slice(0, 7) === displayEnd.slice(0, 7)
@@ -164,7 +165,7 @@ export function Plan({ settings, now, desktop }: { settings: Settings; now: Date
     <section className="card plan-month" aria-label={monthTitle}>
       <div className="month-grid">
         {Array.from({ length: 7 }, (_, i) => {
-          const weekday = addDays("2026-11-15", i);
+          const weekday = addDays(displayStart.date, i - before);
           return <small key={weekday} className="plan-weekday muted">
             <span aria-hidden="true">{formatDay(weekday, { weekday: "narrow" }, locale)}</span>
             <span className="sr-only">{formatDay(weekday, { weekday: "long" }, locale)}</span>

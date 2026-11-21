@@ -2,6 +2,14 @@ import { addDays } from "./dates";
 import { calendarEvents, dayDifference, hijriOn, monthStartEvent, type CalendarEvent, type CalendarSettings } from "./hijri";
 import { assignedMosque, mosqueWeekday, type MosquePlan } from "./mosques";
 
+// CLDR 48 first-day exceptions to the Monday default. See public/app/cldr-week-data-notice.txt.
+const sundayRegions = new Set([
+  "AG", "AS", "BD", "BR", "BS", "BT", "BW", "BZ", "CA", "CO", "DM", "DO", "ET", "GT", "GU", "HK", "HN", "ID", "IL",
+  "IN", "IS", "JM", "JP", "KE", "KH", "KR", "LA", "MH", "MM", "MO", "MT", "MX", "MZ", "NI", "NP", "PA", "PE", "PH",
+  "PK", "PR", "PT", "PY", "SA", "SG", "SV", "TH", "TT", "TW", "UM", "US", "VE", "VI", "WS", "YE", "ZA", "ZW",
+]);
+const saturdayRegions = new Set(["AF", "BH", "DJ", "DZ", "EG", "IQ", "IR", "JO", "KW", "LY", "OM", "QA", "SD", "SY"]);
+
 export function calendarMonthOn(day: string, offset = 0) {
   const date = new Date(day.slice(0, 7) + "-01T12:00:00Z");
   date.setUTCMonth(date.getUTCMonth() + offset);
@@ -33,7 +41,11 @@ export function calendarWeekStart(language: string, zone: string, preferred: rea
     weekInfo?: { firstDay: number };
   };
   const first = locale.getWeekInfo?.().firstDay ?? locale.weekInfo?.firstDay;
-  return first === undefined ? (locale.maximize().region === "US" ? 0 : 1) : first % 7;
+  if (first !== undefined) return first % 7;
+  const region = locale.maximize().region;
+  if (sundayRegions.has(region)) return 0;
+  if (saturdayRegions.has(region)) return 6;
+  return region === "MV" ? 5 : 1;
 }
 
 export function monthStartsInRange(first: string, last: string, adjustment: number, config: CalendarSettings) {

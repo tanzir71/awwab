@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { calculateZakat, gramsPerBhori, initialZakat, nisabWeight, paymentsForHawl,
   zakatHawl, zakatMoney, zakatPrices, zakatProfileTotals, type ZakatProfile } from "./zakat";
 import { advanceSai, bearing, correctSai, distance, emptyPreparation, initialSai, initialTrip, makkah,
@@ -147,6 +147,23 @@ describe("desktop Plan calendar", () => {
     expect(monday[0]).toMatchObject({ day: "2026-11-30", adjacent: true, weekday: 1 });
     expect(monday.at(-1)).toMatchObject({ day: "2027-01-03", adjacent: true, weekday: 0 });
     expect(sunday).toHaveLength(35);
+  });
+
+  it("keeps regional week starts when the browser lacks locale week data", () => {
+    class LocaleWithoutWeekInfo extends Intl.Locale {
+      getWeekInfo = undefined;
+      weekInfo = undefined;
+    }
+    vi.stubGlobal("Intl", Object.create(Intl, { Locale: { value: LocaleWithoutWeekInfo } }));
+    try {
+      expect(calendarWeekStart("en", "Asia/Dhaka", ["en-GB"])).toBe(0);
+      expect(calendarWeekStart("en", "Europe/London", ["en-GB"])).toBe(1);
+      expect(calendarWeekStart("en", "America/Toronto", ["en-CA"])).toBe(0);
+      expect(calendarWeekStart("ur", "Asia/Karachi", [])).toBe(0);
+      expect(calendarWeekStart("id", "Asia/Jakarta", ["id-ID"])).toBe(0);
+      expect(calendarWeekStart("fa", "Asia/Tehran", ["fa-IR"])).toBe(6);
+      expect(calendarWeekStart("en", "Indian/Maldives", ["en-MV"])).toBe(5);
+    } finally { vi.unstubAllGlobals(); }
   });
 
   it("shows both expected Rajab dates and highlights every day of the two White Days windows once", () => {
