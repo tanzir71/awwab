@@ -131,10 +131,10 @@ function DesktopHadithReading({ id, inDrawer, onShare, onWord }: {
         {topic && <div><dt>{t("hadithTopic")}</dt><dd>{topic}</dd></div>}
       </dl>
       <div className="equal-row hadith-desk-actions">
-        <button type="button" className="action soft" disabled={!firstWord} onClick={() => {
+        <button type="button" className="action soft" disabled={!firstWord} onClick={event => {
           if (!firstWord) return;
           onWord();
-          useUi.getState().selectWord({ word: firstWord, citation, connected: false });
+          useUi.getState().selectWord({ word: firstWord, citation, connected: false }, { trigger: event.currentTarget, keyboard: event.detail === 0 });
         }}>{t("hadithPickAnatomy")}</button>
         <button type="button" className="action hadith-copy-reference" onClick={() => void copy()}>{t("hadithCopyReference")}</button>
         <button type="button" className="action" aria-haspopup="dialog" disabled={!canShare} onClick={share}>{t("hadithShareImage")}</button>

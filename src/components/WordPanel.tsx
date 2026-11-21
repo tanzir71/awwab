@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { X } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { toast } from "sonner";
@@ -232,17 +232,44 @@ function Anatomy({ selection, settings, layout }: { selection: WordSelection; se
   </div>;
 }
 
+function wordFocusTarget(trigger?: HTMLElement) {
+  return trigger?.isConnected && trigger.getClientRects().length ? trigger : document.getElementById("app-main");
+}
+
 export function WordPanel({ presentation = "sheet", settings, reader = false }: {
   presentation?: "inline" | "drawer" | "sheet"; settings: Settings; reader?: boolean;
 }) {
   const word = useUi(state => state.word);
+  const activation = useUi(state => state.wordActivation);
   const selectWord = useUi(state => state.selectWord);
   const previousFocus = useRef<HTMLElement>();
+  const inlinePanel = useRef<HTMLElement>(null);
+  const inlineTrigger = useRef<HTMLElement>();
   const t = message.bind(null, settings);
   const key = word ? [word.verse, word.position, word.script, word.word].join(":") : "";
-  if (presentation === "inline") return word ? <aside className={reader ? "word-side anatomy-reader-panel" : "word-side card"} aria-label={t("wordAnatomy")}
-    onKeyDown={event => { if (event.key === "Escape") selectWord(); }}>
-    {!reader && <button className="icon-button anatomy-close" aria-label={t("closeWordAnatomy")} onClick={() => selectWord()}><X size={20} /></button>}
+
+  useLayoutEffect(() => {
+    if (!word) inlineTrigger.current = undefined;
+    if (presentation !== "inline" || !activation) return;
+    const panel = inlinePanel.current;
+    if (activation.trigger.isConnected && !panel?.contains(activation.trigger)) inlineTrigger.current = activation.trigger;
+    if (activation.keyboard) panel?.focus({ preventScroll: true });
+  }, [activation, presentation, word]);
+
+  function closeInline() {
+    const target = wordFocusTarget(inlineTrigger.current);
+    selectWord();
+    target?.focus({ preventScroll: true });
+  }
+
+  if (presentation === "inline") return word ? <aside ref={inlinePanel} tabIndex={-1}
+    className={reader ? "word-side anatomy-reader-panel" : "word-side card"} aria-label={t("wordAnatomy")}
+    onKeyDown={event => {
+      if (event.key !== "Escape" || event.defaultPrevented || event.nativeEvent.isComposing) return;
+      event.preventDefault();
+      closeInline();
+    }}>
+    {!reader && <button className="icon-button anatomy-close" aria-label={t("closeWordAnatomy")} onClick={closeInline}><X size={20} /></button>}
     <Anatomy key={key} selection={word} settings={settings} layout={reader ? settings.mode === "maktab" ? "maktab-reader" : "adult-reader" : "side"} />
   </aside> : null;
   const drawer = presentation === "drawer";
@@ -252,12 +279,13 @@ export function WordPanel({ presentation = "sheet", settings, reader = false }: 
       overlayClassName={drawer ? "desktop-detail-overlay" : undefined} aria-describedby={undefined} showCloseButton={false}
       onOpenAutoFocus={() => {
         const active = document.activeElement;
-        previousFocus.current = active instanceof HTMLElement && active !== document.body ? active : undefined;
+        previousFocus.current = activation?.trigger.isConnected ? activation.trigger
+          : active instanceof HTMLElement && active !== document.body ? active : inlineTrigger.current;
       }}
       onCloseAutoFocus={event => {
         const trigger = previousFocus.current;
         previousFocus.current = undefined;
-        const target = trigger?.isConnected ? trigger : document.getElementById("app-main");
+        const target = wordFocusTarget(trigger);
         if (target) {
           event.preventDefault();
           target.focus({ preventScroll: true });

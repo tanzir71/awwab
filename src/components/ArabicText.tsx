@@ -1,4 +1,4 @@
-import React, { type ReactNode } from "react";
+import React, { type MouseEvent, type ReactNode } from "react";
 import { splitArabicPhrase, splitArabicWords, splitGraphemes, wordAnatomy } from "../lib/wordAnatomy";
 import { useUi, type WordSelection } from "../lib/uiState";
 import { useCopy } from "../lib/copy";
@@ -14,7 +14,7 @@ function WordChip({ children, recall, href, selected, indicator, annotation, onS
   selected?: boolean;
   indicator?: WordIndicator;
   annotation?: WordDetail["annotation"];
-  onSelect: () => void;
+  onSelect: (event: MouseEvent<HTMLButtonElement>) => void;
 }) {
   if (href) return <a className="word-chip" href={href}>{children}</a>;
   return <button type="button" className="word-chip" data-recall={recall} data-learning={indicator?.state} aria-pressed={selected}
@@ -69,9 +69,10 @@ export function ArabicText({ text, citation, words, recall = "read", mushaf, com
             const screenReaderText = chipRecall === "read" ? transliteration : t("revealWord", { number: index + 1 });
             return (
               <WordChip key={partIndex} recall={chipRecall} href={wordLink?.(index + 1)} selected={selectedPosition === undefined ? undefined : selectedPosition === position} indicator={indicator} annotation={detail?.annotation}
-                onSelect={() => {
+                onSelect={event => {
                   if (onWordSelected?.(position) === false) return;
-                  selectWord({ word: anatomyWord, citation, connected: index > 0, verse, position, script: mushaf, ...detail });
+                  selectWord({ word: anatomyWord, citation, connected: index > 0, verse, position, script: mushaf, ...detail },
+                    { trigger: event.currentTarget, keyboard: event.detail === 0 });
                 }}>
                 <span>{shown}</span>
                 {chipRecall === "read" && showGlosses && detail?.gloss && <small lang={detail.glossLanguage ?? "en"} dir="auto">{detail.gloss}</small>}

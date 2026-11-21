@@ -193,8 +193,9 @@ function MobileHadith() {
       <p className="small">{featureSource} · {otherSource} · {t("hadithSahih")}</p>
       <div className="equal-row">
         <button className="action hadith-gold" type="button" onClick={() => param("read", featuredId)}>{t("hadithRead")}</button>
-        <button className="action light" type="button" onClick={() =>
-          selectWord({ word: splitArabicWords(featuredArabic)[0], citation: featureSource, connected: false })}>{t("hadithSpell")}</button>
+        <button className="action light" type="button" onClick={event =>
+          selectWord({ word: splitArabicWords(featuredArabic)[0], citation: featureSource, connected: false },
+            { trigger: event.currentTarget, keyboard: event.detail === 0 })}>{t("hadithSpell")}</button>
       </div>
     </section>
     <section className="hadith-gallery">

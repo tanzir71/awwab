@@ -14,13 +14,16 @@ export interface WordSelection extends Partial<WordGloss> {
   annotation?: { label: string; lessons?: { title: string; to: string }[] };
 }
 
+type WordActivation = { trigger: HTMLElement; keyboard: boolean };
+
 export const useUi = create<{
   word?: WordSelection;
+  wordActivation?: WordActivation;
   wordPinned: boolean;
   toggleWordPin: () => void;
-  selectWord: (word?: WordSelection) => void;
+  selectWord: (word?: WordSelection, activation?: WordActivation) => void;
 }>((set) => ({
   wordPinned: false,
   toggleWordPin: () => set(state => ({ wordPinned: !!state.word && !state.wordPinned })),
-  selectWord: word => set(state => word && state.wordPinned ? state : { word, wordPinned: false }),
+  selectWord: (word, wordActivation) => set(state => word && state.wordPinned ? state : { word, wordActivation, wordPinned: false }),
 }));
