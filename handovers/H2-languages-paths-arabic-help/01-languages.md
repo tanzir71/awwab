@@ -316,6 +316,8 @@ The Hausa prayer guide and Return draft covers the numbered prayer steps, lost-c
 
 The Hausa Qaida and Takhti draft covers the 17 lesson names, the nine letter families, tracing feedback and print instructions. Review the names for wasali, tanwini, sukuni and maddi alongside the letter shapes. Check the instructions beside the generated Arabic practice clips and on the printed tracing sheets.
 
+The Hausa Word Bank draft includes all 125 core glosses, the word-type labels and the everyday Arabic signs and examples. Review the glosses in context, especially short particles that take different meanings depending on the sentence. Try searching in Hausa and Arabic, revealing a gloss and saving a review offline.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
