@@ -346,6 +346,8 @@ The Hausa draft also includes all 24 Gulf and Modern Standard A1 lessons. Compar
 
 The Hausa Working in the Gulf draft covers ten Emirati Arabic lessons. Check the terms for work shifts, contracts, payslips and workplace rights against the dialogues and the printed signs in the lessons.
 
+The Hausa draft covers all 4,042 messages in the current UI catalogue. In the final 26 A2 and B1 lessons, review the terms for health, news and huɗuba and check the reply choices and Quran root references alongside the Arabic text and recordings. Publication requires two native reviewer sign-offs and review of the religious wording.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
