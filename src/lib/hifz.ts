@@ -141,11 +141,11 @@ export function portionBucket(record: PortionReview | undefined, today: string):
 }
 
 export function nextPortion(portions: HifzPortion[], reviews: HifzReviews, now: Date, today: string) {
-  return portions.find(portion => {
-    const record = reviews[portion.id];
-    const bucket = portionBucket(record, today);
-    return bucket === "manzil" ? isDue(record.review, now) : bucket === "sabqi" && record.lastDay < today;
-  }) ?? portions.find(portion => !reviews[portion.id]?.learnedOn);
+  const sabaq = portions.find(portion => !reviews[portion.id]?.learnedOn);
+  if (sabaq && (reviews[sabaq.id]?.lastDay ?? "") < today) return sabaq;
+
+  const sabqi = portions.find(({ id }) => portionBucket(reviews[id], today) === "sabqi" && reviews[id].lastDay < today);
+  return sabqi ?? portions.find(({ id }) => portionBucket(reviews[id], today) === "manzil" && isDue(reviews[id].review, now)) ?? sabaq;
 }
 
 export function recitalProgress(portions: HifzPortion[], recital: JuzRecital | undefined, today: string) {

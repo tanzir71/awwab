@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { message } from "./copy";
 import { hifzVirtueKey, hifzVirtueMessages } from "./essentialPassages";
 import { chapters, essentialPassages, getHifzPassage, groupPortions, juzs, maxPortionAyahs, maxPortionWords, nextPortion,
-  passageLabel, portionBucket, portionPlan, ratePortion, rateRecitalPortion, recitalProgress, studyPhrases, verseText, type JuzRecital, type StudyQuran } from "./hifz";
+  passageLabel, portionBucket, portionPlan, ratePortion, rateRecitalPortion, recitalProgress, studyPhrases, verseText, type HifzReviews, type JuzRecital, type StudyQuran } from "./hifz";
 import { juzAmma, learnedSurahs, levels, patternPracticePath, patternReviewPrefix, placementStartingLevel, qaidaIslandProgress, tracks } from "./learningPaths";
 import { essentialPassageTitle } from "./paths-copy";
 import { parseCorpus } from "./morphology";
@@ -545,6 +545,27 @@ describe("Learning path progress", () => {
     const known = { ...review, review: { ...review.review, card: { ...review.review.card, due: time("2026-12-10") } } };
     expect(nextPortion([portion], { [portion.id]: known }, time("2026-11-29"), "2026-11-29")).toBeUndefined();
     expect(nextPortion([portion], { [portion.id]: known }, time("2026-12-10"), "2026-12-10")).toBe(portion);
+  });
+
+  it("offers today's Sabaq, then unreviewed Sabqi, then due Manzil", () => {
+    const [manzil, sabqi, sabaq] = groupPortions(getHifzPassage("al-mulk"), quran);
+    const portions = [manzil, sabqi, sabaq];
+    const today = "2026-11-29";
+    const now = new Date(`${today}T09:00:00Z`);
+    const oldReview = ratePortion(undefined, "got-it", new Date("2026-11-20T09:00:00Z"), "2026-11-20");
+    const manzilReview = { ...oldReview, learnedOn: "2026-11-20" };
+    const sabqiReview = { ...oldReview, learnedOn: "2026-11-25", lastDay: "2026-11-25" };
+    const reviews: HifzReviews = { [manzil.id]: manzilReview, [sabqi.id]: sabqiReview };
+    expect(nextPortion(portions, reviews, now, today)).toBe(sabaq);
+
+    reviews[sabaq.id] = ratePortion(undefined, "shaky", now, today);
+    expect(nextPortion(portions, reviews, now, today)).toBe(sabqi);
+
+    reviews[sabqi.id] = ratePortion(sabqiReview, "got-it", now, today);
+    expect(nextPortion(portions, reviews, now, today)).toBe(manzil);
+
+    reviews[manzil.id] = ratePortion(manzilReview, "got-it", now, today);
+    expect(nextPortion(portions, reviews, now, today)).toBe(sabaq);
   });
 
   it("resumes a full-juz recital in order and reopens seven days after completion", () => {
