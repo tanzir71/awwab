@@ -220,6 +220,8 @@ The Malay planning draft includes Hijri dates and moon-sighting confirmations, m
 
 The Malay zakat draft covers assets, nisab, haul, payments and print sheets. The calculator can store and display amounts in Malaysian ringgit. Review the description of scholarly differences about worn jewellery with the cited guidance, and compare the totals in the calculator and printed summary.
 
+The Malay Qaida and Takhti draft covers all 17 lesson titles, practice and recording controls, nine letter families and the printable tracing sheets. Review the wording for the short vowels in both Adult and Maktab alongside the marked letters and generated practice clips.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
