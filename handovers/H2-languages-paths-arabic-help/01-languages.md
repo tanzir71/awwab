@@ -152,6 +152,8 @@ The Turkish sharing draft includes progress milestones, card templates, image fo
 
 The Turkish Umrah preparation draft covers trip details, the 12-item checklist, and the controls for offline packs and trip transfer. Ask in Arabic includes Turkish meanings for all 63 phrases and covers full-screen cards, directions, and the emergency panel. Review the phrasing with the spoken Arabic, especially when changing a gate number, destination, or family member. The emergency panel links to the official numbers. [Saudi emergency contacts](https://my.gov.sa/en/emergency-contact).
 
+The Turkish live Umrah draft covers the daily plan, Harem focus, the seven ritual steps, the pocket guide, the installed map, and the sa‘y counter and location options. Review the ritual wording with the cited sources and test corrections as the route alternates between Safâ and Merve. The preview uses the English narration pack for Turkish.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
