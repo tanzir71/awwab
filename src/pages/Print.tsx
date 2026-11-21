@@ -22,7 +22,7 @@ import { localeQuranWordGloss, type WordGloss } from "@/lib/localePacks";
 import { anatomyGlossKey } from "@/lib/study-gloss-messages.mjs";
 import type { Settings } from "@/lib/storageService";
 import { prayerIds } from "@/types/Prayer";
-import { quranMeaningSource, quranText } from "@/lib/quran";
+import { formatQuranReference, quranMeaningSource, quranText } from "@/lib/quran";
 import { splitArabicWords, wordAnatomy } from "@/lib/wordAnatomy";
 import surahs from "../../docs/content/surahs-for-salah.json";
 import ritual from "../../docs/content/umrah-steps.json";
@@ -228,6 +228,10 @@ export function PrintSheet({ settings, now }: { settings: Settings; now: Date })
   } else if (sheet === "surah-cards") {
     const cards = [selected, ...pocketSet.filter(number => number !== selected)].slice(0, 4);
     const { local, english } = quranMeaningPreferences(settings);
+    const footnotes = cards.flatMap(number => quranText[number]).flatMap(({ ref }) => {
+      const text = local?.footnotes?.[ref];
+      return text ? [{ ref, text }] : [];
+    });
     heading = t("printSurahTitle");
     subtitle = t("printSurahIntro");
     content = <>
@@ -245,13 +249,21 @@ export function PrintSheet({ settings, now }: { settings: Settings; now: Date })
             {verses.map(verse => <ArabicText key={verse.ref} text={verseLines(verse[settings.script])} mushaf={settings.script} citation={verse.ref} verse={verse.ref} />)}
           </div>
           {transliteration && <p className="paper-transliteration" lang="ar-Latn" dir="ltr">{transliteration}</p>}
-          {local && <p lang={language} dir="auto">{verses.map(verse => local.verses[verse.ref]).join(" ")}</p>}
+          {local && <p lang={language} dir="auto" className="whitespace-pre-wrap">{verses.map(verse => local.verses[verse.ref]).join(" ")}</p>}
           {english && <p lang="en" dir="ltr">{verses.map(verse => verse.english).join(" ")}</p>}
         </section>;
       })}</div>
       <p className="paper-note">{t(settings.script === "indopak" ? "printIndopakCredit" : "printUthmaniCredit")}
         {local && <> · <a href={local.source} dir="auto" rel="noreferrer">{local.credit}</a></>}
         {english && <> · <a href={quranMeaningSource} rel="noreferrer">{t("printPickthallCredit")}</a></>} · {t("printBrandCredit")}</p>
+      {footnotes.length > 0 && <section className="paper-note compact-stack">
+        <h2>{t("quranEditionFootnotes")}</h2>
+        <dl className="compact-stack">{footnotes.map(({ ref, text }) => <div key={ref}>
+          <dt><bdi>{formatQuranReference(ref, locale)}</bdi></dt>
+          <dd className="whitespace-pre-wrap break-words" lang={language} dir="auto">{text}</dd>
+        </div>)}</dl>
+      </section>}
+      {local?.sourceNotice && <p className="paper-note whitespace-pre-wrap break-words" dir="auto">{local.sourceNotice}</p>}
     </>;
   } else if (sheet === "umrah-guide") {
     heading = t("umrahPracticePocket");

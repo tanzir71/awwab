@@ -70,7 +70,7 @@ The export includes curated word meanings for Al-Fātiḥa, Al-ʿAsr, and Salah 
 
 The Bangla export fills the remaining study glosses from `drafts/bn.json`. Reviewers can find the new entries under `supplementalDraftKeys`. Each entry is paired with its English source so the export can omit it when that source changes.
 
-The Urdu draft covers all 4,042 messages in the current UI catalogue. Review the landing page, onboarding, language picker, Today, and prayer setup on phone and desktop in the right-to-left layout. Check the prayer labels, date and time order, and the wording in both Adult and Maktab modes. Publication requires two native reviewer sign-offs.
+The Urdu draft covers the full UI catalogue. Review the landing page, onboarding, language picker, Today, and prayer setup on phone and desktop in the right-to-left layout. Check the prayer labels, date and time order, and the wording in both Adult and Maktab modes. Publication requires two native reviewer sign-offs.
 
 The Urdu prayer draft also covers How to Pray, Return, the seven Sayyid al-Istighfār lines, and the make-up prayer and fasting planner. Compare the lost-count and Hanafi notes with their linked references, and check the direction of the prayer tabs, numbers, and counters.
 
@@ -98,7 +98,7 @@ The Urdu draft includes the nine Umrah & Hajj and ten Gulf Work speaking lessons
 
 The final Urdu entries cover the study desk, milestone and share cards, audio pack prompts, surah pocket cards, and startup and storage messages. Review the wording on both the share preview and exported image.
 
-The Indonesian draft covers all 4,042 messages in the current UI catalogue, including landing, onboarding, and the Adult and Maktab variants. The review export pairs them with the English source and links to screenshots for context. Publication requires two native reviewer sign-offs.
+The Indonesian draft covers the full UI catalogue, including landing, onboarding, and the Adult and Maktab variants. The review export pairs them with the English source and links to screenshots for context. Publication requires two native reviewer sign-offs.
 
 The Indonesian draft also covers How to Pray, Return, and the make-up prayer and fasting planner. The locale export includes the existing Sayyid al-Istighfār meanings, the hope verse meaning, and the Hanafi note on sujūd al-sahw. Review these against the linked source content. The reader displays the citations alongside whichever language is available.
 
@@ -122,7 +122,7 @@ The Indonesian Understand draft covers all 22 grammar lessons, the word-by-word 
 
 The final Indonesian draft entries cover the study desk, Today, search, Surahs, Word Bank, Fluency, the Hadith interface, and print and audio controls. Review the Indonesian Hadith labels alongside the original reference and grade. The language catalogue and a translated Hadith edition go through separate review and licensing checks.
 
-The Turkish draft covers all 4,042 messages in the current UI catalogue. Review the landing page, onboarding, placement, prayer setup, and Today in Adult and Maktab modes. Check the prayer method and school labels alongside the suggestions, and review the Qur’an terminology with the placement and Elifba lesson examples.
+The Turkish draft covers the full UI catalogue. Review the landing page, onboarding, placement, prayer setup, and Today in Adult and Maktab modes. Check the prayer method and school labels alongside the suggestions, and review the Qur’an terminology with the placement and Elifba lesson examples.
 
 The Turkish settings draft includes reading and display preferences, your words, backup and restore, reminders, and source credits. Review the calendar file labels and the backup and glossary controls alongside the screens that use those preferences.
 
@@ -162,7 +162,7 @@ The Turkish Saudi Speak draft covers all 14 A2 and 12 B1 lessons, including the 
 
 The Turkish desktop study draft includes the Adult plan customiser, Maktab study and sticker labels, and study history. It also covers install help, audio catalogue states, and reference recording controls. Review the browser menu labels on the platforms named in the install instructions.
 
-The French draft covers all 4,042 messages in the current UI catalogue, including the landing page. Review the learning and pilgrimage terms at phone and desktop widths, including the short labels beside the ticks. Open `/awwab/lang/fr.html` in a French review build.
+The French draft covers the full UI catalogue, including the landing page. Review the learning and pilgrimage terms at phone and desktop widths, including the short labels beside the ticks. Open `/awwab/lang/fr.html` in a French review build.
 
 The French first-run draft also covers both learning modes, the reading placement, and prayer setup. Compare the welcome verse wording with the Arabic and citation. Check the city names, calculation method labels, and the distinction between the prayer guide reference and ʿAṣr calculation.
 
@@ -208,7 +208,7 @@ The ten French Gulf workplace lessons cover applying for work, shifts, contracts
 
 The French Saudi Speak draft also covers all 14 A2 and 12 B1 lessons, including the dialogues, vocabulary, signs and replies. Review the wording alongside the spoken Arabic, including the conversations about health, faith, and work.
 
-The Malay draft covers all 4,042 messages in the current UI catalogue, including the landing page, navigation, metadata and image descriptions. Review the terms for solat, qada, cerapan anak bulan and sa‘i in context. The local review page is `/awwab/lang/ms.html` and uses `ms.draft.json` from the review export.
+The Malay draft covers the full UI catalogue, including the landing page, navigation, metadata and image descriptions. Review the terms for solat, qada, cerapan anak bulan and sa‘i in context. The local review page is `/awwab/lang/ms.html` and uses `ms.draft.json` from the review export.
 
 The Malay setup draft includes the welcome screens, the Adult and Maktab choices, the placement questions and audio controls, and the prayer setup form. Review the wording for the prayer guide and the separate Asar calculation setting. The regional references specify 18° below the horizon for both Subuh and Isyak. Verify zone reference points, rounding and adjustments against the official timetable before offering the proposed Malaysian method in setup. [Selangor Mufti on Subuh](https://www.muftiselangor.gov.my/2025/07/03/15-taudhih-al-falak-fajar-sadiq-dalam-menentukan-permulaan-waktu-solat-subuh/), [Federal Territories Mufti on prayer timetables](https://muftiwp.gov.my/en/artikel/bayan-al-falak/5088-bayan-al-falak-siri-ke-5-isu-ketepatan-waktu-solat-dalam-takwim-waktu-solat-pejabat-mufti), [Selangor Mufti on zones and rounding](https://www.muftiselangor.gov.my/soalan-lazim/).
 
@@ -300,7 +300,7 @@ The Persian study draft covers the desktop plan customiser, Maktab stickers, stu
 
 The Persian Speak draft includes the shared lesson controls, 12 Saudi A1 lessons and nine Umrah and Hajj lessons. Review the vocabulary alongside the generated Arabic, including the 18 lines shared with Ask in Arabic. Check the difference between the labels for the saʿy and tawaf areas on the signs.
 
-The Persian draft covers all 4,042 entries in the current UI catalogue. In Speak, compare everyday expressions across the 24 Gulf and Modern Standard A1 lessons. Review shifts, contracts, pay and workplace rights in the ten Working in the Gulf lessons. In the 26 A2 and B1 lessons, compare the sermon and news vocabulary, reply choices and Quran root references with the Arabic text and audio.
+The Persian draft covers the full UI catalogue. In Speak, compare everyday expressions across the 24 Gulf and Modern Standard A1 lessons. Review shifts, contracts, pay and workplace rights in the ten Working in the Gulf lessons. In the 26 A2 and B1 lessons, compare the sermon and news vocabulary, reply choices and Quran root references with the Arabic text and audio.
 
 The Hausa draft includes all 214 landing-page entries, including navigation, image descriptions and metadata. Open `/awwab/lang/ha.html` in a review build using `ha.draft.json`. Check the hooked letters ɓ, ɗ and ƙ at phone and desktop widths and review the terms for sallah, ramuwa, alwala and Umara in context.
 
@@ -346,7 +346,7 @@ The Hausa draft also includes all 24 Gulf and Modern Standard A1 lessons. Compar
 
 The Hausa Working in the Gulf draft covers ten Emirati Arabic lessons. Check the terms for work shifts, contracts, payslips and workplace rights against the dialogues and the printed signs in the lessons.
 
-The Hausa draft covers all 4,042 messages in the current UI catalogue. In the final 26 A2 and B1 lessons, review the terms for health, news and huɗuba and check the reply choices and Quran root references alongside the Arabic text and recordings. Publication requires two native reviewer sign-offs and review of the religious wording.
+The Hausa draft covers the full UI catalogue. In the final 26 A2 and B1 lessons, review the terms for health, news and huɗuba and check the reply choices and Quran root references alongside the Arabic text and recordings. Publication requires two native reviewer sign-offs and review of the religious wording.
 
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
@@ -361,6 +361,8 @@ To include a licensed and reviewed Quran edition, pass its JSON file as the four
 Run `node scripts/export-quran-review.mjs <candidate-manifest.json> <new-directory>` to prepare local review drafts from downloaded numbered text. The manifest is an array with one `locale`, relative `file`, `credit`, HTTPS `source` and HTTPS `terms` per edition. The exporter checks every `surah|ayah|meaning` record, preserves the source wording and notice, and records the exact source hash. Open the output’s `index.html` to compare each edition offline with the app’s Uthmani Arabic and attributed English. Each `edition.draft.json` starts with empty redistribution fields. The [Tanzil translation terms](https://tanzil.net/trans/) accompany its candidate editions. Confirm permission and review feedback for each edition before compiling a production pack.
 
 For an original QuranEnc CSV, set `format` to `quranenc-csv` and use the edition URL printed in its notice as `source`. The exporter preserves the version, full notice, and verse footnotes in the offline review and draft JSON. QuranEnc's terms require intact content, publisher attribution, the version and notice, and updates to newer editions. Verify these conditions for all app surfaces before publishing a reviewed pack. [QuranEnc terms](https://quranenc.com/en/home/about/terms)
+
+Set `AWWAB_REVIEW_QURAN` to a matching `edition.draft.json` in the local review environment to read the edition in the preview app. Source footnotes open under their āyah. Sources shows the publisher notice and terms, and pocket-card printouts include the corresponding footnotes and publisher notice. Share images use the attributed English meaning when the selected local edition requires carrying a notice or the selected āyāt have footnotes. Review previews flag draft packs and only build them in review mode.
 
 | Locale | QuranEnc review candidate | CSV version |
 |---|---|---|

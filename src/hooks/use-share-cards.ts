@@ -53,7 +53,8 @@ export function useShareCards(settings: Settings, now: Date, template?: Template
     const title = studyNames.surah(language, chapter.number, chapter.number === 103 ? "Al-ʿAsr" : chapter.transliteration);
     const ayahNumber = (ref: string) => number.format(Number(ref.split(":")[1]));
     const reference = `${number.format(chapter.number)}:${ayahNumber(verses[0].ref)}${verses.length > 1 ? `–${ayahNumber(verses.at(-1).ref)}` : ""}`;
-    const localQuote = edition && verses.every(verse => edition.verses[verse.ref]);
+    // Image cards have space for an excerpt and credit, but cannot preserve a full edition notice or footnotes.
+    const localQuote = edition && !edition.sourceNotice && verses.every(verse => edition.verses[verse.ref] && !edition.footnotes?.[verse.ref]);
     const meaning = verses.map(verse => localQuote ? edition.verses[verse.ref] : verse.english).join(" ");
     const citation = localQuote ? `${reference} · ${edition.credit} · ${languages.find(item => item.code === language).native}`
       : englishCitation(`${reference} · M. M. Pickthall`);

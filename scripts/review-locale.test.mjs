@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdtempSync, rmdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, describe, expect, it, vi } from "vitest";
@@ -8,8 +8,10 @@ import { fingerprint } from "./ui-catalogue.mjs";
 
 const directory = mkdtempSync(join(tmpdir(), "awwab-review-"));
 const path = join(directory, "review.json");
+const quranPath = join(directory, "quran.json");
 afterAll(() => {
   rmSync(path, { force: true });
+  rmSync(quranPath, { force: true });
   rmdirSync(directory);
 });
 
@@ -41,5 +43,22 @@ describe("local locale review builds", () => {
   it("checks the ICU arguments in translated entries", () => {
     const path = draft({ messages: { settingsLanguageSearch: "Cari bahasa" } });
     expect(() => reviewLocale(path, "/awwab/")).toThrow("settingsLanguageSearch: Keep the required ICU arguments");
+  });
+
+  it("validates and packs a matching Quran draft with its source material for local review", () => {
+    const ui = draft({ messages: { aboutAwwab: "Tentang Awwab" } });
+    const { chapters } = JSON.parse(readFileSync(new URL("../public/data/quran-study-index-v1.json", import.meta.url), "utf8"));
+    const verses = Object.fromEntries(chapters.flatMap(({ number, ayahs }) =>
+      Array.from({ length: ayahs }, (_, i) => [`${number}:${i + 1}`, "Draft meaning"])));
+    const edition = { _status: "draft", locale: "id", credit: "Candidate edition", source: "https://example.com/quran",
+      sourceTerms: "https://example.com/terms", verses, footnotes: { "1:1": "First line\nSecond line" },
+      sourceNotice: "Publisher notice", sourceVersion: "v1.0.1-csv.1" };
+    writeFileSync(quranPath, JSON.stringify(edition));
+    const { pack } = reviewLocale(ui, "/awwab/", quranPath);
+    expect(pack).toMatchObject({ reviewOnly: true, quran: { verses, footnotes: edition.footnotes, sourceNotice: edition.sourceNotice,
+      sourceVersion: edition.sourceVersion, licenseUrl: edition.sourceTerms } });
+
+    writeFileSync(quranPath, JSON.stringify({ ...edition, locale: "ur" }));
+    expect(() => reviewLocale(ui, "/awwab/", quranPath)).toThrow("in the catalogue’s language");
   });
 });

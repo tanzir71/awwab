@@ -25,7 +25,8 @@ export default defineConfig(({ mode }) => {
   const published = publishedLocales();
   const isReview = mode === "review";
   const preview = mode === "preview" || isReview;
-  const review = isReview ? reviewLocale(loadEnv(mode, __dirname, "AWWAB_REVIEW_").AWWAB_REVIEW_CATALOGUE, base) : undefined;
+  const reviewEnv = isReview ? loadEnv(mode, __dirname, "AWWAB_REVIEW_") : undefined;
+  const review = reviewEnv ? reviewLocale(reviewEnv.AWWAB_REVIEW_CATALOGUE, base, reviewEnv.AWWAB_REVIEW_QURAN) : undefined;
   const available = review ? { ...published, [review.code]: review.asset } : published;
   return {
   base,

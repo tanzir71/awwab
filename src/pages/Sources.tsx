@@ -61,6 +61,8 @@ export function Sources() {
     {editions.map(({ edition, label }) => <section className="card compact-stack" key={label}>
       <h2 dir="auto">{edition.credit}</h2>
       <p>{label}</p>
+      {edition === quranEdition && quranEdition.sourceNotice &&
+        <p dir="auto" className="small muted whitespace-pre-wrap break-words">{quranEdition.sourceNotice}</p>}
       <div className="chips"><a className="text-button" href={edition.source} rel="noreferrer">{t("sourcesVisit", { name: edition.credit })}</a>
         <a className="text-button" href={edition.licenseUrl} dir="auto" rel="noreferrer">{edition.license}</a></div>
     </section>)}

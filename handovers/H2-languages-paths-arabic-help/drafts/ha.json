@@ -2,6 +2,7 @@
   "_status": "draft",
   "locale": "ha",
   "messages": {
+    "quranEditionFootnotes": { "source": "Translation footnotes", "text": "Bayanan ƙasan shafi na fassara" },
     "aboutAwwab": { "source": "About awwab", "text": "Game da Awwab" },
     "actions": { "source": "Actions", "text": "Ayyuka" },
     "activity": { "source": "{count, plural, one {# study day} other {# study days}}", "text": "{count, plural, one {ranar karatu #} other {ranakun karatu #}}" },

@@ -2,6 +2,7 @@
   "_status": "draft",
   "locale": "fa",
   "messages": {
+    "quranEditionFootnotes": { "source": "Translation footnotes", "text": "پانوشت‌های ترجمه" },
     "aboutAwwab": { "source": "About awwab", "text": "دربارهٔ اوّاب" },
     "actions": { "source": "Actions", "text": "کارها" },
     "activity": { "source": "{count, plural, one {# study day} other {# study days}}", "text": "{count, plural, one {# روز مطالعه} other {# روز مطالعه}}" },

@@ -130,6 +130,7 @@ export const studyMessages = {
   indopakCredit: { en: "IndoPak by DigitalKhatt", bn: "ইন্দোপাক লিপি · ডিজিটাল খাত" },
   tanzilCredit: { en: "Quran text by Tanzil", bn: "কুরআনের পাঠ · তানযিল" },
   englishTranslationCredit: { en: "English by M. M. Pickthall", bn: "ইংরেজি অনুবাদ · এম. এম. পিকথল" },
+  quranEditionFootnotes: { en: "Translation footnotes", bn: "অনুবাদের পাদটীকা" },
   practised: { en: "Practised", bn: "অনুশীলন হয়েছে" },
   continueAction: { en: "Continue", bn: "চালিয়ে যান" },
   qaidaLessons: { en: "Qaida lessons", bn: "কায়দার পাঠ" },

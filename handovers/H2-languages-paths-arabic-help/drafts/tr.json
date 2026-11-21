@@ -2,6 +2,7 @@
   "_status": "draft",
   "locale": "tr",
   "messages": {
+    "quranEditionFootnotes": { "source": "Translation footnotes", "text": "Çevirinin dipnotları" },
     "aboutAwwab": { "source": "About awwab", "text": "Awwab hakkında" },
     "actions": { "source": "Actions", "text": "İşlemler" },
     "activity": { "source": "{count, plural, one {# study day} other {# study days}}", "text": "{count, plural, one {# çalışma günü} other {# çalışma günü}}" },

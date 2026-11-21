@@ -2,6 +2,7 @@
   "_status": "draft",
   "locale": "ur",
   "messages": {
+    "quranEditionFootnotes": { "source": "Translation footnotes", "text": "ترجمے کے حواشی" },
     "activity": { "source": "{count, plural, one {# study day} other {# study days}}", "text": "{count, plural, one {مطالعے کا # دن} other {مطالعے کے # دن}}" },
     "adjustPractice": { "source": "Adjust", "text": "بدلیں" },
     "adultOffline": { "source": "Adult mode · works offline", "text": "بڑوں کا انداز · آف لائن" },

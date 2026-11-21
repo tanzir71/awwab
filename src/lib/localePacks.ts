@@ -10,7 +10,11 @@ type TranslationAttribution = { credit: string; source: string; license: string;
 type WordScript = "uthmani" | "indopak";
 export type WordGloss = { gloss: string; glossLanguage: string;
   glossCredit?: Pick<TranslationAttribution, "credit" | "source"> & { location: string; script: WordScript } };
-type QuranMeaningEdition = TranslationAttribution & { verses: Record<string, string> };
+type QuranMeaningEdition = TranslationAttribution & {
+  verses: Record<string, string>;
+  footnotes?: Record<string, string>;
+  sourceNotice?: string;
+};
 type QuranWordEdition = TranslationAttribution & { words: Record<string, string>; indopak?: Record<string, string> };
 type HadithMeaningEdition = TranslationAttribution & { narrations: Record<string, { book: number; inBook: number; text: string }> };
 type LocalePack = { messages: PackMessages; quran?: QuranMeaningEdition; quranWords?: QuranWordEdition; hadith?: Partial<Record<HadithCollection, HadithMeaningEdition>> };

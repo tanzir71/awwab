@@ -31,11 +31,16 @@ export function QuranVerseMeaning({ verse, settings, cue = false, reveal = false
   const preferences = quranMeaningPreferences(settings);
   const edition = reveal ? localeQuranEdition(settings.language) : preferences.local;
   const meaning = edition?.verses[verse.ref];
+  const footnote = edition?.footnotes?.[verse.ref];
   const showEnglish = english ?? (preferences.english || (reveal && !meaning));
   if (!meaning && !showEnglish) return null;
   return <div className="quran-verse-meaning">
     {meaning && <>
       <p className="muted">{cue && <>{t("cue")} · </>}<bdi lang={settings.language} dir="auto">{meaning}</bdi></p>
+      {footnote && <details className="small">
+        <summary className="min-h-11 cursor-pointer py-3">{t("quranEditionFootnotes")}</summary>
+        <p className="muted whitespace-pre-wrap break-words" lang={settings.language} dir="auto">{footnote}</p>
+      </details>}
       <a className="small" href={edition.source} dir="auto" rel="noreferrer">{edition.credit}</a>
     </>}
     {showEnglish && <>
