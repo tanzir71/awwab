@@ -176,6 +176,8 @@ The French settings draft includes reading and display preferences, the language
 
 The French planning draft covers the Hijri calendar, local moon-sighting confirmation, prayer reminders, mosque timetables and assignments, and Eid records. Compare the confirmed date in the calendar with the exported reminder. Review the WhatsApp wording with mosque names and the two Eid labels.
 
+The French zakat draft covers assets, payments, the nisab and jewellery notes, and the Hijri anniversary. The printable sheets include the zakat summary and prayer timetable. Compare the totals in the saved data, the app, and the printed summary, including decimal commas and digit grouping in euro amounts.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
