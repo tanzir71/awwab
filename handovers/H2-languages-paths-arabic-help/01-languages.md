@@ -334,6 +334,8 @@ The Hausa study draft covers the desktop study plan, Makarantar Allo stickers, s
 
 The Hausa share draft covers milestone captions, templates and image sizes. Review the card text in each size. Check the Return card with the prayer count hidden and shown, and check the surah card citation, translator credit and Awwab link.
 
+The Hausa Umrah preparation draft covers trip details, the 12-item checklist, offline pack labels and trip file transfer. Review the labels for entering an Arabic hotel name and address. Check that the import confirmation explains which trip details and duʿā requests the file will replace.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
