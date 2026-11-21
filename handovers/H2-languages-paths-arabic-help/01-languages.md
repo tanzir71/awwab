@@ -124,6 +124,8 @@ The final Indonesian draft entries cover the study desk, Today, search, Surahs, 
 
 The Turkish draft covers the landing page, onboarding, placement, prayer setup, and Today in Adult and Maktab modes. It includes the prayer log, weekly history, calendar event labels, and all 17 Elifba lesson titles. Check the prayer method and school labels alongside the suggestions, and review the Qur’an terminology with the placement and lesson examples.
 
+The Turkish settings draft includes reading and display preferences, your words, backup and restore, reminders, and source credits. Review the calendar file labels and the backup and glossary controls alongside the screens that use those preferences.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
