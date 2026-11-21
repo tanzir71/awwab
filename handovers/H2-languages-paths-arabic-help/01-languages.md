@@ -278,6 +278,8 @@ The Persian Return draft covers the istighfar counter, return history, all seven
 
 The Persian Word Anatomy and prayer study draft covers the Al-ʿAsr example, the curated Al-Fātiḥah and Al-ʿAsr glosses, and the word-by-word meanings of common prayer phrases. Review the glosses against the matching Arabic words, including phrases whose order differs in Persian. Check the examples that connect Quranic roots to everyday Arabic.
 
+The Persian Umrah narration draft includes all seven generated tracks and their transcripts, step titles, notes and playback controls. Compare the recordings with the transcripts and sources in the lesson audio review export. Automated transcription misheard parts of the two-rakʿah heading and some place names. Check those passages by ear, as well as the counts and directions in the tawaf and saʿy tracks.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.

@@ -26,6 +26,7 @@ RASA = "https://huggingface.co/datasets/ai4bharat/Rasa"
 SIWIS = "https://huggingface.co/rhasspy/piper-voices/blob/0c9c5d340496a47205a799eb046aab69334a88e9/fr/fr_FR/siwis/medium/MODEL_CARD"
 SIWIS_DATA = "https://doi.org/10.7488/ds/1705"
 SUARIFY_YATI = "https://huggingface.co/Suarify/kecil-tts-yati-v0.3/tree/dcb1efaaaccdfc53b4b0cdbfad190e86ddeac68b"
+PIPER_GANJI = "https://huggingface.co/rhasspy/piper-voices/blob/661e39caff61dcfcbbd2178a7c2dd0144b858b0e/fa/fa_IR/ganji/medium/MODEL_CARD"
 
 
 def read(path):
@@ -179,6 +180,22 @@ def build_umrah_guide_malay(model):
 
     pack = umrah_guide_pack("ms", "Bahasa Melayu", "Kecil-TTS Yati · Suarify", SUARIFY_YATI,
                             "https://www.apache.org/licenses/LICENSE-2.0", malay)
+    write_umrah_guide_packs([pack])
+
+
+def build_umrah_guide_persian(model):
+    from piper import PiperVoice, SynthesisConfig
+
+    voice = PiperVoice.load(model)
+    config = SynthesisConfig(length_scale=1.13)
+
+    def persian(text, target):
+        pronounced = text.replace("حجرالاسود", "حَجَرِ اَسوَد")
+        with wave.open(str(target), "wb") as stream:
+            voice.synthesize_wav(pronounced, stream, syn_config=config)
+
+    pack = umrah_guide_pack("fa", "فارسی", "Piper · Ganji", PIPER_GANJI,
+                            "https://opensource.org/license/mit", persian)
     write_umrah_guide_packs([pack])
 
 
@@ -449,6 +466,7 @@ def main():
     task.add_argument("--umrah-guide-urdu", action="store_true", help="Build Urdu Umrah narration with local Libra TTS weights")
     task.add_argument("--umrah-guide-french", action="store_true", help="Build French Umrah narration with local Piper SIWIS weights")
     task.add_argument("--umrah-guide-malay", action="store_true", help="Build Malay Umrah narration with local Kecil-TTS Yati weights")
+    task.add_argument("--umrah-guide-persian", action="store_true", help="Build Persian Umrah narration with local Piper Ganji weights")
     task.add_argument("--qaida", action="store_true", help="Build Qaida drill audio and placement vowel clips with Emirati Piper")
     parser.add_argument("--piper", default="piper", help="Piper executable for --umrah-guide")
     parser.add_argument("--bangla-model", type=Path, help="Local Indic Tiny TTS Bengali model directory with code and ONNX graphs")
@@ -472,6 +490,9 @@ def main():
         return
     if args.umrah_guide_malay:
         build_umrah_guide_malay(args.model)
+        return
+    if args.umrah_guide_persian:
+        build_umrah_guide_persian(args.model)
         return
     if args.ask_male:
         build_male_ask(args.model, read(PHRASES)["phrases"], args.resume)

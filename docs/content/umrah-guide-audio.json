@@ -203,6 +203,46 @@
           "path": "packs/audio/umrah-guide-v1/ms/halq.mp3"
         }
       ]
+    },
+    {
+      "id": "umrah-guide-v1-fa",
+      "language": "fa",
+      "name": "فارسی",
+      "speaker": "Piper · Ganji",
+      "source": "https://huggingface.co/rhasspy/piper-voices/blob/661e39caff61dcfcbbd2178a7c2dd0144b858b0e/fa/fa_IR/ganji/medium/MODEL_CARD",
+      "licenseUrl": "https://opensource.org/license/mit",
+      "attribution": "Generated speech · Piper · Ganji",
+      "bytes": 489332,
+      "items": [
+        {
+          "ref": "umrah-guide-v1-fa:ihram",
+          "path": "packs/audio/umrah-guide-v1/fa/ihram.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-fa:talbiyah",
+          "path": "packs/audio/umrah-guide-v1/fa/talbiyah.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-fa:tawaf",
+          "path": "packs/audio/umrah-guide-v1/fa/tawaf.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-fa:two_rakahs",
+          "path": "packs/audio/umrah-guide-v1/fa/two_rakahs.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-fa:zamzam",
+          "path": "packs/audio/umrah-guide-v1/fa/zamzam.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-fa:sai",
+          "path": "packs/audio/umrah-guide-v1/fa/sai.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-fa:halq",
+          "path": "packs/audio/umrah-guide-v1/fa/halq.mp3"
+        }
+      ]
     }
   ]
 }
