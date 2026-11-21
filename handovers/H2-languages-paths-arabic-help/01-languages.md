@@ -308,6 +308,8 @@ The Hausa onboarding draft covers the welcome screen, learning mode, placement c
 
 The Hausa settings draft covers the language picker, reading and display preferences, privacy, backups, wording suggestions and calendar reminders. Check the import and export labels on a phone and computer. Use the exported `.ics` file to review how prayer names and reminders appear in a calendar.
 
+The Hausa Today and Plan draft covers prayer logging, weekly history, moon confirmations and mosque timetables. Review prayer names on the Today screen and in exported files. Check the wording for an expected date and a confirmed date, and compare how Juma’a and Eid times appear in the mosque timetable.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
