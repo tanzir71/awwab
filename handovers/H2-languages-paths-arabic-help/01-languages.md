@@ -242,7 +242,7 @@ The Malay share draft covers milestones, card templates, image formats and the p
 
 The Malay Umrah preparation draft includes trip details, the 12-item checklist, offline pack labels and trip file transfer. Review the import warning with particular attention to the trip details and prayer request list that the imported file replaces.
 
-The Malay live Umrah draft covers the daily plan, Haram focus, all seven ritual steps, the printed pocket guide, and the offline map and sa‘i counter. Review the distinction between tawaf rounds and sa‘i journeys, the direction labels and the description of optional location use.
+The Malay live Umrah draft covers the daily plan, Haram focus, all seven ritual steps, the printed pocket guide, and the offline map and sa‘i counter. Review the distinction between tawaf rounds and sa‘i journeys, the direction labels and the description of optional location use. The preview offers generated Malay narration for every step. Compare those recordings with the written transcripts, paying particular attention to the ritual names, counts and place names.
 
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 

@@ -85,7 +85,7 @@ describe("Supplemental Tajweed recitations", () => {
 
 describe("Generated Umrah narration", () => {
   it("pairs all seven steps and transcripts with size-checked clips in every supported language", () => {
-    expect(umrahGuidePacks.map(pack => pack.language)).toEqual(["en", "bn", "ur", "fr"]);
+    expect(umrahGuidePacks.map(pack => pack.language)).toEqual(["en", "bn", "ur", "fr", "ms"]);
     expect(rituals.steps).toHaveLength(7);
     for (const pack of umrahGuidePacks) {
       expect(pack.items.map(item => item.ref)).toEqual(rituals.steps.map(step => `${pack.id}:${step.id}`));
@@ -104,6 +104,7 @@ describe("Generated Umrah narration", () => {
     }
     expect(umrahGuidePack("ur").language).toBe("ur");
     expect(umrahGuidePack("fr").language).toBe("fr");
+    expect(umrahGuidePack("ms").language).toBe("ms");
     expect(umrahGuidePack("id").language).toBe("en");
   });
 });

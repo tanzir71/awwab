@@ -1,0 +1,26 @@
+Kecil-TTS-8M
+Copyright 2026 Suarify (https://suarify.my)
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+ATTRIBUTION: if you use, modify or redistribute Kecil-TTS-8M (its code, its model weights or its web demo), you must keep this
+NOTICE file and credit Suarify, for example: "Voice by Kecil-TTS-8M, Suarify (https://suarify.my)". Enterprise and custom
+work: https://suarify.my/contact-form
+
+Except for lexicon_e.json, which is CC BY-SA 4.0 (see below), code and model weights are Apache-2.0.
+
+Built on, with thanks:
+- Paradee-8M v1.3 by Sahil Mahendrakar (Apache-2.0): the 8M-parameter architecture, the training recipe and the starting
+  weights. https://huggingface.co/sahilmahendrakar/Paradee-8M-v1.3
+- Kokoro-82M by hexgrad (Apache-2.0): the text encoder whose phoneme features the text side learns to predict, and the
+  178-symbol phoneme vocabulary. https://huggingface.co/hexgrad/Kokoro-82M
+- Chatterbox Multilingual by Resemble AI (MIT): generated the synthetic Malay speech the model was trained on.
+- misaki (Apache-2.0): English word pronunciations in lexicon_en.json were taken from its US dictionaries.
+- Training sentences: Tatoeba (CC BY 2.0 FR), Malay Wikipedia (CC BY-SA 4.0) and sentence templates written for this
+  project. The sentences are used only as prompts; no recordings of people were used.
+
+lexicon_e.json (which Malay words use the pepet vowel and which the taling vowel) is derived from:
+- WikiPron Malay and Indonesian pronunciation lists, extracted from Wiktionary (CC BY-SA 4.0). This derived file is
+  therefore shared under CC BY-SA 4.0: https://creativecommons.org/licenses/by-sa/4.0/
+- g2p-id schwa dictionary (MIT).
+- Hand corrections written for this project.

@@ -25,6 +25,7 @@ LIBRA_URDU = "https://huggingface.co/Ekam/Libra-TTS/tree/f8f945e21862cb4a9cf7c84
 RASA = "https://huggingface.co/datasets/ai4bharat/Rasa"
 SIWIS = "https://huggingface.co/rhasspy/piper-voices/blob/0c9c5d340496a47205a799eb046aab69334a88e9/fr/fr_FR/siwis/medium/MODEL_CARD"
 SIWIS_DATA = "https://doi.org/10.7488/ds/1705"
+SUARIFY_YATI = "https://huggingface.co/Suarify/kecil-tts-yati-v0.3/tree/dcb1efaaaccdfc53b4b0cdbfad190e86ddeac68b"
 
 
 def read(path):
@@ -164,6 +165,20 @@ def build_umrah_guide_french(model):
                             "https://creativecommons.org/licenses/by/4.0/", french)
     pack["dataset"] = SIWIS_DATA
     pack["datasetName"] = "SIWIS French Speech Synthesis Database"
+    write_umrah_guide_packs([pack])
+
+
+def build_umrah_guide_malay(model):
+    from kecil_tts import KecilTTS, SAMPLE_RATE
+    import soundfile as sf
+
+    voice = KecilTTS(str(model.resolve()))
+
+    def malay(text, target):
+        sf.write(target, voice(text, speed=0.95), SAMPLE_RATE, subtype="PCM_16")
+
+    pack = umrah_guide_pack("ms", "Bahasa Melayu", "Kecil-TTS Yati · Suarify", SUARIFY_YATI,
+                            "https://www.apache.org/licenses/LICENSE-2.0", malay)
     write_umrah_guide_packs([pack])
 
 
@@ -433,6 +448,7 @@ def main():
     task.add_argument("--umrah-guide", action="store_true", help="Build English and Bangla Umrah narration with Piper LJSpeech and Indic Tiny TTS")
     task.add_argument("--umrah-guide-urdu", action="store_true", help="Build Urdu Umrah narration with local Libra TTS weights")
     task.add_argument("--umrah-guide-french", action="store_true", help="Build French Umrah narration with local Piper SIWIS weights")
+    task.add_argument("--umrah-guide-malay", action="store_true", help="Build Malay Umrah narration with local Kecil-TTS Yati weights")
     task.add_argument("--qaida", action="store_true", help="Build Qaida drill audio and placement vowel clips with Emirati Piper")
     parser.add_argument("--piper", default="piper", help="Piper executable for --umrah-guide")
     parser.add_argument("--bangla-model", type=Path, help="Local Indic Tiny TTS Bengali model directory with code and ONNX graphs")
@@ -453,6 +469,9 @@ def main():
         return
     if args.umrah_guide_french:
         build_umrah_guide_french(args.model)
+        return
+    if args.umrah_guide_malay:
+        build_umrah_guide_malay(args.model)
         return
     if args.ask_male:
         build_male_ask(args.model, read(PHRASES)["phrases"], args.resume)

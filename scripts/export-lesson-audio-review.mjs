@@ -6,6 +6,7 @@ import qaida from "../docs/content/qaida-lessons.json" with { type: "json" };
 import umrahAudio from "../docs/content/umrah-guide-audio.json" with { type: "json" };
 import umrah from "../docs/content/umrah-steps.json" with { type: "json" };
 import french from "../handovers/H2-languages-paths-arabic-help/drafts/fr.json" with { type: "json" };
+import malay from "../handovers/H2-languages-paths-arabic-help/drafts/ms.json" with { type: "json" };
 import urdu from "../handovers/H2-languages-paths-arabic-help/drafts/ur.json" with { type: "json" };
 import { qaidaAudioRef, qaidaHarakatExercise, qaidaHarakatExerciseRef, qaidaRowCitation, qaidaRows } from "../src/lib/qaidaPractice.ts";
 import { qaidaRecitationLessons, qaidaRecitations } from "../src/lib/qaidaRecitation.ts";
@@ -112,6 +113,7 @@ function qaidaEntries(lesson) {
 
 const ritualDrafts = {
   fr: { name: "French", messages: french.messages },
+  ms: { name: "Malay", messages: malay.messages },
   ur: { name: "Urdu", messages: urdu.messages },
 };
 
@@ -177,6 +179,7 @@ review.write(output, {
     "umrah-bn": { label: "Umrah Bangla narration", assignment: "A Bangla speaker checks wording and pronunciation. A scholar checks the instructions against the cited sources." },
     "umrah-ur": { label: "Umrah Urdu narration", assignment: "An Urdu speaker checks wording and pronunciation. A scholar checks the instructions against the cited sources." },
     "umrah-fr": { label: "Umrah French narration", assignment: "A French speaker checks wording and pronunciation. A scholar checks the instructions against the cited sources." },
+    "umrah-ms": { label: "Umrah Malay narration", assignment: "A Malay speaker checks wording and pronunciation. A scholar checks the instructions against the cited sources." },
   },
   varietyLabel: "Material",
   groupLabel: "Lesson or guide",

@@ -12,7 +12,8 @@
     "en": "Ihram and intention. Check your miqat before arrival. If you are flying, listen for the airline's announcement.",
     "bn": "ইহরাম ও নিয়ত। পৌঁছানোর আগে আপনার মিকাত জেনে নিন। বিমানে গেলে বিমান সংস্থার ঘোষণা শুনুন।",
     "ur": "احرام اور نیت۔ پہنچنے سے پہلے اپنا میقات معلوم کر لیں۔ اگر آپ ہوائی سفر کر رہے ہیں تو فضائی کمپنی کا اعلان سنیں۔",
-    "fr": "Iḥrām et intention. Repérez votre mīqāt avant d’y arriver. Si vous voyagez en avion, écoutez l’annonce de la compagnie aérienne."
+    "fr": "Iḥrām et intention. Repérez votre mīqāt avant d’y arriver. Si vous voyagez en avion, écoutez l’annonce de la compagnie aérienne.",
+    "ms": "Ihram dan niat. Ketahui lokasi miqat anda sebelum tiba. Jika menaiki pesawat, dengar pengumuman syarikat penerbangan."
    },
    "trigger": "manual or flight reminder before mīqāt (airline announces)",
    "duas": [
@@ -30,7 +31,8 @@
     "en": "Talbiyah. This step follows the intention. The words of the Talbiyah are on the screen with their source.",
     "bn": "তালবিয়া। এই ধাপ নিয়তের পর। তালবিয়ার শব্দ ও সূত্র পর্দায় দেওয়া আছে।",
     "ur": "تلبیہ۔ یہ مرحلہ نیت کے بعد آتا ہے۔ تلبیہ کے الفاظ اور ان کا حوالہ اسکرین پر موجود ہیں۔",
-    "fr": "Talbiya. Cette étape suit l’intention. Les paroles de la talbiya et leur source sont affichées à l’écran."
+    "fr": "Talbiya. Cette étape suit l’intention. Les paroles de la talbiya et leur source sont affichées à l’écran.",
+    "ms": "Talbiah. Baca talbiah selepas berniat. Anda boleh melihat lafaz dan rujukannya pada skrin."
    },
    "trigger": "after niyyah until reaching the Kaʿbah"
   },
@@ -45,7 +47,8 @@
     "en": "Tawaf. Begin at the Black Stone line and keep the Kaaba on your left. Count seven rounds by hand. The guide shows the supplication for the stretch between the Yemeni Corner and the Black Stone.",
     "bn": "তাওয়াফ। হাজরে আসওয়াদের রেখা থেকে শুরু করুন এবং কাবা আপনার বাঁ পাশে রাখুন। সাত চক্কর নিজে গুনুন। রুকনে ইয়ামানি ও হাজরে আসওয়াদের মাঝের দোয়া নির্দেশিকায় দেওয়া আছে।",
     "ur": "طواف۔ حجر اسود کے سامنے والی لکیر سے شروع کریں اور کعبہ کو اپنے بائیں طرف رکھیں۔ سات چکر خود گنیں۔ رکن یمانی اور حجر اسود کے درمیان پڑھی جانے والی دعا رہنما میں دی گئی ہے۔",
-    "fr": "Ṭawāf. Commencez à la hauteur de la Pierre noire en gardant la Kaʿba à votre gauche. Comptez les sept tours à la main. Le guide affiche l’invocation pour le parcours entre l’angle yéménite et la Pierre noire."
+    "fr": "Ṭawāf. Commencez à la hauteur de la Pierre noire en gardant la Kaʿba à votre gauche. Comptez les sept tours à la main. Le guide affiche l’invocation pour le parcours entre l’angle yéménite et la Pierre noire.",
+    "ms": "Tawaf. Mulakan pada garisan Hajar Aswad dengan Kaabah di sebelah kiri anda. Kira sendiri sehingga cukup tujuh pusingan. Panduan menunjukkan doa untuk laluan antara Rukun Yamani dengan Hajar Aswad."
    },
    "trigger": "geofence: haram_mataf (enter) → show counter",
    "counter": "manual",
@@ -71,7 +74,8 @@
     "en": "Two rakats. If you can, pray behind Maqam Ibrahim. If it is crowded, use another place in the mosque.",
     "bn": "দুই রাকাত। সম্ভব হলে মাকামে ইবরাহিমের পেছনে নামাজ পড়ুন। ভিড় হলে মসজিদের অন্য জায়গায় পড়ুন।",
     "ur": "دو رکعت۔ اگر ممکن ہو تو مقام ابراہیم کے پیچھے نماز پڑھیں۔ اگر وہاں بھیڑ ہو تو مسجد میں کسی اور جگہ پڑھ لیں۔",
-    "fr": "Deux rakʿāt. Si vous le pouvez, priez derrière le Maqām Ibrāhīm. S’il y a trop de monde, priez ailleurs dans la mosquée."
+    "fr": "Deux rakʿāt. Si vous le pouvez, priez derrière le Maqām Ibrāhīm. S’il y a trop de monde, priez ailleurs dans la mosquée.",
+    "ms": "Dua rakaat. Jika boleh, solat di belakang Maqam Ibrahim. Jika tempat itu sesak, solat di bahagian lain dalam masjid."
    },
    "trigger": "after 7 rounds",
    "notes": [
@@ -92,7 +96,8 @@
     "en": "Zamzam. This step comes before Sa'y. Continue when you're ready.",
     "bn": "জমজম। এই ধাপ সাঈয়ের আগে। প্রস্তুত হলে পরের ধাপে যান۔",
     "ur": "زمزم۔ یہ مرحلہ سعی سے پہلے آتا ہے۔ جب آپ تیار ہوں تو آگے بڑھیں۔",
-    "fr": "Zamzam. Cette étape précède le saʿy. Continuez quand vous êtes prêt."
+    "fr": "Zamzam. Cette étape précède le saʿy. Continuez quand vous êtes prêt.",
+    "ms": "Zamzam. Minum air Zamzam sebelum sa‘i. Teruskan apabila anda bersedia."
    },
    "trigger": "manual"
   },
@@ -107,7 +112,8 @@
     "en": "Sa'y. One walk from Safa to Marwah counts as one lap. Alternate between the two ends and finish the seventh lap at Marwah. Men jog lightly between the green lights.",
     "bn": "সাঈ। সাফা থেকে মারওয়া পর্যন্ত একবার গেলে এক চক্কর হয়। দুই প্রান্তের মধ্যে পালা করে হেঁটে সপ্তম চক্কর মারওয়ায় শেষ করুন। সবুজ বাতির মাঝের অংশে পুরুষেরা হালকা দৌড়াবেন।",
     "ur": "سعی۔ صفا سے مروہ تک ایک بار جانا ایک پھیرا شمار ہوتا ہے۔ دونوں سروں کے درمیان باری باری جائیں اور ساتواں پھیرا مروہ پر ختم کریں۔ سبز روشنیوں کے درمیان مرد ہلکی دوڑ لگائیں۔",
-    "fr": "Saʿy. Aller de Ṣafā à Marwa compte pour un trajet. Alternez entre les deux extrémités et terminez le septième trajet à Marwa. Les hommes trottinent entre les feux verts."
+    "fr": "Saʿy. Aller de Ṣafā à Marwa compte pour un trajet. Alternez entre les deux extrémités et terminez le septième trajet à Marwa. Les hommes trottinent entre les feux verts.",
+    "ms": "Sa‘i. Berjalan dari Safa ke Marwah dikira satu perjalanan. Berjalan berselang-seli antara kedua-dua hujung. Akhiri di Marwah selepas perjalanan ketujuh. Lelaki berlari anak di antara lampu hijau."
    },
    "trigger": "geofence: masa_safa (enter)",
    "counter": "auto (beta) + manual",
@@ -134,7 +140,8 @@
     "en": "Shave or trim. Men can shave or trim their hair. Women trim about a fingertip's length.",
     "bn": "চুল মুণ্ডন বা ছাঁটা। পুরুষেরা মাথা মুণ্ডন বা চুল ছাঁটতে পারেন। নারীরা আঙুলের ডগা পরিমাণ চুল ছাঁটবেন।",
     "ur": "سر منڈوانا یا بال ترشوانا۔ مرد سر منڈوا سکتے ہیں یا بال ترشوا سکتے ہیں۔ خواتین تقریباً انگلی کے سرے کے برابر بال کاٹیں۔",
-    "fr": "Raser ou raccourcir les cheveux. Les hommes peuvent se raser la tête ou raccourcir leurs cheveux. Les femmes coupent environ la longueur du bout d’un doigt."
+    "fr": "Raser ou raccourcir les cheveux. Les hommes peuvent se raser la tête ou raccourcir leurs cheveux. Les femmes coupent environ la longueur du bout d’un doigt.",
+    "ms": "Bercukur atau bergunting. Lelaki boleh mencukur kepala atau menggunting rambut. Wanita menggunting rambut kira-kira sepanjang hujung jari."
    },
    "trigger": "after lap 7 at Marwah",
    "notes": [

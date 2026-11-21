@@ -163,6 +163,46 @@
       ],
       "dataset": "https://doi.org/10.7488/ds/1705",
       "datasetName": "SIWIS French Speech Synthesis Database"
+    },
+    {
+      "id": "umrah-guide-v1-ms",
+      "language": "ms",
+      "name": "Bahasa Melayu",
+      "speaker": "Kecil-TTS Yati · Suarify",
+      "source": "https://huggingface.co/Suarify/kecil-tts-yati-v0.3/tree/dcb1efaaaccdfc53b4b0cdbfad190e86ddeac68b",
+      "licenseUrl": "https://www.apache.org/licenses/LICENSE-2.0",
+      "attribution": "Generated speech · Kecil-TTS Yati · Suarify",
+      "bytes": 409556,
+      "items": [
+        {
+          "ref": "umrah-guide-v1-ms:ihram",
+          "path": "packs/audio/umrah-guide-v1/ms/ihram.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-ms:talbiyah",
+          "path": "packs/audio/umrah-guide-v1/ms/talbiyah.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-ms:tawaf",
+          "path": "packs/audio/umrah-guide-v1/ms/tawaf.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-ms:two_rakahs",
+          "path": "packs/audio/umrah-guide-v1/ms/two_rakahs.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-ms:zamzam",
+          "path": "packs/audio/umrah-guide-v1/ms/zamzam.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-ms:sai",
+          "path": "packs/audio/umrah-guide-v1/ms/sai.mp3"
+        },
+        {
+          "ref": "umrah-guide-v1-ms:halq",
+          "path": "packs/audio/umrah-guide-v1/ms/halq.mp3"
+        }
+      ]
     }
   ]
 }
