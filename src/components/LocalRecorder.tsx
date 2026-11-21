@@ -10,8 +10,7 @@ export function LocalRecorder({ label, compact = false, actionClass, actionLabel
   const { t } = useCopy();
   const active = useRef<{ input: MediaStream; recorder: MediaRecorder }>();
   const mounted = useRef(true);
-  const requesting = useRef(false);
-  const captureSuspended = useRef(suspended);
+  const pending = useRef<{ cancelled: boolean }>();
   const playback = useRef<HTMLAudioElement>(null);
   const [recording, setRecording] = useState(false);
   const [audio, setAudio] = useState("");
@@ -21,14 +20,15 @@ export function LocalRecorder({ label, compact = false, actionClass, actionLabel
     mounted.current = true;
     return () => {
       mounted.current = false;
+      if (pending.current) pending.current.cancelled = true;
       const session = active.current;
       if (session?.recorder.state === "recording") session.recorder.stop();
       session?.input.getTracks().forEach(track => track.stop());
     };
   }, []);
   useEffect(() => {
-    captureSuspended.current = suspended;
     if (!suspended) return;
+    if (pending.current) pending.current.cancelled = true;
     const session = active.current;
     if (session?.recorder.state === "recording") session.recorder.stop();
     session?.input.getTracks().forEach(track => track.stop());
@@ -37,15 +37,16 @@ export function LocalRecorder({ label, compact = false, actionClass, actionLabel
   useEffect(() => () => { if (audio) URL.revokeObjectURL(audio); }, [audio]);
 
   async function start() {
-    if (requesting.current || captureSuspended.current) return;
+    if (pending.current || active.current || suspended) return;
     if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
       setMessage("recordingUnavailable"); return;
     }
-    requesting.current = true;
+    const request = { cancelled: false };
+    pending.current = request;
     let input: MediaStream | undefined;
     try {
       input = await navigator.mediaDevices.getUserMedia({ audio: true });
-      if (!mounted.current || captureSuspended.current) { input.getTracks().forEach(track => track.stop()); return; }
+      if (request.cancelled) { input.getTracks().forEach(track => track.stop()); return; }
       const recorder = new MediaRecorder(input);
       const chunks: BlobPart[] = [];
       const timer = window.setTimeout(() => { if (recorder.state === "recording") recorder.stop(); }, maxSeconds * 1000);
@@ -68,9 +69,9 @@ export function LocalRecorder({ label, compact = false, actionClass, actionLabel
       setMessage(undefined);
     } catch {
       input?.getTracks().forEach(track => track.stop());
-      if (mounted.current && !captureSuspended.current) setMessage("microphonePermission");
+      if (!request.cancelled) setMessage("microphonePermission");
     } finally {
-      requesting.current = false;
+      pending.current = undefined;
     }
   }
 
