@@ -150,6 +150,8 @@ The Turkish grammar draft covers all 22 lessons in Grammar Foundations, Roots & 
 
 The Turkish sharing draft includes progress milestones, card templates, image formats, and controls for showing prayer counts. Check the headings and footer in both the preview and saved image. For cards containing a Qur’an meaning, verify the translation credit and language label.
 
+The Turkish Umrah preparation draft covers trip details, the 12-item checklist, and the controls for offline packs and trip transfer. Ask in Arabic includes Turkish meanings for all 63 phrases and covers full-screen cards, directions, and the emergency panel. Review the phrasing with the spoken Arabic, especially when changing a gate number, destination, or family member. The emergency panel links to the official numbers. [Saudi emergency contacts](https://my.gov.sa/en/emergency-contact).
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
