@@ -91,7 +91,8 @@ export function WordBank({ settings, desktop, now }: { settings: Settings; deskt
   const known = knownCoreQuranWords(knownVerses, knownVocabulary);
   const activeRoot = root ?? (pinned || rootOfDay);
   const deferredQuery = useDeferredValue(query);
-  const term = wordBankSearch(deferredQuery);
+  const searchKey = (value: string) => wordBankSearch(value.toLocaleLowerCase(language));
+  const term = searchKey(deferredQuery);
   const filter = filters.find(value => value === params.get("status")) ?? "all";
 
   useEffect(() => {
@@ -118,7 +119,7 @@ export function WordBank({ settings, desktop, now }: { settings: Settings; deskt
     if (filter === "due" && !item.due) return false;
     if ((filter === "known" || filter === "learning") && item.state !== filter) return false;
     return !term || [item.text, item.key.slice(5), item.meaning, item.gloss?.en, item.gloss?.bn, item.tr, item.root, item.type, item.kind]
-      .some(value => value && wordBankSearch(value).includes(term));
+      .some(value => value && searchKey(value).includes(term));
   }).sort((first, second) => {
     if (sort === "arabic") return letterOrder.compare(first.text, second.text);
     if (sort === "next") return nextAt(first) - nextAt(second);

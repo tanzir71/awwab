@@ -136,6 +136,8 @@ The Turkish prayer guide draft includes the rakʿah instructions, the notes on l
 
 The Turkish Elifba and writing draft includes the lesson practice controls, the vowel explanations in both modes, and all nine writing families. Review the Turkish letter and vowel terminology alongside the marked Arabic, generated drills, and printable tracing sheets.
 
+The Turkish Word Bank draft includes the 125 core Qur’an glosses, grammar labels, and review controls. Search uses Turkish case rules, including dotted and dotless I. Review each gloss alongside the Arabic lemma and the cited corpus.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
