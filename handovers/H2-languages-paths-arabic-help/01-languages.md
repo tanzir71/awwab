@@ -318,6 +318,8 @@ The Hausa Qaida and Takhti draft covers the 17 lesson names, the nine letter fam
 
 The Hausa Word Bank draft includes all 125 core glosses, the word-type labels and the everyday Arabic signs and examples. Review the glosses in context, especially short particles that take different meanings depending on the sentence. Try searching in Hausa and Arabic, revealing a gloss and saving a review offline.
 
+The Hausa Word Anatomy draft covers the Al-Asr example, word-by-word glosses in Al-Fatiha and Al-Asr, and the phrases used in the salah practice drills. Compare the meanings with the cited verse or narration, and check the Hausa labels for letter position, joining, prefixes and word families.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
