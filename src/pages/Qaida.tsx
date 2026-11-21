@@ -300,7 +300,9 @@ function QaidaLesson({ lesson, settings, completed, desktop }: { lesson: Lesson;
   const citation = qaidaRowCitation(lesson.n, row);
   const letterNames = lesson.n === 3;
   const oldClip = useLiveQuery(() => revisedVowelRows ? db.audio.get(oldAudioRef) : undefined, [oldAudioRef, revisedVowelRows]);
-  const rowLabel = t("rowLabel", { row: row + 1 });
+  const number = new Intl.NumberFormat(locale);
+  const rowNumber = number.format(row + 1);
+  const rowLabel = t("rowLabel", { row: rowNumber });
   const gradeEntry = reviews[qaidaReviewId(lesson.n, row)]?.card.last_review;
 
   useEffect(() => {
@@ -408,7 +410,7 @@ function QaidaLesson({ lesson, settings, completed, desktop }: { lesson: Lesson;
       <button className="action light" type="button" disabled={row === 0} onClick={() => move(row - 1)}>{t("previousRow")}</button>
       <button className="action soft" type="button" disabled={row === rows.length - 1} onClick={() => move(row + 1)}>{t("nextRow")}</button>
     </div>
-    <p className="small muted qaida-row-status">{t("rowOf", { row: row + 1, total: rows.length })}{gradeEntry ? ` · ${t("qaidaRowRead")}` : ""}</p>
+    <p className="small muted qaida-row-status">{t("rowOf", { row: rowNumber, total: number.format(rows.length) })}{gradeEntry ? ` · ${t("qaidaRowRead")}` : ""}</p>
     {!desktop && <div className="qaida-phone-extra">{actions}<Link to="/learn/takhti/boat" className="action soft">{t("takhtiWriting")}</Link></div>}
     {finished ? <div className="equal-row">
       <Link className="action" to={lesson.n < qaida.lessons.length ? `/learn/qaida/${lesson.n + 1}` : "/learn"}>{t("continueLearning")}</Link>

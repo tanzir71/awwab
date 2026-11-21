@@ -264,6 +264,8 @@ The Persian Today draft covers prayer times, logging and weekly history, the dai
 
 The Persian settings draft covers the profile, reading and display preferences, wording suggestions, backups, calendar reminders and source credits. Check the replacement warning during restore, the display of Persian digits, and the prayer names in the exported calendar file.
 
+The Persian Qaida and Takhti draft covers the practice and recording controls, nine letter families and printable tracing sheets. Compare the short-vowel descriptions with the marked examples and generated clips. The Qaida row numbers follow the selected digit preference.
+
 To review the wording in the app, export a fresh review directory and put `AWWAB_REVIEW_CATALOGUE=path/to/id.draft.json` in a local `.env.review.local` file. Run `npm run build -- --mode review` and `npm run preview -- --outDir dist-review --host 127.0.0.1`. Open `/awwab/lang/id.html` on that local server and follow the link into the app. After the service worker activates, reload offline to review the installed catalogue.
 
 The review build checks the source fingerprint, variants, and ICU arguments. Missing entries use the usual app fallbacks. Review assets go to `dist-review` and carry preview and noindex markers. Keep the exported review file outside `public/locales`. That directory accepts compiled release packs and rejects packs made by the review build.
